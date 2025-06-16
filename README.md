@@ -61,7 +61,7 @@ The phoneme inventory uses the standard International Phonetic Alphabet (IPA) Ar
 | Qalqala (Sughra)      | `Q`                     |
 | Qalqala (Kubra)       | `QQ`                    |
 
-All the phonemes are configurable in `resources/base_phonemes.yaml` and `resources/rule_phonemes.yaml`.
+All the phonemes are configurable in [`resources/base_phonemes.yaml`](resources/base_phonemes.yaml) and `[resources/rule_phonemes.yaml]`(resources/rule_phonemes.yaml).
 
 
 ## Usage
