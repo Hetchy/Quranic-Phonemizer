@@ -1,6 +1,6 @@
 # Quranic Phonemizer
 
-A modular phonemizer for the Qurʾān in the Hafs riwaya, converting text to phoneme sequences with support for Tajweed rules.
+A modular phonemizer (Grapheme to Phoneme converter) for the Qurʾān in the Hafs riwaya, converting text to phoneme sequences with support for Tajweed rules.
 
 The system uses a hierarchical pipeline that tokenizes text, applies contextual phoneme mappings, and processes Tajweed rules. It is highly extensible and customizable.
 
