@@ -16,7 +16,7 @@ The system uses a hierarchical pipeline that tokenizes text, applies contextual 
   - [Outputs](#outputs)
   - [Stops (Boundary Markers)](#stops-boundary-markers)
 - [Contributing](#contributing)
-- [License](#license)
+- [Credits](#credits)
 - [Citing](#citing)
 
 ## Phoneme Inventory
@@ -88,7 +88,7 @@ print(res.phonemes_str())
 
 بِسۡمِ ٱللَّهِ ٱلرَّحۡمَـٰنِ ٱلرَّحِيمِ ‏﴿١﴾‏
 
-> b i s m i l l a h i r r a ħ m a: n i r r a ħ i: m
+b i s m i l l a h i r r a ħ m a: n i r r a ħ i: m
 
 
 ### Input References
@@ -128,13 +128,13 @@ print(res.phonemes_str(phoneme_sep=" ", word_sep=" | ", verse_sep="\n"))
 ```
 قُلۡ هُوَ ٱللَّهُ أَحَدٌ ‏﴿١﴾‏ ٱللَّهُ ٱلصَّمَدُ ‏﴿٢﴾‏ لَمۡ يَلِدۡ وَلَمۡ يُولَدۡ ‏﴿٣﴾‏ وَلَمۡ يَكُن لَّهُۥ كُفُوًا أَحَدُۢ ‏﴿٤﴾‏
 
-> q u l | h u w a | l l a h u | ʔ a ħ a d QQ
+q u l | h u w a | l l a h u | ʔ a ħ a d QQ
 
-> ʔ a l l a h u | sˤ sˤ a m a d QQ
+ʔ a l l a h u | sˤ sˤ a m a d QQ
 
-> l a m | j a l i d QQ | w a l a m | j u: l a d QQ
+l a m | j a l i d QQ | w a l a m | j u: l a d QQ
 
-> w a l a m | j a k u | l l a h u: | k u f u w a n | ʔ a ħ a d QQ
+w a l a m | j a k u | l l a h u: | k u f u w a n | ʔ a ħ a d QQ
 
 #### Output Example (Table View)
 
@@ -145,19 +145,6 @@ df
 ```
 
 <div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
@@ -317,12 +304,14 @@ These stops introduce explicit boundaries into the phoneme sequence to support m
 
 ## Contributing
 
-If you find any issues or have suggestions for improvements, please feel free to email me, open an issue or submit a pull request.
+If you find any issues or have suggestions for improvements, please feel free to email me, open an issue or submit a pull request. 
 
-Currently, the project is in the early stages of development. The following features are yet to be implemented:
+The following features are yet to be implemented:
 - Lam/Raa Tafkheem & Tarqeeq rules
 - Support other qira'at/riwayat
 
 ## Credits
+
+The project makes use of a modified version of the Quranic University Library's (QUL) [Hafs script with Tajweed](https://qul.tarteel.ai/resources/quran-script/58)
 
 ## Citing
