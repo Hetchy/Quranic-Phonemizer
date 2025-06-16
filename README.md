@@ -276,11 +276,11 @@ print(res.phonemes_str(phoneme_sep="", word_sep=" "))
 ```
 
 كَذٰلِكَ ٱلۡعَذَابُ‌ۖ وَلَعَذَابُ ٱلۡأَخِرَةِ أَكۡبَرُ‌ۚ لَوۡ كَانُواۡ يَعۡلَمُونَ ‏﴿٣٣﴾‏
-> kaða:lika lʕaða:b<span style="color:green">u</span> walaʕaða:bu lʔaxirati ʔakba<span style="color:green">ru</span> law ka:nu: jaʕlamu:n
+kaða:lika lʕaða:b<span style="color:green">u</span> walaʕaða:bu lʔaxirati ʔakba<span style="color:green">ru</span> law ka:nu: jaʕlamu:n
 
-> kaða:lika lʕaða:b<span style="color:green">QQ</span> walaʕaða:bu lʔaxirati ʔakba<span style="color:green">ru</span> law ka:nu: jaʕlamu:n
+kaða:lika lʕaða:b<span style="color:green">QQ</span> walaʕaða:bu lʔaxirati ʔakba<span style="color:green">ru</span> law ka:nu: jaʕlamu:n
 
-> kaða:lika lʕaða:b<span style="color:green">u</span> walaʕaða:bu lʔaxirati ʔakba<span style="color:green">r</span> law ka:nu: jaʕlamu:n
+kaða:lika lʕaða:b<span style="color:green">u</span> walaʕaða:bu lʔaxirati ʔakba<span style="color:green">r</span> law ka:nu: jaʕlamu:n
 
 
 ```python
@@ -294,9 +294,9 @@ print(res.phonemes_str(phoneme_sep="", word_sep=" ", verse_sep=""))
 ```
 
 إِنَّ شَجَرَتَ ٱلزَّقُّومِ ‏﴿٤٣﴾‏ طَعَامُ ٱلۡأَثِيمِ ‏﴿٤٤﴾‏
-> ʔiña ʃaʒarata zzaqqu:<span style="color:green">m</span> tˤaʕa:mu lʔaθi:m
+ʔiña ʃaʒarata zzaqqu:<span style="color:green">m</span> tˤaʕa:mu lʔaθi:m
 
-> ʔiña ʃaʒarata zzaqqu:<span style="color:green">mi</span> tˤaʕa:mu lʔaθi:m
+ʔiña ʃaʒarata zzaqqu:<span style="color:green">mi</span> tˤaʕa:mu lʔaθi:m
 
 
 These stops introduce explicit boundaries into the phoneme sequence to support more precise modeling.
