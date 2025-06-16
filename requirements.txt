@@ -1,0 +1,6 @@
+# Core dependencies for the phonemizer project
+# YAML processing for configuration files
+PyYAML>=6.0
+
+# Data analysis and table display (optional, used in show_table() method)
+pandas>=1.5.0

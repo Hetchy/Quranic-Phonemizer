@@ -1,0 +1,40 @@
+ham_wasl: {}
+
+idgham:
+  nasalized_map:
+    "n": "ñ"
+    "m": "m̃"
+    "j": "j̃"
+    "w": "w̃"
+
+ikhfaa:
+  heavy_letters_phonemes: ["sˤ", "dˤ", "tˤ", "ðˤ", "q", "ɣ", "x"] 
+  light_phoneme: "ŋ"
+  heavy_phoneme: "ŋˤ"
+  shafawi_phoneme: "ɱ"
+
+iqlab:
+  phoneme: "m̃"
+
+qalqala:
+  phonemes:
+    - target: "q"  
+      weak: "Q"
+      strong: "QQ"
+      strongest: "QQQ"
+    - target: "tˤ"  
+      weak: "Q"
+      strong: "QQ"
+      strongest: "QQQ"
+    - target: "b"  
+      weak: "Q"
+      strong: "QQ"
+      strongest: "QQQ"
+    - target: "ʒ"  
+      weak: "Q"
+      strong: "QQ"
+      strongest: "QQQ"
+    - target: "d"
+      weak: "Q"
+      strong: "QQ"
+      strongest: "QQQ"

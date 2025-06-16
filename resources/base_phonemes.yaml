@@ -1,0 +1,374 @@
+letters:
+
+  HAMZA_WASL:
+    cp: 0x0671
+    char: "ٱ"
+    phoneme: ""
+
+  ALEF:
+    cp: 0x0627
+    char: "ا"
+    phoneme: ":"
+
+  HAMZA_ABOVE_ALEF:
+    cp: 0x0623
+    char: "أ"
+    phoneme: "ʔ"
+
+  HAMZA_BELOW_ALEF:
+    cp: 0x0625
+    char: "إ"
+    phoneme: "ʔ"
+
+  HAMZA:
+    cp: 0x0621
+    char: "ء"
+    phoneme: "ʔ"
+
+  HAMZA_ABOVE_LETTER:
+    cp: 0x0654
+    char: "ٔ"
+    phoneme: "ʔ"
+
+  HAMZA_BELOW_LETTER:
+    cp: 0x0655
+    char: "ٕ"
+    phoneme: "ʔ"
+
+  HAMZA_WAW:
+    cp: 0x0624
+    char: "ؤ"
+    phoneme: "ʔ"
+
+  HAMZA_YA:
+    cp: 0x0626
+    char: "ئ"
+    phoneme: "ʔ"
+
+  BA:
+    cp: 0x0628
+    char: "ب"
+    phoneme: "b"
+
+  TA:
+    cp: 0x062A
+    char: "ت"
+    phoneme: "t"
+
+  THA:
+    cp: 0x062B
+    char: "ث"
+    phoneme: "θ"
+
+  JEEM:
+    cp: 0x062C
+    char: "ج"
+    phoneme: "ʒ"
+
+  HHA:
+    cp: 0x062D
+    char: "ح"
+    phoneme: "ħ"
+
+  KHA:
+    cp: 0x062E
+    char: "خ"
+    phoneme: "x"
+
+  DAL:
+    cp: 0x062F
+    char: "د"
+    phoneme: "d"
+
+  THAL:
+    cp: 0x0630
+    char: "ذ"
+    phoneme: "ð"
+
+  RA:
+    cp: 0x0631
+    char: "ر"
+    phoneme: "r"
+
+  ZAIN:
+    cp: 0x0632
+    char: "ز"
+    phoneme: "z"
+
+  SEEN:
+    cp: 0x0633
+    char: "س"
+    phoneme: "s"
+
+  SHEEN:
+    cp: 0x0634
+    char: "ش"
+    phoneme: "ʃ"
+
+  SAD:
+    cp: 0x0635
+    char: "ص"
+    phoneme: "sˤ"
+
+  DAD:
+    cp: 0x0636
+    char: "ض"
+    phoneme: "dˤ"
+
+  TTA:
+    cp: 0x0637
+    char: "ط"
+    phoneme: "tˤ"
+
+  DTHA:
+    cp: 0x0638
+    char: "ظ"
+    phoneme: "ðˤ"
+
+  AIN:
+    cp: 0x0639
+    char: "ع"
+    phoneme: "ʕ"
+
+  GHAIN:
+    cp: 0x063A
+    char: "غ"
+    phoneme: "ɣ"
+
+  FA:
+    cp: 0x0641
+    char: "ف"
+    phoneme: "f"
+
+  QAF:
+    cp: 0x0642
+    char: "ق"
+    phoneme: "q"
+
+  KAF:
+    cp: 0x0643
+    char: "ك"
+    phoneme: "k"
+
+  LAM:
+    cp: 0x0644
+    char: "ل"
+    phoneme: "l"
+
+  MEEM:
+    cp: 0x0645
+    char: "م"
+    phoneme: "m"
+
+  NOON:
+    cp: 0x0646
+    char: "ن"
+    phoneme: "n"
+
+  HA:
+    cp: 0x0647
+    char: "ه"
+    phoneme: "h"
+
+  TAA_MARBUTA:
+    cp: 0x0629
+    char: "ة"
+    phoneme: "<t/h>"
+
+  WAW:
+    cp: 0x0648
+    char: "و"
+    phoneme: "<w/:>"
+
+  YA:
+    cp: 0x064A
+    char: "ي"
+    phoneme: "<j/:>"
+
+  ALEF_MAKSURA:
+    cp: 0x0649
+    char: "ى"
+    phoneme: "<j/:>"
+
+
+diacritics:
+
+  SUKUN:
+    cp: 0x06E1
+    char: "ۡ"
+    phoneme: "<SUKUN>"
+
+  SHADDA:
+    cp: 0x0651
+    char: "ّ"
+    phoneme: "<SHADDA>"
+
+  FATHATAN:
+    cp: 0x064B
+    char: "ً"
+    phoneme: "an"
+
+  DAMMATAN:
+    cp: 0x064C
+    char: "ٌ"
+    phoneme: "un"
+
+  KASRATAN:
+    cp: 0x064D
+    char: "ٍ"
+    phoneme: "in"
+
+  FATHA:
+    cp: 0x064E
+    char: "َ"
+    phoneme: "a"
+
+  DAMMA:
+    cp: 0x064F
+    char: "ُ"
+    phoneme: "u"
+
+  KASRA:
+    cp: 0x0650
+    char: "ِ"
+    phoneme: "i"
+
+
+mudud:
+
+  MINI_WAW:
+    cp: 0x06E5
+    char: "ۥ"
+    phoneme: ":"
+
+  MINI_YA_END:
+    cp: 0x06E6
+    char: "ۦ"
+    phoneme: ":"
+
+  MINI_YA_MIDDLE:
+    cp: 0x06E7
+    char: "ۧ"
+    phoneme: "<j/:>"
+
+  DAGGER_ALEF:
+    cp: 0x0670
+    char: "ٰ"
+    phoneme: "<:/a:>"
+ 
+  LONG_MADD:
+    cp: 0x0653
+    char: "ٓ◌ٓ" 
+    phoneme: ""
+
+
+mini_letters:
+
+  MINI_NOON:
+    cp: 0x06E8
+    char: "ۨ"
+    phoneme: ""
+
+  MINI_MEEM_ABOVE:
+    cp: 0x06E2
+    char: "ۢ"
+    phoneme: ""
+
+  MINI_MEEM_BELOW:
+    cp: 0x06ED
+    char: "ۭ"
+    phoneme: ""
+
+  MINI_SEEN_ABOVE:
+    cp: 0x06DC
+    char: "ۜ"
+    phoneme: ""
+
+  MINI_SEEN_BELOW:
+    cp: 0x06E3
+    char: "ۣ"
+    phoneme: ""
+
+
+stop_signs:
+
+  PREFERRED_CONTINUE:
+    cp: 0x06D6
+    char: "ۖ "
+    phoneme: ""
+
+  PREFERRED_STOP:
+    cp: 0x06D7
+    char: "ۗ"
+    phoneme: ""
+
+  OPTIONAL_STOP:
+    cp: 0x06DA
+    char: "ۚ"
+    phoneme: ""
+
+  COMPULSORY_STOP:
+    cp: 0x06D8
+    char: "ۘ"
+    phoneme: ""
+
+  PROHIBITED_STOP:
+    cp: 0x06D9
+    char: "ۙ"
+    phoneme: ""
+
+  EITHER_STOP:
+    cp: 0x06DB
+    char: "ۛ"
+    phoneme: ""
+
+
+special_singletons:
+
+  S1: # 11:41 مَجۡر۪ٮٰهَا 
+    cp: 0x06EA 
+    char: "۪ "
+    phoneme: ""
+
+  S2: # 12:11 تَأۡمَ۫نَّا 
+    cp: 0x06EB
+    char: "۫ "
+    phoneme: ""
+
+  S3: # 41:44 ءَا۠عۡجَمِىٌّ۬ 
+    cp: 0x06EC
+    char: "۬ "
+    phoneme: ""
+
+  S4: # 41:44 ءَا۠عۡجَمِىٌّ۬ 
+    cp: 0x06E0
+    char: "۠ "
+    phoneme: ""
+
+
+other:
+
+  ZWNJ:
+    cp: 0x200C
+    char: "‌"
+    phoneme: ""
+
+  PARTIAL_ALEF_MAKSURA:
+    cp: 0x066E
+    char: "ٮ"
+    phoneme: ""
+
+  TATWEEL:
+    cp: 0x0640
+    char: "ـ"
+    phoneme: ""
+
+  RUB_EL_HIZB:
+    cp: 0x06DE
+    char: "۞"
+    phoneme: ""
+
+  SAJDAH_MARK:
+    cp: 0x06E9
+    char: "۩"
+    phoneme: ""

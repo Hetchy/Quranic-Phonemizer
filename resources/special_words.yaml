@@ -1,0 +1,102 @@
+special_words:
+
+  - text: "حم"
+    locations:
+      - "40:1:1"  # Surah Ghafir
+      - "41:1:1"  # Surah Fussilat
+      - "42:1:1"  # Surah Ash-Shura
+      - "43:1:1"  # Surah Az-Zukhruf
+      - "44:1:1"  # Surah Ad-Dukhan
+      - "45:1:1"  # Surah Al-Jathiyah
+      - "46:1:1"  # Surah Al-Ahqaf
+    phonemes: ["ħ", "a:", "m", "i:", "m"]
+
+  - text: "الم"
+    locations:
+      - "2:1:1"  # Surah Al-Baqarah
+      - "3:1:1"  # Surah Āl-Imran
+      - "29:1:1" # Surah Al-Ankabut
+      - "30:1:1" # Surah Al-Rum
+      - "31:1:1" # Surah Luqman
+      - "32:1:1" # Surah As-Sajdah
+    phonemes: ["a", "l", "i", "f", "l", "a:", "m̃", "i:", "m"]
+
+  - text: "الر"
+    locations:
+      - "10:1:1"  # Surah Yunus
+      - "11:1:1"  # Surah Hud
+      - "12:1:1"  # Surah Yusuf
+      - "14:1:1"  # Surah Ibrahim
+      - "15:1:1"  # Surah Al-Hijr
+    phonemes: ["a", "l", "i", "f", "l", "a:", "m", "r", "a"]
+
+  - text: "المص"
+    locations:
+      - "7:1:1"  # Surah Al-A'raf
+    phonemes: ["a", "l", "i", "f", "l", "a:", "m̃", "i:", "m", "sˤ", "a:", "d", "QQ"]
+
+  - text: "المر"
+    locations:
+      - "13:1:1"  # Surah Ar-Ra'd
+    phonemes: ["a", "l", "i", "f", "l", "a:", "m̃", "i:", "m", "r", "a"]
+
+  - text: "كهيعص"
+    locations:
+      - "19:1:1"  # Surah Maryam
+    phonemes: ["k", "a:", "f", "h", "a", "j", "a", "ʕ", "a", "j", "ŋˤ", "sˤ", "a:", "d", "QQ"]
+
+  - text: "طسم"
+    locations:
+      - "26:1:1"  # Surah Ash-Shu'ara
+      - "28:1:1"  # Surah Al-Qasas
+    phonemes: ["tˤ", "a:", "s", "i:", "m̃", "i:", "m"]
+
+  - text: "طس"
+    locations:
+      - "27:1:1"  # Surah An-Naml
+    phonemes: ["tˤ", "a:", "s", "i:", "n"]
+
+  - text: "طه"
+    locations:
+      - "20:1:1"  # Surah Ta-Ha
+    phonemes: ["tˤ", "a:", "h", "a:"]
+
+  - text: "يس"
+    locations:
+      - "36:1:1"  # Surah Ya-Sin
+    phonemes: ["j", "a:", "s", "i:", "n"]
+
+  - text: "ص"
+    locations:
+      - "38:1:1"  # Surah Sad
+    phonemes: ["sˤ", "a:", "d", "QQ"]
+
+  - text: "عسق"
+    locations:
+      - "42:2:1"  # Surah Ash-Shura
+    phonemes: ["ʕ", "a", "j", "ŋ", "s", "i:", "ŋˤ", "q", "a:", "f"]
+
+  - text: "ق"
+    locations:
+      - "50:1:1"  # Surah Qaf
+    phonemes: ["q", "a:", "f"]
+
+  - text: "ن"
+    locations:
+      - "68:1:1"  # Surah Al-Qalam
+    phonemes: ["n", "u:", "n"] 
+
+  - text: "مجراها"
+    locations:
+      - "11:41:6"  # Surah Hud
+    phonemes: ["m", "a", "ʒ", "r", "i:", "h", "a:"]
+
+  - text: "نُـۨجِى"
+    locations:
+      - "21:88:7"  # Surah Al-Anbiya
+    phonemes: ["n", "u", "ŋ", "ʒ", "i"] 
+
+  - text: "بِأَييِّكُمُ"
+    locations:
+      - "68:6:1"  # Surah Al-Qalam
+    phonemes: ['b', 'i', 'ʔ', 'a', 'j', 'j', 'i', 'k', 'u', 'm', 'u']
