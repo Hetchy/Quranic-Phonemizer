@@ -1,6 +1,6 @@
-# Quranic Phonemizer
+# Qurʾānic Phonemizer
 
-A modular phonemizer for the Qurʾān in the Hafs riwaya, converting text to phoneme sequences with support for Tajweed rules.
+A modular phonemizer (Grapheme to Phoneme converter) for the Qurʾān in the Hafs riwaya, converting text to phoneme sequences with support for Tajweed rules.
 
 The system uses a hierarchical pipeline that tokenizes text, applies contextual phoneme mappings, and processes Tajweed rules. It is highly extensible and customizable.
 
@@ -16,7 +16,7 @@ The system uses a hierarchical pipeline that tokenizes text, applies contextual 
   - [Outputs](#outputs)
   - [Stops (Boundary Markers)](#stops-boundary-markers)
 - [Contributing](#contributing)
-- [License](#license)
+- [Credits](#credits)
 - [Citing](#citing)
 
 ## Phoneme Inventory
@@ -61,7 +61,7 @@ The phoneme inventory uses the standard International Phonetic Alphabet (IPA) Ar
 | Qalqala (Sughra)      | `Q`                     |
 | Qalqala (Kubra)       | `QQ`                    |
 
-All the phonemes are configurable in `resources/base_phonemes.yaml` and `resources/rule_phonemes.yaml`.
+All the phonemes are configurable in [resources/base_phonemes.yaml](resources/base_phonemes.yaml) and [resources/rule_phonemes.yaml](resources/rule_phonemes.yaml).
 
 
 ## Usage
@@ -88,7 +88,7 @@ print(res.phonemes_str())
 
 بِسۡمِ ٱللَّهِ ٱلرَّحۡمَـٰنِ ٱلرَّحِيمِ ‏﴿١﴾‏
 
-> b i s m i l l a h i r r a ħ m a: n i r r a ħ i: m
+b i s m i l l a h i r r a ħ m a: n i r r a ħ i: m
 
 
 ### Input References
@@ -128,13 +128,13 @@ print(res.phonemes_str(phoneme_sep=" ", word_sep=" | ", verse_sep="\n"))
 ```
 قُلۡ هُوَ ٱللَّهُ أَحَدٌ ‏﴿١﴾‏ ٱللَّهُ ٱلصَّمَدُ ‏﴿٢﴾‏ لَمۡ يَلِدۡ وَلَمۡ يُولَدۡ ‏﴿٣﴾‏ وَلَمۡ يَكُن لَّهُۥ كُفُوًا أَحَدُۢ ‏﴿٤﴾‏
 
-> q u l | h u w a | l l a h u | ʔ a ħ a d QQ
+q u l | h u w a | l l a h u | ʔ a ħ a d QQ
 
-> ʔ a l l a h u | sˤ sˤ a m a d QQ
+ʔ a l l a h u | sˤ sˤ a m a d QQ
 
-> l a m | j a l i d QQ | w a l a m | j u: l a d QQ
+l a m | j a l i d QQ | w a l a m | j u: l a d QQ
 
-> w a l a m | j a k u | l l a h u: | k u f u w a n | ʔ a ħ a d QQ
+w a l a m | j a k u | l l a h u: | k u f u w a n | ʔ a ħ a d QQ
 
 #### Output Example (Table View)
 
@@ -145,19 +145,6 @@ df
 ```
 
 <div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
@@ -289,11 +276,12 @@ print(res.phonemes_str(phoneme_sep="", word_sep=" "))
 ```
 
 كَذٰلِكَ ٱلۡعَذَابُ‌ۖ وَلَعَذَابُ ٱلۡأَخِرَةِ أَكۡبَرُ‌ۚ لَوۡ كَانُواۡ يَعۡلَمُونَ ‏﴿٣٣﴾‏
-> kaða:lika lʕaða:b<span style="color:green">u</span> walaʕaða:bu lʔaxirati ʔakba<span style="color:green">ru</span> law ka:nu: jaʕlamu:n
 
-> kaða:lika lʕaða:b<span style="color:green">QQ</span> walaʕaða:bu lʔaxirati ʔakba<span style="color:green">ru</span> law ka:nu: jaʕlamu:n
+kaða:lika lʕaða:b**u** walaʕaða:bu lʔaxirati ʔakba**ru** law ka:nu: jaʕlamu:n
 
-> kaða:lika lʕaða:b<span style="color:green">u</span> walaʕaða:bu lʔaxirati ʔakba<span style="color:green">r</span> law ka:nu: jaʕlamu:n
+kaða:lika lʕaða:b**QQ** walaʕaða:bu lʔaxirati ʔakba**ru** law ka:nu: jaʕlamu:n
+
+kaða:lika lʕaða:b**u** walaʕaða:bu lʔaxirati ʔakba**r** law ka:nu: jaʕlamu:n
 
 
 ```python
@@ -307,22 +295,24 @@ print(res.phonemes_str(phoneme_sep="", word_sep=" ", verse_sep=""))
 ```
 
 إِنَّ شَجَرَتَ ٱلزَّقُّومِ ‏﴿٤٣﴾‏ طَعَامُ ٱلۡأَثِيمِ ‏﴿٤٤﴾‏
-> ʔiña ʃaʒarata zzaqqu:<span style="color:green">m</span> tˤaʕa:mu lʔaθi:m
 
-> ʔiña ʃaʒarata zzaqqu:<span style="color:green">mi</span> tˤaʕa:mu lʔaθi:m
+ʔiña ʃaʒarata zzaqqu:**m** tˤaʕa:mu lʔaθi:m
 
+ʔiña ʃaʒarata zzaqqu:**mi** tˤaʕa:mu lʔaθi:m
 
 These stops introduce explicit boundaries into the phoneme sequence to support more precise modeling.
 
 
 ## Contributing
 
-If you find any issues or have suggestions for improvements, please feel free to email me, open an issue or submit a pull request.
+If you find any issues or have suggestions for improvements, please feel free to email me, open an issue or submit a pull request. 
 
-Currently, the project is in the early stages of development. The following features are yet to be implemented:
+The following features are yet to be implemented:
 - Lam/Raa Tafkheem & Tarqeeq rules
 - Support other qira'at/riwayat
 
 ## Credits
+
+The project makes use of a modified version of the Quranic University Library's (QUL) [Hafs script with Tajweed](https://qul.tarteel.ai/resources/quran-script/58)
 
 ## Citing
