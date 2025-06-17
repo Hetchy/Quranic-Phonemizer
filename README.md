@@ -277,11 +277,11 @@ print(res.phonemes_str(phoneme_sep="", word_sep=" "))
 
 كَذٰلِكَ ٱلۡعَذَابُ‌ۖ وَلَعَذَابُ ٱلۡأَخِرَةِ أَكۡبَرُ‌ۚ لَوۡ كَانُواۡ يَعۡلَمُونَ ‏﴿٣٣﴾‏
 
-kaða:lika lʕaða:b**u** walaʕaða:bu lʔaxirati ʔakba**ru** law ka:nu: jaʕlamu:n
+kaða:lika lʕaða:b`u` walaʕaða:bu lʔaxirati ʔakba`ru` law ka:nu: jaʕlamu:n
 
-kaða:lika lʕaða:b**QQ** walaʕaða:bu lʔaxirati ʔakba**ru** law ka:nu: jaʕlamu:n
+kaða:lika lʕaða:b`QQ` walaʕaða:bu lʔaxirati ʔakba`ru` law ka:nu: jaʕlamu:n
 
-kaða:lika lʕaða:b**u** walaʕaða:bu lʔaxirati ʔakba**r** law ka:nu: jaʕlamu:n
+kaða:lika lʕaða:b`u` walaʕaða:bu lʔaxirati ʔakba`r` law ka:nu: jaʕlamu:n
 
 
 ```python
@@ -296,9 +296,9 @@ print(res.phonemes_str(phoneme_sep="", word_sep=" ", verse_sep=""))
 
 إِنَّ شَجَرَتَ ٱلزَّقُّومِ ‏﴿٤٣﴾‏ طَعَامُ ٱلۡأَثِيمِ ‏﴿٤٤﴾‏
 
-ʔiña ʃaʒarata zzaqqu:**m** tˤaʕa:mu lʔaθi:m
+ʔiña ʃaʒarata zzaqqu:`m` tˤaʕa:mu lʔaθi:m
 
-ʔiña ʃaʒarata zzaqqu:**mi** tˤaʕa:mu lʔaθi:m
+ʔiña ʃaʒarata zzaqqu:`mi` tˤaʕa:mu lʔaθi:m
 
 These stops introduce explicit boundaries into the phoneme sequence to support more precise modeling.
 
