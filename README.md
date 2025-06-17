@@ -96,7 +96,7 @@ b i s m i l l a h i r r a ħ m a: n i r r a ħ i: m
 
 | Format Example  | Meaning                                                |
 | --------------- | ------------------------------------------------------ |
-| `"1"`           | Entire chapter 1 (Al-Fātiḥa)                       |
+| `"1"`           | Entire chapter 1 (Al-Fātiħa)                       |
 | `"1:1"`         | Verse 1 of chapter 1                               |
 | `"1:1:1"`       | Word 1 of verse 1 of chapter 1                     |
 | `"1:1 - 1:4"`   | Verse range: 1:1 through 1:4                       |
