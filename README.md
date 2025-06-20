@@ -12,9 +12,9 @@ The system uses a hierarchical pipeline that tokenizes text, applies contextual 
 - [Usage](#usage)
   - [Installation](#installation)
   - [Quick Start](#quick-start)
-  - [Input References](#input-references)
-  - [Outputs](#outputs)
-  - [Stops (Boundary Markers)](#stops-boundary-markers)
+- [Input References](#input-references)
+- [Outputs](#outputs)
+- [Stops (Boundary Markers)](#stops-boundary-markers)
 - [Contributing](#contributing)
 - [Credits](#credits)
 - [Citing](#citing)
@@ -91,12 +91,12 @@ print(res.phonemes_str())
 b i s m i l l a h i r r a ħ m a: n i r r a ħ i: m
 
 
-### Input References
+## Input References
 `phonemize` accepts a variety of flexible formats to specify which part of the Qurʾān to phonemize:
 
 | Format Example  | Meaning                                                |
 | --------------- | ------------------------------------------------------ |
-| `"1"`           | Entire chapter 1 (Al-Fātiḥa)                       |
+| `"1"`           | Entire chapter 1 (Al-Fātiħa)                       |
 | `"1:1"`         | Verse 1 of chapter 1                               |
 | `"1:1:1"`       | Word 1 of verse 1 of chapter 1                     |
 | `"1:1 - 1:4"`   | Verse range: 1:1 through 1:4                       |
@@ -106,7 +106,7 @@ b i s m i l l a h i r r a ħ m a: n i r r a ħ i: m
 This allows fine-grained selection of input text to phonemize.
 
 
-### Outputs
+## Outputs
 The phonemizer returns a `PhonemizeResult` object, which contains:
 
 | Attribute           | Description                                                 |
@@ -119,7 +119,7 @@ The phonemizer returns a `PhonemizeResult` object, which contains:
 | `show_table()`      | Pandas DataFrame view: word locations, word text, phonemes  |
 | `save(path, fmt)`   | Save results to JSON or CSV                                 |
 
-#### Output Example (Phonemes String)
+### Output Example (Phonemes String)
 
 ```python
 res = pm.phonemize("112", stops=["verse"])
@@ -136,7 +136,7 @@ l a m | j a l i d QQ | w a l a m | j u: l a d QQ
 
 w a l a m | j a k u | l l a h u: | k u f u w a n | ʔ a ħ a d QQ
 
-#### Output Example (Table View)
+### Output Example (Table View)
 
 ```python
 res = pm.phonemize("112", stops=["verse"])
@@ -249,7 +249,7 @@ df
 </table>
 </div>
 
-### Stops (Boundary Markers)
+## Stops (Boundary Markers)
 
 Optionally, pass a `stops=[]` list to force word/verse segmentation:
 
