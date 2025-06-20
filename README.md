@@ -255,7 +255,7 @@ Optionally, pass a `stops=[]` list to force word/verse segmentation:
 
 | Stop key               | Symbol 
 | ---------------------- | ------ 
-| `"verse"`              | —
+| `"verse"`              | ۝
 | `"preferred_continue"` | ۖ      
 | `"preferred_stop"`     | ۗ      
 | `"optional_stop"`      | ۚ      
@@ -266,13 +266,13 @@ Optionally, pass a `stops=[]` list to force word/verse segmentation:
 ref = "68:33"
 res = pm.phonemize(ref)
 print(res.text)
-print(res.phonemes_str(phoneme_sep="", word_sep=" "))
+print(res.phonemes_str())
 
 res = pm.phonemize(ref, stops=["preferred_continue"])
-print(res.phonemes_str(phoneme_sep="", word_sep=" "))
+print(res.phonemes_str())
 
 res = pm.phonemize(ref, stops=["optional_stop"])
-print(res.phonemes_str(phoneme_sep="", word_sep=" "))
+print(res.phonemes_str())
 ```
 
 كَذٰلِكَ ٱلۡعَذَابُ‌ۖ وَلَعَذَابُ ٱلۡأَخِرَةِ أَكۡبَرُ‌ۚ لَوۡ كَانُواۡ يَعۡلَمُونَ ‏﴿٣٣﴾‏
@@ -288,7 +288,7 @@ kaða:lika lʕaða:b`u` walaʕaða:bu lʔaxirati ʔakba`r` law ka:nu: jaʕlamu:n
 ref = "44:43 - 44:44"
 res = pm.phonemize(ref, stops=["verse"])
 print(res.text)
-print(res.phonemes_str(phoneme_sep="", word_sep=" ", verse_sep=""))
+print(res.phonemes_str())
 
 res = pm.phonemize(ref, stops=[])
 print(res.phonemes_str(phoneme_sep="", word_sep=" ", verse_sep=""))
