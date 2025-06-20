@@ -60,21 +60,21 @@ class Phonemizer:
             ]),
 
             CompositePipelineStage([ # Tajweed Rules
-                HamWaslRule(configs.get('ham_wasl')),
-                QalqalaRule(configs.get('qalqala')),
-                IqlabRule(configs.get('iqlab')),
+                HamWaslRule(configs.get('ham_wasl', {})),
+                QalqalaRule(configs.get('qalqala', {})),
+                IqlabRule(configs.get('iqlab', {})),
                 CompositePipelineStage([
-                    GhunnahRule(configs.get('idgham')),
-                    IdghamGhunnahRule(configs.get('idgham')),
-                    IdghamWoGhunnahRule(configs.get('idgham')),
-                    IdghamShafawiRule(configs.get('idgham')),
-                    IdghamMutamathilaynRule(configs.get('idgham')),
-                    IdghamMutajanisaynRule(configs.get('idgham')),
-                    IdghamMutaqaribaynRule(configs.get('idgham')),
+                    GhunnahRule(configs.get('idgham', {})),
+                    IdghamGhunnahRule(configs.get('idgham', {})),
+                    IdghamWoGhunnahRule(configs.get('idgham', {})),
+                    IdghamShafawiRule(configs.get('idgham', {})),
+                    IdghamMutamathilaynRule(configs.get('idgham', {})),
+                    IdghamMutajanisaynRule(configs.get('idgham', {})),
+                    IdghamMutaqaribaynRule(configs.get('idgham', {})),
                 ]),
                 CompositePipelineStage([
-                    IkhfaaRule(configs.get('ikhfaa')),
-                    IkhfaaShafawiRule(configs.get('ikhfaa')),
+                    IkhfaaRule(configs.get('ikhfaa', {})),
+                    IkhfaaShafawiRule(configs.get('ikhfaa', {})),
                 ]),
             ]),
 
@@ -192,14 +192,14 @@ class WordBoundaryHandler(PipelineStage):
                 continue
 
             if tok.is_start:
-                self._handle_word_start(tok, context)
+                self._handle_word_start(tok)
             
             if tok.is_end:
-                self._handle_word_end(tokens, tok_idx, context)
+                self._handle_word_end(tokens, tok_idx)
         
         return tokens
     
-    def _handle_word_start(self, tok: Token, context: PipelineContext) -> None:
+    def _handle_word_start(self, tok: Token) -> None:
         """Handle word start boundary processing"""
         # 1. remove rule tags
         if tok.tag and (
@@ -213,17 +213,18 @@ class WordBoundaryHandler(PipelineStage):
         if (
             len(tok.phonemes) >= 2
             and tok.phonemes[0].is_letter()
-            and tok.phonemes[1] == Diacritic.SHADDA
+            and tok.phonemes[1] == Diacritic["SHADDA"]
         ):
             tok.phonemes.pop(1)
     
-    def _handle_word_end(self, tokens: List[Token], tok_idx: int, context: PipelineContext) -> None:
+    def _handle_word_end(self, tokens: List[Token], tok_idx: int) -> None:
         """Handle word end boundary processing"""
         # 1. remove rule tags
-        if tokens[tok_idx].tag and (
-            tokens[tok_idx].tag.startswith("idgham") or
-            tokens[tok_idx].tag.startswith("ikhfaa") or
-            tokens[tok_idx].tag == "iqlab"
+        tag = tokens[tok_idx].tag
+        if tag and (
+            tag.startswith("idgham") or
+            tag.startswith("ikhfaa") or
+            tag == "iqlab"
         ):
             tokens[tok_idx].tag = None
         
@@ -236,15 +237,15 @@ class WordBoundaryHandler(PipelineStage):
         
         # 2a. hamza + fathatan  ->  hamza + fatha
         if (
-            second_last_ph == Letter.HAMZA
-            and last_ph == Diacritic.FATHATAN
+            second_last_ph == Letter["HAMZA"]
+            and last_ph == Diacritic["FATHATAN"]
         ):
             tokens[tok_idx].phonemes[-1] = tanween_to_diacritic(last_ph)
 
         # 2b. _ + fathatan + alef  ->  _ + fatha + alef
         elif (
-            second_last_ph == Diacritic.FATHATAN
-            and last_ph == Letter.ALEF
+            second_last_ph == Diacritic["FATHATAN"]
+            and last_ph == Letter["ALEF"]
         ):
             tokens[tok_idx].phonemes[-2] = tanween_to_diacritic(second_last_ph)
 
@@ -253,7 +254,7 @@ class WordBoundaryHandler(PipelineStage):
             while (
                 tokens[tok_idx].phonemes
                 and not tokens[tok_idx].phonemes[-1].is_letter()
-                and tokens[tok_idx].phonemes[-1] not in [Diacritic.SHADDA, Diacritic.SUKUN]
+                and tokens[tok_idx].phonemes[-1] not in [Diacritic["SHADDA"], Diacritic["SUKUN"]]
             ):
                 tokens[tok_idx].phonemes.pop()
         
@@ -269,11 +270,11 @@ class WordBoundaryHandler(PipelineStage):
                 break
         
         if last_letter_ph in [
-            Letter.QAF,
-            Letter.TTA,
-            Letter.BA,
-            Letter.JEEM,
-            Letter.DAL
+            Letter["QAF"],
+            Letter["TTA"],
+            Letter["BA"],
+            Letter["JEEM"],
+            Letter["DAL"]
         ]:
             qalqala_tok_idx = tok_idx
             while last_letter_ph not in tokens[qalqala_tok_idx].phonemes:
@@ -299,14 +300,14 @@ class ConditionalPhonemeDisambiguator(PipelineStage):
 
             for k, cur_ph in enumerate(tok.phonemes):
                 if cur_ph.name == "DAGGER_ALEF":
-                    self._disambiguate_dagger_alef(tokens, tok_idx, k, cur_ph, context)
+                    self._disambiguate_dagger_alef(tokens, tok_idx, k, cur_ph)
                 elif cur_ph.is_conditional():
                     self._disambiguate_conditional(tokens, tok_idx, k, cur_ph)
         
         return tokens
     
     def _disambiguate_dagger_alef(self, tokens: List[Token], tok_idx: int, ph_idx: int,
-                                  cur_ph: Phoneme, context: PipelineContext) -> None:
+                                  cur_ph: Phoneme) -> None:
         """Handle dagger alef disambiguation"""
         tok = tokens[tok_idx]
         [short_vowel, long_vowel] = cur_ph.get_conditional_options()
@@ -315,7 +316,7 @@ class ConditionalPhonemeDisambiguator(PipelineStage):
         if len(phs_before) == 0:
             return
 
-        if phs_before[-1] == Diacritic.FATHA: # case (A)
+        if phs_before[-1] == Diacritic["FATHA"]: # case (A)
             cur_ph.assign(short_vowel)
         elif phs_before[-1].name == "ALEF_MAKSURA": # case (B)
             tok.phonemes.pop(ph_idx)
@@ -361,9 +362,9 @@ class WordEndAlefHandler(PipelineStage):
             
             if (  # fatha + alef + sukoon  ->  fatha
                 len(word_phs) >= 3
-                and word_phs[-3] == Diacritic.FATHA
-                and word_phs[-2] == Letter.ALEF
-                and word_phs[-1] == Diacritic.SUKUN
+                and word_phs[-3] == Diacritic["FATHA"]
+                and word_phs[-2] == Letter["ALEF"]
+                and word_phs[-1] == Diacritic["SUKUN"]
                 and not tok.is_end  # only applies on continued recitation
             ):
                 tok.phonemes.pop()
@@ -371,32 +372,32 @@ class WordEndAlefHandler(PipelineStage):
             
             elif (  # _ + fathatan + alef  ->  _ + fathatan
                 len(word_phs) >= 2
-                and word_phs[-2] == Diacritic.FATHATAN
-                and word_phs[-1] == Letter.ALEF
+                and word_phs[-2] == Diacritic["FATHATAN"]
+                and word_phs[-1] == Letter["ALEF"]
             ):
                 tok.phonemes.pop()
             
             elif (  # lam + alef + fathatan  ->  lam + fathatan
                 len(word_phs) >= 3
-                and word_phs[-3] == Letter.LAM
-                and word_phs[-2] == Letter.ALEF
-                and word_phs[-1] == Diacritic.FATHATAN
+                and word_phs[-3] == Letter["LAM"]
+                and word_phs[-2] == Letter["ALEF"]
+                and word_phs[-1] == Diacritic["FATHATAN"]
             ) or (  # lam + shadda + alef + fathatan  ->  lam + fathatan
                 len(word_phs) >= 4
-                and word_phs[-4] == Letter.LAM
-                and word_phs[-3] == Diacritic.SHADDA
-                and word_phs[-2] == Letter.ALEF
-                and word_phs[-1] == Diacritic.FATHATAN
+                and word_phs[-4] == Letter["LAM"]
+                and word_phs[-3] == Diacritic["SHADDA"]
+                and word_phs[-2] == Letter["ALEF"]
+                and word_phs[-1] == Diacritic["FATHATAN"]
             ):
                 tok.phonemes.pop(-2)
 
             elif (  # lam + alef  ->  lam + fatha + alef
                 len(word_phs) >= 2
-                and word_phs[-2] == Letter.LAM
-                and word_phs[-1] == Letter.ALEF
+                and word_phs[-2] == Letter["LAM"]
+                and word_phs[-1] == Letter["ALEF"]
             ):
-                fatha = Diacritic.FATHA
-                tok.phonemes.insert(-1, create_phoneme(fatha, "diacritics"))
+                fatha = Diacritic["FATHA"]
+                tok.phonemes.insert(-1, create_phoneme("a", "diacritics"))
         
         return tokens
 
@@ -411,7 +412,7 @@ class LongVowelHandler(PipelineStage):
                 
             new_phs = []
             for ph_idx, ph in enumerate(tok.phonemes):
-                if ph == Diacritic.SUKUN:
+                if ph == Diacritic["SUKUN"]:
                     continue
                 elif ph == ":":
                     prev_phs, _ = Token.get_word_phonemes_split(tokens, i, ph_idx)
@@ -457,7 +458,7 @@ class ShaddaHandler(PipelineStage):
                 
             new_phs = []
             for ph_idx, ph in enumerate(tok.phonemes):
-                if ph == Diacritic.SHADDA:
+                if ph == Diacritic["SHADDA"]:
                     prev_phs, _ = Token.get_word_phonemes_split(tokens, tok_idx, ph_idx)
                     if len(prev_phs) > 0 and prev_phs[-1].is_letter():
                         if self.seperate_phonemes:
@@ -489,7 +490,7 @@ class TanweenHandler(PipelineStage):
                 if ph.is_tanween():
                     new_phs.append(ph.phoneme[0])
                     new_phs.append(ph.phoneme[1])
-                elif ph != Diacritic.SUKUN:
+                elif ph != Diacritic["SUKUN"]:
                     new_phs.append(ph)
             
             tok.phonemes = new_phs
