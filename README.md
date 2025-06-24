@@ -21,7 +21,7 @@ The system uses a hierarchical pipeline that tokenizes text, applies contextual 
 
 ## Phoneme Inventory
 
-The phoneme inventory uses the standard International Phonetic Alphabet (IPA) Arabic phonemes alongside custom phonemes for Tajweed rules. There is a total of 67 phonemes, corresponding to:
+The phoneme inventory uses the standard International Phonetic Alphabet (IPA) [Arabic phonemes](https://en.wikipedia.org/wiki/Help%3AIPA/Arabic?utm_source=chatgpt.com) alongside custom phonemes for Tajweed rules. There is a total of 67 phonemes, corresponding to:
 
 - 28 consonants
 - 24 geminated consonants
@@ -313,6 +313,6 @@ The following features are yet to be implemented:
 
 ## Credits
 
-The project makes use of a modified version of the Quranic University Library's (QUL) [Hafs script with Tajweed](https://qul.tarteel.ai/resources/quran-script/58)
+The project makes use of a modified version of the Quranic University Library's (QUL) [Hafs script with Tajweed](https://qul.tarteel.ai/resources/quran-script/58).
 
 ## Citing
