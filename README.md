@@ -21,20 +21,28 @@ The system uses a hierarchical pipeline that tokenizes text, applies contextual 
 
 ## Phoneme Inventory
 
-The phoneme inventory uses the standard International Phonetic Alphabet (IPA) Arabic phonemes alongside custom phonemes for Tajweed rules.
+The phoneme inventory uses the standard International Phonetic Alphabet (IPA) Arabic phonemes alongside custom phonemes for Tajweed rules. There is a total of 67 phonemes, corresponding to:
+
+- 28 consonants
+- 24 geminated consonants
+- 6 vowels
+- 9 Tajweed phonemes
+
+All phonemes are configurable in [resources/base_phonemes.yaml](resources/base_phonemes.yaml) and [resources/rule_phonemes.yaml](resources/rule_phonemes.yaml).
 
 ### Consonants
 
 | **Letter**                | **Phoneme** | **Letter** | **Phoneme** | **Letter** | **Phoneme** | **Letter** | **Phoneme** |
 |:-------------------------:|:-----------:|:----------:|:-----------:|:----------:|:-----------:|:----------:|:-----------:|
-| أ / إ / ء / ؤ / ئ         | `ʔ`         | د          | `d`         | ض          | `dˤ`        | ك          | `k`         |
-| ب                         | `b`         | ذ          | `ð`         | ط          | `tˤ`        | ل          | `l`         |
-| ت                         | `t`         | ر          | `r`         | ظ          | `ðˤ`        | م          | `m`         |
-| ث                         | `θ`         | ز          | `z`         | ع          | `ʕ`         | ن          | `n`         |
-| ج                         | `ʒ`         | س          | `s`         | غ          | `ɣ`         | هـ          | `h`         |
-| ح                         | `ħ`         | ش          | `ʃ`         | ف          | `f`         | و          | `w`         |
-| خ                         | `x`         | ص          | `sˤ`        | ق          | `q`         | ي          | `j`         |
+| أ / إ / ء / ؤ / ئ         | `ʔ`       | د          | `d` / `dd`         | ض          | `dˤ` / `dˤdˤ`        | ك          | `k` / `kk`         |
+| ب                         | `b` / `bb`         | ذ          | `ð` / `ðð`         | ط          | `tˤ` / `tˤtˤ`       | ل          | `l` / `ll`         |
+| ت                         | `t` / `tt`         | ر          | `r` / `rr`         | ظ          | `ðˤ` / `ðˤðˤ`        | م          | `m`        |
+| ث                         | `θ` / `θθ`         | ز          | `z` / `zz`         | ع          | `ʕ` / `ʕʕ`         | ن          | `n`        |
+| ج                         | `ʒ` / `ʒʒ`         | س          | `s` / `ss`         | غ          | `ɣ`        | هـ          | `h` / `hh`        |
+| ح                         | `ħ` / `ħħ`         | ش          | `ʃ` / `ʃʃ`         | ف          | `f` / `ff`         | و          | `w` / `ww`         |
+| خ                         | `x` / `xx`         | ص          | `sˤ` / `sˤsˤ`        | ق          | `q` / `qq`         | ي          | `j` / `jj`         |
 
+Gemination (shaddah) is represented by repeating the phoneme to create new distinct phonemes. Note that there is no gemination for `m` / `n` (modelled as Tajweed instead), and for `ʔ` / `ɣ` (do not exist in the Qurʾān).
 
 ### Vowels
 
@@ -61,8 +69,6 @@ The phoneme inventory uses the standard International Phonetic Alphabet (IPA) Ar
 | Qalqala (Sughra)      | `Q`                     |
 | Qalqala (Kubra)       | `QQ`                    |
 
-All the phonemes are configurable in [resources/base_phonemes.yaml](resources/base_phonemes.yaml) and [resources/rule_phonemes.yaml](resources/rule_phonemes.yaml).
-
 
 ## Usage
 
@@ -88,8 +94,7 @@ print(res.phonemes_str())
 
 بِسۡمِ ٱللَّهِ ٱلرَّحۡمَـٰنِ ٱلرَّحِيمِ ‏﴿١﴾‏
 
-b i s m i l l a h i r r a ħ m a: n i r r a ħ i: m
-
+bismi llahi rraħma:ni rraħi:m
 
 ## Input References
 `phonemize` accepts a variety of flexible formats to specify which part of the Qurʾān to phonemize:
@@ -102,8 +107,6 @@ b i s m i l l a h i r r a ħ m a: n i r r a ħ i: m
 | `"1:1 - 1:4"`   | Verse range: 1:1 through 1:4                       |
 | `"1:1 - 1:2:2"` | From 1:1 to word 2 of 1:2                          |
 | `"1 - 2:2"`     | From entire chapter 1 through verse 2 of chapter 2 |
-
-This allows fine-grained selection of input text to phonemize.
 
 
 ## Outputs
@@ -128,13 +131,13 @@ print(res.phonemes_str(phoneme_sep=" ", word_sep=" | ", verse_sep="\n"))
 ```
 قُلۡ هُوَ ٱللَّهُ أَحَدٌ ‏﴿١﴾‏ ٱللَّهُ ٱلصَّمَدُ ‏﴿٢﴾‏ لَمۡ يَلِدۡ وَلَمۡ يُولَدۡ ‏﴿٣﴾‏ وَلَمۡ يَكُن لَّهُۥ كُفُوًا أَحَدُۢ ‏﴿٤﴾‏
 
-q u l | h u w a | l l a h u | ʔ a ħ a d QQ
+q u l | h u w a | ll a h u | ʔ a ħ a d QQ
 
-ʔ a l l a h u | sˤ sˤ a m a d QQ
+ʔ a ll a h u | sˤsˤ a m a d QQ
 
 l a m | j a l i d QQ | w a l a m | j u: l a d QQ
 
-w a l a m | j a k u | l l a h u: | k u f u w a n | ʔ a ħ a d QQ
+w a l a m | j a k u | ll a h u: | k u f u w a n | ʔ a ħ a d QQ
 
 ### Output Example (Table View)
 
@@ -299,9 +302,6 @@ print(res.phonemes_str(phoneme_sep="", word_sep=" ", verse_sep=""))
 ʔiña ʃaʒarata zzaqqu:`m` tˤaʕa:mu lʔaθi:m
 
 ʔiña ʃaʒarata zzaqqu:`mi` tˤaʕa:mu lʔaθi:m
-
-These stops introduce explicit boundaries into the phoneme sequence to support more precise modeling.
-
 
 ## Contributing
 
