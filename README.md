@@ -313,6 +313,6 @@ The following features are yet to be implemented:
 
 ## Credits
 
-The project makes use of a modified version of the Quranic University Library's (QUL) [Hafs script with Tajweed](https://qul.tarteel.ai/resources/quran-script/58).
+The project makes use of a modified version of the Quranic Universal Library's (QUL) [Hafs script with Tajweed](https://qul.tarteel.ai/resources/quran-script/58).
 
 ## Citing
