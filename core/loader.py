@@ -41,7 +41,7 @@ def _key_to_tuple(key: str) -> Tuple[int, int, int]:
     return int(s), int(v), int(w)
 
 
-def _parse_endpoint(spec: str) -> Tuple[int, int, int | None]:
+def _parse_endpoint(spec: str) -> Tuple[int | None, int | None, int | None]:
     """
     Turn 'n', 'n:n', or 'n:n:n' into a tuple (s, v, w_or_None).
     """
@@ -66,10 +66,10 @@ def keys_for_reference(ref: str, db: Dict[str, dict]) -> List[str]:
         start, end = _parse_endpoint(left), _parse_endpoint(right)
 
     # Canonicalise: fill missing verse/word with 0 / big number
-    def canon(tpl, is_end=False):
+    def canon(tpl, is_end=False) -> Tuple[int, int, int]:
         s, v, w = tpl
         if v is None:
-            return (s,   0 if not is_end else 10_000, 0 if not is_end else 10_000)
+            return (s, 0 if not is_end else 10_000, 0 if not is_end else 10_000)
         if w is None:
             return (s, v, 0 if not is_end else 10_000)
         return (s, v, w)

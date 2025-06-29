@@ -26,8 +26,8 @@ class HamWaslRule(Rule):
                     continue # silent when not beginning on the word, so skip
 
                 if ( # noun case: always fatha
-                    tokens[tok_idx + 1].tag == "laam_shamsiyah"
-                    or (len(tok.text) > 1 and tok.text[1] == "ل")
+                    len(tok.text) > 1 and tok.text[1] == "ل"
+                    or tokens[tok_idx + 1].tag == "laam_shamsiyah"
                     or (len(tokens[tok_idx + 1].text) > 0 and tokens[tok_idx + 1].text[0] == "ل")
                 ):
                     ham_wasl_phs = [

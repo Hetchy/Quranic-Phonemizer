@@ -28,7 +28,7 @@ special_words:
       - "12:1:1"  # Surah Yusuf
       - "14:1:1"  # Surah Ibrahim
       - "15:1:1"  # Surah Al-Hijr
-    phonemes: ["a", "l", "i", "f", "l", "a:", "m", "r", "a"]
+    phonemes: ["a", "l", "i", "f", "l", "a:", "m", "r", "a:"]
 
   - text: "المص"
     locations:
@@ -89,7 +89,7 @@ special_words:
   - text: "مجراها"
     locations:
       - "11:41:6"  # Surah Hud
-    phonemes: ["m", "a", "ʒ", "r", "i:", "h", "a:"]
+    phonemes: ["m", "a", "ʒ", "Q", "r", "i:", "h", "a:"]
 
   - text: "نُـۨجِى"
     locations:
@@ -99,4 +99,4 @@ special_words:
   - text: "بِأَييِّكُمُ"
     locations:
       - "68:6:1"  # Surah Al-Qalam
-    phonemes: ['b', 'i', 'ʔ', 'a', 'j', 'j', 'i', 'k', 'u', 'm', 'u']
+    phonemes: ['b', 'i', 'ʔ', 'a', 'jj', 'i', 'k', 'u', 'm', 'u']

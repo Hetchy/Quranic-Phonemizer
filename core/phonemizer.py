@@ -192,15 +192,16 @@ class WordBoundaryHandler(PipelineStage):
                 continue
 
             if tok.is_start:
-                self._handle_word_start(tok)
+                self._handle_word_start(tokens, tok_idx)
             
             if tok.is_end:
                 self._handle_word_end(tokens, tok_idx)
         
         return tokens
     
-    def _handle_word_start(self, tok: Token) -> None:
+    def _handle_word_start(self, tokens: List[Token], tok_idx: int) -> None:
         """Handle word start boundary processing"""
+        tok = tokens[tok_idx]
         # 1. remove rule tags
         if tok.tag and (
             tok.tag.startswith("idgham") or
@@ -214,8 +215,16 @@ class WordBoundaryHandler(PipelineStage):
             len(tok.phonemes) >= 2
             and tok.phonemes[0].is_letter()
             and tok.phonemes[1] == Diacritic["SHADDA"]
-        ):
+        ): 
             tok.phonemes.pop(1)
+        elif (
+            len(tokens) > tok_idx + 1
+            and len(tok.phonemes) == 1
+            and len(tokens[tok_idx + 1].phonemes) >= 1
+            and tok.phonemes[0].is_letter()
+            and tokens[tok_idx + 1].phonemes[0] == Diacritic["SHADDA"]
+        ):
+            tokens[tok_idx + 1].phonemes.pop(0)
     
     def _handle_word_end(self, tokens: List[Token], tok_idx: int) -> None:
         """Handle word end boundary processing"""

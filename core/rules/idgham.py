@@ -118,8 +118,6 @@ class IdghamWoGhunnahRule(Rule):
                     cur_ph[-1] = tanween_to_diacritic(cur_ph[-1])
                 elif Letter.NOON in cur_ph:
                     cur_ph.pop() # remove noon
-                else: # edge case when nooon has shaddah/sukoon (man raq)
-                    raise ValueError(f"Invalid Idgham Wo Ghunnah rule in {cur_tok.location}:\n{cur_tok.phonemes}\n{next_tok.phonemes}")
                 
                 cur_tok.mark_consumed_by(self.name)
                 next_tok.mark_consumed_by(self.name)
@@ -158,7 +156,7 @@ class IdghamShafawiRule(Rule):
 
         while i < len(tokens) - 2:
             cur_tok = tokens[i]
-            next_tok = tokens[i+1] if i + 1 < len(tokens) else None
+            next_tok = tokens[i+1]
             if (
                 cur_tok.tag == self.name
                 and next_tok.tag == self.name

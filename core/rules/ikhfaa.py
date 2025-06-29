@@ -50,6 +50,8 @@ class IkhfaaRule(Rule):
 
             # If not a two-token rule, check for single-token Ikhfaa (noon + ikhfaa letter)
             elif cur_tok.tag == self.name and self.name not in cur_tok.consumed_by:
+                if len(cur_tok.phonemes) < 2:
+                    raise ValueError(f"Ikhfaa rule applied to a token with less than 2 phonemes: {cur_tok.location}")
                 ikhfaa_ph = heavy_ikhfaa_ph if cur_tok.phonemes[1] in heavy_letters_phs else light_ikhfaa_ph
                 cur_tok.phonemes[0] = ikhfaa_ph
                 cur_tok.mark_consumed_by(self.name)

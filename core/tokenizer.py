@@ -23,6 +23,8 @@ from .loader import load_db, keys_for_reference
 _TAG_RE  = re.compile(r"<rule class=([a-zA-Z0-9_-]+)>(.*?)</rule>", re.DOTALL)
 _DIGIT_RE = re.compile(r"^[\u0660-\u0669]+$")        # Arabic-Indic digits
 
+DATA_DIR = Path(__file__).resolve().parent.parent / "resources"
+
 @dataclass(slots=True)
 class Token:
     text: str
@@ -143,14 +145,11 @@ def _strip_rule_tags(text: str) -> List[Tuple[str | None, str]]:
 
     return tokens
 
-def _load_special_words(special_words_path: str | None = None) -> Dict[str, Dict]:
+def _load_special_words(special_words_path: str) -> Dict[str, Dict]:
     """
     Load special words from YAML file.
     Returns a dict mapping location -> special word entry.
-    """
-    if special_words_path is None:
-        special_words_path = Path(__file__).parent.parent / "resources" / "special_words.yaml"
-    
+    """    
     try:
         with open(special_words_path, 'r', encoding='utf-8') as f:
             data = yaml.safe_load(f)
@@ -169,9 +168,9 @@ def _load_special_words(special_words_path: str | None = None) -> Dict[str, Dict
 def tokenize(
     ref: str,
     *,
-    db_path: str | None = "resources/Quran.json",
+    db_path: str = str(DATA_DIR / "Quran.json"),
     stops: List[str] = [],
-    special_words_path: str | None = None,
+    special_words_path: str = str(DATA_DIR / "special_words.yaml"),
 ) -> List[Token]:
     """
     Resolve *ref* via loader then emit an ordered Token list.
