@@ -123,47 +123,155 @@ class Token:
         
         return word_phonemes
 
-def _strip_rule_tags(text: str) -> List[Tuple[str | None, str]]:
-    """
-    Convert one word (possibly containing embedded <rule …>) into Tokens.
-    """
-    tokens: List[Tuple[str | None, str]] = []
-    idx = 0
-    for m in _TAG_RE.finditer(text):
-        if m.start() > idx:
-            plain = text[idx : m.start()]
-            if plain:
-                tokens.append((None, plain))
-        rule, inner = m.group(1), m.group(2)
-        tokens.append((rule, inner))
-        idx = m.end()
 
-    if idx < len(text):
-        rest = text[idx:]
-        if rest:
-            tokens.append((None, rest))
+class Tokenizer:
+    """Tokenizer that lazily loads the Qurʾānic DB and emits :class:`Token` objects."""
 
-    return tokens
+    def __init__(self, db_path: str | Path = DATA_DIR / "Quran.json",
+                 *, special_words_path: str | Path = DATA_DIR / "special_words.yaml") -> None:
+        self.db_path = str(db_path)
+        self.special_words_path = str(special_words_path)
+        self.db: Dict[str, dict] = {}
+        self.special_words: Dict[str, Dict] = {}
+        self.load_db(self.db_path)
+        self.special_words = self._load_special_words(self.special_words_path)
 
-def _load_special_words(special_words_path: str) -> Dict[str, Dict]:
-    """
-    Load special words from YAML file.
-    Returns a dict mapping location -> special word entry.
-    """    
-    try:
-        with open(special_words_path, 'r', encoding='utf-8') as f:
-            data = yaml.safe_load(f)
-        
-        # Create location -> special_word mapping
-        location_map = {}
-        for special_word in data.get('special_words', []):
-            for location in special_word.get('locations', []):
-                location_map[location] = special_word
-        
-        return location_map
-    except (FileNotFoundError, yaml.YAMLError):
-        # If file not found or invalid YAML, return empty dict
-        return {}
+    def load_db(self, db_path: str | Path) -> Dict[str, dict]:
+        """Load the Qurʾānic JSON DB from ``db_path``."""
+        self.db_path = str(db_path)
+        self.db = load_db(self.db_path)
+        return self.db
+
+    # -------------------------- helpers -------------------------- #
+    @staticmethod
+    def _strip_rule_tags(text: str) -> List[Tuple[str | None, str]]:
+        """Convert one word (possibly containing embedded ``<rule>``) into tokens."""
+        tokens: List[Tuple[str | None, str]] = []
+        idx = 0
+        for m in _TAG_RE.finditer(text):
+            if m.start() > idx:
+                plain = text[idx:m.start()]
+                if plain:
+                    tokens.append((None, plain))
+            rule, inner = m.group(1), m.group(2)
+            tokens.append((rule, inner))
+            idx = m.end()
+
+        if idx < len(text):
+            rest = text[idx:]
+            if rest:
+                tokens.append((None, rest))
+
+        return tokens
+
+    @staticmethod
+    def _load_special_words(special_words_path: str) -> Dict[str, Dict]:
+        """Load special words from YAML file."""
+        try:
+            with open(special_words_path, "r", encoding="utf-8") as f:
+                data = yaml.safe_load(f)
+
+            location_map: Dict[str, Dict] = {}
+            for special_word in data.get("special_words", []):
+                for location in special_word.get("locations", []):
+                    location_map[location] = special_word
+            return location_map
+        except (FileNotFoundError, yaml.YAMLError):
+            return {}
+
+    # ------------------------- public API ------------------------ #
+    def tokenize(self, ref: str, *, stops: List[str] | None = None) -> List[Token]:
+        """Resolve ``ref`` and return a list of :class:`Token` objects."""
+        stops = stops or []
+
+        stop_chars_map = {
+            "preferred_continue": "\u06D6",  # ۖ
+            "preferred_stop": "\u06D7",      # ۗ
+            "optional_stop": "\u06DA",       # ۚ
+            "compulsory_stop": "\u06D8",     # ۘ
+            "prohibited_stop": "\u06D9",     # ۙ
+        }
+
+        valid_stops = {"verse"} | set(stop_chars_map.keys())
+        invalid_stops = set(stops) - valid_stops
+        if invalid_stops:
+            raise ValueError(
+                f"Invalid stop types: {invalid_stops}. Valid types are: {valid_stops}"
+            )
+
+        target_stop_chars: Set[str] = set()
+        verse_boundaries = False
+        for stop_type in stops:
+            if stop_type == "verse":
+                verse_boundaries = True
+            elif stop_type in stop_chars_map:
+                target_stop_chars.add(stop_chars_map[stop_type])
+
+        if not self.db:
+            self.load_db(self.db_path)
+
+        locations = keys_for_reference(ref, self.db)
+        toks: List[Token] = []
+
+        special_words_map = self.special_words
+
+        for loc in locations:
+            raw = self.db[loc]["text"]
+            if isinstance(raw, list):
+                raw = "".join(raw)
+
+            stripped = re.sub(r"</?rule[^>]*?>", "", raw)
+            if _DIGIT_RE.fullmatch(stripped.strip()):
+                continue
+
+            if loc in special_words_map:
+                special_word = special_words_map[loc]
+                combined_text = re.sub(r"</?rule[^>]*?>", "", raw)
+                phonemes = [
+                    Phoneme(phoneme=ph, name="", cp=0, char="", category="special")
+                    for ph in special_word.get("phonemes", [])
+                ]
+                token = Token(text=combined_text, tag="special", location=loc, phonemes=phonemes)
+                toks.append(token)
+            else:
+                for tag, txt in self._strip_rule_tags(raw):
+                    if txt:
+                        token = Token(text=txt, tag=tag, location=loc)
+                        if target_stop_chars and any(c in txt for c in target_stop_chars):
+                            token = replace(token, is_end=True)
+                        toks.append(token)
+
+        if toks:
+            if target_stop_chars:
+                for i in range(len(toks) - 1):
+                    if toks[i].is_end:
+                        toks[i + 1] = replace(toks[i + 1], is_start=True)
+
+            if verse_boundaries:
+                prev_verse = None
+                for i, token in enumerate(toks):
+                    s, v, _ = token.location.split(":")
+                    current_verse = f"{s}:{v}"
+
+                    if prev_verse != current_verse:
+                        toks[i] = replace(toks[i], is_start=True)
+
+                    next_token = toks[i + 1] if i + 1 < len(toks) else None
+                    if next_token is None:
+                        toks[i] = replace(toks[i], is_end=True)
+                    else:
+                        next_s, next_v, _ = next_token.location.split(":")
+                        next_verse = f"{next_s}:{next_v}"
+                        if current_verse != next_verse:
+                            toks[i] = replace(toks[i], is_end=True)
+
+                    prev_verse = current_verse
+
+            toks[0] = replace(toks[0], is_start=True)
+            toks[-1] = replace(toks[-1], is_end=True)
+
+        return toks
+
 
 def tokenize(
     ref: str,
@@ -172,119 +280,5 @@ def tokenize(
     stops: List[str] = [],
     special_words_path: str = str(DATA_DIR / "special_words.yaml"),
 ) -> List[Token]:
-    """
-    Resolve *ref* via loader then emit an ordered Token list.
-    
-    Parameters
-    ----------
-    stops : List[str]
-        List of stop types to mark as boundaries. Can include:
-        - "verse": Mark verse boundaries
-        - "preferred_continue": ۖ 
-        - "preferred_stop": ۗ 
-        - "optional_stop": ۚ 
-        - "compulsory_stop": ۘ 
-        - "prohibited_stop": ۙ 
-    """
-    # Create mapping of stop names to characters
-    stop_chars_map = {
-        "preferred_continue": "\u06D6",   # ۖ
-        "preferred_stop": "\u06D7",       # ۗ
-        "optional_stop": "\u06DA",        # ۚ
-        "compulsory_stop": "\u06D8",      # ۘ
-        "prohibited_stop": "\u06D9",      # ۙ
-    }
-    
-    # Validate stop parameters
-    valid_stops = {"verse"} | set(stop_chars_map.keys())
-    invalid_stops = set(stops) - valid_stops
-    if invalid_stops:
-        raise ValueError(f"Invalid stop types: {invalid_stops}. Valid types are: {valid_stops}")
-    
-    # Get the set of stop characters we're looking for
-    target_stop_chars = set()
-    verse_boundaries = False
-    
-    for stop_type in stops:
-        if stop_type == "verse":
-            verse_boundaries = True
-        elif stop_type in stop_chars_map:
-            target_stop_chars.add(stop_chars_map[stop_type])
-    
-    db = load_db(db_path)
-    locations = keys_for_reference(ref, db)
-    toks: List[Token] = []
-    
-    # Load special words mapping
-    special_words_map = _load_special_words(special_words_path)
-
-    for loc in locations:
-        raw = db[loc]["text"]
-        if isinstance(raw, list):
-            raw = "".join(raw)
-
-        # Skip verse number if the stripped text is only digits
-        stripped = re.sub(r"</?rule[^>]*?>", "", raw)
-        if _DIGIT_RE.fullmatch(stripped.strip()):
-            continue
-
-        # Check if this location is a special word
-        if loc in special_words_map:
-            special_word = special_words_map[loc]
-            # Strip all rule tags from the raw text
-            combined_text = re.sub(r"</?rule[^>]*?>", "", raw)
-            # Create phoneme objects from the strings in the YAML
-            phonemes = [Phoneme(phoneme=ph, name="", cp=0, char="", category="special")
-                       for ph in special_word.get('phonemes', [])]
-            # Create single token with special tag and phonemes from YAML
-            token = Token(text=combined_text, tag="special", location=loc, phonemes=phonemes)
-            toks.append(token)
-        else:
-            # Normal processing
-            for tag, txt in _strip_rule_tags(raw):
-                if txt:
-                    token = Token(text=txt, tag=tag, location=loc)
-                    
-                    # Check for stop characters in this token
-                    if target_stop_chars and any(char in txt for char in target_stop_chars):
-                        token = replace(token, is_end=True)
-                    
-                    toks.append(token)
-
-    # Set is_start and is_end flags for verse boundaries and first/last tokens
-    if toks:
-        # First, mark tokens following stop signs as is_start
-        if target_stop_chars:
-            for i in range(len(toks) - 1):  # Don't check the last token
-                if toks[i].is_end:  # This token has a stop sign
-                    toks[i + 1] = replace(toks[i + 1], is_start=True)
-        
-        if verse_boundaries:
-            # Set is_start and is_end at verse boundaries
-            prev_verse = None
-            for i, token in enumerate(toks):
-                s, v, _ = token.location.split(":")
-                current_verse = f"{s}:{v}"
-                
-                # Set is_start for first token of each verse
-                if prev_verse != current_verse:
-                    toks[i] = replace(toks[i], is_start=True)
-                
-                # Set is_end for last token of each verse
-                next_token = toks[i + 1] if i + 1 < len(toks) else None
-                if next_token is None:
-                    # Last token overall
-                    toks[i] = replace(toks[i], is_end=True)
-                else:
-                    next_s, next_v, _ = next_token.location.split(":")
-                    next_verse = f"{next_s}:{next_v}"
-                    if current_verse != next_verse:
-                        # Last token of this verse
-                        toks[i] = replace(toks[i], is_end=True)
-                
-                prev_verse = current_verse
-        
-        toks[0] = replace(toks[0], is_start=True)
-        toks[-1] = replace(toks[-1], is_end=True)
-
-    return toks
+    """Backwards-compatible wrapper for :class:`Tokenizer`."""
+    return Tokenizer(db_path=db_path, special_words_path=special_words_path).tokenize(ref, stops=stops)

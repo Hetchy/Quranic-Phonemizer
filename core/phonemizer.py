@@ -18,7 +18,7 @@ from typing import List
 
 import yaml
 
-from .tokenizer import tokenize, Token
+from .tokenizer import Tokenizer, Token
 from .phoneme import Phoneme, Letter, Diacritic, map_word, create_phoneme, tanween_to_diacritic
 from .helpers import compile_text
 from .pipeline import PipelineContext, PipelineStage, CompositePipelineStage
@@ -44,6 +44,7 @@ class Phonemizer:
         rule_cfg: str | Path = DATA_DIR / "rule_phonemes.yaml",
     ) -> None:
         self.db_path = str(db_path)
+        self.tokenizer = Tokenizer(db_path=self.db_path)
         self.rule_cfg_path = rule_cfg
         self.pipeline = self._build_pipeline()
   
@@ -116,7 +117,7 @@ class Phonemizer:
             stops=stops,
         )
         
-        tokens = tokenize(ref, stops=stops, db_path=self.db_path)
+        tokens = self.tokenizer.tokenize(ref, stops=stops)
         tokens = self.pipeline.process(tokens, context)
         
         phoneme_arrays = self._format_phonemes(tokens)
