@@ -233,8 +233,7 @@ diacritics:
     char: "ِ"
     phoneme: "i"
 
-
-mudud:
+mini_letters:
 
   MINI_WAW:
     cp: 0x06E5
@@ -255,14 +254,6 @@ mudud:
     cp: 0x0670
     char: "ٰ"
     phoneme: "<:/a:>"
- 
-  LONG_MADD:
-    cp: 0x0653
-    char: "ٓ◌ٓ" 
-    phoneme: ""
-
-
-mini_letters:
 
   MINI_NOON:
     cp: 0x06E8
@@ -323,7 +314,7 @@ stop_signs:
     phoneme: ""
 
 
-special_singletons:
+special:
 
   S1: # 11:41 مَجۡر۪ٮٰهَا 
     cp: 0x06EA 
@@ -351,6 +342,11 @@ other:
   ZWNJ:
     cp: 0x200C
     char: "‌"
+    phoneme: ""
+
+  LONG_MADD:
+    cp: 0x0653
+    char: "ٓ◌ٓ" 
     phoneme: ""
 
   PARTIAL_ALEF_MAKSURA:

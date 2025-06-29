@@ -271,14 +271,3 @@ class Tokenizer:
             toks[-1] = replace(toks[-1], is_end=True)
 
         return toks
-
-
-def tokenize(
-    ref: str,
-    *,
-    db_path: str = str(DATA_DIR / "Quran.json"),
-    stops: List[str] = [],
-    special_words_path: str = str(DATA_DIR / "special_words.yaml"),
-) -> List[Token]:
-    """Backwards-compatible wrapper for :class:`Tokenizer`."""
-    return Tokenizer(db_path=db_path, special_words_path=special_words_path).tokenize(ref, stops=stops)

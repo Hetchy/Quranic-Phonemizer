@@ -33,7 +33,7 @@ special_words:
   - text: "المص"
     locations:
       - "7:1:1"  # Surah Al-A'raf
-    phonemes: ["a", "l", "i", "f", "l", "a:", "m̃", "i:", "m", "sˤ", "a:", "d", "QQ"]
+    phonemes: ["a", "l", "i", "f", "l", "a:", "m̃", "i:", "m", "sˤ", "a:", "d", "Q"]
 
   - text: "المر"
     locations:
@@ -43,7 +43,7 @@ special_words:
   - text: "كهيعص"
     locations:
       - "19:1:1"  # Surah Maryam
-    phonemes: ["k", "a:", "f", "h", "a", "j", "a", "ʕ", "a", "j", "ŋˤ", "sˤ", "a:", "d", "QQ"]
+    phonemes: ["k", "a:", "f", "h", "a", "j", "a", "ʕ", "a", "j", "ŋ", "sˤ", "a:", "d", "Q"]
 
   - text: "طسم"
     locations:
@@ -69,12 +69,12 @@ special_words:
   - text: "ص"
     locations:
       - "38:1:1"  # Surah Sad
-    phonemes: ["sˤ", "a:", "d", "QQ"]
+    phonemes: ["sˤ", "a:", "d", "Q"]
 
   - text: "عسق"
     locations:
       - "42:2:1"  # Surah Ash-Shura
-    phonemes: ["ʕ", "a", "j", "ŋ", "s", "i:", "ŋˤ", "q", "a:", "f"]
+    phonemes: ["ʕ", "a", "j", "ŋ", "s", "i:", "ŋ", "q", "a:", "f"]
 
   - text: "ق"
     locations:
