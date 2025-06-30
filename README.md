@@ -40,7 +40,7 @@ All phonemes are configurable in [resources/base_phonemes.yaml](resources/base_p
 | ث                         | `θ` / `θθ`         | ز          | `z` / `zz`         | ع          | `ʕ` / `ʕʕ`         | ن          | `n`        |
 | ج                         | `ʒ` / `ʒʒ`         | س          | `s` / `ss`         | غ          | `ɣ`        | هـ          | `h` / `hh`        |
 | ح                         | `ħ` / `ħħ`         | ش          | `ʃ` / `ʃʃ`         | ف          | `f` / `ff`         | و          | `w` / `ww`         |
-| خ                         | `x` / `xx`         | ص          | `sˤ` / `sˤsˤ`        | ق          | `q` / `qq`         | ي          | `j` / `jj`         |
+| خ                         | `x` / `xx`         | ص          | `sˤ` / `sˤsˤ`        | ق          | `q` / `qq`         | ي / ى          | `j` / `jj`         |
 
 Gemination (shaddah) is represented by repeating the phoneme to create new distinct phonemes. Note that there is no gemination for `m` / `n` (modelled as Tajweed instead), and for `ʔ` / `ɣ` (do not exist in the Qurʾān).
 
@@ -54,7 +54,7 @@ Gemination (shaddah) is represented by repeating the phoneme to create new disti
 | ِ         | `i`           |
 | ا         | `aː`          |
 | و         | `uː`          |
-| ي         | `iː`          |
+| ي / ى         | `iː`          |
 
 
 ### Tajweed Rules
