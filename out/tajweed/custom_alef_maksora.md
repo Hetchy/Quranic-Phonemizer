@@ -1,2 +1,0 @@
-<h3>1 verse(s) contain rule <code>custom_alef_maksora</code></h3><h4>Total occurrences: 1</h4>
-<p><strong>2:72</strong> — وَإِذۡ قَتَلۡتُمۡ نَفۡسًا فَٱدّ<rule class=custom_alef_maksora>ٰ</rule>ر<span style='color:red;font-weight:bold'>ٰ</span>ٔۡتُمۡ فِيهَا‌ۖ وَٱللَّهُ مُخۡرِجٌ مَّا كُنتُمۡ تَكۡتُمُونَ <span style='color:gray'>(Occurrences in verse: 1)</span></p>
