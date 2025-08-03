@@ -20,6 +20,9 @@ from .word import Word
 class PipelineContext:
     """A context object to pass through the pipeline."""
     rule_configs: Dict[str, Dict[str, str]]
+    db_path: str = ""
+    ref: str = ""
+    stops: List[str] = field(default_factory=list)
 
 class PipelineStage(ABC):
     """An abstract base class for a stage in the processing pipeline."""

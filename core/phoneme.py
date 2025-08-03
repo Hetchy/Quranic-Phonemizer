@@ -76,6 +76,7 @@ _by_char: Dict[str, Phoneme] = {}
 _by_name: Dict[str, Phoneme] = {}
 Letter: Type[Enum] = None
 Diacritic: Type[Enum] = None
+Other: Type[Enum] = None
 
 
 def load_phoneme_data(yaml_path: Union[str, Path] = None) -> None:
@@ -85,7 +86,7 @@ def load_phoneme_data(yaml_path: Union[str, Path] = None) -> None:
     Args:
         yaml_path: Path to phoneme mapping YAML file. If None, uses default path.
     """
-    global _by_cp, _by_char, _by_name, Letter, Diacritic
+    global _by_cp, _by_char, _by_name, Letter, Diacritic, Other
     
     if not yaml_path:
         yaml_path = Path(__file__).parent.parent / "resources" / "base_phonemes.yaml"
@@ -96,6 +97,7 @@ def load_phoneme_data(yaml_path: Union[str, Path] = None) -> None:
 
     letters_names = []
     diacritics_names = []
+    other_names = []
 
     data = yaml.safe_load(Path(yaml_path).read_text(encoding="utf-8"))
     if not isinstance(data, dict):
@@ -123,10 +125,13 @@ def load_phoneme_data(yaml_path: Union[str, Path] = None) -> None:
                 letters_names.append(name)
             elif category.lower() == "diacritics":
                 diacritics_names.append(name)
+            elif category.lower() == "other":
+                other_names.append(name)
 
     # Create enums for letter and diacritic names
     Letter = Enum("Letter", {n: _by_name[n].phoneme for n in letters_names}, type=str)
     Diacritic = Enum("Diacritic", {n: _by_name[n].phoneme for n in diacritics_names}, type=str)
+    Other = Enum("Other", {n: _by_name[n].phoneme if _by_name[n].phoneme else n for n in other_names}, type=str)
 
 
 def tanween_to_diacritic(tanween_ph: Phoneme) -> Phoneme:

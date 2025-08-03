@@ -1,7 +1,7 @@
 __pycache__/
 *.py[cod]
-out/
-resources/archive/
+out
+resources/archive
 test.ipynb
 refactor_plan.md
 
