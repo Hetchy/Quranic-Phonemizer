@@ -12,33 +12,30 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import List
+from typing import List, Dict
 
-from .tokenizer import Token
+from .word import Word
 
 @dataclass
 class PipelineContext:
-    """Shared context passed between pipeline stages"""
-    db_path: str
-    ref: str
-    stops: List[str] = field(default_factory=list)
-
+    """A context object to pass through the pipeline."""
+    rule_configs: Dict[str, Dict[str, str]]
 
 class PipelineStage(ABC):
-    """Base class for all pipeline stages"""
+    """An abstract base class for a stage in the processing pipeline."""
     
     @abstractmethod
-    def process(self, tokens: List[Token], context: PipelineContext) -> List[Token]:
-        """Process tokens and return modified tokens"""
+    def process(self, words: List[Word], context: PipelineContext) -> List[Word]:
+        pass
 
 
 class CompositePipelineStage(PipelineStage):
-    """A pipeline stage that contains multiple sub-stages"""
+    """A pipeline stage that is composed of other stages."""
     
     def __init__(self, stages: List[PipelineStage]):
         self.stages = stages
     
-    def process(self, tokens: List[Token], context: PipelineContext) -> List[Token]:
+    def process(self, words: List[Word], context: PipelineContext) -> List[Word]:
         for stage in self.stages:
-            tokens = stage.process(tokens, context)
-        return tokens 
+            words = stage.process(words, context)
+        return words 
