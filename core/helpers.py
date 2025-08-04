@@ -17,6 +17,7 @@ import re
 from pathlib import Path
 from typing import Dict, List, Tuple, Iterable
 from .loader import load_db, keys_for_reference
+from . import Phonemizer
 
 
 # ------------------------------------------------------------------ #
@@ -270,67 +271,59 @@ def phonemize_and_save(
     The output format is:
     - Each line contains a word followed by its phoneme array
     - All phoneme arrays are aligned to start at the same column
-    - Extra newline at verse endpoints (no verse numbers/markers)
-    - File is saved as data/phonemized/<ref>.txt
+    - Verse numbers are shown as headers
     
     Parameters
     ----------
     ref : str
-        Quranic reference (e.g., "69:24", "2:1-5")
+        Qurʾānic reference (e.g. "1:1", "2:282", "1-114").
     db_path : str | Path
-        Path to the Quran database
+        Path to the Qurʾān word-by-word JSON.
     output_dir : str | Path
         Directory to save the phonemized output
     """
-    from .phonemizer import Phonemizer
-    import os
-    import unicodedata
-    
-    def visual_width(text):
-        """Calculate visual width by removing combining characters (diacritics)"""
-        # Remove combining characters (Arabic diacritics)
-        normalized = ''.join(c for c in text if not unicodedata.combining(c))
-        return len(normalized)
-    
-    def align_at_column(word, phoneme_str, target_col=20):
-        """Align phoneme string to start at target column"""
-        word_width = visual_width(word)
-        if word_width >= target_col:
-            # If word is too long, truncate and add space
-            # We need to be careful with Arabic text truncation
-            spaces_needed = 1
-        else:
-            spaces_needed = target_col - word_width
-        return word + (" " * spaces_needed) + phoneme_str
-    
-    # Create output directory if it doesn't exist
-    os.makedirs(output_dir, exist_ok=True)
+    # Import here to avoid circular imports
+    from . import Phonemizer
     
     # Phonemize the reference
     phonemizer = Phonemizer(db_path=db_path)
     res = phonemizer.phonemize(ref, stops=stops)
     quran_text = res.text
-    phoneme_arrays = res.phonemes_nested()
+    phoneme_arrays = res.phonemes  # Use phonemes instead of _nested
     
-    if not quran_text or not phoneme_arrays:
-        print(f"No content found for reference: {ref}")
-        return
-    
-    # Build the output lines
-    output_lines = []
-
+    # Load the database to get word texts
     db = load_db(db_path)
     keys = keys_for_reference(ref, db)
     
-    current_verse = None
+    # Create output directory if it doesn't exist
+    Path(output_dir).mkdir(parents=True, exist_ok=True)
+    
+    # Helper functions for formatting
+    def visual_width(text):
+        """Calculate visual width by removing combining characters (diacritics)"""
+        import unicodedata
+        return len(''.join(c for c in text if not unicodedata.combining(c)))
+    
+    def align_at_column(word, phoneme_str, target_col=20):
+        """Align phoneme string to start at target column"""
+        word_width = visual_width(word)
+        padding = max(target_col - word_width, 2)
+        return word + ' ' * padding + phoneme_str
+    
+    # Process and format output
+    output_lines = []
     phoneme_index = 0
+    current_verse = None
     
     for key in keys:
-        s, v, _ = key.split(":")
+        # Extract verse information
+        s, v, w = key.split(":")
         verse_key = f"{s}:{v}"
         
-        # Add blank line when verse changes
-        if current_verse is not None and current_verse != verse_key:
+        # Add verse header if starting a new verse
+        if verse_key != current_verse:
+            if output_lines:  # Add blank line before new verse (except for first)
+                output_lines.append("")
             output_lines.append(f"\n{s}:{v}")
         current_verse = verse_key
         
