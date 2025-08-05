@@ -2,5 +2,5 @@ from typing import List
 from .letter import LetterSymbol
 
 class HamzaLetter(LetterSymbol):
-    def phonemize(self) -> List[str]:
+    def phonemize_letter(self) -> List[str]:
         return []

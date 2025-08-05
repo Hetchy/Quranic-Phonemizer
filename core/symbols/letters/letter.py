@@ -6,7 +6,7 @@ Moved into core/symbols/letters/ directory.
 
 from __future__ import annotations
 
-from typing import List, Optional
+from typing import List, Optional, final
 
 from ..symbol import Symbol
 from ..diacritic import DiacriticSymbol
@@ -89,7 +89,10 @@ class LetterSymbol(Symbol):
         self.is_phonemized = True
         self.affected_by = affected_by
 
+    @final
     def phonemize(self) -> List[str]:
+        if self.is_last and self.parent_word.is_stopping:
+            self.diacritic = DiacriticSymbol("ۡ", "SUKUN")
         return self.phonemize_letter() + self.phonemize_modifiers()
 
     def phonemize_letter(self) -> List[str]:
@@ -98,14 +101,18 @@ class LetterSymbol(Symbol):
         return [self.apply_shaddah()]
 
     def phonemize_modifiers(self) -> List[str]:
+        if self.has_tanween:
+            # split tanween into two phonemes e.g. ["a", "n"]
+            return [self.diacritic.base_phoneme[0], self.diacritic.base_phoneme[1]]
+
         out = []
-        if self.diacritic and self.diacritic.base_phoneme:
+        if self.diacritic:
             out.append(self.diacritic.base_phoneme)
         # if self.extension and self.extension.base_phoneme:
         #     out.append(self.extension.base_phoneme)
         return out
 
     def apply_shaddah(self) -> str:
-        if self.has_shaddah:
+        if self.has_shaddah and not (self.is_first and self.parent_word.is_starting):
             return self.base_phoneme + self.base_phoneme
         return self.base_phoneme

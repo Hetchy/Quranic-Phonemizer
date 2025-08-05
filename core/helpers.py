@@ -374,7 +374,7 @@ def compare_files(
     context_lines : int
         Number of context lines to show around differences (default: 3)
     ignore_whitespace : bool
-        Whether to ignore whitespace differences (default: False)
+        Whether to ignore whitespace differences and empty lines (default: False)
     return_result : bool
         If True, return the diff as a string. If False, print it (default: False)
         
@@ -412,10 +412,10 @@ def compare_files(
         with open(file2_path, 'r', encoding='utf-8') as f2:
             lines2 = f2.readlines()
             
-        # Optionally ignore whitespace
+        # Optionally ignore whitespace and empty lines
         if ignore_whitespace:
-            lines1 = [line.strip() + '\n' for line in lines1]
-            lines2 = [line.strip() + '\n' for line in lines2]
+            lines1 = [line.strip() + '\n' for line in lines1 if line.strip()]
+            lines2 = [line.strip() + '\n' for line in lines2 if line.strip()]
         
         # Compare files
         if lines1 == lines2:

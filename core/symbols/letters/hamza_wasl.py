@@ -3,7 +3,7 @@ from typing import List, Dict, Any, Optional
 from .letter import LetterSymbol
 
 class HamzaWaslLetter(LetterSymbol):
-    def phonemize(self) -> List[str]:
+    def phonemize_letter(self) -> List[str]:
         if self.is_first and self.parent_word.is_starting:
             second_letter = self.next_letter(1)
             third_letter = self.next_letter(2)
