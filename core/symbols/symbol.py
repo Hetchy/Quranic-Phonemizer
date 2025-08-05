@@ -13,4 +13,4 @@ class Symbol(ABC):
     """Abstract base class for all symbols in a word."""
     def __init__(self, char: str, phoneme: Optional[str] = None):
         self.char = char
-        self.phoneme = phoneme
+        self.base_phoneme = phoneme

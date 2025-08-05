@@ -9,7 +9,7 @@ from typing import Dict, Any, Optional
 import yaml
 
 # We keep the resources beside core package
-DATA_DIR = Path(__file__).resolve().parent / "resources"
+DATA_DIR = Path(__file__).resolve().parent.parent / "resources"
 
 _BASE_CACHE: Dict[str, str] = {}
 _RULE_CACHE: Dict[str, Any] = {}

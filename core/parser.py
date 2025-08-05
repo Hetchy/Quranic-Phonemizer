@@ -1,19 +1,43 @@
 """
-Symbol parser for the Quranic phonemizer - Phase 2 implementation.
+Parser for the Quranic phonemizer.
 """
 
 from __future__ import annotations
 
 from typing import List, Dict, Any
-import unicodedata
+from pathlib import Path
+import yaml
+import json
+import re
 
+from .loader import load_db, keys_for_reference
+from .location import Location
+from .word import Word
 from .symbols.symbol import Symbol
-from .symbols.letter import LetterSymbol
+from .symbols.letters.letter import LetterSymbol
 from .symbols.diacritic import DiacriticSymbol
 from .symbols.extension import ExtensionSymbol
 from .symbols.stop import StopSymbol
 from .symbols.other import OtherSymbol
-from .location import Location
+
+from .symbols.letters.noon import NoonLetter
+from .symbols.letters.meem import MeemLetter
+from .symbols.letters.hamza_wasl import HamzaWaslLetter
+from .symbols.letters.qalqala_letter import QalqalaLetter
+
+# Data directory
+DATA_DIR = Path(__file__).resolve().parent.parent / "resources"
+
+LETTER_CLASSES: dict[str, type[LetterSymbol]] = {
+    "ن": NoonLetter,
+    "م": MeemLetter,
+    "ٱ": HamzaWaslLetter,
+    "ق": QalqalaLetter,
+    "ط": QalqalaLetter,
+    "ب": QalqalaLetter,
+    "ج": QalqalaLetter,
+    "د": QalqalaLetter,
+}
 
 
 class Parser:
@@ -45,9 +69,9 @@ class Parser:
         for other_type, other_info in self.symbol_mappings.get("other", {}).items():
             self.other_map[other_info["char"]] = (other_type, other_info)
     
-    def parse_word(self, text: str, location: Location) -> 'ParsedWord':
-        """Parse a word text into a ParsedWord object with properly associated symbols."""
-        word = ParsedWord(location=location, text=text)
+    def parse_word(self, text: str, location: Location) -> Word:
+        """Parse a word text into a Word object with properly associated symbols."""
+        word = Word(location=location, text=text)
         
         # Strip rule tags for character processing
         stripped_text = self._strip_rule_tags(text)
@@ -73,75 +97,59 @@ class Parser:
             # Check if it's a letter
             if char in self.letter_map:
                 letter_type, letter_info = self.letter_map[char]
-                letter = LetterSymbol(char, letter_info.get("phoneme"))
+                letter_cls = LETTER_CLASSES.get(char, LetterSymbol)
+                letter = letter_cls(char, letter_info.get("phoneme"))
+                
+                # Look ahead for associated diacritics, extensions, and shaddah
+                j = i + 1
+                while j < len(stripped_text):
+                    next_char = stripped_text[j]
+                    
+                    # Check for diacritics
+                    if next_char in self.diacritic_map:
+                        diacritic_type, diacritic_info = self.diacritic_map[next_char]
+                        diacritic = DiacriticSymbol(next_char, diacritic_type, diacritic_info.get("phoneme"))
+                        letter.diacritic = diacritic
+                        j += 1
+                        continue
+                    
+                    # Check for extensions
+                    elif next_char in self.extension_map:
+                        extension_type, extension_info = self.extension_map[next_char]
+                        extension = ExtensionSymbol(next_char, extension_info.get("phoneme"), extension_type)
+                        letter.extension = extension
+                        j += 1
+                        continue
+                    
+                    # Check for shaddah
+                    elif next_char == "ّ":  # SHADDAH
+                        letter.has_shaddah = True
+                        j += 1
+                        continue
+                    
+                    # Check for other symbols that should be associated with this letter
+                    elif next_char in self.other_map:
+                        other_type, other_info = self.other_map[next_char]
+                        other = OtherSymbol(next_char, other_info.get("phoneme"))
+                        other.type = other_type
+                        letter.other_symbols.append(other)
+                        j += 1
+                        continue
+                    
+                    # If it's not an associated symbol, break the loop
+                    else:
+                        break
+                
+                # Set parent references
+                letter.parent_word = word
+                letter.index_in_word = len(word.letters)
                 word.letters.append(letter)
-                i += 1
+                
+                # Update i to j to skip processed characters
+                i = j
                 continue
             
-            # Check if it's a diacritic
-            if char in self.diacritic_map:
-                diacritic_type, diacritic_info = self.diacritic_map[char]
-                diacritic = DiacriticSymbol(char, diacritic_info.get("phoneme"), diacritic_type)
-                # Associate with the previous letter if it exists
-                if word.letters:
-                    letter = word.letters[-1]
-                    letter.add_diacritic(diacritic)
-                else:
-                    # Diacritic without a letter - create a new letter with this diacritic
-                    letter = LetterSymbol(char, diacritic_info.get("phoneme"))
-                    letter.add_diacritic(diacritic)
-                    word.letters.append(letter)
-                i += 1
-                continue
-            
-            # Check if it's an extension symbol
-            if char in self.extension_map:
-                extension_type, extension_info = self.extension_map[char]
-                extension = ExtensionSymbol(char, extension_info.get("phoneme"), extension_type)
-                # Associate with the previous letter if it exists
-                if word.letters:
-                    letter = word.letters[-1]
-                    letter.extension = extension
-                else:
-                    # Extension without a letter - create a new letter with this extension
-                    letter = LetterSymbol(char, extension_info.get("phoneme"))
-                    letter.extension = extension
-                    word.letters.append(letter)
-                i += 1
-                continue
-            
-            # Check if it's a shaddah (special handling)
-            if char in self.other_map and self.other_map[char][0] == "SHADDA":
-                # Associate shaddah with the previous letter
-                if word.letters:
-                    letter = word.letters[-1]
-                    letter.has_shaddah = True
-                else:
-                    # Shaddah without a letter - create a new letter with shaddah
-                    letter = LetterSymbol(char)
-                    letter.has_shaddah = True
-                    word.letters.append(letter)
-                i += 1
-                continue
-            
-            # Check if it's another "other" symbol
-            if char in self.other_map:
-                other_type, other_info = self.other_map[char]
-                other = OtherSymbol(char, other_info.get("phoneme"))
-                other.type = other_type
-                # Associate with the previous letter if it exists
-                if word.letters:
-                    letter = word.letters[-1]
-                    letter.other_symbols.append(other)
-                else:
-                    # Other symbol without a letter - create a new letter with this other symbol
-                    letter = LetterSymbol(char, other_info.get("phoneme"))
-                    letter.other_symbols.append(other)
-                    word.letters.append(letter)
-                i += 1
-                continue
-            
-            # If we get here, it's an unknown symbol
+            # If we get here, it's an unknown symbol - treat as other
             other = OtherSymbol(char)
             # Associate with the previous letter if it exists
             if word.letters:
@@ -149,8 +157,10 @@ class Parser:
                 letter.other_symbols.append(other)
             else:
                 # Unknown symbol without a letter - create a new letter with this symbol
-                letter = LetterSymbol(char)
+                letter = LetterSymbol(char, "")
                 letter.other_symbols.append(other)
+                letter.parent_word = word
+                letter.index_in_word = len(word.letters)
                 word.letters.append(letter)
             i += 1
         
@@ -158,54 +168,67 @@ class Parser:
     
     def _strip_rule_tags(self, text: str) -> str:
         """Remove rule tags from text for character processing."""
-        import re
         stripped_text = re.sub(r"<rule class=[^>]+>", "", text)
         stripped_text = re.sub(r"</rule>", "", stripped_text)
         return stripped_text
+    
+    def load_words(self, ref: str, db_path: str | Path = DATA_DIR / "Quran.json", *, stop_types: List[str] = []) -> List[Word]:
+        """Load words for a reference range and annotate boundaries."""
+        db = load_db(db_path)
+        locations = keys_for_reference(ref, db)
+        words: List[Word] = []
+
+        for loc in locations:
+            raw = db[loc]["text"]
+            location_obj = Location.from_key(loc)
+            word = self.parse_word(raw, location_obj)
+            words.append(word)
+
+        self._link_words(words)
+        self._annotate_boundaries(words, stop_types=stop_types)
+        return words
+    
+    def _link_words(self, words: List[Word]) -> None:
+        """Link words with references to previous and next words."""
+        for i, word in enumerate(words):
+            if i > 0:
+                word.previous_word = words[i - 1]
+            if i < len(words) - 1:
+                word.next_word = words[i + 1]
+    
+    def _annotate_boundaries(self, words: List[Word], *, stop_types: List[str]) -> None:
+        """Set is_starting / is_stopping flags on each word.
+
+        Parameters
+        ----------
+        words : List[Word]
+            Sequence of words.
+        stop_types : list[str]
+            Stop sign types that should be treated as hard boundaries. If empty, no stop signs count.
+        """
+        words[0].is_starting = True
+        words[-1].is_stopping = True
+
+        for idx, word in enumerate(words):
+            # Stop-sign logic
+            if word.stop_sign and word.stop_sign.type in stop_types:
+                word.is_stopping = True
+                if word.next_word:
+                    word.next_word.is_starting = True
+
+        if "verse" in stop_types:
+            for idx, word in enumerate(words):
+                prev_word = word.previous_word
+                next_word = word.next_word
+                # Start of verse
+                if prev_word is None or prev_word.location.aya_num != word.location.aya_num:
+                    word.is_starting = True
+                # End of verse
+                if next_word is None or next_word.location.aya_num != word.location.aya_num:
+                    word.is_stopping = True
 
 
-class ParsedWord:
-    """Represents a word with properly parsed and associated symbols."""
-    
-    def __init__(self, location: Location, text: str):
-        self.location = location
-        self.text = text
-        self.letters: List[LetterSymbol] = []
-        self.stop_sign: StopSymbol = None
-    
-    def debug_print(self) -> str:
-        """Pretty print the word structure for debugging purposes."""
-        result = f"Word at {self.location.location_key}:\n"
-        result += f"  Text: {self.text}\n"
-        if self.stop_sign:
-            result += f"  Stop Sign: {self.stop_sign.char} (type: {self.stop_sign.type})\n"
-        else:
-            result += "  Stop Sign: None\n"
-        
-        result += "  Symbols:\n"
-        for i, symbol in enumerate(self.symbols):
-            symbol_type = symbol.__class__.__name__
-            result += f"    {i}: {symbol_type} '{symbol.char}'"
-            if symbol.phoneme:
-                result += f" -> {symbol.phoneme}"
-            if hasattr(symbol, 'type') and symbol.type:
-                result += f" (type: {symbol.type})"
-            
-            # For letters, show associated diacritics, extensions, shaddah, and other symbols
-            if isinstance(symbol, LetterSymbol):
-                if symbol.diacritic:
-                    result += f" + diacritic '{symbol.diacritic.char}' -> {symbol.diacritic.phoneme}"
-                    if symbol.diacritic.type:
-                        result += f" (type: {symbol.diacritic.type})"
-                if symbol.extension:
-                    result += f" + extension '{symbol.extension.char}' -> {symbol.extension.phoneme}"
-                    if symbol.extension.type:
-                        result += f" (type: {symbol.extension.type})"
-                if symbol.has_shaddah:
-                    result += " + shaddah"
-                if symbol.other_symbols:
-                    for other in symbol.other_symbols:
-                        result += f" + other '{other.char}' -> {other.phoneme}"
-            result += "\n"
-        
-        return result
+def load_symbol_mappings(map_path: str | Path = DATA_DIR / "base_phonemes.yaml") -> Dict[str, Any]:
+    """Load symbol mappings from YAML file."""
+    with Path(map_path).expanduser().open(encoding="utf-8") as fh:
+        return yaml.safe_load(fh)

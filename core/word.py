@@ -16,8 +16,6 @@ from .symbols.stop import StopSymbol
 
 @dataclass
 class Word:
-    """Represents a single word as a list of letters with their associated diacritics, 
-    extensions, and other symbols."""
     location: Location
     letters: List[LetterSymbol] = field(default_factory=list)
     text: str = ""
@@ -25,22 +23,13 @@ class Word:
     previous_word: Optional[Word] = None
     next_word: Optional[Word] = None
 
-    def first_letter(self) -> Optional[LetterSymbol]:
-        """Get the first letter symbol in the word."""
-        if self.letters:
-            return self.letters[0]
-        return None
+    is_starting: bool = False  # True if this word is the start after a pause
+    is_stopping: bool = False  # True if this word is paused at 
 
-    def last_letter(self) -> Optional[LetterSymbol]:
-        """Get the last letter symbol in the word."""
-        if self.letters:
-            return self.letters[-1]
-        return None
-        
-    def get_previous_letter(self, index: int) -> Optional[LetterSymbol]:
+    def get_prev_letter(self, index: int, n: int = 1) -> Optional[LetterSymbol]:
         """Get the previous letter in the current word or last letter of previous word."""
         if index > 0:
-            return self.letters[index - 1]
+            return self.letters[index - n]
         elif self.previous_word and self.previous_word.letters:
             return self.previous_word.letters[-1]
         return None
@@ -50,7 +39,6 @@ class Word:
         if index + n < len(self.letters):
             return self.letters[index + n]
         elif self.next_word and self.next_word.letters:
-            # Return the first letter of the next word
             return self.next_word.letters[0]
         return None
         

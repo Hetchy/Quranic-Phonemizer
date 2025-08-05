@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
 
 from .symbol import Symbol
-from .letter import LetterSymbol
+from .letters.letter import LetterSymbol
 from .diacritic import DiacriticSymbol
 from .extension import ExtensionSymbol
 from .stop import StopSymbol

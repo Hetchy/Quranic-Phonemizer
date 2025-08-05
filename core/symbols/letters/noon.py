@@ -1,69 +1,35 @@
-"""
-NOON letter class with specific phonemization rules.
-"""
-
+#!/usr/bin/env python3
 from typing import List, Dict, Any, Optional
-from ..letter import LetterSymbol
+from .letter import LetterSymbol
 
+from core.phoneme_registry import get_rule_phoneme
 
 class NoonLetter(LetterSymbol):
-    """NOON letter with specific phonemization rules."""
-    
-    def phonemize(self) -> List[str]:
-        """Phonemize NOON based on Tajweed rules."""
-        phonemes = []
-        
-        # Use neighbour helpers
-        next_letter = self.next_letter()
-        
-        # Ghunnah (nasalization) when NOON has shaddah
+    def phonemize_letter(self):
         if self.has_shaddah:
-            # Use nasalized version of noon
-            phonemes.append("ñ")  # Using the nasalized phoneme from rule config
-            return phonemes
+            return ["ñ"]
+        if self.diacritic:
+            return [self.base_phoneme]
+        if self.is_last and self.parent_word.is_stopping:
+            return [self.base_phoneme]
         
-        # Check for Iqlab rule
-        if not self.diacritic and next_letter and next_letter.char == "ب":
-            # Iqlab when followed by baa
-            phonemes.append("m̃")  # Using the iqlab phoneme from rule config
-            # Mark next letter as affected (will not be phonemized)
-            next_letter.mark_phonemized([], affected_by=self)
-            return phonemes
+        next_letter = self.next_letter()
+        if not next_letter:
+            return ["n?"]
+
+        # Iqlab
+        if next_letter.char == "ب":
+            return ["m̃"]
         
-        # Check for Ikhfaa rule
-        # Ikhfaa letters: ت ث ج د ذ ز س ش ص ض ط ظ ف ق ك
-        ikhfaa_letters = ["ت", "ث", "ج", "د", "ذ", "ز", "س", "ش", "ص", "ض", "ط", "ظ", "ف", "ق", "ك"]
-        if not self.diacritic and next_letter and next_letter.char in ikhfaa_letters:
-            # Ikhfaa - use the light or heavy phoneme based on the next letter
-            phonemes.append("ŋ")  # Using the ikhfaa phoneme from rule config
-            # Mark next letter as affected (will not be phonemized)
-            next_letter.mark_phonemized([], affected_by=self)
-            return phonemes
+        # Ikhfaa    
+        if next_letter.is_ikhfaa:
+            return ["ŋ"] if next_letter.is_heavy else ["ŋ"]
         
-        # Check for Idgham rule
-        # Idgham letters (yanmu): ي ر ز س ش ص ض ط ظ ف ق ك ل م ن ه
-        idgham_letters = ["ي", "ر", "ز", "س", "ش", "ص", "ض", "ط", "ظ", "ف", "ق", "ك", "ل", "م", "ن", "ه"]
-        if not self.diacritic and next_letter and next_letter.char in idgham_letters:
-            # Idgham without ghunnah
-            # Mark next letter as affected (will not be phonemized)
-            next_letter.mark_phonemized([], affected_by=self)
-            return []  # Return empty list as the noon is assimilated
+        # Idgham
+        if next_letter.is_idgham:
+            nasal_map = get_rule_phoneme("idgham", "nasalized_map")
+            target_phoneme = nasal_map.get(next_letter.base_phoneme)
+            next_letter.mark_phonemized([target_phoneme], affected_by=self)
+            return []
         
-        # Normal phonemization if none of the special rules apply
-        if self.phoneme:
-            phonemes.append(self.phoneme)
-            
-        # Add diacritic phoneme if present
-        if self.diacritic and self.diacritic.phoneme:
-            phonemes.append(self.diacritic.phoneme)
-        
-        # Add extension phoneme if present
-        if self.extension and self.extension.phoneme:
-            phonemes.append(self.extension.phoneme)
-        
-        # Add other symbols phonemes
-        for other in self.other_symbols:
-            if other.phoneme:
-                phonemes.append(other.phoneme)
-        
-        return phonemes
+        return ["n??"]
