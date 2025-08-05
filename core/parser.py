@@ -24,19 +24,27 @@ from .symbols.letters.noon import NoonLetter
 from .symbols.letters.meem import MeemLetter
 from .symbols.letters.hamza_wasl import HamzaWaslLetter
 from .symbols.letters.qalqala_letter import QalqalaLetter
+from .symbols.letters.vowel import VowelLetter
 
 # Data directory
 DATA_DIR = Path(__file__).resolve().parent.parent / "resources"
 
 LETTER_CLASSES: dict[str, type[LetterSymbol]] = {
+    "ٱ": HamzaWaslLetter,
     "ن": NoonLetter,
     "م": MeemLetter,
-    "ٱ": HamzaWaslLetter,
+
     "ق": QalqalaLetter,
     "ط": QalqalaLetter,
     "ب": QalqalaLetter,
     "ج": QalqalaLetter,
     "د": QalqalaLetter,
+
+    "ا": VowelLetter,
+    "و": VowelLetter,
+    "ي": VowelLetter,
+    "ى": VowelLetter,
+    "ۧ":  VowelLetter,
 }
 
 

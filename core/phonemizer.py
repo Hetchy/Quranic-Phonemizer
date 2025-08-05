@@ -10,7 +10,6 @@ from .phonemize_result import PhonemizeResult
 # Data directory
 DATA_DIR = Path(__file__).resolve().parent.parent / "resources"
 
-
 class Phonemizer:
     def __init__(
         self,
@@ -19,7 +18,6 @@ class Phonemizer:
     ) -> None:
         self.db_path = str(db_path)
         self.map_path = str(map_path)
-        # Initialize parser with symbol mappings
         symbol_mappings = load_symbol_mappings(map_path)
         self.parser = Parser(symbol_mappings)
         self.word_processor = WordProcessor()

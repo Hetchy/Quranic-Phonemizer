@@ -1,13 +1,13 @@
 letters:
-  HAMZA_WASL:
-    cp: 0x0671
-    char: "ٱ"
-    phoneme: ""
-
   ALEF:
     cp: 0x0627
     char: "ا"
-    phoneme: ":"
+    phoneme: ""
+
+  HAMZA_WASL:
+    cp: 0x0671
+    char: "ٱ"
+    phoneme: "ʔ"
 
   HAMZA_ABOVE_ALEF:
     cp: 0x0623
@@ -172,27 +172,27 @@ letters:
   TAA_MARBUTA:
     cp: 0x0629
     char: "ة"
-    phoneme: "<t/h>"
+    phoneme: "t"
 
   WAW:
     cp: 0x0648
     char: "و"
-    phoneme: "<w/:>"
+    phoneme: "w"
 
   YA:
     cp: 0x064A
     char: "ي"
-    phoneme: "<j/:>"
+    phoneme: "j"
 
   ALEF_MAKSURA:
     cp: 0x0649
     char: "ى"
-    phoneme: "<j/:>"
+    phoneme: "j"
 
   MINI_YA_MIDDLE:
     cp: 0x06E7
     char: "ۧ"
-    phoneme: "<j/:>"
+    phoneme: "j"
 
 
 diacritics:
@@ -236,17 +236,17 @@ extensions:
   MINI_WAW:
     cp: 0x06E5
     char: "ۥ"
-    phoneme: ":"
+    phoneme: ""
 
   MINI_YA_END:
     cp: 0x06E6
     char: "ۦ"
-    phoneme: ":"
+    phoneme: ""
 
   DAGGER_ALEF:
     cp: 0x0670
     char: "ٰ"
-    phoneme: "<:/a:>"
+    phoneme: ""
 
 
 stop_signs:

@@ -10,14 +10,14 @@ class HamzaWaslLetter(LetterSymbol):
             
             # noun case
             if second_letter and second_letter.char == "ل":
-                return ["ʔ", "a"]
+                return [self.base_phoneme, "a"]
             
             # verb case
             if third_letter and third_letter.diacritic:
                 if third_letter.has_damma:
-                    return ["ʔ", "u"]
+                    return [self.base_phoneme, "u"]
                 if third_letter.has_fatha or third_letter.has_kasra:
-                    return ["ʔ", "i"]
+                    return [self.base_phoneme, "i"]
             
             return ["ʔ?"]
         
