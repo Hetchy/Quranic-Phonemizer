@@ -353,17 +353,17 @@ def phonemize_and_save(
         f.write('\n'.join(output_lines))
     
     print(f"Phonemized output saved to: {output_file}")
-
 def compare_files(
     file1_path: str | Path,
     file2_path: str | Path,
     *,
-    context_lines: int = 3,
+    context_lines: int = 1,
     ignore_whitespace: bool = False,
     return_result: bool = False,
 ) -> bool | str:
     """
     Compare two text files and output differences if they're not identical.
+    Only considers differences within [...] brackets, ignoring other text differences.
     
     Parameters
     ----------
@@ -384,7 +384,7 @@ def compare_files(
         If return_result=False: Returns True if files are identical, False if different
         If return_result=True: Returns the diff string (empty if files are identical)
     """
-    import difflib
+    import re
     from pathlib import Path
     
     file1_path = Path(file1_path)
@@ -405,6 +405,24 @@ def compare_files(
         print(error_msg)
         return False
     
+    def extract_brackets(line):
+        """Extract content within [...] brackets from a line"""
+        return re.findall(r'\[([^\]]*)\]', line)
+    
+    def find_verse_reference(lines, line_index):
+        """Find the most recent line with num:num pattern before the given line"""
+        verse_pattern = re.compile(r'^\d+:\d+')
+        for i in range(line_index, -1, -1):
+            if i < len(lines) and verse_pattern.match(lines[i].strip()):
+                return lines[i].strip(), i + 1
+        return None, None
+    
+    def get_context_lines(lines, line_num, context_lines):
+        """Get context lines around a specific line number"""
+        start = max(0, line_num - context_lines)
+        end = min(len(lines), line_num + context_lines + 1)
+        return lines[start:end], start
+    
     try:
         # Read files
         with open(file1_path, 'r', encoding='utf-8') as f1:
@@ -417,31 +435,60 @@ def compare_files(
             lines1 = [line.strip() + '\n' for line in lines1 if line.strip()]
             lines2 = [line.strip() + '\n' for line in lines2 if line.strip()]
         
-        # Compare files
-        if lines1 == lines2:
+        # Compare files line by line, only considering [...] content
+        max_lines = max(len(lines1), len(lines2))
+        differences = []
+        
+        for i in range(max_lines):
+            line1 = lines1[i] if i < len(lines1) else ""
+            line2 = lines2[i] if i < len(lines2) else ""
+            
+            brackets1 = extract_brackets(line1)
+            brackets2 = extract_brackets(line2)
+            
+            if brackets1 != brackets2:
+                verse_ref, verse_line_num = find_verse_reference(lines1, i)
+                if not verse_ref:
+                    verse_ref, verse_line_num = find_verse_reference(lines2, i)
+                differences.append((i, line1.rstrip('\n'), line2.rstrip('\n'), brackets1, brackets2, verse_ref, verse_line_num))
+        
+        if not differences:
             result_msg = f"Files are identical: {file1_path.name} and {file2_path.name}"
             if return_result:
                 return ""  # Empty string indicates no differences
             print(result_msg)
             return True
         
-        # Generate unified diff
-        diff = difflib.unified_diff(
-            lines1,
-            lines2,
-            fromfile=str(file1_path),
-            tofile=str(file2_path),
-            n=context_lines
-        )
+        # Generate diff output
+        diff_lines = [f"Files differ in {len(differences)} lines: {file1_path.name} vs {file2_path.name}"]
+        diff_lines.append("=" * 60)
         
-        diff_output = ''.join(diff)
+        for line_num, line1, line2, brackets1, brackets2, verse_ref, verse_line_num in differences:
+            if verse_ref and verse_line_num:
+                diff_lines.append(f"\nVerse {verse_ref} (line {verse_line_num}):")
+            
+            diff_lines.append(f"Difference at line {line_num + 1}:")
+            
+            # Get context for file1
+            context1, start1 = get_context_lines(lines1, line_num, context_lines)
+            diff_lines.append(f"File1 ({file1_path.name}):")
+            for i, ctx_line in enumerate(context1):
+                marker = ">>>" if start1 + i == line_num else "   "
+                diff_lines.append(f"{marker} {start1 + i + 1:4d}: {ctx_line.rstrip()}")
+            
+            # Get context for file2
+            context2, start2 = get_context_lines(lines2, line_num, context_lines)
+            diff_lines.append(f"File2 ({file2_path.name}):")
+            for i, ctx_line in enumerate(context2):
+                marker = ">>>" if start2 + i == line_num else "   "
+                diff_lines.append(f"{marker} {start2 + i + 1:4d}: {ctx_line.rstrip()}")
+            
+            diff_lines.append("")
         
+        result = "\n".join(diff_lines)
         if return_result:
-            return diff_output
-        
-        print(f"Files differ: {file1_path.name} vs {file2_path.name}")
-        print("=" * 60)
-        print(diff_output)
+            return result
+        print(result)
         return False
         
     except Exception as e:

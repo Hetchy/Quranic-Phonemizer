@@ -25,6 +25,7 @@ from .symbols.letters.meem import MeemLetter
 from .symbols.letters.hamza_wasl import HamzaWaslLetter
 from .symbols.letters.qalqala_letter import QalqalaLetter
 from .symbols.letters.vowel import VowelLetter
+from .symbols.letters.taa_marbuta import TaaMarbutaLetter
 
 # Data directory
 DATA_DIR = Path(__file__).resolve().parent.parent / "resources"
@@ -33,6 +34,7 @@ LETTER_CLASSES: dict[str, type[LetterSymbol]] = {
     "ٱ": HamzaWaslLetter,
     "ن": NoonLetter,
     "م": MeemLetter,
+    "ة": TaaMarbutaLetter,
 
     "ق": QalqalaLetter,
     "ط": QalqalaLetter,
@@ -200,7 +202,7 @@ class Parser:
         """Link words with references to previous and next words."""
         for i, word in enumerate(words):
             if i > 0:
-                word.previous_word = words[i - 1]
+                word.prev_word = words[i - 1]
             if i < len(words) - 1:
                 word.next_word = words[i + 1]
     
@@ -226,7 +228,7 @@ class Parser:
 
         if "verse" in stop_types:
             for idx, word in enumerate(words):
-                prev_word = word.previous_word
+                prev_word = word.prev_word
                 next_word = word.next_word
                 # Start of verse
                 if prev_word is None or prev_word.location.ayah_num != word.location.ayah_num:

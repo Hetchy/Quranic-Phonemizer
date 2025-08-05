@@ -64,23 +64,27 @@ class LetterSymbol(Symbol):
 
     @property
     def has_sukun(self) -> bool:
-        return self.diacritic and self.diacritic.is_sukun()
+        return self.diacritic and self.diacritic.is_sukun
 
     @property
     def has_fatha(self) -> bool:
-        return self.diacritic and self.diacritic.is_fatha()
+        return self.diacritic and self.diacritic.is_fatha
 
     @property
     def has_damma(self) -> bool:
-        return self.diacritic and self.diacritic.is_damma()
+        return self.diacritic and self.diacritic.is_damma
 
     @property
     def has_kasra(self) -> bool:
-        return self.diacritic and self.diacritic.is_kasra()
+        return self.diacritic and self.diacritic.is_kasra
 
     @property
     def has_tanween(self) -> bool:
-        return self.diacritic and self.diacritic.is_tanween()
+        return self.diacritic and self.diacritic.is_tanween
+
+    @property
+    def has_fathatan(self) -> bool:
+        return self.diacritic and self.diacritic.is_fathatan
 
     @property
     def is_silent(self) -> bool:
@@ -98,7 +102,11 @@ class LetterSymbol(Symbol):
     @final
     def phonemize(self) -> List[str]:
         if self.is_last and self.parent_word.is_stopping:
-            self.diacritic = DiacriticSymbol("ۡ", "SUKUN")
+            if self.char == "ء" and self.has_fathatan:
+                self.diacritic = DiacriticSymbol("َ", "FATHA")
+            else:
+                self.diacritic = DiacriticSymbol("۟", "SUKUN")
+        
         return self.phonemize_letter() + self.phonemize_modifiers()
 
     def phonemize_letter(self) -> List[str]:

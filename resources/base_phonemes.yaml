@@ -196,9 +196,14 @@ letters:
 
 
 diacritics:
+  # SUKUN:
+  #   cp: 0x06E1
+  #   char: "ۡ"
+  #   phoneme: ""
+
   SUKUN:
-    cp: 0x06E1
-    char: "ۡ"
+    cp: 0x0652
+    char: "ْ"
     phoneme: ""
 
   FATHATAN:
@@ -233,6 +238,11 @@ diacritics:
 
 
 extensions:
+  DAGGER_ALEF:
+    cp: 0x0670
+    char: "ٰ"
+    phoneme: ""
+
   MINI_WAW:
     cp: 0x06E5
     char: "ۥ"
@@ -241,11 +251,6 @@ extensions:
   MINI_YA_END:
     cp: 0x06E6
     char: "ۦ"
-    phoneme: ""
-
-  DAGGER_ALEF:
-    cp: 0x0670
-    char: "ٰ"
     phoneme: ""
 
 
@@ -287,6 +292,11 @@ other:
     char: "ّ"
     phoneme: ""
 
+  SILENT:
+    cp: 0x06DF
+    char: "۟"
+    phoneme: ""
+
   MINI_NOON:
     cp: 0x06E8
     char: "ۨ"
@@ -325,22 +335,22 @@ other:
   S3: # 41:44 ءَا۠عۡجَمِىٌّ۬ 
     cp: 0x06EC
     char: "۬ "
-    phoneme: ""
+    phoneme: "" 
 
-  S4: # 41:44 ءَا۠عۡجَمِىٌّ۬ 
-    cp: 0x06E0
-    char: "۠ "
-    phoneme: ""
+  # S3: # 41:44 ءَا۠عۡجَمِىٌّ۬ 
+  #   cp: 0x06E0
+  #   char: "۠ "
+  #   phoneme: ""
 
-  ZWNJ:
-    cp: 0x200C
-    char: "‌"
-    phoneme: ""
+  # ZWNJ:
+  #   cp: 0x200C
+  #   char: "‌"
+  #   phoneme: ""
 
-  LONG_MADD:
-    cp: 0x0653
-    char: "ٓ◌ٓ" 
-    phoneme: ""
+  # LONG_MADD:
+  #   cp: 0x0653
+  #   char: "ٓ◌ٓ" 
+  #   phoneme: ""
 
   PARTIAL_ALEF_MAKSURA:
     cp: 0x066E

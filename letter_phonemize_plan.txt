@@ -28,18 +28,6 @@ Diacritic
         diacritic does not get phonemized
 
 
-DAGGER_ALEF
-
-    its letter has a fatha
-        ":"
-    
-    its letter does not have fatha
-        "a:"
-
-    if letter is ALEF_MAKSURA
-        nothing
-
-
 HAMZA_WASL
 
     if starting word and is first letter
@@ -147,3 +135,11 @@ WAW / YA / MINI_YA_MIDDLE / ALEF MAKSURA
         extend previous "a" "u" "i" diacritic phoneme with ":"
     else 
         normal phoneme
+
+DAGGER_ALEF
+
+    its letter has a fatha
+        ":"
+
+    waw/alef maksura no diacritic + prev has fatha
+        ":"
