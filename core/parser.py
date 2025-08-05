@@ -229,10 +229,10 @@ class Parser:
                 prev_word = word.previous_word
                 next_word = word.next_word
                 # Start of verse
-                if prev_word is None or prev_word.location.aya_num != word.location.aya_num:
+                if prev_word is None or prev_word.location.ayah_num != word.location.ayah_num:
                     word.is_starting = True
                 # End of verse
-                if next_word is None or next_word.location.aya_num != word.location.aya_num:
+                if next_word is None or next_word.location.ayah_num != word.location.ayah_num:
                     word.is_stopping = True
 
 

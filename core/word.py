@@ -17,12 +17,12 @@ from .symbols.stop import StopSymbol
 @dataclass
 class Word:
     location: Location
-    letters: List[LetterSymbol] = field(default_factory=list)
     text: str = ""
-    stop_sign: Optional[StopSymbol] = None
-    previous_word: Optional[Word] = None
+    letters: List[LetterSymbol] = field(default_factory=list)
+    prev_word: Optional[Word] = None
     next_word: Optional[Word] = None
 
+    stop_sign: Optional[StopSymbol] = None
     is_starting: bool = False  # True if this word is the start after a pause
     is_stopping: bool = False  # True if this word is paused at 
 
@@ -30,8 +30,8 @@ class Word:
         """Get the previous letter in the current word or last letter of previous word."""
         if index > 0:
             return self.letters[index - n]
-        elif self.previous_word and self.previous_word.letters:
-            return self.previous_word.letters[-1]
+        elif self.prev_word and self.prev_word.letters:
+            return self.prev_word.letters[-1]
         return None
         
     def get_next_letter(self, index: int, n: int = 1) -> Optional[LetterSymbol]:
@@ -49,7 +49,7 @@ class Word:
         return None
 
     def debug_print(self) -> str:
-        """Pretty print the word structure for debugging purposes."""
+        """Pretty print for debugging purposes."""
         result = f"Word at {self.location.location_key}:\n"
         result += f"  Text: {self.text}\n"
         if self.stop_sign:
@@ -57,16 +57,14 @@ class Word:
         else:
             result += "  Stop Sign: None\n"
         
-        # Show word linking information
-        if self.previous_word:
-            result += f"  Previous Word: {self.previous_word.location.location_key}\n"
-        else:
-            result += "  Previous Word: None\n"
-            
-        if self.next_word:
-            result += f"  Next Word: {self.next_word.location.location_key}\n"
-        else:
-            result += "  Next Word: None\n"
+        # if self.prev_word:
+        #     result += f"  Previous Word: {self.prev_word.location.location_key}\n"
+        # else:
+        #     result += "  Previous Word: None\n"
+        # if self.next_word:
+        #     result += f"  Next Word: {self.next_word.location.location_key}\n"
+        # else:
+        #     result += "  Next Word: None\n"
         
         result += "  Letters:\n"
         for i, letter in enumerate(self.letters):
@@ -78,9 +76,6 @@ class Word:
                 result += f"      Phonemes: {letter.phonemes}\n"
             if letter.affected_by:
                 result += f"      Affected By: '{letter.affected_by.char}'\n"
-            if letter.affects:
-                affected_chars = [f"'{l.char}'" for l in letter.affects]
-                result += f"      Affects: {', '.join(affected_chars)}\n"
             
             # Show diacritic
             if letter.diacritic:
@@ -92,7 +87,7 @@ class Word:
             
             # Show shaddah
             if letter.has_shaddah:
-                result += "      Shaddah: ّ (gemination)\n"
+                result += "      Shaddah\n"
             
             # Show other symbols
             if letter.other_symbols:

@@ -8,9 +8,7 @@ class NoonLetter(LetterSymbol):
     def phonemize_letter(self):
         if self.has_shaddah:
             return ["ñ"]
-        if self.diacritic:
-            return [self.base_phoneme]
-        if self.is_last and self.parent_word.is_stopping:
+        if self.diacritic or (self.is_last and self.parent_word.is_stopping):
             return [self.base_phoneme]
         
         next_letter = self.next_letter()

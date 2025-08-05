@@ -13,6 +13,8 @@ from ..diacritic import DiacriticSymbol
 from ..extension import ExtensionSymbol
 from ..other import OtherSymbol
 
+from core.phoneme_registry import get_rule_phoneme
+
 class LetterSymbol(Symbol):
     """Represents a consonant or vowel letter with associated diacritics, extensions, and other symbols."""
 
@@ -37,12 +39,12 @@ class LetterSymbol(Symbol):
         return self.parent_word.get_next_letter(self.index_in_word, n)
 
     @property
-    def is_last(self) -> bool:
-        return self.index_in_word == len(self.parent_word.letters) - 1
-    
-    @property
     def is_first(self) -> bool:
         return self.index_in_word == 0
+    
+    @property
+    def is_last(self) -> bool:
+        return self.index_in_word == len(self.parent_word.letters) - 1
 
     @property
     def is_heavy(self) -> bool:
@@ -81,6 +83,10 @@ class LetterSymbol(Symbol):
         return self.diacritic and self.diacritic.is_tanween()
 
     @property
+    def is_silent(self) -> bool:
+        return self.diacritic is None and self.extension is None
+
+    @property
     def can_phonemize(self) -> bool:
         return not self.is_phonemized
 
@@ -102,8 +108,7 @@ class LetterSymbol(Symbol):
 
     def phonemize_modifiers(self) -> List[str]:
         if self.has_tanween:
-            # split tanween into two phonemes e.g. ["a", "n"]
-            return [self.diacritic.base_phoneme[0], self.diacritic.base_phoneme[1]]
+            return self.apply_tanween()
 
         out = []
         if self.diacritic:
@@ -116,3 +121,26 @@ class LetterSymbol(Symbol):
         if self.has_shaddah and not (self.is_first and self.parent_word.is_starting):
             return self.base_phoneme + self.base_phoneme
         return self.base_phoneme
+
+    def apply_tanween(self) -> List[str]:
+        diacritic_ph = self.diacritic.base_phoneme[0]
+        noon_ph      = self.diacritic.base_phoneme[1]
+
+        next_letter = self.next_letter(1)
+        if next_letter.char == "ا":
+            if self.parent_word.is_stopping:
+                return [diacritic_ph]
+            else:
+                next_letter.mark_phonemized([], affected_by=self.diacritic)
+                next_letter = self.next_letter(2)
+            
+        if next_letter.is_ikhfaa:
+            return [diacritic_ph, "ŋ" if next_letter.is_heavy else "ŋ"]
+        
+        if next_letter.is_idgham:
+            nasal_map = get_rule_phoneme("idgham", "nasalized_map")
+            target_phoneme = nasal_map.get(next_letter.base_phoneme)
+            next_letter.mark_phonemized([target_phoneme], affected_by=self.diacritic)
+            return [diacritic_ph]
+
+        return [diacritic_ph, noon_ph]
