@@ -353,6 +353,8 @@ def phonemize_and_save(
         f.write('\n'.join(output_lines))
     
     print(f"Phonemized output saved to: {output_file}")
+
+
 def compare_files(
     file1_path: str | Path,
     file2_path: str | Path,
@@ -360,7 +362,9 @@ def compare_files(
     context_lines: int = 1,
     ignore_whitespace: bool = False,
     return_result: bool = False,
+    exclude: list[str] = None,
 ) -> bool | str:
+
     """
     Compare two text files and output differences if they're not identical.
     Only considers differences within [...] brackets, ignoring other text differences.
@@ -377,6 +381,8 @@ def compare_files(
         Whether to ignore whitespace differences and empty lines (default: False)
     return_result : bool
         If True, return the diff as a string. If False, print it (default: False)
+    exclude : list[str]
+        List of strings to exclude from comparison. If any string is found in file1 line, skip comparison
         
     Returns
     -------
@@ -386,6 +392,9 @@ def compare_files(
     """
     import re
     from pathlib import Path
+    
+    if exclude is None:
+        exclude = []
     
     file1_path = Path(file1_path)
     file2_path = Path(file2_path)
@@ -423,6 +432,10 @@ def compare_files(
         end = min(len(lines), line_num + context_lines + 1)
         return lines[start:end], start
     
+    def should_exclude_line(line, exclude):
+        """Check if line contains any string from exclude"""
+        return any(exclude_str in line for exclude_str in exclude)
+    
     try:
         # Read files
         with open(file1_path, 'r', encoding='utf-8') as f1:
@@ -442,6 +455,10 @@ def compare_files(
         for i in range(max_lines):
             line1 = lines1[i] if i < len(lines1) else ""
             line2 = lines2[i] if i < len(lines2) else ""
+            
+            # Skip comparison if line1 contains any excluded string
+            if should_exclude_line(line1, exclude):
+                continue
             
             brackets1 = extract_brackets(line1)
             brackets2 = extract_brackets(line2)
@@ -471,18 +488,14 @@ def compare_files(
             
             # Get context for file1
             context1, start1 = get_context_lines(lines1, line_num, context_lines)
-            diff_lines.append(f"File1 ({file1_path.name}):")
+            diff_lines.append(f"Context ({file1_path.name}):")
             for i, ctx_line in enumerate(context1):
                 marker = ">>>" if start1 + i == line_num else "   "
                 diff_lines.append(f"{marker} {start1 + i + 1:4d}: {ctx_line.rstrip()}")
             
-            # Get context for file2
-            context2, start2 = get_context_lines(lines2, line_num, context_lines)
-            diff_lines.append(f"File2 ({file2_path.name}):")
-            for i, ctx_line in enumerate(context2):
-                marker = ">>>" if start2 + i == line_num else "   "
-                diff_lines.append(f"{marker} {start2 + i + 1:4d}: {ctx_line.rstrip()}")
-            
+            # Show diff of the specific lines
+            diff_lines.append(f"- {file1_path.name}: {line1}")
+            diff_lines.append(f"+ {file2_path.name}: {line2}")
             diff_lines.append("")
         
         result = "\n".join(diff_lines)

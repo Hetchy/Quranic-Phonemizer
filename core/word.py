@@ -24,21 +24,28 @@ class Word:
 
     def get_prev_letter(self, index: int, n: int = 1) -> Optional[LetterSymbol]:
         """Get the previous letter in the current word or last letter of previous word."""
-        if index > 0:
-            return self.letters[index - n]
+        target_index = index - n
+        if target_index >= 0:
+            return self.letters[target_index]
         elif self.prev_word and self.prev_word.letters:
-            return self.prev_word.letters[-n]
+            underflow = abs(target_index)
+            prev_letters_count = len(self.prev_word.letters)
+            if underflow <= prev_letters_count:
+                return self.prev_word.letters[prev_letters_count - underflow]
         return None
         
     def get_next_letter(self, index: int, n: int = 1) -> Optional[LetterSymbol]:
-        """Get the next letter in the current word or first letter(s) of next word."""
-        if index + n < len(self.letters):
-            return self.letters[index + n]
-        elif self.next_word and self.next_word.letters:
-            return self.next_word.letters[n - 1]
+        """Get the next letter in the current or next word."""
+        target_index = index + n
+        if target_index < len(self.letters):
+            return self.letters[target_index]
+        elif self.next_word:
+            overflow = target_index - len(self.letters)
+            if overflow < len(self.next_word.letters):
+                return self.next_word.letters[overflow]
         return None
     
-    def phonemize(self, debug: bool = False) -> None:
+    def phonemize(self) -> None:
         """Phonemize the word by processing all letters and collecting their phonemes."""
         if self.phonemes:
             return
@@ -67,6 +74,9 @@ class Word:
         else:
             result += "  Stop Sign: None\n"
         
+        result += "  is_starting: " + str(self.is_starting) + "\n"
+        result += "  is_stopping: " + str(self.is_stopping) + "\n"
+        
         result += "  Letters:\n"
         for i, letter in enumerate(self.letters):
             result += f"    {i}: Letter '{letter.char}' -> {letter.base_phoneme}\n"
@@ -93,7 +103,6 @@ class Word:
             if letter.other_symbols:
                 result += "      Other symbols:\n"
                 for j, other in enumerate(letter.other_symbols):
-                    result += f"        {j}: '{other.char}' -> {other.base_phoneme}\n"
+                    result += f"        {j}: '{other.char}' -> {other.base_phoneme} (name: {other.name})\n"
         
-        print(result)
         return result

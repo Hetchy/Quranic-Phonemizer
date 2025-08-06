@@ -47,10 +47,12 @@ class Phonemizer:
         """
         words = self.parser.load_words(ref, self.db_path, stop_types=stops)
         for word in words:
-            word.phonemize(debug=debug)
+            word.phonemize()
 
         all_phonemes = []
         for word in words:
             all_phonemes.append(word.get_phonemes())
+            if debug:
+                print(word.debug_print())
         
         return PhonemizeResult(ref, " ".join(w.text for w in words), all_phonemes)

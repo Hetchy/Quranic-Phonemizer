@@ -24,6 +24,9 @@ class HamzaWaslLetter(LetterSymbol):
             if not prev_letter:
                 return []
 
+            if not prev_letter.phonemes:
+                prev_letter = self.prev_letter(2)
+                
             # case 1
             if prev_letter.has_tanween:
                 prev_letter.phonemes.append("i")

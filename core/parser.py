@@ -26,6 +26,7 @@ from .symbols.letters.hamza_wasl import HamzaWaslLetter
 from .symbols.letters.qalqala_letter import QalqalaLetter
 from .symbols.letters.vowel import VowelLetter
 from .symbols.letters.taa_marbuta import TaaMarbutaLetter
+from .symbols.letters.vowel import AlefMaksuraLetter
 
 # Data directory
 DATA_DIR = Path(__file__).resolve().parent.parent / "resources"
@@ -45,8 +46,8 @@ LETTER_CLASSES: dict[str, type[LetterSymbol]] = {
     "ا": VowelLetter,
     "و": VowelLetter,
     "ي": VowelLetter,
-    "ى": VowelLetter,
-    "ۧ":  VowelLetter,
+    "ى": AlefMaksuraLetter,
+    "ۧ":  VowelLetter, # mini yaa
 }
 
 
@@ -188,7 +189,7 @@ class Parser:
                         continue
                     
                     # Check for shaddah
-                    elif next_char == "ّ":  # SHADDAH
+                    elif next_char == "ّ":
                         letter.has_shaddah = True
                         j += 1
                         continue
@@ -220,13 +221,7 @@ class Parser:
             if word.letters:
                 letter = word.letters[-1]
                 letter.other_symbols.append(other)
-            else:
-                # Unknown symbol without a letter - create a new letter with this symbol
-                letter = LetterSymbol("UNKNOWN", char, "")
-                letter.other_symbols.append(other)
-                letter.parent_word = word
-                letter.index_in_word = len(word.letters)
-                word.letters.append(letter)
+
             i += 1
         
         return word
@@ -274,9 +269,11 @@ class Parser:
         words[0].is_starting = True
         words[-1].is_stopping = True
 
+        stop_types = [s.lower() for s in stop_types]
+
         for idx, word in enumerate(words):
             # Stop-sign logic
-            if word.stop_sign and word.stop_sign.name in stop_types:
+            if word.stop_sign and word.stop_sign.name.lower() in stop_types:
                 word.is_stopping = True
                 if word.next_word:
                     word.next_word.is_starting = True

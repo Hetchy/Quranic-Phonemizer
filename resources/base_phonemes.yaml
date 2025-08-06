@@ -291,10 +291,15 @@ other:
     cp: 0x0651
     char: "ّ"
     phoneme: ""
-
-  SILENT:
+  
+  SILENT_ALWAYS:
     cp: 0x06DF
     char: "۟"
+    phoneme: ""
+
+  SILENT_AT_CONTINUATION:
+    cp: 0x06E0
+    char: "۠"
     phoneme: ""
 
   MINI_NOON:
@@ -337,11 +342,6 @@ other:
     char: "۬ "
     phoneme: "" 
 
-  # S3: # 41:44 ءَا۠عۡجَمِىٌّ۬ 
-  #   cp: 0x06E0
-  #   char: "۠ "
-  #   phoneme: ""
-
   # ZWNJ:
   #   cp: 0x200C
   #   char: "‌"
@@ -371,3 +371,4 @@ other:
     cp: 0x06E9
     char: "۩"
     phoneme: ""
+    

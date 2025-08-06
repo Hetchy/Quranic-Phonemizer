@@ -149,27 +149,30 @@ class LetterSymbol(Symbol):
     @property
     def is_silent(self) -> bool:
         return self.diacritic is None and self.extension is None
-
-    @property
-    def has_phonemes(self) -> bool:
-        if len(self.phonemes) == 1:
-            return self.phonemes[0] != ""
-        return len(self.phonemes) > 0
             
     @property
     def can_phonemize(self) -> bool:
         return not self.is_phonemized
 
-    def mark_phonemized(self, phonemes: Optional[List[str]] = None, affected_by: Optional["LetterSymbol"] = None) -> None:
+    def mark_phonemized(self, phonemes: Optional[List[str]] = None, affected_by: Optional["LetterSymbol"] = None):
         self.phonemes = phonemes or []
         self.is_phonemized = True
         self.affected_by = affected_by
 
     @final
     def phonemize(self) -> List[str]:
+        # remove shaddah when starting at a word
+        if self.is_first and self.parent_word.is_starting:
+            self.has_shaddah = False
+
+        # change diacritics when stopping at a word
         if self.is_last and self.parent_word.is_stopping:
             if self.char == "ء" and self.has_fathatan:
                 self.diacritic = DiacriticSymbol("FATHA", "َ", "a")
+            elif self.char in ["ى"]:
+                self.diacritic = None
+            elif self.char == "ا":
+                self.diacritic = None
             else:
                 self.diacritic = DiacriticSymbol("SUKUN", "۟", None)
         
@@ -177,7 +180,7 @@ class LetterSymbol(Symbol):
         return self.phonemes
 
     def phonemize_letter(self) -> List[str]:
-        if not self.diacritic: # silent
+        if not self.diacritic and not self.has_shaddah: # silent
             return []
         
         return [self.apply_shaddah()]
@@ -195,7 +198,7 @@ class LetterSymbol(Symbol):
         return [self.diacritic.base_phoneme + (":" if self.extension else "")]
 
     def apply_shaddah(self) -> str:
-        if self.has_shaddah and not (self.is_first and self.parent_word.is_starting):
+        if self.has_shaddah:
             return self.base_phoneme + self.base_phoneme
         
         return self.base_phoneme
@@ -208,7 +211,7 @@ class LetterSymbol(Symbol):
         next_letter = self.next_letter(1)
         if next_letter.char in ["ا", "ى"]:
             if self.parent_word.is_stopping:
-                return [short_vowel_ph] # tanween becomes vowel
+                return [short_vowel_ph + ":"] # tanween becomes long vowel
             else:
                 next_letter.mark_phonemized(None, affected_by=self.diacritic)
                 next_letter = self.next_letter(2)

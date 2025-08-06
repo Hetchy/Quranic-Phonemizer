@@ -1,5 +1,4 @@
 special_words:
-
   - text: "حم"
     locations:
       - "40:1:1"  # Surah Ghafir
