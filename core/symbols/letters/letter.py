@@ -37,6 +37,66 @@ class LetterSymbol(Symbol):
 
     def next_letter(self, n: int = 1) -> Optional["LetterSymbol"]:
         return self.parent_word.get_next_letter(self.index_in_word, n)
+        
+    def prev_phoneme(self) -> Optional[str]:
+        """
+        Get the previous phoneme by looking at previous letters.
+        Starts from the immediately previous letter and works backwards until a phoneme is found.
+        Returns None if no previous phoneme is found.
+        """
+        # Start with the current word
+        current_word = self.parent_word
+        current_index = self.index_in_word
+        
+        # Look at previous letters in the current word
+        while current_index > 0:
+            current_index -= 1
+            prev_letter = current_word.letters[current_index]
+            if prev_letter.phonemes and prev_letter.phonemes:
+                return prev_letter.phonemes[-1]  # Return the last phoneme of the previous letter
+        
+        # If no phoneme found in current word, check previous word
+        prev_word = current_word.prev_word
+        if prev_word:
+            for letter in reversed(prev_word.letters):
+                if letter.phonemes and letter.phonemes:
+                    return letter.phonemes[-1]  # Return the last phoneme
+
+        return None
+        
+    def find_prev_phoneme_letter(self) -> Optional[tuple["LetterSymbol", int]]:
+        """
+        Find the letter containing the previous phoneme and the index of that phoneme.
+        Returns a tuple of (letter, phoneme_index) or None if no previous phoneme is found.
+        This allows direct modification of the previous phoneme.
+        """
+        # Start with the current word
+        current_word = self.parent_word
+        current_index = self.index_in_word
+        
+        # Look at previous letters in the current word
+        while current_index > 0:
+            current_index -= 1
+            prev_letter = current_word.letters[current_index]
+            if prev_letter.phonemes and prev_letter.phonemes:
+                return (prev_letter, len(prev_letter.phonemes) - 1)  # Return letter and index of last phoneme
+        
+        # If no phoneme found in current word, check previous word
+        prev_word = current_word.prev_word
+        if prev_word.letters:
+            for letter in reversed(prev_word.letters):
+                if letter.phonemes and letter.phonemes:
+                    return (letter, len(letter.phonemes) - 1)  # Return letter and index of last phoneme
+
+        return None
+        
+    def modify_prev_phoneme(self, new_phoneme: str) -> bool:
+        result = self.find_prev_phoneme_letter()
+        if result:
+            letter, phoneme_idx = result
+            letter.phonemes[phoneme_idx] = new_phoneme
+            return True
+        return False
 
     @property
     def is_first(self) -> bool:
