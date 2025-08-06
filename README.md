@@ -76,8 +76,8 @@ Gemination (shaddah) is represented by repeating the phoneme to create new disti
 
 
 ```bash
-git clone <repo-url>
-cd <repo>
+git clone https://github.com/Hetchy/Quranic-Phonemizer.git
+cd phonemizer
 pip install -r requirements.txt
 ```
 
