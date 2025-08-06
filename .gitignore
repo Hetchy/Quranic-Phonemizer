@@ -1,5 +1,5 @@
 __pycache__/
 *.py[cod]
-out/
-resources/archive/
-test.ipynb 
+out
+resources/archive
+test.ipynb

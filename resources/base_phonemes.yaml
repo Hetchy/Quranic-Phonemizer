@@ -1,14 +1,13 @@
 letters:
+  ALEF:
+    cp: 0x0627
+    char: "ا"
+    phoneme: ""
 
   HAMZA_WASL:
     cp: 0x0671
     char: "ٱ"
-    phoneme: ""
-
-  ALEF:
-    cp: 0x0627
-    char: "ا"
-    phoneme: ":"
+    phoneme: "ʔ"
 
   HAMZA_ABOVE_ALEF:
     cp: 0x0623
@@ -173,35 +172,39 @@ letters:
   TAA_MARBUTA:
     cp: 0x0629
     char: "ة"
-    phoneme: "<t/h>"
+    phoneme: "t"
 
   WAW:
     cp: 0x0648
     char: "و"
-    phoneme: "<w/:>"
+    phoneme: "w"
 
   YA:
     cp: 0x064A
     char: "ي"
-    phoneme: "<j/:>"
+    phoneme: "j"
 
   ALEF_MAKSURA:
     cp: 0x0649
     char: "ى"
-    phoneme: "<j/:>"
+    phoneme: "j"
+
+  MINI_YA_MIDDLE:
+    cp: 0x06E7
+    char: "ۧ"
+    phoneme: "j"
 
 
 diacritics:
+  # SUKUN:
+  #   cp: 0x06E1
+  #   char: "ۡ"
+  #   phoneme: ""
 
   SUKUN:
-    cp: 0x06E1
-    char: "ۡ"
-    phoneme: "<SUKUN>"
-
-  SHADDA:
-    cp: 0x0651
-    char: "ّ"
-    phoneme: "<SHADDA>"
+    cp: 0x0652
+    char: "ْ"
+    phoneme: ""
 
   FATHATAN:
     cp: 0x064B
@@ -233,59 +236,28 @@ diacritics:
     char: "ِ"
     phoneme: "i"
 
-mini_letters:
+
+extensions:
+  DAGGER_ALEF:
+    cp: 0x0670
+    char: "ٰ"
+    phoneme: ""
 
   MINI_WAW:
     cp: 0x06E5
     char: "ۥ"
-    phoneme: ":"
+    phoneme: ""
 
   MINI_YA_END:
     cp: 0x06E6
     char: "ۦ"
-    phoneme: ":"
-
-  MINI_YA_MIDDLE:
-    cp: 0x06E7
-    char: "ۧ"
-    phoneme: "<j/:>"
-
-  DAGGER_ALEF:
-    cp: 0x0670
-    char: "ٰ"
-    phoneme: "<:/a:>"
-
-  MINI_NOON:
-    cp: 0x06E8
-    char: "ۨ"
-    phoneme: ""
-
-  MINI_MEEM_ABOVE:
-    cp: 0x06E2
-    char: "ۢ"
-    phoneme: ""
-
-  MINI_MEEM_BELOW:
-    cp: 0x06ED
-    char: "ۭ"
-    phoneme: ""
-
-  MINI_SEEN_ABOVE:
-    cp: 0x06DC
-    char: "ۜ"
-    phoneme: ""
-
-  MINI_SEEN_BELOW:
-    cp: 0x06E3
-    char: "ۣ"
     phoneme: ""
 
 
 stop_signs:
-
   PREFERRED_CONTINUE:
     cp: 0x06D6
-    char: "ۖ "
+    char: "ۖ"
     phoneme: ""
 
   PREFERRED_STOP:
@@ -314,40 +286,61 @@ stop_signs:
     phoneme: ""
 
 
-special:
+other:
+  SHADDA:
+    cp: 0x0651
+    char: "ّ"
+    phoneme: ""
+  
+  SILENT_ALWAYS:
+    cp: 0x06DF
+    char: "۟"
+    phoneme: ""
+
+  SILENT_AT_CONTINUATION:
+    cp: 0x06E0
+    char: "۠"
+    phoneme: ""
+
+  MINI_NOON:
+    cp: 0x06E8
+    char: "ۨ"
+    phoneme: ""
+
+  MINI_MEEM_ABOVE:
+    cp: 0x06E2
+    char: "ۢ"
+    phoneme: ""
+
+  MINI_MEEM_BELOW:
+    cp: 0x06ED
+    char: "ۭ"
+    phoneme: ""
+
+  MINI_SEEN_ABOVE:
+    cp: 0x06DC
+    char: "ۜ"
+    phoneme: ""
+
+  MINI_SEEN_BELOW:
+    cp: 0x06E3
+    char: "ۣ"
+    phoneme: ""
 
   S1: # 11:41 مَجۡر۪ٮٰهَا 
     cp: 0x06EA 
     char: "۪ "
     phoneme: ""
 
-  S2: # 12:11 تَأۡمَ۫نَّا 
+  S2: # 12:11 تَأۡمَ۫نَّا 
     cp: 0x06EB
     char: "۫ "
     phoneme: ""
 
-  S3: # 41:44 ءَا۠عۡجَمِىٌّ۬ 
+  S3: # 41:44 ءَا۠عۡجَمِىٌّ۬ 
     cp: 0x06EC
     char: "۬ "
-    phoneme: ""
-
-  S4: # 41:44 ءَا۠عۡجَمِىٌّ۬ 
-    cp: 0x06E0
-    char: "۠ "
-    phoneme: ""
-
-
-other:
-
-  ZWNJ:
-    cp: 0x200C
-    char: "‌"
-    phoneme: ""
-
-  LONG_MADD:
-    cp: 0x0653
-    char: "ٓ◌ٓ" 
-    phoneme: ""
+    phoneme: "" 
 
   PARTIAL_ALEF_MAKSURA:
     cp: 0x066E

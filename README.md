@@ -135,7 +135,7 @@ q u l | h u w a | ll a h u | ʔ a ħ a d QQ
 
 ʔ a ll a h u | sˤsˤ a m a d QQ
 
-l a m | j a l i d QQ | w a l a m | j u: l a d QQ
+l a m | j a l i d Q | w a l a m | j u: l a d QQ
 
 w a l a m | j a k u | ll a h u: | k u f u w a n | ʔ a ħ a d QQ
 
@@ -204,7 +204,7 @@ df
       <th>7</th>
       <td>112:3:2</td>
       <td>يَلِدۡ</td>
-      <td>jalidQQ</td>
+      <td>jalidQ</td>
     </tr>
     <tr>
       <th>8</th>
@@ -291,7 +291,7 @@ kaða:lika lʕaða:b`u` walaʕaða:bu lʔaxirati ʔakba`r` law ka:nu: jaʕlamu:n
 ref = "44:43 - 44:44"
 res = pm.phonemize(ref, stops=["verse"])
 print(res.text)
-print(res.phonemes_str())
+print(res.phonemes_str(phoneme_sep="", word_sep=" ", verse_sep=""))
 
 res = pm.phonemize(ref, stops=[])
 print(res.phonemes_str(phoneme_sep="", word_sep=" ", verse_sep=""))

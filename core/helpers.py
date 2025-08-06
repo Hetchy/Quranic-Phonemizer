@@ -17,6 +17,7 @@ import re
 from pathlib import Path
 from typing import Dict, List, Tuple, Iterable
 from .loader import load_db, keys_for_reference
+from . import Phonemizer
 
 
 # ------------------------------------------------------------------ #
@@ -270,67 +271,59 @@ def phonemize_and_save(
     The output format is:
     - Each line contains a word followed by its phoneme array
     - All phoneme arrays are aligned to start at the same column
-    - Extra newline at verse endpoints (no verse numbers/markers)
-    - File is saved as data/phonemized/<ref>.txt
+    - Verse numbers are shown as headers
     
     Parameters
     ----------
     ref : str
-        Quranic reference (e.g., "69:24", "2:1-5")
+        Qurʾānic reference (e.g. "1:1", "2:282", "1-114").
     db_path : str | Path
-        Path to the Quran database
+        Path to the Qurʾān word-by-word JSON.
     output_dir : str | Path
         Directory to save the phonemized output
     """
-    from .phonemizer import Phonemizer
-    import os
-    import unicodedata
-    
-    def visual_width(text):
-        """Calculate visual width by removing combining characters (diacritics)"""
-        # Remove combining characters (Arabic diacritics)
-        normalized = ''.join(c for c in text if not unicodedata.combining(c))
-        return len(normalized)
-    
-    def align_at_column(word, phoneme_str, target_col=20):
-        """Align phoneme string to start at target column"""
-        word_width = visual_width(word)
-        if word_width >= target_col:
-            # If word is too long, truncate and add space
-            # We need to be careful with Arabic text truncation
-            spaces_needed = 1
-        else:
-            spaces_needed = target_col - word_width
-        return word + (" " * spaces_needed) + phoneme_str
-    
-    # Create output directory if it doesn't exist
-    os.makedirs(output_dir, exist_ok=True)
+    # Import here to avoid circular imports
+    from . import Phonemizer
     
     # Phonemize the reference
     phonemizer = Phonemizer(db_path=db_path)
     res = phonemizer.phonemize(ref, stops=stops)
     quran_text = res.text
-    phoneme_arrays = res.phonemes_nested()
+    phoneme_arrays = res.phonemes_nested()  # Use the method to get nested phonemes
     
-    if not quran_text or not phoneme_arrays:
-        print(f"No content found for reference: {ref}")
-        return
-    
-    # Build the output lines
-    output_lines = []
-
+    # Load the database to get word texts
     db = load_db(db_path)
     keys = keys_for_reference(ref, db)
     
-    current_verse = None
+    # Create output directory if it doesn't exist
+    Path(output_dir).mkdir(parents=True, exist_ok=True)
+    
+    # Helper functions for formatting
+    def visual_width(text):
+        """Calculate visual width by removing combining characters (diacritics)"""
+        import unicodedata
+        return len(''.join(c for c in text if not unicodedata.combining(c)))
+    
+    def align_at_column(word, phoneme_str, target_col=20):
+        """Align phoneme string to start at target column"""
+        word_width = visual_width(word)
+        padding = max(target_col - word_width, 2)
+        return word + ' ' * padding + phoneme_str
+    
+    # Process and format output
+    output_lines = []
     phoneme_index = 0
+    current_verse = None
     
     for key in keys:
-        s, v, _ = key.split(":")
+        # Extract verse information
+        s, v, w = key.split(":")
         verse_key = f"{s}:{v}"
         
-        # Add blank line when verse changes
-        if current_verse is not None and current_verse != verse_key:
+        # Add verse header if starting a new verse
+        if verse_key != current_verse:
+            if output_lines:  # Add blank line before new verse (except for first)
+                output_lines.append("")
             output_lines.append(f"\n{s}:{v}")
         current_verse = verse_key
         
@@ -361,16 +354,20 @@ def phonemize_and_save(
     
     print(f"Phonemized output saved to: {output_file}")
 
+
 def compare_files(
     file1_path: str | Path,
     file2_path: str | Path,
     *,
-    context_lines: int = 3,
+    context_lines: int = 1,
     ignore_whitespace: bool = False,
     return_result: bool = False,
+    exclude: list[str] = None,
 ) -> bool | str:
+
     """
     Compare two text files and output differences if they're not identical.
+    Only considers differences within [...] brackets, ignoring other text differences.
     
     Parameters
     ----------
@@ -381,9 +378,11 @@ def compare_files(
     context_lines : int
         Number of context lines to show around differences (default: 3)
     ignore_whitespace : bool
-        Whether to ignore whitespace differences (default: False)
+        Whether to ignore whitespace differences and empty lines (default: False)
     return_result : bool
         If True, return the diff as a string. If False, print it (default: False)
+    exclude : list[str]
+        List of strings to exclude from comparison. If any string is found in file1 line, skip comparison
         
     Returns
     -------
@@ -391,8 +390,11 @@ def compare_files(
         If return_result=False: Returns True if files are identical, False if different
         If return_result=True: Returns the diff string (empty if files are identical)
     """
-    import difflib
+    import re
     from pathlib import Path
+    
+    if exclude is None:
+        exclude = []
     
     file1_path = Path(file1_path)
     file2_path = Path(file2_path)
@@ -412,6 +414,28 @@ def compare_files(
         print(error_msg)
         return False
     
+    def extract_brackets(line):
+        """Extract content within [...] brackets from a line"""
+        return re.findall(r'\[([^\]]*)\]', line)
+    
+    def find_verse_reference(lines, line_index):
+        """Find the most recent line with num:num pattern before the given line"""
+        verse_pattern = re.compile(r'^\d+:\d+')
+        for i in range(line_index, -1, -1):
+            if i < len(lines) and verse_pattern.match(lines[i].strip()):
+                return lines[i].strip(), i + 1
+        return None, None
+    
+    def get_context_lines(lines, line_num, context_lines):
+        """Get context lines around a specific line number"""
+        start = max(0, line_num - context_lines)
+        end = min(len(lines), line_num + context_lines + 1)
+        return lines[start:end], start
+    
+    def should_exclude_line(line, exclude):
+        """Check if line contains any string from exclude"""
+        return any(exclude_str in line for exclude_str in exclude)
+    
     try:
         # Read files
         with open(file1_path, 'r', encoding='utf-8') as f1:
@@ -419,36 +443,65 @@ def compare_files(
         with open(file2_path, 'r', encoding='utf-8') as f2:
             lines2 = f2.readlines()
             
-        # Optionally ignore whitespace
+        # Optionally ignore whitespace and empty lines
         if ignore_whitespace:
-            lines1 = [line.strip() + '\n' for line in lines1]
-            lines2 = [line.strip() + '\n' for line in lines2]
+            lines1 = [line.strip() + '\n' for line in lines1 if line.strip()]
+            lines2 = [line.strip() + '\n' for line in lines2 if line.strip()]
         
-        # Compare files
-        if lines1 == lines2:
+        # Compare files line by line, only considering [...] content
+        max_lines = max(len(lines1), len(lines2))
+        differences = []
+        
+        for i in range(max_lines):
+            line1 = lines1[i] if i < len(lines1) else ""
+            line2 = lines2[i] if i < len(lines2) else ""
+            
+            # Skip comparison if line1 contains any excluded string
+            if should_exclude_line(line1, exclude):
+                continue
+            
+            brackets1 = extract_brackets(line1)
+            brackets2 = extract_brackets(line2)
+            
+            if brackets1 != brackets2:
+                verse_ref, verse_line_num = find_verse_reference(lines1, i)
+                if not verse_ref:
+                    verse_ref, verse_line_num = find_verse_reference(lines2, i)
+                differences.append((i, line1.rstrip('\n'), line2.rstrip('\n'), brackets1, brackets2, verse_ref, verse_line_num))
+        
+        if not differences:
             result_msg = f"Files are identical: {file1_path.name} and {file2_path.name}"
             if return_result:
                 return ""  # Empty string indicates no differences
             print(result_msg)
             return True
         
-        # Generate unified diff
-        diff = difflib.unified_diff(
-            lines1,
-            lines2,
-            fromfile=str(file1_path),
-            tofile=str(file2_path),
-            n=context_lines
-        )
+        # Generate diff output
+        diff_lines = [f"Files differ in {len(differences)} lines: {file1_path.name} vs {file2_path.name}"]
+        diff_lines.append("=" * 60)
         
-        diff_output = ''.join(diff)
+        for line_num, line1, line2, brackets1, brackets2, verse_ref, verse_line_num in differences:
+            if verse_ref and verse_line_num:
+                diff_lines.append(f"\nVerse {verse_ref} (line {verse_line_num}):")
+            
+            diff_lines.append(f"Difference at line {line_num + 1}:")
+            
+            # Get context for file1
+            context1, start1 = get_context_lines(lines1, line_num, context_lines)
+            diff_lines.append(f"Context ({file1_path.name}):")
+            for i, ctx_line in enumerate(context1):
+                marker = ">>>" if start1 + i == line_num else "   "
+                diff_lines.append(f"{marker} {start1 + i + 1:4d}: {ctx_line.rstrip()}")
+            
+            # Show diff of the specific lines
+            diff_lines.append(f"- {file1_path.name}: {line1}")
+            diff_lines.append(f"+ {file2_path.name}: {line2}")
+            diff_lines.append("")
         
+        result = "\n".join(diff_lines)
         if return_result:
-            return diff_output
-        
-        print(f"Files differ: {file1_path.name} vs {file2_path.name}")
-        print("=" * 60)
-        print(diff_output)
+            return result
+        print(result)
         return False
         
     except Exception as e:

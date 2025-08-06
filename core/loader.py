@@ -62,8 +62,8 @@ def keys_for_reference(ref: str, db: Dict[str, dict]) -> List[str]:
     if "-" not in ref:                               # single spec
         start = end = _parse_endpoint(ref)
     else:                                            # range
-        left, right = ref.split("-")
-        start, end = _parse_endpoint(left), _parse_endpoint(right)
+        left, right = ref.split("-", 1)  # Split only on first "-"
+        start, end = _parse_endpoint(left.strip()), _parse_endpoint(right.strip())
 
     # Canonicalise: fill missing verse/word with 0 / big number
     def canon(tpl, is_end=False) -> Tuple[int, int, int]:
