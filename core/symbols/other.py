@@ -11,5 +11,5 @@ from .symbol import Symbol
 
 class OtherSymbol(Symbol):
     """A catch-all for any other symbols that may appear."""
-    def __init__(self, char: str, phoneme: Optional[str] = None):
-        super().__init__(char, phoneme)
+    def __init__(self, name: str, char: str, phoneme: Optional[str] = None):
+        super().__init__(name, char, phoneme)

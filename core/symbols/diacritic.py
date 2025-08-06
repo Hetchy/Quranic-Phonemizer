@@ -10,31 +10,30 @@ from .symbol import Symbol
 
 
 class DiacriticSymbol(Symbol):
-    def __init__(self, char: str, type_name: str, phoneme: Optional[str] = None):
-        super().__init__(char, phoneme)
-        self.type = type_name
+    def __init__(self, name: str, char: str, phoneme: Optional[str]):
+        super().__init__(name, char, phoneme)
 
     @property
     def is_sukun(self) -> bool:
-        return self.type == "SUKUN"
+        return self.name == "SUKUN"
 
     @property
     def is_fatha(self) -> bool:
-        return self.type == "FATHA"
+        return self.name == "FATHA"
 
     @property
     def is_damma(self) -> bool:
-        return self.type == "DAMMA"
+        return self.name == "DAMMA"
 
     @property
     def is_kasra(self) -> bool:
-        return self.type == "KASRA"
+        return self.name == "KASRA"
 
     @property
     def is_tanween(self) -> bool:
-        return self.type in ["FATHATAN", "DAMMATAN", "KASRATAN"]
+        return self.name in ["FATHATAN", "DAMMATAN", "KASRATAN"]
 
     @property
     def is_fathatan(self) -> bool:
-        return self.type == "FATHATAN"
+        return self.name == "FATHATAN"
         

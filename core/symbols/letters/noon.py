@@ -8,7 +8,7 @@ class NoonLetter(LetterSymbol):
     def phonemize_letter(self):
         if self.has_shaddah:
             return ["ñ"]
-        if self.diacritic or (self.is_last and self.parent_word.is_stopping):
+        if self.diacritic:
             return [self.base_phoneme]
         
         next_letter = self.next_letter()
@@ -24,10 +24,12 @@ class NoonLetter(LetterSymbol):
             return ["ŋ"] if next_letter.is_heavy else ["ŋ"]
         
         # Idgham
-        if next_letter.is_idgham:
+        if next_letter.is_idgham_ghunnah:
             nasal_map = get_rule_phoneme("idgham", "nasalized_map")
             target_phoneme = nasal_map.get(next_letter.base_phoneme)
-            next_letter.mark_phonemized([target_phoneme], affected_by=self)
+            next_letter.has_shaddah = False
+            next_phonemes = [target_phoneme] + next_letter.phonemize_modifiers()
+            next_letter.mark_phonemized(next_phonemes, affected_by=self)
             return []
         
         return ["n??"]

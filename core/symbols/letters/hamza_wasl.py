@@ -24,11 +24,19 @@ class HamzaWaslLetter(LetterSymbol):
         if self.is_first: # Iltiqaa Sakinayn
             prev_letter = self.prev_letter(1)
 
+            if not prev_letter:
+                return ["ʔ?"]
+
+            # case 1
             if prev_letter.has_tanween:
                 prev_letter.phonemes.append("i")
 
-            elif prev_letter.phonemes and prev_letter.phonemes[-1] in ["a:", "u:", "i:"]:
-                prev_letter.phonemes[-1] -= ":"
-            
+            if not prev_letter.has_phonemes:
+                prev_letter = self.prev_letter(2)
+
+            # case 2
+            if prev_letter.has_phonemes and prev_letter.phonemes[-1] in ["a:", "u:", "i:"]:
+                prev_letter.phonemes[-1] = prev_letter.phonemes[-1][0] # remove ":"
+        
         # otherwise it is silent
         return []

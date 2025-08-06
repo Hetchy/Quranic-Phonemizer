@@ -4,7 +4,6 @@ from typing import List
 from pathlib import Path
 
 from .parser import Parser, load_symbol_mappings
-from .word_processor import WordProcessor
 from .phonemize_result import PhonemizeResult
 
 # Data directory
@@ -15,18 +14,19 @@ class Phonemizer:
         self,
         db_path: str | Path = DATA_DIR / "Quran.json",
         map_path: str | Path = DATA_DIR / "base_phonemes.yaml",
+        special_words_path: str | Path = DATA_DIR / "special_words.yaml",
     ) -> None:
         self.db_path = str(db_path)
         self.map_path = str(map_path)
         symbol_mappings = load_symbol_mappings(map_path)
-        self.parser = Parser(symbol_mappings)
-        self.word_processor = WordProcessor()
+        self.parser = Parser(symbol_mappings, special_words_path)
 
     def phonemize(
         self,
         ref: str,
         *,
         stops: List[str] = [],
+        debug: bool = False,
     ) -> PhonemizeResult:
         """
         Phonemize a reference range.
@@ -37,21 +37,20 @@ class Phonemizer:
             Qurʾānic reference.
         stops : List[str], default []
             List of stop types to mark as boundaries.
+        debug : bool, default False
+            Whether to print debug information.
             
         Returns
         -------
         PhonemizeResult
             Object containing reference, text and phonemes.
         """
-        # Load words using the consolidated parser
         words = self.parser.load_words(ref, self.db_path, stop_types=stops)
-
-        # Process each word
-        all_phonemes = []
-        full_text = " ".join(word.text for word in words)
-        
         for word in words:
-            phonemes = self.word_processor.process_word(word)
-            all_phonemes.append(phonemes)
+            word.phonemize(debug=debug)
+
+        all_phonemes = []
+        for word in words:
+            all_phonemes.append(word.get_phonemes())
         
-        return PhonemizeResult(ref, full_text, all_phonemes)
+        return PhonemizeResult(ref, " ".join(w.text for w in words), all_phonemes)

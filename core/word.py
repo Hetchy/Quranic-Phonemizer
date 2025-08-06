@@ -4,34 +4,30 @@ Word class for the Quranic phonemizer.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import List, Optional, TYPE_CHECKING
+from typing import List, Optional, Dict
 
-if TYPE_CHECKING:
-    from .symbols.letter import LetterSymbol
-    from .location import Location
-
+from .symbols.letters.letter import LetterSymbol
+from .location import Location
 from .symbols.stop import StopSymbol
 
-
-@dataclass
 class Word:
-    location: Location
-    text: str = ""
-    letters: List[LetterSymbol] = field(default_factory=list)
-    prev_word: Optional[Word] = None
-    next_word: Optional[Word] = None
-
-    stop_sign: Optional[StopSymbol] = None
-    is_starting: bool = False  # True if this word is the start after a pause
-    is_stopping: bool = False  # True if this word is paused at 
+    def __init__(self, location: Location, text: str = ""):
+        self.location = location
+        self.text = text
+        self.prev_word: Optional[Word] = None
+        self.next_word: Optional[Word] = None
+        self.letters: List[LetterSymbol] = []
+        self.phonemes: Optional[List[str]] = None
+        self.stop_sign: Optional[StopSymbol] = None
+        self.is_starting: bool = False  # True if this word is the start after a pause
+        self.is_stopping: bool = False  # True if this word is paused at
 
     def get_prev_letter(self, index: int, n: int = 1) -> Optional[LetterSymbol]:
         """Get the previous letter in the current word or last letter of previous word."""
         if index > 0:
             return self.letters[index - n]
         elif self.prev_word and self.prev_word.letters:
-            return self.prev_word.letters[-1]
+            return self.prev_word.letters[-n]
         return None
         
     def get_next_letter(self, index: int, n: int = 1) -> Optional[LetterSymbol]:
@@ -39,39 +35,43 @@ class Word:
         if index + n < len(self.letters):
             return self.letters[index + n]
         elif self.next_word and self.next_word.letters:
-            return self.next_word.letters[0]
+            return self.next_word.letters[n - 1]
         return None
+    
+    def phonemize(self, debug: bool = False) -> None:
+        """Phonemize the word by processing all letters and collecting their phonemes."""
+        if self.phonemes:
+            return
         
-    def get_letter_at(self, index: int) -> Optional[LetterSymbol]:
-        """Get the letter at the specific index in the current word."""
-        if 0 <= index < len(self.letters):
-            return self.letters[index]
-        return None
+        for i, letter in enumerate(self.letters):
+            if letter.can_phonemize:
+                letter.phonemize()
+
+    def get_phonemes(self) -> List[str]:
+        if self.phonemes:
+            return self.phonemes
+        
+        phonemes = []
+        for letter in self.letters:
+            phonemes.extend(ph for ph in letter.phonemes if ph)
+        
+        self.phonemes = phonemes
+        return self.phonemes
 
     def debug_print(self) -> str:
         """Pretty print for debugging purposes."""
         result = f"Word at {self.location.location_key}:\n"
         result += f"  Text: {self.text}\n"
         if self.stop_sign:
-            result += f"  Stop Sign: {self.stop_sign.char} (type: {self.stop_sign.type})\n"
+            result += f"  Stop Sign: {self.stop_sign.char} (name: {self.stop_sign.name})\n"
         else:
             result += "  Stop Sign: None\n"
         
-        # if self.prev_word:
-        #     result += f"  Previous Word: {self.prev_word.location.location_key}\n"
-        # else:
-        #     result += "  Previous Word: None\n"
-        # if self.next_word:
-        #     result += f"  Next Word: {self.next_word.location.location_key}\n"
-        # else:
-        #     result += "  Next Word: None\n"
-        
         result += "  Letters:\n"
         for i, letter in enumerate(self.letters):
-            result += f"    {i}: Letter '{letter.char}' -> {letter.phoneme}\n"
+            result += f"    {i}: Letter '{letter.char}' -> {letter.base_phoneme}\n"
             
             # Show sequential phonemization attributes
-            result += f"      Is Phonemized: {letter.is_phonemized}\n"
             if letter.phonemes:
                 result += f"      Phonemes: {letter.phonemes}\n"
             if letter.affected_by:
@@ -79,11 +79,11 @@ class Word:
             
             # Show diacritic
             if letter.diacritic:
-                result += f"      Diacritic: '{letter.diacritic.char}' -> {letter.diacritic.phoneme} (type: {letter.diacritic.type})\n"
+                result += f"      Diacritic: '{letter.diacritic.char}' -> {letter.diacritic.base_phoneme} (name: {letter.diacritic.name})\n"
             
             # Show extension
             if letter.extension:
-                result += f"      Extension: '{letter.extension.char}' -> {letter.extension.phoneme} (type: {letter.extension.type})\n"
+                result += f"      Extension: '{letter.extension.char}' -> {letter.extension.base_phoneme} (name: {letter.extension.name})\n"
             
             # Show shaddah
             if letter.has_shaddah:
@@ -93,6 +93,7 @@ class Word:
             if letter.other_symbols:
                 result += "      Other symbols:\n"
                 for j, other in enumerate(letter.other_symbols):
-                    result += f"        {j}: '{other.char}' -> {other.phoneme}\n"
+                    result += f"        {j}: '{other.char}' -> {other.base_phoneme}\n"
         
+        print(result)
         return result

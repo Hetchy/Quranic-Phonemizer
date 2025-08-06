@@ -21,7 +21,7 @@ class MeemLetter(LetterSymbol):
         
         # idgham shafawi
         if self.is_last and next_letter.char == "م":
-            next_letter.mark_phonemized([], affected_by=self)
+            next_letter.mark_phonemized(next_letter.phonemize_modifiers(), affected_by=self)
             return ["m̃"]
             
         return ["m??"]

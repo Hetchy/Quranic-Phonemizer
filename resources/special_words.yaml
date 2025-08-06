@@ -95,8 +95,3 @@ special_words:
     locations:
       - "21:88:7"  # Surah Al-Anbiya
     phonemes: ["n", "u", "ŋ", "ʒ", "i"] 
-
-  - text: "بِأَييِّكُمُ"
-    locations:
-      - "68:6:1"  # Surah Al-Qalam
-    phonemes: ['b', 'i', 'ʔ', 'a', 'jj', 'i', 'k', 'u', 'm', 'u']
