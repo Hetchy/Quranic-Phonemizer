@@ -3,3 +3,7 @@ __pycache__/
 out
 resources/archive
 test.ipynb
+.windsurf
+.vscode
+.cursor
+.venv
