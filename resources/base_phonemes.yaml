@@ -257,7 +257,7 @@ extensions:
 stop_signs:
   PREFERRED_CONTINUE:
     cp: 0x06D6
-    char: "ۖ "
+    char: "ۖ"
     phoneme: ""
 
   PREFERRED_STOP:
@@ -342,16 +342,6 @@ other:
     char: "۬ "
     phoneme: "" 
 
-  # ZWNJ:
-  #   cp: 0x200C
-  #   char: "‌"
-  #   phoneme: ""
-
-  # LONG_MADD:
-  #   cp: 0x0653
-  #   char: "ٓ◌ٓ" 
-  #   phoneme: ""
-
   PARTIAL_ALEF_MAKSURA:
     cp: 0x066E
     char: "ٮ"
@@ -371,4 +361,3 @@ other:
     cp: 0x06E9
     char: "۩"
     phoneme: ""
-    

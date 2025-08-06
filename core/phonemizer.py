@@ -45,6 +45,18 @@ class Phonemizer:
         PhonemizeResult
             Object containing reference, text and phonemes.
         """
+        valid_stops = {
+            "verse"
+            "preferred_continue",
+            "preferred_stop", 
+            "optional_stop",
+            "compulsory_stop",
+            "prohibited_stop",
+        }
+        invalid_stops = set(stops) - valid_stops
+        if invalid_stops:
+            raise ValueError(f"Invalid stop types: {invalid_stops}. Valid stops are: {valid_stops}")
+        
         words = self.parser.load_words(ref, self.db_path, stop_types=stops)
         for word in words:
             word.phonemize()

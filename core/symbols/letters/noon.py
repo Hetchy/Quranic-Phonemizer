@@ -1,27 +1,26 @@
-#!/usr/bin/env python3
-from typing import List, Dict, Any, Optional
+from typing import List
 from .letter import LetterSymbol
 
 from core.phoneme_registry import get_rule_phoneme
 
-class NoonLetter(LetterSymbol):
-    def phonemize_letter(self):
+class Noon(LetterSymbol):
+    def phonemize_letter(self) -> List[str]:
         if self.has_shaddah:
-            return ["ñ"]
+            return [get_rule_phoneme("idgham", "nasalized_map").get("n")]
+        
         if self.diacritic:
             return [self.base_phoneme]
         
         next_letter = self.next_letter()
-        if not next_letter:
-            return ["n?"]
 
         # Iqlab
         if next_letter.char == "ب":
-            return ["m̃"]
+            return [get_rule_phoneme("iqlab", "phoneme")]
         
         # Ikhfaa    
         if next_letter.is_ikhfaa:
-            return ["ŋ"] if next_letter.is_heavy else ["ŋ"]
+            ikhfaa_key = "heavy_phoneme" if next_letter.is_heavy else "light_phoneme"
+            return [get_rule_phoneme("ikhfaa", ikhfaa_key)]
         
         # Idgham Ghunnah
         if next_letter.is_idgham_ghunnah:
@@ -36,4 +35,4 @@ class NoonLetter(LetterSymbol):
         if next_letter.char in ["ل", "ر"]:
             return []
         
-        return ["n??"]
+        return [self.base_phoneme]

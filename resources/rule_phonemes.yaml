@@ -7,13 +7,14 @@ idgham:
 
 ikhfaa:
   light_phoneme: "ŋ"
-  heavy_phoneme: "ŋ"
-  # heavy_phoneme: "ŋˤ"
+  # heavy_phoneme: "ŋ"
+  heavy_phoneme: "ŋˤ"
   shafawi_phoneme: "ɱ"
 
 iqlab:
   phoneme: "m̃"
 
 qalqala:
-    weak: "Q"
-    strong: "Q"
+  weak: "Q"
+  # strong: "Q"
+  strong: "QQ"

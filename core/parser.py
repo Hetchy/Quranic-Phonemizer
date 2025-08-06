@@ -20,36 +20,37 @@ from .symbols.extension import ExtensionSymbol
 from .symbols.stop import StopSymbol
 from .symbols.other import OtherSymbol
 
-from .symbols.letters.noon import NoonLetter
-from .symbols.letters.meem import MeemLetter
-from .symbols.letters.hamza_wasl import HamzaWaslLetter
-from .symbols.letters.qalqala_letter import QalqalaLetter
-from .symbols.letters.vowel import VowelLetter
-from .symbols.letters.taa_marbuta import TaaMarbutaLetter
-from .symbols.letters.vowel import AlefMaksuraLetter
+from .symbols.letters.noon import Noon
+from .symbols.letters.meem import Meem
+from .symbols.letters.hamza_wasl import HamzaWasl
+from .symbols.letters.qalqala_letter import Qalqala
+from .symbols.letters.taa_marbuta import TaaMarbuta
+from .symbols.letters.vowel import AlefMaksura
+from .symbols.letters.vowel import Alef
+from .symbols.letters.vowel import Waw
+from .symbols.letters.vowel import Yaa
 
 # Data directory
 DATA_DIR = Path(__file__).resolve().parent.parent / "resources"
 
 LETTER_CLASSES: dict[str, type[LetterSymbol]] = {
-    "ٱ": HamzaWaslLetter,
-    "ن": NoonLetter,
-    "م": MeemLetter,
-    "ة": TaaMarbutaLetter,
+    "ٱ": HamzaWasl,
+    "ن": Noon,
+    "م": Meem,
+    "ة": TaaMarbuta,
 
-    "ق": QalqalaLetter,
-    "ط": QalqalaLetter,
-    "ب": QalqalaLetter,
-    "ج": QalqalaLetter,
-    "د": QalqalaLetter,
+    "ق": Qalqala,
+    "ط": Qalqala,
+    "ب": Qalqala,
+    "ج": Qalqala,
+    "د": Qalqala,
 
-    "ا": VowelLetter,
-    "و": VowelLetter,
-    "ي": VowelLetter,
-    "ى": AlefMaksuraLetter,
-    "ۧ":  VowelLetter, # mini yaa
+    "ا": Alef,
+    "ى": AlefMaksura,
+    "و": Waw,
+    "ي": Yaa,
+    "ۧ":  Yaa, # mini yaa
 }
-
 
 def _load_special_words(yaml_path: str | Path) -> Dict[str, List[str]]:
     """

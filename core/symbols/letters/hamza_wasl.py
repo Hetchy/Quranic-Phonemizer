@@ -1,8 +1,7 @@
-#!/usr/bin/env python3
-from typing import List, Dict, Any, Optional
+from typing import List
 from .letter import LetterSymbol
 
-class HamzaWaslLetter(LetterSymbol):
+class HamzaWasl(LetterSymbol):
     def phonemize_letter(self) -> List[str]:
         if self.is_first and self.parent_word.is_starting:
             second_letter = self.next_letter(1)

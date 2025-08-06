@@ -47,11 +47,11 @@ class Word:
     
     def phonemize(self) -> None:
         """Phonemize the word by processing all letters and collecting their phonemes."""
-        if self.phonemes:
+        if self.phonemes: # special case for words that are phonemized already
             return
         
         for i, letter in enumerate(self.letters):
-            if letter.can_phonemize:
+            if letter.can_phonemize():
                 letter.phonemize()
 
     def get_phonemes(self) -> List[str]:
@@ -62,8 +62,7 @@ class Word:
         for letter in self.letters:
             phonemes.extend(ph for ph in letter.phonemes if ph)
         
-        self.phonemes = phonemes
-        return self.phonemes
+        return phonemes
 
     def debug_print(self) -> str:
         """Pretty print for debugging purposes."""
