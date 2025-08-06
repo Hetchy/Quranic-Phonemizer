@@ -11,7 +11,7 @@ from .symbols.diacritic import DiacriticSymbol
 from .symbols.extension import ExtensionSymbol
 from .symbols.stop import StopSymbol
 from .symbols.other import OtherSymbol
-from .phonemize_result import PhonemizeResult
+from .phonemizer import PhonemizeResult
 
 __all__ = [
     'Phonemizer',
