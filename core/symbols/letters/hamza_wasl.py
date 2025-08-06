@@ -19,13 +19,11 @@ class HamzaWaslLetter(LetterSymbol):
                 if third_letter.has_fatha or third_letter.has_kasra:
                     return [self.base_phoneme, "i"]
             
-            return ["ʔ?"]
-        
         if self.is_first: # Iltiqaa Sakinayn
             prev_letter = self.prev_letter(1)
 
             if not prev_letter:
-                return ["ʔ?"]
+                return []
 
             # case 1
             if prev_letter.has_tanween:
