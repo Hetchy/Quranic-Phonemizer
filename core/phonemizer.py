@@ -23,6 +23,14 @@ class Phonemizer:
         self.map_path = str(map_path)
         symbol_mappings = load_symbol_mappings(map_path)
         self.parser = Parser(symbol_mappings, special_words_path)
+        self.valid_stops = {
+            "verse",
+            "preferred_continue",
+            "preferred_stop", 
+            "optional_stop",
+            "compulsory_stop",
+            "prohibited_stop",
+        }
 
     def phonemize(
         self,
@@ -48,17 +56,9 @@ class Phonemizer:
         PhonemizeResult
             Object containing reference, text and phonemes.
         """
-        valid_stops = {
-            "verse",
-            "preferred_continue",
-            "preferred_stop", 
-            "optional_stop",
-            "compulsory_stop",
-            "prohibited_stop",
-        }
-        invalid_stops = set(stops) - valid_stops
+        invalid_stops = set(stops) - self.valid_stops
         if invalid_stops:
-            raise ValueError(f"Invalid stop types: {invalid_stops}. Valid stops are: {valid_stops}")
+            raise ValueError(f"Invalid stop types: {invalid_stops}. Valid stops are: {self.valid_stops}")
         
         words = self.parser.load_words(ref, self.db_path, stop_types=stops)
         for word in words:
@@ -69,7 +69,7 @@ class Phonemizer:
             all_phonemes.append(word.get_phonemes())
             if debug:
                 print(word.debug_print())
-        
+
         return PhonemizeResult(ref, " ".join(w.text for w in words), all_phonemes, words)
 
 

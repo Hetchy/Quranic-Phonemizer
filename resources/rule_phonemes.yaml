@@ -18,3 +18,6 @@ qalqala:
   weak: "Q"
   # strong: "Q"
   strong: "QQ"
+
+lam_heavy:
+  phoneme: "lˤlˤ"
