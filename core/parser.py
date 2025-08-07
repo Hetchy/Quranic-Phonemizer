@@ -29,14 +29,15 @@ from .symbols.letters.vowel import AlefMaksura
 from .symbols.letters.vowel import Alef
 from .symbols.letters.vowel import Waw
 from .symbols.letters.vowel import Yaa
+from .symbols.letters.lam import Lam
 
-# Data directory
 DATA_DIR = Path(__file__).resolve().parent.parent / "resources"
 
 LETTER_CLASSES: dict[str, type[LetterSymbol]] = {
     "ٱ": HamzaWasl,
-    "ن": Noon,
+    "ل": Lam,
     "م": Meem,
+    "ن": Noon,
     "ة": TaaMarbuta,
 
     "ق": Qalqala,

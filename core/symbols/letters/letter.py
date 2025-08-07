@@ -139,6 +139,9 @@ class LetterSymbol(Symbol):
         if self.has_tanween:
             return self.apply_tanween()
         
+        if self.has_fatha and self.is_heavy:
+            return [self.diacritic.base_phoneme + "ˤ"]
+
         if not self.diacritic:
             return []
 
@@ -167,11 +170,12 @@ class LetterSymbol(Symbol):
             
         # Iqlab
         if next_letter.char == "ب":
-            return [short_vowel_ph, "m̃"]
+            return [short_vowel_ph, get_rule_phoneme("iqlab", "phoneme")]
 
         # Ikhfaa
         if next_letter.is_ikhfaa:
-            return [short_vowel_ph, "ŋ" if next_letter.is_heavy else "ŋ"]
+            ikhfaa_key = "heavy_phoneme" if next_letter.is_heavy else "light_phoneme"
+            return [short_vowel_ph, get_rule_phoneme("ikhfaa", ikhfaa_key)]
         
         # Idgham Ghunnah
         if next_letter.is_idgham_ghunnah:
