@@ -16,7 +16,7 @@ class Alef(VowelLetter):
         if not self.parent_word.is_stopping and self.has_symbol("SILENT_AT_CONTINUATION"):
             return []  # e.g. أَنَا۠
 
-        return self._lengthen_compatible_phoneme(["a"])
+        return self._lengthen_compatible_phoneme(["a", "aˤ"])
 
 class AlefMaksura(VowelLetter):
     def phonemize_letter(self) -> List[str]:
@@ -24,7 +24,7 @@ class AlefMaksura(VowelLetter):
             # treat as Yaa
             return super().phonemize_letter()
         
-        return self._lengthen_compatible_phoneme(["a", "i"])
+        return self._lengthen_compatible_phoneme(["a", "aˤ", "i"])
 
 class Waw(VowelLetter):
     def phonemize_letter(self) -> List[str]:
