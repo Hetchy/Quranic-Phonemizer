@@ -21,54 +21,50 @@ The system uses a hierarchical pipeline that tokenizes text, applies contextual 
 
 ## Phoneme Inventory
 
-The phoneme inventory uses the standard International Phonetic Alphabet (IPA) [Arabic phonemes](https://en.wikipedia.org/wiki/Help%3AIPA/Arabic?utm_source=chatgpt.com) alongside custom phonemes for Tajweed rules. There is a total of 67 phonemes, corresponding to:
+The phoneme inventory uses the standard International Phonetic Alphabet (IPA) [Arabic phonemes](https://en.wikipedia.org/wiki/Help%3AIPA/Arabic?utm_source=chatgpt.com) alongside custom phonemes for Tajweed rules. There is a total of 72 phonemes, corresponding to:
 
 - 28 consonants
 - 24 geminated consonants
-- 6 vowels
-- 9 Tajweed phonemes
+- 8 vowels
+- 12 Tajweed phonemes
 
 All phonemes are configurable in [resources/base_phonemes.yaml](resources/base_phonemes.yaml) and [resources/rule_phonemes.yaml](resources/rule_phonemes.yaml).
 
 ### Consonants
-
-| **Letter**                | **Phoneme** | **Letter** | **Phoneme** | **Letter** | **Phoneme** | **Letter** | **Phoneme** |
-|:-------------------------:|:-----------:|:----------:|:-----------:|:----------:|:-----------:|:----------:|:-----------:|
-| أ / إ / ء / ؤ / ئ         | `ʔ`       | د          | `d` / `dd`         | ض          | `dˤ` / `dˤdˤ`        | ك          | `k` / `kk`         |
-| ب                         | `b` / `bb`         | ذ          | `ð` / `ðð`         | ط          | `tˤ` / `tˤtˤ`       | ل          | `l` / `ll`         |
-| ت                         | `t` / `tt`         | ر          | `r` / `rr`         | ظ          | `ðˤ` / `ðˤðˤ`        | م          | `m`        |
-| ث                         | `θ` / `θθ`         | ز          | `z` / `zz`         | ع          | `ʕ` / `ʕʕ`         | ن          | `n`        |
-| ج                         | `ʒ` / `ʒʒ`         | س          | `s` / `ss`         | غ          | `ɣ`        | هـ          | `h` / `hh`        |
-| ح                         | `ħ` / `ħħ`         | ش          | `ʃ` / `ʃʃ`         | ف          | `f` / `ff`         | و          | `w` / `ww`         |
-| خ                         | `x` / `xx`         | ص          | `sˤ` / `sˤsˤ`        | ق          | `q` / `qq`         | ي / ى          | `j` / `jj`         |
+| **Letter**               | **Phoneme**              | **Letter** | **Phoneme**               | **Letter** | **Phoneme**              | **Letter** | **Phoneme**              |
+|:------------------------:|:------------------------:|:----------:|:-------------------------:|:----------:|:------------------------:|:----------:|:------------------------:|
+| أ , إ , ء , ؤ , ئ        | `ʔ`                      | د          | `d` / `dd`                | ض          | `dˤ` / `dˤdˤ`            | ك          | `k` / `kk`              |
+| ب                        | `b` / `bb`               | ذ          | `ð` / `ðð`                | ط          | `tˤ` / `tˤtˤ`            | ل          | `l` / `ll` / `lˤlˤ`      |
+| ت                        | `t` / `tt`               | ر          | `r` / `rˤ` / `rr` / `rˤrˤ`| ظ          | `ðˤ` / `ðˤðˤ`            | م          | `m`                      |
+| ث                        | `θ` / `θθ`               | ز          | `z` / `zz`                | ع          | `ʕ` / `ʕʕ`               | ن          | `n`                      |
+| ج                        | `ʒ` / `ʒʒ`               | س          | `s` / `ss`                | غ          | `ɣ`                      | هـ         | `h` / `hh`               |
+| ح                        | `ħ` / `ħħ`               | ش          | `ʃ` / `ʃʃ`                | ف          | `f` / `ff`               | و          | `w` / `ww`               |
+| خ                        | `x` / `xx`               | ص          | `sˤ` / `sˤsˤ`             | ق          | `q` / `qq`               | ي , ى      | `j` / `jj`               |
 
 Gemination (shaddah) is represented by repeating the phoneme to create new distinct phonemes. Note that there is no gemination for `m` / `n` (modelled as Tajweed instead), and for `ʔ` / `ɣ` (do not exist in the Qurʾān).
 
 ### Vowels
 
 
-| **Vowel** | **Phoneme** |
-|:---------:|:-----------:|
-| َ         | `a`           |
-| ُ         | `u`           |
-| ِ         | `i`           |
-| ا         | `aː`          |
-| و         | `uː`          |
-| ي / ى         | `iː`          |
+| **Vowel**     | **Phoneme**   |
+|:-------------:|:-------------:|
+| َ              | `a` / `aˤ`    |
+| ُ              | `u`           |
+| ِ              | `i`           |
+| ا             | `a:` / `aˤ:`  |
+| و             | `u:`          |
+| ي , ى         | `i:`          |
 
 
 ### Tajweed Rules
 
-| **Rule**              | **Phoneme**           |
-|:----------------------:|:---------------------:|
-| Idgham                | `ñ` / `m̃` / `j̃` / `w̃`      |
-| Iqlab                 | `m̃`                    |
-| Ikhfaa (Light)        | `ŋ`                     |
-| Ikhfaa (Heavy)        | `ŋˤ`                   |
-| Ikhfaa (Shafawi)      | `ɱ`                     |
-| Qalqala (Sughra)      | `Q`                     |
-| Qalqala (Kubra)       | `QQ`                    |
-
+| **Rule**           | **Phoneme**                                              |
+|:------------------:|:---------------------------------------------------------|
+| Idgham             | `ñ` / `m̃` / `j̃` / `w̃`                                    |
+| Iqlab              | `m̃`                                                      |
+| Ikhfaa             | `ŋ`  (Light)<br> `ŋˤ` (Heavy)<br> `ɱ`  (Shafawi)        |
+| Qalqala            | `Q`  (Sughra)<br> `QQ` (Kubra)                          |
+| Tafkheem           | `lˤlˤ` (Lam in "Allah")<br> `rˤ` / `rˤrˤ` (Raa)                    |
 
 ## Usage
 
