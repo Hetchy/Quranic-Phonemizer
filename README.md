@@ -9,7 +9,7 @@ Potential use cases:
 - **Linguistic Analysis**: Study phonological patterns and Tajweed rule distributions across the Qurʾān
 - **Educational Tools**: Build interactive applications for teaching pronunciation and Tajweed
 
-In addition to the Python API, the phonemizer can be used interactively through the [website](https://quranic-phonemizer.com/).
+In addition to the Python API, the phonemizer can be used interactively through the [website](https://quranicphonemizer.com/).
 
 ## Table of Contents
 - [Phoneme Inventory](#phoneme-inventory)
