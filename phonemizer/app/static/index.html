@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Qurʾānic Phonemizer</title>
+  <link rel="stylesheet" href="/static/style.css?v=2" />
+</head>
+<body>
+  <div class="container">
+    <header style="text-align: center;">
+      <h1>Qurʾānic Phonemizer</h1>
+    </header>
+
+    <section class="controls">
+      <div class="panel">
+        <h2>Selection</h2>
+        <div class="row">
+          <label>Mode</label>
+          <div>
+            <label><input type="radio" name="mode" value="single" checked /> Single</label>
+            <label><input type="radio" name="mode" value="range" /> Range</label>
+          </div>
+        </div>
+
+        <div id="single-selectors">
+          <div class="row">
+            <label>Type</label>
+            <div>
+              <label><input type="radio" name="singleType" value="surah" checked /> Surah</label>
+              <label><input type="radio" name="singleType" value="verse" /> Verse</label>
+              <label><input type="radio" name="singleType" value="word" /> Word</label>
+            </div>
+          </div>
+
+          <div class="row">
+            <label>Surah</label>
+            <select id="single-surah"></select>
+          </div>
+
+          <div class="row single-verse hide">
+            <label>Verse</label>
+            <select id="single-verse"></select>
+          </div>
+
+          <div class="row single-word hide">
+            <label>Word</label>
+            <select id="single-word"></select>
+          </div>
+        </div>
+
+        <div id="range-selectors" class="hide">
+          <div class="row">
+            <label>Start</label>
+            <div class="row-inline">
+              <select id="range-start-kind">
+                <option value="surah">Surah</option>
+                <option value="verse">Verse</option>
+                <option value="word">Word</option>
+              </select>
+              <select id="range-start-surah"></select>
+              <select id="range-start-verse"></select>
+              <select id="range-start-word"></select>
+            </div>
+          </div>
+
+          <div class="row">
+            <label>End</label>
+            <div class="row-inline">
+              <select id="range-end-kind">
+                <option value="surah">Surah</option>
+                <option value="verse">Verse</option>
+                <option value="word">Word</option>
+              </select>
+              <select id="range-end-surah"></select>
+              <select id="range-end-verse"></select>
+              <select id="range-end-word"></select>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <label>Stops</label>
+          <div id="stops-box" class="stops"></div>
+        </div>
+
+        <div class="row">
+          <label>Newlines</label>
+          <div>
+            <label><input type="radio" name="newlineMode" value="verse" checked /> Per verse</label>
+            <label><input type="radio" name="newlineMode" value="word" /> Per word</label>
+          </div>
+        </div>
+
+        <div class="actions">
+          <div class="row-inline-actions">
+            <button id="go" type="button">Phonemize</button>
+            <select id="export-format">
+              <option value="json">JSON</option>
+              <option value="csv">CSV</option>
+            </select>
+            <select id="export-split">
+              <option value="word">Split: Word</option>
+              <option value="verse">Split: Verse</option>
+              <option value="both">Split: Both (JSON only)</option>
+            </select>
+            <button id="export" type="button">Export</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="outputs">
+      <div class="panel">
+        <h2 style="text-align: center;">Phonemes</h2>
+        <pre id="phonemes" class="scroll"></pre>
+      </div>
+      <div class="panel">
+        <h2 style="text-align: center;">Text</h2>
+        <pre id="text" class="scroll"></pre>
+      </div>
+    </section>
+
+    <footer style="text-align: center;">
+      <span class="muted">
+        GitHub: <a href="https://github.com/Hetchy/Quranic-Phonemizer" target="_blank" rel="noopener noreferrer">Hetchy/Quranic-Phonemizer</a>
+        • Contact: <a href="mailto:quranicphonemizer@gmail.com">quranicphonemizer@gmail.com</a>
+      </span>
+    </footer>
+  </div>
+
+  <div id="loading" class="loading hide" hidden>
+    <div class="spinner"></div>
+    <div>Phonemizing…</div>
+  </div>
+
+  <script src="/static/app.js?v=2"></script>
+  </body>
+  </html>
