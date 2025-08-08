@@ -308,7 +308,7 @@ print(res.phonemes_str(phoneme_sep="", word_sep=" ", verse_sep=""))
 
 ## Contributing
 
-If you find any issues or have feature suggestions, please feel free to email quranic-phonemizer@gmail.com, open an issue or submit a pull request. 
+If you find any issues or have feature suggestions, please feel free to email quranicphonemizer@gmail.com, open an issue or submit a pull request. 
 
 Particularly, support for other qira'at/riwayat would be very useful.
 
