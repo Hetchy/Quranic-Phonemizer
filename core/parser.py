@@ -30,6 +30,7 @@ from .symbols.letters.vowel import Alef
 from .symbols.letters.vowel import Waw
 from .symbols.letters.vowel import Yaa
 from .symbols.letters.lam import Lam
+from .symbols.letters.raa import Raa
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "resources"
 
@@ -39,6 +40,7 @@ LETTER_CLASSES: dict[str, type[LetterSymbol]] = {
     "م": Meem,
     "ن": Noon,
     "ة": TaaMarbuta,
+    "ر": Raa,
 
     "ق": Qalqala,
     "ط": Qalqala,

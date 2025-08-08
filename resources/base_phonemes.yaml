@@ -196,11 +196,6 @@ letters:
 
 
 diacritics:
-  # SUKUN:
-  #   cp: 0x06E1
-  #   char: "ۡ"
-  #   phoneme: ""
-
   SUKUN:
     cp: 0x0652
     char: "ْ"

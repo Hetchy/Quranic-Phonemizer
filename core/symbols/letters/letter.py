@@ -127,19 +127,20 @@ class LetterSymbol(Symbol):
         if not self.diacritic and not self.has_shaddah: # silent
             return []
         
-        return [self.apply_shaddah()]
+        return self.apply_shaddah()
 
-    def apply_shaddah(self) -> str:
+    def apply_shaddah(self, phoneme: Optional[str] = None) -> List[str]:
         if self.has_shaddah:
-            return self.base_phoneme + self.base_phoneme
+            base = phoneme or self.base_phoneme
+            return [base + base]
         
-        return self.base_phoneme
+        return [phoneme or self.base_phoneme]
 
     def phonemize_modifiers(self) -> List[str]:
         if self.has_tanween:
             return self.apply_tanween()
         
-        if self.has_fatha and self.is_heavy:
+        if self.has_fatha and (self.is_heavy or self.char == "ر"):
             return [self.diacritic.base_phoneme + "ˤ"]
 
         if not self.diacritic:
