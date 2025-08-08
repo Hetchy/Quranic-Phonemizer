@@ -288,8 +288,8 @@ def phonemize_and_save(
     # Phonemize the reference
     phonemizer = Phonemizer(db_path=db_path)
     res = phonemizer.phonemize(ref, stops=stops)
-    quran_text = res.text
-    phoneme_arrays = res.phonemes_nested()  # Use the method to get nested phonemes
+    quran_text = res.text()
+    phoneme_arrays = res.phonemes_list("word")
     
     # Load the database to get word texts
     db = load_db(db_path)

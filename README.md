@@ -91,13 +91,13 @@ from core.phonemizer import Phonemizer
 
 pm = Phonemizer()
 res = pm.phonemize("1:1")
-print(res.text)
+print(res.text())
 print(res.phonemes_str())
 ```
 
-بِسۡمِ ٱللَّهِ ٱلرَّحۡمَـٰنِ ٱلرَّحِيمِ ‏﴿١﴾‏
+بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ  (١) 
 
-bismi llahi rraħma:ni rraħi:m
+bismi llahi rˤrˤaˤħma:ni rˤrˤaˤħi:m
 
 ## Input References
 `phonemize()` accepts a variety of flexible formats to specify which part of the Qurʾān to phonemize:
@@ -118,25 +118,24 @@ bismi llahi rraħma:ni rraħi:m
 | Attribute           | Description                                                 |
 | ------------------- | ----------------------------------------------------------- |
 | `ref`               | The original reference string                               |
-| `text`              | The Qurʾānic text                                           |
-| `phonemes_nested()` | List of phoneme lists, one per word                         |
-| `phonemes_flat()`   | Flat list of all phonemes                                   |
+| `text()`            | The Qurʾānic text  |
+| `phonemes_list(split)` | Phoneme lists grouped by `split`: `"word"`, `"verse"`, or `"both"` |
 | `phonemes_str()`    | Full phoneme string, configurable with separators           |
-| `show_table()`      | Pandas DataFrame view: word locations, word text, phonemes  |
-| `save(path, fmt)`   | Save results to JSON or CSV                                 |
+| `show_table(split)` | Pandas DataFrame view, grouped by `split`                   |
+| `save(path, fmt, split)` | Save results to JSON or CSV |
 
 ### Output Example (Phonemes String)
 
 ```python
 res = pm.phonemize("112", stops=["verse"])
-print(res.text)
+print(res.text())
 print(res.phonemes_str(phoneme_sep=" ", word_sep=" | ", verse_sep="\n"))
 ```
-قُلۡ هُوَ ٱللَّهُ أَحَدٌ ‏﴿١﴾‏ ٱللَّهُ ٱلصَّمَدُ ‏﴿٢﴾‏ لَمۡ يَلِدۡ وَلَمۡ يُولَدۡ ‏﴿٣﴾‏ وَلَمۡ يَكُن لَّهُۥ كُفُوًا أَحَدُۢ ‏﴿٤﴾‏
+قُلْ هُوَ ٱللَّهُ أَحَدٌ  (١)  ٱللَّهُ ٱلصَّمَدُ  (٢)  لَمْ يَلِدْ وَلَمْ يُولَدْ  (٣)  وَلَمْ يَكُن لَّهُۥ كُفُوًا أَحَدٌۢ  (٤) 
 
-q u l | h u w a | ll a h u | ʔ a ħ a d QQ
+q u l | h u w a | lˤlˤ aˤ h u | ʔ a ħ a d QQ
 
-ʔ a ll a h u | sˤsˤ a m a d QQ
+ʔ a lˤlˤ aˤ h u | sˤsˤ aˤ m a d QQ
 
 l a m | j a l i d Q | w a l a m | j u: l a d QQ
 
@@ -164,7 +163,7 @@ df
     <tr>
       <th>0</th>
       <td>112:1:1</td>
-      <td>قُلۡ</td>
+      <td>قُلْ</td>
       <td>qul</td>
     </tr>
     <tr>
@@ -176,8 +175,8 @@ df
     <tr>
       <th>2</th>
       <td>112:1:3</td>
-      <td>ٱللَّهُ</td>
-      <td>llahu</td>
+      <td>ٱللَّهُ</td>
+      <td>lˤlˤaˤhu</td>
     </tr>
     <tr>
       <th>3</th>
@@ -188,43 +187,43 @@ df
     <tr>
       <th>4</th>
       <td>112:2:1</td>
-      <td>ٱللَّهُ</td>
-      <td>ʔallahu</td>
+      <td>ٱللَّهُ</td>
+      <td>ʔalˤlˤaˤhu</td>
     </tr>
     <tr>
       <th>5</th>
       <td>112:2:2</td>
-      <td>ٱلصَّمَدُ</td>
-      <td>sˤsˤamadQQ</td>
+      <td>ٱلصَّمَدُ</td>
+      <td>sˤsˤaˤmadQQ</td>
     </tr>
     <tr>
       <th>6</th>
       <td>112:3:1</td>
-      <td>لَمۡ</td>
+      <td>لَمْ</td>
       <td>lam</td>
     </tr>
     <tr>
       <th>7</th>
       <td>112:3:2</td>
-      <td>يَلِدۡ</td>
+      <td>يَلِدْ</td>
       <td>jalidQ</td>
     </tr>
     <tr>
       <th>8</th>
       <td>112:3:3</td>
-      <td>وَلَمۡ</td>
+      <td>وَلَمْ</td>
       <td>walam</td>
     </tr>
     <tr>
       <th>9</th>
       <td>112:3:4</td>
-      <td>يُولَدۡ</td>
+      <td>يُولَدْ</td>
       <td>ju:ladQQ</td>
     </tr>
     <tr>
       <th>10</th>
       <td>112:4:1</td>
-      <td>وَلَمۡ</td>
+      <td>وَلَمْ</td>
       <td>walam</td>
     </tr>
     <tr>
@@ -236,7 +235,7 @@ df
     <tr>
       <th>12</th>
       <td>112:4:3</td>
-      <td>لَّهُۥ</td>
+      <td>لَّهُۥ</td>
       <td>llahu:</td>
     </tr>
     <tr>
@@ -248,7 +247,7 @@ df
     <tr>
       <th>14</th>
       <td>112:4:5</td>
-      <td>أَحَدُۢ</td>
+      <td>أَحَدٌۢ</td>
       <td>ʔaħadQQ</td>
     </tr>
   </tbody>
@@ -271,7 +270,7 @@ Optionally, pass a `stops=[]` list to force word/verse segmentation:
 ```python
 ref = "68:33"
 res = pm.phonemize(ref)
-print(res.text)
+print(res.text())
 print(res.phonemes_str())
 
 res = pm.phonemize(ref, stops=["preferred_continue"])
@@ -283,28 +282,28 @@ print(res.phonemes_str())
 
 كَذٰلِكَ ٱلۡعَذَابُ‌ۖ وَلَعَذَابُ ٱلۡأَخِرَةِ أَكۡبَرُ‌ۚ لَوۡ كَانُواۡ يَعۡلَمُونَ ‏﴿٣٣﴾‏
 
-kaða:lika lʕaða:b`u` walaʕaða:bu lʔaxirati ʔakba`ru` law ka:nu: jaʕlamu:n
+kaða:lika lʕaða:b`u` walaʕaða:bu lʔa:xirˤaˤti ʔakba`rˤu` law ka:nu: jaʕlamu:n
 
-kaða:lika lʕaða:b`QQ` walaʕaða:bu lʔaxirati ʔakba`ru` law ka:nu: jaʕlamu:n
+kaða:lika lʕaða:b`QQ` walaʕaða:bu lʔa:xirˤaˤti ʔakba`rˤu` law ka:nu: jaʕlamu:n
 
-kaða:lika lʕaða:b`u` walaʕaða:bu lʔaxirati ʔakba`r` law ka:nu: jaʕlamu:n
+kaða:lika lʕaða:b`u` walaʕaða:bu lʔa:xirˤaˤti ʔakba`rˤ` law ka:nu: jaʕlamu:n
 
 
 ```python
 ref = "44:43 - 44:44"
 res = pm.phonemize(ref, stops=["verse"])
-print(res.text)
+print(res.text())
 print(res.phonemes_str(phoneme_sep="", word_sep=" ", verse_sep=""))
 
 res = pm.phonemize(ref, stops=[])
 print(res.phonemes_str(phoneme_sep="", word_sep=" ", verse_sep=""))
 ```
 
-إِنَّ شَجَرَتَ ٱلزَّقُّومِ ‏﴿٤٣﴾‏ طَعَامُ ٱلۡأَثِيمِ ‏﴿٤٤﴾‏
+إِنَّ شَجَرَتَ ٱلزَّقُّومِ  (٤٣)  طَعَامُ ٱلْأَثِيمِ  (٤٤) 
 
-ʔiña ʃaʒarata zzaqqu:`m` tˤaʕa:mu lʔaθi:m
+ʔiña ʃaʒarˤaˤta zzaqqu:`m` tˤaˤʕa:mu lʔaθi:m
 
-ʔiña ʃaʒarata zzaqqu:`mi` tˤaʕa:mu lʔaθi:m
+ʔiña ʃaʒarˤaˤta zzaqqu:m`i` tˤaˤʕa:mu lʔaθi:m
 
 ## Contributing
 
