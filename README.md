@@ -2,7 +2,14 @@
 
 A modular phonemizer (Grapheme to Phoneme converter) for the Qurʾān in the Hafs riwaya, converting text to phoneme sequences with support for Tajweed rules.
 
-The system uses a hierarchical pipeline that tokenizes text, applies contextual phoneme mappings, and processes Tajweed rules. It is highly extensible and customizable.
+Potential use cases:
+
+- **Speech Recognition**: Create training data for speech recognition and machine learning systems
+- **Text-to-Speech**: Develop accurate TTS systems for Qurʾānic Arabic
+- **Linguistic Analysis**: Study phonological patterns and Tajweed rule distributions across the Qurʾān
+- **Educational Tools**: Build interactive applications for teaching pronunciation and Tajweed
+
+In addition to the Python API, the phonemizer can be used interactively through the [website](https://quranic-phonemizer.com/).
 
 ## Table of Contents
 - [Phoneme Inventory](#phoneme-inventory)
@@ -51,7 +58,7 @@ Gemination (shaddah) is represented by repeating the phoneme to create new disti
 | َ              | `a` / `aˤ`    |
 | ُ              | `u`           |
 | ِ              | `i`           |
-| ا             | `a:` / `aˤ:`  |
+| ا , ى         | `a:` / `aˤ:`  |
 | و             | `u:`          |
 | ي , ى         | `i:`          |
 
@@ -60,11 +67,11 @@ Gemination (shaddah) is represented by repeating the phoneme to create new disti
 
 | **Rule**           | **Phoneme**                                              |
 |:------------------:|:---------------------------------------------------------|
-| Idgham             | `ñ` / `m̃` / `j̃` / `w̃`                                    |
 | Iqlab              | `m̃`                                                      |
-| Ikhfaa             | `ŋ`  (Light)<br> `ŋˤ` (Heavy)<br> `ɱ`  (Shafawi)        |
-| Qalqala            | `Q`  (Sughra)<br> `QQ` (Kubra)                          |
-| Tafkheem           | `lˤlˤ` (Lam in "Allah")<br> `rˤ` / `rˤrˤ` (Raa)                    |
+| Idgham             | `ñ` / `m̃` / `j̃` / `w̃`                                    |
+| Ikhfaa             | `ŋ`  (Light)<br> `ŋˤ` (Heavy)<br> `ɱ`  (Shafawi)         |
+| Qalqala            | `Q`  (Sughra)<br> `QQ` (Kubra)                           |
+| Tafkheem           | `lˤlˤ` (Lam in "Allah")<br> `rˤ` / `rˤrˤ` (Raa)          |
 
 ## Usage
 
@@ -93,25 +100,25 @@ print(res.phonemes_str())
 bismi llahi rraħma:ni rraħi:m
 
 ## Input References
-`phonemize` accepts a variety of flexible formats to specify which part of the Qurʾān to phonemize:
+`phonemize()` accepts a variety of flexible formats to specify which part of the Qurʾān to phonemize:
 
-| Format Example  | Meaning                                                |
-| --------------- | ------------------------------------------------------ |
-| `"1"`           | Entire chapter 1 (Al-Fātiħa)                       |
-| `"1:1"`         | Verse 1 of chapter 1                               |
-| `"1:1:1"`       | Word 1 of verse 1 of chapter 1                     |
-| `"1:1 - 1:4"`   | Verse range: 1:1 through 1:4                       |
-| `"1:1 - 1:2:2"` | From 1:1 to word 2 of 1:2                          |
-| `"1 - 2:2"`     | From entire chapter 1 through verse 2 of chapter 2 |
+| Format Example  | Meaning                                              |
+| --------------- | -----------------------------------------------------|
+| `"1"`           | Entire chapter 1                                     |
+| `"1:1"`         | Verse 1 of chapter 1                                 |
+| `"1:1:1"`       | Word 1 of verse 1 of chapter 1                       |
+| `"1:1 - 1:4"`   | Verse range: 1:1 through 1:4                         |
+| `"1:1 - 1:2:2"` | From 1:1 to word 2 of 1:2                            |
+| `"1 - 2:2"`     | From entire chapter 1 through verse 2 of chapter 2   |
 
 
 ## Outputs
-The phonemizer returns a `PhonemizeResult` object, which contains:
+`phonemize()` returns a `PhonemizeResult` object, containing:
 
 | Attribute           | Description                                                 |
 | ------------------- | ----------------------------------------------------------- |
 | `ref`               | The original reference string                               |
-| `text`              | The Qurʾānic text                                            |
+| `text`              | The Qurʾānic text                                           |
 | `phonemes_nested()` | List of phoneme lists, one per word                         |
 | `phonemes_flat()`   | Flat list of all phonemes                                   |
 | `phonemes_str()`    | Full phoneme string, configurable with separators           |
@@ -301,14 +308,23 @@ print(res.phonemes_str(phoneme_sep="", word_sep=" ", verse_sep=""))
 
 ## Contributing
 
-If you find any issues or have suggestions for improvements, please feel free to email me, open an issue or submit a pull request. 
+If you find any issues or have feature suggestions, please feel free to email quranic-phonemizer@gmail.com, open an issue or submit a pull request. 
 
-The following features are yet to be implemented:
-- Lam/Raa Tafkheem & Tarqeeq rules
-- Support other qira'at/riwayat
+Particularly, support for other qira'at/riwayat would be very useful.
 
 ## Credits
 
-The project makes use of a modified version of the Quranic Universal Library's (QUL) [Hafs script with Tajweed](https://qul.tarteel.ai/resources/quran-script/58).
+The project makes use of the [Quranic Universal Library's (QUL) Hafs script](https://qul.tarteel.ai/resources/quran-script/312).
 
 ## Citing
+
+If you use this phonemizer in your work, please cite it as follows:
+
+```bibtex
+@misc{phonemizer,
+  author = {Ahmed Ibrahim},
+  title = {Quranic Phonemizer},
+  howpublished = {\url{https://github.com/Hetchy/Quranic-Phonemizer}},
+  year = {2025}
+}
+```
