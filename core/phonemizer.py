@@ -66,10 +66,6 @@ class Phonemizer:
         if invalid_stops:
             raise ValueError(f"Invalid stop types: {invalid_stops}. Valid stops are: {self.valid_stops}")
 
-        # Default segmentation is per-verse if not specified
-        if stops == []:
-            stops = ["verse"]
-
         words = self.parser.load_words(ref, self.db_path, stop_types=stops)
         for word in words:
             word.phonemize()
@@ -83,17 +79,6 @@ class Phonemizer:
         return PhonemizeResult(ref, " ".join(w.text for w in words), all_phonemes, words, stops)
 
     def _validate_refs(self, ref: str) -> None:
-        """Validate a reference string against surah/ayah/word bounds from surah_info.json.
-
-        Supported examples:
-        - "1"                  → whole surah
-        - "1:1"               → a verse
-        - "1:1:1"             → a word
-        - "1:1 - 1:4"         → verse range within a surah
-        - "1 - 2:2"           → cross-surah range
-        - "44:43 - 44:44"     → explicit verse range
-        Whitespace around '-' is allowed.
-        """
         ref = ref.strip()
 
         def parse_endpoint(text: str) -> tuple[int, int | None, int | None]:
@@ -141,7 +126,6 @@ class Phonemizer:
 
 @dataclass(slots=True)
 class PhonemizeResult:
-    """Result data class for phonemization operations."""
     ref: str
     _text: str                     
     _nested: List[List[str]]       

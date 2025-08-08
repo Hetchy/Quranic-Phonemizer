@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 OtherSymbol class for the Quranic phonemizer.
 """

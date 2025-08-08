@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 DiacriticSymbol class for the Quranic phonemizer.
 """

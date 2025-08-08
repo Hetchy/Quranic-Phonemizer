@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 StopSymbol class for the Quranic phonemizer.
 """

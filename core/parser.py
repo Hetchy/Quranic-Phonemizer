@@ -13,7 +13,6 @@ import re
 from .loader import load_db, keys_for_reference
 from .location import Location
 from .word import Word
-from .symbols.symbol import Symbol
 from .symbols.letters.letter import LetterSymbol
 from .symbols.diacritic import DiacriticSymbol
 from .symbols.extension import ExtensionSymbol
