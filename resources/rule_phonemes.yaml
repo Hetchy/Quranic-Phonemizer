@@ -15,9 +15,12 @@ iqlab:
   phoneme: "m̃"
 
 qalqala:
-  weak: "Q"
-  # strong: "Q"
-  strong: "QQ"
+  sughra: "Q"
+  # kubra: "Q"
+  kubra: "QQ"
 
 lam_heavy:
   phoneme: "lˤlˤ"
+
+raa_heavy:
+  phoneme: "rˤ"

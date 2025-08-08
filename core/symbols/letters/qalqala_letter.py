@@ -7,10 +7,10 @@ class Qalqala(LetterSymbol):
         if self.has_sukun:
             # Qalqala Kubra
             if self.is_last and self.parent_word.is_stopping:
-                return [self.apply_shaddah(), get_rule_phoneme("qalqala", "strong")]
+                return self.apply_shaddah() + [get_rule_phoneme("qalqala", "kubra")]
 
             # Qalqala Sughra
-            return [self.apply_shaddah(), get_rule_phoneme("qalqala", "weak")]
+            return self.apply_shaddah() + [get_rule_phoneme("qalqala", "sughra")]
 
         return super().phonemize_letter()
     
