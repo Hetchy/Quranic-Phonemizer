@@ -323,7 +323,7 @@ If you use this phonemizer in your work, please cite it as follows:
 @misc{ibrahim2025quranicphonemizer,
   author = {Ahmed Ibrahim},
   title = {Quranic Phonemizer},
-  year = {2025}
+  year = {2025},
   howpublished = {\url{https://github.com/Hetchy/Quranic-Phonemizer}},
 }
 ```
