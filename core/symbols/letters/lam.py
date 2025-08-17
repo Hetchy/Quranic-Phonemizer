@@ -1,7 +1,7 @@
-from typing import List, ClassVar, Dict
+from typing import List
 from core.phoneme_registry import get_rule_phoneme
-from core.location import Location
 from .letter import LetterSymbol
+from core.symbols.extension import ExtensionSymbol
 
 class Lam(LetterSymbol):
     ALLAH_LETTER_PATTERNS = {
@@ -28,30 +28,34 @@ class Lam(LetterSymbol):
         super().__init__(*args, **kwargs)
     
     def phonemize_letter(self) -> List[str]:        
-        if self.is_heavy:
-            return [get_rule_phoneme("lam_heavy", "phoneme")]
+        if self._word_contains_Allah():
+            self.extension = ExtensionSymbol("DAGGER_ALEF", "", None)
+            if self.is_heavy:
+                return [get_rule_phoneme("lam_heavy", "phoneme")]
 
         return super().phonemize_letter()
 
     @property
     def is_heavy(self) -> bool:
-        if not (self.has_shaddah and not self.is_first):
+        return self._word_contains_Allah() and self.prev_phoneme() in ["a", "a:", "u"]
+    
+    def _word_contains_Allah(self) -> bool:
+        if not self.has_shaddah or self.is_first:
             return False
 
         word_letters = [letter.char for letter in self.parent_word.letters]
         for pattern_letters in self.ALLAH_LETTER_PATTERNS.values():
             if self._letters_match(word_letters, pattern_letters):
-                if self.prev_phoneme() in ["a", "a:", "u"]:
-                    return True
+                return True
         
         return False
-    
+
     def _letters_match(self, word_letters: List[str], pattern_letters: List[str]) -> bool:
         if len(word_letters) != len(pattern_letters):
             return False
             
-        for word_char, pattern_char in zip(word_letters, pattern_letters):
-            if word_char != pattern_char:
+        for word_letter, pattern_letter in zip(word_letters, pattern_letters):
+            if word_letter != pattern_letter:
                 return False
                 
         return True

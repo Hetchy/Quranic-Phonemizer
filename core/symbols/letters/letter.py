@@ -115,7 +115,7 @@ class LetterSymbol(Symbol):
         if self.is_last and self.parent_word.is_stopping:
             if self.char == "ء" and self.has_fathatan:
                 self.diacritic = DiacriticSymbol("FATHA", "َ", "a")
-                self.extension = ExtensionSymbol("", "", None) # represents an alef
+                self.extend() # represents an alef
             elif self.char in ["ى", "ا"]:
                 self.diacritic = None
             else:
@@ -138,19 +138,22 @@ class LetterSymbol(Symbol):
         return [phoneme or self.base_phoneme]
 
     def phonemize_modifiers(self) -> List[str]:
-        if self.has_tanween:
-            return self.apply_tanween()
-        
-        if self.has_fatha and (self.is_heavy or self.char == "ر"):
-            return [self.diacritic.base_phoneme + "ˤ"]
-
         if not self.diacritic:
             return []
 
         if self.has_sukun:
             return []
-            
-        return [self.diacritic.base_phoneme + (":" if self.extension else "")]
+        
+        if self.has_tanween:
+            return self.apply_tanween()
+
+        result = self.diacritic.base_phoneme
+        if self.has_fatha and (self.is_heavy or self.char == "ر"):
+            result += "ˤ"
+        if self.extension:
+            result += ":"
+
+        return [result]
 
     def apply_tanween(self) -> List[str]:
         # split tanween
@@ -198,6 +201,10 @@ class LetterSymbol(Symbol):
     def has_symbol(self, symbol_name: str) -> bool:
         return any(symbol.name == symbol_name for symbol in self.other_symbols)
         
+    def extend(self):
+        if not self.extension:
+            self.extension = ExtensionSymbol("", "", None)
+
     @property
     def is_first(self) -> bool:
         return self.index_in_word == 0
