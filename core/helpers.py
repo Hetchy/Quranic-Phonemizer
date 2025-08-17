@@ -257,12 +257,11 @@ def save_verses_with_all_rules(
         out_path = os.path.join(output_dir, f"{rule}.md")
         with open(out_path, "w", encoding="utf-8") as out_f:
             out_f.write(html if html else "")
-
 def phonemize_and_save(
     ref: str,
+    output_path: str | Path,
     *,
     db_path: str | Path = "resources/Quran.json",
-    output_dir: str | Path = "data/phonemized",
     stops: List[str] = [],
 ) -> None:
     """
@@ -277,10 +276,12 @@ def phonemize_and_save(
     ----------
     ref : str
         Qurʾānic reference (e.g. "1:1", "2:282", "1-114").
+    output_path : str | Path
+        Full path to save the phonemized output file
     db_path : str | Path
         Path to the Qurʾān word-by-word JSON.
-    output_dir : str | Path
-        Directory to save the phonemized output
+    stops : List[str]
+        List of stop types to mark as boundaries.
     """
     # Import here to avoid circular imports
     from . import Phonemizer
@@ -296,7 +297,7 @@ def phonemize_and_save(
     keys = keys_for_reference(ref, db)
     
     # Create output directory if it doesn't exist
-    Path(output_dir).mkdir(parents=True, exist_ok=True)
+    Path(output_path).parent.mkdir(parents=True, exist_ok=True)
     
     # Helper functions for formatting
     def visual_width(text):
@@ -345,14 +346,10 @@ def phonemize_and_save(
             phoneme_index += 1
     
     # Save to file
-    # Clean the reference for use as filename (replace problematic characters)
-    safe_ref = re.sub(r'[<>:"/\\|?*]', '_', ref)
-    output_file = Path(output_dir) / f"{safe_ref}.txt"
-    
-    with open(output_file, 'w', encoding='utf-8') as f:
+    with open(output_path, 'w', encoding='utf-8') as f:
         f.write('\n'.join(output_lines))
     
-    print(f"Phonemized output saved to: {output_file}")
+    print(f"Phonemized output saved to: {output_path}")
 
 
 def compare_files(

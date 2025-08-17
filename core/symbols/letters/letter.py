@@ -115,6 +115,7 @@ class LetterSymbol(Symbol):
         if self.is_last and self.parent_word.is_stopping:
             if self.char == "ء" and self.has_fathatan:
                 self.diacritic = DiacriticSymbol("FATHA", "َ", "a")
+                self.extension = ExtensionSymbol("", "", None) # represents an alef
             elif self.char in ["ى", "ا"]:
                 self.diacritic = None
             else:
