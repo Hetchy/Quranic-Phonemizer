@@ -89,15 +89,15 @@ def index() -> FileResponse:
 @app.get("/favicon.ico")
 def favicon_ico() -> FileResponse:
     # Many browsers request /favicon.ico; serve the PNG icon
-    alt = APP_DIR / "@icon.png"
-    path = alt if alt.exists() else (APP_DIR / "icon.png")
+    alt = APP_DIR / "static" / "icon.png"
+    path = alt if alt.exists() else (APP_DIR / "static" / "icon.png")
     return FileResponse(str(path), media_type="image/png")
 
 
 @app.get("/icon.png")
 def icon_png() -> FileResponse:
-    alt = APP_DIR / "@icon.png"
-    path = alt if alt.exists() else (APP_DIR / "icon.png")
+    alt = APP_DIR / "static" / "icon.png"
+    path = alt if alt.exists() else (APP_DIR / "static" / "icon.png")
     return FileResponse(str(path), media_type="image/png")
 
 
