@@ -97,7 +97,7 @@ print(res.phonemes_str())
 
 بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ  (١) 
 
-bismi llahi rˤrˤaˤħma:ni rˤrˤaˤħi:m
+bismi lla:hi rˤrˤaˤħma:ni rˤrˤaˤħi:m
 
 ## Input References
 `phonemize()` accepts a variety of flexible formats to specify which part of the Qurʾān to phonemize:
@@ -133,9 +133,9 @@ print(res.phonemes_str(phoneme_sep=" ", word_sep=" | ", verse_sep="\n"))
 ```
 قُلْ هُوَ ٱللَّهُ أَحَدٌ  (١)  ٱللَّهُ ٱلصَّمَدُ  (٢)  لَمْ يَلِدْ وَلَمْ يُولَدْ  (٣)  وَلَمْ يَكُن لَّهُۥ كُفُوًا أَحَدٌۢ  (٤) 
 
-q u l | h u w a | lˤlˤ aˤ h u | ʔ a ħ a d QQ
+q u l | h u w a | lˤlˤ aˤ: h u | ʔ a ħ a d QQ
 
-ʔ a lˤlˤ aˤ h u | sˤsˤ aˤ m a d QQ
+ʔ a lˤlˤ aˤ: h u | sˤsˤ aˤ m a d QQ
 
 l a m | j a l i d Q | w a l a m | j u: l a d QQ
 
@@ -176,7 +176,7 @@ df
       <th>2</th>
       <td>112:1:3</td>
       <td>ٱللَّهُ</td>
-      <td>lˤlˤaˤhu</td>
+      <td>lˤlˤaˤ:hu</td>
     </tr>
     <tr>
       <th>3</th>
@@ -188,7 +188,7 @@ df
       <th>4</th>
       <td>112:2:1</td>
       <td>ٱللَّهُ</td>
-      <td>ʔalˤlˤaˤhu</td>
+      <td>ʔalˤlˤaˤ:hu</td>
     </tr>
     <tr>
       <th>5</th>
