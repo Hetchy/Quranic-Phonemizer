@@ -85,6 +85,22 @@ def index() -> FileResponse:
     return FileResponse(str(APP_DIR / "static" / "index.html"))
 
 
+# Favicon endpoints (serve PNG as favicon)
+@app.get("/favicon.ico")
+def favicon_ico() -> FileResponse:
+    # Many browsers request /favicon.ico; serve the PNG icon
+    alt = APP_DIR / "@icon.png"
+    path = alt if alt.exists() else (APP_DIR / "icon.png")
+    return FileResponse(str(path), media_type="image/png")
+
+
+@app.get("/icon.png")
+def icon_png() -> FileResponse:
+    alt = APP_DIR / "@icon.png"
+    path = alt if alt.exists() else (APP_DIR / "icon.png")
+    return FileResponse(str(path), media_type="image/png")
+
+
 @app.get("/api/meta")
 def get_meta() -> Dict[str, Any]:
     # Build surah list with id and names
