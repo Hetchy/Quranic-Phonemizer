@@ -1,6 +1,6 @@
 # Qurʾānic Phonemizer
 
-A modular phonemizer (Grapheme to Phoneme converter) for the Qurʾān in the Hafs riwaya, converting text to phoneme sequences with support for Tajweed rules.
+A custom phonemizer (Grapheme to Phoneme converter) for the Qurʾān in the Hafs riwaya, converting text to phoneme sequences with support for Tajweed rules.
 
 Potential use cases:
 
@@ -69,7 +69,7 @@ Gemination (shaddah) is represented by repeating the phoneme to create new disti
 |:------------------:|:---------------------------------------------------------|
 | Iqlab              | `m̃`                                                      |
 | Idgham             | `ñ` / `m̃` / `j̃` / `w̃`                                    |
-| Ikhfaa             | `ŋ`  (Light)<br> `ŋˤ` (Heavy)<br> `ɱ`  (Shafawi)         |
+| Ikhfaa             | `ŋ`  (Light / Shafawi)<br> `ŋˤ` (Heavy)      |
 | Qalqala            | `Q`  (Sughra)<br> `QQ` (Kubra)                           |
 | Tafkheem           | `lˤlˤ` (Lam in "Allah")<br> `rˤ` / `rˤrˤ` (Raa)          |
 
