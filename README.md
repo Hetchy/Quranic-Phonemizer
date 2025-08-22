@@ -28,12 +28,12 @@ In addition to the Python API, the phonemizer can be used interactively: [qurani
 
 ## Phoneme Inventory
 
-The phoneme inventory uses the standard International Phonetic Alphabet (IPA) [Arabic phonemes](https://en.wikipedia.org/wiki/Help%3AIPA/Arabic?utm_source=chatgpt.com) alongside custom phonemes for Tajweed rules. There is a total of 72 phonemes, corresponding to:
+The phoneme inventory uses the standard International Phonetic Alphabet (IPA) [Arabic phonemes](https://en.wikipedia.org/wiki/Help%3AIPA/Arabic?utm_source=chatgpt.com) alongside custom phonemes for Tajweed rules. There is a total of 71 phonemes, corresponding to:
 
 - 28 consonants
 - 24 geminated consonants
 - 8 vowels
-- 12 Tajweed phonemes
+- 11 Tajweed phonemes
 
 All phonemes are configurable in [resources/base_phonemes.yaml](resources/base_phonemes.yaml) and [resources/rule_phonemes.yaml](resources/rule_phonemes.yaml).
 
