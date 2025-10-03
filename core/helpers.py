@@ -288,7 +288,7 @@ def phonemize_and_save(
     
     # Phonemize the reference
     phonemizer = Phonemizer(db_path=db_path)
-    res = phonemizer.phonemize(ref, stops=stops)
+    res = phonemizer.phonemize(ref=ref, stops=stops)
     quran_text = res.text()
     phoneme_arrays = res.phonemes_list("word")
     

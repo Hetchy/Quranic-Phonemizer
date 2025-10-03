@@ -8,6 +8,7 @@ from pathlib import Path
 
 from .parser import Parser, load_symbol_mappings
 from .word import Word
+from .text_matcher import TextMatcher
 
 # Data directory
 DATA_DIR = Path(__file__).resolve().parent.parent / "resources"
@@ -23,6 +24,8 @@ class Phonemizer:
         self.map_path = str(map_path)
         symbol_mappings = load_symbol_mappings(map_path)
         self.parser = Parser(symbol_mappings, special_words_path)
+        # Initialize text matcher for text-based references
+        self.text_matcher = TextMatcher(db_path, symbol_mappings)
         # Load surah/verse/word boundaries for reference validation
         with (DATA_DIR / "surah_info.json").open("r", encoding="utf-8") as fh:
             self._surah_info: dict[str, dict] = json.load(fh)
@@ -35,10 +38,132 @@ class Phonemizer:
             "prohibited_stop",
         }
 
+    def _is_text_reference(self, ref: str) -> bool:
+        """
+        Determine if the reference is a text-based reference vs traditional format.
+        
+        Traditional formats:
+        - "1", "1:2", "1:2:3" (single reference)  
+        - "1:2-1:5", "1:2:3-1:2:7" (range reference)
+        
+        Text references contain Arabic characters.
+        
+        Parameters
+        ----------
+        ref : str
+            Reference string to check
+            
+        Returns
+        -------
+        bool
+            True if text reference, False if traditional format
+        """
+        ref = ref.strip()
+        
+        # Check for traditional format patterns
+        # Pattern: numbers, colons, and optional single dash for ranges
+        traditional_pattern = r'^[\d:-]+$'
+        
+        if re.match(traditional_pattern, ref):
+            # Additional validation: ensure it's a valid traditional format
+            try:
+                # Try parsing as traditional reference
+                if "-" in ref:
+                    left, right = [p.strip() for p in ref.split("-", 1)]
+                    self._parse_traditional_endpoint(left)
+                    self._parse_traditional_endpoint(right)
+                else:
+                    self._parse_traditional_endpoint(ref)
+                return False  # Successfully parsed as traditional
+            except:
+                pass  # Fall through to text reference
+        
+        # If not traditional format, assume it's text
+        return True
+    
+    def _parse_traditional_endpoint(self, text: str) -> tuple[int, int | None, int | None]:
+        """Helper to parse traditional reference endpoints."""
+        parts = text.strip().split(":")
+        if not 1 <= len(parts) <= 3:
+            raise ValueError(f"Invalid reference endpoint: '{text}'")
+        try:
+            surah = int(parts[0])
+            verse = int(parts[1]) if len(parts) >= 2 and parts[1] != "" else None
+            word = int(parts[2]) if len(parts) == 3 and parts[2] != "" else None
+        except ValueError:
+            raise ValueError(f"Reference components must be integers: '{text}'")
+        return surah, verse, word
+    
+    def _is_verse_format(self, ref: str) -> bool:
+        """Check if reference is in verse format (e.g., '1:2', not ranges or chapter-only)."""
+        ref = ref.strip()
+        if "-" in ref:
+            return False  # Range format
+        
+        parts = ref.split(":")
+        return len(parts) == 2  # Exactly surah:verse format
+    
+    def _expand_verse_scope(self, ref: str) -> str:
+        """
+        Expand a verse reference to include neighboring verses.
+        For ref='2:5', returns scope including verses 2:4, 2:5, and 2:6.
+        Handles chapter boundaries appropriately.
+        """
+        if not self._is_verse_format(ref):
+            return ref  # Not a verse format, return as-is
+        
+        surah, verse, _ = self._parse_traditional_endpoint(ref)
+        
+        # Get surah info to check boundaries
+        surah_key = str(surah)
+        if surah_key not in self._surah_info:
+            return ref  # Invalid surah, return as-is
+        
+        surah_info = self._surah_info[surah_key]
+        max_verses = int(surah_info["num_verses"])
+        
+        # Calculate expanded range
+        verse_before = None
+        verse_after = None
+        
+        # Handle verse before
+        if verse > 1:
+            verse_before = f"{surah}:{verse - 1}"
+        elif surah > 1:
+            # First verse of chapter, get last verse of previous chapter
+            prev_surah_key = str(surah - 1)
+            if prev_surah_key in self._surah_info:
+                prev_max_verses = int(self._surah_info[prev_surah_key]["num_verses"])
+                verse_before = f"{surah - 1}:{prev_max_verses}"
+        
+        # Handle verse after  
+        if verse < max_verses:
+            verse_after = f"{surah}:{verse + 1}"
+        elif surah < 114:  # Last surah is 114
+            # Last verse of chapter, get first verse of next chapter
+            next_surah_key = str(surah + 1)
+            if next_surah_key in self._surah_info:
+                verse_after = f"{surah + 1}:1"
+        
+        # Build expanded scope
+        scope_parts = []
+        if verse_before:
+            scope_parts.append(verse_before)
+        scope_parts.append(ref)  # Original verse
+        if verse_after:
+            scope_parts.append(verse_after)
+        
+        # Create range format
+        if len(scope_parts) == 1:
+            return scope_parts[0]
+        else:
+            return f"{scope_parts[0]}-{scope_parts[-1]}"
+
     def phonemize(
         self,
-        ref: str,
+        ref: str = None,
         *,
+        ref_text: str = None,
         stops: List[str] = [],
         debug: bool = False,
     ) -> PhonemizeResult:
@@ -47,8 +172,11 @@ class Phonemizer:
         
         Parameters
         ----------
-        ref : str
-            Qurʾānic reference.
+        ref : str, optional
+            Qurʾānic reference in traditional format (e.g. "1:1", "1:1-1:3").
+            If provided with ref_text, limits the search scope to this reference.
+        ref_text : str, optional
+            Arabic text to search for. Either ref or ref_text must be provided.
         stops : List[str], default []
             List of stop types to mark as boundaries.
         debug : bool, default False
@@ -57,8 +185,80 @@ class Phonemizer:
         Returns
         -------
         PhonemizeResult
-            Object containing reference, text and phonemes.
+            Object containing reference, text and phonemes. For text-based matches,
+            includes match_score attribute. If no good match is found, phonemes_str()
+            will return None.
+            
+        Raises
+        ------
+        ValueError
+            If neither ref nor ref_text is provided, or if both are provided
+            but ref is not a traditional reference format.
         """
+        # Validation: either ref or ref_text must be provided
+        if ref is None and ref_text is None:
+            raise ValueError("Either 'ref' or 'ref_text' must be provided")
+        
+        # Handle different parameter combinations
+        match_score = None  # Track match score for text-based searches
+        failed_match = False  # Track if text search failed due to low score
+        
+        if ref_text is not None:
+            if ref is not None:
+                # Both ref and ref_text provided - validate ref is traditional format
+                if self._is_text_reference(ref):
+                    raise ValueError("When both 'ref' and 'ref_text' are provided, 'ref' must be a traditional reference format (e.g., '2', '2:1', '2:1-2:5')")
+                
+                # Scoped text search: search for ref_text within the specified ref scope
+                # Expand scope to include neighboring verses if ref is in verse format
+                expanded_ref = self._expand_verse_scope(ref)
+                if debug:
+                    if expanded_ref != ref:
+                        print(f"Expanded scope from '{ref}' to '{expanded_ref}' to include neighboring verses")
+                    print(f"Searching for text '{ref_text}' within scope '{expanded_ref}'")
+                ref_result, match_score = self.text_matcher.find_matching_range_scoped_with_score_space_robust(ref_text, expanded_ref)
+                if ref_result is None:
+                    failed_match = True
+                    if debug:
+                        print(f"No good match found within scope '{expanded_ref}' (score: {match_score:.3f}) - will return null phonemes")
+                else:
+                    ref = ref_result
+                    if debug:
+                        print(f"Found scoped match: {ref} (score: {match_score:.3f})")
+            else:
+                # Only ref_text provided - search entire database
+                if debug:
+                    print(f"Searching for text '{ref_text}' in entire database")
+                ref_result, match_score = self.text_matcher.find_matching_range_with_score(ref_text)
+                if ref_result is None:
+                    failed_match = True
+                    if debug:
+                        print(f"No good match found in database (score: {match_score:.3f}) - will return null phonemes")
+                else:
+                    ref = ref_result
+                    if debug:
+                        print(f"Found match: {ref} (score: {match_score:.3f})")
+        else:
+            # Only ref provided - handle as before
+            original_ref = ref
+            if self._is_text_reference(ref):
+                if debug:
+                    print(f"Detected text reference: {ref}")
+                # Convert text to traditional reference format
+                ref_result, match_score = self.text_matcher.find_matching_range_with_score(ref)
+                if ref_result is None:
+                    failed_match = True
+                    if debug:
+                        print(f"No good match found for text (score: {match_score:.3f}) - will return null phonemes")
+                else:
+                    ref = ref_result
+                    if debug:
+                        print(f"Converted to traditional reference: {ref} (score: {match_score:.3f})")
+        
+        # Handle failed matches - return special result that will have null phonemes
+        if failed_match:
+            return PhonemizeResult("", "", [], [], stops, match_score)
+        
         # Validate reference against known bounds
         self._validate_refs(ref)
 
@@ -76,7 +276,7 @@ class Phonemizer:
             if debug:
                 print(word.debug_print())
 
-        return PhonemizeResult(ref, " ".join(w.text for w in words), all_phonemes, words, stops)
+        return PhonemizeResult(ref, " ".join(w.text for w in words), all_phonemes, words, stops, match_score)
 
     def _validate_refs(self, ref: str) -> None:
         ref = ref.strip()
@@ -131,6 +331,7 @@ class PhonemizeResult:
     _nested: List[List[str]]       
     _words: List[Word]
     stops: List[str]
+    match_score: float = None  # Score for text-based matches (None for traditional refs)
 
     # ---  convenience views  ---------------------------------
     def phonemes_list(self, split: Literal["word", "verse", "both"] = "word") -> list:
@@ -217,14 +418,19 @@ class PhonemizeResult:
         phoneme_sep: str = "",
         word_sep:    str = " ",
         verse_sep:   str = "\n",
-    ) -> str:
+    ) -> str | None:
         """
         Flatten phonemes to a single string.
 
         • phoneme_sep – between adjacent phonemes
         • word_sep    – between words  (falls back to phoneme_sep if blank)
         • verse_sep   – between verses (falls back to word_sep → phoneme_sep if blank)
+        
+        Returns None if no words/phonemes are available (e.g., failed text match).
         """
+        # Return None if no words available (failed text match)
+        if not self._words:
+            return None
         parts: list[str] = []
         prev_verse: str | None = None
         prev_word:  str | None = None
