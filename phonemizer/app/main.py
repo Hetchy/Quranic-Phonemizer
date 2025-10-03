@@ -31,7 +31,8 @@ RESOURCES_DIR = _find_resources_dir(APP_DIR)
 
 
 class PhonemizeRequest(BaseModel):
-    ref: str
+    ref: str = None
+    ref_text: str = None
     stops: List[str] = []
     newline_mode: str = "verse"  # "verse" | "word"
 
@@ -144,6 +145,11 @@ def api_phonemize(body: PhonemizeRequest, request: Request) -> Dict[str, Any]:
     # Require explicit user action header to avoid accidental auto-requests from preloaders
     if request.headers.get("x-phonemize-intent") != "1":
         raise HTTPException(status_code=400, detail="Phonemize requires user action")
+    
+    # Validate that either ref or ref_text is provided
+    if body.ref is None and body.ref_text is None:
+        raise HTTPException(status_code=400, detail="Either 'ref' or 'ref_text' must be provided")
+    
     # Validate newline mode
     if body.newline_mode not in {"verse", "word"}:
         raise HTTPException(status_code=400, detail="newline_mode must be 'verse' or 'word'")
@@ -154,7 +160,7 @@ def api_phonemize(body: PhonemizeRequest, request: Request) -> Dict[str, Any]:
         raise HTTPException(status_code=400, detail=f"Invalid stops: {sorted(invalid)}")
 
     try:
-        result = pm.phonemize(body.ref, stops=body.stops)
+        result = pm.phonemize(ref=body.ref, ref_text=body.ref_text, stops=body.stops)
     except Exception as exc:  # pragma: no cover (thin API surface)
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
@@ -165,13 +171,19 @@ def api_phonemize(body: PhonemizeRequest, request: Request) -> Dict[str, Any]:
     else:  # word
         phonemes_text = result.phonemes_str(phoneme_sep=" ", word_sep="\n", verse_sep="\n")
 
-    return {
+    response = {
         "ref": result.ref,
         "text": result.text(),
-        "phonemes": phonemes_text,
+        "phonemes": phonemes_text,  # This can be None for failed matches
         # verses → words → phonemes
         "verses_words": result.phonemes_list("both"),
     }
+    
+    # Include match score for text-based searches
+    if result.match_score is not None:
+        response["match_score"] = result.match_score
+    
+    return response
 
 
 def _sanitize_filename(name: str) -> str:
