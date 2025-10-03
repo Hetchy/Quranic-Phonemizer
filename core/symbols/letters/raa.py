@@ -29,7 +29,7 @@ class Raa(LetterSymbol):
                     case "FATHA" | "DAMMA":
                         return self._heavy_phoneme()
                     case "KASRA":
-                        return self._heavy_phoneme() if nxt.is_heavy else self._light_phoneme()
+                        return self._heavy_phoneme() if nxt and nxt.is_heavy else self._light_phoneme()
                     
                     case "SUKUN": # check prev prev letter
                         match prev2.diacritic.name:
