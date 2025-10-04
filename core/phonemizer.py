@@ -93,71 +93,6 @@ class Phonemizer:
         except ValueError:
             raise ValueError(f"Reference components must be integers: '{text}'")
         return surah, verse, word
-    
-    def _is_verse_format(self, ref: str) -> bool:
-        """Check if reference is in verse format (e.g., '1:2', not ranges or chapter-only)."""
-        ref = ref.strip()
-        if "-" in ref:
-            return False  # Range format
-        
-        parts = ref.split(":")
-        return len(parts) == 2  # Exactly surah:verse format
-    
-    def _expand_verse_scope(self, ref: str) -> str:
-        """
-        Expand a verse reference to include neighboring verses.
-        For ref='2:5', returns scope including verses 2:4, 2:5, and 2:6.
-        Handles chapter boundaries appropriately.
-        """
-        if not self._is_verse_format(ref):
-            return ref  # Not a verse format, return as-is
-        
-        surah, verse, _ = self._parse_traditional_endpoint(ref)
-        
-        # Get surah info to check boundaries
-        surah_key = str(surah)
-        if surah_key not in self._surah_info:
-            return ref  # Invalid surah, return as-is
-        
-        surah_info = self._surah_info[surah_key]
-        max_verses = int(surah_info["num_verses"])
-        
-        # Calculate expanded range
-        verse_before = None
-        verse_after = None
-        
-        # Handle verse before
-        if verse > 1:
-            verse_before = f"{surah}:{verse - 1}"
-        elif surah > 1:
-            # First verse of chapter, get last verse of previous chapter
-            prev_surah_key = str(surah - 1)
-            if prev_surah_key in self._surah_info:
-                prev_max_verses = int(self._surah_info[prev_surah_key]["num_verses"])
-                verse_before = f"{surah - 1}:{prev_max_verses}"
-        
-        # Handle verse after  
-        if verse < max_verses:
-            verse_after = f"{surah}:{verse + 1}"
-        elif surah < 114:  # Last surah is 114
-            # Last verse of chapter, get first verse of next chapter
-            next_surah_key = str(surah + 1)
-            if next_surah_key in self._surah_info:
-                verse_after = f"{surah + 1}:1"
-        
-        # Build expanded scope
-        scope_parts = []
-        if verse_before:
-            scope_parts.append(verse_before)
-        scope_parts.append(ref)  # Original verse
-        if verse_after:
-            scope_parts.append(verse_after)
-        
-        # Create range format
-        if len(scope_parts) == 1:
-            return scope_parts[0]
-        else:
-            return f"{scope_parts[0]}-{scope_parts[-1]}"
 
     def phonemize(
         self,
@@ -210,17 +145,13 @@ class Phonemizer:
                     raise ValueError("When both 'ref' and 'ref_text' are provided, 'ref' must be a traditional reference format (e.g., '2', '2:1', '2:1-2:5')")
                 
                 # Scoped text search: search for ref_text within the specified ref scope
-                # Expand scope to include neighboring verses if ref is in verse format
-                expanded_ref = self._expand_verse_scope(ref)
                 if debug:
-                    if expanded_ref != ref:
-                        print(f"Expanded scope from '{ref}' to '{expanded_ref}' to include neighboring verses")
-                    print(f"Searching for text '{ref_text}' within scope '{expanded_ref}'")
-                ref_result, match_score = self.text_matcher.find_matching_range_scoped_with_score_space_robust(ref_text, expanded_ref)
+                    print(f"Searching for text '{ref_text}' within scope '{ref}'")
+                ref_result, match_score = self.text_matcher.find_matching_range_scoped_with_score_space_robust(ref_text, ref)
                 if ref_result is None:
                     failed_match = True
                     if debug:
-                        print(f"No good match found within scope '{expanded_ref}' (score: {match_score:.3f}) - will return null phonemes")
+                        print(f"No good match found within scope '{ref}' (score: {match_score:.3f}) - will return null phonemes")
                 else:
                     ref = ref_result
                     if debug:
