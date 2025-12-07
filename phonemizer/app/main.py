@@ -19,13 +19,19 @@ def _find_resources_dir(start: Path) -> Path:
     """Find the project's resources directory by walking up parents.
 
     This is resilient to the app living under different nesting levels.
+    Resources are now expected at core/resources/ (inside the core package).
     """
     for up in [start, start.parent, start.parent.parent, start.parent.parent.parent]:
+        # Check new location: core/resources
+        core_resources = up / "core" / "resources"
+        if (core_resources / "surah_info.json").exists():
+            return core_resources
+        # Check legacy location: resources at same level
         candidate = up.parent / "resources" if (up / "app").exists() else up / "resources"
         if (candidate / "surah_info.json").exists():
             return candidate
-    # Fallback to original expectation
-    return (start.parents[1] / "resources")
+    # Fallback to core/resources relative to the phonemizer package
+    return (start.parents[2] / "core" / "resources")
 
 RESOURCES_DIR = _find_resources_dir(APP_DIR)
 
