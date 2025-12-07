@@ -12,6 +12,13 @@ from .symbols.extension import ExtensionSymbol
 from .symbols.stop import StopSymbol
 from .symbols.other import OtherSymbol
 from .phonemizer import PhonemizeResult
+from .mapping import (
+    MappingType,
+    LetterMapping,
+    WordMapping,
+    AlignmentEntry,
+    PhonemizationMapping,
+)
 
 __all__ = [
     'Phonemizer',
@@ -24,6 +31,9 @@ __all__ = [
     'StopSymbol',
     'OtherSymbol',
     'PhonemizeResult',
+    'MappingType',
+    'LetterMapping',
+    'WordMapping',
+    'AlignmentEntry',
+    'PhonemizationMapping',
 ]
-
-

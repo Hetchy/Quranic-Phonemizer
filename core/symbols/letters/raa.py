@@ -1,6 +1,8 @@
 from typing import List
 from .letter import LetterSymbol
 from core.phoneme_registry import get_rule_phoneme
+from core.mapping import MappingType
+
 
 class Raa(LetterSymbol):
     def phonemize_letter(self) -> List[str]:
@@ -9,15 +11,16 @@ class Raa(LetterSymbol):
         nxt = self.next_letter()
 
         if not self.diacritic:
-            return [] # only in "وَٱذْكُر رَّبَّكَ" Idgham
+            self.set_mapping(mapping_type=MappingType.SILENT, rule="raa_idgham")
+            return []
 
-        match self.diacritic.name: # check raa diacritic
+        match self.diacritic.name:
             case "FATHA" | "FATHATAN" | "DAMMA" | "DAMMATAN":
                 return self._heavy_phoneme()
             case "KASRA" | "KASRATAN":
                 return self._light_phoneme()
             
-            case "SUKUN": # check prev letter
+            case "SUKUN":
                 if not prev.diacritic:
                     match prev.char:
                         case "ٱ" | "ا" | "و":
@@ -31,7 +34,7 @@ class Raa(LetterSymbol):
                     case "KASRA":
                         return self._heavy_phoneme() if nxt and nxt.is_heavy else self._light_phoneme()
                     
-                    case "SUKUN": # check prev prev letter
+                    case "SUKUN":
                         match prev2.diacritic.name:
                             case "FATHA" | "DAMMA":
                                 return self._heavy_phoneme()
@@ -39,7 +42,9 @@ class Raa(LetterSymbol):
                                 return self._light_phoneme()
     
     def _heavy_phoneme(self) -> List[str]:
+        self.set_mapping(rule="raa_heavy")
         return self.apply_shaddah(get_rule_phoneme("raa_heavy", "phoneme"))
 
     def _light_phoneme(self) -> List[str]:
+        self.set_mapping(rule="raa_light")
         return super().phonemize_letter()

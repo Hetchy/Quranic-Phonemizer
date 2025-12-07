@@ -1,9 +1,15 @@
 __pycache__/
 *.py[cod]
-out
+# out
 resources/archive
 test.ipynb
 .windsurf
 .vscode
 .cursor
 .venv
+
+# Package build artifacts
+*.egg-info/
+dist/
+build/
+*.egg

@@ -4,11 +4,14 @@ Word class for the Quranic phonemizer.
 
 from __future__ import annotations
 
-from typing import List, Optional, Dict
+import re
+from typing import List, Optional
 
 from .symbols.letters.letter import LetterSymbol
 from .location import Location
 from .symbols.stop import StopSymbol
+from .mapping import WordMapping, LetterMapping
+
 
 class Word:
     def __init__(self, location: Location, text: str = ""):
@@ -19,11 +22,10 @@ class Word:
         self.letters: List[LetterSymbol] = []
         self.phonemes: Optional[List[str]] = None
         self.stop_sign: Optional[StopSymbol] = None
-        self.is_starting: bool = False  # True if this word is the start after a pause
-        self.is_stopping: bool = False  # True if this word is paused at
+        self.is_starting: bool = False
+        self.is_stopping: bool = False
 
     def get_prev_letter(self, index: int, n: int = 1) -> Optional[LetterSymbol]:
-        """Get the previous letter in the current word or last letter of previous word."""
         target_index = index - n
         if target_index >= 0:
             return self.letters[target_index]
@@ -35,7 +37,6 @@ class Word:
         return None
         
     def get_next_letter(self, index: int, n: int = 1) -> Optional[LetterSymbol]:
-        """Get the next letter in the current or next word."""
         target_index = index + n
         if target_index < len(self.letters):
             return self.letters[target_index]
@@ -46,10 +47,8 @@ class Word:
         return None
     
     def phonemize(self) -> None:
-        """Phonemize the word by processing all letters and collecting their phonemes."""
-        if self.phonemes: # special case for words that are phonemized already
+        if self.phonemes:
             return
-        
         for i, letter in enumerate(self.letters):
             if letter.can_phonemize():
                 letter.phonemize()
@@ -57,15 +56,38 @@ class Word:
     def get_phonemes(self) -> List[str]:
         if self.phonemes:
             return self.phonemes
-        
         phonemes = []
         for letter in self.letters:
             phonemes.extend(ph for ph in letter.phonemes if ph)
-        
         return phonemes
 
+    def build_mapping(self) -> WordMapping:
+        letter_mappings = []
+        for i, letter in enumerate(self.letters):
+            lm = LetterMapping(
+                index=i,
+                char=letter.char,
+                phonemes=list(letter.phonemes) if letter.phonemes else [],
+                diacritic=letter.diacritic.name if letter.diacritic else None,
+                has_shaddah=letter.has_shaddah,
+                mapping_type=letter.mapping_type,
+                rule=letter.rule,
+            )
+            letter_mappings.append(lm)
+        
+        clean_text = re.sub(r"</?rule[^>]*?>", "", self.text)
+        
+        return WordMapping(
+            location=self.location.location_key,
+            text=clean_text,
+            phonemes=self.get_phonemes(),
+            letter_mappings=letter_mappings,
+            is_special_word=self.phonemes is not None,
+            is_starting=self.is_starting,
+            is_stopping=self.is_stopping,
+        )
+
     def debug_print(self) -> str:
-        """Pretty print for debugging purposes."""
         result = f"Word at {self.location.location_key}:\n"
         result += f"  Text: {self.text}\n"
         if self.stop_sign:
@@ -80,28 +102,21 @@ class Word:
         for i, letter in enumerate(self.letters):
             result += f"    {i}: Letter '{letter.char}' -> {letter.base_phoneme}\n"
             
-            # Show sequential phonemization attributes
             if letter.phonemes:
                 result += f"      Phonemes: {letter.phonemes}\n"
             if letter.affected_by:
                 result += f"      Affected By: '{letter.affected_by.char}'\n"
-            
-            # Show diacritic
             if letter.diacritic:
                 result += f"      Diacritic: '{letter.diacritic.char}' -> {letter.diacritic.base_phoneme} (name: {letter.diacritic.name})\n"
-            
-            # Show extension
             if letter.extension:
                 result += f"      Extension: '{letter.extension.char}' -> {letter.extension.base_phoneme} (name: {letter.extension.name})\n"
-            
-            # Show shaddah
             if letter.has_shaddah:
                 result += "      Shaddah\n"
-            
-            # Show other symbols
             if letter.other_symbols:
                 result += "      Other symbols:\n"
                 for j, other in enumerate(letter.other_symbols):
                     result += f"        {j}: '{other.char}' -> {other.base_phoneme} (name: {other.name})\n"
+            if letter.rule:
+                result += f"      Rule: {letter.rule}\n"
         
         return result

@@ -5,10 +5,9 @@ idgham:
     "j": "j̃"
     "w": "w̃"
 
-ikhfaa:
+ikhfaa: 
   light_phoneme: "ŋ"
-  # heavy_phoneme: "ŋ"
-  heavy_phoneme: "ŋˤ"
+  heavy_phoneme: "ŋ"
   shafawi_phoneme: "ŋ"
 
 iqlab:
@@ -16,8 +15,7 @@ iqlab:
 
 qalqala:
   sughra: "Q"
-  # kubra: "Q"
-  kubra: "QQ"
+  kubra: "Q"
 
 lam_heavy:
   phoneme: "lˤlˤ"
