@@ -3,4 +3,3 @@ include LICENSE
 include requirements.txt
 recursive-include resources *.json *.yaml *.txt
 recursive-include core *.py
-
