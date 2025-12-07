@@ -317,13 +317,15 @@ The project makes use of the [Quranic Universal Library's (QUL) Hafs script](htt
 
 ## Citing
 
-If you use this phonemizer in your work, please cite it as follows:
+If you use this phonemizer in your work, please cite [the paper](https://openreview.net/pdf?id=hZt0JK28iV) as follows:
 
 ```bibtex
-@misc{ibrahim2025quranicphonemizer,
-  author = {Ahmed Ibrahim},
-  title = {Quranic Phonemizer},
-  year = {2025},
-  howpublished = {\url{https://github.com/Hetchy/Quranic-Phonemizer}},
+@inproceedings{
+ibrahim2025quranic,
+title={Qur{\textquoteright}anic Phonemizer: Bringing Tajweed-Aware Phonemes to Qur{\textquoteright}anic Machine Learning},
+author={Ahmed Ibrahim},
+booktitle={5th Muslims in ML Workshop co-located with NeurIPS 2025},
+year={2025},
+url={https://openreview.net/forum?id=hZt0JK28iV}
 }
 ```
