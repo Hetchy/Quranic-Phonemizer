@@ -2,16 +2,17 @@ from __future__ import annotations
 
 import json
 import re
-from dataclasses import dataclass
-from typing import List, Literal
+from dataclasses import dataclass, field
+from typing import List, Literal, Optional
 from pathlib import Path
 
 from .parser import Parser, load_symbol_mappings
 from .word import Word
 from .text_matcher import TextMatcher
+from .mapping import PhonemizationMapping, WordMapping, AlignmentEntry
 
-# Data directory
 DATA_DIR = Path(__file__).resolve().parent.parent / "resources"
+
 
 class Phonemizer:
     def __init__(
@@ -22,11 +23,10 @@ class Phonemizer:
     ) -> None:
         self.db_path = str(db_path)
         self.map_path = str(map_path)
+        self.special_words_path = str(special_words_path)
         symbol_mappings = load_symbol_mappings(map_path)
         self.parser = Parser(symbol_mappings, special_words_path)
-        # Initialize text matcher for text-based references
         self.text_matcher = TextMatcher(db_path, symbol_mappings)
-        # Load surah/verse/word boundaries for reference validation
         with (DATA_DIR / "surah_info.json").open("r", encoding="utf-8") as fh:
             self._surah_info: dict[str, dict] = json.load(fh)
         self.valid_stops = {
@@ -39,50 +39,24 @@ class Phonemizer:
         }
 
     def _is_text_reference(self, ref: str) -> bool:
-        """
-        Determine if the reference is a text-based reference vs traditional format.
-        
-        Traditional formats:
-        - "1", "1:2", "1:2:3" (single reference)  
-        - "1:2-1:5", "1:2:3-1:2:7" (range reference)
-        
-        Text references contain Arabic characters.
-        
-        Parameters
-        ----------
-        ref : str
-            Reference string to check
-            
-        Returns
-        -------
-        bool
-            True if text reference, False if traditional format
-        """
         ref = ref.strip()
-        
-        # Check for traditional format patterns
-        # Pattern: numbers, colons, and optional single dash for ranges
         traditional_pattern = r'^[\d:-]+$'
         
         if re.match(traditional_pattern, ref):
-            # Additional validation: ensure it's a valid traditional format
             try:
-                # Try parsing as traditional reference
                 if "-" in ref:
                     left, right = [p.strip() for p in ref.split("-", 1)]
                     self._parse_traditional_endpoint(left)
                     self._parse_traditional_endpoint(right)
                 else:
                     self._parse_traditional_endpoint(ref)
-                return False  # Successfully parsed as traditional
+                return False
             except:
-                pass  # Fall through to text reference
+                pass
         
-        # If not traditional format, assume it's text
         return True
     
     def _parse_traditional_endpoint(self, text: str) -> tuple[int, int | None, int | None]:
-        """Helper to parse traditional reference endpoints."""
         parts = text.strip().split(":")
         if not 1 <= len(parts) <= 3:
             raise ValueError(f"Invalid reference endpoint: '{text}'")
@@ -102,49 +76,17 @@ class Phonemizer:
         stops: List[str] = [],
         debug: bool = False,
     ) -> PhonemizeResult:
-        """
-        Phonemize a reference range.
-        
-        Parameters
-        ----------
-        ref : str, optional
-            Qurʾānic reference in traditional format (e.g. "1:1", "1:1-1:3").
-            If provided with ref_text, limits the search scope to this reference.
-        ref_text : str, optional
-            Arabic text to search for. Either ref or ref_text must be provided.
-        stops : List[str], default []
-            List of stop types to mark as boundaries.
-        debug : bool, default False
-            Whether to print debug information.
-            
-        Returns
-        -------
-        PhonemizeResult
-            Object containing reference, text and phonemes. For text-based matches,
-            includes match_score attribute. If no good match is found, phonemes_str()
-            will return None.
-            
-        Raises
-        ------
-        ValueError
-            If neither ref nor ref_text is provided, or if both are provided
-            but ref is not a traditional reference format.
-        """
-        # Validation: either ref or ref_text must be provided
         if ref is None and ref_text is None:
             raise ValueError("Either 'ref' or 'ref_text' must be provided")
         
-        # Handle different parameter combinations
-        match_score = None  # Track match score for text-based searches
-        failed_match = False  # Track if text search failed due to low score
+        match_score = None
+        failed_match = False
         
         if ref_text is not None:
             if ref is not None:
-                # Both ref and ref_text provided - validate ref is traditional format
                 if self._is_text_reference(ref):
                     raise ValueError("When both 'ref' and 'ref_text' are provided, 'ref' must be a traditional reference format (e.g., '2', '2:1', '2:1-2:5')")
                 
-                # Scoped text search: search for ref_text within the specified ref scope
                 if debug:
                     print(f"Searching for text '{ref_text}' within scope '{ref}'")
                 ref_result, match_score = self.text_matcher.find_matching_range_scoped_with_score_space_robust(ref_text, ref)
@@ -157,7 +99,6 @@ class Phonemizer:
                     if debug:
                         print(f"Found scoped match: {ref} (score: {match_score:.3f})")
             else:
-                # Only ref_text provided - search entire database
                 if debug:
                     print(f"Searching for text '{ref_text}' in entire database")
                 ref_result, match_score = self.text_matcher.find_matching_range_with_score(ref_text)
@@ -170,12 +111,10 @@ class Phonemizer:
                     if debug:
                         print(f"Found match: {ref} (score: {match_score:.3f})")
         else:
-            # Only ref provided - handle as before
             original_ref = ref
             if self._is_text_reference(ref):
                 if debug:
                     print(f"Detected text reference: {ref}")
-                # Convert text to traditional reference format
                 ref_result, match_score = self.text_matcher.find_matching_range_with_score(ref)
                 if ref_result is None:
                     failed_match = True
@@ -186,11 +125,9 @@ class Phonemizer:
                     if debug:
                         print(f"Converted to traditional reference: {ref} (score: {match_score:.3f})")
         
-        # Handle failed matches - return special result that will have null phonemes
         if failed_match:
             return PhonemizeResult("", "", [], [], stops, match_score)
         
-        # Validate reference against known bounds
         self._validate_refs(ref)
 
         invalid_stops = set(stops) - self.valid_stops
@@ -244,7 +181,6 @@ class Phonemizer:
             s2, v2, w2 = parse_endpoint(right)
             check_bounds(s1, v1, w1)
             check_bounds(s2, v2, w2)
-            # Ensure ordering (start <= end) on (surah, verse, word); None treated as 0
             def norm(t: tuple[int, int | None, int | None]) -> tuple[int, int, int]:
                 a, b, c = t
                 return a, (b if b is not None else 0), (c if c is not None else 0)
@@ -262,17 +198,9 @@ class PhonemizeResult:
     _nested: List[List[str]]       
     _words: List[Word]
     stops: List[str]
-    match_score: float = None  # Score for text-based matches (None for traditional refs)
+    match_score: float = None
 
-    # ---  convenience views  ---------------------------------
     def phonemes_list(self, split: Literal["word", "verse", "both"] = "word") -> list:
-        """
-        Return phonemes grouped according to the requested split mode.
-
-        split="word":  List[List[str]] — one list per word (default)
-        split="verse": List[List[str]] — one list per verse (all phonemes in that verse)
-        split="both":  List[List[List[str]]] — per verse, per word
-        """
         if split == "word":
             return self._nested
 
@@ -319,13 +247,11 @@ class PhonemizeResult:
         raise ValueError("split must be one of: 'word', 'verse', 'both'")
 
     def text(self) -> str:
-        """Return the full text with Arabic verse numbers like (١) between verses."""
         parts: list[str] = []
         prev_verse: str | None = None
         for word in self._words:
             cur_verse = str(word.location.ayah_num)
             if prev_verse is not None and cur_verse != prev_verse:
-                # Insert Arabic-indic verse number in parentheses
                 arabic_digits = {
                     '0': '٠', '1': '١', '2': '٢', '3': '٣', '4': '٤',
                     '5': '٥', '6': '٦', '7': '٧', '8': '٨', '9': '٩',
@@ -334,7 +260,6 @@ class PhonemizeResult:
                 parts.append(f" ({arabic_num}) ")
             parts.append(re.sub(r"</?rule[^>]*?>", "", word.text))
             prev_verse = cur_verse
-        # Append the final verse number
         if prev_verse is not None:
             arabic_digits = {
                 '0': '٠', '1': '١', '2': '٢', '3': '٣', '4': '٤',
@@ -350,25 +275,14 @@ class PhonemizeResult:
         word_sep:    str = " ",
         verse_sep:   str = "\n",
     ) -> str | None:
-        """
-        Flatten phonemes to a single string.
-
-        • phoneme_sep – between adjacent phonemes
-        • word_sep    – between words  (falls back to phoneme_sep if blank)
-        • verse_sep   – between verses (falls back to word_sep → phoneme_sep if blank)
-        
-        Returns None if no words/phonemes are available (e.g., failed text match).
-        """
-        # Return None if no words available (failed text match)
         if not self._words:
             return None
         parts: list[str] = []
         prev_verse: str | None = None
         prev_word:  str | None = None
-        have_prev_ph = False           # have we just emitted a phoneme?
+        have_prev_ph = False
 
         def _add_sep(sep: str) -> None:
-            """Append a separator, avoiding consecutive duplicates."""
             if sep and (not parts or parts[-1] != sep):
                 parts.append(sep)
 
@@ -376,19 +290,16 @@ class PhonemizeResult:
             cur_verse = str(word.location.ayah_num)
             cur_word = str(word.location.word_num)
 
-            # -------- verse boundary --------------------------------------
             if prev_verse is not None and cur_verse != prev_verse:
                 chosen = verse_sep if verse_sep else (word_sep if word_sep else phoneme_sep)
                 _add_sep(chosen)
                 have_prev_ph = False
 
-            # -------- word boundary ---------------------------------------
             elif prev_word is not None and cur_word != prev_word:
                 chosen = word_sep if word_sep else phoneme_sep
                 _add_sep(chosen)
                 have_prev_ph = False
 
-            # -------- emit phonemes ---------------------------------------
             for ph in word.get_phonemes():
                 if have_prev_ph:
                     parts.append(phoneme_sep)
@@ -401,14 +312,47 @@ class PhonemizeResult:
             phoneme_sep.join(word) for word in self._nested
         )
 
-    def show_table(self, phoneme_sep: str = "", split: Literal["word", "verse", "both"] = "word") -> "pd.DataFrame":
-        """
-        Create a pandas DataFrame according to the split strategy.
+    def get_mapping(self) -> PhonemizationMapping:
+        """Build the full phonemization mapping with alignment."""
+        word_mappings = [word.build_mapping() for word in self._words]
+        
+        flat_phonemes = []
+        for word in self._words:
+            flat_phonemes.extend(word.get_phonemes())
+        
+        alignment = self._build_alignment(word_mappings)
+        
+        clean_text = re.sub(r"</?rule[^>]*?>", "", self._text)
+        
+        return PhonemizationMapping(
+            ref=self.ref,
+            text=clean_text,
+            words=word_mappings,
+            phoneme_sequence=flat_phonemes,
+            alignment=alignment,
+        )
 
-        - split="word":  one row per word; columns: location (s:v:w), word, phonemes
-        - split="verse": one row per verse; columns: location (s:v), text, phonemes
-        - split="both":  one row per word; columns: verse (s:v), location (s:v:w), word, phonemes
-        """
+    def _build_alignment(self, word_mappings: List[WordMapping]) -> List[AlignmentEntry]:
+        alignment = []
+        phoneme_idx = 0
+        
+        for word_idx, word_map in enumerate(word_mappings):
+            for letter_map in word_map.letter_mappings:
+                for phoneme in letter_map.phonemes:
+                    entry = AlignmentEntry(
+                        phoneme_index=phoneme_idx,
+                        phoneme=phoneme,
+                        word_index=word_idx,
+                        letter_index=letter_map.index,
+                        source_char=letter_map.char,
+                        rule=letter_map.rule,
+                    )
+                    alignment.append(entry)
+                    phoneme_idx += 1
+        
+        return alignment
+
+    def show_table(self, phoneme_sep: str = "", split: Literal["word", "verse", "both"] = "word") -> "pd.DataFrame":
         try:
             import pandas as pd
         except ImportError:
@@ -476,26 +420,17 @@ class PhonemizeResult:
         raise ValueError("split must be one of: 'word', 'verse', 'both'")
 
     def save(self, path: str | Path, *, fmt, split: Literal["word", "verse", "both"] = "word") -> Path:
-        """Persist the result (ref + text + phonemes) to *path*.
-
-        - fmt: "json" or "csv"
-        - split: "word" | "verse" | "both". For CSV, "both" is not supported.
-        JSON layout:
-          { "ref": <range>, "text": <full text>, "phonemes": { <ref>: [<ph> ...], ... } }
-          Values are rendered on a single line (newline per list only).
-        """
         path = Path(path)
 
         def _clean_text(s: str) -> str:
             return re.sub(r"</?rule[^>]*?>", "", s)
 
         if fmt == "json":
-            # Build mappings: ref -> phoneme list(s), and ref -> text
             phoneme_map: dict[str, list] = {}
             text_map: dict[str, str] = {}
             if split == "word":
                 for word in self._words:
-                    ref_key = word.location.location_key  # s:v:w
+                    ref_key = word.location.location_key
                     phoneme_map[ref_key] = [str(p) for p in word.get_phonemes()]
                     text_map[ref_key] = _clean_text(word.text)
             elif split == "verse":
@@ -504,7 +439,7 @@ class PhonemizeResult:
                 current_text_parts: list[str] = []
                 for word in self._words:
                     parts = word.location.location_key.split(":")
-                    verse_key = ":".join(parts[:2])  # s:v
+                    verse_key = ":".join(parts[:2])
                     if current_key is None:
                         current_key = verse_key
                     if verse_key != current_key:
@@ -524,7 +459,7 @@ class PhonemizeResult:
                 current_text_parts: list[str] = []
                 for word in self._words:
                     parts = word.location.location_key.split(":")
-                    verse_key = ":".join(parts[:2])  # s:v
+                    verse_key = ":".join(parts[:2])
                     if current_key is None:
                         current_key = verse_key
                     if verse_key != current_key:
@@ -541,7 +476,6 @@ class PhonemizeResult:
             else:
                 raise ValueError("split must be one of: 'word', 'verse', 'both'")
 
-            # Manual formatting to keep each list on a single line
             lines: list[str] = []
             lines.append("{")
             lines.append(f"  \"ref\": {json.dumps(self.ref, ensure_ascii=False)},")
@@ -572,7 +506,7 @@ class PhonemizeResult:
                 w.writerow(["ref", "text", "phoneme_seq"])
                 if split == "word":
                     for word in self._words:
-                        ref_key = word.location.location_key  # s:v:w
+                        ref_key = word.location.location_key
                         word_text = _clean_text(word.text)
                         w.writerow([ref_key, word_text, " ".join(str(p) for p in word.get_phonemes())])
                 elif split == "verse":
@@ -581,7 +515,7 @@ class PhonemizeResult:
                     current_list: list[str] = []
                     for word in self._words:
                         parts = word.location.location_key.split(":")
-                        verse_key = ":".join(parts[:2])  # s:v
+                        verse_key = ":".join(parts[:2])
                         if current_key is None:
                             current_key = verse_key
                         if verse_key != current_key:
@@ -593,6 +527,10 @@ class PhonemizeResult:
                         current_list.extend(str(p) for p in word.get_phonemes())
                     if current_key is not None:
                         w.writerow([current_key, " ".join(current_text_parts), " ".join(current_list)])
+        elif fmt == "mapping":
+            mapping = self.get_mapping()
+            path.write_text(mapping.to_json(), encoding="utf-8")
         else:
             raise ValueError(f"Unknown format: {fmt}")
         return path
+
