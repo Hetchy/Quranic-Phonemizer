@@ -11,7 +11,7 @@ from .word import Word
 from .text_matcher import TextMatcher
 from .mapping import PhonemizationMapping, WordMapping, AlignmentEntry
 
-DATA_DIR = Path(__file__).resolve().parent.parent / "resources"
+DATA_DIR = Path(__file__).resolve().parent / "resources"
 
 
 class Phonemizer:
