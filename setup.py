@@ -1,6 +1,6 @@
 """
 Setup script for Quranic Phonemizer package.
-"""
+""" 
 from setuptools import setup, find_packages
 from pathlib import Path
 
