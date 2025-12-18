@@ -20,7 +20,7 @@ if requirements_file.exists():
 
 setup(
     name="quranic-phonemizer",
-    version="1.0.0",
+    version="1.0.1",
     description="A custom phonemizer (Grapheme to Phoneme converter) for the Qurʾān in the Hafs riwaya",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -28,10 +28,9 @@ setup(
     author_email="quranicphonemizer@gmail.com",
     url="https://github.com/Hetchy/Quranic-Phonemizer",
     packages=find_packages(exclude=["tests", "*.tests", "*.tests.*", "tests.*", "phonemizer", "out"]),
-    # Resources are included via MANIFEST.in
-    # Note: The phonemizer code expects resources at parent.parent / "resources"
-    # This works in development mode. For production, you may need to adjust
-    # the resource path resolution in the phonemizer code to use importlib.resources
+    package_data={
+        "core": ["resources/*.json", "resources/*.yaml", "resources/*.txt"],
+    },
     include_package_data=True,
     install_requires=requirements,
     python_requires=">=3.8",

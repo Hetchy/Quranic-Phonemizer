@@ -1,5 +1,8 @@
 include README.md
 include LICENSE
 include requirements.txt
-recursive-include resources *.json *.yaml *.txt
 recursive-include core *.py
+recursive-include core/resources *.json *.yaml *.txt
+
+
+

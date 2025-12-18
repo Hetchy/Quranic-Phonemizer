@@ -31,7 +31,7 @@ from .symbols.letters.vowel import Yaa
 from .symbols.letters.lam import Lam
 from .symbols.letters.raa import Raa
 
-DATA_DIR = Path(__file__).resolve().parent.parent / "resources"
+DATA_DIR = Path(__file__).resolve().parent / "resources"
 
 LETTER_CLASSES: dict[str, type[LetterSymbol]] = {
     "ٱ": HamzaWasl,

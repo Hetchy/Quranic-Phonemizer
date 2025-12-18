@@ -35,7 +35,7 @@ class Lam(LetterSymbol):
 
     @property
     def is_heavy(self) -> bool:
-        return self._word_contains_Allah() and self.prev_phoneme() in ["a", "a:", "u"]
+        return self._word_contains_Allah() and self.prev_phoneme() in ["a", "aˤ", "a:", "u"]
     
     def _word_contains_Allah(self) -> bool:
         if not self.has_shaddah or self.is_first:
