@@ -18,13 +18,11 @@ class Noon(LetterSymbol):
         # Iqlab
         if next_letter.char == "ب":
             self.set_mapping(rule="iqlab_noon")
-            next_letter.set_mapping(rule="iqlab_noon")
             return [get_rule_phoneme("iqlab", "phoneme")]
         
         # Ikhfaa    
         if next_letter.is_ikhfaa:
             self.set_mapping(rule="ikhfaa_noon")
-            next_letter.set_mapping(rule="ikhfaa_noon")
             ikhfaa_key = "heavy_phoneme" if next_letter.is_heavy else "light_phoneme"
             return [get_rule_phoneme("ikhfaa", ikhfaa_key)]
         
@@ -34,7 +32,7 @@ class Noon(LetterSymbol):
             next_letter.set_mapping(mapping_type=MappingType.MANY_TO_ONE, rule="idgham_ghunnah_noon")
             nasal_map = get_rule_phoneme("idgham", "nasalized_map")
             target_phoneme = nasal_map.get(next_letter.base_phoneme)
-            next_letter.has_shaddah = False
+            # Note: Don't clear has_shaddah - it's part of the canonical text and should be preserved
             next_phonemes = [target_phoneme] + next_letter.phonemize_modifiers()
             next_letter.mark_phonemized(next_phonemes, affected_by=self)
             return []

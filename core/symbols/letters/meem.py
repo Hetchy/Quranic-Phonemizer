@@ -18,7 +18,6 @@ class Meem(LetterSymbol):
         # Ikhfaa Shafawi
         if self.is_last and next_letter.char == "ب":
             self.set_mapping(rule="ikhfaa_shafawi")
-            next_letter.set_mapping(rule="ikhfaa_shafawi")
             return [get_rule_phoneme("ikhfaa", "shafawi_phoneme")]
         
         # Idgham Shafawi

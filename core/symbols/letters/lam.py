@@ -25,7 +25,7 @@ class Lam(LetterSymbol):
     
     def phonemize_letter(self) -> List[str]:        
         if self._word_contains_Allah():
-            self.extension = ExtensionSymbol("DAGGER_ALEF", "", None)
+            self.extensions.append(ExtensionSymbol("DAGGER_ALEF", "", None))
             if self.is_heavy:
                 self.set_mapping(rule="lam_heavy")
                 return [get_rule_phoneme("lam_heavy", "phoneme")]
@@ -35,6 +35,7 @@ class Lam(LetterSymbol):
 
     @property
     def is_heavy(self) -> bool:
+        # a: is for ءَآللَّهُ
         return self._word_contains_Allah() and self.prev_phoneme() in ["a", "aˤ", "a:", "u"]
     
     def _word_contains_Allah(self) -> bool:

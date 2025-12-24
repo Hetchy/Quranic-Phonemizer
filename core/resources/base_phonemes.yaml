@@ -248,6 +248,13 @@ extensions:
     char: "ۦ"
     phoneme: ""
 
+  MADDAH:
+    cp: 0x0653
+    char: "ٓ"
+    phoneme: ""
+
+
+
 
 stop_signs:
   PREFERRED_CONTINUE:
@@ -324,17 +331,17 @@ other:
 
   S1: # 11:41 مَجۡر۪ٮٰهَا 
     cp: 0x06EA 
-    char: "۪ "
+    char: "۪"
     phoneme: ""
 
   S2: # 12:11 تَأۡمَ۫نَّا 
     cp: 0x06EB
-    char: "۫ "
+    char: "۫"
     phoneme: ""
 
   S3: # 41:44 ءَا۠عۡجَمِىٌّ۬ 
     cp: 0x06EC
-    char: "۬ "
+    char: "۬"
     phoneme: "" 
 
   PARTIAL_ALEF_MAKSURA:
@@ -356,3 +363,4 @@ other:
     cp: 0x06E9
     char: "۩"
     phoneme: ""
+

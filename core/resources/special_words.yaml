@@ -1,5 +1,16 @@
+# Special words in the Quran that require custom phoneme mappings
+# These include huroof muqatta'at (opening letters) and unique words
+#
+# Format:
+# - text: The Arabic text of the word (with all diacritics/symbols)
+#   locations: List of surah:verse:word locations
+#   letter_mappings: List of letter-level mappings with:
+#     - char: The Arabic letter (with any attached madd/diacritics)
+#     - phonemes: List of phonemes for this letter
+#     - rules: List of tajweed rules (optional)
+
 special_words:
-  - text: "حم"
+  - text: "حمٓ"
     locations:
       - "40:1:1"  # Surah Ghafir
       - "41:1:1"  # Surah Fussilat
@@ -8,89 +19,271 @@ special_words:
       - "44:1:1"  # Surah Ad-Dukhan
       - "45:1:1"  # Surah Al-Jathiyah
       - "46:1:1"  # Surah Al-Ahqaf
-    phonemes: ["ħ", "a:", "m", "i:", "m"]
+    letter_mappings:
+      - char: "ح"
+        phonemes: ["ħ", "a:"]
+        rules: ["madd_natural"]
+      - char: "مٓ"
+        phonemes: ["m", "i:", "m"]
+        rules: ["madd_lazim"]
 
-  - text: "الم"
+  - text: "الٓمٓ"
     locations:
-      - "2:1:1"  # Surah Al-Baqarah
-      - "3:1:1"  # Surah Āl-Imran
-      - "29:1:1" # Surah Al-Ankabut
-      - "30:1:1" # Surah Al-Rum
-      - "31:1:1" # Surah Luqman
-      - "32:1:1" # Surah As-Sajdah
-    phonemes: ["a", "l", "i", "ff", "l", "a:", "m̃", "i:", "m"]
+      - "2:1:1"   # Surah Al-Baqarah
+      - "3:1:1"   # Surah Āl-Imran
+      - "29:1:1"  # Surah Al-Ankabut
+      - "30:1:1"  # Surah Al-Rum
+      - "31:1:1"  # Surah Luqman
+      - "32:1:1"  # Surah As-Sajdah
+    letter_mappings:
+      - char: "ا"
+        phonemes: ["a", "l", "i", "f"]
+        rules: []
+      - char: "لٓ"
+        phonemes: ["l", "a:"]
+        rules: ["madd_lazim"]
+      - char: "مٓ"
+        phonemes: ["m̃", "i:", "m"]
+        rules: ["meem_ghunnah", "madd_lazim"]
 
-  - text: "الر"
+  - text: "الٓر ۚ"
     locations:
       - "10:1:1"  # Surah Yunus
       - "11:1:1"  # Surah Hud
       - "12:1:1"  # Surah Yusuf
       - "14:1:1"  # Surah Ibrahim
       - "15:1:1"  # Surah Al-Hijr
-    phonemes: ["a", "l", "i", "ff", "l", "a:", "m", "rˤ", "aˤ:"]
+    letter_mappings:
+      - char: "ا"
+        phonemes: ["a", "l", "i", "f"]
+        rules: []
+      - char: "لٓ"
+        phonemes: ["l", "a:"]
+        rules: ["madd_lazim"]
+      - char: "ر"
+        phonemes: ["m", "rˤ", "aˤ:"]
+        rules: ["madd_natural"]
+      - char: " ۚ"
+        phonemes: []
+        rules: []
 
-  - text: "المص"
+  - text: "الٓمٓصٓ"
     locations:
-      - "7:1:1"  # Surah Al-A'raf
-    phonemes: ["a", "l", "i", "ff", "l", "a:", "m̃", "i:", "m", "sˤ", "aˤ:", "d", "Q"]
+      - "7:1:1"   # Surah Al-A'raf
+    letter_mappings:
+      - char: "ا"
+        phonemes: ["a", "l", "i", "f"]
+        rules: []
+      - char: "لٓ"
+        phonemes: ["l", "a:"]
+        rules: ["madd_lazim"]
+      - char: "مٓ"
+        phonemes: ["m̃", "i:", "m"]
+        rules: ["meem_ghunnah", "madd_lazim"]
+      - char: "صٓ"
+        phonemes: ["sˤ", "aˤ:", "d", "Q"]
+        rules: ["madd_lazim", "qalqala_kubra"]
 
-  - text: "المر"
+  - text: "الٓمٓر ۚ"
     locations:
       - "13:1:1"  # Surah Ar-Ra'd
-    phonemes: ["a", "l", "i", "ff", "l", "a:", "m̃", "i:", "m", "rˤ", "aˤ:"]
+    letter_mappings:
+      - char: "ا"
+        phonemes: ["a", "l", "i", "f"]
+        rules: []
+      - char: "لٓ"
+        phonemes: ["l", "a:"]
+        rules: ["madd_lazim"]
+      - char: "مٓ"
+        phonemes: ["m̃", "i:", "m"]
+        rules: ["meem_ghunnah", "madd_lazim"]
+      - char: "ر"
+        phonemes: ["rˤ", "aˤ:"]
+        rules: ["madd_natural"]
+      - char: " ۚ"
+        phonemes: []
+        rules: []
 
-  - text: "كهيعص"
+  - text: "كٓهيعٓصٓ"
     locations:
       - "19:1:1"  # Surah Maryam
-    phonemes: ["k", "a:", "ff", "h", "a:", "j", "a:", "ʕ", "a", "j", "ŋ", "sˤ", "aˤ:", "d", "Q"]
+    letter_mappings:
+      - char: "كٓ"
+        phonemes: ["k", "a:", "f"]
+        rules: ["madd_lazim"]
+      - char: "ه"
+        phonemes: ["h", "a:"]
+        rules: ["madd_natural"]
+      - char: "ي"
+        phonemes: ["j", "a:"]
+        rules: ["madd_natural"]
+      - char: "عٓ"
+        phonemes: ["ʕ", "a", "j", "ŋ"]
+        rules: ["ikhfaa_noon"]
+      - char: "صٓ"
+        phonemes: ["sˤ", "aˤ:", "d", "Q"]
+        rules: ["madd_lazim", "qalqala_kubra"]
 
-  - text: "طسم"
+  - text: "طسٓمٓ"
     locations:
       - "26:1:1"  # Surah Ash-Shu'ara
       - "28:1:1"  # Surah Al-Qasas
-    phonemes: ["tˤ", "aˤ:", "s", "i:", "m̃", "i:", "m"]
+    letter_mappings:
+      - char: "ط"
+        phonemes: ["tˤ", "aˤ:"]
+        rules: ["madd_natural"]
+      - char: "سٓ"
+        phonemes: ["s", "i:"]
+        rules: ["madd_lazim"]
+      - char: "مٓ"
+        phonemes: ["m̃", "i:", "m"]
+        rules: ["meem_ghunnah", "madd_lazim"]
 
-  - text: "طس"
+  - text: "طسٓ ۚ"
     locations:
       - "27:1:1"  # Surah An-Naml
-    phonemes: ["tˤ", "aˤ:", "s", "i:", "n"]
+    letter_mappings:
+      - char: "ط"
+        phonemes: ["tˤ", "aˤ:"]
+        rules: ["madd_natural"]
+      - char: "سٓ"
+        phonemes: ["s", "i:", "n"]
+        rules: ["madd_lazim"]
+      - char: " ۚ"
+        phonemes: []
+        rules: []
 
   - text: "طه"
     locations:
       - "20:1:1"  # Surah Ta-Ha
-    phonemes: ["tˤ", "aˤ:", "h", "a:"]
+    letter_mappings:
+      - char: "ط"
+        phonemes: ["tˤ", "aˤ:"]
+        rules: ["madd_natural"]
+      - char: "ه"
+        phonemes: ["h", "a:"]
+        rules: ["madd_natural"]
 
-  - text: "يس"
+  - text: "يسٓ"
     locations:
       - "36:1:1"  # Surah Ya-Sin
-    phonemes: ["j", "a:", "s", "i:", "n"]
+    letter_mappings:
+      - char: "ي"
+        phonemes: ["j", "a:"]
+        rules: ["madd_natural"]
+      - char: "سٓ"
+        phonemes: ["s", "i:", "n"]
+        rules: ["madd_lazim"]
 
-  - text: "ص"
-    locations:
-      - "38:1:1"  # Surah Sad
-    phonemes: ["sˤ", "aˤ:", "d", "Q"]
-
-  - text: "عسق"
+  - text: "عٓسٓقٓ"
     locations:
       - "42:2:1"  # Surah Ash-Shura
-    phonemes: ["ʕ", "a", "j", "ŋ", "s", "i:", "ŋ", "q", "aˤ:", "ff"]
+    letter_mappings:
+      - char: "عٓ"
+        phonemes: ["ʕ", "a", "j", "ŋ"]
+        rules: ["ikhfaa_noon"]
+      - char: "سٓ"
+        phonemes: ["s", "i:", "ŋ"]
+        rules: ["madd_lazim", "ikhfaa_noon"]
+      - char: "قٓ"
+        phonemes: ["q", "aˤ:", "f"]
+        rules: ["qalqala_kubra", "madd_lazim"]
 
-  - text: "ق"
+  - text: "صٓ ۚ"
+    locations:
+      - "38:1:1"  # Surah Sad
+    letter_mappings:
+      - char: "صٓ"
+        phonemes: ["sˤ", "aˤ:", "d", "Q"]
+        rules: ["madd_lazim", "qalqala_kubra"]
+      - char: " ۚ"
+        phonemes: []
+        rules: []
+
+  - text: "قٓ ۚ"
     locations:
       - "50:1:1"  # Surah Qaf
-    phonemes: ["q", "aˤ:", "ff"]
+    letter_mappings:
+      - char: "قٓ"
+        phonemes: ["q", "aˤ:", "f"]
+        rules: ["qalqala_kubra", "madd_lazim"]
+      - char: " ۚ"
+        phonemes: []
+        rules: []
 
-  - text: "ن"
+  - text: "نٓ ۚ"
     locations:
       - "68:1:1"  # Surah Al-Qalam
-    phonemes: ["n", "u:", "n"] 
+    letter_mappings:
+      - char: "نٓ"
+        phonemes: ["n", "u:", "n"]
+        rules: ["madd_lazim"]
+      - char: " ۚ"
+        phonemes: []
+        rules: []
 
-  - text: "مجراها"
+  - text: "مَجْرٜىٰهَا"
     locations:
       - "11:41:6"  # Surah Hud
-    phonemes: ["m", "a", "ʒ", "Q", "r", "i:", "h", "a:"]
+    letter_mappings:
+      - char: "مَ"
+        phonemes: ["m", "a"]
+        rules: []
+      - char: "جْ"
+        phonemes: ["ʒ", "Q"]
+        rules: ["qalqala_sughra"]
+      - char: "ر۪"
+        phonemes: ["r"]
+        rules: []
+      - char: "ىٰ"
+        phonemes: ["i:"]
+        rules: ["imala"]
+      - char: "هَ"
+        phonemes: ["h", "a:"]
+        rules: ["madd_natural"]
+      - char: "ا"
+        phonemes: []
+        rules: []
 
-  - text: "نُـۨجِى"
+  - text: "نُـۨجِي"
     locations:
       - "21:88:7"  # Surah Al-Anbiya
-    phonemes: ["n", "u", "ŋ", "ʒ", "i"] 
+    letter_mappings:
+      - char: "نُ"
+        phonemes: ["n", "u"]
+        rules: []
+      - char: "ـۨ"
+        phonemes: ["ŋ"]
+        rules: ["ikhfaa_noon"]
+      - char: "جِ"
+        phonemes: ["ʒ", "i"]
+        rules: []
+      - char: "ى"
+        phonemes: []
+        rules: ["iltiqaa_vowel"]
+
+  - text: "فَٱدَّٰرَٰ͏ْٔتُمْ"
+    locations:
+      - "2:72:4"  # Surah Al-Baqarah
+    letter_mappings:
+      - char: "فَ"
+        phonemes: ["f", "a"]
+        rules: []
+      - char: "ٱ"
+        phonemes: []
+        rules: ["hamzat_wasl"]
+      - char: "دَّٰ"
+        phonemes: ["dd", "a:"]
+        rules: ["madd_natural"]
+      - char: "رَٰ͏"
+        phonemes: ["rˤ", "aˤ"]
+        rules: []
+      - char: "ْٔ"
+        phonemes: ["ʔ"]
+        rules: []
+      - char: "تُ"
+        phonemes: ["t", "u"]
+        rules: []
+      - char: "مْ"
+        phonemes: ["m"]
+        rules: []
