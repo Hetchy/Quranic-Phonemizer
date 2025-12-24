@@ -20,7 +20,7 @@ if requirements_file.exists():
 
 setup(
     name="quranic-phonemizer",
-    version="1.0.1",
+    version="1.0.2",
     description="A custom phonemizer (Grapheme to Phoneme converter) for the Qurʾān in the Hafs riwaya",
     long_description=long_description,
     long_description_content_type="text/markdown",
