@@ -54,9 +54,9 @@ LETTER_CLASSES: dict[str, type[LetterSymbol]] = {
     "ۧ":  Yaa, # mini yaa
 }
 
-def _load_special_words(yaml_path: str | Path) -> Dict[str, List[str]]:
+def _load_special_words(yaml_path: str | Path) -> Dict[str, Dict[str, Any]]:
     """
-    Load special words and their phonemes from YAML file.
+    Load special words and their letter mappings from YAML file.
     
     Parameters
     ----------
@@ -65,8 +65,10 @@ def _load_special_words(yaml_path: str | Path) -> Dict[str, List[str]]:
         
     Returns
     -------
-    Dict[str, List[str]]
-        Dictionary mapping location keys to phoneme lists
+    Dict[str, Dict[str, Any]]
+        Dictionary mapping location keys to special word data including:
+        - 'phonemes': List[str] - word-level phonemes
+        - 'letter_mappings': List[Dict] - per-letter mapping with char, phonemes, rules
     """
     with open(yaml_path, 'r', encoding='utf-8') as file:
         data = yaml.safe_load(file)
@@ -75,30 +77,40 @@ def _load_special_words(yaml_path: str | Path) -> Dict[str, List[str]]:
     
     for word_entry in data['special_words']:
         text = word_entry['text']
-        phonemes = word_entry['phonemes']
+        letter_mappings = word_entry.get('letter_mappings', [])
+        
+        # Build word-level phonemes by concatenating letter phonemes
+        word_phonemes = []
+        for letter_map in letter_mappings:
+            word_phonemes.extend(letter_map.get('phonemes', []))
+        
         locations = word_entry['locations']
         
         for location in locations:
-            special_words_map[location] = phonemes
+            special_words_map[location] = {
+                'text': text,
+                'phonemes': word_phonemes,
+                'letter_mappings': letter_mappings
+            }
     
     return special_words_map
 
 
-def _get_special_word_phonemes(location_key: str, special_words_map: Dict[str, List[str]]) -> Optional[List[str]]:
+def _get_special_word_data(location_key: str, special_words_map: Dict[str, Dict[str, Any]]) -> Optional[Dict[str, Any]]:
     """
-    Get phonemes for a special word at a specific location.
+    Get data for a special word at a specific location.
     
     Parameters
     ----------
     location_key : str
         Location key in format "surah:verse:word"
-    special_words_map : Dict[str, List[str]]
-        Dictionary mapping location keys to phoneme lists
+    special_words_map : Dict[str, Dict[str, Any]]
+        Dictionary mapping location keys to special word data
         
     Returns
     -------
-    Optional[List[str]]
-        Phonemes for the special word, or None if not found
+    Optional[Dict[str, Any]]
+        Special word data including phonemes and letter_mappings, or None if not found
     """
     return special_words_map.get(location_key)
 
@@ -137,10 +149,40 @@ class Parser:
         """Parse a word text into a Word object with properly associated symbols."""
         word = Word(location=location, text=text)
         
-        # Check if this is a special word and set phonemes if found
-        special_phonemes = _get_special_word_phonemes(location.location_key, self.special_words_map)
-        if special_phonemes:
-            word.phonemes = special_phonemes
+        # Check if this is a special word with letter mappings
+        special_data = _get_special_word_data(location.location_key, self.special_words_map)
+        if special_data:
+            word.phonemes = special_data['phonemes']
+            letter_mappings = special_data.get('letter_mappings', [])
+            
+            # Create letter symbols from letter_mappings
+            for letter_map in letter_mappings:
+                char = letter_map['char']
+                phonemes = letter_map.get('phonemes', [])
+                rules = letter_map.get('rules', [])
+                
+                # Check if this char is a stop sign (may include leading space)
+                char_stripped = char.strip()
+                if char_stripped in self.stop_sign_map:
+                    stop_type, stop_info = self.stop_sign_map[char_stripped]
+                    word.stop_sign = StopSymbol(stop_type, char_stripped, stop_info.get("phoneme", ""))
+                    continue  # Don't add as a letter
+                
+                # Get letter class and create symbol
+                letter_class = LETTER_CLASSES.get(char, LetterSymbol)
+                letter_type = char  # Use char as type for special words
+                
+                # Look up in letter_map for proper letter type if exists
+                if char in self.letter_map:
+                    letter_type, letter_info = self.letter_map[char]
+                
+                letter = letter_class(letter_type, char, "")
+                letter.phonemes = phonemes
+                letter.letter_rules = rules
+                letter.parent_word = word
+                letter.index_in_word = len(word.letters)
+                word.letters.append(letter)
+            
             return word
         
         # Strip rule tags for character processing
@@ -187,7 +229,7 @@ class Parser:
                     elif next_char in self.extension_map:
                         extension_type, extension_info = self.extension_map[next_char]
                         extension = ExtensionSymbol(extension_type, next_char, extension_info.get("phoneme"))
-                        letter.extension = extension
+                        letter.extensions.append(extension)
                         j += 1
                         continue
                     

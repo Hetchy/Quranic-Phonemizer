@@ -9,9 +9,23 @@ from pathlib import Path
 from .parser import Parser, load_symbol_mappings
 from .word import Word
 from .text_matcher import TextMatcher
-from .mapping import PhonemizationMapping, WordMapping, AlignmentEntry
+from .mapping import PhonemizationMapping, WordMapping, AlignmentEntry, MaddMapping
+from .madd import build_madd_mappings, classify_madd_types
 
 DATA_DIR = Path(__file__).resolve().parent / "resources"
+
+_VOWEL_PHONEMES = {
+    "a",
+    "aˤ",
+    "u",
+    "i",
+    "a:",
+    "aˤ:",
+    "u:",
+    "i:",
+}
+
+_IDGHAM_NASALIZED_PHONEMES = {"m̃", "ñ", "w̃", "j̃"}
 
 
 class Phonemizer:
@@ -20,11 +34,20 @@ class Phonemizer:
         db_path: str | Path = DATA_DIR / "Quran.json",
         map_path: str | Path = DATA_DIR / "base_phonemes.yaml",
         special_words_path: str | Path = DATA_DIR / "special_words.yaml",
+        extra_symbols: Optional[dict[str, dict]] = None,
     ) -> None:
         self.db_path = str(db_path)
         self.map_path = str(map_path)
         self.special_words_path = str(special_words_path)
         symbol_mappings = load_symbol_mappings(map_path)
+        
+        # Merge extra symbols if provided
+        if extra_symbols:
+            for category, items in extra_symbols.items():
+                if category not in symbol_mappings:
+                    symbol_mappings[category] = {}
+                symbol_mappings[category].update(items)
+        
         self.parser = Parser(symbol_mappings, special_words_path)
         self.text_matcher = TextMatcher(db_path, symbol_mappings)
         with (DATA_DIR / "surah_info.json").open("r", encoding="utf-8") as fh:
@@ -257,7 +280,7 @@ class PhonemizeResult:
                     '5': '٥', '6': '٦', '7': '٧', '8': '٨', '9': '٩',
                 }
                 arabic_num = ''.join(arabic_digits[d] for d in prev_verse)
-                parts.append(f" ({arabic_num}) ")
+                parts.append(f" {arabic_num} ")
             parts.append(re.sub(r"</?rule[^>]*?>", "", word.text))
             prev_verse = cur_verse
         if prev_verse is not None:
@@ -266,7 +289,7 @@ class PhonemizeResult:
                 '5': '٥', '6': '٦', '7': '٧', '8': '٨', '9': '٩',
             }
             arabic_num = ''.join(arabic_digits[d] for d in prev_verse)
-            parts.append(f" ({arabic_num}) ")
+            parts.append(f" {arabic_num} ")
         return " ".join(parts)
 
     def phonemes_str(
@@ -319,7 +342,10 @@ class PhonemizeResult:
         flat_phonemes = []
         for word in self._words:
             flat_phonemes.extend(word.get_phonemes())
-        
+
+        self._assign_phoneme_scoped_rules(word_mappings)
+        build_madd_mappings(word_mappings)
+        classify_madd_types(word_mappings)
         alignment = self._build_alignment(word_mappings)
         
         clean_text = re.sub(r"</?rule[^>]*?>", "", self._text)
@@ -332,20 +358,164 @@ class PhonemizeResult:
             alignment=alignment,
         )
 
+    def _assign_phoneme_scoped_rules(self, word_mappings: List[WordMapping]) -> None:
+        """Populate per-phoneme multi-tag rules (`phoneme_rules`) on LetterMappings.
+
+        The phonemizer computes rule context at the letter level, but some letters emit
+        multiple phonemes (e.g. shaddah + tanween). This routine maps letter-scoped
+        rules to the specific emitted phoneme(s) they actually affect.
+
+        Silent-letter rules remain in `letter_rules` only (since no phoneme is emitted).
+        """
+
+        def _ensure_phoneme_rules(letter_map) -> None:
+            if letter_map.phoneme_rules and len(letter_map.phoneme_rules) == len(letter_map.phonemes):
+                return
+            letter_map.phoneme_rules = [[] for _ in letter_map.phonemes]
+
+        def _add_rule(letter_map, phoneme_idx: int, rule: str) -> None:
+            if phoneme_idx < 0 or phoneme_idx >= len(letter_map.phonemes):
+                return
+            _ensure_phoneme_rules(letter_map)
+            bucket = letter_map.phoneme_rules[phoneme_idx]
+            if rule not in bucket:
+                bucket.append(rule)
+
+        def _tag_all(letter_map, rule: str) -> None:
+            for i in range(len(letter_map.phonemes)):
+                _add_rule(letter_map, i, rule)
+
+        def _tag_first_non_vowel(letter_map, rule: str) -> None:
+            for i, ph in enumerate(letter_map.phonemes):
+                if ph and ph not in _VOWEL_PHONEMES:
+                    _add_rule(letter_map, i, rule)
+                    return
+
+        # Flatten letter mappings in reading order for cross-letter tagging (iltiqaa).
+        flat_letters: List[tuple[int, int]] = []
+        for w_idx, word_map in enumerate(word_mappings):
+            for l_idx, _ in enumerate(word_map.letter_mappings):
+                flat_letters.append((w_idx, l_idx))
+
+        # Pass 1: letter-local mapping (rules applied to this letter's own emitted phonemes).
+        for w_idx, word_map in enumerate(word_mappings):
+            for letter_map in word_map.letter_mappings:
+                if not letter_map.phonemes:
+                    continue
+                _ensure_phoneme_rules(letter_map)
+
+                rules = list(letter_map.letter_rules) if letter_map.letter_rules else []
+
+                for rule in rules:
+                    if rule in ("ikhfaa_noon", "ikhfaa_tanween", "ikhfaa_shafawi"):
+                        for i, ph in enumerate(letter_map.phonemes):
+                            if ph == "ŋ":
+                                _add_rule(letter_map, i, rule)
+                        continue
+
+                    if rule in ("iqlab_noon", "iqlab_tanween"):
+                        for i, ph in enumerate(letter_map.phonemes):
+                            if ph == "m̃":
+                                _add_rule(letter_map, i, rule)
+                        continue
+
+                    if rule == "izhar_tanween":
+                        for i, ph in enumerate(letter_map.phonemes):
+                            if ph == "n":
+                                _add_rule(letter_map, i, rule)
+                        continue
+
+                    if rule == "noon_ghunnah":
+                        for i, ph in enumerate(letter_map.phonemes):
+                            if ph == "ñ":
+                                _add_rule(letter_map, i, rule)
+                        continue
+
+                    if rule in ("meem_ghunnah", "idgham_shafawi"):
+                        for i, ph in enumerate(letter_map.phonemes):
+                            if ph == "m̃":
+                                _add_rule(letter_map, i, rule)
+                        continue
+
+                    if rule in ("idgham_ghunnah_noon", "idgham_ghunnah_tanween"):
+                        for i, ph in enumerate(letter_map.phonemes):
+                            if ph in _IDGHAM_NASALIZED_PHONEMES:
+                                _add_rule(letter_map, i, rule)
+                        continue
+
+                    if rule in ("idgham_bila_ghunnah_noon", "idgham_bila_ghunnah_tanween"):
+                        # Tag the assimilated consonant on the target letter (typically lam/raa).
+                        # Avoid tagging the preceding tanween short vowel by requiring a non-vowel phoneme.
+                        _tag_first_non_vowel(letter_map, rule)
+                        continue
+
+                    if rule in ("raa_heavy", "raa_light", "lam_heavy", "lam_light"):
+                        _tag_first_non_vowel(letter_map, rule)
+                        continue
+
+                    if rule in ("qalqala_sughra", "qalqala_kubra"):
+                        # Only tag the inserted "Q" phoneme (not the consonant).
+                        for i, ph in enumerate(letter_map.phonemes):
+                            if ph == "Q":
+                                _add_rule(letter_map, i, rule)
+                        continue
+
+                    if rule == "taa_marbuta_waqf":
+                        for i, ph in enumerate(letter_map.phonemes):
+                            if ph == "h":
+                                _add_rule(letter_map, i, rule)
+                        continue
+
+                    if rule in ("hamza_wasl_noun", "hamza_wasl_verb_damma", "hamza_wasl_verb_kasra"):
+                        _tag_all(letter_map, rule)
+                        continue
+
+                    if rule == "waqf_tanween":
+                        _tag_all(letter_map, rule)
+                        continue
+
+                    # Silent rules or metadata-only rules: keep as letter_rules only.
+
+        # Pass 2: cross-letter effects for silent hamza-wasl iltiqaa rules.
+        for flat_idx, (w_idx, l_idx) in enumerate(flat_letters):
+            letter_map = word_mappings[w_idx].letter_mappings[l_idx]
+            rules = list(letter_map.letter_rules) if letter_map.letter_rules else []
+
+            for rule in rules:
+                if rule not in ("iltiqaa_tanween", "iltiqaa_vowel"):
+                    continue
+                # Find previous letter that emitted at least one phoneme.
+                prev_idx = flat_idx - 1
+                while prev_idx >= 0:
+                    pw_idx, pl_idx = flat_letters[prev_idx]
+                    prev_letter_map = word_mappings[pw_idx].letter_mappings[pl_idx]
+                    if prev_letter_map.phonemes:
+                        target_phoneme_idx = len(prev_letter_map.phonemes) - 1
+                        _add_rule(prev_letter_map, target_phoneme_idx, rule)
+                        break
+                    prev_idx -= 1
+
     def _build_alignment(self, word_mappings: List[WordMapping]) -> List[AlignmentEntry]:
         alignment = []
         phoneme_idx = 0
         
         for word_idx, word_map in enumerate(word_mappings):
             for letter_map in word_map.letter_mappings:
-                for phoneme in letter_map.phonemes:
+                for local_idx, phoneme in enumerate(letter_map.phonemes):
+                    rules: List[str] = []
+                    if (
+                        letter_map.phoneme_rules
+                        and local_idx < len(letter_map.phoneme_rules)
+                        and letter_map.phoneme_rules[local_idx]
+                    ):
+                        rules = list(letter_map.phoneme_rules[local_idx])
                     entry = AlignmentEntry(
                         phoneme_index=phoneme_idx,
                         phoneme=phoneme,
                         word_index=word_idx,
                         letter_index=letter_map.index,
                         source_char=letter_map.char,
-                        rule=letter_map.rule,
+                        rules=rules,
                     )
                     alignment.append(entry)
                     phoneme_idx += 1
@@ -533,4 +703,3 @@ class PhonemizeResult:
         else:
             raise ValueError(f"Unknown format: {fmt}")
         return path
-

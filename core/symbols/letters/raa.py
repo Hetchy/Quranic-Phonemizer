@@ -10,8 +10,8 @@ class Raa(LetterSymbol):
         prev2 = self.prev_letter(2)
         nxt = self.next_letter()
 
-        if not self.diacritic:
-            self.set_mapping(mapping_type=MappingType.SILENT, rule="raa_idgham")
+        if not self.diacritic: # e.g. وَٱذۡكُر رَّبَّكَ
+            self.set_mapping(mapping_type=MappingType.SILENT, rule="idgham_mutamathilayn")
             return []
 
         match self.diacritic.name:

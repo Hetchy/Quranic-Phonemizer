@@ -257,11 +257,12 @@ def save_verses_with_all_rules(
         out_path = os.path.join(output_dir, f"{rule}.md")
         with open(out_path, "w", encoding="utf-8") as out_f:
             out_f.write(html if html else "")
+
 def phonemize_and_save(
     ref: str,
     output_path: str | Path,
     *,
-    db_path: str | Path = "resources/Quran.json",
+    db_path: str | Path = "core/resources/Quran.json",
     stops: List[str] = [],
 ) -> None:
     """

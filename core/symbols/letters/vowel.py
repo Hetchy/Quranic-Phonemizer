@@ -40,8 +40,29 @@ class Waw(VowelLetter):
         if self.has_symbol("SILENT_ALWAYS"):
             self.set_mapping(mapping_type=MappingType.SILENT, rule="waw_silent")
             return []
+        
+        # Idgham mutamathilayn أَو وَّزَنُوهُمْ
+        next_letter = self.next_letter()
+        if self.next_letter() and self.next_letter().char == "و" and self.next_letter().has_shaddah:
+            self.set_mapping(mapping_type=MappingType.SILENT, rule="idgham_mutamathilayn")
+            return []
+
+        # Idgham mutamathilayn e.g. ءَاتَوا۟ وَّقُلُوبُهُمْ
+        if self.next_letter() and (self.next_letter().char == "ا"):
+            # stop on ءَاتَوا۟
+            if (self.parent_word.is_stopping and self.prev_letter().has_fatha
+                and not self.diacritic and not self.extensions):
+                return ["w"]
+            
+            # continue 
+            if (self.next_letter(2) and self.next_letter(2).char == "و" and self.next_letter(2).has_shaddah):
+                self.set_mapping(mapping_type=MappingType.SILENT, rule="idgham_mutamathilayn")
+                return []
+        
         if self.diacritic:
             return super().phonemize_letter()
+
+        # "a" for cases like الصَّلَوٰة 
         return self._lengthen_compatible_phoneme(["a", "u"])
 
 
@@ -50,6 +71,12 @@ class Yaa(VowelLetter):
         if self.has_symbol("SILENT_ALWAYS"):
             self.set_mapping(mapping_type=MappingType.SILENT, rule="yaa_silent")
             return []
+        
         if self.diacritic:
             return super().phonemize_letter()
+        
+        if self.next_letter() and self.next_letter().char == "ي": # بِأَييِّكُمُ
+            self.set_mapping(mapping_type=MappingType.SILENT, rule="idgham_mutamathilayn")
+            return []
+
         return self._lengthen_compatible_phoneme(["i"])
