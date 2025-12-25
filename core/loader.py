@@ -21,13 +21,20 @@ from typing import Dict, List, Tuple
 
 
 # ----------------------------------------------------------------------
-# JSON loading
+# JSON loading (with caching)
 # ----------------------------------------------------------------------
 
+# Module-level cache for database to avoid re-parsing JSON on every call
+_db_cache: Dict[str, Dict[str, dict]] = {}
+
+
 def load_db(db_path: str | Path) -> Dict[str, dict]:
-    """Read the Qurʾān word-by-word database into a dict."""
-    with Path(db_path).expanduser().open(encoding="utf-8") as fh:
-        return json.load(fh)
+    """Read the Qurʾān word-by-word database into a dict (cached)."""
+    path_str = str(Path(db_path).resolve())
+    if path_str not in _db_cache:
+        with Path(db_path).expanduser().open(encoding="utf-8") as fh:
+            _db_cache[path_str] = json.load(fh)
+    return _db_cache[path_str]
 
 
 # ----------------------------------------------------------------------
