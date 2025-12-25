@@ -496,7 +496,7 @@ class TextMatcher:
         # Return the first (best) candidate as reference range with score
         return self._build_reference_range(best_candidate), best_candidate["total_score"]
     
-    def find_matching_range_scoped_with_score_space_robust(self, input_text: str, scope_ref: str, word_buffer: int = 10) -> tuple[str | None, float]:
+    def find_matching_range_scoped_with_score_space_robust(self, input_text: str, scope_ref: str, word_buffer: int = 5) -> tuple[str | None, float]:
         """
         Find the best matching verse range using space-robust algorithm with variable window sizes.
         
@@ -509,7 +509,7 @@ class TextMatcher:
             Arabic text to search for
         scope_ref : str
             Traditional reference format defining the search scope (e.g., "2", "2:1", "2:1-2:5")
-        word_buffer : int, default 10
+        word_buffer : int, default 5
             Number of words +/- to consider around input length
             
         Returns
@@ -558,7 +558,7 @@ class TextMatcher:
         # Return the first (best) candidate as reference range with score
         return self._build_reference_range(best_candidate), best_candidate["total_score"]
     
-    def _find_candidates_space_robust_scoped(self, input_words: List[str], scope_keys: List[str], word_buffer: int = 10) -> List[Dict[str, Any]]:
+    def _find_candidates_space_robust_scoped(self, input_words: List[str], scope_keys: List[str], word_buffer: int = 5) -> List[Dict[str, Any]]:
         """
         Find candidate matches using space-robust algorithm with variable window sizes.
         
@@ -574,7 +574,7 @@ class TextMatcher:
             Preprocessed input words to match
         scope_keys : List[str]
             Ordered list of location keys within the scope
-        word_buffer : int, default 10
+        word_buffer : int, default 5
             Number of words +/- to consider around input length
             
         Returns

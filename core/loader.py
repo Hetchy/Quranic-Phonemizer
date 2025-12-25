@@ -24,8 +24,13 @@ from typing import Dict, List, Tuple
 # JSON loading (with caching)
 # ----------------------------------------------------------------------
 
+import bisect
+
 # Module-level cache for database to avoid re-parsing JSON on every call
 _db_cache: Dict[str, Dict[str, dict]] = {}
+
+# Pre-sorted index cache: maps db_path -> (sorted_tuples, sorted_keys)
+_index_cache: Dict[str, Tuple[List[Tuple[int, int, int]], List[str]]] = {}
 
 
 def load_db(db_path: str | Path) -> Dict[str, dict]:
@@ -34,7 +39,29 @@ def load_db(db_path: str | Path) -> Dict[str, dict]:
     if path_str not in _db_cache:
         with Path(db_path).expanduser().open(encoding="utf-8") as fh:
             _db_cache[path_str] = json.load(fh)
+        # Build sorted index for fast lookups
+        _build_index(path_str, _db_cache[path_str])
     return _db_cache[path_str]
+
+
+def _build_index(path_str: str, db: Dict[str, dict]) -> None:
+    """Build a sorted index of keys for binary search lookups."""
+    keys = list(db.keys())
+    tuples = [_key_to_tuple(k) for k in keys]
+    # Sort by tuple and keep keys aligned
+    sorted_pairs = sorted(zip(tuples, keys), key=lambda x: x[0])
+    sorted_tuples = [p[0] for p in sorted_pairs]
+    sorted_keys = [p[1] for p in sorted_pairs]
+    _index_cache[path_str] = (sorted_tuples, sorted_keys)
+
+
+def _get_index(db_path: str | Path) -> Tuple[List[Tuple[int, int, int]], List[str]]:
+    """Get the sorted index for a database path."""
+    path_str = str(Path(db_path).resolve())
+    if path_str not in _index_cache:
+        # Ensure db is loaded (which builds the index)
+        load_db(db_path)
+    return _index_cache[path_str]
 
 
 # ----------------------------------------------------------------------
@@ -62,9 +89,10 @@ def _parse_endpoint(spec: str) -> Tuple[int | None, int | None, int | None]:
     raise ValueError(f"Bad reference component: {spec}")
 
 
-def keys_for_reference(ref: str, db: Dict[str, dict]) -> List[str]:
+def keys_for_reference(ref: str, db: Dict[str, dict], db_path: str | Path = None) -> List[str]:
     """
     Return an **ordered** list of location keys matching *ref*.
+    Uses binary search on pre-sorted index for O(log n) performance.
     """
     if "-" not in ref:                               # single spec
         start = end = _parse_endpoint(ref)
@@ -84,9 +112,29 @@ def keys_for_reference(ref: str, db: Dict[str, dict]) -> List[str]:
     lo = canon(start)
     hi = canon(end, is_end=True)
 
-    # Collect keys inside range
-    selected = [
-        k for k in db.keys()
-        if lo <= _key_to_tuple(k) <= hi
-    ]
-    return sorted(selected, key=_key_to_tuple)
+    # Try to use indexed lookup if we have the index
+    # Find the db_path from cache keys (use first cached path that matches this db)
+    index_path = None
+    for cached_path, cached_db in _db_cache.items():
+        if cached_db is db:
+            index_path = cached_path
+            break
+    
+    if index_path and index_path in _index_cache:
+        # Use binary search for O(log n) lookup
+        sorted_tuples, sorted_keys = _index_cache[index_path]
+        
+        # Find start index using bisect_left
+        start_idx = bisect.bisect_left(sorted_tuples, lo)
+        # Find end index using bisect_right with hi+epsilon (to include hi)
+        end_idx = bisect.bisect_right(sorted_tuples, hi)
+        
+        # Return the slice of keys
+        return sorted_keys[start_idx:end_idx]
+    else:
+        # Fallback to O(n) scan if no index available
+        selected = [
+            k for k in db.keys()
+            if lo <= _key_to_tuple(k) <= hi
+        ]
+        return sorted(selected, key=_key_to_tuple)
