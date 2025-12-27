@@ -10,15 +10,15 @@ class HamzaWasl(LetterSymbol):
             third_letter = self.next_letter(2)
             
             if second_letter and second_letter.char == "ل":
-                self.set_mapping(rule="hamza_wasl_noun")
+                self.set_mapping(rule="hamza_wasl_fatha")
                 return [self.base_phoneme, "a"]
             
             if third_letter and third_letter.diacritic:
                 if third_letter.has_damma:
-                    self.set_mapping(rule="hamza_wasl_verb_damma")
+                    self.set_mapping(rule="hamza_wasl_damma")
                     return [self.base_phoneme, "u"]
                 if third_letter.has_fatha or third_letter.has_kasra:
-                    self.set_mapping(rule="hamza_wasl_verb_kasra")
+                    self.set_mapping(rule="hamza_wasl_kasra")
                     return [self.base_phoneme, "i"]
             
         if self.is_first:  # Iltiqaa Sakinayn
@@ -35,6 +35,7 @@ class HamzaWasl(LetterSymbol):
                 prev_letter.phonemes.append("i")
                 self.set_mapping(mapping_type=MappingType.SILENT, rule="iltiqaa_tanween")
 
+            # Case 2: Long vowel demotion to short
             prev_phoneme = self.prev_phoneme()
             if prev_phoneme in ["a:", "aˤ:", "u:", "i:"]:
                 self.modify_prev_phoneme(prev_phoneme[:-1])
