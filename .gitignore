@@ -1,7 +1,9 @@
 __pycache__/
 *.py[cod]
 out
-resources/archive
+core/resources/tajweed_occurences
+core/resources/archive
+mappings.md
 test.ipynb
 .windsurf
 .vscode
