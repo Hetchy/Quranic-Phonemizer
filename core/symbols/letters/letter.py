@@ -140,10 +140,11 @@ class LetterSymbol(Symbol):
         if self.is_last and self.parent_word.is_stopping:
             if self.char == "ء" and self.has_fathatan:
                 self.diacritic = DiacriticSymbol("FATHA", "َ", "a")
+                self.set_mapping(rule="waqf_tanween")
                 self.extend()
             elif self.char in ["ى", "ا"]:
                 self.diacritic = None
-            else: # Change diacritic ot sukun
+            else: # Change diacritic to sukun
                 self.diacritic = DiacriticSymbol("SUKUN", "۟", None)
         
         # Check for special stopping rules (location-specific)
@@ -157,7 +158,6 @@ class LetterSymbol(Symbol):
                 # Restore originals before returning
                 self.diacritic = original_diacritic
                 self.has_shaddah = original_shaddah
-                self.extensions = original_extensions
                 return self.phonemes
             
             # Check for diacritic override
