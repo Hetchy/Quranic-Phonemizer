@@ -11,6 +11,7 @@ class Meem(LetterSymbol):
             return [get_rule_phoneme("idgham", "nasalized_map").get("m")]
         
         if self.diacritic:
+            self.set_mapping(rule="izhar_shafawi")
             return [self.base_phoneme]
         
         next_letter = self.next_letter()
@@ -28,4 +29,5 @@ class Meem(LetterSymbol):
             return [get_rule_phoneme("idgham", "nasalized_map").get("m")]
         
         # Izhar Shafawi
+        self.set_mapping(rule="izhar_shafawi")
         return [self.base_phoneme]

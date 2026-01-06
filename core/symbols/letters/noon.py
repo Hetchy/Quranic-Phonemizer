@@ -11,6 +11,7 @@ class Noon(LetterSymbol):
             return [get_rule_phoneme("idgham", "nasalized_map").get("n")]
         
         if self.diacritic:
+            self.set_mapping(rule="izhar_noon")
             return [self.base_phoneme]
         
         next_letter = self.next_letter()
@@ -44,4 +45,5 @@ class Noon(LetterSymbol):
             return []
         
         # Izhar
+        self.set_mapping(rule="izhar_noon")
         return [self.base_phoneme]

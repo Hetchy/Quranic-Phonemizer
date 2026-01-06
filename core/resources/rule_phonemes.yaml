@@ -11,7 +11,8 @@ ikhfaa:
   shafawi_phoneme: "ŋ"
 
 iqlab:
-  phoneme: "m̃"
+  phoneme: "ŋ"
+  # phoneme: "m̃"
 
 qalqala:
   sughra: "Q"

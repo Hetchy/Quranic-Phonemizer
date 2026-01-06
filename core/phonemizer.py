@@ -98,6 +98,8 @@ class Phonemizer:
         ref_text: str = None,
         stops: List[str] = [],
         debug: bool = False,
+        iqlab_phoneme: Optional[str] = None,
+        ikhfaa_shafawi_phoneme: Optional[str] = None,
     ) -> PhonemizeResult:
         if ref is None and ref_text is None:
             raise ValueError("Either 'ref' or 'ref_text' must be provided")
@@ -156,6 +158,14 @@ class Phonemizer:
         invalid_stops = set(stops) - self.valid_stops
         if invalid_stops:
             raise ValueError(f"Invalid stop types: {invalid_stops}. Valid stops are: {self.valid_stops}")
+
+        # Set phoneme overrides in registry before phonemization
+        from .phoneme_registry import set_phoneme_override, clear_phoneme_overrides
+        clear_phoneme_overrides()
+        if iqlab_phoneme is not None:
+            set_phoneme_override("iqlab", "phoneme", iqlab_phoneme)
+        if ikhfaa_shafawi_phoneme is not None:
+            set_phoneme_override("ikhfaa", "shafawi_phoneme", ikhfaa_shafawi_phoneme)
 
         words = self.parser.load_words(ref, self.db_path, stop_types=stops)
         for word in words:
