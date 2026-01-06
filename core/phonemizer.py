@@ -159,13 +159,13 @@ class Phonemizer:
         if invalid_stops:
             raise ValueError(f"Invalid stop types: {invalid_stops}. Valid stops are: {self.valid_stops}")
 
-        # Set phoneme overrides in registry before phonemization
-        from .phoneme_registry import set_phoneme_override, clear_phoneme_overrides
-        clear_phoneme_overrides()
-        if iqlab_phoneme is not None:
-            set_phoneme_override("iqlab", "phoneme", iqlab_phoneme)
-        if ikhfaa_shafawi_phoneme is not None:
-            set_phoneme_override("ikhfaa", "shafawi_phoneme", ikhfaa_shafawi_phoneme)
+        # Set phoneme overrides if explicitly passed (don't clear existing ones)
+        if iqlab_phoneme is not None or ikhfaa_shafawi_phoneme is not None:
+            from .phoneme_registry import set_phoneme_override
+            if iqlab_phoneme is not None:
+                set_phoneme_override("iqlab", "phoneme", iqlab_phoneme)
+            if ikhfaa_shafawi_phoneme is not None:
+                set_phoneme_override("ikhfaa", "shafawi_phoneme", ikhfaa_shafawi_phoneme)
 
         words = self.parser.load_words(ref, self.db_path, stop_types=stops)
         for word in words:
