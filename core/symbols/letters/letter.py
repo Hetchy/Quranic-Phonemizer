@@ -144,9 +144,14 @@ class LetterSymbol(Symbol):
                 self.extend()
             elif self.char in ["ى", "ا"]:
                 self.diacritic = None
-            else: # Change diacritic to sukun
+            else:  # Change diacritic to sukun
                 self.diacritic = DiacriticSymbol("SUKUN", "۟", None)
         
+        elif self.parent_word.is_stopping and self.diacritic \
+            and self.next_letter() and self.next_letter().is_last and self.next_letter().has_symbol("SILENT_ALWAYS"):
+            # e.g. stop on ٱلْعُلَمَـٰٓؤُا۟
+            self.diacritic = DiacriticSymbol("SUKUN", "۟", None)
+
         # Check for special stopping rules (location-specific)
         if self.parent_word.is_stopping:
             location = self.parent_word.location.location_key
