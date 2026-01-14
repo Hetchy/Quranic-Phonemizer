@@ -359,23 +359,24 @@ def _apply_natural_madd_overrides(word_mappings: List[WordMapping]) -> None:
 
 
 def _load_munfasil_overrides() -> Set[str]:
-    """Load munfasil override references from YAML file."""
+    """Load munfasil override references from bundled YAML file."""
     global _munfasil_overrides_cache
-    
+
     if _munfasil_overrides_cache is not None:
         return _munfasil_overrides_cache
-    
+
     import yaml
-    yaml_path = Path(__file__).resolve().parent.parent.parent / 'recitation_app' / 'data' / 'madd_munfasil_overrides.yaml'
-    
+    # Load from bundled resources (works when pip-installed)
+    yaml_path = Path(__file__).resolve().parent / 'resources' / 'madd_munfasil_special.yaml'
+
     if not yaml_path.exists():
         _munfasil_overrides_cache = set()
         return _munfasil_overrides_cache
-    
+
     try:
         with open(yaml_path, 'r', encoding='utf-8') as f:
             data = yaml.safe_load(f)
-        _munfasil_overrides_cache = set(data.get('munfasil_overrides', []))
+        _munfasil_overrides_cache = set(data.get('munfasil_special', []))
         return _munfasil_overrides_cache
     except Exception:
         _munfasil_overrides_cache = set()
