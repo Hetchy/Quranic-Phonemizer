@@ -218,6 +218,9 @@ class LetterSymbol(Symbol):
         short_vowel_ph = self.diacritic.base_phoneme[0]
         noon_ph = self.diacritic.base_phoneme[1]
 
+        if self.has_fathatan and (self.is_heavy or self.char == 'ر'):
+            short_vowel_ph += "ˤ"
+
         next_letter = self.next_letter(1)
         if not next_letter:
             return []
