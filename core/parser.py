@@ -157,26 +157,51 @@ class Parser:
             
             # Create letter symbols from letter_mappings
             for letter_map in letter_mappings:
-                char = letter_map['char']
+                full_char = letter_map['char']
                 phonemes = letter_map.get('phonemes', [])
                 rules = letter_map.get('rules', [])
-                
+
                 # Check if this char is a stop sign (may include leading space)
-                char_stripped = char.strip()
+                char_stripped = full_char.strip()
                 if char_stripped in self.stop_sign_map:
                     stop_type, stop_info = self.stop_sign_map[char_stripped]
                     word.stop_sign = StopSymbol(stop_type, char_stripped, stop_info.get("phoneme", ""))
                     continue  # Don't add as a letter
-                
-                # Get letter class and create symbol
-                letter_class = LETTER_CLASSES.get(char, LetterSymbol)
-                letter_type = char  # Use char as type for special words
-                
+
+                # Extract base letter (first character) and modifiers
+                # This ensures is_ikhfaa and similar checks work correctly
+                base_char = full_char[0] if full_char else ''
+                modifiers = full_char[1:] if len(full_char) > 1 else ''
+
+                # Get letter class and create symbol using base char
+                letter_class = LETTER_CLASSES.get(base_char, LetterSymbol)
+                letter_type = base_char
+                base_phoneme = ""
+
                 # Look up in letter_map for proper letter type if exists
-                if char in self.letter_map:
-                    letter_type, letter_info = self.letter_map[char]
-                
-                letter = letter_class(letter_type, char, "")
+                if base_char in self.letter_map:
+                    letter_type, letter_info = self.letter_map[base_char]
+                    base_phoneme = letter_info.get("phoneme", "")
+
+                letter = letter_class(letter_type, base_char, base_phoneme)
+
+                # Process modifiers (diacritics, extensions, shaddah, other)
+                for mod_char in modifiers:
+                    if mod_char in self.diacritic_map:
+                        diacritic_type, diacritic_info = self.diacritic_map[mod_char]
+                        diacritic = DiacriticSymbol(diacritic_type, mod_char, diacritic_info.get("phoneme"))
+                        letter.diacritic = diacritic
+                    elif mod_char in self.extension_map:
+                        extension_type, extension_info = self.extension_map[mod_char]
+                        extension = ExtensionSymbol(extension_type, mod_char, extension_info.get("phoneme"))
+                        letter.extensions.append(extension)
+                    elif mod_char == "ّ":
+                        letter.has_shaddah = True
+                    elif mod_char in self.other_map:
+                        other_type, other_info = self.other_map[mod_char]
+                        other = OtherSymbol(other_type, mod_char, other_info.get("phoneme"))
+                        letter.other_symbols.append(other)
+
                 letter.phonemes = phonemes
                 letter.letter_rules = rules
                 letter.parent_word = word
