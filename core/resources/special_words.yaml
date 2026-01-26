@@ -37,7 +37,7 @@ special_words:
       - "32:1:1"  # Surah As-Sajdah
     letter_mappings:
       - char: "ا"
-        phonemes: ["a", "l", "i", "f"]
+        phonemes: ["ʔ", "a", "l", "i", "f"]
         rules: []
       - char: "لٓ"
         phonemes: ["l", "a:"]
@@ -55,7 +55,7 @@ special_words:
       - "15:1:1"  # Surah Al-Hijr
     letter_mappings:
       - char: "ا"
-        phonemes: ["a", "l", "i", "f"]
+        phonemes: ["ʔ", "a", "l", "i", "f"]
         rules: []
       - char: "لٓ"
         phonemes: ["l", "a:"]
@@ -72,7 +72,7 @@ special_words:
       - "7:1:1"   # Surah Al-A'raf
     letter_mappings:
       - char: "ا"
-        phonemes: ["a", "l", "i", "f"]
+        phonemes: ["ʔ", "a", "l", "i", "f"]
         rules: []
       - char: "لٓ"
         phonemes: ["l", "a:"]
@@ -89,7 +89,7 @@ special_words:
       - "13:1:1"  # Surah Ar-Ra'd
     letter_mappings:
       - char: "ا"
-        phonemes: ["a", "l", "i", "f"]
+        phonemes: ["ʔ", "a", "l", "i", "f"]
         rules: []
       - char: "لٓ"
         phonemes: ["l", "a:"]
@@ -286,4 +286,27 @@ special_words:
         rules: []
       - char: "مْ"
         phonemes: ["m"]
+        rules: []
+
+  - text: "ءَا۬عْجَمِىٌّ"
+    locations:
+      - "41:44:9"  # Surah Fussilat
+    letter_mappings:
+      - char: "ءَ"
+        phonemes: ["ʔ", "a"]
+        rules: []
+      - char: "ا۬"
+        phonemes: ["ʔ", "a"]
+        rules: []
+      - char: "عْ"
+        phonemes: ["ʕ"]
+        rules: []
+      - char: "جَ"
+        phonemes: ["ʒ", "a"]
+        rules: []
+      - char: "مِ"
+        phonemes: ["m", "i"]
+        rules: []
+      - char: "ىٌّ"
+        phonemes: ["jj", "u"]
         rules: []
