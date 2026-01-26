@@ -53,6 +53,16 @@ class Word:
             if letter.can_phonemize():
                 letter.phonemize()
 
+        # One-off fix: 41:44:10 waw should be nasalized after special word 41:44:9
+        if (self.location.location_key == "41:44:10" and
+            self.prev_word and
+            self.prev_word.phonemes and  # prev word is a special word
+            self.letters and self.letters[0].phonemes):
+            # Replace 'w' with nasalized 'w̃' for idgham ghunnah
+            if self.letters[0].phonemes[0] == "w":
+                self.letters[0].phonemes[0] = "w̃"
+                self.letters[0].set_mapping(rule="idgham_ghunnah_tanween")
+
     def get_phonemes(self) -> List[str]:
         if self.phonemes:
             return self.phonemes
