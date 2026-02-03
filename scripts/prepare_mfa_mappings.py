@@ -892,9 +892,9 @@ def format_by_verse(
 @dataclass
 class FlatMappingResult:
     """Result of flat mapping conversion for external use."""
-    ref: str
     entries: List[Tuple[str, List[str]]]
     mapping: PhonemizationMapping
+    ref: str = ""  # Optional, may be empty if mapping provided directly
 
     def to_list(self) -> List[Tuple[str, List[str]]]:
         """Return entries as a list of (chars, phonemes) tuples."""
@@ -929,7 +929,8 @@ class FlatMappingResult:
 
 
 def get_flat_mapping(
-    ref: str,
+    ref: str = "",
+    mapping: Optional[PhonemizationMapping] = None,
     stops: Optional[List[str]] = None,
     validate_result: bool = False,
 ) -> FlatMappingResult:
@@ -937,15 +938,20 @@ def get_flat_mapping(
     Generate flat many-to-many letter-phoneme mapping for a Quran reference.
 
     Args:
-        ref: Quran reference (e.g., "1" for Al-Fatiha, "2:255" for Ayat al-Kursi)
-        stops: Stop types (default: ["verse"])
+        ref: Quran reference (e.g., "1" for Al-Fatiha, "2:255" for Ayat al-Kursi).
+             Optional if mapping is provided directly.
+        mapping: Pre-computed PhonemizationMapping. If provided, skips phonemization.
+                 This is useful to avoid redundant phonemization when the mapping
+                 is already available from a prior phonemize() call.
+        stops: Stop types (default: ["verse"]). Only used if mapping is None.
         validate_result: If True, raises ValueError on validation failure
 
     Returns:
         FlatMappingResult with entries and metadata
 
     Raises:
-        ValueError: If validate_result=True and validation fails
+        ValueError: If validate_result=True and validation fails, or if neither
+                    ref nor mapping is provided.
 
     Example:
         >>> from scripts.prepare_mfa_mappings import get_flat_mapping
@@ -955,17 +961,27 @@ def get_flat_mapping(
         ب -> ['b', 'i']
         س -> ['s']
         م  -> ['m', 'i']
-    """
-    if stops is None:
-        stops = ["verse"]
 
-    phonemizer = Phonemizer()
-    phon_result = phonemizer.phonemize(ref, stops=stops)
-    mapping = phon_result.get_mapping()
+        # With pre-computed mapping (avoids redundant phonemization):
+        >>> from core.phonemizer import Phonemizer
+        >>> pm = Phonemizer()
+        >>> phon_result = pm.phonemize("1:1")
+        >>> mapping = phon_result.get_mapping()
+        >>> result = get_flat_mapping(mapping=mapping)
+    """
+    if mapping is None:
+        # Phonemize only if mapping not provided
+        if not ref:
+            raise ValueError("Either ref or mapping must be provided")
+        if stops is None:
+            stops = ["verse"]
+        phonemizer = Phonemizer()
+        phon_result = phonemizer.phonemize(ref, stops=stops)
+        mapping = phon_result.get_mapping()
 
     flat = build_flat_mapping(mapping)
 
-    result = FlatMappingResult(ref=ref, entries=flat, mapping=mapping)
+    result = FlatMappingResult(entries=flat, mapping=mapping, ref=ref)
 
     if validate_result:
         violations = result.validate()
