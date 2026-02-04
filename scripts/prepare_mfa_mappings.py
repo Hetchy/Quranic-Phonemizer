@@ -556,9 +556,19 @@ def handle_iltiqaa_vowel(
 # Main Conversion
 # =============================================================================
 
-def build_flat_mapping(mapping: PhonemizationMapping) -> List[Tuple[str, List[str]]]:
-    """Convert PhonemizationMapping to flat [chars, phonemes] sequence."""
-    words = mapping.words
+def build_flat_mapping(
+    mapping: PhonemizationMapping,
+    words: Optional[List[WordMapping]] = None,
+) -> List[Tuple[str, List[str]]]:
+    """Convert PhonemizationMapping to flat [chars, phonemes] sequence.
+
+    Args:
+        mapping: The full phonemization mapping (provides context for special rules)
+        words: Optional filtered word list. If None, uses mapping.words.
+               Useful for generating flat mapping for a word range subset.
+    """
+    if words is None:
+        words = mapping.words
 
     # Phase 1: Build proto-entries per word
     all_word_entries: List[List[ProtoEntry]] = []
@@ -931,6 +941,7 @@ class FlatMappingResult:
 def get_flat_mapping(
     ref: str = "",
     mapping: Optional[PhonemizationMapping] = None,
+    words: Optional[List[WordMapping]] = None,
     stops: Optional[List[str]] = None,
     validate_result: bool = False,
 ) -> FlatMappingResult:
@@ -943,6 +954,10 @@ def get_flat_mapping(
         mapping: Pre-computed PhonemizationMapping. If provided, skips phonemization.
                  This is useful to avoid redundant phonemization when the mapping
                  is already available from a prior phonemize() call.
+        words: Optional filtered word list. If None, uses mapping.words.
+               Useful for generating flat mapping for a subset of words (e.g., when
+               aligning a word range like "76:11:6-76:12:5" where the mapping
+               contains full verses but only a subset of words are needed).
         stops: Stop types (default: ["verse"]). Only used if mapping is None.
         validate_result: If True, raises ValueError on validation failure
 
@@ -968,6 +983,10 @@ def get_flat_mapping(
         >>> phon_result = pm.phonemize("1:1")
         >>> mapping = phon_result.get_mapping()
         >>> result = get_flat_mapping(mapping=mapping)
+
+        # With filtered words (for word range alignment):
+        >>> filtered_words = [w for w in mapping.words if w.location >= "7:2:3"]
+        >>> result = get_flat_mapping(mapping=mapping, words=filtered_words)
     """
     if mapping is None:
         # Phonemize only if mapping not provided
@@ -979,7 +998,7 @@ def get_flat_mapping(
         phon_result = phonemizer.phonemize(ref, stops=stops)
         mapping = phon_result.get_mapping()
 
-    flat = build_flat_mapping(mapping)
+    flat = build_flat_mapping(mapping, words=words)
 
     result = FlatMappingResult(entries=flat, mapping=mapping, ref=ref)
 
