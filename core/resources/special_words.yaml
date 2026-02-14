@@ -187,7 +187,7 @@ special_words:
         rules: ["madd_lazim", "ikhfaa_noon"]
       - char: "قٓ"
         phonemes: ["q", "aˤ:", "f"]
-        rules: ["qalqala_kubra", "madd_lazim"]
+        rules: ["madd_lazim"]
 
   - text: "صٓ ۚ"
     locations:
@@ -206,7 +206,7 @@ special_words:
     letter_mappings:
       - char: "قٓ"
         phonemes: ["q", "aˤ:", "f"]
-        rules: ["qalqala_kubra", "madd_lazim"]
+        rules: ["madd_lazim"]
       - char: " ۚ"
         phonemes: []
         rules: []
