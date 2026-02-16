@@ -167,12 +167,8 @@ def get_merge_info(letter: LetterMapping, word: WordMapping, idx: int) -> MergeI
         return MergeInfo("LEFT", rule)
 
     # Group 3: RIGHT merge within-word
-    # Special case: mid-word hamza wasl merges LEFT instead of RIGHT
     if RIGHT_MERGE_RULES & rules:
         rule = (RIGHT_MERGE_RULES & rules).pop()
-        if rule == "hamza_wasl_silent" and idx > 0:
-            # Mid-word hamza wasl merges LEFT
-            return MergeInfo("LEFT", rule)
         return MergeInfo("RIGHT", rule)
 
     # Group 2: within-word vs cross-word idgham
@@ -287,6 +283,49 @@ def build_word_proto_entries(word: WordMapping) -> List[ProtoEntry]:
             ))
 
     return entries
+
+
+def redistribute_waqf_tanween(entries: List[ProtoEntry], word: WordMapping) -> List[ProtoEntry]:
+    """Move waqf_tanween long vowel from consonant to the following alef.
+
+    When stopping with fathatan, the phonemizer places 'a:' on the consonant
+    and the alef is silent. For MFA alignment, the alef should carry the 'a:'
+    (consistent with normal vowel lengthening where the vowel letter owns the
+    long vowel phoneme).
+    """
+    result = list(entries)
+    for i in range(len(result) - 1):
+        entry = result[i]
+        next_entry = result[i + 1]
+
+        if not entry.letter_indices or not next_entry.letter_indices:
+            continue
+
+        letter = word.letter_mappings[entry.letter_indices[0]]
+        next_letter = word.letter_mappings[next_entry.letter_indices[0]]
+
+        if ("waqf_tanween" not in (letter.letter_rules or [])
+                or next_letter.char not in ("ا", "ى")
+                or next_entry.phonemes
+                or not entry.phonemes
+                or ":" not in entry.phonemes[-1]):
+            continue
+
+        # Pop long vowel from consonant, give to alef
+        long_vowel = entry.phonemes[-1]
+        result[i] = ProtoEntry(
+            chars=entry.chars,
+            phonemes=entry.phonemes[:-1],
+            letter_indices=entry.letter_indices,
+            merge_info=entry.merge_info,
+        )
+        result[i + 1] = ProtoEntry(
+            chars=next_entry.chars,
+            phonemes=[long_vowel],
+            letter_indices=next_entry.letter_indices,
+            merge_info=MergeInfo("NONE"),
+        )
+    return result
 
 
 def build_special_word_entries(word: WordMapping) -> List[ProtoEntry]:
@@ -577,6 +616,7 @@ def build_flat_mapping(
             entries = build_special_word_entries(word)
         else:
             entries = build_word_proto_entries(word)
+            entries = redistribute_waqf_tanween(entries, word)
             entries = merge_within_word(entries)
         all_word_entries.append(entries)
 
