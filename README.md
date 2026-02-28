@@ -1,13 +1,13 @@
 # Qurʾanic Phonemizer
 
-A Grapheme-to-Phoneme converter (G2P) for the Qurʾan (Hafs riwaya), converting text to phoneme sequences with comprehensive support for all Tajweed rules and waqf phonetic effects.
+A Grapheme-to-Phoneme converter (G2P) for the Qurʾan (Hafs riwaya), converting text to phoneme sequences with comprehensive support for all tajweed rules and waqf phonetic effects.
 
 Potential use cases:
 
 - **Speech Recognition**: Phonetically transcribe recitations, create training data for machine learning systems
 - **Text-to-Speech**: Develop accurate TTS systems for Qurʾanic Arabic
-- **Linguistic & Tajweed Analysis**: Study phonological patterns and Tajweed rule distributions across the Qurʾan, apply tajweed rule labels and coloring
-- **Educational Tools**: Build interactive applications for asessing Qur'an and Tajweed pronunciation
+- **Linguistic & Tajweed Analysis**: Study phonological patterns and tajweed rule distributions across the Qurʾan, apply tajweed rule labels and coloring
+- **Educational Tools**: Build interactive applications for asessing Qur'an and tajweed pronunciation
 - **Timing Analysis**: Generate word-by-word timestamps for recitations, analyse madd/ghunnah durations
 
 In addition to the Python API, the phonemizer can be used interactively: [quranicphonemizer.com](https://quranicphonemizer.com/).
@@ -34,7 +34,7 @@ The phoneme inventory uses the standard International Phonetic Alphabet (IPA) [A
 - 28 consonants
 - 24 geminated consonants
 - 8 vowels
-- 11 Tajweed phonemes
+- 11 tajweed phonemes
 
 All phonemes are configurable in [resources/base_phonemes.yaml](resources/base_phonemes.yaml) and [resources/rule_phonemes.yaml](resources/rule_phonemes.yaml).
 
@@ -49,7 +49,7 @@ All phonemes are configurable in [resources/base_phonemes.yaml](resources/base_p
 | ح                        | `ħ` / `ħħ`               | ش          | `ʃ` / `ʃʃ`                | ف          | `f` / `ff`               | و          | `w` / `ww`               |
 | خ                        | `x` / `xx`               | ص          | `sˤ` / `sˤsˤ`             | ق          | `q` / `qq`               | ي , ى      | `j` / `jj`               |
 
-Gemination (shaddah) is represented by repeating the phoneme to create new distinct phonemes. Note that there is no gemination for `m` / `n` (modelled as Tajweed instead), and for `ʔ` / `ɣ` (do not exist in the Qurʾān).
+Gemination (shaddah) is represented by repeating the phoneme to create new distinct phonemes. Note that there is no gemination for `m` / `n` (modelled as tajweed instead), and for `ʔ` / `ɣ` (do not exist in the Qurʾān).
 
 ### Vowels
 
@@ -310,7 +310,7 @@ print(res.phonemes_str(phoneme_sep="", word_sep=" ", verse_sep=""))
 
 If you find any issues or have feature suggestions, please feel free to open an issue or submit a pull request. 
 
-Future plans include detailed Tajweed annotations and support for other turuq and riwayat.
+Future plans include detailed tajweed annotations and support for other turuq and riwayat.
 
 ## Credits
 
