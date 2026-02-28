@@ -1,13 +1,14 @@
-# Qurʾānic Phonemizer
+# Qurʾanic Phonemizer
 
-A custom phonemizer (Grapheme to Phoneme converter) for the Qurʾān in the Hafs riwaya, converting text to phoneme sequences with support for Tajweed rules.
+A Grapheme-to-Phoneme converter (G2P) for the Qurʾan (Hafs riwaya), converting text to phoneme sequences with comprehensive support for all Tajweed rules and waqf phonetic effects.
 
 Potential use cases:
 
-- **Speech Recognition**: Create training data for speech recognition and machine learning systems
-- **Text-to-Speech**: Develop accurate TTS systems for Qurʾānic Arabic
-- **Linguistic Analysis**: Study phonological patterns and Tajweed rule distributions across the Qurʾān
-- **Educational Tools**: Build interactive applications for teaching pronunciation and Tajweed
+- **Speech Recognition**: Phonetically transcribe recitations, create training data for machine learning systems
+- **Text-to-Speech**: Develop accurate TTS systems for Qurʾanic Arabic
+- **Linguistic & Tajweed Analysis**: Study phonological patterns and Tajweed rule distributions across the Qurʾan, apply tajweed rule labels and coloring
+- **Educational Tools**: Build interactive applications for asessing Qur'an and Tajweed pronunciation
+- **Timing Analysis**: Generate word-by-word timestamps for recitations, analyse madd/ghunnah durations
 
 In addition to the Python API, the phonemizer can be used interactively: [quranicphonemizer.com](https://quranicphonemizer.com/).
 
@@ -307,9 +308,9 @@ print(res.phonemes_str(phoneme_sep="", word_sep=" ", verse_sep=""))
 
 ## Contributing
 
-If you find any issues or have feature suggestions, please feel free to email quranicphonemizer@gmail.com, open an issue or submit a pull request. 
+If you find any issues or have feature suggestions, please feel free to open an issue or submit a pull request. 
 
-Particularly, support for other qira'at/riwayat would be very useful.
+Future plans include detailed Tajweed annotations and support for other turuq and riwayat.
 
 ## Credits
 
