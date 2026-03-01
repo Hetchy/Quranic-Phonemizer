@@ -27,7 +27,7 @@ setup(
     author="Ahmed Ibrahim",
     author_email="quranicphonemizer@gmail.com",
     url="https://github.com/Hetchy/Quranic-Phonemizer",
-    packages=find_packages(exclude=["tests", "*.tests", "*.tests.*", "tests.*", "phonemizer", "out"]) + ["scripts"],
+    packages=find_packages(exclude=["tests", "*.tests", "*.tests.*", "tests.*", "out"]) + ["scripts"],
     package_data={
         "core": ["resources/*.json", "resources/*.yaml", "resources/*.txt"],
     },
