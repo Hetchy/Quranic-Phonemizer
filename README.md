@@ -28,7 +28,7 @@ In addition to the Python API, the phonemizer can be used interactively: [qurani
 - [Input References](#input-references)
 - [Text Search](#text-search)
 - [Outputs](#outputs)
-- [Stops (Boundary Markers)](#stops-boundary-markers)
+- [Stops (Waqf)](#stops-boundary-markers)
 - [Contributing](#contributing)
 - [Credits](#credits)
 - [Citing](#citing)
@@ -131,17 +131,17 @@ bismi lla:hi rˤrˤaˤħma:ni rˤrˤaˤħi:m
 The `match_score` attribute (0–1) indicates how closely the input text matched the Qurʾānic text. You can also scope the search to a specific surah or range by combining `ref` and `ref_text`:
 
 ```python
-res = pm.phonemize(ref="2", ref_text="الله لا إله إلا هو")
+res = pm.phonemize(ref="2", ref_text="الله لا إله إلا هو الحي القيوم")
 print(res.ref)
 print(res.match_score)
 print(res.phonemes_str())
 ```
 
-2:255:1-2:255:5
+2:255:1-2:255:7
 
-0.848
+0.836
 
-ʔalˤlˤaˤ:hu la: ʔila:ha ʔilla: huw
+ʔalˤlˤaˤ:hu la: ʔila:ha ʔilla: huwa lħajju lqaˤjju:m
 
 ## Outputs
 `phonemize()` returns a `PhonemizeResult` object, containing:
