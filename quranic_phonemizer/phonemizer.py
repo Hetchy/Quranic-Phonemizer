@@ -324,8 +324,8 @@ class PhonemizeResult:
             cur_word = str(word.location.word_num)
 
             if prev_verse is not None and cur_verse != prev_verse:
-                chosen = verse_sep if verse_sep else (word_sep if word_sep else phoneme_sep)
-                _add_sep(chosen)
+                _add_sep(word_sep if word_sep else phoneme_sep)
+                _add_sep(verse_sep if verse_sep else (word_sep if word_sep else phoneme_sep))
                 have_prev_ph = False
 
             elif prev_word is not None and cur_word != prev_word:
