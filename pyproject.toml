@@ -16,9 +16,8 @@ keywords = ["phonemizer", "g2p", "grapheme-to-phoneme", "quran", "quranic", "ara
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
-    "Intended Audience :: Research",
+    "Intended Audience :: Science/Research",
     "Intended Audience :: Education",
-    "Intended Audience :: Religion",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
@@ -26,8 +25,8 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
-    "Topic :: Natural Language Processing :: Tajweed :: Phonemization",
-    "Topic :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Text Processing :: Linguistic",
     "Natural Language :: Arabic",
 ]
 dependencies = [
