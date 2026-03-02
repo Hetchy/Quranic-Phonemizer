@@ -165,9 +165,9 @@ print(res.phonemes_str(phoneme_sep=" ", word_sep=" | ", verse_sep="\n"))
 ```
 قُلْ هُوَ ٱللَّهُ أَحَدٌ  ١  ٱللَّهُ ٱلصَّمَدُ  ٢  لَمْ يَلِدْ وَلَمْ يُولَدْ  ٣  وَلَمْ يَكُن لَّهُۥ كُفُوًا أَحَدٌ  ٤ 
 
-q u l | h u w a | lˤlˤ aˤ: h u | ʔ a ħ a d Q
-ʔ a lˤlˤ aˤ: h u | sˤsˤ aˤ m a d Q
-l a m | j a l i d Q | w a l a m | j u: l a d Q
+q u l | h u w a | lˤlˤ aˤ: h u | ʔ a ħ a d Q |
+ʔ a lˤlˤ aˤ: h u | sˤsˤ aˤ m a d Q |
+l a m | j a l i d Q | w a l a m | j u: l a d Q |
 w a l a m | j a k u | ll a h u: | k u f u w a n | ʔ a ħ a d Q
 
 ## Stops (Boundary Markers)
