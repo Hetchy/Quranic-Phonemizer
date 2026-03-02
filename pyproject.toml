@@ -4,9 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "quranic-phonemizer"
-version = "1.0.1"
-description = "A custom phonemizer (Grapheme to Phoneme converter) for the Qurʾān in the Hafs riwaya"
-readme = "README.md"
+version = "1.0.2"
+description = "A Grapheme-to-Phoneme converter (G2P) for the Qurʾan (Hafs riwaya), converting text to phoneme sequences with comprehensive support for all tajweed rules and waqf phonetic effects."
 license = "MIT"
 requires-python = ">=3.8"
 authors = [
