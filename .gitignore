@@ -1,5 +1,4 @@
 .env
-publish.sh
 __pycache__/
 *.py[cod]
 out
