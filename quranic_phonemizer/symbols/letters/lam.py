@@ -1,7 +1,7 @@
 from typing import List
-from core.phoneme_registry import get_rule_phoneme
+from ...phoneme_registry import get_rule_phoneme
 from .letter import LetterSymbol
-from core.symbols.extension import ExtensionSymbol
+from ..extension import ExtensionSymbol
 
 
 class Lam(LetterSymbol):

@@ -1,8 +1,8 @@
 include README.md
 include LICENSE
 include requirements.txt
-recursive-include core *.py
-recursive-include core/resources *.json *.yaml *.txt
+recursive-include quranic_phonemizer *.py
+recursive-include quranic_phonemizer/resources *.json *.yaml *.txt
 
 
 

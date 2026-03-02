@@ -1,6 +1,6 @@
 from typing import List
 from .letter import LetterSymbol
-from core.phoneme_registry import get_rule_phoneme
+from ...phoneme_registry import get_rule_phoneme
 
 
 class Qalqala(LetterSymbol):

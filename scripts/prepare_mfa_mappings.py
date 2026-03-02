@@ -20,8 +20,8 @@ from typing import List, Optional, Tuple, Set
 # Add parent directory to path for imports
 sys.path.insert(0, str(__file__).rsplit("/", 2)[0])
 
-from core.phonemizer import Phonemizer
-from core.mapping import (
+from quranic_phonemizer.phonemizer import Phonemizer
+from quranic_phonemizer.mapping import (
     PhonemizationMapping,
     WordMapping,
     LetterMapping,
@@ -1018,7 +1018,7 @@ def get_flat_mapping(
         م  -> ['m', 'i']
 
         # With pre-computed mapping (avoids redundant phonemization):
-        >>> from core.phonemizer import Phonemizer
+        >>> from quranic_phonemizer.phonemizer import Phonemizer
         >>> pm = Phonemizer()
         >>> phon_result = pm.phonemize("1:1")
         >>> mapping = phon_result.get_mapping()

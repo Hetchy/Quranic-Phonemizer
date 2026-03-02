@@ -1,7 +1,7 @@
 from typing import List
 from .letter import LetterSymbol
-from core.phoneme_registry import get_rule_phoneme
-from core.mapping import MappingType
+from ...phoneme_registry import get_rule_phoneme
+from ...mapping import MappingType
 
 
 class Meem(LetterSymbol):

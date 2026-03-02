@@ -11,13 +11,13 @@ from ..diacritic import DiacriticSymbol
 from ..extension import ExtensionSymbol
 from ..other import OtherSymbol
 
-from core.phoneme_registry import get_rule_phoneme
-from core.mapping import MappingType
-from core.specials import should_skip_letter_for_stopping, get_stopping_diacritic_override, get_stopping_skip_letters
+from ...phoneme_registry import get_rule_phoneme
+from ...mapping import MappingType
+from ...specials import should_skip_letter_for_stopping, get_stopping_diacritic_override, get_stopping_skip_letters
 
 
 if TYPE_CHECKING:
-    from core.word import Word
+    from ...word import Word
 
 
 class LetterSymbol(Symbol):

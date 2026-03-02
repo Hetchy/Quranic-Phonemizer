@@ -1,8 +1,10 @@
+.env
+publish.sh
 __pycache__/
 *.py[cod]
 out
-core/resources/tajweed_occurences
-core/resources/archive
+quranic_phonemizer/resources/tajweed_occurences
+quranic_phonemizer/resources/archive
 mappings.md
 test.ipynb
 .windsurf
@@ -15,3 +17,8 @@ test.ipynb
 dist/
 build/
 *.egg
+
+docs/
+scripts/compare_full_quran.py
+scripts/convert_transcript.py
+scripts/find_top_verses.py

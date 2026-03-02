@@ -1,6 +1,6 @@
 from typing import List
 from .letter import LetterSymbol
-from core.mapping import MappingType
+from ...mapping import MappingType
 
 
 class VowelLetter(LetterSymbol):
