@@ -982,7 +982,8 @@ def get_flat_mapping(
     ref: str = "",
     mapping: Optional[PhonemizationMapping] = None,
     words: Optional[List[WordMapping]] = None,
-    stops: Optional[List[str]] = None,
+    stop_signs: Optional[List[str]] = None,
+    stop_refs: Optional[List[str]] = None,
     validate_result: bool = False,
 ) -> FlatMappingResult:
     """
@@ -998,7 +999,8 @@ def get_flat_mapping(
                Useful for generating flat mapping for a subset of words (e.g., when
                aligning a word range like "76:11:6-76:12:5" where the mapping
                contains full verses but only a subset of words are needed).
-        stops: Stop types (default: ["verse"]). Only used if mapping is None.
+        stop_signs: Stop sign types (default: ["verse"]). Only used if mapping is None.
+        stop_refs: Explicit location references to mark as stopping words. Only used if mapping is None.
         validate_result: If True, raises ValueError on validation failure
 
     Returns:
@@ -1010,7 +1012,7 @@ def get_flat_mapping(
 
     Example:
         >>> from scripts.prepare_mfa_mappings import get_flat_mapping
-        >>> result = get_flat_mapping("1", stops=["verse"])
+        >>> result = get_flat_mapping("1", stop_signs=["verse"])
         >>> for chars, phonemes in result.entries[:3]:
         ...     print(f"{chars} -> {phonemes}")
         ب -> ['b', 'i']
@@ -1032,10 +1034,12 @@ def get_flat_mapping(
         # Phonemize only if mapping not provided
         if not ref:
             raise ValueError("Either ref or mapping must be provided")
-        if stops is None:
-            stops = ["verse"]
+        if stop_signs is None:
+            stop_signs = ["verse"]
+        if stop_refs is None:
+            stop_refs = []
         phonemizer = Phonemizer()
-        phon_result = phonemizer.phonemize(ref, stops=stops)
+        phon_result = phonemizer.phonemize(ref, stop_signs=stop_signs, stop_refs=stop_refs)
         mapping = phon_result.get_mapping()
 
     flat = build_flat_mapping(mapping, words=words)
@@ -1064,10 +1068,16 @@ def main():
         help="Reference to phonemize (default: chapter 1)"
     )
     parser.add_argument(
-        "--stops",
+        "--stop-signs",
         nargs="*",
         default=["verse"],
-        help="Stop types (default: verse)"
+        help="Stop sign types (default: verse)"
+    )
+    parser.add_argument(
+        "--stop-refs",
+        nargs="*",
+        default=[],
+        help="Explicit location references (e.g. 2:3:5) to mark as stopping words"
     )
     parser.add_argument(
         "--validate",
@@ -1091,7 +1101,7 @@ def main():
     args = parser.parse_args()
 
     # Get flat mapping
-    result = get_flat_mapping(args.ref, stops=args.stops)
+    result = get_flat_mapping(args.ref, stop_signs=args.stop_signs, stop_refs=args.stop_refs)
 
     # Save to file if requested
     if args.output:

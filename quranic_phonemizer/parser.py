@@ -302,7 +302,7 @@ class Parser:
         stripped_text = re.sub(r"</rule>", "", stripped_text)
         return stripped_text
     
-    def load_words(self, ref: str, db_path: str | Path = DATA_DIR / "Quran.json", *, stop_types: List[str] = []) -> List[Word]:
+    def load_words(self, ref: str, db_path: str | Path = DATA_DIR / "Quran.json", *, stop_signs: List[str] = [], stop_refs: List[str] = []) -> List[Word]:
         """Load words for a reference range and annotate boundaries."""
         db = load_db(db_path)
         locations = keys_for_reference(ref, db)
@@ -315,7 +315,7 @@ class Parser:
             words.append(word)
 
         self._link_words(words)
-        self._annotate_boundaries(words, stop_types=stop_types)
+        self._annotate_boundaries(words, stop_signs=stop_signs, stop_refs=stop_refs)
         return words
     
     def _link_words(self, words: List[Word]) -> None:
@@ -326,29 +326,31 @@ class Parser:
             if i < len(words) - 1:
                 word.next_word = words[i + 1]
     
-    def _annotate_boundaries(self, words: List[Word], *, stop_types: List[str]) -> None:
+    def _annotate_boundaries(self, words: List[Word], *, stop_signs: List[str], stop_refs: List[str] = []) -> None:
         """Set is_starting / is_stopping flags on each word.
 
         Parameters
         ----------
         words : List[Word]
             Sequence of words.
-        stop_types : list[str]
+        stop_signs : list[str]
             Stop sign types that should be treated as hard boundaries. If empty, no stop signs count.
+        stop_refs : list[str]
+            Explicit location references (e.g. '2:3:5') whose words should be marked as stopping.
         """
         words[0].is_starting = True
         words[-1].is_stopping = True
 
-        stop_types = [s.lower() for s in stop_types]
+        stop_signs = [s.lower() for s in stop_signs]
 
         for idx, word in enumerate(words):
             # Stop-sign logic
-            if word.stop_sign and word.stop_sign.name.lower() in stop_types:
+            if word.stop_sign and word.stop_sign.name.lower() in stop_signs:
                 word.is_stopping = True
                 if word.next_word:
                     word.next_word.is_starting = True
 
-        if "verse" in stop_types:
+        if "verse" in stop_signs:
             for idx, word in enumerate(words):
                 prev_word = word.prev_word
                 next_word = word.next_word
@@ -358,6 +360,15 @@ class Parser:
                 # End of verse
                 if next_word is None or next_word.location.ayah_num != word.location.ayah_num:
                     word.is_stopping = True
+
+        # Explicit stop refs
+        if stop_refs:
+            stop_ref_set = {r.strip() for r in stop_refs}
+            for word in words:
+                if word.location.location_key in stop_ref_set:
+                    word.is_stopping = True
+                    if word.next_word:
+                        word.next_word.is_starting = True
 
 
 def load_symbol_mappings(map_path: str | Path = DATA_DIR / "base_phonemes.yaml") -> Dict[str, Any]:

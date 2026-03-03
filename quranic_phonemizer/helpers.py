@@ -263,7 +263,8 @@ def phonemize_and_save(
     output_path: str | Path,
     *,
     db_path: str | Path = "core/resources/Quran.json",
-    stops: List[str] = [],
+    stop_signs: List[str] = [],
+    stop_refs: List[str] = [],
 ) -> None:
     """
     Phonemize a given reference and save the formatted output to a file.
@@ -281,15 +282,17 @@ def phonemize_and_save(
         Full path to save the phonemized output file
     db_path : str | Path
         Path to the Qurʾān word-by-word JSON.
-    stops : List[str]
-        List of stop types to mark as boundaries.
+    stop_signs : List[str]
+        List of stop sign types to mark as boundaries.
+    stop_refs : List[str]
+        List of explicit location references (e.g. '2:3:5') to mark as stopping words.
     """
     # Import here to avoid circular imports
     from . import Phonemizer
     
     # Phonemize the reference
     phonemizer = Phonemizer(db_path=db_path)
-    res = phonemizer.phonemize(ref=ref, stops=stops)
+    res = phonemizer.phonemize(ref=ref, stop_signs=stop_signs, stop_refs=stop_refs)
     quran_text = res.text()
     phoneme_arrays = res.phonemes_list("word")
     
