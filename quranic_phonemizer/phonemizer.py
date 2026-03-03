@@ -63,7 +63,7 @@ class Phonemizer:
 
     def _is_text_reference(self, ref: str) -> bool:
         ref = ref.strip()
-        traditional_pattern = r'^[\d:-]+$'
+        traditional_pattern = r'^[\d:\s-]+$'
         
         if re.match(traditional_pattern, ref):
             try:
