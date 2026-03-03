@@ -7,7 +7,7 @@
   <a href="https://huggingface.co/datasets/hetchyy/everyayah-phonemes"><img src="https://img.shields.io/badge/%F0%9F%A4%97_Hugging_Face-EveryAyah_Phonemes_Dataset-yellow" alt="Dataset"></a>
   <a href="https://openreview.net/forum?id=hZt0JK28iV"><img src="https://img.shields.io/badge/Paper-OpenReview-red" alt="Paper"></a>
   <a href="https://github.com/Hetchy/Quranic-Phonemizer/blob/main/LICENSE"><img src="https://img.shields.io/pypi/l/quranic-phonemizer" alt="License"></a>
-  <a href="https://pypi.org/project/quranic-phonemizer/"><img src="https://img.shields.io/pypi/dm/quranic-phonemizer" alt="Downloads"></a>
+  <a href="https://pypi.org/project/quranic-phonemizer/"><img src="https://static.pepy.tech/badge/quranic-phonemizer/month" alt="Downloads"></a>
 </p>
 
 A Grapheme-to-Phoneme converter (G2P) for the Qurʾan (Hafs riwaya), converting text to phoneme sequences with comprehensive support for all tajweed rules and waqf phonetic effects.
