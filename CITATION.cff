@@ -9,3 +9,12 @@ url: "https://github.com/Hetchy/Quranic-Phonemizer"
 repository-code: "https://github.com/Hetchy/Quranic-Phonemizer"
 version: "1.0.0"
 license: MIT
+preferred-citation:
+  type: conference-paper
+  title: "Qur'anic Phonemizer: Bringing Tajweed-Aware Phonemes to Qur'anic Machine Learning"
+  authors:
+    - family-names: Ibrahim
+      given-names: Ahmed
+  year: 2025
+  collection-title: "5th Muslims in ML Workshop co-located with NeurIPS 2025"
+  url: "https://openreview.net/forum?id=hZt0JK28iV"
