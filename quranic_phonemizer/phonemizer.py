@@ -52,7 +52,7 @@ class Phonemizer:
         self.text_matcher = TextMatcher(db_path, symbol_mappings)
         with (DATA_DIR / "surah_info.json").open("r", encoding="utf-8") as fh:
             self._surah_info: dict[str, dict] = json.load(fh)
-        self.valid_stops = {
+        self.valid_stop_signs = {
             "verse",
             "preferred_continue",
             "preferred_stop", 
@@ -96,7 +96,8 @@ class Phonemizer:
         ref: str = None,
         *,
         ref_text: str = None,
-        stops: List[str] = [],
+        stop_signs: List[str] = [],
+        stop_refs: List[str] = [],
         debug: bool = False,
         iqlab_phoneme: Optional[str] = None,
         ikhfaa_shafawi_phoneme: Optional[str] = None,
@@ -151,13 +152,13 @@ class Phonemizer:
                         print(f"Converted to traditional reference: {ref} (score: {match_score:.3f})")
         
         if failed_match:
-            return PhonemizeResult("", "", [], [], stops, match_score)
+            return PhonemizeResult("", "", [], [], stop_signs, stop_refs, match_score)
         
         self._validate_refs(ref)
 
-        invalid_stops = set(stops) - self.valid_stops
+        invalid_stops = set(stop_signs) - self.valid_stop_signs
         if invalid_stops:
-            raise ValueError(f"Invalid stop types: {invalid_stops}. Valid stops are: {self.valid_stops}")
+            raise ValueError(f"Invalid stop sign types: {invalid_stops}. Valid stop signs are: {self.valid_stop_signs}")
 
         # Set phoneme overrides if explicitly passed (don't clear existing ones)
         if iqlab_phoneme is not None or ikhfaa_shafawi_phoneme is not None:
@@ -167,7 +168,7 @@ class Phonemizer:
             if ikhfaa_shafawi_phoneme is not None:
                 set_phoneme_override("ikhfaa", "shafawi_phoneme", ikhfaa_shafawi_phoneme)
 
-        words = self.parser.load_words(ref, self.db_path, stop_types=stops)
+        words = self.parser.load_words(ref, self.db_path, stop_signs=stop_signs, stop_refs=stop_refs)
         for word in words:
             word.phonemize()
 
@@ -177,7 +178,7 @@ class Phonemizer:
             if debug:
                 print(word.debug_print())
 
-        return PhonemizeResult(ref, " ".join(w.text for w in words), all_phonemes, words, stops, match_score)
+        return PhonemizeResult(ref, " ".join(w.text for w in words), all_phonemes, words, stop_signs, stop_refs, match_score)
 
     def _validate_refs(self, ref: str) -> None:
         ref = ref.strip()
@@ -230,7 +231,8 @@ class PhonemizeResult:
     _text: str                     
     _nested: List[List[str]]       
     _words: List[Word]
-    stops: List[str]
+    stop_signs: List[str]
+    stop_refs: List[str]
     match_score: float = None
 
     def phonemes_list(self, split: Literal["word", "verse", "both"] = "word") -> list:
@@ -660,7 +662,8 @@ class PhonemizeResult:
             lines.append("{")
             lines.append(f"  \"ref\": {json.dumps(self.ref, ensure_ascii=False)},")
             lines.append(f"  \"text\": {json.dumps(self._text, ensure_ascii=False)},")
-            lines.append(f"  \"stops\": {json.dumps(self.stops, ensure_ascii=False)},")
+            lines.append(f"  \"stop_signs\": {json.dumps(self.stop_signs, ensure_ascii=False)},")
+            lines.append(f"  \"stop_refs\": {json.dumps(self.stop_refs, ensure_ascii=False)},")
             lines.append("  \"texts\": {")
             text_items = list(text_map.items())
             for idx, (k, v) in enumerate(text_items):
