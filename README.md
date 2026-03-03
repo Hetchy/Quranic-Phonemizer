@@ -28,7 +28,7 @@ In addition to the Python API, the phonemizer can be used interactively: [qurani
 - [Input References](#input-references)
 - [Text Search](#text-search)
 - [Outputs](#outputs)
-- [Stops (Waqf)](#stops-boundary-markers)
+- [Stops (Waqf)](#stops-waqf)
 - [Contributing](#contributing)
 - [Credits](#credits)
 - [Citing](#citing)
@@ -159,7 +159,7 @@ print(res.phonemes_str())
 ### Output Example (Phonemes String)
 
 ```python
-res = pm.phonemize("112", stops=["verse"])
+res = pm.phonemize("112", stop_signs=["verse"])
 print(res.text())
 print(res.phonemes_str(phoneme_sep=" ", word_sep=" | ", verse_sep="\n"))
 ```
@@ -170,9 +170,9 @@ q u l | h u w a | lˤlˤ aˤ: h u | ʔ a ħ a d Q |
 l a m | j a l i d Q | w a l a m | j u: l a d Q |
 w a l a m | j a k u | ll a h u: | k u f u w a n | ʔ a ħ a d Q
 
-## Stops (Boundary Markers)
+## Stops (Waqf)
 
-Optionally, pass a `stops=[]` list to force word/verse segmentation:
+Optionally, pass `stop_signs=[]` to apply stops at Quranic stop signs, and/or `stop_refs=[]` to stop at specific word locations:
 
 | Stop key               | Symbol 
 | ---------------------- | ------ 
@@ -189,10 +189,10 @@ res = pm.phonemize(ref)
 print(res.text())
 print(res.phonemes_str())
 
-res = pm.phonemize(ref, stops=["preferred_continue"])
+res = pm.phonemize(ref, stop_signs=["preferred_continue"])
 print(res.phonemes_str())
 
-res = pm.phonemize(ref, stops=["optional_stop"])
+res = pm.phonemize(ref, stop_signs=["optional_stop"])
 print(res.phonemes_str())
 ```
 
@@ -203,6 +203,11 @@ kaða:lika lʕaða:`bu` walaʕaða:bu lʔa:xirˤaˤti ʔakba`rˤu` law ka:nu: ja
 kaða:lika lʕaða:`bQ` walaʕaða:bu lʔa:xirˤaˤti ʔakba`rˤu` law ka:nu: jaʕlamu:n
 
 kaða:lika lʕaða:`bu` walaʕaða:bu lʔa:xirˤaˤti ʔakba`rˤ` law ka:nu: jaʕlamu:n
+
+```python
+# Stop at a specific word location
+res = pm.phonemize("1:1-1:3", stop_refs=["1:2:2"])
+```
 
 ## Contributing
 
