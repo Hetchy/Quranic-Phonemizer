@@ -29,6 +29,7 @@ In addition to the Python API, the phonemizer can be used interactively: [qurani
 - [Text Search](#text-search)
 - [Outputs](#outputs)
 - [Stops (Waqf)](#stops-boundary-markers)
+- [Phonetic Text](#phonetic-text)
 - [Contributing](#contributing)
 - [Credits](#credits)
 - [Citing](#citing)
@@ -155,6 +156,7 @@ print(res.phonemes_str())
 | `phonemes_str(phoneme_sep, word_sep, verse_sep)` | Full phoneme string, configurable with separators           |
 | `show_table(phoneme_sep, split)` | Pandas DataFrame view, grouped by `split` (requires `pandas`)  |
 | `save(path, *, fmt, split)` | Save results to JSON, CSV, or mapping format |
+| `phonetic_text(word_sep, verse_sep)` | Recitation-accurate display text with stopping/starting transforms |
 
 ### Output Example (Phonemes String)
 
@@ -170,7 +172,7 @@ q u l | h u w a | lˤlˤ aˤ: h u | ʔ a ħ a d Q |
 l a m | j a l i d Q | w a l a m | j u: l a d Q |
 w a l a m | j a k u | ll a h u: | k u f u w a n | ʔ a ħ a d Q
 
-## Stops (Boundary Markers)
+## Stops (Waqf)
 
 Optionally, pass a `stops=[]` list to force word/verse segmentation:
 
@@ -203,6 +205,56 @@ kaða:lika lʕaða:`bu` walaʕaða:bu lʔa:xirˤaˤti ʔakba`rˤu` law ka:nu: ja
 kaða:lika lʕaða:`bQ` walaʕaða:bu lʔa:xirˤaˤti ʔakba`rˤu` law ka:nu: jaʕlamu:n
 
 kaða:lika lʕaða:`bu` walaʕaða:bu lʔa:xirˤaˤti ʔakba`rˤ` law ka:nu: jaʕlamu:n
+
+## Phonetic Text
+
+`phonetic_text()` returns a recitation-accurate rendering of the Arabic text, applying the phonetic transforms that occur when starting or stopping on a word. This is useful for displaying text as it would actually be recited.
+
+### Starting Transforms
+
+| Transform | Original | Phonetic Text |
+|---|---|---|
+| Hamza wasl → fatha | `ٱلرَّحْمَٰنِ` | `أَلرَّحْمَٰنْ` |
+| Hamza wasl → damma | `ٱدْعُ` | `أُدْعْ` |
+| Hamza wasl → kasra | `ٱهْدِنَا` | `إِهْدِنَا` |
+| Remove first-letter shaddah | `لِّلْمُتَّقِينَ` | `لِلْمُتَّقِينْ` |
+
+### Stopping Transforms
+
+| Transform | Original | Phonetic Text |
+|---|---|---|
+| Haraka → sukun | `ٱلرَّحِيمِ` | `ٱلرَّحِيمْ` |
+| Taa marbuta → haa + sukun | `رَحْمَةِ` | `رَحْمَهْ` |
+| Madd iwad (alef) | `كِتَٰبًا` | `كِتَٰبَا` |
+| Madd iwad (hamza) | `دُعَآءً` | `دُعَآءَا` |
+| Strip madd silah | `حَوْلَهُۥ` | `حَوْلَهْ` |
+
+### Other Transforms
+
+| Transform | Original | Phonetic Text |
+|---|---|---|
+| Allah dagger alef | `ٱللَّهِ` | `ٱللَّـٰهِ` |
+
+### Huroof Muqattaʿat
+
+Opening letters are returned as their spelled-out recitation forms:
+
+| Text | Phonetic Text |
+|---|---|
+| الٓمٓ | أَلِفْ لَآم مِّيٓمْ |
+| الٓر | أَلِفْ لَآمْ رَا |
+| الٓمٓصٓ | أَلِفْ لَآم مِّيٓمْ صَآدْ |
+| الٓمٓر | أَلِفْ لَآم مِّيٓمْ رَا |
+| كٓهيعٓصٓ | كآفْ هَا يَا عَيْن صَآدْ |
+| طه | طَا هَا |
+| طسٓمٓ | طَا سِيٓن مِّيٓمْ |
+| طسٓ | طَا سِيٓنْ |
+| يسٓ | يَا سِيٓنْ |
+| صٓ | صَآدْ |
+| حمٓ | حَا مِيٓمْ |
+| عٓسٓقٓ | عَيْن سِيٓن قَآفْ |
+| قٓ | قَآفْ |
+| نٓ | نُوٓنْ |
 
 ## Contributing
 
