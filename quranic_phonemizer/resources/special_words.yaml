@@ -11,6 +11,7 @@
 
 special_words:
   - text: "حمٓ"
+    display_text: "حَا مِيٓمْ"
     locations:
       - "40:1:1"  # Surah Ghafir
       - "41:1:1"  # Surah Fussilat
@@ -28,6 +29,7 @@ special_words:
         rules: ["madd_lazim"]
 
   - text: "الٓمٓ"
+    display_text: "أَلِفْ لَآم مِّيٓمْ"
     locations:
       - "2:1:1"   # Surah Al-Baqarah
       - "3:1:1"   # Surah Āl-Imran
@@ -47,6 +49,7 @@ special_words:
         rules: ["meem_ghunnah", "madd_lazim"]
 
   - text: "الٓر ۚ"
+    display_text: "أَلِفْ لَآمْ رَا"
     locations:
       - "10:1:1"  # Surah Yunus
       - "11:1:1"  # Surah Hud
@@ -68,6 +71,7 @@ special_words:
         rules: []
 
   - text: "الٓمٓصٓ"
+    display_text: "أَلِفْ لَآم مِّيٓمْ صَآدْ"
     locations:
       - "7:1:1"   # Surah Al-A'raf
     letter_mappings:
@@ -85,6 +89,7 @@ special_words:
         rules: ["madd_lazim", "qalqala_kubra"]
 
   - text: "الٓمٓر ۚ"
+    display_text: "أَلِفْ لَآم مِّيٓمْ رَا"
     locations:
       - "13:1:1"  # Surah Ar-Ra'd
     letter_mappings:
@@ -105,6 +110,7 @@ special_words:
         rules: []
 
   - text: "كٓهيعٓصٓ"
+    display_text: "كآفْ هَا يَا عَيْن صَآدْ"
     locations:
       - "19:1:1"  # Surah Maryam
     letter_mappings:
@@ -125,6 +131,7 @@ special_words:
         rules: ["madd_lazim", "qalqala_kubra"]
 
   - text: "طسٓمٓ"
+    display_text: "طَا سِيٓن مِّيٓمْ"
     locations:
       - "26:1:1"  # Surah Ash-Shu'ara
       - "28:1:1"  # Surah Al-Qasas
@@ -140,6 +147,7 @@ special_words:
         rules: ["meem_ghunnah", "madd_lazim"]
 
   - text: "طسٓ ۚ"
+    display_text: "طَا سِيٓنْ"
     locations:
       - "27:1:1"  # Surah An-Naml
     letter_mappings:
@@ -154,6 +162,7 @@ special_words:
         rules: []
 
   - text: "طه"
+    display_text: "طَا هَا"
     locations:
       - "20:1:1"  # Surah Ta-Ha
     letter_mappings:
@@ -165,6 +174,7 @@ special_words:
         rules: ["madd_natural"]
 
   - text: "يسٓ"
+    display_text: "يَا سِيٓنْ"
     locations:
       - "36:1:1"  # Surah Ya-Sin
     letter_mappings:
@@ -176,6 +186,7 @@ special_words:
         rules: ["madd_lazim"]
 
   - text: "عٓسٓقٓ"
+    display_text: "عَيْن سِيٓن قَآفْ"
     locations:
       - "42:2:1"  # Surah Ash-Shura
     letter_mappings:
@@ -190,6 +201,7 @@ special_words:
         rules: ["madd_lazim"]
 
   - text: "صٓ ۚ"
+    display_text: "صَآدْ"
     locations:
       - "38:1:1"  # Surah Sad
     letter_mappings:
@@ -201,6 +213,7 @@ special_words:
         rules: []
 
   - text: "قٓ ۚ"
+    display_text: "قَآفْ"
     locations:
       - "50:1:1"  # Surah Qaf
     letter_mappings:
@@ -212,6 +225,7 @@ special_words:
         rules: []
 
   - text: "نٓ ۚ"
+    display_text: "نُوٓنْ"
     locations:
       - "68:1:1"  # Surah Al-Qalam
     letter_mappings:

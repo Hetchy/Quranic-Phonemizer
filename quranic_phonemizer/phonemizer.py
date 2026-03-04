@@ -11,6 +11,7 @@ from .word import Word
 from .text_matcher import TextMatcher
 from .mapping import PhonemizationMapping, WordMapping, AlignmentEntry, MaddMapping
 from .madd import build_madd_mappings, classify_madd_types
+from .phonetic_text import build_phonetic_text
 
 DATA_DIR = Path(__file__).resolve().parent / "resources"
 
@@ -303,6 +304,11 @@ class PhonemizeResult:
             arabic_num = ''.join(arabic_digits[d] for d in prev_verse)
             parts.append(f" {arabic_num} ")
         return " ".join(parts)
+
+    def phonetic_text(self, word_sep: str = " ", verse_sep: str = "\n") -> str | None:
+        if not self._words:
+            return None
+        return build_phonetic_text(self._words, word_sep=word_sep, verse_sep=verse_sep)
 
     def phonemes_str(
         self,

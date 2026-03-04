@@ -5,6 +5,7 @@ Some words require special handling when phonemizing, especially for
 stopping (waqf) scenarios.
 """
 
+from pathlib import Path
 from typing import Dict, Set, Optional, Tuple
 
 # Letters (by char) to skip during phonemization when stopping at these locations.
@@ -24,6 +25,26 @@ STOPPING_DIACRITIC_OVERRIDES: Dict[str, Dict[int, Optional[str]]] = {
     # This makes the phoneme 'n' instead of 'n i'
     "27:36:8": {4: "SUKUN"},  # noon at index 4 gets sukun
 }
+
+
+_DISPLAY_TEXT_MAP: Optional[Dict[str, str]] = None
+
+
+def get_display_text(location_key: str) -> Optional[str]:
+    """Return spelled-out display_text for huroof muqattaat, or None."""
+    global _DISPLAY_TEXT_MAP
+    if _DISPLAY_TEXT_MAP is None:
+        import yaml
+        yaml_path = Path(__file__).resolve().parent / "resources" / "special_words.yaml"
+        with yaml_path.open("r", encoding="utf-8") as fh:
+            data = yaml.safe_load(fh)
+        _DISPLAY_TEXT_MAP = {}
+        for entry in data.get("special_words", []):
+            display = entry.get("display_text")
+            if display:
+                for loc in entry.get("locations", []):
+                    _DISPLAY_TEXT_MAP[loc] = display
+    return _DISPLAY_TEXT_MAP.get(location_key)
 
 
 def get_stopping_skip_letters(location: str) -> Set[str]:
