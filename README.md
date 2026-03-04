@@ -29,6 +29,7 @@ In addition to the Python API, the phonemizer can be used interactively: [qurani
 - [Text Search](#text-search)
 - [Outputs](#outputs)
 - [Stops (Waqf)](#stops-waqf)
+- [Phonetic Text](#phonetic-text)
 - [Contributing](#contributing)
 - [Credits](#credits)
 - [Citing](#citing)
