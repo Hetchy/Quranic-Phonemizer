@@ -7,7 +7,7 @@
   <a href="https://huggingface.co/datasets/hetchyy/everyayah-phonemes"><img src="https://img.shields.io/badge/%F0%9F%A4%97_Hugging_Face-EveryAyah_Phonemes_Dataset-yellow" alt="Dataset"></a>
   <a href="https://openreview.net/forum?id=hZt0JK28iV"><img src="https://img.shields.io/badge/Paper-OpenReview-red" alt="Paper"></a>
   <a href="https://github.com/Hetchy/Quranic-Phonemizer/blob/main/LICENSE"><img src="https://img.shields.io/pypi/l/quranic-phonemizer" alt="License"></a>
-  <a href="https://pypi.org/project/quranic-phonemizer/"><img src="https://img.shields.io/pypi/dm/quranic-phonemizer" alt="Downloads"></a>
+  <a href="https://pypi.org/project/quranic-phonemizer/"><img src="https://static.pepy.tech/badge/quranic-phonemizer/month" alt="Downloads"></a>
 </p>
 
 A Grapheme-to-Phoneme converter (G2P) for the Qurʾan (Hafs riwaya), converting text to phoneme sequences with comprehensive support for all tajweed rules and waqf phonetic effects.
@@ -28,8 +28,7 @@ In addition to the Python API, the phonemizer can be used interactively: [qurani
 - [Input References](#input-references)
 - [Text Search](#text-search)
 - [Outputs](#outputs)
-- [Stops (Waqf)](#stops-boundary-markers)
-- [Phonetic Text](#phonetic-text)
+- [Stops (Waqf)](#stops-waqf)
 - [Contributing](#contributing)
 - [Credits](#credits)
 - [Citing](#citing)
@@ -161,7 +160,7 @@ print(res.phonemes_str())
 ### Output Example (Phonemes String)
 
 ```python
-res = pm.phonemize("112", stops=["verse"])
+res = pm.phonemize("112", stop_signs=["verse"])
 print(res.text())
 print(res.phonemes_str(phoneme_sep=" ", word_sep=" | ", verse_sep="\n"))
 ```
@@ -174,7 +173,7 @@ w a l a m | j a k u | ll a h u: | k u f u w a n | ʔ a ħ a d Q
 
 ## Stops (Waqf)
 
-Optionally, pass a `stops=[]` list to force word/verse segmentation:
+Optionally, pass `stop_signs=[]` to apply stops at Quranic stop signs, and/or `stop_refs=[]` to stop at specific word locations:
 
 | Stop key               | Symbol 
 | ---------------------- | ------ 
@@ -191,10 +190,10 @@ res = pm.phonemize(ref)
 print(res.text())
 print(res.phonemes_str())
 
-res = pm.phonemize(ref, stops=["preferred_continue"])
+res = pm.phonemize(ref, stop_signs=["preferred_continue"])
 print(res.phonemes_str())
 
-res = pm.phonemize(ref, stops=["optional_stop"])
+res = pm.phonemize(ref, stop_signs=["optional_stop"])
 print(res.phonemes_str())
 ```
 
@@ -205,6 +204,11 @@ kaða:lika lʕaða:`bu` walaʕaða:bu lʔa:xirˤaˤti ʔakba`rˤu` law ka:nu: ja
 kaða:lika lʕaða:`bQ` walaʕaða:bu lʔa:xirˤaˤti ʔakba`rˤu` law ka:nu: jaʕlamu:n
 
 kaða:lika lʕaða:`bu` walaʕaða:bu lʔa:xirˤaˤti ʔakba`rˤ` law ka:nu: jaʕlamu:n
+
+```python
+# Stop at a specific word location
+res = pm.phonemize("1:1-1:3", stop_refs=["1:2:2"])
+```
 
 ## Phonetic Text
 
