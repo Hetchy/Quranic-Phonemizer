@@ -277,7 +277,8 @@ def classify_madd_types(word_mappings: List[WordMapping]) -> None:
                     next_word_idx = phoneme_word_map[next_global_idx]
                     if next_word_idx == word_idx:
                         mm.madd_type = 'wajib_muttasil'
-                    else:
+                    elif not word_map.is_stopping:
+                        # Cross-word munfasil only when continuing to next word
                         mm.madd_type = 'jaiz_munfasil'
                 elif next_phoneme in SHADDAH_PHONEMES or next_phoneme in GHUNNAH_PHONEMES:
                     # Shaddah or ghunnah follows - madd lazim (only within same word)
