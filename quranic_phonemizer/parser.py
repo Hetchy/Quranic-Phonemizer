@@ -30,6 +30,7 @@ from .symbols.letters.vowel import Waw
 from .symbols.letters.vowel import Yaa
 from .symbols.letters.lam import Lam
 from .symbols.letters.raa import Raa
+from .tajweed_rule import TajweedRule, TajweedRuleTag
 
 DATA_DIR = Path(__file__).resolve().parent / "resources"
 
@@ -86,11 +87,14 @@ def _load_special_words(yaml_path: str | Path) -> Dict[str, Dict[str, Any]]:
         
         locations = word_entry['locations']
         
+        tajweed_mapping = word_entry.get('tajweed_mapping')
+
         for location in locations:
             special_words_map[location] = {
                 'text': text,
                 'phonemes': word_phonemes,
-                'letter_mappings': letter_mappings
+                'letter_mappings': letter_mappings,
+                'tajweed_mapping': tajweed_mapping,
             }
     
     return special_words_map
@@ -159,7 +163,6 @@ class Parser:
             for letter_map in letter_mappings:
                 full_char = letter_map['char']
                 phonemes = letter_map.get('phonemes', [])
-                rules = letter_map.get('rules', [])
 
                 # Check if this char is a stop sign (may include leading space)
                 char_stripped = full_char.strip()
@@ -203,11 +206,22 @@ class Parser:
                         letter.other_symbols.append(other)
 
                 letter.phonemes = phonemes
-                letter.letter_rules = rules
                 letter.parent_word = word
                 letter.index_in_word = len(word.letters)
                 word.letters.append(letter)
-            
+
+            # Populate _tajweed_rules from single-entry tajweed_mapping (non-muqattaat)
+            tajweed_mapping = special_data.get('tajweed_mapping')
+            if tajweed_mapping and len(tajweed_mapping) == 1:
+                tm_entries = tajweed_mapping[0].get('entries', [])
+                for letter, tm_entry in zip(word.letters, tm_entries):
+                    for rule_str in tm_entry.get('source_rules', []):
+                        try:
+                            letter._tajweed_rules.append(
+                                TajweedRuleTag(rule=TajweedRule(rule_str), is_source=True))
+                        except ValueError:
+                            pass
+
             return word
         
         # Strip rule tags for character processing

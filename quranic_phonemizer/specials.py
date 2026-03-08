@@ -28,6 +28,7 @@ STOPPING_DIACRITIC_OVERRIDES: Dict[str, Dict[int, Optional[str]]] = {
 
 
 _DISPLAY_TEXT_MAP: Optional[Dict[str, str]] = None
+_TAJWEED_MAPPING_MAP: Optional[Dict[str, list]] = None
 
 
 def get_display_text(location_key: str) -> Optional[str]:
@@ -45,6 +46,23 @@ def get_display_text(location_key: str) -> Optional[str]:
                 for loc in entry.get("locations", []):
                     _DISPLAY_TEXT_MAP[loc] = display
     return _DISPLAY_TEXT_MAP.get(location_key)
+
+
+def get_tajweed_mapping(location_key: str) -> Optional[list]:
+    """Return tajweed_mapping list for muqattaat, or None."""
+    global _TAJWEED_MAPPING_MAP
+    if _TAJWEED_MAPPING_MAP is None:
+        import yaml
+        yaml_path = Path(__file__).resolve().parent / "resources" / "special_words.yaml"
+        with yaml_path.open("r", encoding="utf-8") as fh:
+            data = yaml.safe_load(fh)
+        _TAJWEED_MAPPING_MAP = {}
+        for entry in data.get("special_words", []):
+            tm = entry.get("tajweed_mapping")
+            if tm:
+                for loc in entry.get("locations", []):
+                    _TAJWEED_MAPPING_MAP[loc] = tm
+    return _TAJWEED_MAPPING_MAP.get(location_key)
 
 
 def get_stopping_skip_letters(location: str) -> Set[str]:
