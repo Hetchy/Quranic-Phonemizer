@@ -10,7 +10,7 @@
   <a href="https://pypi.org/project/quranic-phonemizer/"><img src="https://static.pepy.tech/badge/quranic-phonemizer/month" alt="Downloads"></a>
 </p>
 
-A Grapheme-to-Phoneme converter (G2P) for the Qurʾan (Hafs riwaya), converting text to phoneme sequences with comprehensive support for all tajweed rules and waqf phonetic effects.
+A Grapheme-to-Phoneme converter (G2P) for the Qurʾan (Hafs riwaya), converting text to phoneme sequences with comprehensive support for waqf phonetic effects and tajweed mappings.
 
 Potential use cases:
 
@@ -19,8 +19,6 @@ Potential use cases:
 - **Linguistic & Tajweed Analysis**: Study phonological patterns and tajweed rule distributions across the Qurʾan, apply tajweed rule labels and coloring
 - **Educational Tools**: Build interactive applications for assessing Qur'an and tajweed pronunciation
 - **Timing Analysis**: Generate word-by-word timestamps for recitations, analyse madd/ghunnah durations
-
-In addition to the Python API, the phonemizer can be used interactively: [quranicphonemizer.com](https://quranicphonemizer.com/).
 
 ## Table of Contents
 - [Phoneme Inventory](#phoneme-inventory)
@@ -358,7 +356,7 @@ For full details, merge rule reference, and validation rules, see [docs/letter-p
 
 If you find any issues or have feature suggestions, please feel free to open an issue or submit a pull request. 
 
-Future plans include detailed tajweed annotations and support for other turuq and riwayat.
+Future plans include support for other turuq and riwayat.
 
 ## Credits
 
