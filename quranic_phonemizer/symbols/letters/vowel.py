@@ -32,6 +32,11 @@ class AlefMaksura(VowelLetter):
     def phonemize_letter(self) -> List[str]:
         if self.diacritic or self.has_shaddah:
             return super().phonemize_letter()
+
+        # mid-word alef maksura
+        if not self.is_last:
+            self.set_tajweed_rule(TajweedRule.VOWEL_SILENT)
+
         return self._lengthen_compatible_phoneme(["a", "aˤ", "i"])
 
 
@@ -62,7 +67,10 @@ class Waw(VowelLetter):
         if self.diacritic:
             return super().phonemize_letter()
 
-        # "a" for cases like الصَّلَوٰة
+        # "a" for cases like الصَّلَوٰة , ٱلۡحَيَوٰةِ 
+        if self.prev_phoneme() == "a":
+            self.set_tajweed_rule(TajweedRule.VOWEL_SILENT)
+        
         return self._lengthen_compatible_phoneme(["a", "u"])
 
 
