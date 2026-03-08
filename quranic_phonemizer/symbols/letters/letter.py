@@ -12,8 +12,8 @@ from ..extension import ExtensionSymbol
 from ..other import OtherSymbol
 
 from ...phoneme_registry import get_rule_phoneme
-from ...mapping import MappingType
 from ...specials import should_skip_letter_for_stopping, get_stopping_diacritic_override, get_stopping_skip_letters
+from ...tajweed_rule import TajweedRule, TajweedRuleTag
 
 
 if TYPE_CHECKING:
@@ -36,27 +36,25 @@ class LetterSymbol(Symbol):
         self.phonemes: List[str] = []
         self.is_phonemized: bool = False
         self.affected_by: Optional["LetterSymbol"] = None
-        
-        # Mapping metadata
-        self._mapping_type: MappingType = MappingType.STANDARD
-        self._rules: List[str] = []
+
+        self._tajweed_rules: List[TajweedRuleTag] = []
 
     def prev_letter(self, n: int = 1) -> Optional["LetterSymbol"]:
         return self.parent_word.get_prev_letter(self.index_in_word, n)
 
     def next_letter(self, n: int = 1) -> Optional["LetterSymbol"]:
         return self.parent_word.get_next_letter(self.index_in_word, n)
-        
+
     def prev_phoneme(self) -> Optional[str]:
         current_word = self.parent_word
         current_index = self.index_in_word
-        
+
         while current_index > 0:
             current_index -= 1
             prev_letter = current_word.letters[current_index]
             if prev_letter.phonemes and prev_letter.phonemes:
                 return prev_letter.phonemes[-1]
-        
+
         prev_word = current_word.prev_word
         if prev_word:
             for letter in reversed(prev_word.letters):
@@ -64,17 +62,17 @@ class LetterSymbol(Symbol):
                     return letter.phonemes[-1]
 
         return None
-        
+
     def find_prev_phoneme_letter(self) -> Optional[tuple["LetterSymbol", int]]:
         current_word = self.parent_word
         current_index = self.index_in_word
-        
+
         while current_index > 0:
             current_index -= 1
             prev_letter = current_word.letters[current_index]
             if prev_letter.phonemes and prev_letter.phonemes:
                 return (prev_letter, len(prev_letter.phonemes) - 1)
-        
+
         prev_word = current_word.prev_word
         if prev_word.letters:
             for letter in reversed(prev_word.letters):
@@ -82,7 +80,7 @@ class LetterSymbol(Symbol):
                     return (letter, len(letter.phonemes) - 1)
 
         return None
-        
+
     def modify_prev_phoneme(self, new_phoneme: str) -> bool:
         result = self.find_prev_phoneme_letter()
         if result:
@@ -90,7 +88,7 @@ class LetterSymbol(Symbol):
             letter.phonemes[phoneme_idx] = new_phoneme
             return True
         return False
-        
+
     def can_phonemize(self) -> bool:
         return not self.is_phonemized
 
@@ -99,39 +97,26 @@ class LetterSymbol(Symbol):
         self.is_phonemized = True
         self.affected_by = affected_by
 
-    def set_mapping(self, mapping_type: MappingType = None, rule: str = None):
-        """Set mapping metadata for this letter."""
-        if mapping_type is not None:
-            self._mapping_type = mapping_type
-        if rule is not None:
-            if rule not in self._rules:
-                self._rules.append(rule)
-
-    def _determine_mapping_type(self) -> MappingType:
-        if self._mapping_type != MappingType.STANDARD:
-            return self._mapping_type
-        if not self.phonemes:
-            return MappingType.SILENT
-        if self.has_shaddah or (self.diacritic and self.diacritic.is_tanween):
-            return MappingType.ONE_TO_MANY
-        if self._rules:
-            return MappingType.CONTEXTUAL
-        return MappingType.STANDARD
+    def set_tajweed_rule(self, rule: TajweedRule, target: Optional["LetterSymbol"] = None):
+        """Tag a TajweedRule on this letter (source) and optionally on a target letter."""
+        tag = TajweedRuleTag(rule=rule, is_source=True)
+        if tag not in self._tajweed_rules:
+            self._tajweed_rules.append(tag)
+        if target is not None:
+            target_tag = TajweedRuleTag(rule=rule, is_source=False)
+            if target_tag not in target._tajweed_rules:
+                target._tajweed_rules.append(target_tag)
 
     @property
-    def mapping_type(self) -> MappingType:
-        return self._determine_mapping_type()
-    
-    @property
-    def rules(self) -> List[str]:
-        return list(self._rules)
+    def tajweed_rules(self) -> List[TajweedRuleTag]:
+        return list(self._tajweed_rules)
 
     @final
     def phonemize(self) -> List[str]:
         # Preserve original state for mapping
         original_diacritic = self.diacritic
         original_shaddah = self.has_shaddah
-        
+
         # Remove shaddah on starting letter
         if self.is_first and self.parent_word.is_starting:
             self.has_shaddah = False
@@ -140,13 +125,12 @@ class LetterSymbol(Symbol):
         if self.is_last and self.parent_word.is_stopping:
             if self.char == "ء" and self.has_fathatan:
                 self.diacritic = DiacriticSymbol("FATHA", "َ", "a")
-                self.set_mapping(rule="waqf_tanween")
                 self.extend()
             elif self.char in ["ى", "ا"]:
                 self.diacritic = None
             else:  # Change diacritic to sukun
                 self.diacritic = DiacriticSymbol("SUKUN", "۟", None)
-        
+
         elif self.parent_word.is_stopping and self.diacritic \
             and self.next_letter() and self.next_letter().is_last and self.next_letter().has_symbol("SILENT_ALWAYS"):
             # e.g. stop on ٱلْعُلَمَـٰٓؤُا۟
@@ -155,16 +139,15 @@ class LetterSymbol(Symbol):
         # Check for special stopping rules (location-specific)
         if self.parent_word.is_stopping:
             location = self.parent_word.location.location_key
-            
+
             # Check if this letter should be skipped entirely
             if should_skip_letter_for_stopping(location, self.char):
-                self.set_mapping(mapping_type=MappingType.SILENT, rule="special_stop_skip")
                 self.phonemes = []
                 # Restore originals before returning
                 self.diacritic = original_diacritic
                 self.has_shaddah = original_shaddah
                 return self.phonemes
-            
+
             # Check for diacritic override
             has_override, new_diacritic = get_stopping_diacritic_override(location, self.index_in_word)
             if has_override:
@@ -172,23 +155,37 @@ class LetterSymbol(Symbol):
                     self.diacritic = DiacriticSymbol("SUKUN", "۟", None)
                 elif new_diacritic is None:
                     self.diacritic = None
-        
+
         # Phonemize letter and modifiers
         self.phonemes = self.phonemize_letter() + self.phonemize_modifiers()
-        
+
+        # Istilaa consonants get tafkheem (raa excluded by is_heavy; lam deduped)
+        if self.is_heavy:
+            self.set_tajweed_rule(TajweedRule.TAFKHEEM)
+
         # Restore original state for mapping
         self.diacritic = original_diacritic
         self.has_shaddah = original_shaddah
-        
+
         return self.phonemes
+
+    # Dispatch map for idgham silent types → TajweedRule
+    IDGHAM_RULE_MAP = {
+        "idgham_mutamathilayn": TajweedRule.IDGHAM_MUTAMATHILAYN,
+        "idgham_mutaqaribayn": TajweedRule.IDGHAM_MUTAQARIBAYN,
+        "lam_shamsiyah": TajweedRule.LAM_SHAMSIYAH,
+        "idgham_mutajanisayn_kamil": TajweedRule.IDGHAM_MUTAJANISAYN_KAMIL,
+        "idgham_mutajanisayn_naqis": TajweedRule.IDGHAM_MUTAJANISAYN_NAQIS,
+    }
 
     def phonemize_letter(self) -> List[str]:
         if not self.diacritic and not self.has_shaddah:
             rule = self.classify_idgham_silent_type()
             if rule:
-                self.set_mapping(mapping_type=MappingType.SILENT, rule=rule)
+                if rule in self.IDGHAM_RULE_MAP:
+                    self.set_tajweed_rule(self.IDGHAM_RULE_MAP[rule], target=self.next_letter())
             return [self.base_phoneme] if rule == "idgham_mutajanisayn_naqis" else []
-        
+
         return self.apply_shaddah()
 
     def apply_shaddah(self, phoneme: Optional[str] = None) -> List[str]:
@@ -208,10 +205,10 @@ class LetterSymbol(Symbol):
         result = self.diacritic.base_phoneme
         if self.has_fatha and (self.is_heavy or self.char == "ر"):
             result += "ˤ"
-        
+
         if self.extensions:
             result += ":"
-        
+
         return [result]
 
     def apply_tanween(self) -> List[str]:
@@ -227,30 +224,27 @@ class LetterSymbol(Symbol):
 
         if next_letter.char in ["ا", "ى"]:
             if self.parent_word.is_stopping:
-                self.set_mapping(rule="waqf_tanween")
                 return [short_vowel_ph + ":"]
             else:
                 next_letter.mark_phonemized(None, affected_by=self.diacritic)
-                next_letter.set_mapping(mapping_type=MappingType.SILENT, rule="tanween_alif")
                 next_letter = self.next_letter(2)
                 if not next_letter:
                     return [short_vowel_ph + ":"]
-            
+
         # Iqlab
         if next_letter.char == "ب":
-            self.set_mapping(rule="iqlab_tanween")
+            self.set_tajweed_rule(TajweedRule.IQLAB_TANWEEN, target=next_letter)
             return [short_vowel_ph, get_rule_phoneme("iqlab", "phoneme")]
 
         # Ikhfaa
         if next_letter.is_ikhfaa:
-            self.set_mapping(rule="ikhfaa_tanween")
+            self.set_tajweed_rule(TajweedRule.IKHFAA_TANWEEN, target=next_letter)
             ikhfaa_key = "heavy_phoneme" if next_letter.is_heavy else "light_phoneme"
             return [short_vowel_ph, get_rule_phoneme("ikhfaa", ikhfaa_key)]
-        
+
         # Idgham Ghunnah
         if next_letter.is_idgham_ghunnah:
-            self.set_mapping(mapping_type=MappingType.MANY_TO_ONE, rule="idgham_ghunnah_tanween")
-            next_letter.set_mapping(mapping_type=MappingType.MANY_TO_ONE, rule="idgham_ghunnah_tanween")
+            self.set_tajweed_rule(TajweedRule.IDGHAM_GHUNNAH_TANWEEN, target=next_letter)
             nasal_map = get_rule_phoneme("idgham", "nasalized_map")
             target_phoneme = nasal_map.get(next_letter.base_phoneme)
             # Note: Don't clear has_shaddah - it's part of the canonical text and should be preserved
@@ -260,23 +254,21 @@ class LetterSymbol(Symbol):
 
         # Idgham no Ghunnah
         if next_letter.char in ["ل", "ر"]:
-            self.set_mapping(mapping_type=MappingType.MANY_TO_ONE, rule="idgham_bila_ghunnah_tanween")
-            next_letter.set_mapping(mapping_type=MappingType.MANY_TO_ONE, rule="idgham_bila_ghunnah_tanween")
+            self.set_tajweed_rule(TajweedRule.IDGHAM_BILA_GHUNNAH_TANWEEN, target=next_letter)
             return [short_vowel_ph]
 
         # Izhar
-        self.set_mapping(rule="izhar_tanween")
         return [short_vowel_ph, noon_ph]
 
     def classify_idgham_silent_type(self) -> Optional[str]:
         if self.next_letter() and self.next_letter().char == self.char:
             return "idgham_mutamathilayn"
-        
+
         mutaqaribayn_map = {
             "ل": ("ر",), # e.g. بَل رَّبُّكُمۡ
             "ق": ("ك",)  # only نَخۡلُقكُّم
         }
-        
+
         mutajanisayn_kamil_map = {
             "ذ": ("ظ",), # e.g. إِذ ظَّلَمۡتُمۡ
             "د": ("ت",), # e.g. أَرَدتُّمۡ
@@ -288,7 +280,7 @@ class LetterSymbol(Symbol):
         mutajanisayn_naqis_map = {
             "ط": ("ت",),
         }
-        
+
         next_char = self.next_letter().char if self.next_letter() else None
         if not next_char:
             return None
@@ -301,16 +293,16 @@ class LetterSymbol(Symbol):
             return "idgham_mutajanisayn_kamil"
         if next_char in mutajanisayn_naqis_map.get(self.char, ()):
             return "idgham_mutajanisayn_naqis"
-        
+
         if self.char == "ل":
             return "lam_shamsiyah"
 
         return "idgham_unknown"
-    
+
 
     def has_symbol(self, symbol_name: str) -> bool:
         return any(symbol.name == symbol_name for symbol in self.other_symbols)
-        
+
     def extend(self):
         if not self.extensions:
             self.extensions.append(ExtensionSymbol("", "", None))
@@ -318,7 +310,7 @@ class LetterSymbol(Symbol):
     @property
     def is_first(self) -> bool:
         return self.index_in_word == 0
-    
+
     @property
     def is_last(self) -> bool:
         return self.index_in_word == len(self.parent_word.letters) - 1
