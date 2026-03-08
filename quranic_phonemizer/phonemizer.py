@@ -350,6 +350,21 @@ class PhonemizeResult:
 
     def tajweed_mappings(self) -> TajweedMapping:
         """Build structured tajweed rule annotations."""
+        # Pass 1: build word mappings for cross-word madd detection
+        word_maps: dict[str, WordMapping] = {}
+        all_word_maps: list[WordMapping] = []
+        for word in self._words:
+            location_key = word.location.location_key
+            if get_tajweed_mapping(location_key) is not None:
+                continue
+            word_map = word.build_mapping()
+            word_maps[location_key] = word_map
+            all_word_maps.append(word_map)
+
+        build_madd_mappings(all_word_maps)
+        classify_madd_types(all_word_maps)
+
+        # Pass 2: build tajweed entries per word
         tajweed_words: list[TajweedWordMapping] = []
 
         for word in self._words:
@@ -373,12 +388,8 @@ class PhonemizeResult:
                     tajweed_words.append(TajweedWordMapping(location=sub_loc, entries=entries, is_stopping=is_stop))
                 continue
 
-            # Build word mapping for madd detection
-            word_map = word.build_mapping()
-            build_madd_mappings([word_map])
-            classify_madd_types([word_map])
-
             # Normal word: build entries from letters + tajweed rules
+            word_map = word_maps[location_key]
             entries, letter_to_entry, extension_to_entry = _build_word_entries(word, word_map)
 
             # Apply madd post-pass
