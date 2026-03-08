@@ -30,6 +30,8 @@ In addition to the Python API, the phonemizer can be used interactively: [qurani
 - [Outputs](#outputs)
 - [Stops (Waqf)](#stops-waqf)
 - [Phonetic Text](#phonetic-text)
+- [Tajweed Mappings](#tajweed-mappings)
+- [Letter-Phoneme Mappings](#letter-phoneme-mappings)
 - [Contributing](#contributing)
 - [Credits](#credits)
 - [Citing](#citing)
@@ -260,6 +262,97 @@ Opening letters are returned as their spelled-out recitation forms:
 | عٓسٓقٓ | عَيْن سِيٓن قَآفْ |
 | قٓ | قَآفْ |
 | نٓ | نُوٓنْ |
+
+## Tajweed Mappings
+
+`tajweed_mappings()` returns per-letter tajweed rule annotations for any phonemized passage. Each Arabic letter is annotated with the rules it participates in, distinguishing between **source rules** (rules the letter triggers) and **target rules** (rules affecting this letter from another letter). Annotations account for starting and stopping effects — cross-word rules disappear when stopping, while rules like `qalqala_kubra` and `madd_arid_lissukun` only appear at stops.
+
+```python
+result = pm.phonemize("1:1", stop_signs=["verse"])
+tajweed = result.tajweed_mappings()
+print(tajweed.to_json(indent=2))
+```
+
+Example output for `ٱلرَّحْمَـٰنِ` (continuing):
+
+```json
+{"location": "1:1:3", "entries": [
+  {"char": "ٱ", "source_rules": ["hamza_wasl_silent"]},
+  {"char": "ل", "source_rules": ["lam_shamsiyah"]},
+  {"char": "ر", "source_rules": ["tafkheem"], "target_rules": ["lam_shamsiyah"]},
+  {"char": "ح"},
+  {"char": "م"},
+  {"char": "ٰ", "source_rules": ["madd_tabii"]},
+  {"char": "ن"}
+]}
+```
+
+Extension characters (dagger alef `ٰ`, mini waw `ۥ`, mini yaa `ۦ`) are split into their own entries so their madd rules are kept separate from the base letter. Huroof muqattaat are returned in their spelled-out recitation form (e.g. الٓمٓ → أَلِفْ · لَآم · مِّيٓمْ).
+
+### Rules
+
+**Source-only** — rules that annotate only the letter itself:
+
+- `tafkheem`
+- `noon_ghunnah`, `meem_ghunnah`
+- `qalqala_sughra`, `qalqala_kubra`
+- `vowel_silent`, `silent_iltiqaa_sakinayn`, `iltiqaa_sakinayn_tanween`
+- `hamza_wasl_silent`, `hamza_wasl_fatha`, `hamza_wasl_kasra`, `hamza_wasl_damma`
+- `madd_tabii`, `madd_wajib_muttasil`, `madd_jaiz_munfasil`, `madd_lazim`, `madd_arid_lissukun`, `madd_leen`
+
+**Source + target** — the source letter triggers the rule and a second letter is annotated as the target:
+
+- `iqlab_noon`, `iqlab_tanween`
+- `ikhfaa_noon`, `ikhfaa_tanween`, `ikhfaa_shafawi`
+- `idgham_ghunnah_noon`, `idgham_ghunnah_tanween`, `idgham_shafawi`
+- `idgham_bila_ghunnah_noon`, `idgham_bila_ghunnah_tanween`
+- `idgham_mutamathilayn`, `idgham_mutaqaribayn`, `idgham_mutajanisayn_kamil`, `idgham_mutajanisayn_naqis`, `lam_shamsiyah`
+
+For full details, examples, and multi-rule overlap documentation, see [docs/tajweed-mappings.md](docs/tajweed-mappings.md).
+
+## Letter-Phoneme Mappings
+
+`letter_phoneme_mappings()` returns flat `[chars, phonemes]` pairs where every entry has at least one phoneme. Silent letters are merged into adjacent entries rather than appearing with empty phonemes, and word boundaries are encoded as spaces in the `chars` field.
+
+```python
+result = pm.phonemize("1:1")
+lpm = result.letter_phoneme_mappings()
+for chars, phonemes in lpm.to_list():
+    print(f"{chars!r} -> {phonemes}")
+```
+
+```
+'ب' -> ['b', 'i']
+'س' -> ['s']
+'م ' -> ['m', 'i']
+'ٱلل' -> ['ll', 'a:']
+'ه ' -> ['h', 'i']
+'ٱلر' -> ['rˤrˤ', 'aˤ']
+'ح' -> ['ħ']
+'م' -> ['m']
+'ٰ' -> ['a:']
+'ن ' -> ['n', 'i']
+'ٱلر' -> ['rˤrˤ', 'aˤ']
+'ح' -> ['ħ']
+'ي' -> ['i:']
+'م' -> ['m']
+```
+
+### Merge Rules
+
+Silent letters merge in one of three directions:
+
+| Direction | When | Example |
+|-----------|------|---------|
+| **PREV** | Silent vowel letter merges into previous entry | `"وا" -> ['w']` — silent alef appended to waw |
+| **NEXT** | Silent letter at word start merges into next entry | `"ٱلر" -> ['rˤrˤ', 'aˤ']` — hamza wasl + lam into raa |
+| **CROSS-WORD** | Silent letter at word end merges with next word's first | `"ن ر" -> ['rˤrˤ', 'aˤ']` — space inside chars |
+
+When both sides of a word boundary have phonemes, they stay separate with a space suffix on the last entry: `"ن " -> ['ŋ']`.
+
+Extension characters (dagger alef, mini waw, mini yaa) are split into their own entries. Mappings reflect stopping/starting context — entry count and merge patterns change depending on waqf.
+
+For full details, merge rule reference, and validation rules, see [docs/letter-phoneme-mappings.md](docs/letter-phoneme-mappings.md).
 
 ## Contributing
 
