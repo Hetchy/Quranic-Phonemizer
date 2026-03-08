@@ -13,12 +13,14 @@ from .symbols.stop import StopSymbol
 from .symbols.other import OtherSymbol
 from .phonemizer import PhonemizeResult
 from .mapping import (
-    MappingType,
     LetterMapping,
     WordMapping,
     AlignmentEntry,
     PhonemizationMapping,
 )
+from .tajweed_rule import TajweedRule, TajweedRuleTag
+from .tajweed_mapping import TajweedMapping, TajweedWordMapping, TajweedEntry
+from .letter_phoneme_mapping import FlatMappingResult
 
 __all__ = [
     'Phonemizer',
@@ -31,9 +33,14 @@ __all__ = [
     'StopSymbol',
     'OtherSymbol',
     'PhonemizeResult',
-    'MappingType',
     'LetterMapping',
     'WordMapping',
     'AlignmentEntry',
     'PhonemizationMapping',
+    'TajweedRule',
+    'TajweedRuleTag',
+    'TajweedMapping',
+    'TajweedWordMapping',
+    'TajweedEntry',
+    'FlatMappingResult',
 ]

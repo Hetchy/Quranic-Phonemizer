@@ -17,6 +17,7 @@ from .specials import (
     get_stopping_diacritic_override,
 )
 from .symbols.letters.lam import Lam
+from .tajweed_rule import TajweedRule
 
 if TYPE_CHECKING:
     from .word import Word
@@ -46,11 +47,11 @@ _STOP_STRIP_EXTENSIONS = {
 # Diacritic names that count as harakaat (replaced by sukun when stopping)
 _HARAKA_NAMES = {"FATHA", "DAMMA", "KASRA", "FATHATAN", "DAMMATAN", "KASRATAN"}
 
-# Hamza wasl rule → replacement char + haraka char
+# Hamza wasl TajweedRule → replacement char + haraka char
 _HAMZA_WASL_RULES = {
-    "hamza_wasl_fatha": (_char("letters", "HAMZA_ABOVE_ALEF"), _char("diacritics", "FATHA")),
-    "hamza_wasl_damma": (_char("letters", "HAMZA_ABOVE_ALEF"), _char("diacritics", "DAMMA")),
-    "hamza_wasl_kasra": (_char("letters", "HAMZA_BELOW_ALEF"), _char("diacritics", "KASRA")),
+    TajweedRule.HAMZA_WASL_FATHA: (_char("letters", "HAMZA_ABOVE_ALEF"), _char("diacritics", "FATHA")),
+    TajweedRule.HAMZA_WASL_DAMMA: (_char("letters", "HAMZA_ABOVE_ALEF"), _char("diacritics", "DAMMA")),
+    TajweedRule.HAMZA_WASL_KASRA: (_char("letters", "HAMZA_BELOW_ALEF"), _char("diacritics", "KASRA")),
 }
 
 # Map diacritic names → chars (for assembling output)
@@ -167,9 +168,9 @@ def _build_letter_segment(
 
     # A. Hamza wasl (starting + first letter + char == ٱ)
     if starting and is_first and letter_char == hamza_wasl_char:
-        rules = lt.rules
-        for rule_name, (repl_char, haraka) in _HAMZA_WASL_RULES.items():
-            if rule_name in rules:
+        source_rules = {tag.rule for tag in lt._tajweed_rules if tag.is_source}
+        for rule, (repl_char, haraka) in _HAMZA_WASL_RULES.items():
+            if rule in source_rules:
                 return repl_char + haraka
         # Fallback: fatha (al- definite article pattern)
         return _char("letters", "HAMZA_ABOVE_ALEF") + _char("diacritics", "FATHA")

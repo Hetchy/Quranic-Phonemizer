@@ -61,7 +61,8 @@ class Word:
             # Replace 'w' with nasalized 'w̃' for idgham ghunnah
             if self.letters[0].phonemes[0] == "w":
                 self.letters[0].phonemes[0] = "w̃"
-                self.letters[0].set_mapping(rule="idgham_ghunnah_tanween")
+                from .tajweed_rule import TajweedRule
+                self.letters[0].set_tajweed_rule(TajweedRule.IDGHAM_GHUNNAH_TANWEEN)
 
     def get_phonemes(self) -> List[str]:
         if self.phonemes:
@@ -133,10 +134,7 @@ class Word:
                         OtherSymbolMapping(char=sym.char, name=sym.name)
                     )
 
-            # Get letter_rules - special words set letter_rules directly, regular use rules property
-            # Note: getattr returns None if not set, but special words set [] for empty rules
-            letter_rules_attr = getattr(letter, 'letter_rules', None)
-            rules = letter_rules_attr if letter_rules_attr is not None else letter.rules
+            tajweed_tags = list(letter._tajweed_rules)
 
             lm = LetterMapping(
                 index=i,
@@ -146,9 +144,7 @@ class Word:
                 has_shaddah=letter.has_shaddah,
                 extensions=extension_mappings,
                 other_symbols=other_symbols_mappings,
-                mapping_type=letter.mapping_type,
-                letter_rules=rules,
-                phoneme_rules=[[] for _ in phonemes],
+                tajweed_rules=tajweed_tags,
             )
             letter_mappings.append(lm)
 
@@ -202,7 +198,7 @@ class Word:
                 result += "      Other symbols:\n"
                 for j, other in enumerate(letter.other_symbols):
                     result += f"        {j}: '{other.char}' -> {other.base_phoneme} (name: {other.name})\n"
-            if letter.rules:
-                result += f"      Rules: {letter.rules}\n"
+            if letter._tajweed_rules:
+                result += f"      Tajweed Rules: {letter._tajweed_rules}\n"
         
         return result

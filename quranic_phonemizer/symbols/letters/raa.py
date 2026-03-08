@@ -1,7 +1,7 @@
 from typing import List
 from .letter import LetterSymbol
 from ...phoneme_registry import get_rule_phoneme
-from ...mapping import MappingType
+from ...tajweed_rule import TajweedRule
 
 
 class Raa(LetterSymbol):
@@ -10,8 +10,8 @@ class Raa(LetterSymbol):
         prev2 = self.prev_letter(2)
         nxt = self.next_letter()
 
-        if not self.diacritic: # e.g. وَٱذۡكُر رَّبَّكَ
-            self.set_mapping(mapping_type=MappingType.SILENT, rule="idgham_mutamathilayn")
+        if not self.diacritic: # e.g. وَٱذۡكُر رَّبَّكَ
+            self.set_tajweed_rule(TajweedRule.IDGHAM_MUTAMATHILAYN, target=self.next_letter())
             return []
 
         match self.diacritic.name:
@@ -19,7 +19,7 @@ class Raa(LetterSymbol):
                 return self._heavy_phoneme()
             case "KASRA" | "KASRATAN":
                 return self._light_phoneme()
-            
+
             case "SUKUN":
                 if not prev.diacritic:
                     match prev.char:
@@ -36,18 +36,17 @@ class Raa(LetterSymbol):
                             return self._heavy_phoneme()
                         else:
                             return self._light_phoneme()
-                    
+
                     case "SUKUN":
                         match prev2.diacritic.name:
                             case "FATHA" | "DAMMA":
                                 return self._heavy_phoneme()
                             case "KASRA":
                                 return self._light_phoneme()
-    
+
     def _heavy_phoneme(self) -> List[str]:
-        self.set_mapping(rule="raa_heavy")
+        self.set_tajweed_rule(TajweedRule.TAFKHEEM)
         return self.apply_shaddah(get_rule_phoneme("raa_heavy", "phoneme"))
 
     def _light_phoneme(self) -> List[str]:
-        self.set_mapping(rule="raa_light")
         return super().phonemize_letter()

@@ -1,5 +1,6 @@
 from typing import List
 from ...phoneme_registry import get_rule_phoneme
+from ...tajweed_rule import TajweedRule
 from .letter import LetterSymbol
 from ..extension import ExtensionSymbol
 
@@ -19,25 +20,23 @@ class Lam(LetterSymbol):
         'ٱللَّهُمَّ': ['ٱ', 'ل', 'ل', 'ه', 'م'],
         'ٱللَّهَ': ['ٱ', 'ل', 'ل', 'ه'],
     }
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-    
-    def phonemize_letter(self) -> List[str]:        
+
+    def phonemize_letter(self) -> List[str]:
         if self._word_contains_Allah():
             self.extensions.append(ExtensionSymbol("DAGGER_ALEF", "", None))
             if self.is_heavy:
-                self.set_mapping(rule="lam_heavy")
+                self.set_tajweed_rule(TajweedRule.TAFKHEEM)
                 return [get_rule_phoneme("lam_heavy", "phoneme")]
-            else:
-                self.set_mapping(rule="lam_light")
         return super().phonemize_letter()
 
     @property
     def is_heavy(self) -> bool:
-        # a: is for ءَآللَّهُ
+        # a: is for ءَآللَّهُ
         return self._word_contains_Allah() and self.prev_phoneme() in ["a", "aˤ", "a:", "u"]
-    
+
     def _word_contains_Allah(self) -> bool:
         if not self.has_shaddah or self.is_first:
             return False

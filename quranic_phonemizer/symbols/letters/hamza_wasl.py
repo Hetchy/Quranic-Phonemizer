@@ -1,6 +1,6 @@
 from typing import List
 from .letter import LetterSymbol
-from ...mapping import MappingType
+from ...tajweed_rule import TajweedRule
 
 
 class HamzaWasl(LetterSymbol):
@@ -24,45 +24,47 @@ class HamzaWasl(LetterSymbol):
         if self.is_first and self.parent_word.is_starting:
             # Check special words first (both sets get kasra)
             if self._is_special_noun() or self._is_special_verb():
-                self.set_mapping(rule="hamza_wasl_kasra")
+                self.set_tajweed_rule(TajweedRule.HAMZA_WASL_KASRA)
                 return [self.base_phoneme, "i"]
 
             second_letter = self.next_letter(1)
             third_letter = self.next_letter(2)
 
             if second_letter and second_letter.char == "ل":
-                self.set_mapping(rule="hamza_wasl_fatha")
+                self.set_tajweed_rule(TajweedRule.HAMZA_WASL_FATHA)
                 return [self.base_phoneme, "a"]
 
             if third_letter and third_letter.diacritic:
                 if third_letter.has_damma:
-                    self.set_mapping(rule="hamza_wasl_damma")
+                    self.set_tajweed_rule(TajweedRule.HAMZA_WASL_DAMMA)
                     return [self.base_phoneme, "u"]
                 if third_letter.has_fatha or third_letter.has_kasra:
-                    self.set_mapping(rule="hamza_wasl_kasra")
+                    self.set_tajweed_rule(TajweedRule.HAMZA_WASL_KASRA)
                     return [self.base_phoneme, "i"]
 
         if self.is_first:  # Iltiqaa Sakinayn
             prev_letter = self.prev_letter(1)
             if not prev_letter:
-                self.set_mapping(mapping_type=MappingType.SILENT, rule="hamza_wasl_silent")
+                self.set_tajweed_rule(TajweedRule.HAMZA_WASL_SILENT)
                 return []
 
             if not prev_letter.phonemes:
                 prev_letter = self.prev_letter(2)
-                
+
             # Case 1: tanween
+            # Note: tanween+vowel cases can't both fire — appended "i" isn't a long vowel
             if prev_letter.has_tanween:
                 prev_letter.phonemes.append("i")
-                self.set_mapping(mapping_type=MappingType.SILENT, rule="iltiqaa_tanween")
+                prev_letter.set_tajweed_rule(TajweedRule.ILTIQAA_SAKINAYN_TANWEEN)
 
             # Case 2: Long vowel demotion to short
             prev_phoneme = self.prev_phoneme()
             if prev_phoneme in ["a:", "aˤ:", "u:", "i:"]:
                 self.modify_prev_phoneme(prev_phoneme[:-1])
-                self.set_mapping(mapping_type=MappingType.SILENT, rule="iltiqaa_vowel")
+                prev_letter.set_tajweed_rule(TajweedRule.SILENT_ILTIQAA_SAKINAYN)
 
-        self.set_mapping(mapping_type=MappingType.SILENT, rule="hamza_wasl_silent")
+        # Fallthrough: always tag HAMZA_WASL_SILENT
+        self.set_tajweed_rule(TajweedRule.HAMZA_WASL_SILENT)
         return []
 
     def _is_special_noun(self) -> bool:

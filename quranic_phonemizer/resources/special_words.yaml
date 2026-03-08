@@ -7,9 +7,15 @@
 #   letter_mappings: List of letter-level mappings with:
 #     - char: The Arabic letter (with any attached madd/diacritics)
 #     - phonemes: List of phonemes for this letter
-#     - rules: List of tajweed rules (optional)
+#   display_text: (muqattaat only) Spelled-out phonetic text form
+#   tajweed_mapping: Tajweed rule annotations.
+#     Muqattaat: each item is one word in the spelled-out form with entries per grapheme.
+#     Non-muqattaat: single item with entries per letter.
+#     source_rules/target_rules use TajweedRule enum string values.
 
 special_words:
+  # ── Huroof muqattaat ──────────────────────────────────────────────
+
   - text: "حمٓ"
     display_text: "حَا مِيٓمْ"
     locations:
@@ -23,10 +29,20 @@ special_words:
     letter_mappings:
       - char: "ح"
         phonemes: ["ħ", "a:"]
-        rules: ["madd_natural"]
       - char: "مٓ"
         phonemes: ["m", "i:", "m"]
-        rules: ["madd_lazim"]
+    tajweed_mapping:
+      - text: "حَا"
+        entries:
+          - char: "ح"
+          - char: "ا"
+            source_rules: ["madd_tabii"]
+      - text: "مِيٓمْ"
+        entries:
+          - char: "م"
+          - char: "ي"
+            source_rules: ["madd_lazim"]
+          - char: "م"
 
   - text: "الٓمٓ"
     display_text: "أَلِفْ لَآم مِّيٓمْ"
@@ -40,13 +56,30 @@ special_words:
     letter_mappings:
       - char: "ا"
         phonemes: ["ʔ", "a", "l", "i", "f"]
-        rules: []
       - char: "لٓ"
         phonemes: ["l", "a:"]
-        rules: ["madd_lazim"]
       - char: "مٓ"
         phonemes: ["m̃", "i:", "m"]
-        rules: ["meem_ghunnah", "madd_lazim"]
+    tajweed_mapping:
+      - text: "أَلِفْ"
+        entries:
+          - char: "أ"
+          - char: "ل"
+          - char: "ف"
+      - text: "لَآم"
+        entries:
+          - char: "ل"
+          - char: "ا"
+            source_rules: ["madd_lazim"]
+          - char: "م"
+            source_rules: ["idgham_shafawi"]
+      - text: "مِّيٓمْ"
+        entries:
+          - char: "م"
+            target_rules: ["idgham_shafawi"]
+          - char: "ي"
+            source_rules: ["madd_lazim"]
+          - char: "م"
 
   - text: "الٓر ۚ"
     display_text: "أَلِفْ لَآمْ رَا"
@@ -59,16 +92,30 @@ special_words:
     letter_mappings:
       - char: "ا"
         phonemes: ["ʔ", "a", "l", "i", "f"]
-        rules: []
       - char: "لٓ"
         phonemes: ["l", "a:"]
-        rules: ["madd_lazim"]
       - char: "ر"
         phonemes: ["m", "rˤ", "aˤ:"]
-        rules: ["madd_natural"]
       - char: " ۚ"
         phonemes: []
-        rules: []
+    tajweed_mapping:
+      - text: "أَلِفْ"
+        entries:
+          - char: "أ"
+          - char: "ل"
+          - char: "ف"
+      - text: "لَآمْ"
+        entries:
+          - char: "ل"
+          - char: "ا"
+            source_rules: ["madd_lazim"]
+          - char: "م"
+      - text: "رَا"
+        entries:
+          - char: "ر"
+            source_rules: ["tafkheem"]
+          - char: "ا"
+            source_rules: ["madd_tabii", "tafkheem"]
 
   - text: "الٓمٓصٓ"
     display_text: "أَلِفْ لَآم مِّيٓمْ صَآدْ"
@@ -77,16 +124,40 @@ special_words:
     letter_mappings:
       - char: "ا"
         phonemes: ["ʔ", "a", "l", "i", "f"]
-        rules: []
       - char: "لٓ"
         phonemes: ["l", "a:"]
-        rules: ["madd_lazim"]
       - char: "مٓ"
         phonemes: ["m̃", "i:", "m"]
-        rules: ["meem_ghunnah", "madd_lazim"]
       - char: "صٓ"
         phonemes: ["sˤ", "aˤ:", "d", "Q"]
-        rules: ["madd_lazim", "qalqala_kubra"]
+    tajweed_mapping:
+      - text: "أَلِفْ"
+        entries:
+          - char: "أ"
+          - char: "ل"
+          - char: "ف"
+      - text: "لَآم"
+        entries:
+          - char: "ل"
+          - char: "ا"
+            source_rules: ["madd_lazim"]
+          - char: "م"
+            source_rules: ["idgham_shafawi"]
+      - text: "مِّيٓمْ"
+        entries:
+          - char: "م"
+            target_rules: ["idgham_shafawi"]
+          - char: "ي"
+            source_rules: ["madd_lazim"]
+          - char: "م"
+      - text: "صَآدْ"
+        entries:
+          - char: "ص"
+            source_rules: ["tafkheem"]
+          - char: "ا"
+            source_rules: ["madd_lazim", "tafkheem"]
+          - char: "د"
+            source_rules: ["qalqala_kubra"]
 
   - text: "الٓمٓر ۚ"
     display_text: "أَلِفْ لَآم مِّيٓمْ رَا"
@@ -95,19 +166,40 @@ special_words:
     letter_mappings:
       - char: "ا"
         phonemes: ["ʔ", "a", "l", "i", "f"]
-        rules: []
       - char: "لٓ"
         phonemes: ["l", "a:"]
-        rules: ["madd_lazim"]
       - char: "مٓ"
         phonemes: ["m̃", "i:", "m"]
-        rules: ["meem_ghunnah", "madd_lazim"]
       - char: "ر"
         phonemes: ["rˤ", "aˤ:"]
-        rules: ["madd_natural"]
       - char: " ۚ"
         phonemes: []
-        rules: []
+    tajweed_mapping:
+      - text: "أَلِفْ"
+        entries:
+          - char: "أ"
+          - char: "ل"
+          - char: "ف"
+      - text: "لَآم"
+        entries:
+          - char: "ل"
+          - char: "ا"
+            source_rules: ["madd_lazim"]
+          - char: "م"
+            source_rules: ["idgham_shafawi"]
+      - text: "مِّيٓمْ"
+        entries:
+          - char: "م"
+            target_rules: ["idgham_shafawi"]
+          - char: "ي"
+            source_rules: ["madd_lazim"]
+          - char: "م"
+      - text: "رَا"
+        entries:
+          - char: "ر"
+            source_rules: ["tafkheem"]
+          - char: "ا"
+            source_rules: ["madd_tabii", "tafkheem"]
 
   - text: "كٓهيعٓصٓ"
     display_text: "كآفْ هَا يَا عَيْن صَآدْ"
@@ -116,19 +208,46 @@ special_words:
     letter_mappings:
       - char: "كٓ"
         phonemes: ["k", "a:", "f"]
-        rules: ["madd_lazim"]
       - char: "ه"
         phonemes: ["h", "a:"]
-        rules: ["madd_natural"]
       - char: "ي"
         phonemes: ["j", "a:"]
-        rules: ["madd_natural"]
       - char: "عٓ"
         phonemes: ["ʕ", "a", "j", "ŋ"]
-        rules: ["ikhfaa_noon"]
       - char: "صٓ"
         phonemes: ["sˤ", "aˤ:", "d", "Q"]
-        rules: ["madd_lazim", "qalqala_kubra"]
+    tajweed_mapping:
+      - text: "كآفْ"
+        entries:
+          - char: "ك"
+          - char: "ا"
+            source_rules: ["madd_lazim"]
+          - char: "ف"
+      - text: "هَا"
+        entries:
+          - char: "ه"
+          - char: "ا"
+            source_rules: ["madd_tabii"]
+      - text: "يَا"
+        entries:
+          - char: "ي"
+          - char: "ا"
+            source_rules: ["madd_tabii"]
+      - text: "عَيْن"
+        entries:
+          - char: "ع"
+          - char: "ي"
+          - char: "ن"
+            source_rules: ["ikhfaa_noon"]
+      - text: "صَآدْ"
+        entries:
+          - char: "ص"
+            source_rules: ["tafkheem"]
+            target_rules: ["ikhfaa_noon"]
+          - char: "ا"
+            source_rules: ["madd_lazim", "tafkheem"]
+          - char: "د"
+            source_rules: ["qalqala_kubra"]
 
   - text: "طسٓمٓ"
     display_text: "طَا سِيٓن مِّيٓمْ"
@@ -138,13 +257,31 @@ special_words:
     letter_mappings:
       - char: "ط"
         phonemes: ["tˤ", "aˤ:"]
-        rules: ["madd_natural"]
       - char: "سٓ"
         phonemes: ["s", "i:"]
-        rules: ["madd_lazim"]
       - char: "مٓ"
         phonemes: ["m̃", "i:", "m"]
-        rules: ["meem_ghunnah", "madd_lazim"]
+    tajweed_mapping:
+      - text: "طَا"
+        entries:
+          - char: "ط"
+            source_rules: ["tafkheem"]
+          - char: "ا"
+            source_rules: ["madd_tabii", "tafkheem"]
+      - text: "سِيٓن"
+        entries:
+          - char: "س"
+          - char: "ي"
+            source_rules: ["madd_lazim"]
+          - char: "ن"
+            source_rules: ["idgham_ghunnah_noon"]
+      - text: "مِّيٓمْ"
+        entries:
+          - char: "م"
+            target_rules: ["idgham_ghunnah_noon"]
+          - char: "ي"
+            source_rules: ["madd_lazim"]
+          - char: "م"
 
   - text: "طسٓ ۚ"
     display_text: "طَا سِيٓنْ"
@@ -153,13 +290,23 @@ special_words:
     letter_mappings:
       - char: "ط"
         phonemes: ["tˤ", "aˤ:"]
-        rules: ["madd_natural"]
       - char: "سٓ"
         phonemes: ["s", "i:", "n"]
-        rules: ["madd_lazim"]
       - char: " ۚ"
         phonemes: []
-        rules: []
+    tajweed_mapping:
+      - text: "طَا"
+        entries:
+          - char: "ط"
+            source_rules: ["tafkheem"]
+          - char: "ا"
+            source_rules: ["madd_tabii", "tafkheem"]
+      - text: "سِيٓنْ"
+        entries:
+          - char: "س"
+          - char: "ي"
+            source_rules: ["madd_lazim"]
+          - char: "ن"
 
   - text: "طه"
     display_text: "طَا هَا"
@@ -168,10 +315,20 @@ special_words:
     letter_mappings:
       - char: "ط"
         phonemes: ["tˤ", "aˤ:"]
-        rules: ["madd_natural"]
       - char: "ه"
         phonemes: ["h", "a:"]
-        rules: ["madd_natural"]
+    tajweed_mapping:
+      - text: "طَا"
+        entries:
+          - char: "ط"
+            source_rules: ["tafkheem"]
+          - char: "ا"
+            source_rules: ["madd_tabii", "tafkheem"]
+      - text: "هَا"
+        entries:
+          - char: "ه"
+          - char: "ا"
+            source_rules: ["madd_tabii"]
 
   - text: "يسٓ"
     display_text: "يَا سِيٓنْ"
@@ -180,10 +337,20 @@ special_words:
     letter_mappings:
       - char: "ي"
         phonemes: ["j", "a:"]
-        rules: ["madd_natural"]
       - char: "سٓ"
         phonemes: ["s", "i:", "n"]
-        rules: ["madd_lazim"]
+    tajweed_mapping:
+      - text: "يَا"
+        entries:
+          - char: "ي"
+          - char: "ا"
+            source_rules: ["madd_tabii"]
+      - text: "سِيٓنْ"
+        entries:
+          - char: "س"
+          - char: "ي"
+            source_rules: ["madd_lazim"]
+          - char: "ن"
 
   - text: "عٓسٓقٓ"
     display_text: "عَيْن سِيٓن قَآفْ"
@@ -192,13 +359,33 @@ special_words:
     letter_mappings:
       - char: "عٓ"
         phonemes: ["ʕ", "a", "j", "ŋ"]
-        rules: ["ikhfaa_noon"]
       - char: "سٓ"
         phonemes: ["s", "i:", "ŋ"]
-        rules: ["madd_lazim", "ikhfaa_noon"]
       - char: "قٓ"
         phonemes: ["q", "aˤ:", "f"]
-        rules: ["madd_lazim"]
+    tajweed_mapping:
+      - text: "عَيْن"
+        entries:
+          - char: "ع"
+          - char: "ي"
+          - char: "ن"
+            source_rules: ["ikhfaa_noon"]
+      - text: "سِيٓن"
+        entries:
+          - char: "س"
+            target_rules: ["ikhfaa_noon"]
+          - char: "ي"
+            source_rules: ["madd_lazim"]
+          - char: "ن"
+            source_rules: ["ikhfaa_noon"]
+      - text: "قَآفْ"
+        entries:
+          - char: "ق"
+            source_rules: ["tafkheem"]
+            target_rules: ["ikhfaa_noon"]
+          - char: "ا"
+            source_rules: ["madd_lazim", "tafkheem"]
+          - char: "ف"
 
   - text: "صٓ ۚ"
     display_text: "صَآدْ"
@@ -207,10 +394,17 @@ special_words:
     letter_mappings:
       - char: "صٓ"
         phonemes: ["sˤ", "aˤ:", "d", "Q"]
-        rules: ["madd_lazim", "qalqala_kubra"]
       - char: " ۚ"
         phonemes: []
-        rules: []
+    tajweed_mapping:
+      - text: "صَآدْ"
+        entries:
+          - char: "ص"
+            source_rules: ["tafkheem"]
+          - char: "ا"
+            source_rules: ["madd_lazim", "tafkheem"]
+          - char: "د"
+            source_rules: ["qalqala_kubra"]
 
   - text: "قٓ ۚ"
     display_text: "قَآفْ"
@@ -219,10 +413,16 @@ special_words:
     letter_mappings:
       - char: "قٓ"
         phonemes: ["q", "aˤ:", "f"]
-        rules: ["madd_lazim"]
       - char: " ۚ"
         phonemes: []
-        rules: []
+    tajweed_mapping:
+      - text: "قَآفْ"
+        entries:
+          - char: "ق"
+            source_rules: ["tafkheem"]
+          - char: "ا"
+            source_rules: ["madd_lazim", "tafkheem"]
+          - char: "ف"
 
   - text: "نٓ ۚ"
     display_text: "نُوٓنْ"
@@ -231,10 +431,17 @@ special_words:
     letter_mappings:
       - char: "نٓ"
         phonemes: ["n", "u:", "n"]
-        rules: ["madd_lazim"]
       - char: " ۚ"
         phonemes: []
-        rules: []
+    tajweed_mapping:
+      - text: "نُوٓنْ"
+        entries:
+          - char: "ن"
+          - char: "و"
+            source_rules: ["madd_lazim"]
+          - char: "ن"
+
+  # ── Non-muqattaat special words ───────────────────────────────────
 
   - text: "مَجْرٜىٰهَا"
     locations:
@@ -242,22 +449,26 @@ special_words:
     letter_mappings:
       - char: "مَ"
         phonemes: ["m", "a"]
-        rules: []
       - char: "جْ"
         phonemes: ["ʒ", "Q"]
-        rules: ["qalqala_sughra"]
       - char: "ر۪"
         phonemes: ["r"]
-        rules: []
       - char: "ىٰ"
         phonemes: ["i:"]
-        rules: ["imala"]
       - char: "هَ"
         phonemes: ["h", "a:"]
-        rules: ["madd_natural"]
       - char: "ا"
         phonemes: []
-        rules: []
+    tajweed_mapping:
+      - entries:
+          - char: "م"
+          - char: "ج"
+            source_rules: ["qalqala_sughra"]
+          - char: "ر"
+          - char: "ى"
+          - char: "ه"
+            source_rules: ["madd_tabii"]
+          - char: "ا"
 
   - text: "نُـۨجِي"
     locations:
@@ -265,42 +476,50 @@ special_words:
     letter_mappings:
       - char: "نُ"
         phonemes: ["n", "u"]
-        rules: []
       - char: "ـۨ"
         phonemes: ["ŋ"]
-        rules: ["ikhfaa_noon"]
       - char: "جِ"
         phonemes: ["ʒ", "i"]
-        rules: []
       - char: "ى"
         phonemes: []
-        rules: ["iltiqaa_vowel"]
+    tajweed_mapping:
+      - entries:
+          - char: "ن"
+          - char: "ـ"
+            source_rules: ["ikhfaa_noon"]
+          - char: "ج"
+          - char: "ى"
+            source_rules: ["silent_iltiqaa_sakinayn"]
 
-  - text: "فَٱدَّٰرَٰ͏ْٔتُمْ"
+  - text: "فَٱدَّٰرَٰ͏ْٔتُمْ"
     locations:
       - "2:72:4"  # Surah Al-Baqarah
     letter_mappings:
       - char: "فَ"
         phonemes: ["f", "a"]
-        rules: []
       - char: "ٱ"
         phonemes: []
-        rules: ["hamzat_wasl"]
-      - char: "دَّٰ"
+      - char: "دَّٰ"
         phonemes: ["dd", "a:"]
-        rules: ["madd_natural"]
       - char: "رَٰ͏"
         phonemes: ["rˤ", "aˤ"]
-        rules: []
-      - char: "ْٔ"
+      - char: "ْٔ"
         phonemes: ["ʔ"]
-        rules: []
       - char: "تُ"
         phonemes: ["t", "u"]
-        rules: []
       - char: "مْ"
         phonemes: ["m"]
-        rules: []
+    tajweed_mapping:
+      - entries:
+          - char: "ف"
+          - char: "ٱ"
+            source_rules: ["hamza_wasl_silent"]
+          - char: "د"
+            source_rules: ["madd_tabii"]
+          - char: "ر"
+          - char: "ء"
+          - char: "ت"
+          - char: "م"
 
   - text: "ءَا۬عْجَمِىٌّ"
     locations:
@@ -308,19 +527,21 @@ special_words:
     letter_mappings:
       - char: "ءَ"
         phonemes: ["ʔ", "a"]
-        rules: []
       - char: "ا۬"
         phonemes: ["ʔ", "a"]
-        rules: []
       - char: "عْ"
         phonemes: ["ʕ"]
-        rules: []
       - char: "جَ"
         phonemes: ["ʒ", "a"]
-        rules: []
       - char: "مِ"
         phonemes: ["m", "i"]
-        rules: []
       - char: "ىٌّ"
         phonemes: ["jj", "u"]
-        rules: []
+    tajweed_mapping:
+      - entries:
+          - char: "ء"
+          - char: "ا"
+          - char: "ع"
+          - char: "ج"
+          - char: "م"
+          - char: "ى"

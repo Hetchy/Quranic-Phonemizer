@@ -1,6 +1,6 @@
 from typing import List
 from .letter import LetterSymbol
-from ...mapping import MappingType
+from ...tajweed_rule import TajweedRule
 
 
 class VowelLetter(LetterSymbol):
@@ -13,17 +13,17 @@ class VowelLetter(LetterSymbol):
                 letter, idx = result
                 short_vowel = letter.phonemes.pop(idx)
                 return [short_vowel + ":"]
-        self.set_mapping(mapping_type=MappingType.SILENT)
+        self.set_tajweed_rule(TajweedRule.VOWEL_SILENT)
         return []
 
 
 class Alef(VowelLetter):
     def phonemize_letter(self) -> List[str]:
         if self.has_symbol("SILENT_ALWAYS"):
-            self.set_mapping(mapping_type=MappingType.SILENT, rule="alef_silent_always")
+            self.set_tajweed_rule(TajweedRule.VOWEL_SILENT)
             return []
         if not self.parent_word.is_stopping and self.has_symbol("SILENT_AT_CONTINUATION"):
-            self.set_mapping(mapping_type=MappingType.SILENT, rule="alef_silent_continuation")
+            self.set_tajweed_rule(TajweedRule.VOWEL_SILENT)
             return []
         return self._lengthen_compatible_phoneme(["a", "aˤ"])
 
@@ -38,45 +38,45 @@ class AlefMaksura(VowelLetter):
 class Waw(VowelLetter):
     def phonemize_letter(self) -> List[str]:
         if self.has_symbol("SILENT_ALWAYS"):
-            self.set_mapping(mapping_type=MappingType.SILENT, rule="waw_silent")
-            return []
-        
-        # Idgham mutamathilayn أَو وَّزَنُوهُمْ
-        next_letter = self.next_letter()
-        if self.next_letter() and self.next_letter().char == "و" and self.next_letter().has_shaddah:
-            self.set_mapping(mapping_type=MappingType.SILENT, rule="idgham_mutamathilayn")
+            self.set_tajweed_rule(TajweedRule.VOWEL_SILENT)
             return []
 
-        # Idgham mutamathilayn e.g. ءَاتَوا۟ وَّقُلُوبُهُمْ
+        # Idgham mutamathilayn أَو وَّزَنُوهُمْ
+        next_letter = self.next_letter()
+        if self.next_letter() and self.next_letter().char == "و" and self.next_letter().has_shaddah:
+            self.set_tajweed_rule(TajweedRule.IDGHAM_MUTAMATHILAYN, target=self.next_letter())
+            return []
+
+        # Idgham mutamathilayn e.g. ءَاتَوا۟ وَّقُلُوبُهُمْ
         if self.next_letter() and (self.next_letter().char == "ا"):
             # stop on ءَاتَوا۟
             if (self.parent_word.is_stopping and self.prev_letter().has_fatha
                 and not self.diacritic and not self.extensions):
                 return ["w"]
-            
-            # continue 
+
+            # continue
             if (self.next_letter(2) and self.next_letter(2).char == "و" and self.next_letter(2).has_shaddah):
-                self.set_mapping(mapping_type=MappingType.SILENT, rule="idgham_mutamathilayn")
+                self.set_tajweed_rule(TajweedRule.IDGHAM_MUTAMATHILAYN, target=self.next_letter(2))
                 return []
-        
+
         if self.diacritic:
             return super().phonemize_letter()
 
-        # "a" for cases like الصَّلَوٰة 
+        # "a" for cases like الصَّلَوٰة
         return self._lengthen_compatible_phoneme(["a", "u"])
 
 
 class Yaa(VowelLetter):
     def phonemize_letter(self) -> List[str]:
         if self.has_symbol("SILENT_ALWAYS"):
-            self.set_mapping(mapping_type=MappingType.SILENT, rule="yaa_silent")
+            self.set_tajweed_rule(TajweedRule.VOWEL_SILENT)
             return []
-        
+
         if self.diacritic:
             return super().phonemize_letter()
-        
-        if self.next_letter() and self.next_letter().char == "ي": # بِأَييِّكُمُ
-            self.set_mapping(mapping_type=MappingType.SILENT, rule="idgham_mutamathilayn")
+
+        if self.next_letter() and self.next_letter().char == "ي": # بِأَييِّكُمُ
+            self.set_tajweed_rule(TajweedRule.IDGHAM_MUTAMATHILAYN, target=self.next_letter())
             return []
 
         return self._lengthen_compatible_phoneme(["i"])
