@@ -227,11 +227,12 @@ Tajweed rules change depending on whether recitation stops (waqf) or starts (ibt
 - `qalqala_kubra` — qalqala letter at word-end when stopping (may be `qalqala_sughra` or absent when continuing)
 
 **Rules that appear only when starting:**
-- `hamza_wasl_fatha` / `hamza_wasl_kasra` / `hamza_wasl_damma` — hamza wasl is pronounced only when starting
+- `hamza_wasl_fatha` / `hamza_wasl_kasra` / `hamza_wasl_damma` — hamza wasl is pronounced only when starting; these rules replace `hamza_wasl_silent` (which applies mid-verse when the hamza is skipped over)
 
 **Rules that disappear when stopping:**
 - Cross-word noon/meem rules (ikhfaa, iqlab, idgham) — the last letter receives sukun, blocking cross-word interaction
-- Iltiqaa rules — only apply when continuing through a hamza wasl
+- Cross-word idgham rules (`idgham_mutamathilayn`, `idgham_mutaqaribayn`, `idgham_mutajanisayn`) — same reason; stopping breaks the word boundary assimilation
+- Both iltiqaa rules (`iltiqaa_sakinayn_tanween`, `silent_iltiqaa_sakinayn`) — only apply when continuing into a hamza wasl; disappear when stopping before that word
 - `madd_jaiz_munfasil` — becomes `madd_tabii` when stopping; the cross-word hamza interaction does not occur, so the long vowel is treated as natural lengthening
 - `tafkheem` on raa — may disappear when stopping if the word-final raa's sukun (from waqf) is preceded by a kasra or ya, switching to tarqeeq
 
