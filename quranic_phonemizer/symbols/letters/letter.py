@@ -126,7 +126,7 @@ class LetterSymbol(Symbol):
             if self.char == "ء" and self.has_fathatan:
                 self.diacritic = DiacriticSymbol("FATHA", "َ", "a")
                 self.extend()
-            elif self.char in ["ى", "ا"]:
+            elif self.char == "ا" or (self.char == "ى" and not self.has_sukun):
                 self.diacritic = None
             else:  # Change diacritic to sukun
                 self.diacritic = DiacriticSymbol("SUKUN", "۟", None)
