@@ -232,6 +232,11 @@ Tajweed rules change depending on whether recitation stops (waqf) or starts (ibt
 **Rules that disappear when stopping:**
 - Cross-word noon/meem rules (ikhfaa, iqlab, idgham) — the last letter receives sukun, blocking cross-word interaction
 - Iltiqaa rules — only apply when continuing through a hamza wasl
+- `madd_jaiz_munfasil` — becomes `madd_tabii` when stopping; the cross-word hamza interaction does not occur, so the long vowel is treated as natural lengthening
+- `tafkheem` on raa — may disappear when stopping if the word-final raa's sukun (from waqf) is preceded by a kasra or ya, switching to tarqeeq
+
+**Rules that appear only due to stopping (context-dependent):**
+- `tafkheem` on raa — may appear when stopping if the word-final raa receives sukun and the preceding vowel context favors heaviness (fatha or damma), whereas it was absent when continuing with a different vowel
 
 ## Huroof Muqattaat (Opening Letters)
 
