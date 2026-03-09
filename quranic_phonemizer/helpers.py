@@ -262,7 +262,7 @@ def phonemize_and_save(
     ref: str,
     output_path: str | Path,
     *,
-    db_path: str | Path = "core/resources/Quran.json",
+    db_path: str | Path = "quranic_phonemizer/resources/Quran.json",
     stop_signs: List[str] = [],
     stop_refs: List[str] = [],
 ) -> None:
