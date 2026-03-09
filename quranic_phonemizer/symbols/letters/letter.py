@@ -262,6 +262,9 @@ class LetterSymbol(Symbol):
 
     def classify_idgham_silent_type(self) -> Optional[str]:
         if self.next_letter() and self.next_letter().char == self.char:
+            # Within-word ل→ل is lam shamsiyah (definite article), not mutamathilayn
+            if self.char == "ل" and self.next_letter().parent_word == self.parent_word:
+                return "lam_shamsiyah"
             return "idgham_mutamathilayn"
 
         mutaqaribayn_map = {
