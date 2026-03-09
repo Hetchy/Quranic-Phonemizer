@@ -64,10 +64,16 @@ class Waw(VowelLetter):
                 self.set_tajweed_rule(TajweedRule.IDGHAM_MUTAMATHILAYN, target=self.next_letter(2))
                 return []
 
-        if self.diacritic:
+        # Stopping gives waw sukun, but if prev letter has damma
+        # waw acts as vowel letter (e.g. هُوَ → hu:)
+        if self.diacritic and not (
+            self.has_sukun and self.is_last and self.parent_word.is_stopping
+            and not self.has_shaddah
+            and self.prev_letter() and self.prev_letter().has_damma
+        ):
             return super().phonemize_letter()
 
-        # "a" for cases like الصَّلَوٰة , ٱلۡحَيَوٰةِ 
+        # "a" for cases like الصَّلَوٰة , ٱلۡحَيَوٰةِ
         if self.prev_phoneme() == "a":
             self.set_tajweed_rule(TajweedRule.VOWEL_SILENT)
         
