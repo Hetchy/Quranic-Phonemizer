@@ -29,7 +29,13 @@ class Alef(VowelLetter):
 
 
 class AlefMaksura(VowelLetter):
+    COMPATIBLE_PHONEMES = ["a", "aˤ", "i"]
+
     def phonemize_letter(self) -> List[str]:
+        if self.has_symbol("SILENT_ALWAYS"):
+            self.set_tajweed_rule(TajweedRule.VOWEL_SILENT)
+            return []
+
         if self.diacritic or self.has_shaddah:
             return super().phonemize_letter()
 
@@ -37,7 +43,15 @@ class AlefMaksura(VowelLetter):
         if not self.is_last:
             self.set_tajweed_rule(TajweedRule.VOWEL_SILENT)
 
-        return self._lengthen_compatible_phoneme(["a", "aˤ", "i"])
+        # When stopping, ى is consonant yaa if prev vowel can't be lengthened
+        # e.g. ٱلْبَغْىِ , ٱلْهَدْىِ but NOT when ى is tanween companion (e.g. مُصَلًّى, أَذًى)
+        if self.is_last and self.parent_word.is_stopping:
+            prev = self.prev_letter()
+            if prev and not prev.has_tanween:
+                if self.prev_phoneme() not in self.COMPATIBLE_PHONEMES:
+                    return [self.base_phoneme]
+
+        return self._lengthen_compatible_phoneme(self.COMPATIBLE_PHONEMES)
 
 
 class Waw(VowelLetter):
@@ -86,7 +100,13 @@ class Yaa(VowelLetter):
             self.set_tajweed_rule(TajweedRule.VOWEL_SILENT)
             return []
 
-        if self.diacritic:
+        # Stopping gives yaa sukun, but if prev letter has kasra
+        # yaa acts as vowel letter (e.g. ـِيَ → i:)
+        if self.diacritic and not (
+            self.has_sukun and self.is_last and self.parent_word.is_stopping
+            and not self.has_shaddah
+            and self.prev_letter() and self.prev_letter().has_kasra
+        ):
             return super().phonemize_letter()
 
         if self.next_letter() and self.next_letter().char == "ي": # بِأَييِّكُمُ
