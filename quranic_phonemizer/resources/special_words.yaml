@@ -466,8 +466,9 @@ special_words:
             source_rules: ["qalqala_sughra"]
           - char: "ر"
           - char: "ى"
-          - char: "ه"
+          - char: "ٰ"
             source_rules: ["madd_tabii"]
+          - char: "ه"
           - char: "ا"
 
   - text: "نُـۨجِي"
@@ -515,6 +516,7 @@ special_words:
           - char: "ٱ"
             source_rules: ["hamza_wasl_silent"]
           - char: "د"
+          - char: "ٰ"
             source_rules: ["madd_tabii"]
           - char: "ر"
           - char: "ء"
