@@ -62,7 +62,9 @@ class Waw(VowelLetter):
 
         # Idgham mutamathilayn أَو وَّزَنُوهُمْ
         next_letter = self.next_letter()
-        if self.next_letter() and self.next_letter().char == "و" and self.next_letter().has_shaddah:
+        if (self.next_letter() and self.next_letter().char == "و"
+                and self.next_letter().has_shaddah
+                and not self.parent_word.is_stopping):
             self.set_tajweed_rule(TajweedRule.IDGHAM_MUTAMATHILAYN, target=self.next_letter())
             return []
 
