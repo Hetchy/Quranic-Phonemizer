@@ -7,8 +7,7 @@ This module handles:
 3. Special cases (tanween+alef, hamza+fathatan, lafdh jalalah)
 """
 
-from pathlib import Path
-from typing import List, Set
+from typing import List
 
 from .mapping import MaddMapping, WordMapping
 from .symbols.letters.lam import Lam
@@ -47,8 +46,9 @@ LAZIM_OVERRIDE_LOCATIONS = {"10:51:7", "10:91:1"}
 # These have long vowels that need explicit tabi'i classification
 NATURAL_MADD_LOCATIONS = {"11:41:6", "2:72:4"}
 
-# Cache for munfasil overrides
-_munfasil_overrides_cache: Set[str] = None
+# Particle letters: vocative يا and demonstrative ها
+# When dagger alef sits on these, the hamza belongs to the next (joined) word
+_PARTICLE_LETTERS = {'ي', 'ه'}
 
 
 def build_madd_mappings(word_mappings: List[WordMapping]) -> None:
@@ -303,22 +303,25 @@ def classify_madd_types(word_mappings: List[WordMapping]) -> None:
 
 
 def _apply_munfasil_overrides(word_mappings: List[WordMapping]) -> None:
-    """Apply munfasil overrides for special cases where muttasil should be munfasil.
-    
-    These are words like يَـٰٓأَيُّهَا where the dagger alef precedes a hamza
-    in the same word graphically, but should be treated as munfasil.
+    """Reclassify particle-joined words from muttasil to munfasil.
+
+    Words like يَـٰٓأَيُّهَا (ya + ayyuha) and هَـٰٓؤُلَآءِ (ha + ulaa'i) have a
+    vocative يا or demonstrative ها particle graphically joined to the next word.
+    The dagger alef on the particle is followed by hamza in the same graphical word,
+    so classify_madd_types() marks it as wajib_muttasil. But linguistically the hamza
+    belongs to a separate word, so the correct classification is jaiz_munfasil.
+
+    Detection: a muttasil madd on dagger alef (ٰ) where the carrier letter is ي or ه.
     """
-    overrides = _load_munfasil_overrides()
-    if not overrides:
-        return
-    
     for word_map in word_mappings:
-        if word_map.location in overrides:
-            # Only apply to the FIRST muttasil madd (the dagger alef one)
-            for mm in word_map.madd_mappings:
-                if mm.madd_type == 'wajib_muttasil':
-                    mm.madd_type = 'jaiz_munfasil'
-                    break
+        for mm in word_map.madd_mappings:
+            if mm.madd_type != 'wajib_muttasil':
+                continue
+            if mm.vowel_grapheme != 'ٰ':
+                continue
+            letter = word_map.letter_mappings[mm.letter_index]
+            if letter.char in _PARTICLE_LETTERS:
+                mm.madd_type = 'jaiz_munfasil'
 
 
 def _apply_lazim_overrides(word_mappings: List[WordMapping]) -> None:
@@ -359,29 +362,6 @@ def _apply_natural_madd_overrides(word_mappings: List[WordMapping]) -> None:
                 ))
 
 
-def _load_munfasil_overrides() -> Set[str]:
-    """Load munfasil override references from bundled YAML file."""
-    global _munfasil_overrides_cache
-
-    if _munfasil_overrides_cache is not None:
-        return _munfasil_overrides_cache
-
-    import yaml
-    # Load from bundled resources (works when pip-installed)
-    yaml_path = Path(__file__).resolve().parent / 'resources' / 'madd_munfasil_special.yaml'
-
-    if not yaml_path.exists():
-        _munfasil_overrides_cache = set()
-        return _munfasil_overrides_cache
-
-    try:
-        with open(yaml_path, 'r', encoding='utf-8') as f:
-            data = yaml.safe_load(f)
-        _munfasil_overrides_cache = set(data.get('munfasil_special', []))
-        return _munfasil_overrides_cache
-    except Exception:
-        _munfasil_overrides_cache = set()
-        return _munfasil_overrides_cache
 
 
 def _classify_arid_lissukun(word_mappings: List[WordMapping]) -> None:
