@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=61.0", "setuptools-scm>=8"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "quranic-phonemizer"
-version = "2.0"
+dynamic = ["version"]
 description = "A Grapheme-to-Phoneme converter (G2P) for the Qurʾan (Hafs riwaya), converting text to phoneme sequences with comprehensive support for all tajweed rules and waqf phonetic effects."
 readme = "README.md"
 license = "MIT"
@@ -38,6 +38,8 @@ dependencies = [
 Homepage = "https://quranicphonemizer.com"
 Repository = "https://github.com/Hetchy/Quranic-Phonemizer"
 Issues = "https://github.com/Hetchy/Quranic-Phonemizer/issues"
+
+[tool.setuptools_scm]
 
 [tool.setuptools.packages.find]
 exclude = ["tests", "tests.*", "*.tests", "*.tests.*", "out"]
