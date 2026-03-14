@@ -55,6 +55,18 @@ LETTER_CLASSES: dict[str, type[LetterSymbol]] = {
     "ۧ":  Yaa, # mini yaa
 }
 
+def _load_letter_overrides(yaml_path: str | Path) -> Dict[str, List[Dict[str, Any]]]:
+    """Load letter-level phoneme overrides keyed by location."""
+    with open(yaml_path, 'r', encoding='utf-8') as file:
+        data = yaml.safe_load(file)
+
+    overrides_map: Dict[str, List[Dict[str, Any]]] = {}
+    for entry in data.get('letter_overrides', []):
+        loc = entry['location']
+        overrides_map.setdefault(loc, []).append(entry)
+    return overrides_map
+
+
 def _load_special_words(yaml_path: str | Path) -> Dict[str, Dict[str, Any]]:
     """
     Load special words and their letter mappings from YAML file.
@@ -125,6 +137,7 @@ class Parser:
     def __init__(self, symbol_mappings: Dict[str, Any], special_words_path: str | Path = DATA_DIR / "special_words.yaml"):
         self.symbol_mappings = symbol_mappings
         self.special_words_map = _load_special_words(special_words_path)
+        self.letter_overrides_map = _load_letter_overrides(special_words_path)
         self._build_lookup_tables()
     
     def _build_lookup_tables(self) -> None:
@@ -308,8 +321,13 @@ class Parser:
 
             i += 1
         
+        # Attach letter overrides if any exist for this location
+        overrides = self.letter_overrides_map.get(location.location_key)
+        if overrides:
+            word._letter_overrides = overrides
+
         return word
-    
+
     def _strip_rule_tags(self, text: str) -> str:
         """Remove rule tags from text for character processing."""
         stripped_text = re.sub(r"<rule class=[^>]+>", "", text)

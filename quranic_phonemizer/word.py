@@ -5,12 +5,13 @@ Word class for the Quranic phonemizer.
 from __future__ import annotations
 
 import re
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 from .symbols.letters.letter import LetterSymbol
 from .location import Location
 from .symbols.stop import StopSymbol
 from .mapping import WordMapping, LetterMapping
+from .tajweed_rule import TajweedRule, TajweedRuleTag
 
 
 class Word:
@@ -24,6 +25,7 @@ class Word:
         self.stop_sign: Optional[StopSymbol] = None
         self.is_starting: bool = False
         self.is_stopping: bool = False
+        self._letter_overrides: Optional[List[Dict[str, Any]]] = None
 
     def get_prev_letter(self, index: int, n: int = 1) -> Optional[LetterSymbol]:
         target_index = index - n
@@ -53,16 +55,27 @@ class Word:
             if letter.can_phonemize():
                 letter.phonemize()
 
-        # One-off fix: 41:44:10 waw should be nasalized after special word 41:44:9
-        if (self.location.location_key == "41:44:10" and
-            self.prev_word and
-            self.prev_word.phonemes and  # prev word is a special word
-            self.letters and self.letters[0].phonemes):
-            # Replace 'w' with nasalized 'w̃' for idgham ghunnah
-            if self.letters[0].phonemes[0] == "w":
-                self.letters[0].phonemes[0] = "w̃"
-                from .tajweed_rule import TajweedRule
-                self.letters[0].set_tajweed_rule(TajweedRule.IDGHAM_GHUNNAH_TANWEEN)
+    def apply_phoneme_overrides(self) -> None:
+        """Apply letter-level phoneme and tajweed overrides after phonemization."""
+        if not self._letter_overrides:
+            return
+        for override in self._letter_overrides:
+            context = override.get('context', 'always')
+            if context == 'stopping' and not self.is_stopping:
+                continue
+            if context == 'starting' and not self.is_starting:
+                continue
+            target = override['target_char']
+            for letter in self.letters:
+                if letter.char == target:
+                    if 'override_phonemes' in override:
+                        letter.phonemes = list(override['override_phonemes'])
+                    if 'override_tajweed' in override:
+                        letter._tajweed_rules = [
+                            TajweedRuleTag(rule=TajweedRule(r), is_source=True)
+                            for r in override['override_tajweed']
+                        ]
+                    break
 
     def get_phonemes(self) -> List[str]:
         if self.phonemes:

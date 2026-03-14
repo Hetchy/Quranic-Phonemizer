@@ -1,17 +1,21 @@
-# Special words in the Quran that require custom phoneme mappings
-# These include huroof muqatta'at (opening letters) and unique words
+# Special words and letter-level overrides for the Quranic phonemizer.
 #
-# Format:
+# ── special_words ──
+# Words whose phonemization is fully hardcoded (currently huroof muqattaat only).
 # - text: The Arabic text of the word (with all diacritics/symbols)
 #   locations: List of surah:verse:word locations
-#   letter_mappings: List of letter-level mappings with:
-#     - char: The Arabic letter (with any attached madd/diacritics)
-#     - phonemes: List of phonemes for this letter
+#   letter_mappings: Per-letter char → phonemes mappings
 #   display_text: (muqattaat only) Spelled-out phonetic text form
-#   tajweed_mapping: Tajweed rule annotations.
-#     Muqattaat: each item is one word in the spelled-out form with entries per grapheme.
-#     Non-muqattaat: single item with entries per letter.
+#   tajweed_mapping: Tajweed rule annotations per grapheme.
 #     source_rules/target_rules use TajweedRule enum string values.
+#
+# ── letter_overrides ──
+# Targeted phoneme overrides applied after normal phonemization.
+# - location: surah:verse:word
+#   target_char: Base letter character to match
+#   override_phonemes: Replacement phoneme list
+#   override_tajweed: Replacement tajweed
+#   context: "always" (default), "stopping", or "starting"
 
 special_words:
   # ── Huroof muqattaat ──────────────────────────────────────────────
@@ -443,109 +447,48 @@ special_words:
             source_rules: ["madd_lazim"]
           - char: "ن"
 
-  # ── Non-muqattaat special words ───────────────────────────────────
+  # ── Letter-level phoneme overrides for non-muqattaat special words ──
 
-  - text: "مَجْرٜىٰهَا"
-    locations:
-      - "11:41:6"  # Surah Hud
-    letter_mappings:
-      - char: "مَ"
-        phonemes: ["m", "a"]
-      - char: "جْ"
-        phonemes: ["ʒ", "Q"]
-      - char: "ر۪"
-        phonemes: ["r"]
-      - char: "ىٰ"
-        phonemes: ["i:"]
-      - char: "هَ"
-        phonemes: ["h", "a:"]
-      - char: "ا"
-        phonemes: []
-    tajweed_mapping:
-      - entries:
-          - char: "م"
-          - char: "ج"
-            source_rules: ["qalqala_sughra"]
-          - char: "ر"
-          - char: "ى"
-          - char: "ٰ"
-            source_rules: ["madd_tabii"]
-          - char: "ه"
-          - char: "ا"
+letter_overrides:
+  # ءَا۬عْجَمِىٌّ — hamza fatha popped by alef lengthening, must restore
+  - location: "41:44:9"
+    target_char: "ء"
+    override_phonemes: ["ʔ", "a"]
+  # alef as second hamza
+  - location: "41:44:9"
+    target_char: "ا"
+    override_phonemes: ["ʔ", "a"]
 
-  - text: "نُـۨجِي"
-    locations:
-      - "21:88:7"  # Surah Al-Anbiya
-    letter_mappings:
-      - char: "نُ"
-        phonemes: ["n", "u"]
-      - char: "ـۨ"
-        phonemes: ["ŋ"]
-      - char: "جِ"
-        phonemes: ["ʒ", "i"]
-      - char: "ى"
-        phonemes: []
-    tajweed_mapping:
-      - entries:
-          - char: "ن"
-          - char: "ـ"
-            source_rules: ["ikhfaa_noon"]
-          - char: "ج"
-          - char: "ى"
-            source_rules: ["silent_iltiqaa_sakinayn"]
+  # مَجْرٜىٰهَا — raa has no diacritic (imala marker)
+  - location: "11:41:6"
+    target_char: "ر"
+    override_phonemes: ["r"]
+    override_tajweed: [] # clear auto tafkheem tag
+  # imala changes vowel quality
+  - location: "11:41:6"
+    target_char: "ى"
+    override_phonemes: ["i:"]
+    override_tajweed: [] # clear silent vowel tag
 
-  - text: "فَٱدَّٰرَٰ͏ْٔتُمْ"
-    locations:
-      - "2:72:4"  # Surah Al-Baqarah
-    letter_mappings:
-      - char: "فَ"
-        phonemes: ["f", "a"]
-      - char: "ٱ"
-        phonemes: []
-      - char: "دَّٰ"
-        phonemes: ["dd", "a:"]
-      - char: "رَٰ͏"
-        phonemes: ["rˤ", "aˤ"]
-      - char: "ْٔ"
-        phonemes: ["ʔ"]
-      - char: "تُ"
-        phonemes: ["t", "u"]
-      - char: "مْ"
-        phonemes: ["m"]
-    tajweed_mapping:
-      - entries:
-          - char: "ف"
-          - char: "ٱ"
-            source_rules: ["hamza_wasl_silent"]
-          - char: "د"
-          - char: "ٰ"
-            source_rules: ["madd_tabii"]
-          - char: "ر"
-          - char: "ء"
-          - char: "ت"
-          - char: "م"
+  # ءَاتَىٰنَِۧ — stopping: skip mini yaa entirely
+  - location: "27:36:8"
+    context: "stopping"
+    target_char: "ۧ"
+    override_phonemes: []
+    # override_phonemes: ["i:"]
+  # stopping: noon kasra → sukun
+  - location: "27:36:8"
+    context: "stopping"
+    target_char: "ن"
+    override_phonemes: ["n"]
 
-  - text: "ءَا۬عْجَمِىٌّ"
-    locations:
-      - "41:44:9"  # Surah Fussilat
-    letter_mappings:
-      - char: "ءَ"
-        phonemes: ["ʔ", "a"]
-      - char: "ا۬"
-        phonemes: ["ʔ", "a"]
-      - char: "عْ"
-        phonemes: ["ʕ"]
-      - char: "جَ"
-        phonemes: ["ʒ", "a"]
-      - char: "مِ"
-        phonemes: ["m", "i"]
-      - char: "ىٌّ"
-        phonemes: ["jj", "u"]
-    tajweed_mapping:
-      - entries:
-          - char: "ء"
-          - char: "ا"
-          - char: "ع"
-          - char: "ج"
-          - char: "م"
-          - char: "ى"
+  # فَٱدَّٰرَٰ͏ْٔتُمْ — dagger alef on raa is ornamental (CGJ)
+  - location: "2:72:4"
+    target_char: "ر"
+    override_phonemes: ["rˤ", "aˤ"]
+
+  # نُـۨجِى — mini noon carries ikhfaa nasalization
+  - location: "21:88:7"
+    target_char: "ۨ"
+    override_phonemes: ["ŋ"]
+    override_tajweed: ["ikhfaa_noon"]

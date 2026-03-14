@@ -12,7 +12,6 @@ from ..extension import ExtensionSymbol
 from ..other import OtherSymbol
 
 from ...phoneme_registry import get_rule_phoneme
-from ...specials import should_skip_letter_for_stopping, get_stopping_diacritic_override, get_stopping_skip_letters
 from ...tajweed_rule import TajweedRule, TajweedRuleTag
 
 
@@ -135,26 +134,6 @@ class LetterSymbol(Symbol):
             and self.next_letter() and self.next_letter().is_last and self.next_letter().has_symbol("SILENT_ALWAYS"):
             # e.g. stop on ٱلْعُلَمَـٰٓؤُا۟
             self.diacritic = DiacriticSymbol("SUKUN", "۟", None)
-
-        # Check for special stopping rules (location-specific)
-        if self.parent_word.is_stopping:
-            location = self.parent_word.location.location_key
-
-            # Check if this letter should be skipped entirely
-            if should_skip_letter_for_stopping(location, self.char):
-                self.phonemes = []
-                # Restore originals before returning
-                self.diacritic = original_diacritic
-                self.has_shaddah = original_shaddah
-                return self.phonemes
-
-            # Check for diacritic override
-            has_override, new_diacritic = get_stopping_diacritic_override(location, self.index_in_word)
-            if has_override:
-                if new_diacritic == "SUKUN":
-                    self.diacritic = DiacriticSymbol("SUKUN", "۟", None)
-                elif new_diacritic is None:
-                    self.diacritic = None
 
         # Phonemize letter and modifiers
         self.phonemes = self.phonemize_letter() + self.phonemize_modifiers()

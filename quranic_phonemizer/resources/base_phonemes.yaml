@@ -194,6 +194,11 @@ letters:
     char: "ۧ"
     phoneme: "j"
 
+  MINI_NOON:
+    cp: 0x06E8
+    char: "ۨ"
+    phoneme: "ŋ"
+
 
 diacritics:
   SUKUN:
@@ -302,11 +307,6 @@ other:
   SILENT_AT_CONTINUATION:
     cp: 0x06E0
     char: "۠"
-    phoneme: ""
-
-  MINI_NOON:
-    cp: 0x06E8
-    char: "ۨ"
     phoneme: ""
 
   MINI_MEEM_ABOVE:

@@ -167,6 +167,8 @@ class Phonemizer:
         words = self.parser.load_words(ref, self.db_path, stop_signs=stop_signs, stop_refs=stop_refs)
         for word in words:
             word.phonemize()
+        for word in words:
+            word.apply_phoneme_overrides()
 
         all_phonemes = []
         for word in words:

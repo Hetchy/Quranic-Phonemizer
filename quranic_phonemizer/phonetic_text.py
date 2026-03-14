@@ -11,11 +11,7 @@ import re
 from typing import List, Optional, TYPE_CHECKING
 
 from .parser import load_symbol_mappings
-from .specials import (
-    get_display_text,
-    should_skip_letter_for_stopping,
-    get_stopping_diacritic_override,
-)
+from .specials import get_display_text
 from .symbols.letters.lam import Lam
 from .tajweed_rule import TajweedRule
 
@@ -150,9 +146,7 @@ def _build_letter_segment(
     stopping = word.is_stopping
     location_key = word.location.location_key
 
-    # F. Location-specific skip
-    if stopping and should_skip_letter_for_stopping(location_key, lt.char):
-        return None
+    # F. Location-specific skip (removed — now handled by letter_overrides)
 
     letter_char = lt.char
     shaddah = lt.has_shaddah
@@ -221,11 +215,7 @@ def _build_letter_segment(
             if diac_name in _HARAKA_NAMES:
                 diac_name = "SUKUN"
 
-    # F. Location-specific diacritic overrides
-    if stopping:
-        has_override, new_diac = get_stopping_diacritic_override(location_key, idx)
-        if has_override:
-            diac_name = new_diac
+    # F. Location-specific diacritic overrides (removed — now handled by letter_overrides)
 
     # G. Allah dagger alef
     allah_extra = ""
