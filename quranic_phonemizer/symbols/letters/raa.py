@@ -14,6 +14,7 @@ class Raa(LetterSymbol):
             self.set_tajweed_rule(TajweedRule.IDGHAM_MUTAMATHILAYN, target=self.next_letter())
             return []
 
+        
         match self.diacritic.name:
             case "FATHA" | "FATHATAN" | "DAMMA" | "DAMMATAN":
                 return self._heavy_phoneme()
@@ -38,6 +39,9 @@ class Raa(LetterSymbol):
                             return self._light_phoneme()
 
                     case "SUKUN":
+                        if prev.char == "ي":
+                            return self._light_phoneme()
+
                         match prev2.diacritic.name:
                             case "FATHA" | "DAMMA":
                                 return self._heavy_phoneme()
