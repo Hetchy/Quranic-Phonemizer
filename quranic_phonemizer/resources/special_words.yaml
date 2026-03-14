@@ -237,6 +237,7 @@ special_words:
         entries:
           - char: "ع"
           - char: "ي"
+            source_rules: ["madd_lazim"]
           - char: "ن"
             source_rules: ["ikhfaa_noon"]
       - text: "صَآدْ"
@@ -368,6 +369,7 @@ special_words:
         entries:
           - char: "ع"
           - char: "ي"
+            source_rules: ["madd_lazim"]
           - char: "ن"
             source_rules: ["ikhfaa_noon"]
       - text: "سِيٓن"
