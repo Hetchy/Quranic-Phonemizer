@@ -25,9 +25,9 @@ Potential use cases:
 - [Text Search](#text-search)
 - [Outputs](#outputs)
 - [Stops (Waqf)](#stops-waqf)
-- [Phonetic Text](#phonetic-text)
 - [Tajweed Mappings](#tajweed-mappings)
 - [Letter-Phoneme Mappings](#letter-phoneme-mappings)
+- [Phonetic Text](#phonetic-text)
 - [Contributing](#contributing)
 - [Credits](#credits)
 - [Citing](#citing)
@@ -209,56 +209,6 @@ kaða:lika lʕaða:`bu` walaʕaða:bu lʔa:xirˤaˤti ʔakba`rˤ` law ka:nu: ja�
 res = pm.phonemize("1:1-1:3", stop_refs=["1:2:2"])
 ```
 
-## Phonetic Text
-
-`phonetic_text()` returns a recitation-accurate rendering of the Arabic text, applying the phonetic transforms that occur when starting or stopping on a word. This is useful for displaying text as it would actually be recited.
-
-### Starting Transforms
-
-| Transform | Original | Phonetic Text |
-|---|---|---|
-| Hamza wasl → fatha | `ٱلرَّحْمَٰنِ` | `أَلرَّحْمَٰنْ` |
-| Hamza wasl → damma | `ٱدْعُ` | `أُدْعْ` |
-| Hamza wasl → kasra | `ٱهْدِنَا` | `إِهْدِنَا` |
-| Remove first-letter shaddah | `لِّلْمُتَّقِينَ` | `لِلْمُتَّقِينْ` |
-
-### Stopping Transforms
-
-| Transform | Original | Phonetic Text |
-|---|---|---|
-| Haraka → sukun | `ٱلرَّحِيمِ` | `ٱلرَّحِيمْ` |
-| Taa marbuta → haa + sukun | `رَحْمَةِ` | `رَحْمَهْ` |
-| Madd iwad (alef) | `كِتَٰبًا` | `كِتَٰبَا` |
-| Madd iwad (hamza) | `دُعَآءً` | `دُعَآءَا` |
-| Strip madd silah | `حَوْلَهُۥ` | `حَوْلَهْ` |
-
-### Other Transforms
-
-| Transform | Original | Phonetic Text |
-|---|---|---|
-| Allah dagger alef | `ٱللَّهِ` | `ٱللَّـٰهِ` |
-
-### Huroof Muqattaʿat
-
-Opening letters are returned as their spelled-out recitation forms:
-
-| Text | Phonetic Text |
-|---|---|
-| الٓمٓ | أَلِفْ لَآم مِّيٓمْ |
-| الٓر | أَلِفْ لَآمْ رَا |
-| الٓمٓصٓ | أَلِفْ لَآم مِّيٓمْ صَآدْ |
-| الٓمٓر | أَلِفْ لَآم مِّيٓمْ رَا |
-| كٓهيعٓصٓ | كآفْ هَا يَا عَيْن صَآدْ |
-| طه | طَا هَا |
-| طسٓمٓ | طَا سِيٓن مِّيٓمْ |
-| طسٓ | طَا سِيٓنْ |
-| يسٓ | يَا سِيٓنْ |
-| صٓ | صَآدْ |
-| حمٓ | حَا مِيٓمْ |
-| عٓسٓقٓ | عَيْن سِيٓن قَآفْ |
-| قٓ | قَآفْ |
-| نٓ | نُوٓنْ |
-
 ## Tajweed Mappings
 
 `tajweed_mappings()` returns per-letter tajweed rule annotations for any phonemized passage. Each Arabic letter is annotated with the rules it participates in, distinguishing between **source rules** (rules the letter triggers) and **target rules** (rules affecting this letter from another letter). Annotations account for starting and stopping effects — cross-word rules disappear when stopping, while rules like `qalqala_kubra` and `madd_arid_lissukun` only appear at stops.
@@ -349,6 +299,57 @@ When both sides of a word boundary have phonemes, they stay separate with a spac
 Extension characters (dagger alef, mini waw, mini yaa) are split into their own entries. Mappings reflect stopping/starting context — entry count and merge patterns change depending on waqf.
 
 For full details, merge rule reference, and validation rules, see [docs/letter-phoneme-mappings.md](docs/letter-phoneme-mappings.md).
+
+
+## Phonetic Text
+
+`phonetic_text()` returns a recitation-accurate rendering of the Arabic text, applying the phonetic transforms that occur when starting or stopping on a word. This is useful for displaying text as it would actually be recited.
+
+### Starting Transforms
+
+| Transform | Original | Phonetic Text |
+|---|---|---|
+| Hamza wasl → fatha | `ٱلرَّحْمَٰنِ` | `أَلرَّحْمَٰنْ` |
+| Hamza wasl → damma | `ٱدْعُ` | `أُدْعْ` |
+| Hamza wasl → kasra | `ٱهْدِنَا` | `إِهْدِنَا` |
+| Remove first-letter shaddah | `لِّلْمُتَّقِينَ` | `لِلْمُتَّقِينْ` |
+
+### Stopping Transforms
+
+| Transform | Original | Phonetic Text |
+|---|---|---|
+| Haraka → sukun | `ٱلرَّحِيمِ` | `ٱلرَّحِيمْ` |
+| Taa marbuta → haa + sukun | `رَحْمَةِ` | `رَحْمَهْ` |
+| Madd iwad (alef) | `كِتَٰبًا` | `كِتَٰبَا` |
+| Madd iwad (hamza) | `دُعَآءً` | `دُعَآءَا` |
+| Strip madd silah | `حَوْلَهُۥ` | `حَوْلَهْ` |
+
+### Other Transforms
+
+| Transform | Original | Phonetic Text |
+|---|---|---|
+| Allah dagger alef | `ٱللَّهِ` | `ٱللَّـٰهِ` |
+
+### Huroof Muqattaʿat
+
+Opening letters are returned as their spelled-out recitation forms:
+
+| Text | Phonetic Text |
+|---|---|
+| الٓمٓ | أَلِفْ لَآم مِّيٓمْ |
+| الٓر | أَلِفْ لَآمْ رَا |
+| الٓمٓصٓ | أَلِفْ لَآم مِّيٓمْ صَآدْ |
+| الٓمٓر | أَلِفْ لَآم مِّيٓمْ رَا |
+| كٓهيعٓصٓ | كآفْ هَا يَا عَيْن صَآدْ |
+| طه | طَا هَا |
+| طسٓمٓ | طَا سِيٓن مِّيٓمْ |
+| طسٓ | طَا سِيٓنْ |
+| يسٓ | يَا سِيٓنْ |
+| صٓ | صَآدْ |
+| حمٓ | حَا مِيٓمْ |
+| عٓسٓقٓ | عَيْن سِيٓن قَآفْ |
+| قٓ | قَآفْ |
+| نٓ | نُوٓنْ |
 
 ## Contributing
 
