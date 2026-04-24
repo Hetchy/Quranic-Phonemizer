@@ -1,0 +1,36 @@
+# Simple-mode collapse rules.
+#
+# Simple mode produces a reduced phoneme vocabulary by mapping geminated and
+# allophonic variants back to their base phoneme. The collapse is applied as a
+# post-processing pass on the output of the full phonemizer; the underlying
+# per-letter phoneme data is not altered, so tajweed/mapping/alignment views
+# continue to use the full vocabulary.
+#
+# Two-stage algorithm:
+#   1. `replace` — substring replacements applied to each phoneme token
+#      (maps the allophonic variants to their base phoneme).
+#   2. `collapse_geminates` — after replacement, the token is split into
+#      units (base char + attached combining marks: `ˤ`, `~`, `:`) and
+#      consecutive identical units are deduped. This handles geminates,
+#      including geminated emphatics (e.g. `lˤlˤ` -> (stage 1) `ll` ->
+#      (stage 2) `l`; `sˤsˤ` -> (stage 2 only) `sˤ`).
+
+# Tokens dropped from the output entirely.
+drop_tokens:
+  - "Q"      # qalqala release marker
+
+# Substring replacements. Applied in order, to each phoneme token.
+# Only allophonic variants are listed here — the phonemic emphatic
+# consonants (sˤ, dˤ, tˤ, ðˤ from ص ض ط ظ) are preserved as distinct
+# phonemes because they contrast with their plain counterparts.
+replace:
+  "rˤ": "r"     # heavy raa (tafkheem) -> plain r
+  "lˤ": "l"     # heavy lam (Allah) -> plain l
+  "aˤ": "a"     # emphasised fatha -> plain a
+  "ñ": "n"      # idgham-nasalised n (precomposed U+00F1) -> n
+  "m̃": "m"      # idgham-nasalised m (m + U+0303) -> m
+  "j̃": "j"      # idgham-nasalised j (j + U+0303) -> j
+  "w̃": "w"      # idgham-nasalised w (w + U+0303) -> w
+
+# Dedupe consecutive identical units within a token (gemination).
+collapse_geminates: true
