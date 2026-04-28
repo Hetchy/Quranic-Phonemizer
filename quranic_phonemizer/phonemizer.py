@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from typing import List, Literal, Optional
 from pathlib import Path
 
-from .parser import Parser, load_symbol_mappings
+from .parser import Parser, annotate_word_boundaries, load_symbol_mappings
 from .word import Word
 from .text_matcher import TextMatcher
 from .mapping import PhonemizationMapping, WordMapping, AlignmentEntry
@@ -184,23 +184,86 @@ class Phonemizer:
             if ikhfaa_shafawi_phoneme is not None:
                 set_phoneme_override("ikhfaa", "shafawi_phoneme", ikhfaa_shafawi_phoneme)
 
-        words = self.parser.load_words(ref, self.db_path, stop_signs=stop_signs, stop_refs=stop_refs)
-        for word in words:
-            word.phonemize()
-        for word in words:
-            word.apply_phoneme_overrides()
-
-        all_phonemes = []
+        # Sliding-window phonemize: at most 3 live Word objects coexist
+        # ({prev1, curr, nxt}). Records are emitted as words leave the window
+        # so the heavy graph never accumulates.
         records: List[WordRecord] = []
-        for word in words:
-            all_phonemes.append(word.get_phonemes())
-            records.append(extract_record(word))
-            if debug:
-                print(word.debug_print())
+        all_phonemes: List[List[str]] = []
+        text_parts: List[str] = []
 
-        text = " ".join(w.text for w in words)
-        # `words` goes out of scope at function return — the live graph is
-        # released; PhonemizeResult holds only the immutable records.
+        stop_signs_lower = [s.lower() for s in stop_signs]
+        stop_ref_set = {r.strip() for r in stop_refs}
+        verse_stop = "verse" in stop_signs_lower
+        ann_kwargs = dict(
+            stop_signs_lower=stop_signs_lower,
+            stop_ref_set=stop_ref_set,
+            verse_stop=verse_stop,
+        )
+
+        def _emit(w: Word) -> None:
+            w.apply_phoneme_overrides()
+            rec = extract_record(w)
+            records.append(rec)
+            all_phonemes.append(rec.phonemes)
+            text_parts.append(w.text)
+            if debug:
+                print(w.debug_print())
+
+        def _link_and_phonemize(prev1, curr, nxt) -> None:
+            curr.prev_word = prev1
+            curr.next_word = nxt
+            if prev1 is not None:
+                prev1.next_word = curr
+            if nxt is not None:
+                nxt.prev_word = curr
+            annotate_word_boundaries(curr, prev1, nxt, **ann_kwargs)
+            curr.phonemize()
+
+        word_iter = self.parser.iter_words(ref, self.db_path)
+
+        # Prime the window: load curr (word[0]) and nxt (word[1]).
+        try:
+            curr = next(word_iter)
+        except StopIteration:
+            # Empty range — never happens in practice (validate_refs ensures
+            # at least one word) but be defensive.
+            return PhonemizeResult(ref, "", [], [], stop_signs, stop_refs, match_score, mode)
+        try:
+            nxt = next(word_iter)
+        except StopIteration:
+            nxt = None
+        prev1 = None
+        _link_and_phonemize(prev1, curr, nxt)
+
+        # Main loop: shift the window forward one slot per incoming word,
+        # phonemize the new curr, and emit prev2 (which has now lost any
+        # possible cross-word writer).
+        for incoming in word_iter:
+            prev2, prev1, curr, nxt = prev1, curr, nxt, incoming
+            _link_and_phonemize(prev1, curr, nxt)
+            if prev2 is not None:
+                _emit(prev2)
+                # Drop the back-edge so prev2 (now unreferenced) can GC.
+                if prev1 is not None:
+                    prev1.prev_word = None
+
+        # Drain phase 1: shift None into nxt to phonemize the very last word.
+        if nxt is not None:
+            prev2, prev1, curr, nxt = prev1, curr, nxt, None
+            _link_and_phonemize(prev1, curr, nxt)
+            if prev2 is not None:
+                _emit(prev2)
+                if prev1 is not None:
+                    prev1.prev_word = None
+
+        # Drain phase 2: emit the trailing prev1 and curr (no future neighbour
+        # can mutate them).
+        if prev1 is not None:
+            _emit(prev1)
+        if curr is not None:
+            _emit(curr)
+
+        text = " ".join(text_parts)
         return PhonemizeResult(ref, text, all_phonemes, records, stop_signs, stop_refs, match_score, mode)
 
     def _validate_refs(self, ref: str) -> None:

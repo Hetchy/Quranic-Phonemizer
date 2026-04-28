@@ -24,6 +24,31 @@ from .tajweed_rule import TajweedRuleTag
 
 _RULE_TAG_RE = re.compile(r"</?rule[^>]*?>")
 
+# Tiny flyweight pools for the per-letter mapping records. Only ~5 unique
+# extensions and ~11 unique other-symbols ever appear across the entire
+# Quran, but they were previously allocated per occurrence (~30k extra
+# objects on the full Quran path).
+_EXT_POOL: dict = {}
+_OTHER_POOL: dict = {}
+
+
+def _intern_ext(char: str, name: str) -> ExtensionSymbolMapping:
+    key = (char, name)
+    cached = _EXT_POOL.get(key)
+    if cached is None:
+        cached = ExtensionSymbolMapping(char=char, name=name)
+        _EXT_POOL[key] = cached
+    return cached
+
+
+def _intern_other(char: str, name: str) -> OtherSymbolMapping:
+    key = (char, name)
+    cached = _OTHER_POOL.get(key)
+    if cached is None:
+        cached = OtherSymbolMapping(char=char, name=name)
+        _OTHER_POOL[key] = cached
+    return cached
+
 # Quranic symbol characters (stop signs, rub el hizb, etc.) — used by
 # leading-symbol extraction. Must match the historic set used by
 # Word.build_mapping.
@@ -44,21 +69,35 @@ _QURANIC_SYMBOLS = {
 _DIACRITIC_SKIP = " ًٌٍَُِّْ"
 
 
+# Sentinel: shared empty tuple stored in slots when a list field would be
+# empty. Saves the ~56-byte empty-list allocation per per-letter list
+# (~1M skipped allocations on the full Quran).
+_EMPTY: Tuple = ()
+
+
 @dataclass(slots=True)
 class LetterRecord:
-    """Per-letter snapshot. Captures everything mapping/output methods read."""
+    """Per-letter snapshot. Captures everything mapping/output methods read.
+
+    List-typed fields default to a shared empty tuple sentinel; consumers
+    iterate or call ``list(...)`` regardless and never observe a typed
+    difference.
+    """
 
     index: int
     char: str
     phonemes: List[str]
     diacritic: Optional[str]                    # diacritic.name, e.g. "FATHA"
     has_shaddah: bool
-    extensions: List[ExtensionSymbolMapping]    # already in mapping-record shape
-    other_symbols: List[OtherSymbolMapping]
-    tajweed_rules: List[TajweedRuleTag]         # interned flyweights from live phase
+    extensions: object                          # tuple/list of ExtensionSymbolMapping (often _EMPTY)
+    other_symbols: object                       # tuple/list of OtherSymbolMapping (often _EMPTY)
+    tajweed_rules: object                       # tuple/list of TajweedRuleTag (often _EMPTY)
 
     def has_symbol(self, name: str) -> bool:
-        return any(s.name == name for s in self.other_symbols)
+        for s in self.other_symbols:
+            if s.name == name:
+                return True
+        return False
 
 
 @dataclass(slots=True)
@@ -74,23 +113,27 @@ class WordRecord:
     is_stopping: bool
     is_special_word: bool
     stop_sign: Optional[Tuple[str, str]]         # (char, name) or None
-    leading_symbols: List[OtherSymbolMapping]
+    leading_symbols: object                      # tuple/list of OtherSymbolMapping (often _EMPTY)
 
 
-def _extract_leading_symbols(text: str, first_letter_char: str) -> List[OtherSymbolMapping]:
+def _extract_leading_symbols(text: str, first_letter_char: str):
     """Mirror Word.build_mapping's leading-symbol scan: find Quranic symbols
-    that appear before the first letter character in the raw word text."""
-    leading: List[OtherSymbolMapping] = []
+    that appear before the first letter character in the raw word text.
+
+    Returns the shared empty tuple if no leading symbols are found, so most
+    words pay zero allocation cost.
+    """
     if not text or not first_letter_char:
-        return leading
+        return _EMPTY
     text_before_first_letter = text.split(first_letter_char)[0]
+    leading: List[OtherSymbolMapping] = []
     for char in text_before_first_letter:
         if char in _DIACRITIC_SKIP:
             continue
         sym_name = _QURANIC_SYMBOLS.get(char)
         if sym_name is not None:
-            leading.append(OtherSymbolMapping(char=char, name=sym_name))
-    return leading
+            leading.append(_intern_other(char, sym_name))
+    return leading if leading else _EMPTY
 
 
 def extract_record(word) -> WordRecord:
@@ -110,18 +153,18 @@ def extract_record(word) -> WordRecord:
             LetterRecord(
                 index=i,
                 char=lt.char,
-                phonemes=list(lt.phonemes) if lt.phonemes else [],
+                phonemes=list(lt.phonemes) if lt.phonemes else _EMPTY,
                 diacritic=lt.diacritic.name if lt.diacritic else None,
                 has_shaddah=lt.has_shaddah,
-                extensions=[
-                    ExtensionSymbolMapping(char=e.char, name=e.name)
-                    for e in ext_list
-                ],
-                other_symbols=[
-                    OtherSymbolMapping(char=s.char, name=s.name)
-                    for s in other_list
-                ],
-                tajweed_rules=list(tajweed_list),
+                extensions=(
+                    [_intern_ext(e.char, e.name) for e in ext_list]
+                    if ext_list else _EMPTY
+                ),
+                other_symbols=(
+                    [_intern_other(s.char, s.name) for s in other_list]
+                    if other_list else _EMPTY
+                ),
+                tajweed_rules=list(tajweed_list) if tajweed_list else _EMPTY,
             )
         )
 
