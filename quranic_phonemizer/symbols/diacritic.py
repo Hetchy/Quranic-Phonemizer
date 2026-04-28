@@ -16,7 +16,15 @@ _DIACRITIC_POOL: Dict[Tuple[str, str, Optional[str]], "DiacriticSymbol"] = {}
 
 
 class DiacriticSymbol(Symbol):
-    __slots__ = ()
+    """Diacritic instances are cached and immutable. The is_* boolean
+    predicates are pre-computed and stored as plain slot attributes (not
+    @property descriptors) so look-ups in the hot phonemize_modifiers /
+    apply_tanween paths are direct slot reads."""
+
+    __slots__ = (
+        "is_sukun", "is_fatha", "is_damma", "is_kasra",
+        "is_tanween", "is_fathatan",
+    )
 
     def __new__(cls, name: str, char: str, phoneme: Optional[str]):
         key = (name, char, phoneme)
@@ -25,6 +33,12 @@ class DiacriticSymbol(Symbol):
             return cached
         obj = super().__new__(cls)
         Symbol.__init__(obj, name, char, phoneme)
+        obj.is_sukun = name == "SUKUN"
+        obj.is_fatha = name == "FATHA"
+        obj.is_damma = name == "DAMMA"
+        obj.is_kasra = name == "KASRA"
+        obj.is_fathatan = name == "FATHATAN"
+        obj.is_tanween = name in ("FATHATAN", "DAMMATAN", "KASRATAN")
         _DIACRITIC_POOL[key] = obj
         return obj
 
@@ -32,27 +46,3 @@ class DiacriticSymbol(Symbol):
         # __new__ already initialised attributes (or returned a cached
         # instance). Skip re-initialisation to avoid redundant work.
         pass
-
-    @property
-    def is_sukun(self) -> bool:
-        return self.name == "SUKUN"
-
-    @property
-    def is_fatha(self) -> bool:
-        return self.name == "FATHA"
-
-    @property
-    def is_damma(self) -> bool:
-        return self.name == "DAMMA"
-
-    @property
-    def is_kasra(self) -> bool:
-        return self.name == "KASRA"
-
-    @property
-    def is_tanween(self) -> bool:
-        return self.name in ("FATHATAN", "DAMMATAN", "KASRATAN")
-
-    @property
-    def is_fathatan(self) -> bool:
-        return self.name == "FATHATAN"
