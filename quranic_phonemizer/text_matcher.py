@@ -10,10 +10,9 @@ This module implements the text-to-reference matching algorithm as specified:
 
 from __future__ import annotations
 
-import json
 import re
 from pathlib import Path
-from typing import Dict, List, Tuple, Optional, Any
+from typing import Dict, List, Optional, Any
 from difflib import SequenceMatcher
 
 from .loader import load_db
