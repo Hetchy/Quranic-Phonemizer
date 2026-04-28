@@ -35,21 +35,20 @@ class LetterSymbol(Symbol):
     )
 
     def __init__(self, name: str, char: str, base_phoneme: str):
-        super().__init__(name, char, base_phoneme)
-
-        self.has_shaddah: bool = False
-        self.diacritic: Optional[DiacriticSymbol] = None
-        self.extensions: Optional[List[ExtensionSymbol]] = None
-        self.other_symbols: Optional[List[OtherSymbol]] = None
-
-        # phonemes is overwritten by phonemize() / mark_phonemized() / parse_word
-        # for special words; init to the interned empty tuple to skip the
-        # per-letter list allocation (saves ~326k allocs on the full Quran).
-        self.phonemes: List[str] = ()
-        self.is_phonemized: bool = False
-        self.affected_by: Optional["LetterSymbol"] = None
-
-        self._tajweed_rules: Optional[List[TajweedRuleTag]] = None
+        # Inline Symbol.__init__ to skip the extra frame (~326k calls on the
+        # full Quran). Tuple-unpack assignment is also faster than separate
+        # statements for slot writes.
+        (
+            self.name, self.char, self.base_phoneme,
+            self.has_shaddah, self.diacritic, self.extensions,
+            self.other_symbols, self.phonemes, self.is_phonemized,
+            self.affected_by, self._tajweed_rules,
+        ) = (
+            name, char, base_phoneme,
+            False, None, None,
+            None, (), False,
+            None, None,
+        )
 
     def add_extension(self, ext: ExtensionSymbol) -> None:
         if self.extensions is None:
