@@ -42,7 +42,10 @@ class LetterSymbol(Symbol):
         self.extensions: Optional[List[ExtensionSymbol]] = None
         self.other_symbols: Optional[List[OtherSymbol]] = None
 
-        self.phonemes: List[str] = []
+        # phonemes is overwritten by phonemize() / mark_phonemized() / parse_word
+        # for special words; init to the interned empty tuple to skip the
+        # per-letter list allocation (saves ~326k allocs on the full Quran).
+        self.phonemes: List[str] = ()
         self.is_phonemized: bool = False
         self.affected_by: Optional["LetterSymbol"] = None
 

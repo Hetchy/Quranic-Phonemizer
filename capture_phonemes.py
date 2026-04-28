@@ -71,6 +71,19 @@ def main() -> None:
         out_path.write_text(serialize(result), encoding="utf-8")
         print(f"wrote {out_path} ({out_path.stat().st_size} bytes)")
 
+    # Letter-phoneme + tajweed mappings for the full Quran
+    result = p.phonemize("1-114")
+
+    lpm = result.letter_phoneme_mappings()
+    lpm_path = out_dir / "quran_full_letter_phoneme_mappings.json"
+    lpm_path.write_text(lpm.to_json(indent=0), encoding="utf-8")
+    print(f"wrote {lpm_path} ({lpm_path.stat().st_size} bytes)")
+
+    tm = result.tajweed_mappings()
+    tm_path = out_dir / "quran_full_tajweed_mappings.json"
+    tm_path.write_text(tm.to_json(indent=0), encoding="utf-8")
+    print(f"wrote {tm_path} ({tm_path.stat().st_size} bytes)")
+
 
 if __name__ == "__main__":
     main()
