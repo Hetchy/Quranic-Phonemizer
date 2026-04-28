@@ -195,6 +195,99 @@ class _MmapLazyDB:
         return self._sorted_tuples
 
 
+class _DedupMmapDB:
+    """Like _MmapLazyDB but the underlying binary stores deduplicated word
+    texts. Uses ~3x less disk and ~5 MB less idle RSS by exploiting the
+    fact that only 20,696 of 77,433 word texts are unique.
+
+    File layout (see build_dedup_formats.py):
+      <u32 n_words> <u32 n_unique>
+      <(n_unique+1) * u32 offsets>
+      <u32 text_blob_len> <text_blob_bytes>
+      <n_words * u16 word_idx>     -- word_idx[w] -> index into offsets/text_blob
+    """
+
+    __slots__ = ("_mm", "_file", "_offsets", "_text_blob_start",
+                 "_word_indices", "_verse_start", "_sorted_tuples")
+
+    def __init__(self, mm, file_obj, offsets, text_blob_start,
+                 word_indices, verse_start, sorted_tuples):
+        self._mm = mm
+        self._file = file_obj
+        self._offsets = offsets
+        self._text_blob_start = text_blob_start
+        self._word_indices = word_indices
+        self._verse_start = verse_start
+        self._sorted_tuples = sorted_tuples
+
+    def _word_idx(self, key: str) -> int:
+        s_str, v_str, w_str = key.split(":", 2)
+        return self._verse_start[(int(s_str), int(v_str))] + int(w_str) - 1
+
+    def __getitem__(self, key: str) -> str:
+        word_idx = self._word_idx(key)
+        u_idx = self._word_indices[word_idx]
+        b = self._text_blob_start
+        o = self._offsets
+        return self._mm[b + o[u_idx]:b + o[u_idx + 1]].decode("utf-8")
+
+    def __contains__(self, key: str) -> bool:
+        try:
+            self._word_idx(key)
+            return True
+        except (KeyError, ValueError):
+            return False
+
+    def keys(self):
+        for s, v, w in self._sorted_tuples:
+            yield f"{s}:{v}:{w}"
+
+    def items(self):
+        for k in self.keys():
+            yield k, self[k]
+
+
+class _DedupEagerDB:
+    """Deduplicated DB with eager UTF-8 decode of unique texts.
+
+    77k word slots all point into a list of ~20.7k Python str objects
+    via uint16 indices. Best of both worlds: small disk file *and*
+    sub-microsecond lookups, at the cost of decoding all unique texts
+    up-front.
+    """
+
+    __slots__ = ("_unique_texts", "_word_indices", "_verse_start",
+                 "_sorted_tuples")
+
+    def __init__(self, unique_texts, word_indices, verse_start, sorted_tuples):
+        self._unique_texts = unique_texts
+        self._word_indices = word_indices
+        self._verse_start = verse_start
+        self._sorted_tuples = sorted_tuples
+
+    def _word_idx(self, key: str) -> int:
+        s_str, v_str, w_str = key.split(":", 2)
+        return self._verse_start[(int(s_str), int(v_str))] + int(w_str) - 1
+
+    def __getitem__(self, key: str) -> str:
+        return self._unique_texts[self._word_indices[self._word_idx(key)]]
+
+    def __contains__(self, key: str) -> bool:
+        try:
+            self._word_idx(key)
+            return True
+        except (KeyError, ValueError):
+            return False
+
+    def keys(self):
+        for s, v, w in self._sorted_tuples:
+            yield f"{s}:{v}:{w}"
+
+    def items(self):
+        for k in self.keys():
+            yield k, self[k]
+
+
 # ----------------------------------------------------------------------
 # Format-specific load functions
 # ----------------------------------------------------------------------
@@ -252,6 +345,96 @@ def _load_binary_blob(path: Path) -> _BlobDB:
     return _BlobDB(text_blob, offsets, keys)
 
 
+def _read_dedup_blob_header(mm_or_bytes, n_total_expected=None):
+    """Parse the dedup-blob header. Returns (n, n_unique, offsets,
+    text_blob_start, word_indices) where text_blob_start is a byte offset
+    into mm_or_bytes pointing at the start of the deduplicated text blob.
+    """
+    n, m = struct.unpack_from("<II", mm_or_bytes, 0)
+    pos = 8
+    offsets_size = (m + 1) * 4
+    offsets = array.array("I")
+    offsets.frombytes(bytes(mm_or_bytes[pos:pos + offsets_size]))
+    pos += offsets_size
+    text_blob_len = struct.unpack_from("<I", mm_or_bytes, pos)[0]
+    pos += 4
+    text_blob_start = pos
+    pos += text_blob_len
+    word_indices = array.array("H")
+    word_indices.frombytes(bytes(mm_or_bytes[pos:pos + 2 * n]))
+    return n, m, offsets, text_blob_start, word_indices
+
+
+def _load_dedup_eager(path: Path) -> Tuple[_DedupEagerDB, List[Tuple[int, int, int]]]:
+    """Read the dedup blob and eagerly decode the ~20.7k unique strings.
+
+    Memory model:
+      - one Python str per UNIQUE text (~20.7k objects)
+      - uint16 array of per-word indices (~155 KB)
+      - small (s, v) -> base_idx dict for key parsing
+
+    Returns (db, sorted_tuples) — caller stashes both into the caches.
+    """
+    with path.open("rb") as fh:
+        data = fh.read()
+    n, m, offsets, tstart, word_indices = _read_dedup_blob_header(data)
+    # Eagerly decode the unique texts so all subsequent lookups are pure
+    # dict-style pointer fetches.
+    unique_texts = [data[tstart + offsets[i]:tstart + offsets[i + 1]].decode("utf-8")
+                    for i in range(m)]
+
+    verse_start, sorted_tuples = _build_verse_index_and_tuples()
+    if len(sorted_tuples) != n:
+        raise ValueError(
+            f"dedup blob has {n} word slots but surah_info implies "
+            f"{len(sorted_tuples)}; rebuild quran_db_dedup.bin"
+        )
+    return _DedupEagerDB(unique_texts, word_indices, verse_start, sorted_tuples), sorted_tuples
+
+
+def _load_dedup_mmap(path: Path) -> Tuple[_DedupMmapDB, List[Tuple[int, int, int]]]:
+    """Read the dedup blob via mmap. Decodes are deferred to lookup time;
+    only OS pages actually touched stay resident.
+
+    Idle RSS for this loader is ~5 MB lower than plain mmap because the
+    word_indices table (uint16, 155 KB) is much smaller than 77k full-text
+    offsets, and the text blob itself is only ~422 KB instead of ~1.5 MB.
+    """
+    fh = path.open("rb")
+    mm = mmap.mmap(fh.fileno(), 0, access=mmap.ACCESS_READ)
+    n, m, offsets, tstart, word_indices = _read_dedup_blob_header(mm)
+    verse_start, sorted_tuples = _build_verse_index_and_tuples()
+    if len(sorted_tuples) != n:
+        raise ValueError(
+            f"dedup blob has {n} word slots but surah_info implies "
+            f"{len(sorted_tuples)}; rebuild quran_db_dedup.bin"
+        )
+    return _DedupMmapDB(mm, fh, offsets, tstart, word_indices,
+                        verse_start, sorted_tuples), sorted_tuples
+
+
+def _build_verse_index_and_tuples():
+    """Build (verse_start, sorted_tuples) from surah_info.json."""
+    with _SURAH_INFO_PATH.open(encoding="utf-8") as info_f:
+        info = json.load(info_f)
+    verse_start: Dict[Tuple[int, int], int] = {}
+    sorted_tuples: List[Tuple[int, int, int]] = []
+    base = 0
+    for s in range(1, 115):
+        s_str = str(s)
+        s_data = info.get(s_str)
+        if not s_data:
+            continue
+        for v_info in s_data["verses"]:
+            v = v_info["verse"]
+            verse_start[(s, v)] = base
+            nw = v_info["num_words"]
+            for w in range(1, nw + 1):
+                sorted_tuples.append((s, v, w))
+            base += nw
+    return verse_start, sorted_tuples
+
+
 def _load_mmap_lazy(path: Path) -> Tuple[_MmapLazyDB, List[Tuple[int, int, int]]]:
     """Pay-as-you-go: mmap the binary file. Eager structures are kept
     minimal — just the offsets array and a (s, v) -> base_idx dict.
@@ -271,25 +454,8 @@ def _load_mmap_lazy(path: Path) -> Tuple[_MmapLazyDB, List[Tuple[int, int, int]]
     text_blob_start = pos
     # Skip the keys section entirely; reconstruct from surah_info instead.
 
-    # Build verse_start: (s, v) -> base_idx, plus canonical (s, v, w) tuples.
-    with _SURAH_INFO_PATH.open(encoding="utf-8") as info_f:
-        info = json.load(info_f)
-    verse_start: Dict[Tuple[int, int], int] = {}
-    sorted_tuples: List[Tuple[int, int, int]] = []
-    base = 0
-    for s in range(1, 115):
-        s_str = str(s)
-        s_data = info.get(s_str)
-        if not s_data:
-            continue
-        for v_info in s_data["verses"]:
-            v = v_info["verse"]
-            verse_start[(s, v)] = base
-            nw = v_info["num_words"]
-            for w in range(1, nw + 1):
-                sorted_tuples.append((s, v, w))
-            base += nw
-
+    verse_start, sorted_tuples = _build_verse_index_and_tuples()
+    base = len(sorted_tuples)
     if base != n:
         # surah_info disagrees with the binary file — refuse to load
         # rather than silently mis-mapping indices.
@@ -307,19 +473,23 @@ _LOADERS = {
     "blob": _load_binary_blob,
     "texts": _load_texts_only,
     "mmap": _load_mmap_lazy,
+    "dedup": _load_dedup_eager,
+    "dedup_mmap": _load_dedup_mmap,
 }
 
 # Formats that ship their keys in canonical sort order. Their loaders
 # guarantee db.keys() is already sorted, so _build_index can skip the
 # explicit sort step.
-_PRE_SORTED_FORMATS = {"flat", "blob", "texts", "mmap"}
+_PRE_SORTED_FORMATS = {"flat", "blob", "texts", "mmap", "dedup", "dedup_mmap"}
 
 
 _SIBLING_FILENAMES = {
-    "texts": "quran_db_texts.json",
-    "flat":  "quran_db_flat.json",
-    "blob":  "quran_db_blob.bin",
-    "mmap":  "quran_db_blob.bin",  # same file, different load strategy
+    "texts":      "quran_db_texts.json",
+    "flat":       "quran_db_flat.json",
+    "blob":       "quran_db_blob.bin",
+    "mmap":       "quran_db_blob.bin",   # same file, different load strategy
+    "dedup":      "quran_db_dedup.bin",
+    "dedup_mmap": "quran_db_dedup.bin",  # same file, mmap'd
 }
 
 
@@ -343,6 +513,8 @@ def _resolve_format_and_path(db_path: str | Path) -> Tuple[str, Path]:
             p = p.with_name(_SIBLING_FILENAMES[fmt])
         return fmt, p
 
+    if p.name.endswith("_dedup.bin"):
+        return "dedup", p
     if p.suffix == ".bin":
         return "blob", p
     if p.name.endswith("_texts.json"):
@@ -351,7 +523,10 @@ def _resolve_format_and_path(db_path: str | Path) -> Tuple[str, Path]:
         return "flat", p
 
     if p.name == "Quran.json":
-        for f in ("texts", "flat", "blob"):
+        # Prefer the format that is both smallest *and* fastest at lookup
+        # time. dedup-eager wins on memory + speed; texts wins on full-Quran
+        # cold starts but uses more RAM.
+        for f in ("dedup", "texts", "flat", "blob"):
             sibling = p.with_name(_SIBLING_FILENAMES[f])
             if sibling.exists():
                 return f, sibling
@@ -370,9 +545,10 @@ def load_db(db_path: str | Path):
         # Loader returns (db, sorted_keys, sorted_tuples) — populate index directly.
         db, sorted_keys, sorted_tuples = _LOADERS[fmt](p)
         _index_cache[path_str] = (sorted_tuples, sorted_keys)
-    elif fmt == "mmap":
-        # mmap-lazy: keep sorted_keys = None; bisect path returns
-        # generated keys for the requested range only.
+    elif fmt in ("mmap", "dedup", "dedup_mmap"):
+        # Loaders that defer key materialisation: store None for sorted_keys
+        # and let keys_for_reference() generate strings only for the requested
+        # range from sorted_tuples.
         db, sorted_tuples = _LOADERS[fmt](p)
         _index_cache[path_str] = (sorted_tuples, None)
     else:

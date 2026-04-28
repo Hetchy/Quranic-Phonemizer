@@ -1,9 +1,11 @@
 """Regenerate the slim runtime DB formats from the canonical Quran.json.
 
 Outputs alongside Quran.json in quranic_phonemizer/resources/:
-  - quran_db_texts.json : [text, ...] in canonical order (smallest, default)
+  - quran_db_dedup.bin  : deduplicated binary, 20.7k unique texts +
+                           uint16 word indices  (default at runtime)
+  - quran_db_texts.json : [text, ...] in canonical order
   - quran_db_flat.json  : [keys, texts] parallel arrays
-  - quran_db_blob.bin   : packed binary  (opt-in via QURAN_DB_FORMAT=blob)
+  - quran_db_blob.bin   : packed binary, no dedup
 
 Run after editing Quran.json.
 """
@@ -63,6 +65,42 @@ def main() -> None:
         f.write(struct.pack("<I", len(key_blob)))
         f.write(key_blob)
     print(f"wrote {blob_path}: {blob_path.stat().st_size / 1024:.1f} KB")
+
+    # quran_db_dedup.bin: deduplicated binary. Only ~20.7k of the 77.4k
+    # word strings are unique; we store one copy of each and a uint16
+    # index per word slot. Layout matches loader._read_dedup_blob_header.
+    dedup_path = dst / "quran_db_dedup.bin"
+    uniq_index: dict[str, int] = {}
+    word_indices: list[int] = []
+    for t in texts:
+        u = uniq_index.get(t)
+        if u is None:
+            u = len(uniq_index)
+            uniq_index[t] = u
+        word_indices.append(u)
+    unique_texts = list(uniq_index.keys())
+    if len(unique_texts) > 65535:
+        raise RuntimeError(
+            f"dedup unique count {len(unique_texts)} > uint16 limit; "
+            "widen the per-word index width in loader and writer"
+        )
+    u_bytes_list = [t.encode("utf-8") for t in unique_texts]
+    u_blob = b"".join(u_bytes_list)
+    u_offsets = array.array("I")
+    off = 0
+    for ub in u_bytes_list:
+        u_offsets.append(off)
+        off += len(ub)
+    u_offsets.append(off)
+    word_idx_arr = array.array("H", word_indices)
+    with dedup_path.open("wb") as f:
+        f.write(struct.pack("<II", n, len(unique_texts)))
+        f.write(u_offsets.tobytes())
+        f.write(struct.pack("<I", len(u_blob)))
+        f.write(u_blob)
+        f.write(word_idx_arr.tobytes())
+    print(f"wrote {dedup_path}: {dedup_path.stat().st_size / 1024:.1f} KB "
+          f"({len(unique_texts):,} unique texts, {n:,} word slots)")
 
 
 if __name__ == "__main__":
