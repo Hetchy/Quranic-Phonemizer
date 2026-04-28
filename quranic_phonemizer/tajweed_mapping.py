@@ -75,25 +75,24 @@ class TajweedMapping:
         return json.dumps(self.to_dict(), indent=indent, ensure_ascii=False)
 
 
-def _build_word_entries(word_map: WordMapping) -> tuple[List[TajweedEntry], Dict[int, int], Dict[tuple[int, int], int]]:
-    """Build TajweedEntry list from a WordMapping.
+def _build_word_entries(word, word_map: WordMapping) -> tuple[List[TajweedEntry], Dict[int, int]]:
+    """Build TajweedEntry list from a word and its mapping.
 
-    Returns (entries, letter_to_entry_map, extension_to_entry_map) where
-    letter_to_entry_map maps letter_index -> first entry_index for that
-    letter, and extension_to_entry_map maps (letter_index, ext_index) ->
-    entry_index for splittable extensions.
+    Returns (entries, letter_to_entry_map) where letter_to_entry_map maps
+    letter_index -> first entry_index for that letter.
     """
     entries: List[TajweedEntry] = []
     letter_to_entry: Dict[int, int] = {}
+    # Also track extension entries: (letter_index, ext_index) -> entry_index
     extension_to_entry: Dict[tuple[int, int], int] = {}
 
-    for i, lm in enumerate(word_map.letter_mappings):
+    for i, letter in enumerate(word.letters):
         letter_to_entry[i] = len(entries)
 
         # Partition tajweed rules by source/target
         source_rules: List[TajweedRule] = []
         target_rules: List[TajweedRule] = []
-        for tag in lm.tajweed_rules:
+        for tag in letter._tajweed_rules or ():
             if tag.is_source:
                 if tag.rule not in source_rules:
                     source_rules.append(tag.rule)
@@ -103,20 +102,22 @@ def _build_word_entries(word_map: WordMapping) -> tuple[List[TajweedEntry], Dict
 
         # Main letter entry
         entry = TajweedEntry(
-            char=lm.char,
+            char=letter.char,
             source_rules=list(source_rules),
             target_rules=list(target_rules),
         )
         entries.append(entry)
 
         # Check for splittable extensions
-        for ext_idx, ext in enumerate(lm.extensions):
-            if ext.name in SPLITTABLE_EXTENSIONS:
-                ext_char = ext.char or EXTENSION_FALLBACK_CHARS.get(ext.name, "")
-                if ext_char:
-                    ext_entry_idx = len(entries)
-                    extension_to_entry[(i, ext_idx)] = ext_entry_idx
-                    entries.append(TajweedEntry(char=ext_char))
+        if i < len(word_map.letter_mappings):
+            lm = word_map.letter_mappings[i]
+            for ext_idx, ext in enumerate(lm.extensions):
+                if ext.name in SPLITTABLE_EXTENSIONS:
+                    ext_char = ext.char or EXTENSION_FALLBACK_CHARS.get(ext.name, "")
+                    if ext_char:
+                        ext_entry_idx = len(entries)
+                        extension_to_entry[(i, ext_idx)] = ext_entry_idx
+                        entries.append(TajweedEntry(char=ext_char))
 
     return entries, letter_to_entry, extension_to_entry
 
