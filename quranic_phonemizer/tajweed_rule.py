@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass
 from enum import Enum
+from typing import Dict, Tuple
 
 
 class TajweedRule(Enum):
@@ -59,3 +60,33 @@ class TajweedRule(Enum):
 class TajweedRuleTag:
     rule: TajweedRule
     is_source: bool = True
+
+
+# Flyweight pool: at most ~36 rules x 2 is_source values = 72 distinct tags.
+# Pre-populated lazily; subsequent allocations return the cached instance.
+_TAG_POOL: Dict[Tuple[TajweedRule, bool], TajweedRuleTag] = {}
+
+_orig_tag_new = TajweedRuleTag.__new__
+
+
+def _intern_tag_new(cls, rule: TajweedRule, is_source: bool = True):
+    key = (rule, is_source)
+    cached = _TAG_POOL.get(key)
+    if cached is not None:
+        return cached
+    obj = _orig_tag_new(cls)
+    object.__setattr__(obj, "rule", rule)
+    object.__setattr__(obj, "is_source", is_source)
+    _TAG_POOL[key] = obj
+    return obj
+
+
+def _intern_tag_init(self, rule: TajweedRule = None, is_source: bool = True):  # noqa: ARG001
+    # Attributes are already set by __new__ (or were the first time the
+    # instance was created). Frozen dataclass __init__ would attempt to
+    # re-set frozen fields, raising FrozenInstanceError, so override.
+    pass
+
+
+TajweedRuleTag.__new__ = _intern_tag_new
+TajweedRuleTag.__init__ = _intern_tag_init
