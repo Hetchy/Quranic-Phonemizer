@@ -194,30 +194,10 @@ class Phonemizer:
         stop_signs_lower = [s.lower() for s in stop_signs]
         stop_ref_set = {r.strip() for r in stop_refs}
         verse_stop = "verse" in stop_signs_lower
-        ann_kwargs = dict(
-            stop_signs_lower=stop_signs_lower,
-            stop_ref_set=stop_ref_set,
-            verse_stop=verse_stop,
-        )
-
-        def _emit(w: Word) -> None:
-            w.apply_phoneme_overrides()
-            rec = extract_record(w)
-            records.append(rec)
-            all_phonemes.append(rec.phonemes)
-            text_parts.append(w.text)
-            if debug:
-                print(w.debug_print())
-
-        def _link_and_phonemize(prev1, curr, nxt) -> None:
-            curr.prev_word = prev1
-            curr.next_word = nxt
-            if prev1 is not None:
-                prev1.next_word = curr
-            if nxt is not None:
-                nxt.prev_word = curr
-            annotate_word_boundaries(curr, prev1, nxt, **ann_kwargs)
-            curr.phonemize()
+        # Fast path: when no stop_signs / stop_refs are configured, the
+        # only is_starting/is_stopping flags that fire are the range
+        # endpoints. Skip the per-word annotator entirely in that case.
+        no_boundary_config = (not stop_signs_lower) and (not stop_ref_set)
 
         word_iter = self.parser.iter_words(ref, self.db_path)
 
@@ -225,43 +205,96 @@ class Phonemizer:
         try:
             curr = next(word_iter)
         except StopIteration:
-            # Empty range — never happens in practice (validate_refs ensures
-            # at least one word) but be defensive.
             return PhonemizeResult(ref, "", [], [], stop_signs, stop_refs, match_score, mode)
         try:
             nxt = next(word_iter)
         except StopIteration:
             nxt = None
         prev1 = None
-        _link_and_phonemize(prev1, curr, nxt)
 
-        # Main loop: shift the window forward one slot per incoming word,
-        # phonemize the new curr, and emit prev2 (which has now lost any
-        # possible cross-word writer).
+        # First word setup: prev_word=None, next_word=nxt; is_starting=True
+        # always (range edge), is_stopping iff nxt is None (single-word range).
+        curr.prev_word = None
+        curr.next_word = nxt
+        if nxt is not None:
+            nxt.prev_word = curr
+        curr.is_starting = True
+        if nxt is None:
+            curr.is_stopping = True
+        if not no_boundary_config:
+            annotate_word_boundaries(
+                curr, None, nxt,
+                stop_signs_lower=stop_signs_lower,
+                stop_ref_set=stop_ref_set,
+                verse_stop=verse_stop,
+            )
+        curr.phonemize()
+
+        # Main loop: shift the window, phonemize new curr, emit prev2.
         for incoming in word_iter:
             prev2, prev1, curr, nxt = prev1, curr, nxt, incoming
-            _link_and_phonemize(prev1, curr, nxt)
+            curr.prev_word = prev1
+            curr.next_word = nxt
+            prev1.next_word = curr
+            nxt.prev_word = curr
+            if not no_boundary_config:
+                annotate_word_boundaries(
+                    curr, prev1, nxt,
+                    stop_signs_lower=stop_signs_lower,
+                    stop_ref_set=stop_ref_set,
+                    verse_stop=verse_stop,
+                )
+            curr.phonemize()
             if prev2 is not None:
-                _emit(prev2)
+                prev2.apply_phoneme_overrides()
+                rec = extract_record(prev2)
+                records.append(rec)
+                all_phonemes.append(rec.phonemes)
+                text_parts.append(prev2.text)
+                if debug:
+                    print(prev2.debug_print())
                 # Drop the back-edge so prev2 (now unreferenced) can GC.
-                if prev1 is not None:
-                    prev1.prev_word = None
+                prev1.prev_word = None
 
-        # Drain phase 1: shift None into nxt to phonemize the very last word.
+        # Drain phase 1: shift None into nxt slot to phonemize the very
+        # last word with next_word=None (so is_stopping fires correctly).
         if nxt is not None:
             prev2, prev1, curr, nxt = prev1, curr, nxt, None
-            _link_and_phonemize(prev1, curr, nxt)
+            curr.prev_word = prev1
+            curr.next_word = None
+            if prev1 is not None:
+                prev1.next_word = curr
+            curr.is_stopping = True
+            if not no_boundary_config:
+                annotate_word_boundaries(
+                    curr, prev1, None,
+                    stop_signs_lower=stop_signs_lower,
+                    stop_ref_set=stop_ref_set,
+                    verse_stop=verse_stop,
+                )
+            curr.phonemize()
             if prev2 is not None:
-                _emit(prev2)
+                prev2.apply_phoneme_overrides()
+                rec = extract_record(prev2)
+                records.append(rec)
+                all_phonemes.append(rec.phonemes)
+                text_parts.append(prev2.text)
+                if debug:
+                    print(prev2.debug_print())
                 if prev1 is not None:
                     prev1.prev_word = None
 
-        # Drain phase 2: emit the trailing prev1 and curr (no future neighbour
-        # can mutate them).
-        if prev1 is not None:
-            _emit(prev1)
-        if curr is not None:
-            _emit(curr)
+        # Drain phase 2: emit the trailing prev1 and curr.
+        for w in (prev1, curr):
+            if w is None:
+                continue
+            w.apply_phoneme_overrides()
+            rec = extract_record(w)
+            records.append(rec)
+            all_phonemes.append(rec.phonemes)
+            text_parts.append(w.text)
+            if debug:
+                print(w.debug_print())
 
         text = " ".join(text_parts)
         return PhonemizeResult(ref, text, all_phonemes, records, stop_signs, stop_refs, match_score, mode)

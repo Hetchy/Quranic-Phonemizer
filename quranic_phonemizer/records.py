@@ -146,25 +146,37 @@ def extract_record(word) -> WordRecord:
     """
     letter_records: List[LetterRecord] = []
     for i, lt in enumerate(word.letters):
-        ext_list = lt.extensions or ()
-        other_list = lt.other_symbols or ()
-        tajweed_list = lt._tajweed_rules or ()
+        # Capture references to the live letter's lists. The live
+        # LetterSymbol goes out of scope right after the word is emitted
+        # (it leaves the sliding window), so nothing else mutates them.
+        # Sharing the reference avoids ~326k list() copies per full Quran.
+        ph = lt.phonemes
+        if not ph:
+            ph = _EMPTY
+        ext_list = lt.extensions
+        if ext_list:
+            ext_list = [_intern_ext(e.char, e.name) for e in ext_list]
+        else:
+            ext_list = _EMPTY
+        other_list = lt.other_symbols
+        if other_list:
+            other_list = [_intern_other(s.char, s.name) for s in other_list]
+        else:
+            other_list = _EMPTY
+        taj = lt._tajweed_rules
+        if not taj:
+            taj = _EMPTY
+        diac = lt.diacritic
         letter_records.append(
             LetterRecord(
                 index=i,
                 char=lt.char,
-                phonemes=list(lt.phonemes) if lt.phonemes else _EMPTY,
-                diacritic=lt.diacritic.name if lt.diacritic else None,
+                phonemes=ph,
+                diacritic=diac.name if diac is not None else None,
                 has_shaddah=lt.has_shaddah,
-                extensions=(
-                    [_intern_ext(e.char, e.name) for e in ext_list]
-                    if ext_list else _EMPTY
-                ),
-                other_symbols=(
-                    [_intern_other(s.char, s.name) for s in other_list]
-                    if other_list else _EMPTY
-                ),
-                tajweed_rules=list(tajweed_list) if tajweed_list else _EMPTY,
+                extensions=ext_list,
+                other_symbols=other_list,
+                tajweed_rules=taj,
             )
         )
 
