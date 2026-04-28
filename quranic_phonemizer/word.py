@@ -205,8 +205,6 @@ class Word:
             
             if letter.phonemes:
                 result += f"      Phonemes: {letter.phonemes}\n"
-            if letter.affected_by:
-                result += f"      Affected By: '{letter.affected_by.char}'\n"
             if letter.diacritic:
                 result += f"      Diacritic: '{letter.diacritic.char}' -> {letter.diacritic.base_phoneme} (name: {letter.diacritic.name})\n"
             if letter.extensions:
