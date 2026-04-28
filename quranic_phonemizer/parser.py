@@ -355,7 +355,7 @@ class Parser:
         stripped_text = re.sub(r"</rule>", "", stripped_text)
         return stripped_text
     
-    def load_words(self, ref: str, db_path: str | Path = DATA_DIR / "Quran.json", *, stop_signs: List[str] = [], stop_refs: List[str] = []) -> List[Word]:
+    def load_words(self, ref: str, db_path: str | Path = DATA_DIR / "quran_db.bin", *, stop_signs: List[str] = [], stop_refs: List[str] = []) -> List[Word]:
         """Load words for a reference range and annotate boundaries."""
         db = load_db(db_path)
         locations = keys_for_reference(ref, db)
