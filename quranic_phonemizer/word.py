@@ -57,8 +57,8 @@ class Word:
     def phonemize(self) -> None:
         if self.phonemes:
             return
-        for i, letter in enumerate(self.letters):
-            if letter.can_phonemize():
+        for letter in self.letters:
+            if not letter.is_phonemized:
                 letter.phonemize()
 
     def apply_phoneme_overrides(self) -> None:
@@ -87,8 +87,9 @@ class Word:
         if self.phonemes:
             return self.phonemes
         phonemes = []
+        extend = phonemes.extend
         for letter in self.letters:
-            phonemes.extend(ph for ph in letter.phonemes if ph)
+            extend(filter(None, letter.phonemes))
         return phonemes
 
     def build_mapping(self) -> WordMapping:
