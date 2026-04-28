@@ -24,6 +24,22 @@ from .letter_phoneme_mapping import (
 
 DATA_DIR = Path(__file__).resolve().parent / "resources"
 
+
+def _format_text_table(rows: list[dict]) -> str:
+    if not rows:
+        return ""
+    columns = list(rows[0].keys())
+    widths = {c: max(len(c), *(len(str(r.get(c, ""))) for r in rows)) for c in columns}
+    sep = "+".join("-" * (widths[c] + 2) for c in columns)
+    sep = f"+{sep}+"
+    header = "| " + " | ".join(c.ljust(widths[c]) for c in columns) + " |"
+    body = [
+        "| " + " | ".join(str(r.get(c, "")).ljust(widths[c]) for c in columns) + " |"
+        for r in rows
+    ]
+    return "\n".join([sep, header, sep, *body, sep])
+
+
 class Phonemizer:
     def __init__(
         self,
@@ -473,12 +489,7 @@ class PhonemizeResult:
 
         return alignment
 
-    def show_table(self, phoneme_sep: str = "", split: Literal["word", "verse", "both"] = "word") -> "pd.DataFrame":
-        try:
-            import pandas as pd
-        except ImportError:
-            raise ImportError("pandas is required for show_table(). Install with: pip install pandas")
-        
+    def show_table(self, phoneme_sep: str = "", split: Literal["word", "verse", "both"] = "word"):
         if split == "word":
             rows = []
             for word in self._words:
@@ -490,9 +501,7 @@ class PhonemizeResult:
                     'phonemes': phoneme_str,
                 })
             rows.sort(key=lambda x: tuple(map(int, x['location'].split(':'))))
-            return pd.DataFrame(rows)
-
-        if split == "verse":
+        elif split == "verse":
             rows = []
             current_key: str | None = None
             current_text_parts: list[str] = []
@@ -520,9 +529,7 @@ class PhonemizeResult:
                     'phonemes': phoneme_sep.join(current_list),
                 })
             rows.sort(key=lambda x: tuple(map(int, x['location'].split(':'))))
-            return pd.DataFrame(rows)
-
-        if split == "both":
+        elif split == "both":
             rows = []
             for word in self._words:
                 parts = word.location.location_key.split(":")
@@ -536,9 +543,15 @@ class PhonemizeResult:
                     'phonemes': phoneme_str,
                 })
             rows.sort(key=lambda x: tuple(map(int, x['location'].split(':'))))
-            return pd.DataFrame(rows)
+        else:
+            raise ValueError("split must be one of: 'word', 'verse', 'both'")
 
-        raise ValueError("split must be one of: 'word', 'verse', 'both'")
+        try:
+            import pandas as pd
+            return pd.DataFrame(rows)
+        except ImportError:
+            print(_format_text_table(rows))
+            return rows
 
     def save(self, path: str | Path, *, fmt, split: Literal["word", "verse", "both"] = "word") -> Path:
         path = Path(path)
