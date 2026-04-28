@@ -49,8 +49,8 @@ if variant == 'eager_dict':
     keys, tuples = [], []
     for s in range(1, 115):
         s_str = str(s)
-        for v_info in info[s_str]['verses']:
-            v = v_info['verse']
+        for v_idx, v_info in enumerate(info[s_str]['verses'], start=1):
+            v = v_idx
             prefix = s_str + ':' + str(v) + ':'
             for w in range(1, v_info['num_words'] + 1):
                 keys.append(prefix + str(w))
@@ -95,8 +95,8 @@ elif variant == 'mmap_index_lazy':
     base = 0
     for s in range(1, 115):
         s_str = str(s)
-        for v_info in info[s_str]['verses']:
-            v = v_info['verse']
+        for v_idx, v_info in enumerate(info[s_str]['verses'], start=1):
+            v = v_idx
             verse_start[(s, v)] = base
             nw = v_info['num_words']
             for w in range(1, nw + 1):

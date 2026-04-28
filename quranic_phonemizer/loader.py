@@ -73,12 +73,11 @@ def _build_canonical_keys_and_tuples() -> Tuple[List[str], List[Tuple[int, int, 
         s_data = info.get(s_str)
         if not s_data:
             continue
-        for v_info in s_data["verses"]:
-            v = v_info["verse"]
-            prefix = s_str + ":" + str(v) + ":"
+        for v_idx, v_info in enumerate(s_data["verses"], start=1):
+            prefix = s_str + ":" + str(v_idx) + ":"
             for w in range(1, v_info["num_words"] + 1):
                 a_keys(prefix + str(w))
-                a_tuples((s, v, w))
+                a_tuples((s, v_idx, w))
     return keys, tuples
 
 
@@ -425,12 +424,11 @@ def _build_verse_index_and_tuples():
         s_data = info.get(s_str)
         if not s_data:
             continue
-        for v_info in s_data["verses"]:
-            v = v_info["verse"]
-            verse_start[(s, v)] = base
+        for v_idx, v_info in enumerate(s_data["verses"], start=1):
+            verse_start[(s, v_idx)] = base
             nw = v_info["num_words"]
             for w in range(1, nw + 1):
-                sorted_tuples.append((s, v, w))
+                sorted_tuples.append((s, v_idx, w))
             base += nw
     return verse_start, sorted_tuples
 

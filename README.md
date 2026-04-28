@@ -152,7 +152,7 @@ print(res.phonemes_str())
 | `text()`            | The Qurʾānic text  |
 | `phonemes_list(split)` | Phoneme lists grouped by `split`: `"word"`, `"verse"`, or `"both"` |
 | `phonemes_str(phoneme_sep, word_sep, verse_sep)` | Full phoneme string, configurable with separators           |
-| `show_table(phoneme_sep, split)` | Pandas DataFrame view, grouped by `split` (requires `pandas`)  |
+| `show_table(phoneme_sep, split)` | Tabular view grouped by `split`. Returns a `pandas.DataFrame` if `pandas` is installed; otherwise prints a plain-text table and returns the rows as a list of dicts |
 | `save(path, *, fmt, split)` | Save results to JSON, CSV, or mapping format |
 | `phonetic_text(word_sep, verse_sep)` | Recitation-accurate display text with stopping/starting transforms |
 
