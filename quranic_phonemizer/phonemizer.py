@@ -12,6 +12,7 @@ from .text_matcher import TextMatcher
 from .mapping import PhonemizationMapping, WordMapping, AlignmentEntry
 from .madd import build_madd_mappings, classify_madd_types
 from .phonetic_text import build_phonetic_text
+from .records import WordRecord, extract_record, build_word_mapping_from_record
 from .tajweed_rule import TajweedRule
 from .tajweed_mapping import (
     TajweedMapping, TajweedWordMapping, TajweedEntry,
@@ -190,12 +191,17 @@ class Phonemizer:
             word.apply_phoneme_overrides()
 
         all_phonemes = []
+        records: List[WordRecord] = []
         for word in words:
             all_phonemes.append(word.get_phonemes())
+            records.append(extract_record(word))
             if debug:
                 print(word.debug_print())
 
-        return PhonemizeResult(ref, " ".join(w.text for w in words), all_phonemes, words, stop_signs, stop_refs, match_score, mode)
+        text = " ".join(w.text for w in words)
+        # `words` goes out of scope at function return — the live graph is
+        # released; PhonemizeResult holds only the immutable records.
+        return PhonemizeResult(ref, text, all_phonemes, records, stop_signs, stop_refs, match_score, mode)
 
     def _validate_refs(self, ref: str) -> None:
         ref = ref.strip()
@@ -247,7 +253,7 @@ class PhonemizeResult:
     ref: str
     _text: str
     _nested: List[List[str]]
-    _words: List[Word]
+    _records: List["WordRecord"]
     stop_signs: List[str]
     stop_refs: List[str]
     match_score: float = None
@@ -275,15 +281,15 @@ class PhonemizeResult:
             current_verse_id: str | None = None
             current_verse_phonemes: list[str] = []
 
-            for word in self._words:
-                verse_id = str(word.location.ayah_num)
+            for rec in self._records:
+                verse_id = str(rec.location.ayah_num)
                 if current_verse_id is None:
                     current_verse_id = verse_id
                 if verse_id != current_verse_id:
                     verses.append(current_verse_phonemes)
                     current_verse_phonemes = []
                     current_verse_id = verse_id
-                current_verse_phonemes.extend(self._view(word.get_phonemes()))
+                current_verse_phonemes.extend(self._view(rec.phonemes))
 
             if current_verse_phonemes:
                 verses.append(current_verse_phonemes)
@@ -294,15 +300,15 @@ class PhonemizeResult:
             current_verse_id: str | None = None
             current_words_in_verse: list[list[str]] = []
 
-            for word in self._words:
-                verse_id = str(word.location.ayah_num)
+            for rec in self._records:
+                verse_id = str(rec.location.ayah_num)
                 if current_verse_id is None:
                     current_verse_id = verse_id
                 if verse_id != current_verse_id:
                     verses_words.append(current_words_in_verse)
                     current_words_in_verse = []
                     current_verse_id = verse_id
-                current_words_in_verse.append(self._view(word.get_phonemes()))
+                current_words_in_verse.append(self._view(rec.phonemes))
 
             if current_words_in_verse:
                 verses_words.append(current_words_in_verse)
@@ -313,30 +319,26 @@ class PhonemizeResult:
     def text(self) -> str:
         parts: list[str] = []
         prev_verse: str | None = None
-        for word in self._words:
-            cur_verse = str(word.location.ayah_num)
+        arabic_digits = {
+            '0': '٠', '1': '١', '2': '٢', '3': '٣', '4': '٤',
+            '5': '٥', '6': '٦', '7': '٧', '8': '٨', '9': '٩',
+        }
+        for rec in self._records:
+            cur_verse = str(rec.location.ayah_num)
             if prev_verse is not None and cur_verse != prev_verse:
-                arabic_digits = {
-                    '0': '٠', '1': '١', '2': '٢', '3': '٣', '4': '٤',
-                    '5': '٥', '6': '٦', '7': '٧', '8': '٨', '9': '٩',
-                }
                 arabic_num = ''.join(arabic_digits[d] for d in prev_verse)
                 parts.append(f" {arabic_num} ")
-            parts.append(re.sub(r"</?rule[^>]*?>", "", word.text))
+            parts.append(re.sub(r"</?rule[^>]*?>", "", rec.text))
             prev_verse = cur_verse
         if prev_verse is not None:
-            arabic_digits = {
-                '0': '٠', '1': '١', '2': '٢', '3': '٣', '4': '٤',
-                '5': '٥', '6': '٦', '7': '٧', '8': '٨', '9': '٩',
-            }
             arabic_num = ''.join(arabic_digits[d] for d in prev_verse)
             parts.append(f" {arabic_num} ")
         return " ".join(parts)
 
     def phonetic_text(self, word_sep: str = " ", verse_sep: str = "\n") -> str | None:
-        if not self._words:
+        if not self._records:
             return None
-        return build_phonetic_text(self._words, word_sep=word_sep, verse_sep=verse_sep)
+        return build_phonetic_text(self._records, word_sep=word_sep, verse_sep=verse_sep)
 
     def phonemes_str(
         self,
@@ -344,7 +346,7 @@ class PhonemizeResult:
         word_sep:    str = " ",
         verse_sep:   str = "\n",
     ) -> str | None:
-        if not self._words:
+        if not self._records:
             return None
         parts: list[str] = []
         prev_verse: str | None = None
@@ -355,9 +357,9 @@ class PhonemizeResult:
             if sep and (not parts or parts[-1] != sep):
                 parts.append(sep)
 
-        for word in self._words:
-            cur_verse = str(word.location.ayah_num)
-            cur_word = str(word.location.word_num)
+        for rec in self._records:
+            cur_verse = str(rec.location.ayah_num)
+            cur_word = str(rec.location.word_num)
 
             if prev_verse is not None and cur_verse != prev_verse:
                 _add_sep(word_sep if word_sep else phoneme_sep)
@@ -369,7 +371,7 @@ class PhonemizeResult:
                 _add_sep(chosen)
                 have_prev_ph = False
 
-            for ph in self._view(word.get_phonemes()):
+            for ph in self._view(rec.phonemes):
                 if have_prev_ph:
                     parts.append(phoneme_sep)
                 parts.append(ph)
@@ -386,11 +388,11 @@ class PhonemizeResult:
         # Pass 1: build word mappings for cross-word madd detection
         word_maps: dict[str, WordMapping] = {}
         all_word_maps: list[WordMapping] = []
-        for word in self._words:
-            location_key = word.location.location_key
+        for rec in self._records:
+            location_key = rec.location.location_key
             if get_tajweed_mapping(location_key) is not None:
                 continue
-            word_map = word.build_mapping()
+            word_map = build_word_mapping_from_record(rec)
             word_maps[location_key] = word_map
             all_word_maps.append(word_map)
 
@@ -400,8 +402,8 @@ class PhonemizeResult:
         # Pass 2: build tajweed entries per word
         tajweed_words: list[TajweedWordMapping] = []
 
-        for word in self._words:
-            location_key = word.location.location_key
+        for rec in self._records:
+            location_key = rec.location.location_key
 
             # Check for special words with YAML-defined tajweed_mapping
             yaml_tm = get_tajweed_mapping(location_key)
@@ -416,20 +418,20 @@ class PhonemizeResult:
                             source_rules=source_rules,
                             target_rules=target_rules,
                         ))
-                    is_stop = word.is_stopping and (sub_idx == len(yaml_tm) - 1)
+                    is_stop = rec.is_stopping and (sub_idx == len(yaml_tm) - 1)
                     sub_loc = f"{location_key}:{sub_idx}" if len(yaml_tm) > 1 else location_key
                     tajweed_words.append(TajweedWordMapping(location=sub_loc, entries=entries, is_stopping=is_stop))
                 continue
 
-            # Normal word: build entries from letters + tajweed rules
+            # Normal word: build entries from letter mappings + tajweed rules
             word_map = word_maps[location_key]
-            entries, letter_to_entry, extension_to_entry = _build_word_entries(word, word_map)
+            entries, letter_to_entry, extension_to_entry = _build_word_entries(word_map)
 
             # Apply madd post-pass
             _apply_madd_rules(entries, word_map, letter_to_entry, extension_to_entry)
 
             tajweed_words.append(TajweedWordMapping(
-                location=location_key, entries=entries, is_stopping=word.is_stopping,
+                location=location_key, entries=entries, is_stopping=rec.is_stopping,
             ))
 
         return TajweedMapping(ref=self.ref, words=tajweed_words)
@@ -450,18 +452,18 @@ class PhonemizeResult:
 
     def get_mapping(self) -> PhonemizationMapping:
         """Build the full phonemization mapping with alignment."""
-        word_mappings = [word.build_mapping() for word in self._words]
-        
-        flat_phonemes = []
-        for word in self._words:
-            flat_phonemes.extend(word.get_phonemes())
+        word_mappings = [build_word_mapping_from_record(rec) for rec in self._records]
+
+        flat_phonemes: list[str] = []
+        for rec in self._records:
+            flat_phonemes.extend(rec.phonemes)
 
         build_madd_mappings(word_mappings)
         classify_madd_types(word_mappings)
         alignment = self._build_alignment(word_mappings)
-        
+
         clean_text = re.sub(r"</?rule[^>]*?>", "", self._text)
-        
+
         return PhonemizationMapping(
             ref=self.ref,
             text=clean_text,
@@ -492,11 +494,11 @@ class PhonemizeResult:
     def show_table(self, phoneme_sep: str = "", split: Literal["word", "verse", "both"] = "word"):
         if split == "word":
             rows = []
-            for word in self._words:
-                clean_word_text = re.sub(r"</?rule[^>]*?>", "", word.text)
-                phoneme_str = phoneme_sep.join(self._view(word.get_phonemes()))
+            for rec in self._records:
+                clean_word_text = re.sub(r"</?rule[^>]*?>", "", rec.text)
+                phoneme_str = phoneme_sep.join(self._view(rec.phonemes))
                 rows.append({
-                    'location': word.location.location_key,
+                    'location': rec.location.location_key,
                     'word': clean_word_text,
                     'phonemes': phoneme_str,
                 })
@@ -506,8 +508,8 @@ class PhonemizeResult:
             current_key: str | None = None
             current_text_parts: list[str] = []
             current_list: list[str] = []
-            for word in self._words:
-                parts = word.location.location_key.split(":")
+            for rec in self._records:
+                parts = rec.location.location_key.split(":")
                 verse_key = ":".join(parts[:2])
                 if current_key is None:
                     current_key = verse_key
@@ -520,8 +522,8 @@ class PhonemizeResult:
                     current_key = verse_key
                     current_text_parts = []
                     current_list = []
-                current_text_parts.append(re.sub(r"</?rule[^>]*?>", "", word.text))
-                current_list.extend(self._view(word.get_phonemes()))
+                current_text_parts.append(re.sub(r"</?rule[^>]*?>", "", rec.text))
+                current_list.extend(self._view(rec.phonemes))
             if current_key is not None:
                 rows.append({
                     'location': current_key,
@@ -531,14 +533,14 @@ class PhonemizeResult:
             rows.sort(key=lambda x: tuple(map(int, x['location'].split(':'))))
         elif split == "both":
             rows = []
-            for word in self._words:
-                parts = word.location.location_key.split(":")
+            for rec in self._records:
+                parts = rec.location.location_key.split(":")
                 verse_key = ":".join(parts[:2])
-                clean_word_text = re.sub(r"</?rule[^>]*?>", "", word.text)
-                phoneme_str = phoneme_sep.join(self._view(word.get_phonemes()))
+                clean_word_text = re.sub(r"</?rule[^>]*?>", "", rec.text)
+                phoneme_str = phoneme_sep.join(self._view(rec.phonemes))
                 rows.append({
                     'verse': verse_key,
-                    'location': word.location.location_key,
+                    'location': rec.location.location_key,
                     'word': clean_word_text,
                     'phonemes': phoneme_str,
                 })
@@ -563,16 +565,16 @@ class PhonemizeResult:
             phoneme_map: dict[str, list] = {}
             text_map: dict[str, str] = {}
             if split == "word":
-                for word in self._words:
-                    ref_key = word.location.location_key
-                    phoneme_map[ref_key] = self._view(word.get_phonemes())
-                    text_map[ref_key] = _clean_text(word.text)
+                for rec in self._records:
+                    ref_key = rec.location.location_key
+                    phoneme_map[ref_key] = self._view(rec.phonemes)
+                    text_map[ref_key] = _clean_text(rec.text)
             elif split == "verse":
                 current_key: str | None = None
                 current_list: list[str] = []
                 current_text_parts: list[str] = []
-                for word in self._words:
-                    parts = word.location.location_key.split(":")
+                for rec in self._records:
+                    parts = rec.location.location_key.split(":")
                     verse_key = ":".join(parts[:2])
                     if current_key is None:
                         current_key = verse_key
@@ -582,8 +584,8 @@ class PhonemizeResult:
                         current_list = []
                         current_text_parts = []
                         current_key = verse_key
-                    current_list.extend(self._view(word.get_phonemes()))
-                    current_text_parts.append(_clean_text(word.text))
+                    current_list.extend(self._view(rec.phonemes))
+                    current_text_parts.append(_clean_text(rec.text))
                 if current_key is not None:
                     phoneme_map[current_key] = current_list
                     text_map[current_key] = " ".join(current_text_parts)
@@ -591,8 +593,8 @@ class PhonemizeResult:
                 current_key: str | None = None
                 current_list: list[list[str]] = []
                 current_text_parts: list[str] = []
-                for word in self._words:
-                    parts = word.location.location_key.split(":")
+                for rec in self._records:
+                    parts = rec.location.location_key.split(":")
                     verse_key = ":".join(parts[:2])
                     if current_key is None:
                         current_key = verse_key
@@ -602,8 +604,8 @@ class PhonemizeResult:
                         current_list = []
                         current_text_parts = []
                         current_key = verse_key
-                    current_list.append(self._view(word.get_phonemes()))
-                    current_text_parts.append(_clean_text(word.text))
+                    current_list.append(self._view(rec.phonemes))
+                    current_text_parts.append(_clean_text(rec.text))
                 if current_key is not None:
                     phoneme_map[current_key] = current_list
                     text_map[current_key] = " ".join(current_text_parts)
@@ -640,16 +642,16 @@ class PhonemizeResult:
                 w = csv.writer(fh)
                 w.writerow(["ref", "text", "phoneme_seq"])
                 if split == "word":
-                    for word in self._words:
-                        ref_key = word.location.location_key
-                        word_text = _clean_text(word.text)
-                        w.writerow([ref_key, word_text, " ".join(self._view(word.get_phonemes()))])
+                    for rec in self._records:
+                        ref_key = rec.location.location_key
+                        word_text = _clean_text(rec.text)
+                        w.writerow([ref_key, word_text, " ".join(self._view(rec.phonemes))])
                 elif split == "verse":
                     current_key: str | None = None
                     current_text_parts: list[str] = []
                     current_list: list[str] = []
-                    for word in self._words:
-                        parts = word.location.location_key.split(":")
+                    for rec in self._records:
+                        parts = rec.location.location_key.split(":")
                         verse_key = ":".join(parts[:2])
                         if current_key is None:
                             current_key = verse_key
@@ -658,8 +660,8 @@ class PhonemizeResult:
                             current_key = verse_key
                             current_text_parts = []
                             current_list = []
-                        current_text_parts.append(_clean_text(word.text))
-                        current_list.extend(self._view(word.get_phonemes()))
+                        current_text_parts.append(_clean_text(rec.text))
+                        current_list.extend(self._view(rec.phonemes))
                     if current_key is not None:
                         w.writerow([current_key, " ".join(current_text_parts), " ".join(current_list)])
         elif fmt == "mapping":

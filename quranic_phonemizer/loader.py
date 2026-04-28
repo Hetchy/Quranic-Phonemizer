@@ -406,13 +406,36 @@ def _load_dedup_eager(path: Path) -> Tuple[_DedupEagerDB, List[Tuple[int, int, i
     unique_texts = [data[tstart + offsets[i]:tstart + offsets[i + 1]].decode("utf-8")
                     for i in range(m)]
 
-    verse_start, sorted_tuples = _build_verse_index_and_tuples()
+    verse_start, sorted_tuples = _legacy_build_verse_index_and_tuples()
     if len(sorted_tuples) != n:
         raise ValueError(
             f"dedup blob has {n} word slots but surah_info implies "
             f"{len(sorted_tuples)}; rebuild quran_db_dedup.bin"
         )
     return _DedupEagerDB(unique_texts, word_indices, verse_start, sorted_tuples), sorted_tuples
+
+
+def _legacy_build_verse_index_and_tuples():
+    """Legacy helper for eager loaders that still want sorted_tuples upfront.
+
+    The default loader path (``dedup_mmap``) does not need this; only
+    ``dedup``/``mmap`` formats kept for back-compat call it.
+    """
+    info = _load_surah_info()
+    verse_start: Dict[Tuple[int, int], int] = {}
+    sorted_tuples: List[Tuple[int, int, int]] = []
+    base = 0
+    for s in range(1, 115):
+        s_data = info.get(str(s))
+        if not s_data:
+            continue
+        for v_idx, v_info in enumerate(s_data["verses"], start=1):
+            verse_start[(s, v_idx)] = base
+            nw = v_info["num_words"]
+            for w in range(1, nw + 1):
+                sorted_tuples.append((s, v_idx, w))
+            base += nw
+    return verse_start, sorted_tuples
 
 
 def _load_dedup_mmap(path: Path) -> _DedupMmapDB:
@@ -482,7 +505,7 @@ def _load_mmap_lazy(path: Path) -> Tuple[_MmapLazyDB, List[Tuple[int, int, int]]
     text_blob_start = pos
     # Skip the keys section entirely; reconstruct from surah_info instead.
 
-    verse_start, sorted_tuples = _build_verse_index_and_tuples()
+    verse_start, sorted_tuples = _legacy_build_verse_index_and_tuples()
     base = len(sorted_tuples)
     if base != n:
         # surah_info disagrees with the binary file — refuse to load

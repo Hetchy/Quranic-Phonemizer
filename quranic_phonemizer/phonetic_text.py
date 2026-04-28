@@ -1,8 +1,9 @@
 """
-Phonetic text rendering — converts phonemized Words into display text
+Phonetic text rendering — converts phonemized words into display text
 as it would be recited (with stopping transforms, hamza wasl, etc.).
 
-All transforms are read-only: no Word/LetterSymbol objects are mutated.
+Operates purely on WordRecord / LetterRecord snapshots; never touches the
+live Word/LetterSymbol graph.
 """
 
 from __future__ import annotations
@@ -16,8 +17,7 @@ from .symbols.letters.lam import Lam
 from .tajweed_rule import TajweedRule
 
 if TYPE_CHECKING:
-    from .word import Word
-    from .symbols.letters.letter import LetterSymbol
+    from .records import LetterRecord, WordRecord
 
 # ── Load chars from YAML (single source of truth) ─────────────────
 _mappings = load_symbol_mappings()
@@ -54,30 +54,31 @@ _HAMZA_WASL_RULES = {
 _DIAC_CHARS = {name: entry["char"] for name, entry in _DIACRITICS.items()}
 
 _ARABIC_DIGITS = {
-    '0': '\u0660', '1': '\u0661', '2': '\u0662', '3': '\u0663', '4': '\u0664',
-    '5': '\u0665', '6': '\u0666', '7': '\u0667', '8': '\u0668', '9': '\u0669',
+    '0': '٠', '1': '١', '2': '٢', '3': '٣', '4': '٤',
+    '5': '٥', '6': '٦', '7': '٧', '8': '٨', '9': '٩',
 }
+
 
 _RULE_TAG_RE = re.compile(r"</?rule[^>]*?>")
 
 
 def build_phonetic_text(
-    words: List["Word"],
+    records: List["WordRecord"],
     word_sep: str = " ",
     verse_sep: str = "\n",
 ) -> str:
     parts: list[str] = []
     prev_verse: Optional[str] = None
 
-    for word in words:
-        cur_verse = str(word.location.ayah_num)
+    for rec in records:
+        cur_verse = str(rec.location.ayah_num)
         if prev_verse is not None and cur_verse != prev_verse:
             arabic_num = "".join(_ARABIC_DIGITS[d] for d in prev_verse)
             parts.append(f" {arabic_num} ")
             parts.append(verse_sep)
         elif prev_verse is not None:
             parts.append(word_sep)
-        parts.append(build_word_phonetic_text(word))
+        parts.append(build_word_phonetic_text(rec))
         prev_verse = cur_verse
 
     # Final verse marker
@@ -88,37 +89,37 @@ def build_phonetic_text(
     return "".join(parts)
 
 
-def build_word_phonetic_text(word: "Word") -> str:
+def build_word_phonetic_text(rec: "WordRecord") -> str:
     # 1. Huroof muqattaat short-circuit
-    display = get_display_text(word.location.location_key)
+    display = get_display_text(rec.location.location_key)
     if display is not None:
-        return _wrap_word(word, display)
+        return _wrap_word(rec, display)
 
-    letters = word.letters
-    if not letters:
+    letter_records = rec.letter_records
+    if not letter_records:
         return ""
 
     # Pre-compute Allah detection
-    allah_lam_idx = _get_allah_lam_index(letters)
+    allah_lam_idx = _get_allah_lam_index(letter_records)
 
-    n = len(letters)
+    n = len(letter_records)
     segments: list[str] = []
-    for idx, lt in enumerate(letters):
-        seg = _build_letter_segment(lt, idx, n, word, allah_lam_idx)
+    for idx, lr in enumerate(letter_records):
+        seg = _build_letter_segment(lr, idx, n, rec, allah_lam_idx)
         if seg is not None:
             segments.append(seg)
 
-    return _wrap_word(word, "".join(segments))
+    return _wrap_word(rec, "".join(segments))
 
 
-def _wrap_word(word: "Word", core: str) -> str:
+def _wrap_word(rec: "WordRecord", core: str) -> str:
     """Prepend leading symbols and append stop sign to the core word text."""
     parts: list[str] = []
 
-    # Leading symbols (e.g. rub el hizb ۞) from word.text before first letter
-    if word.text and word.letters:
-        clean = _RULE_TAG_RE.sub("", word.text)
-        first_char = word.letters[0].char
+    # Leading symbols (e.g. rub el hizb ۞) from rec.text before first letter
+    if rec.text and rec.letter_records:
+        clean = _RULE_TAG_RE.sub("", rec.text)
+        first_char = rec.letter_records[0].char
         idx = clean.find(first_char)
         if idx > 0:
             parts.append(clean[:idx])
@@ -126,32 +127,32 @@ def _wrap_word(word: "Word", core: str) -> str:
     parts.append(core)
 
     # Trailing stop sign
-    if word.stop_sign:
+    if rec.stop_sign is not None:
         parts.append(" ")
-        parts.append(word.stop_sign.char)
+        parts.append(rec.stop_sign[0])
 
     return "".join(parts)
 
 
 def _build_letter_segment(
-    lt: "LetterSymbol",
+    lr: "LetterRecord",
     idx: int,
     n_letters: int,
-    word: "Word",
+    rec: "WordRecord",
     allah_lam_idx: int,
 ) -> Optional[str]:
     is_first = idx == 0
     is_last = idx == n_letters - 1
-    starting = word.is_starting
-    stopping = word.is_stopping
-    location_key = word.location.location_key
+    starting = rec.is_starting
+    stopping = rec.is_stopping
+    location_key = rec.location.location_key
 
     # F. Location-specific skip (removed — now handled by letter_overrides)
 
-    letter_char = lt.char
-    shaddah = lt.has_shaddah
-    diac_name = lt.diacritic.name if lt.diacritic else None
-    extensions = lt.extensions or ()
+    letter_char = lr.char
+    shaddah = lr.has_shaddah
+    diac_name = lr.diacritic                       # already a name string or None
+    extensions = lr.extensions or ()
     insert_alef = False
 
     hamza_wasl_char = _char("letters", "HAMZA_WASL")
@@ -162,7 +163,7 @@ def _build_letter_segment(
 
     # A. Hamza wasl (starting + first letter + char == ٱ)
     if starting and is_first and letter_char == hamza_wasl_char:
-        source_rules = {tag.rule for tag in (lt._tajweed_rules or ()) if tag.is_source}
+        source_rules = {tag.rule for tag in lr.tajweed_rules if tag.is_source}
         for rule, (repl_char, haraka) in _HAMZA_WASL_RULES.items():
             if rule in source_rules:
                 return repl_char + haraka
@@ -204,14 +205,15 @@ def _build_letter_segment(
 
     # D. Madd iwad — tanween+alef pattern (second-to-last letter)
     if stopping and not is_last and idx == n_letters - 2:
-        next_lt = word.letters[idx + 1]
-        if diac_name == "FATHATAN" and next_lt.char in (alef_char, alef_maksura_char):
+        next_lr = rec.letter_records[idx + 1]
+        if diac_name == "FATHATAN" and next_lr.char in (alef_char, alef_maksura_char):
             diac_name = "FATHA"
 
     # E. Penultimate sukun before SILENT_ALWAYS
     if stopping and not is_last:
-        next_lt = word.letters[idx + 1]
-        if next_lt.is_last and next_lt.has_symbol("SILENT_ALWAYS"):
+        next_lr = rec.letter_records[idx + 1]
+        next_is_last = (idx + 1) == (n_letters - 1)
+        if next_is_last and next_lr.has_symbol("SILENT_ALWAYS"):
             if diac_name in _HARAKA_NAMES:
                 diac_name = "SUKUN"
 
@@ -241,21 +243,21 @@ def _build_letter_segment(
     return "".join(parts)
 
 
-def _is_allah_word(letters: List["LetterSymbol"]) -> bool:
-    letter_chars = [lt.char for lt in letters]
+def _is_allah_word(letter_records: List["LetterRecord"]) -> bool:
+    letter_chars = [lr.char for lr in letter_records]
     for pattern_letters in Lam.ALLAH_LETTER_PATTERNS.values():
-        if letter_chars == pattern_letters:
+        if letter_chars == list(pattern_letters):
             return True
     return False
 
 
-def _get_allah_lam_index(letters: List["LetterSymbol"]) -> int:
+def _get_allah_lam_index(letter_records: List["LetterRecord"]) -> int:
     """Find the index of the second lam (the one with shaddah) in an Allah word.
     Returns -1 if not an Allah word."""
-    if not _is_allah_word(letters):
+    if not _is_allah_word(letter_records):
         return -1
     lam_char = _char("letters", "LAM")
-    for i, lt in enumerate(letters):
-        if lt.char == lam_char and lt.has_shaddah:
+    for i, lr in enumerate(letter_records):
+        if lr.char == lam_char and lr.has_shaddah:
             return i
     return -1
