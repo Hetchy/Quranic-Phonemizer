@@ -134,6 +134,67 @@ class _BlobDB:
             yield k, b[o[i]:o[i + 1]].decode("utf-8")
 
 
+class _MmapLazyDB:
+    """Pay-as-you-go DB:
+      - texts are kept on disk via mmap; only pages actually touched stay
+        resident. UTF-8 is decoded per lookup.
+      - the canonical (s, v, w) tuples are pre-built (~600 KB) so the
+        bisect index works without re-sorting, but the per-word *string*
+        keys are never materialised — db[key] parses the key directly.
+
+    Idle RSS for this DB layer is ~10 MB total. Trade-off vs the eager
+    dict format: per-lookup is ~2 µs slower (mmap slice + UTF-8 decode).
+    Verse call (50 lookups) ~ +100 µs. Full Quran (77k lookups) ~ +50–150 ms.
+    """
+
+    __slots__ = ("_mm", "_file", "_offsets", "_text_blob_start",
+                 "_verse_start", "_sorted_tuples")
+
+    def __init__(self, mm, file_obj, offsets, text_blob_start,
+                 verse_start, sorted_tuples):
+        self._mm = mm
+        self._file = file_obj
+        self._offsets = offsets
+        self._text_blob_start = text_blob_start
+        self._verse_start = verse_start
+        self._sorted_tuples = sorted_tuples
+
+    def _idx(self, key: str) -> int:
+        s_str, v_str, w_str = key.split(":", 2)
+        return self._verse_start[(int(s_str), int(v_str))] + int(w_str) - 1
+
+    def __getitem__(self, key: str) -> str:
+        i = self._idx(key)
+        b = self._text_blob_start
+        o = self._offsets
+        return self._mm[b + o[i]:b + o[i + 1]].decode("utf-8")
+
+    def __contains__(self, key: str) -> bool:
+        try:
+            self._idx(key)
+            return True
+        except (KeyError, ValueError):
+            return False
+
+    def keys(self):
+        # Generate canonical keys on-demand. Used by code paths that call
+        # ``db.keys()`` directly (rare); the hot path uses
+        # ``keys_for_reference`` which bypasses this and builds keys for
+        # only the requested range.
+        for s, v, w in self._sorted_tuples:
+            yield f"{s}:{v}:{w}"
+
+    def items(self):
+        b = self._text_blob_start
+        o = self._offsets
+        mm = self._mm
+        for i, (s, v, w) in enumerate(self._sorted_tuples):
+            yield f"{s}:{v}:{w}", mm[b + o[i]:b + o[i + 1]].decode("utf-8")
+
+    def sorted_tuples(self):
+        return self._sorted_tuples
+
+
 # ----------------------------------------------------------------------
 # Format-specific load functions
 # ----------------------------------------------------------------------
@@ -191,23 +252,74 @@ def _load_binary_blob(path: Path) -> _BlobDB:
     return _BlobDB(text_blob, offsets, keys)
 
 
+def _load_mmap_lazy(path: Path) -> Tuple[_MmapLazyDB, List[Tuple[int, int, int]]]:
+    """Pay-as-you-go: mmap the binary file. Eager structures are kept
+    minimal — just the offsets array and a (s, v) -> base_idx dict.
+    Texts and keys are not materialised at load.
+
+    Returns ``(db, sorted_tuples)`` so the caller can populate the bisect
+    index without recomputing.
+    """
+    fh = path.open("rb")
+    mm = mmap.mmap(fh.fileno(), 0, access=mmap.ACCESS_READ)
+    n = struct.unpack_from("<I", mm, 0)[0]
+    offsets_size = (n + 1) * 4
+    offsets = array.array("I")
+    offsets.frombytes(bytes(mm[4:4 + offsets_size]))
+    pos = 4 + offsets_size
+    text_blob_len = struct.unpack_from("<I", mm, pos)[0]; pos += 4
+    text_blob_start = pos
+    # Skip the keys section entirely; reconstruct from surah_info instead.
+
+    # Build verse_start: (s, v) -> base_idx, plus canonical (s, v, w) tuples.
+    with _SURAH_INFO_PATH.open(encoding="utf-8") as info_f:
+        info = json.load(info_f)
+    verse_start: Dict[Tuple[int, int], int] = {}
+    sorted_tuples: List[Tuple[int, int, int]] = []
+    base = 0
+    for s in range(1, 115):
+        s_str = str(s)
+        s_data = info.get(s_str)
+        if not s_data:
+            continue
+        for v_info in s_data["verses"]:
+            v = v_info["verse"]
+            verse_start[(s, v)] = base
+            nw = v_info["num_words"]
+            for w in range(1, nw + 1):
+                sorted_tuples.append((s, v, w))
+            base += nw
+
+    if base != n:
+        # surah_info disagrees with the binary file — refuse to load
+        # rather than silently mis-mapping indices.
+        raise ValueError(
+            f"binary blob has {n} entries but surah_info implies {base}; "
+            f"rebuild quran_db_blob.bin"
+        )
+
+    return _MmapLazyDB(mm, fh, offsets, text_blob_start, verse_start, sorted_tuples), sorted_tuples
+
+
 _LOADERS = {
     "json": _load_json_full,
     "flat": _load_json_flat,
     "blob": _load_binary_blob,
     "texts": _load_texts_only,
+    "mmap": _load_mmap_lazy,
 }
 
 # Formats that ship their keys in canonical sort order. Their loaders
 # guarantee db.keys() is already sorted, so _build_index can skip the
 # explicit sort step.
-_PRE_SORTED_FORMATS = {"flat", "blob", "texts"}
+_PRE_SORTED_FORMATS = {"flat", "blob", "texts", "mmap"}
 
 
 _SIBLING_FILENAMES = {
     "texts": "quran_db_texts.json",
     "flat":  "quran_db_flat.json",
     "blob":  "quran_db_blob.bin",
+    "mmap":  "quran_db_blob.bin",  # same file, different load strategy
 }
 
 
@@ -258,6 +370,11 @@ def load_db(db_path: str | Path):
         # Loader returns (db, sorted_keys, sorted_tuples) — populate index directly.
         db, sorted_keys, sorted_tuples = _LOADERS[fmt](p)
         _index_cache[path_str] = (sorted_tuples, sorted_keys)
+    elif fmt == "mmap":
+        # mmap-lazy: keep sorted_keys = None; bisect path returns
+        # generated keys for the requested range only.
+        db, sorted_tuples = _LOADERS[fmt](p)
+        _index_cache[path_str] = (sorted_tuples, None)
     else:
         db = _LOADERS[fmt](p)
         _build_index(path_str, db, pre_sorted=fmt in _PRE_SORTED_FORMATS)
@@ -350,6 +467,10 @@ def keys_for_reference(ref: str, db, db_path: str | Path = None) -> List[str]:
         sorted_tuples, sorted_keys = _index_cache[index_path]
         start_idx = bisect.bisect_left(sorted_tuples, lo)
         end_idx = bisect.bisect_right(sorted_tuples, hi)
+        if sorted_keys is None:
+            # mmap-lazy: keys aren't materialised. Generate just the
+            # range we need from the canonical tuples slice.
+            return [f"{s}:{v}:{w}" for s, v, w in sorted_tuples[start_idx:end_idx]]
         return sorted_keys[start_idx:end_idx]
     else:
         selected = [k for k in db.keys() if lo <= _key_to_tuple(k) <= hi]
