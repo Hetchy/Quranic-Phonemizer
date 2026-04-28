@@ -108,7 +108,12 @@ elif variant == 'mmap_index_lazy':
         return _mm[_b + _o[i] : _b + _o[i + 1]].decode('utf-8')
 
 elif variant == 'sqlite_disk':
-    conn = sqlite3.connect(str(res / 'quran.sqlite'))  # built earlier
+    # Reads quran.sqlite produced by `build_db_formats.py` (under /tmp/quran_formats/).
+    # That script must have been run before this variant.
+    sqlite_path = Path('/tmp/quran_formats/quran.sqlite')
+    if not sqlite_path.exists():
+        raise SystemExit('run build_db_formats.py first to produce ' + str(sqlite_path))
+    conn = sqlite3.connect(str(sqlite_path))
     cur = conn.cursor()
     sorted_keys = [r[0] for r in cur.execute('SELECT location FROM quran')]
     sorted_keys.sort(key=lambda k: tuple(int(x) for x in k.split(':')))
