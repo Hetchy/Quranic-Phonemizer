@@ -31,23 +31,26 @@ class LetterSymbol(Symbol):
     __slots__ = (
         "parent_word", "index_in_word", "has_shaddah", "diacritic",
         "extensions", "other_symbols", "phonemes", "is_phonemized",
-        "affected_by", "_tajweed_rules",
+        "affected_by", "_tajweed_rules", "is_first", "is_last",
     )
 
     def __init__(self, name: str, char: str, base_phoneme: str):
         # Inline Symbol.__init__ to skip the extra frame (~326k calls on the
         # full Quran). Tuple-unpack assignment is also faster than separate
-        # statements for slot writes.
+        # statements for slot writes. is_first/is_last are filled in by the
+        # parser once the word's full letter sequence is known.
         (
             self.name, self.char, self.base_phoneme,
             self.has_shaddah, self.diacritic, self.extensions,
             self.other_symbols, self.phonemes, self.is_phonemized,
             self.affected_by, self._tajweed_rules,
+            self.is_first, self.is_last,
         ) = (
             name, char, base_phoneme,
             False, None, None,
             None, (), False,
             None, None,
+            False, False,
         )
 
     def add_extension(self, ext: ExtensionSymbol) -> None:
@@ -316,14 +319,6 @@ class LetterSymbol(Symbol):
     def extend(self):
         if not self.extensions:
             self.add_extension(ExtensionSymbol("", "", None))
-
-    @property
-    def is_first(self) -> bool:
-        return self.index_in_word == 0
-
-    @property
-    def is_last(self) -> bool:
-        return self.index_in_word == len(self.parent_word.letters) - 1
 
     @property
     def is_heavy(self) -> bool:

@@ -271,6 +271,10 @@ class Parser:
                         except ValueError:
                             pass
 
+            if word.letters:
+                word.letters[0].is_first = True
+                word.letters[-1].is_last = True
+
             return word
         
         # The Quran DB and special_words.yaml contain no <rule> tags, so the
@@ -332,7 +336,12 @@ class Parser:
             letter.index_in_word = len(word_letters)
             word_letters.append(letter)
             i = j
-        
+
+        # Mark first/last letters now that the full sequence is known.
+        if word_letters:
+            word_letters[0].is_first = True
+            word_letters[-1].is_last = True
+
         # Attach letter overrides if any exist for this location
         overrides = self.letter_overrides_map.get(location.location_key)
         if overrides:
