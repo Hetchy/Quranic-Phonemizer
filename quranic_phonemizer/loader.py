@@ -38,7 +38,7 @@ import mmap
 import os
 import struct
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import bisect
 
@@ -52,6 +52,20 @@ _index_cache: Dict[str, Tuple[List[Tuple[int, int, int]], List[str]]] = {}
 
 # Path to surah_info, used by the texts-only loader to reconstruct keys.
 _SURAH_INFO_PATH = Path(__file__).resolve().parent / "resources" / "surah_info.json"
+
+# Cached parsed surah_info. Loaded lazily on first need; ~288 KB. Reused
+# both by the loader (to build verse_start) and by keys_for_reference()
+# to walk the canonical key sequence without materialising a 5 MB
+# sorted_tuples list.
+_surah_info_cache: Optional[Dict[str, Any]] = None
+
+
+def _load_surah_info() -> Dict[str, Any]:
+    global _surah_info_cache
+    if _surah_info_cache is None:
+        with _SURAH_INFO_PATH.open(encoding="utf-8") as fh:
+            _surah_info_cache = json.load(fh)
+    return _surah_info_cache
 
 
 def _build_canonical_keys_and_tuples() -> Tuple[List[str], List[Tuple[int, int, int]]]:
@@ -199,25 +213,27 @@ class _DedupMmapDB:
     texts. Uses ~3x less disk and ~5 MB less idle RSS by exploiting the
     fact that only 20,696 of 77,433 word texts are unique.
 
-    File layout (see build_dedup_formats.py):
+    File layout (see build_quran_db.py):
       <u32 n_words> <u32 n_unique>
       <(n_unique+1) * u32 offsets>
       <u32 text_blob_len> <text_blob_bytes>
       <n_words * u16 word_idx>     -- word_idx[w] -> index into offsets/text_blob
+
+    No 77k canonical (s, v, w) tuple list is kept in memory; iteration
+    walks surah_info on demand. Idle RSS is ~5 MB lower as a result.
     """
 
     __slots__ = ("_mm", "_file", "_offsets", "_text_blob_start",
-                 "_word_indices", "_verse_start", "_sorted_tuples")
+                 "_word_indices", "_verse_start")
 
     def __init__(self, mm, file_obj, offsets, text_blob_start,
-                 word_indices, verse_start, sorted_tuples):
+                 word_indices, verse_start):
         self._mm = mm
         self._file = file_obj
         self._offsets = offsets
         self._text_blob_start = text_blob_start
         self._word_indices = word_indices
         self._verse_start = verse_start
-        self._sorted_tuples = sorted_tuples
 
     def _word_idx(self, key: str) -> int:
         s_str, v_str, w_str = key.split(":", 2)
@@ -238,8 +254,16 @@ class _DedupMmapDB:
             return False
 
     def keys(self):
-        for s, v, w in self._sorted_tuples:
-            yield f"{s}:{v}:{w}"
+        info = _load_surah_info()
+        for s in range(1, 115):
+            s_data = info.get(str(s))
+            if not s_data:
+                continue
+            s_str = str(s)
+            for v_idx, v_info in enumerate(s_data["verses"], start=1):
+                prefix = s_str + ":" + str(v_idx) + ":"
+                for w in range(1, v_info["num_words"] + 1):
+                    yield prefix + str(w)
 
     def items(self):
         for k in self.keys():
@@ -391,46 +415,52 @@ def _load_dedup_eager(path: Path) -> Tuple[_DedupEagerDB, List[Tuple[int, int, i
     return _DedupEagerDB(unique_texts, word_indices, verse_start, sorted_tuples), sorted_tuples
 
 
-def _load_dedup_mmap(path: Path) -> Tuple[_DedupMmapDB, List[Tuple[int, int, int]]]:
+def _load_dedup_mmap(path: Path) -> _DedupMmapDB:
     """Read the dedup blob via mmap. Decodes are deferred to lookup time;
     only OS pages actually touched stay resident.
 
-    Idle RSS for this loader is ~5 MB lower than plain mmap because the
-    word_indices table (uint16, 155 KB) is much smaller than 77k full-text
-    offsets, and the text blob itself is only ~422 KB instead of ~1.5 MB.
+    Memory model at idle:
+      - mmap of the blob:       ~few KB of bookkeeping until first access
+      - offsets array:          ~85 KB
+      - word_indices array:     ~160 KB
+      - verse_start dict:       ~290 KB (already needed for key parsing)
+      - surah_info parsed dict: ~290 KB (cached at module level)
+
+    No 77k canonical-tuples list is built. keys_for_reference() walks
+    surah_info on demand for the requested range only.
     """
     fh = path.open("rb")
     mm = mmap.mmap(fh.fileno(), 0, access=mmap.ACCESS_READ)
     n, m, offsets, tstart, word_indices = _read_dedup_blob_header(mm)
-    verse_start, sorted_tuples = _build_verse_index_and_tuples()
-    if len(sorted_tuples) != n:
+    verse_start, n_total = _build_verse_start()
+    if n_total != n:
         raise ValueError(
             f"dedup blob has {n} word slots but surah_info implies "
-            f"{len(sorted_tuples)}; rebuild quran_db_dedup.bin"
+            f"{n_total}; rebuild quran_db_dedup.bin"
         )
-    return _DedupMmapDB(mm, fh, offsets, tstart, word_indices,
-                        verse_start, sorted_tuples), sorted_tuples
+    return _DedupMmapDB(mm, fh, offsets, tstart, word_indices, verse_start)
 
 
-def _build_verse_index_and_tuples():
-    """Build (verse_start, sorted_tuples) from surah_info.json."""
-    with _SURAH_INFO_PATH.open(encoding="utf-8") as info_f:
-        info = json.load(info_f)
+def _build_verse_start():
+    """Build (s, v) -> base_idx and total word count from surah_info.json.
+
+    Returns ``(verse_start, n_words)``. The 77k canonical (s, v, w) tuples
+    are NOT materialised here — keys_for_reference() walks the surah_info
+    structure directly for the requested range, paying only for what's
+    actually needed (a verse-call materialises ~50 keys; a full-Quran call
+    materialises 77k strings, but only at call time, not at idle).
+    """
+    info = _load_surah_info()
     verse_start: Dict[Tuple[int, int], int] = {}
-    sorted_tuples: List[Tuple[int, int, int]] = []
     base = 0
     for s in range(1, 115):
-        s_str = str(s)
-        s_data = info.get(s_str)
+        s_data = info.get(str(s))
         if not s_data:
             continue
         for v_idx, v_info in enumerate(s_data["verses"], start=1):
             verse_start[(s, v_idx)] = base
-            nw = v_info["num_words"]
-            for w in range(1, nw + 1):
-                sorted_tuples.append((s, v_idx, w))
-            base += nw
-    return verse_start, sorted_tuples
+            base += v_info["num_words"]
+    return verse_start, base
 
 
 def _load_mmap_lazy(path: Path) -> Tuple[_MmapLazyDB, List[Tuple[int, int, int]]]:
@@ -543,10 +573,13 @@ def load_db(db_path: str | Path):
         # Loader returns (db, sorted_keys, sorted_tuples) — populate index directly.
         db, sorted_keys, sorted_tuples = _LOADERS[fmt](p)
         _index_cache[path_str] = (sorted_tuples, sorted_keys)
-    elif fmt in ("mmap", "dedup", "dedup_mmap"):
-        # Loaders that defer key materialisation: store None for sorted_keys
-        # and let keys_for_reference() generate strings only for the requested
-        # range from sorted_tuples.
+    elif fmt == "dedup_mmap":
+        # Pure pay-as-you-go: no sorted_tuples either. keys_for_reference()
+        # walks surah_info for the requested range.
+        db = _LOADERS[fmt](p)
+        _index_cache[path_str] = (None, None)
+    elif fmt in ("mmap", "dedup"):
+        # Defer key materialisation but keep sorted_tuples for bisect.
         db, sorted_tuples = _LOADERS[fmt](p)
         _index_cache[path_str] = (sorted_tuples, None)
     else:
@@ -639,14 +672,45 @@ def keys_for_reference(ref: str, db, db_path: str | Path = None) -> List[str]:
 
     if index_path and index_path in _index_cache:
         sorted_tuples, sorted_keys = _index_cache[index_path]
+        if sorted_tuples is None and sorted_keys is None:
+            # Pure lazy mode: walk surah_info to emit keys for the
+            # requested range only. Idle RSS doesn't carry a 5 MB
+            # tuples list; per-call cost scales with the range.
+            return _generate_keys_for_range(lo, hi)
         start_idx = bisect.bisect_left(sorted_tuples, lo)
         end_idx = bisect.bisect_right(sorted_tuples, hi)
         if sorted_keys is None:
-            # mmap-lazy: keys aren't materialised. Generate just the
-            # range we need from the canonical tuples slice.
+            # Tuples kept, keys lazy: generate only the range slice.
             return [f"{s}:{v}:{w}" for s, v, w in sorted_tuples[start_idx:end_idx]]
         return sorted_keys[start_idx:end_idx]
     else:
         selected = [k for k in db.keys() if lo <= _key_to_tuple(k) <= hi]
         return sorted(selected, key=_key_to_tuple)
+
+
+def _generate_keys_for_range(lo, hi) -> List[str]:
+    """Walk surah_info to yield canonical-order keys in [lo, hi] inclusive."""
+    info = _load_surah_info()
+    s_lo, v_lo, w_lo = lo
+    s_hi, v_hi, w_hi = hi
+    keys: List[str] = []
+    a = keys.append
+    for s in range(max(s_lo, 1), min(s_hi, 114) + 1):
+        s_data = info.get(str(s))
+        if not s_data:
+            continue
+        verses = s_data["verses"]
+        n_verses = len(verses)
+        v_start = max(v_lo if s == s_lo else 1, 1)
+        v_end = min(v_hi if s == s_hi else n_verses, n_verses)
+        s_str = str(s)
+        for v_idx in range(v_start, v_end + 1):
+            v_info = verses[v_idx - 1]
+            nw = v_info["num_words"]
+            prefix = s_str + ":" + str(v_idx) + ":"
+            w_start = max(w_lo if (s == s_lo and v_idx == v_lo) else 1, 1)
+            w_end = min(w_hi if (s == s_hi and v_idx == v_hi) else nw, nw)
+            for w in range(w_start, w_end + 1):
+                a(prefix + str(w))
+    return keys
 
