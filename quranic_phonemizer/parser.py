@@ -356,11 +356,7 @@ class Parser:
         return stripped_text
     
     def load_words(self, ref: str, db_path: str | Path = DATA_DIR / "Quran.json", *, stop_signs: List[str] = [], stop_refs: List[str] = []) -> List[Word]:
-        """Load words for a reference range and annotate boundaries (eager).
-
-        Kept for backward compatibility. The streaming hot path used by
-        Phonemizer.phonemize is :meth:`iter_words`.
-        """
+        """Load words for a reference range and annotate boundaries."""
         db = load_db(db_path)
         locations = keys_for_reference(ref, db)
         words: List[Word] = []
@@ -374,54 +370,6 @@ class Parser:
         self._link_words(words)
         self._annotate_boundaries(words, stop_signs=stop_signs, stop_refs=stop_refs)
         return words
-
-    def iter_words(self, ref: str, db_path: str | Path = DATA_DIR / "Quran.json"):
-        """Yield parsed Word objects for the reference range, one at a time.
-
-        Boundary annotation (is_starting / is_stopping) and prev/next
-        linking are NOT done here — they are the responsibility of the
-        sliding-window driver in Phonemizer.phonemize, which has all the
-        neighbour information when curr enters the window.
-        """
-        db = load_db(db_path)
-        locations = keys_for_reference(ref, db)
-        for loc in locations:
-            raw = db[loc]
-            yield self.parse_word(raw, Location.from_key(loc))
-
-
-def annotate_word_boundaries(curr: "Word", prev1: "Word | None", nxt: "Word | None",
-                              *, stop_signs_lower, stop_ref_set, verse_stop) -> None:
-    """Set is_starting / is_stopping on `curr` given its in-window neighbours.
-
-    Called by the sliding-window driver immediately before `curr.phonemize()`
-    so that phonemize_letter sees the correct flags.
-    """
-    if prev1 is None:
-        curr.is_starting = True
-    if nxt is None:
-        curr.is_stopping = True
-
-    # Stop-sign attached to curr → curr stops here
-    if curr.stop_sign is not None and curr.stop_sign.name.lower() in stop_signs_lower:
-        curr.is_stopping = True
-    # Stop-sign attached to prev → curr starts fresh
-    if (prev1 is not None and prev1.stop_sign is not None
-            and prev1.stop_sign.name.lower() in stop_signs_lower):
-        curr.is_starting = True
-
-    # Verse mode: any change of ayah on either side
-    if verse_stop:
-        if prev1 is None or prev1.location.ayah_num != curr.location.ayah_num:
-            curr.is_starting = True
-        if nxt is None or nxt.location.ayah_num != curr.location.ayah_num:
-            curr.is_stopping = True
-
-    # Explicit stop_refs
-    if curr.location.location_key in stop_ref_set:
-        curr.is_stopping = True
-    if prev1 is not None and prev1.location.location_key in stop_ref_set:
-        curr.is_starting = True
     
     def _link_words(self, words: List[Word]) -> None:
         """Link words with references to previous and next words."""
