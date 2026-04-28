@@ -463,6 +463,31 @@ def _build_verse_start():
     return verse_start, base
 
 
+def _build_verse_index_and_tuples():
+    """Eager variant of _build_verse_start that also materialises the full
+    77k canonical (s, v, w) tuple list.
+
+    Used by the eager-dedup and mmap-lazy code paths which still want
+    sorted_tuples upfront for bisect. The default (dedup_mmap) path uses
+    _build_verse_start instead and walks surah_info per query.
+    """
+    info = _load_surah_info()
+    verse_start: Dict[Tuple[int, int], int] = {}
+    sorted_tuples: List[Tuple[int, int, int]] = []
+    base = 0
+    for s in range(1, 115):
+        s_data = info.get(str(s))
+        if not s_data:
+            continue
+        for v_idx, v_info in enumerate(s_data["verses"], start=1):
+            verse_start[(s, v_idx)] = base
+            nw = v_info["num_words"]
+            for w in range(1, nw + 1):
+                sorted_tuples.append((s, v_idx, w))
+            base += nw
+    return verse_start, sorted_tuples
+
+
 def _load_mmap_lazy(path: Path) -> Tuple[_MmapLazyDB, List[Tuple[int, int, int]]]:
     """Pay-as-you-go: mmap the binary file. Eager structures are kept
     minimal — just the offsets array and a (s, v) -> base_idx dict.
