@@ -45,4 +45,4 @@ Issues = "https://github.com/Hetchy/Quranic-Phonemizer/issues"
 exclude = ["tests", "tests.*", "*.tests", "*.tests.*", "out"]
 
 [tool.setuptools.package-data]
-quranic_phonemizer = ["resources/*.json", "resources/*.yaml", "resources/*.txt"]
+quranic_phonemizer = ["resources/*.json", "resources/*.yaml", "resources/*.txt", "resources/*.bin"]

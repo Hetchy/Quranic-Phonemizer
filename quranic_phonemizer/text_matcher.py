@@ -98,18 +98,18 @@ class TextMatcher:
         """Preprocess the entire Quran database with normalization rules."""
         self._preprocessed_db = {}
 
-        for location_key, word_data in self.db.items():
-            original_text = word_data["text"]
+        for location_key, original_text in self.db.items():
             normalized_text = self._normalize_quran_text(original_text)
             stripped_text = self._strip_diacritics(normalized_text)
+            surah, ayah, word = location_key.split(":", 2)
 
             self._preprocessed_db[location_key] = {
                 "original": original_text,
                 "normalized": normalized_text,
                 "stripped": stripped_text,
-                "surah": word_data["surah"],
-                "ayah": word_data["ayah"],
-                "word": word_data["word"]
+                "surah": surah,
+                "ayah": ayah,
+                "word": word,
             }
     
     def _normalize_quran_text(self, text: str) -> str:

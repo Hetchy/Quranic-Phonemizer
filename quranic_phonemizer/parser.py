@@ -362,7 +362,7 @@ class Parser:
         words: List[Word] = []
 
         for loc in locations:
-            raw = db[loc]["text"]
+            raw = db[loc]
             location_obj = Location.from_key(loc)
             word = self.parse_word(raw, location_obj)
             words.append(word)
