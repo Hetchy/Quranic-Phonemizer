@@ -92,7 +92,7 @@ def _build_word_entries(word, word_map: WordMapping) -> tuple[List[TajweedEntry]
         # Partition tajweed rules by source/target
         source_rules: List[TajweedRule] = []
         target_rules: List[TajweedRule] = []
-        for tag in letter._tajweed_rules:
+        for tag in letter._tajweed_rules or ():
             if tag.is_source:
                 if tag.rule not in source_rules:
                     source_rules.append(tag.rule)

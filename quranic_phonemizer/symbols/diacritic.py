@@ -9,6 +9,8 @@ from .symbol import Symbol
 
 
 class DiacriticSymbol(Symbol):
+    __slots__ = ()
+
     def __init__(self, name: str, char: str, phoneme: Optional[str]):
         super().__init__(name, char, phoneme)
 

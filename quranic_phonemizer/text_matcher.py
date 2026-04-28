@@ -39,7 +39,9 @@ class TextMatcher:
         self.db = load_db(db_path)
         self.phoneme_mappings = phoneme_mappings
         self._build_char_mappings()
-        self._preprocess_database()
+        # preprocessed_db is built lazily on first access; users who only call
+        # phonemize() with traditional refs (e.g. "1-114", "2:255") never need it.
+        self._preprocessed_db: Optional[Dict[str, Any]] = None
     
     def _build_char_mappings(self) -> None:
         """Build character mapping tables from phoneme_mappings."""
@@ -85,18 +87,25 @@ class TextMatcher:
         # Skip validation - non-matching unicode characters are fine
         pass
     
+    @property
+    def preprocessed_db(self) -> Dict[str, Any]:
+        """Lazily build and cache the preprocessed Quran database."""
+        if self._preprocessed_db is None:
+            self._preprocess_database()
+        return self._preprocessed_db
+
     def _preprocess_database(self) -> None:
         """Preprocess the entire Quran database with normalization rules."""
-        self.preprocessed_db = {}
-        
+        self._preprocessed_db = {}
+
         for location_key, word_data in self.db.items():
             original_text = word_data["text"]
             normalized_text = self._normalize_quran_text(original_text)
             stripped_text = self._strip_diacritics(normalized_text)
-            
-            self.preprocessed_db[location_key] = {
+
+            self._preprocessed_db[location_key] = {
                 "original": original_text,
-                "normalized": normalized_text, 
+                "normalized": normalized_text,
                 "stripped": stripped_text,
                 "surah": word_data["surah"],
                 "ayah": word_data["ayah"],

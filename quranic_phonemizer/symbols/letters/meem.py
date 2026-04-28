@@ -5,6 +5,8 @@ from ...tajweed_rule import TajweedRule
 
 
 class Meem(LetterSymbol):
+    __slots__ = ()
+
     def phonemize_letter(self) -> List[str]:
         if self.has_shaddah:
             self.set_tajweed_rule(TajweedRule.MEEM_GHUNNAH)

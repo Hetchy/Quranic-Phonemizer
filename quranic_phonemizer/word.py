@@ -15,6 +15,12 @@ from .tajweed_rule import TajweedRule, TajweedRuleTag
 
 
 class Word:
+    __slots__ = (
+        "location", "text", "prev_word", "next_word", "letters",
+        "phonemes", "stop_sign", "is_starting", "is_stopping",
+        "_letter_overrides",
+    )
+
     def __init__(self, location: Location, text: str = ""):
         self.location = location
         self.text = text
@@ -133,7 +139,7 @@ class Word:
 
             # Build extension mappings if present
             extension_mappings = []
-            for ext in letter.extensions:
+            for ext in letter.extensions or ():
                 extension_mappings.append(ExtensionSymbolMapping(
                     char=ext.char,
                     name=ext.name
@@ -147,7 +153,7 @@ class Word:
                         OtherSymbolMapping(char=sym.char, name=sym.name)
                     )
 
-            tajweed_tags = list(letter._tajweed_rules)
+            tajweed_tags = list(letter._tajweed_rules) if letter._tajweed_rules else []
 
             lm = LetterMapping(
                 index=i,

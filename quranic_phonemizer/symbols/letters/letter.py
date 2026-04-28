@@ -19,24 +19,52 @@ if TYPE_CHECKING:
     from ...word import Word
 
 
+_HEAVY_CHARS = frozenset({"خ", "ص", "ض", "غ", "ط", "ق", "ظ"})
+_QALQALA_CHARS = frozenset({"ق", "ط", "ب", "ج", "د"})
+_IKHFAA_CHARS = frozenset({"ت", "ث", "ج", "د", "ذ", "ز", "س", "ش", "ص", "ض", "ط", "ظ", "ف", "ق", "ك"})
+_IDGHAM_GHUNNAH_CHARS = frozenset({"ي", "ن", "م", "و"})
+
+
 class LetterSymbol(Symbol):
     """Represents a consonant or vowel letter with associated diacritics, extensions, and other symbols."""
+
+    __slots__ = (
+        "parent_word", "index_in_word", "has_shaddah", "diacritic",
+        "extensions", "other_symbols", "phonemes", "is_phonemized",
+        "affected_by", "_tajweed_rules",
+    )
 
     def __init__(self, name: str, char: str, base_phoneme: str):
         super().__init__(name, char, base_phoneme)
 
-        self.parent_word: Word
-        self.index_in_word: int
         self.has_shaddah: bool = False
         self.diacritic: Optional[DiacriticSymbol] = None
-        self.extensions: List[ExtensionSymbol] = []
-        self.other_symbols: List[OtherSymbol] = []
+        self.extensions: Optional[List[ExtensionSymbol]] = None
+        self.other_symbols: Optional[List[OtherSymbol]] = None
 
         self.phonemes: List[str] = []
         self.is_phonemized: bool = False
         self.affected_by: Optional["LetterSymbol"] = None
 
-        self._tajweed_rules: List[TajweedRuleTag] = []
+        self._tajweed_rules: Optional[List[TajweedRuleTag]] = None
+
+    def add_extension(self, ext: ExtensionSymbol) -> None:
+        if self.extensions is None:
+            self.extensions = [ext]
+        else:
+            self.extensions.append(ext)
+
+    def add_other_symbol(self, sym: OtherSymbol) -> None:
+        if self.other_symbols is None:
+            self.other_symbols = [sym]
+        else:
+            self.other_symbols.append(sym)
+
+    def add_tajweed_rule(self, tag: TajweedRuleTag) -> None:
+        if self._tajweed_rules is None:
+            self._tajweed_rules = [tag]
+        elif tag not in self._tajweed_rules:
+            self._tajweed_rules.append(tag)
 
     def prev_letter(self, n: int = 1) -> Optional["LetterSymbol"]:
         return self.parent_word.get_prev_letter(self.index_in_word, n)
@@ -98,17 +126,13 @@ class LetterSymbol(Symbol):
 
     def set_tajweed_rule(self, rule: TajweedRule, target: Optional["LetterSymbol"] = None):
         """Tag a TajweedRule on this letter (source) and optionally on a target letter."""
-        tag = TajweedRuleTag(rule=rule, is_source=True)
-        if tag not in self._tajweed_rules:
-            self._tajweed_rules.append(tag)
+        self.add_tajweed_rule(TajweedRuleTag(rule=rule, is_source=True))
         if target is not None:
-            target_tag = TajweedRuleTag(rule=rule, is_source=False)
-            if target_tag not in target._tajweed_rules:
-                target._tajweed_rules.append(target_tag)
+            target.add_tajweed_rule(TajweedRuleTag(rule=rule, is_source=False))
 
     @property
     def tajweed_rules(self) -> List[TajweedRuleTag]:
-        return list(self._tajweed_rules)
+        return list(self._tajweed_rules) if self._tajweed_rules else []
 
     @final
     def phonemize(self) -> List[str]:
@@ -283,11 +307,13 @@ class LetterSymbol(Symbol):
 
 
     def has_symbol(self, symbol_name: str) -> bool:
+        if not self.other_symbols:
+            return False
         return any(symbol.name == symbol_name for symbol in self.other_symbols)
 
     def extend(self):
         if not self.extensions:
-            self.extensions.append(ExtensionSymbol("", "", None))
+            self.add_extension(ExtensionSymbol("", "", None))
 
     @property
     def is_first(self) -> bool:
@@ -299,19 +325,19 @@ class LetterSymbol(Symbol):
 
     @property
     def is_heavy(self) -> bool:
-        return self.char in ["خ", "ص", "ض", "غ", "ط", "ق", "ظ"]
+        return self.char in _HEAVY_CHARS
 
     @property
     def is_qalqala(self) -> bool:
-        return self.char in ["ق", "ط", "ب", "ج", "د"]
+        return self.char in _QALQALA_CHARS
 
     @property
     def is_ikhfaa(self) -> bool:
-        return self.char in ["ت", "ث", "ج", "د", "ذ", "ز", "س", "ش", "ص", "ض", "ط", "ظ", "ف", "ق", "ك"]
+        return self.char in _IKHFAA_CHARS
 
     @property
     def is_idgham_ghunnah(self) -> bool:
-        return self.char in ["ي", "ن", "م", "و"]
+        return self.char in _IDGHAM_GHUNNAH_CHARS
 
     @property
     def has_sukun(self) -> bool:

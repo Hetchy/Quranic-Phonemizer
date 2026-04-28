@@ -6,6 +6,8 @@ from ..extension import ExtensionSymbol
 
 
 class Lam(LetterSymbol):
+    __slots__ = ()
+
     ALLAH_LETTER_PATTERNS = {
         'ءَآللَّهُ': ['ء', 'ا', 'ل', 'ل', 'ه'],
         'وَٱللَّهُ': ['و', 'ٱ', 'ل', 'ل', 'ه'],
@@ -26,7 +28,7 @@ class Lam(LetterSymbol):
 
     def phonemize_letter(self) -> List[str]:
         if self._word_contains_Allah():
-            self.extensions.append(ExtensionSymbol("DAGGER_ALEF", "", None))
+            self.add_extension(ExtensionSymbol("DAGGER_ALEF", "", None))
             if self.is_heavy:
                 self.set_tajweed_rule(TajweedRule.TAFKHEEM)
                 return [get_rule_phoneme("lam_heavy", "phoneme")]

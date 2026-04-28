@@ -5,6 +5,8 @@ from ...tajweed_rule import TajweedRule
 
 
 class Raa(LetterSymbol):
+    __slots__ = ()
+
     def phonemize_letter(self) -> List[str]:
         prev = self.prev_letter()
         prev2 = self.prev_letter(2)

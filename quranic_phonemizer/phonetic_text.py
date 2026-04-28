@@ -151,7 +151,7 @@ def _build_letter_segment(
     letter_char = lt.char
     shaddah = lt.has_shaddah
     diac_name = lt.diacritic.name if lt.diacritic else None
-    extensions = lt.extensions
+    extensions = lt.extensions or ()
     insert_alef = False
 
     hamza_wasl_char = _char("letters", "HAMZA_WASL")
@@ -162,7 +162,7 @@ def _build_letter_segment(
 
     # A. Hamza wasl (starting + first letter + char == ٱ)
     if starting and is_first and letter_char == hamza_wasl_char:
-        source_rules = {tag.rule for tag in lt._tajweed_rules if tag.is_source}
+        source_rules = {tag.rule for tag in (lt._tajweed_rules or ()) if tag.is_source}
         for rule, (repl_char, haraka) in _HAMZA_WASL_RULES.items():
             if rule in source_rules:
                 return repl_char + haraka

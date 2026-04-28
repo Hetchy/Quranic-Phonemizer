@@ -4,6 +4,8 @@ from ...tajweed_rule import TajweedRule
 
 
 class HamzaWasl(LetterSymbol):
+    __slots__ = ()
+
     # Special nouns that get kasra when starting
     HAMZA_WASL_NOUN_PATTERNS = [
         ['ٱ', 'س', 'م'],            # ٱسم

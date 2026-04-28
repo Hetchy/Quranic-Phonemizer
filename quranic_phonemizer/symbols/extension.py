@@ -10,5 +10,8 @@ from .symbol import Symbol
 
 class ExtensionSymbol(Symbol):
     """Represents symbols that extend vowels or have special phonetic properties."""
+
+    __slots__ = ()
+
     def __init__(self, name: str, char: str, phoneme: Optional[str] = None):
         super().__init__(name, char, phoneme)
