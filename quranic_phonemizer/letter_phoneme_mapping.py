@@ -12,7 +12,7 @@ import json
 from dataclasses import dataclass, field
 from typing import List, Optional, Tuple, Set
 
-from .tajweed_rule import TajweedRule, TajweedRuleTag
+from .tajweed_rule import TajweedRule
 from .mapping import (
     PhonemizationMapping,
     WordMapping,

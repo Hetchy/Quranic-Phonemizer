@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import List, Literal, Optional
 from pathlib import Path
 
@@ -19,7 +19,7 @@ from .tajweed_mapping import (
 )
 from .specials import get_tajweed_mapping
 from .letter_phoneme_mapping import (
-    FlatMappingResult, build_letter_phoneme_mapping, validate as validate_lpm,
+    FlatMappingResult, build_letter_phoneme_mapping,
 )
 
 DATA_DIR = Path(__file__).resolve().parent / "resources"

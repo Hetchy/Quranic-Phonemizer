@@ -41,7 +41,8 @@ Issues = "https://github.com/Hetchy/Quranic-Phonemizer/issues"
 [tool.setuptools_scm]
 
 [tool.setuptools.packages.find]
-exclude = ["tests", "tests.*", "*.tests", "*.tests.*", "out"]
+include = ["quranic_phonemizer*"]
+exclude = ["tests*", "out", "docs*", "dev*"]
 
 [tool.setuptools.package-data]
-quranic_phonemizer = ["resources/*.json", "resources/*.yaml", "resources/*.txt"]
+quranic_phonemizer = ["resources/*.json", "resources/*.yaml"]
