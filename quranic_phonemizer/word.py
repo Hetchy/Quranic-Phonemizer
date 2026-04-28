@@ -4,11 +4,13 @@ Word class for the Quranic phonemizer.
 
 from __future__ import annotations
 
+import re
 from typing import Any, Dict, List, Optional
 
 from .symbols.letters.letter import LetterSymbol
 from .location import Location
 from .symbols.stop import StopSymbol
+from .mapping import WordMapping, LetterMapping
 from .tajweed_rule import TajweedRule, TajweedRuleTag
 
 
@@ -90,6 +92,102 @@ class Word:
             extend(filter(None, letter.phonemes))
         return phonemes
 
+    def build_mapping(self) -> WordMapping:
+        from .mapping import ExtensionSymbolMapping, OtherSymbolMapping
+
+        letter_mappings = []
+        leading_symbols = []
+        trailing_symbols = []
+
+        # Quranic symbol characters (stop signs, rub el hizb, etc.)
+        QURANIC_SYMBOLS = {
+            '\u06D6': 'PREFERRED_CONTINUE',
+            '\u06D7': 'PREFERRED_STOP',
+            '\u06D8': 'COMPULSORY_STOP',
+            '\u06D9': 'PROHIBITED_STOP',
+            '\u06DA': 'OPTIONAL_STOP',
+            '\u06DB': 'EITHER_STOP',
+            '\u06DC': 'SMALL_HIGH_SEEN',
+            '\u06DD': 'END_OF_AYAH',
+            '\u06DE': 'START_OF_RUB_EL_HIZB',
+            '\u06DF': 'SMALL_HIGH_ROUNDED_ZERO',
+            '\u06E0': 'SMALL_HIGH_UPRIGHT_RECT',
+            '\u06E9': 'PLACE_OF_SAJDAH',
+        }
+
+        # Diacritics to skip
+        DIACRITICS = '\u064E\u064F\u0650\u0652\u064B\u064C\u064D\u0651'
+
+        # Extract leading symbols from text (symbols that appear before first letter)
+        if self.text and self.letters:
+            first_letter_char = self.letters[0].char
+            text_before_first_letter = self.text.split(first_letter_char)[0]
+
+            # Check for Quranic symbols in the leading text
+            for char in text_before_first_letter:
+                # Skip whitespace and diacritics
+                if char in f' {DIACRITICS}':
+                    continue
+
+                # Check if this is a known Quranic symbol
+                if char in QURANIC_SYMBOLS:
+                    leading_symbols.append(
+                        OtherSymbolMapping(char=char, name=QURANIC_SYMBOLS[char])
+                    )
+
+        for i, letter in enumerate(self.letters):
+            phonemes = list(letter.phonemes) if letter.phonemes else []
+
+            # Build extension mappings if present
+            extension_mappings = []
+            for ext in letter.extensions or ():
+                extension_mappings.append(ExtensionSymbolMapping(
+                    char=ext.char,
+                    name=ext.name
+                ))
+
+            # Build other symbols mappings
+            other_symbols_mappings = []
+            if letter.other_symbols:
+                for sym in letter.other_symbols:
+                    other_symbols_mappings.append(
+                        OtherSymbolMapping(char=sym.char, name=sym.name)
+                    )
+
+            tajweed_tags = list(letter._tajweed_rules) if letter._tajweed_rules else []
+
+            lm = LetterMapping(
+                index=i,
+                char=letter.char,
+                phonemes=phonemes,
+                diacritic=letter.diacritic.name if letter.diacritic else None,
+                has_shaddah=letter.has_shaddah,
+                extensions=extension_mappings,
+                other_symbols=other_symbols_mappings,
+                tajweed_rules=tajweed_tags,
+            )
+            letter_mappings.append(lm)
+
+        # Extract word-level trailing symbols (stop signs)
+        if self.stop_sign:
+            trailing_symbols.append(
+                OtherSymbolMapping(char=self.stop_sign.char, name=self.stop_sign.name)
+            )
+
+        clean_text = re.sub(r"</?rule[^>]*?>", "", self.text)
+
+        return WordMapping(
+            location=self.location.location_key,
+            text=clean_text,
+            phonemes=self.get_phonemes(),
+            letter_mappings=letter_mappings,
+            leading_symbols=leading_symbols,
+            trailing_symbols=trailing_symbols,
+            is_special_word=self.phonemes is not None,
+            is_starting=self.is_starting,
+            is_stopping=self.is_stopping,
+        )
+
     def debug_print(self) -> str:
         result = f"Word at {self.location.location_key}:\n"
         result += f"  Text: {self.text}\n"
@@ -107,6 +205,8 @@ class Word:
             
             if letter.phonemes:
                 result += f"      Phonemes: {letter.phonemes}\n"
+            if letter.affected_by:
+                result += f"      Affected By: '{letter.affected_by.char}'\n"
             if letter.diacritic:
                 result += f"      Diacritic: '{letter.diacritic.char}' -> {letter.diacritic.base_phoneme} (name: {letter.diacritic.name})\n"
             if letter.extensions:

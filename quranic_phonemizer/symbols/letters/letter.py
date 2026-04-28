@@ -31,7 +31,7 @@ class LetterSymbol(Symbol):
     __slots__ = (
         "parent_word", "index_in_word", "has_shaddah", "diacritic",
         "extensions", "other_symbols", "phonemes", "is_phonemized",
-        "_tajweed_rules", "is_first", "is_last",
+        "affected_by", "_tajweed_rules", "is_first", "is_last",
     )
 
     def __init__(self, name: str, char: str, base_phoneme: str):
@@ -43,13 +43,13 @@ class LetterSymbol(Symbol):
             self.name, self.char, self.base_phoneme,
             self.has_shaddah, self.diacritic, self.extensions,
             self.other_symbols, self.phonemes, self.is_phonemized,
-            self._tajweed_rules,
+            self.affected_by, self._tajweed_rules,
             self.is_first, self.is_last,
         ) = (
             name, char, base_phoneme,
             False, None, None,
             None, (), False,
-            None,
+            None, None,
             False, False,
         )
 
@@ -124,9 +124,10 @@ class LetterSymbol(Symbol):
     def can_phonemize(self) -> bool:
         return not self.is_phonemized
 
-    def mark_phonemized(self, phonemes: Optional[List[str]] = None):
+    def mark_phonemized(self, phonemes: Optional[List[str]] = None, affected_by: Optional["LetterSymbol"] = None):
         self.phonemes = phonemes or []
         self.is_phonemized = True
+        self.affected_by = affected_by
 
     def set_tajweed_rule(self, rule: TajweedRule, target: Optional["LetterSymbol"] = None):
         """Tag a TajweedRule on this letter (source) and optionally on a target letter."""
@@ -233,7 +234,7 @@ class LetterSymbol(Symbol):
             if self.parent_word.is_stopping:
                 return [short_vowel_ph + ":"]
             else:
-                next_letter.mark_phonemized(None)
+                next_letter.mark_phonemized(None, affected_by=self.diacritic)
                 next_letter = self.next_letter(2)
                 if not next_letter:
                     return [short_vowel_ph + ":"]
@@ -256,7 +257,7 @@ class LetterSymbol(Symbol):
             target_phoneme = nasal_map.get(next_letter.base_phoneme)
             # Note: Don't clear has_shaddah - it's part of the canonical text and should be preserved
             next_phonemes = [target_phoneme] + next_letter.phonemize_modifiers()
-            next_letter.mark_phonemized(next_phonemes)
+            next_letter.mark_phonemized(next_phonemes, affected_by=self)
             return [short_vowel_ph]
 
         # Idgham no Ghunnah
