@@ -1,8 +1,9 @@
 """Regenerate the slim runtime DB formats from the canonical Quran.json.
 
 Outputs alongside Quran.json in quranic_phonemizer/resources/:
-  - quran_db_flat.json : [keys, texts] parallel arrays  (default at runtime)
-  - quran_db_blob.bin  : packed binary  (opt-in via QURAN_DB_FORMAT=blob)
+  - quran_db_texts.json : [text, ...] in canonical order (smallest, default)
+  - quran_db_flat.json  : [keys, texts] parallel arrays
+  - quran_db_blob.bin   : packed binary  (opt-in via QURAN_DB_FORMAT=blob)
 
 Run after editing Quran.json.
 """
@@ -28,6 +29,13 @@ def main() -> None:
 
     keys = sorted(raw.keys(), key=lt)
     texts = [raw[k]["text"] for k in keys]
+
+    # quran_db_texts.json: just texts in canonical order; keys reconstructed
+    # at load time from surah_info.json.
+    texts_path = dst / "quran_db_texts.json"
+    with texts_path.open("w", encoding="utf-8") as f:
+        json.dump(texts, f, ensure_ascii=False, separators=(",", ":"))
+    print(f"wrote {texts_path}: {texts_path.stat().st_size / 1024:.1f} KB")
 
     # quran_db_flat.json: parallel arrays
     flat_path = dst / "quran_db_flat.json"

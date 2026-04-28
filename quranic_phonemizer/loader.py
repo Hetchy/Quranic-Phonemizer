@@ -1,8 +1,8 @@
 """
 core/loader.py
 ==============
-Load the word-by-word JSON and resolve a *reference string* into an
-ordered list of location keys  (``"s:v:w"``).
+Load the word-by-word DB and resolve a *reference string* into an ordered
+list of location keys (``"s:v:w"``).
 
 Accepted reference formats
 --------------------------
@@ -15,14 +15,19 @@ All numbers are 1-based, no zero-padding required.
 Storage formats
 ---------------
 The runtime DB exposes a dict-like ``db[location_key] -> word_text`` interface.
-Three on-disk formats are supported (controlled by the ``QURAN_DB_FORMAT``
-environment variable, default ``"json"`` for backwards compatibility):
+Four on-disk formats are supported (controlled by ``QURAN_DB_FORMAT`` env
+var, with autodetect that prefers smaller/faster siblings when present):
 
+  - ``texts`` : ``quran_db_texts.json`` — just ``[text, text, ...]`` in
+                canonical order. Keys reconstructed from ``surah_info.json``
+                at load time. Smallest disk + fastest load.  *Default if
+                the file is shipped.*
+  - ``flat``  : ``quran_db_flat.json`` — ``[keys, texts]`` parallel arrays.
+  - ``blob``  : ``quran_db_blob.bin`` — packed binary, lazy UTF-8 decode.
   - ``json``  : original ``Quran.json`` with 6 fields per word (legacy).
-  - ``flat``  : ``quran_db_flat.json`` containing ``[keys, texts]`` parallel
-                arrays. Same Python dict API but ~57% less RAM.
-  - ``blob``  : ``quran_db_blob.bin`` packed binary; lazy UTF-8 decode on access.
-                Smallest RSS (~63% less than ``json``).
+
+All slim formats are stored in canonical sort order, so the bisect index
+is built without an extra sort step.
 """
 
 from __future__ import annotations
@@ -44,6 +49,37 @@ import bisect
 
 _db_cache: Dict[str, "_DBLike"] = {}
 _index_cache: Dict[str, Tuple[List[Tuple[int, int, int]], List[str]]] = {}
+
+# Path to surah_info, used by the texts-only loader to reconstruct keys.
+_SURAH_INFO_PATH = Path(__file__).resolve().parent / "resources" / "surah_info.json"
+
+
+def _build_canonical_keys_and_tuples() -> Tuple[List[str], List[Tuple[int, int, int]]]:
+    """Reconstruct canonical key strings + (s, v, w) tuples from surah_info.
+
+    Not cached globally — the lists are short-lived: they're consumed by
+    the loader to populate ``_db_cache`` and ``_index_cache`` and then go
+    out of scope. Re-running this function on a second load is cheap
+    (~10ms for 77k entries).
+    """
+    with _SURAH_INFO_PATH.open(encoding="utf-8") as fh:
+        info = json.load(fh)
+    keys: List[str] = []
+    tuples: List[Tuple[int, int, int]] = []
+    a_keys = keys.append
+    a_tuples = tuples.append
+    for s in range(1, 115):
+        s_str = str(s)
+        s_data = info.get(s_str)
+        if not s_data:
+            continue
+        for v_info in s_data["verses"]:
+            v = v_info["verse"]
+            prefix = s_str + ":" + str(v) + ":"
+            for w in range(1, v_info["num_words"] + 1):
+                a_keys(prefix + str(w))
+                a_tuples((s, v, w))
+    return keys, tuples
 
 
 # ----------------------------------------------------------------------
@@ -119,6 +155,25 @@ def _load_json_flat(path: Path) -> _DictDB:
     return _DictDB(dict(zip(keys, texts)))
 
 
+def _load_texts_only(path: Path) -> Tuple[_DictDB, List[str], List[Tuple[int, int, int]]]:
+    """Just [text, text, ...] in canonical order; keys reconstructed from
+    surah_info.json. Smallest on-disk size; loads fastest because the
+    canonical ordering lets us skip the sort that builds the bisect index.
+
+    Returns ``(db, keys, tuples)`` so the caller can populate the bisect
+    index without recomputing.
+    """
+    with path.open(encoding="utf-8") as fh:
+        texts = json.load(fh)
+    keys, tuples = _build_canonical_keys_and_tuples()
+    if len(keys) != len(texts):
+        raise ValueError(
+            f"texts file has {len(texts)} entries but surah_info implies "
+            f"{len(keys)}; rebuild quran_db_texts.json"
+        )
+    return _DictDB(dict(zip(keys, texts))), keys, tuples
+
+
 def _load_binary_blob(path: Path) -> _BlobDB:
     """Packed binary format. See build_db_formats.py for layout."""
     with path.open("rb") as fh:
@@ -140,6 +195,19 @@ _LOADERS = {
     "json": _load_json_full,
     "flat": _load_json_flat,
     "blob": _load_binary_blob,
+    "texts": _load_texts_only,
+}
+
+# Formats that ship their keys in canonical sort order. Their loaders
+# guarantee db.keys() is already sorted, so _build_index can skip the
+# explicit sort step.
+_PRE_SORTED_FORMATS = {"flat", "blob", "texts"}
+
+
+_SIBLING_FILENAMES = {
+    "texts": "quran_db_texts.json",
+    "flat":  "quran_db_flat.json",
+    "blob":  "quran_db_blob.bin",
 }
 
 
@@ -147,34 +215,34 @@ def _resolve_format_and_path(db_path: str | Path) -> Tuple[str, Path]:
     """Resolve which on-disk format to use given the requested path.
 
     Resolution order:
-      1. ``QURAN_DB_FORMAT`` env var (``json``/``flat``/``blob``) — overrides
-         everything. If the value is ``flat`` or ``blob`` and the requested
-         path points at the legacy ``Quran.json``, swap to the slim sibling.
-      2. Filename autodetect (``.bin`` -> blob, ``_flat.json`` -> flat).
-      3. If the legacy ``Quran.json`` was requested but a sibling
-         ``quran_db_flat.json`` exists, prefer it (transparent upgrade for
-         packaged installs).
+      1. ``QURAN_DB_FORMAT`` env var (``texts``/``flat``/``blob``/``json``)
+         overrides everything. If the requested path is the legacy
+         ``Quran.json``, swap to the named slim sibling.
+      2. Filename autodetect (``.bin`` -> blob, ``_texts.json`` -> texts,
+         ``_flat.json`` -> flat).
+      3. If the legacy ``Quran.json`` was requested, prefer the smallest
+         sibling that exists (texts > flat > blob > json).
       4. Fall back to legacy ``json`` loader.
     """
     p = Path(db_path).expanduser()
     fmt = os.environ.get("QURAN_DB_FORMAT", "").lower().strip()
     if fmt in _LOADERS:
-        if p.name == "Quran.json":
-            if fmt == "flat":
-                p = p.with_name("quran_db_flat.json")
-            elif fmt == "blob":
-                p = p.with_name("quran_db_blob.bin")
+        if p.name == "Quran.json" and fmt in _SIBLING_FILENAMES:
+            p = p.with_name(_SIBLING_FILENAMES[fmt])
         return fmt, p
 
     if p.suffix == ".bin":
         return "blob", p
+    if p.name.endswith("_texts.json"):
+        return "texts", p
     if p.name.endswith("_flat.json"):
         return "flat", p
 
     if p.name == "Quran.json":
-        sibling_flat = p.with_name("quran_db_flat.json")
-        if sibling_flat.exists():
-            return "flat", sibling_flat
+        for f in ("texts", "flat", "blob"):
+            sibling = p.with_name(_SIBLING_FILENAMES[f])
+            if sibling.exists():
+                return f, sibling
 
     return "json", p
 
@@ -183,19 +251,36 @@ def load_db(db_path: str | Path):
     """Read the Qurʾān word-by-word database (cached)."""
     fmt, p = _resolve_format_and_path(db_path)
     path_str = str(p.resolve())
-    if path_str not in _db_cache:
-        _db_cache[path_str] = _LOADERS[fmt](p)
-        _build_index(path_str, _db_cache[path_str])
-    return _db_cache[path_str]
+    if path_str in _db_cache:
+        return _db_cache[path_str]
+
+    if fmt == "texts":
+        # Loader returns (db, sorted_keys, sorted_tuples) — populate index directly.
+        db, sorted_keys, sorted_tuples = _LOADERS[fmt](p)
+        _index_cache[path_str] = (sorted_tuples, sorted_keys)
+    else:
+        db = _LOADERS[fmt](p)
+        _build_index(path_str, db, pre_sorted=fmt in _PRE_SORTED_FORMATS)
+    _db_cache[path_str] = db
+    return db
 
 
-def _build_index(path_str: str, db) -> None:
-    """Build a sorted index of keys for binary search lookups."""
-    keys = list(db.keys())
-    tuples = [_key_to_tuple(k) for k in keys]
-    sorted_pairs = sorted(zip(tuples, keys), key=lambda x: x[0])
-    sorted_tuples = [p[0] for p in sorted_pairs]
-    sorted_keys = [p[1] for p in sorted_pairs]
+def _build_index(path_str: str, db, *, pre_sorted: bool = False) -> None:
+    """Build a sorted index of keys for binary search lookups.
+
+    If ``pre_sorted`` is True (the file format guarantees canonical order),
+    skip the sort step and just compute (s, v, w) tuples from the keys.
+    """
+    if pre_sorted:
+        keys_view = db.keys()
+        sorted_keys = list(keys_view) if not isinstance(keys_view, list) else keys_view
+        sorted_tuples = [_key_to_tuple(k) for k in sorted_keys]
+    else:
+        keys = list(db.keys())
+        tuples = [_key_to_tuple(k) for k in keys]
+        sorted_pairs = sorted(zip(tuples, keys), key=lambda x: x[0])
+        sorted_tuples = [pair[0] for pair in sorted_pairs]
+        sorted_keys = [pair[1] for pair in sorted_pairs]
     _index_cache[path_str] = (sorted_tuples, sorted_keys)
 
 
