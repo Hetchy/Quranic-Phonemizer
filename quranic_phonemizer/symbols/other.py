@@ -10,5 +10,8 @@ from .symbol import Symbol
 
 class OtherSymbol(Symbol):
     """A catch-all for any other symbols that may appear."""
+
+    __slots__ = ()
+
     def __init__(self, name: str, char: str, phoneme: Optional[str] = None):
         super().__init__(name, char, phoneme)

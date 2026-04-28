@@ -5,6 +5,8 @@ from ...tajweed_rule import TajweedRule
 
 
 class Meem(LetterSymbol):
+    __slots__ = ()
+
     def phonemize_letter(self) -> List[str]:
         if self.has_shaddah:
             self.set_tajweed_rule(TajweedRule.MEEM_GHUNNAH)
@@ -23,7 +25,7 @@ class Meem(LetterSymbol):
         # Idgham Shafawi
         if self.is_last and next_letter.char == "م":
             self.set_tajweed_rule(TajweedRule.IDGHAM_SHAFAWI, target=next_letter)
-            next_letter.mark_phonemized(next_letter.phonemize_modifiers(), affected_by=self)
+            next_letter.mark_phonemized(next_letter.phonemize_modifiers())
             return [get_rule_phoneme("idgham", "nasalized_map").get("m")]
 
         # Izhar Shafawi

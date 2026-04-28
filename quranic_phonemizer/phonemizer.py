@@ -43,7 +43,7 @@ def _format_text_table(rows: list[dict]) -> str:
 class Phonemizer:
     def __init__(
         self,
-        db_path: str | Path = DATA_DIR / "Quran.json",
+        db_path: str | Path = DATA_DIR / "quran_db.bin",
         map_path: str | Path = DATA_DIR / "base_phonemes.yaml",
         special_words_path: str | Path = DATA_DIR / "special_words.yaml",
         extra_symbols: Optional[dict[str, dict]] = None,

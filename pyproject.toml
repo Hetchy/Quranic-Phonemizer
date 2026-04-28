@@ -45,4 +45,4 @@ include = ["quranic_phonemizer*"]
 exclude = ["tests*", "out", "docs*", "dev*"]
 
 [tool.setuptools.package-data]
-quranic_phonemizer = ["resources/*.json", "resources/*.yaml"]
+quranic_phonemizer = ["resources/*.json", "resources/*.yaml", "resources/*.bin"]

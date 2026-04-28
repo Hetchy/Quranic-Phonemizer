@@ -15,6 +15,12 @@ from .tajweed_rule import TajweedRule, TajweedRuleTag
 
 
 class Word:
+    __slots__ = (
+        "location", "text", "prev_word", "next_word", "letters",
+        "phonemes", "stop_sign", "is_starting", "is_stopping",
+        "_letter_overrides",
+    )
+
     def __init__(self, location: Location, text: str = ""):
         self.location = location
         self.text = text
@@ -51,8 +57,8 @@ class Word:
     def phonemize(self) -> None:
         if self.phonemes:
             return
-        for i, letter in enumerate(self.letters):
-            if letter.can_phonemize():
+        for letter in self.letters:
+            if not letter.is_phonemized:
                 letter.phonemize()
 
     def apply_phoneme_overrides(self) -> None:
@@ -81,8 +87,9 @@ class Word:
         if self.phonemes:
             return self.phonemes
         phonemes = []
+        extend = phonemes.extend
         for letter in self.letters:
-            phonemes.extend(ph for ph in letter.phonemes if ph)
+            extend(filter(None, letter.phonemes))
         return phonemes
 
     def build_mapping(self) -> WordMapping:
@@ -133,7 +140,7 @@ class Word:
 
             # Build extension mappings if present
             extension_mappings = []
-            for ext in letter.extensions:
+            for ext in letter.extensions or ():
                 extension_mappings.append(ExtensionSymbolMapping(
                     char=ext.char,
                     name=ext.name
@@ -147,7 +154,7 @@ class Word:
                         OtherSymbolMapping(char=sym.char, name=sym.name)
                     )
 
-            tajweed_tags = list(letter._tajweed_rules)
+            tajweed_tags = list(letter._tajweed_rules) if letter._tajweed_rules else []
 
             lm = LetterMapping(
                 index=i,
@@ -198,8 +205,6 @@ class Word:
             
             if letter.phonemes:
                 result += f"      Phonemes: {letter.phonemes}\n"
-            if letter.affected_by:
-                result += f"      Affected By: '{letter.affected_by.char}'\n"
             if letter.diacritic:
                 result += f"      Diacritic: '{letter.diacritic.char}' -> {letter.diacritic.base_phoneme} (name: {letter.diacritic.name})\n"
             if letter.extensions:

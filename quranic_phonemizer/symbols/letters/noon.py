@@ -5,6 +5,8 @@ from ...tajweed_rule import TajweedRule
 
 
 class Noon(LetterSymbol):
+    __slots__ = ()
+
     def phonemize_letter(self) -> List[str]:
         if self.has_shaddah:
             self.set_tajweed_rule(TajweedRule.NOON_GHUNNAH)
@@ -33,7 +35,7 @@ class Noon(LetterSymbol):
             target_phoneme = nasal_map.get(next_letter.base_phoneme)
             # Note: Don't clear has_shaddah - it's part of the canonical text and should be preserved
             next_phonemes = [target_phoneme] + next_letter.phonemize_modifiers()
-            next_letter.mark_phonemized(next_phonemes, affected_by=self)
+            next_letter.mark_phonemized(next_phonemes)
             return []
 
         # Idgham no Ghunnah

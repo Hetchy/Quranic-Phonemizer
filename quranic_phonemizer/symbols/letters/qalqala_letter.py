@@ -5,6 +5,8 @@ from ...tajweed_rule import TajweedRule
 
 
 class Qalqala(LetterSymbol):
+    __slots__ = ()
+
     def phonemize_letter(self) -> List[str]:
         if self.has_sukun:
             if self.is_last and self.parent_word.is_stopping:

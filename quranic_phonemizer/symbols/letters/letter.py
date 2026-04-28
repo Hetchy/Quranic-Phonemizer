@@ -19,24 +19,57 @@ if TYPE_CHECKING:
     from ...word import Word
 
 
+_HEAVY_CHARS = frozenset({"خ", "ص", "ض", "غ", "ط", "ق", "ظ"})
+_QALQALA_CHARS = frozenset({"ق", "ط", "ب", "ج", "د"})
+_IKHFAA_CHARS = frozenset({"ت", "ث", "ج", "د", "ذ", "ز", "س", "ش", "ص", "ض", "ط", "ظ", "ف", "ق", "ك"})
+_IDGHAM_GHUNNAH_CHARS = frozenset({"ي", "ن", "م", "و"})
+
+
 class LetterSymbol(Symbol):
     """Represents a consonant or vowel letter with associated diacritics, extensions, and other symbols."""
 
+    __slots__ = (
+        "parent_word", "index_in_word", "has_shaddah", "diacritic",
+        "extensions", "other_symbols", "phonemes", "is_phonemized",
+        "_tajweed_rules", "is_first", "is_last",
+    )
+
     def __init__(self, name: str, char: str, base_phoneme: str):
-        super().__init__(name, char, base_phoneme)
+        # Inline Symbol.__init__ to skip the extra frame (~326k calls on the
+        # full Quran). Tuple-unpack assignment is also faster than separate
+        # statements for slot writes. is_first/is_last are filled in by the
+        # parser once the word's full letter sequence is known.
+        (
+            self.name, self.char, self.base_phoneme,
+            self.has_shaddah, self.diacritic, self.extensions,
+            self.other_symbols, self.phonemes, self.is_phonemized,
+            self._tajweed_rules,
+            self.is_first, self.is_last,
+        ) = (
+            name, char, base_phoneme,
+            False, None, None,
+            None, (), False,
+            None,
+            False, False,
+        )
 
-        self.parent_word: Word
-        self.index_in_word: int
-        self.has_shaddah: bool = False
-        self.diacritic: Optional[DiacriticSymbol] = None
-        self.extensions: List[ExtensionSymbol] = []
-        self.other_symbols: List[OtherSymbol] = []
+    def add_extension(self, ext: ExtensionSymbol) -> None:
+        if self.extensions is None:
+            self.extensions = [ext]
+        else:
+            self.extensions.append(ext)
 
-        self.phonemes: List[str] = []
-        self.is_phonemized: bool = False
-        self.affected_by: Optional["LetterSymbol"] = None
+    def add_other_symbol(self, sym: OtherSymbol) -> None:
+        if self.other_symbols is None:
+            self.other_symbols = [sym]
+        else:
+            self.other_symbols.append(sym)
 
-        self._tajweed_rules: List[TajweedRuleTag] = []
+    def add_tajweed_rule(self, tag: TajweedRuleTag) -> None:
+        if self._tajweed_rules is None:
+            self._tajweed_rules = [tag]
+        elif tag not in self._tajweed_rules:
+            self._tajweed_rules.append(tag)
 
     def prev_letter(self, n: int = 1) -> Optional["LetterSymbol"]:
         return self.parent_word.get_prev_letter(self.index_in_word, n)
@@ -91,24 +124,19 @@ class LetterSymbol(Symbol):
     def can_phonemize(self) -> bool:
         return not self.is_phonemized
 
-    def mark_phonemized(self, phonemes: Optional[List[str]] = None, affected_by: Optional["LetterSymbol"] = None):
+    def mark_phonemized(self, phonemes: Optional[List[str]] = None):
         self.phonemes = phonemes or []
         self.is_phonemized = True
-        self.affected_by = affected_by
 
     def set_tajweed_rule(self, rule: TajweedRule, target: Optional["LetterSymbol"] = None):
         """Tag a TajweedRule on this letter (source) and optionally on a target letter."""
-        tag = TajweedRuleTag(rule=rule, is_source=True)
-        if tag not in self._tajweed_rules:
-            self._tajweed_rules.append(tag)
+        self.add_tajweed_rule(TajweedRuleTag(rule=rule, is_source=True))
         if target is not None:
-            target_tag = TajweedRuleTag(rule=rule, is_source=False)
-            if target_tag not in target._tajweed_rules:
-                target._tajweed_rules.append(target_tag)
+            target.add_tajweed_rule(TajweedRuleTag(rule=rule, is_source=False))
 
     @property
     def tajweed_rules(self) -> List[TajweedRuleTag]:
-        return list(self._tajweed_rules)
+        return list(self._tajweed_rules) if self._tajweed_rules else []
 
     @final
     def phonemize(self) -> List[str]:
@@ -205,7 +233,7 @@ class LetterSymbol(Symbol):
             if self.parent_word.is_stopping:
                 return [short_vowel_ph + ":"]
             else:
-                next_letter.mark_phonemized(None, affected_by=self.diacritic)
+                next_letter.mark_phonemized(None)
                 next_letter = self.next_letter(2)
                 if not next_letter:
                     return [short_vowel_ph + ":"]
@@ -228,7 +256,7 @@ class LetterSymbol(Symbol):
             target_phoneme = nasal_map.get(next_letter.base_phoneme)
             # Note: Don't clear has_shaddah - it's part of the canonical text and should be preserved
             next_phonemes = [target_phoneme] + next_letter.phonemize_modifiers()
-            next_letter.mark_phonemized(next_phonemes, affected_by=self)
+            next_letter.mark_phonemized(next_phonemes)
             return [short_vowel_ph]
 
         # Idgham no Ghunnah
@@ -283,35 +311,29 @@ class LetterSymbol(Symbol):
 
 
     def has_symbol(self, symbol_name: str) -> bool:
+        if not self.other_symbols:
+            return False
         return any(symbol.name == symbol_name for symbol in self.other_symbols)
 
     def extend(self):
         if not self.extensions:
-            self.extensions.append(ExtensionSymbol("", "", None))
-
-    @property
-    def is_first(self) -> bool:
-        return self.index_in_word == 0
-
-    @property
-    def is_last(self) -> bool:
-        return self.index_in_word == len(self.parent_word.letters) - 1
+            self.add_extension(ExtensionSymbol("", "", None))
 
     @property
     def is_heavy(self) -> bool:
-        return self.char in ["خ", "ص", "ض", "غ", "ط", "ق", "ظ"]
+        return self.char in _HEAVY_CHARS
 
     @property
     def is_qalqala(self) -> bool:
-        return self.char in ["ق", "ط", "ب", "ج", "د"]
+        return self.char in _QALQALA_CHARS
 
     @property
     def is_ikhfaa(self) -> bool:
-        return self.char in ["ت", "ث", "ج", "د", "ذ", "ز", "س", "ش", "ص", "ض", "ط", "ظ", "ف", "ق", "ك"]
+        return self.char in _IKHFAA_CHARS
 
     @property
     def is_idgham_ghunnah(self) -> bool:
-        return self.char in ["ي", "ن", "م", "و"]
+        return self.char in _IDGHAM_GHUNNAH_CHARS
 
     @property
     def has_sukun(self) -> bool:

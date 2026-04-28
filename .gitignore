@@ -10,7 +10,7 @@ test.ipynb
 .windsurf
 .vscode
 .cursor
-.venv
+.venv*
 .claude
 CLAUDE.md
 

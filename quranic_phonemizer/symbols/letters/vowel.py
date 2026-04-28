@@ -4,6 +4,8 @@ from ...tajweed_rule import TajweedRule
 
 
 class VowelLetter(LetterSymbol):
+    __slots__ = ()
+
     def _lengthen_compatible_phoneme(self, compatible_phonemes: List[str]) -> List[str]:
         prev_phoneme = self.prev_phoneme()
         if prev_phoneme in compatible_phonemes:
@@ -18,6 +20,8 @@ class VowelLetter(LetterSymbol):
 
 
 class Alef(VowelLetter):
+    __slots__ = ()
+
     def phonemize_letter(self) -> List[str]:
         if self.has_symbol("SILENT_ALWAYS"):
             self.set_tajweed_rule(TajweedRule.VOWEL_SILENT)
@@ -29,6 +33,8 @@ class Alef(VowelLetter):
 
 
 class AlefMaksura(VowelLetter):
+    __slots__ = ()
+
     COMPATIBLE_PHONEMES = ["a", "aˤ", "i"]
 
     def phonemize_letter(self) -> List[str]:
@@ -55,6 +61,8 @@ class AlefMaksura(VowelLetter):
 
 
 class Waw(VowelLetter):
+    __slots__ = ()
+
     def phonemize_letter(self) -> List[str]:
         if self.has_symbol("SILENT_ALWAYS"):
             self.set_tajweed_rule(TajweedRule.VOWEL_SILENT)
@@ -97,6 +105,8 @@ class Waw(VowelLetter):
 
 
 class Yaa(VowelLetter):
+    __slots__ = ()
+
     def phonemize_letter(self) -> List[str]:
         if self.has_symbol("SILENT_ALWAYS"):
             self.set_tajweed_rule(TajweedRule.VOWEL_SILENT)
