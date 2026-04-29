@@ -218,11 +218,10 @@ class Phonemizer:
                 raise ValueError(f"Surah out of range: {surah}")
             s_info = self._surah_info[s_key]
             if verse is not None:
-                if verse < 1 or verse > int(s_info["num_verses"]):
+                if verse < 1 or verse > len(s_info):
                     raise ValueError(f"Verse out of range: {surah}:{verse}")
                 if word is not None:
-                    v_info = s_info["verses"][verse - 1]
-                    max_words = int(v_info["num_words"])
+                    max_words = s_info[verse - 1]
                     if word < 1 or word > max_words:
                         raise ValueError(f"Word out of range: {surah}:{verse}:{word} (max {max_words})")
 

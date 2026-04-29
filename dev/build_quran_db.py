@@ -50,7 +50,7 @@ def main() -> None:
     # the sum of num_words across all verses.
     with SURAH_INFO.open(encoding="utf-8") as fh:
         info = json.load(fh)
-    expected = sum(v["num_words"] for s in info.values() for v in s["verses"])
+    expected = sum(w for s in info.values() for w in s)
     if expected != n:
         raise SystemExit(
             f"Mismatch: Quran.json has {n} words but surah_info.json implies "

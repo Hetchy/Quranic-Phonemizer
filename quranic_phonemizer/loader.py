@@ -64,9 +64,9 @@ def _build_verse_start() -> Tuple[Dict[Tuple[int, int], int], int]:
         s_data = info.get(str(s))
         if not s_data:
             continue
-        for v_idx, v_info in enumerate(s_data["verses"], start=1):
+        for v_idx, nw in enumerate(s_data, start=1):
             verse_start[(s, v_idx)] = base
-            base += v_info["num_words"]
+            base += nw
     return verse_start, base
 
 
@@ -189,13 +189,12 @@ def keys_for_reference(ref: str, db: _DB | None = None,
         s_data = info.get(str(s))
         if not s_data:
             continue
-        verses = s_data["verses"]
-        n_verses = len(verses)
+        n_verses = len(s_data)
         v_start = max(v_lo if s == s_lo else 1, 1)
         v_end = min(v_hi if s == s_hi else n_verses, n_verses)
         s_str = str(s)
         for v_idx in range(v_start, v_end + 1):
-            nw = verses[v_idx - 1]["num_words"]
+            nw = s_data[v_idx - 1]
             prefix = s_str + ":" + str(v_idx) + ":"
             w_start = max(w_lo if (s == s_lo and v_idx == v_lo) else 1, 1)
             w_end = min(w_hi if (s == s_hi and v_idx == v_hi) else nw, nw)
