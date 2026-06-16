@@ -129,6 +129,7 @@ class Stats:
     pronounced_letters: int = 0
     entries: int = 0
     multi_grapheme_entries: int = 0
+    skipped: int = 0
     # check A — per silent letter
     silent_without_rule: List[dict] = field(default_factory=list)
     silent_rule_dist: Counter = field(default_factory=Counter)
@@ -255,12 +256,36 @@ def all_word_refs(pm: Phonemizer) -> List[str]:
     return refs
 
 
+_CANONICAL_REF = __import__("re").compile(r"^\d+:\d+:\d+(?:-\d+:\d+:\d+)?$")
+
+
+def segment_stops_from_detailed(path: str) -> List[Tuple[str, List[str]]]:
+    """Read a reciter ``detailed.json`` and return ``[(ref, [stop_ref]), ...]``.
+
+    Each segment's ``matched_ref`` span is one recited unit: its FIRST word is a
+    real ibtidaa (start) and its LAST word a real waqf (stop). Non-canonical
+    transition tokens (Basmala, Isti'adha, …) are skipped.
+    """
+    with open(path, encoding="utf-8") as f:
+        doc = json.load(f)
+    out: List[Tuple[str, List[str]]] = []
+    for entry in doc.get("entries", []):
+        for seg in entry.get("segments", []):
+            mref = seg.get("matched_ref", "")
+            if not _CANONICAL_REF.match(mref):
+                continue
+            last = mref.split("-")[-1]  # "s:v:w"
+            out.append((mref, [last]))
+    return out
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--mode", choices=["continuous", "random-stops"],
+    ap.add_argument("--mode", choices=["continuous", "random-stops", "detailed"],
                     default="continuous")
     ap.add_argument("--n-random-stops", type=int, default=50000)
     ap.add_argument("--seed", type=int, default=42)
+    ap.add_argument("--detailed", help="path to a reciter detailed.json (mode=detailed)")
     ap.add_argument("--out", default="out/audit_silent_letters.json")
     args = ap.parse_args()
 
@@ -281,6 +306,17 @@ def main() -> None:
         for wref in sample:
             s, v, w = wref.split(":")
             audit_one(pm, f"{s}:{v}", [wref], stats)
+
+    elif args.mode == "detailed":
+        if not args.detailed:
+            ap.error("--detailed <path> required for mode=detailed")
+        for ref, stops in segment_stops_from_detailed(args.detailed):
+            try:
+                audit_one(pm, ref, stops, stats)
+            except Exception as e:  # malformed/unsupported span: skip, keep going
+                stats.skipped += 1
+                if stats.skipped <= 10:
+                    print(f"  skip {ref} stop={stops}: {type(e).__name__}: {str(e)[:80]}")
 
     report(stats, args)
 
