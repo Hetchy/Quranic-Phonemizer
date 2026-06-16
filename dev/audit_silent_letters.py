@@ -43,6 +43,12 @@ from typing import List, Optional, Set, Tuple
 from quranic_phonemizer import Phonemizer
 from quranic_phonemizer.tajweed_rule import TajweedRule
 from quranic_phonemizer.letter_phoneme_mapping import TANWEEN_DIACRITICS
+from quranic_phonemizer.silent import sounding_in_flat
+
+
+def pronounced_in_flat(word, li: int) -> bool:
+    """Audit shim — the authoritative implementation lives in the package."""
+    return sounding_in_flat(word, li)
 
 
 # Source rules that render a letter silent (zero phonemes) and merged into a
@@ -72,38 +78,6 @@ SILENCE_EXPLAINING_RULES: Set[TajweedRule] = KNOWN_SILENT_SOURCE_RULES | {
     TajweedRule.IDGHAM_SHAFAWI,
 }
 
-# Short vowel phonemes — used to detect the iltiqaa demotion (a long vowel
-# shortened before hamza wasl is stored on the vowel letter as a single short
-# vowel, then the flat builder moves it to the preceding consonant and silences
-# the vowel letter).
-SHORT_VOWELS: Set[str] = {"a", "aˤ", "u", "i"}
-
-
-def pronounced_in_flat(word, li: int) -> bool:
-    """Whether a letter contributes an audible phoneme at its own position in
-    the final flat mapping (i.e. is a highlight target).
-
-    Mirrors the two redistributions the flat builder applies on top of the raw
-    per-letter phonemes:
-      - iltiqaa: a shortened long vowel before hamza wasl moves to the preceding
-        consonant; the vowel letter goes silent.
-      - waqf tanween: when stopping, the long vowel moves from the tanween
-        consonant onto the following (otherwise silent) alef / alef-maksura.
-    """
-    lm = word.letter_mappings[li]
-    src = {t.rule for t in lm.tajweed_rules if t.is_source}
-    if lm.phonemes:
-        if (TajweedRule.SILENT_ILTIQAA_SAKINAYN in src
-                and len(lm.phonemes) == 1 and lm.phonemes[0] in SHORT_VOWELS):
-            return False
-        return True
-    # raw-silent: is it the waqf-tanween redistribution target?
-    if word.is_stopping and lm.char in ("ا", "ى") and li > 0:
-        prev = word.letter_mappings[li - 1]
-        if (prev.diacritic in TANWEEN_DIACRITICS
-                and prev.phonemes and ":" in prev.phonemes[-1]):
-            return True
-    return False
 
 
 @dataclass

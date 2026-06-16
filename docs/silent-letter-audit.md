@@ -206,3 +206,29 @@ bucket TS-shard `letters[]` tokenization equals the **letter-phoneme atoms**
 (proven char-for-char on a real shard), so the silent/sounding classification
 here maps straight onto the shard's letters for the phantom-highlight feature.
 
+## Public API — `result.silent_flags()`
+
+The audit's per-grapheme silence logic is shipped as a supported method
+(`quranic_phonemizer/silent.py`):
+
+```python
+pm.phonemize("101:2", stop_refs=["101:2:2"]).silent_flags()
+# [('م', False), ('ا', True), ('ٱ', True), ('ل', False), ('ق', False), ...]
+#  مَا ٱلْقَارِعَةُ → the alef of مَا is silent (iltiqaa shortens it before ٱ),
+#  the hamza wasl is silent; ل sounds.
+```
+
+Returns `list[(char, silent)]`, one entry **per written grapheme** (base letters
++ split extensions `ٰ ۥ ۦ`; maddah stays merged, e.g. `آ` is one entry), in
+reading order — the exact shape/order of the bucket TS-shard `letters[]`, so the
+consumer zips it on by index (verified 1:1 across the real Nasser fixture, 47/47
+segments). `silent` is correct for both continuous and stopping context
+(`هُدًى`: `ى` silent continuing → sounding madd-ʿiwaḍ at waqf). Extensions are
+never silent (they carry the madd); muqattaat and lafdh-jalalah use the **written
+atoms** (no synthetic dagger, no spelled-out names), unlike `tajweed_mappings()`.
+
+Cross-word idgham bridge sources are reported by their linguistic silence too;
+keeping both bridge letters highlighted (the gold bridge tile) is a rendering
+choice the consumer applies on top.
+
+
