@@ -433,14 +433,15 @@ class PhonemizeResult:
 
         return TajweedMapping(ref=self.ref, words=tajweed_words)
 
-    def silent_flags(self) -> list[tuple[str, bool]]:
-        """Per-written-grapheme ``(char, silent)`` flags for the TS highlight.
+    def silent_flags(self) -> list[tuple[str, bool, str]]:
+        """Per-written-grapheme ``(char, silent, mark)`` flags for the TS highlight.
 
         One entry per written grapheme (base letters + split extensions) in
         reading order — the exact shape/order of the bucket TS-shard
         ``letters[]``, so the consumer zips it on by index. ``silent`` is the
         linguistic fact (no audible phoneme at this grapheme's position),
-        correct for both continuous and stopping context. See
+        correct for both continuous and stopping context; ``mark`` is the
+        silence combining mark above the grapheme (U+06DF / U+06E0) or ``""``. See
         ``quranic_phonemizer/silent.py``.
         """
         from .silent import build_silent_flags
