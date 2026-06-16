@@ -114,14 +114,86 @@ def part2_shard_vs_lp(pm: Phonemizer, shard_path: str) -> None:
         print("  MISMATCH", mm)
 
 
+def part3_shard_silence_heuristic(pm: Phonemizer, shard_path: str) -> None:
+    """Can the silent grapheme be inferred from the shard's timing alone?
+
+    Tests the "duplicate-span" signal (a silent letter is given the SAME
+    [start,end] as its sounding neighbour): for each grapheme, compare
+    "shares an exact span with a neighbour" against the phonemizer ground truth
+    (silent vs sounding vs extension), and locate where the sounding grapheme
+    sits inside each duplicate-span group.
+    """
+    import sys
+    sys.path.insert(0, __import__("os").path.dirname(__file__))
+    from audit_silent_letters import pronounced_in_flat
+
+    doc = json.load(open(shard_path, encoding="utf-8"))
+    ch = doc["_meta"]["chapter"]
+    miss = false_tag = 0
+    pos = Counter()
+    for seg in doc["segments"]:
+        ref = seg["ref"]
+        if not _CANON_VERSE.match(ref):
+            continue
+        widxs = [w[0] for w in seg["words"]]
+        if widxs != list(range(widxs[0], widxs[0] + len(widxs))):
+            continue
+        s, v = ref.split(":")
+        lo, hi = widxs[0], widxs[-1]
+        span = f"{s}:{v}:{lo}" if lo == hi else f"{s}:{v}:{lo}-{s}:{v}:{hi}"
+        try:
+            mapping = pm.phonemize(span, stop_refs=[f"{s}:{v}:{hi}"]).get_mapping()
+        except Exception:
+            continue
+        gt = []
+        for w in mapping.words:
+            for li, lm in enumerate(w.letter_mappings):
+                gt.append("sound" if pronounced_in_flat(w, li) else "silent")
+                gt += ["ext" for e in lm.extensions if e.char]
+        sh = [(L[1], L[2]) for w in seg["words"] for L in w[3]]
+        if len(sh) != len(gt):
+            continue
+        n = len(sh)
+        for i in range(n):
+            dup = (i > 0 and sh[i - 1] == sh[i]) or (i < n - 1 and sh[i + 1] == sh[i])
+            if gt[i] == "silent" and not dup:
+                miss += 1
+            if gt[i] == "sound" and dup:
+                false_tag += 1
+        i = 0
+        while i < n:
+            j = i
+            while j + 1 < n and sh[j + 1] == sh[i]:
+                j += 1
+            if j > i:
+                snd = [k - i for k in range(i, j + 1) if gt[k] == "sound"]
+                if snd == [0]:
+                    pos["sounding FIRST"] += 1
+                elif snd == [j - i]:
+                    pos["sounding LAST"] += 1
+                elif not snd:
+                    pos["no sounding"] += 1
+                else:
+                    pos["mid/multi"] += 1
+            i = j + 1
+
+    print(f"\n=== Part 3: can silence be inferred from shard timing alone? (surah {ch}) ===")
+    print(f"silent graphemes the duplicate-span signal MISSES   : {miss}")
+    print(f"sounding graphemes it would WRONGLY skip            : {false_tag}")
+    print("position of the sounding grapheme in duplicate-span groups:")
+    for k, c in pos.most_common():
+        print(f"  {c:4d}  {k}")
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--shard", help="path to a TS shard JSON (decompressed) for Part 2")
+    ap.add_argument("--shard", help="path to a TS shard JSON (decompressed) for Parts 2+3")
     args = ap.parse_args()
     pm = Phonemizer()
     part1_tajweed_vs_lp(pm)
     if args.shard:
         part2_shard_vs_lp(pm, args.shard)
+        part3_shard_silence_heuristic(pm, args.shard)
 
 
 if __name__ == "__main__":

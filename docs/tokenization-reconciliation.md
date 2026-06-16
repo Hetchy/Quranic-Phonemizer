@@ -80,3 +80,38 @@ silent flags must be derived from `letter_phoneme_mappings()`, never from
 **One genuinely ambiguous case** carries over from the silent-letter audit:
 `idgham_shafawi` (مْ+م) has two sounding graphemes sharing one merged nasal — a
 highlight convention (recommend the second/target meem) is still needed.
+
+## Can the Inspector infer silence from the shard alone? (No)
+
+Tempting alternative: skip the phonemizer at render time and hard-code a rule
+inside the Inspector off the shard's own timing — a silent letter is the one
+that shares an exact `[start,end]` with its neighbour (`dev/reconcile_tokenization.py`
+Part 3, tested against the phonemizer ground truth on the Nasser fixture):
+
+- **Completeness is fine** — every ground-truth silent grapheme IS duplicate-span
+  (0 misses). The signal finds the *cell*.
+- **But it cannot pick the sounding member.** 38 *sounding* graphemes also share a
+  span and would be wrongly skipped, because the sounding grapheme's position
+  inside a duplicate-span group is **not fixed**:
+  - silent-prefix clusters → sounding is **last**: `ٱل`, `ٱلن`, `ٱلت` (hamza wasl
+    + lam shamsiyah silent, then the sun letter sounds).
+  - base + trailing extension → sounding is **first**: `هۥ`, `ىٰ` (the base sounds,
+    the silah / dagger rides after it).
+  - and the continuing tanween alef (`ـًا`: sound→silent) puts the silent letter
+    **after** the sounding one — the opposite of `ٱل`.
+
+No positional rule separates these without re-encoding *which letters are silent*
+(hamza wasl, lam shamsiyah, tanween alef, assimilated noon, extensions, …) and
+*which phone belongs to which letter* — i.e. re-implementing the phonemizer
+inside the Inspector. The duplicate-span structure is also an **aligner
+behaviour**, not a guarantee, so depending on it is fragile.
+
+### The reconciliation, by contrast, is trivial
+
+The shard atoms equal the letter-phoneme atoms 1:1 (Part 2), and the shard-build
+path already phonemizes each segment for the cross-word bridges. So the silent
+flag is computed **once, at build time**, straight from
+`letter_phoneme_mappings()` (the phonemizer is the single source of the silence
+rules), stamped as a 4th letter slot, and the FE just reads it. No silence logic,
+and no token reconciliation, leaks into the Inspector or the FE.
+
