@@ -93,28 +93,28 @@ def build_silent_flags(mapping: PhonemizationMapping) -> List[Tuple[str, bool, s
 
     ``char`` is the bare grapheme (base letter or split extension) matching the
     shard tokenization; ``silent`` its linguistic silence at its own position;
-    ``mark`` the silence-indicating combining mark above it (or ``""``). The run
-    carrying the base letter owns the base ``silent`` and ``mark``; the dagger
-    alef madd always sounds while the silah drops at waqf.
+    ``mark`` the silence-indicating combining mark above it (or ``""``). The base
+    grapheme owns the letter's ``silent`` and ``mark``; the dagger alef madd
+    always sounds while the silah drops at waqf.
     """
     flags: List[Tuple[str, bool, str]] = []
     for word in mapping.words:
         for li, lm in enumerate(word.letter_mappings):
             silent = not sounding_in_flat(word, li)
             mark = _silent_mark(lm)
-            cur = ""
-            base_pending = True  # the run carrying the base letter owns silent+mark
+            # Tokenize exactly like the bucket shard: the standalone extension
+            # graphemes (dagger alef, mini waw/yaa) become their own tokens, while
+            # every other combining mark (the maddah ٓ, …) merges onto the grapheme
+            # it follows — so e.g. a madd-silah is one ``ۦٓ`` token, not ``ۦ`` + ``ٓ``.
+            tokens: List[str] = []
             for ch in get_full_char(lm):
-                if ch in _SPLIT_EXTENSIONS:
-                    if cur:
-                        flags.append((cur, silent if base_pending else False,
-                                      mark if base_pending else ""))
-                        base_pending = False
-                        cur = ""
-                    flags.append((ch, ch in _SILAH_EXTENSIONS and word.is_stopping, ""))
+                if not tokens or ch in _SPLIT_EXTENSIONS:
+                    tokens.append(ch)
                 else:
-                    cur += ch
-            if cur:
-                flags.append((cur, silent if base_pending else False,
-                              mark if base_pending else ""))
+                    tokens[-1] += ch
+            for i, tok in enumerate(tokens):
+                if tok[0] in _SPLIT_EXTENSIONS:
+                    flags.append((tok, tok[0] in _SILAH_EXTENSIONS and word.is_stopping, ""))
+                else:  # the base grapheme (token 0) owns the letter's silent + mark
+                    flags.append((tok, silent if i == 0 else False, mark if i == 0 else ""))
     return flags
