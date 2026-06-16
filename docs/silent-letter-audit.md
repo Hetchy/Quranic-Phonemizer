@@ -177,11 +177,32 @@ in both contexts; the audit is **complete for continuous and stopping**.
    Finding 1 (tanween alef) to be fixed first.
 4. `idgham_shafawi` needs an explicit highlight convention (Finding 2).
 
-## Next step — bucket validation
+## Validation on real reciter stop points
 
-Validate against real reciter stop points: read where each reciter actually
-paused (from their segments in the bucket), phonemize each pause in waqf
-context, and confirm the silent/sounding split holds at *their* stops (start
-with one reciter, then scale). Tokenisation note: letter-phoneme grouping may
-differ slightly from tajweed-rule tokenisation — reconcile the two before
-splitting Timestamps cells per token.
+`dev/audit_silent_letters.py --mode detailed --detailed <reciter>/detailed.json`
+runs the same checks over a reciter's **real** recitation: each `detailed.json`
+segment's `matched_ref` span is one recited unit (its first word a real ibtidaa,
+its last word a real waqf). Validated across 5 reciters (from the
+`quranic-inspector-fixtures` dataset — the full bucket was out of the available
+token's scope):
+
+| reciter | segments | Check A | Check B | violations at actual stop words |
+|---|---|---|---|---|
+| Husary | 10,581 | 1,908 | 713 | **0** |
+| Abdul Basit | 10,257 | 1,966 | 725 | **0** |
+| Islam Sobhi | 9,661 | 1,555 | 609 | **0** |
+| Bandar Baleela | 12,543 | 1,864 | 734 | **0** |
+| Abdullah Ali Jabir | 8,800 | 2,003 | 711 | **0** |
+
+Every reciter reproduces the synthetic audit exactly: Check A is **only** the
+continuing tanween alef/maksura, Check B is **only** idgham_shafawi, and
+**zero violations land on the words where the reciter actually paused**. The
+silent-rule coverage is complete at real waqf points.
+
+## Tokenization for the highlight
+
+See [`tokenization-reconciliation.md`](tokenization-reconciliation.md): the
+bucket TS-shard `letters[]` tokenization equals the **letter-phoneme atoms**
+(proven char-for-char on a real shard), so the silent/sounding classification
+here maps straight onto the shard's letters for the phantom-highlight feature.
+
