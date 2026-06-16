@@ -11,7 +11,7 @@ test.ipynb
 .vscode
 .cursor
 .venv*
-.claude
+.claude/settings.local.json
 CLAUDE.md
 
 # Package build artifacts
