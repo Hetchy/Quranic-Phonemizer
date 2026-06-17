@@ -20,7 +20,9 @@ U+06DF / U+06E0) or ``""`` — surfaced from ``other_symbols`` (which
 its own position in the final (post-redistribution) output. The dagger alef
 (U+0670) is an unconditional madd and always sounds; the silah (mini waw/yaa,
 U+06E5/U+06E6) is a conditional madd that drops at waqf, so it is silent only when
-its word stops. Cross-word idgham mergers are reported by their linguistic silence
+its word stops. A carrier waw (صَلَوٰة, زَكَوٰة) is a silent seat for a dagger-alef
+madd — when the shard splits the dagger off, the waw grapheme is silent and the
+dagger carries the sound. Cross-word idgham mergers are reported by their linguistic silence
 too; keeping both bridge letters highlighted is a rendering choice the consumer
 applies on top (it already owns the bridge tile).
 
@@ -38,7 +40,7 @@ from __future__ import annotations
 from typing import List, Tuple
 
 from .tajweed_rule import TajweedRule
-from .letter_phoneme_mapping import TANWEEN_DIACRITICS, get_full_char
+from .letter_phoneme_mapping import TANWEEN_DIACRITICS, get_full_char, is_madd_phoneme
 from .mapping import PhonemizationMapping, WordMapping
 
 # Extension graphemes the bucket TS-shard splits into their OWN ``letters[]``
@@ -56,6 +58,22 @@ _SHORT_VOWELS = {"a", "aˤ", "u", "i"}
 # The dagger alef (U+0670, the third split extension) is an unconditional madd that
 # always sounds.
 _SILAH_EXTENSIONS = {"ۥ", "ۦ"}
+
+
+def _is_carrier_waw(lm) -> bool:
+    """A waw that is a silent seat for a dagger-alef madd (صَلَوٰة, زَكَوٰة, ٱلْحَيَوٰة).
+
+    It carries a dagger alef and contributes only the madd — no consonant ``w`` —
+    so when the shard splits the dagger into its own grapheme, the waw itself is
+    silent and the split-off dagger carries the sound. A consonant waw + dagger
+    (وَٰعَدْنَا → ``w`` then madd) keeps its ``w`` and is NOT a carrier; a plain
+    long-vowel waw (نُوحٍ) has no dagger.
+    """
+    if lm.char != "و":
+        return False
+    if not any(getattr(ext, "name", "") == "DAGGER_ALEF" for ext in lm.extensions):
+        return False
+    return bool(lm.phonemes) and all(is_madd_phoneme(p) for p in lm.phonemes)
 
 
 def _silent_mark(lm) -> str:
@@ -102,6 +120,7 @@ def build_silent_flags(mapping: PhonemizationMapping) -> List[Tuple[str, bool, s
         for li, lm in enumerate(word.letter_mappings):
             silent = not sounding_in_flat(word, li)
             mark = _silent_mark(lm)
+            carrier_waw = _is_carrier_waw(lm)
             # Tokenize exactly like the bucket shard: the standalone extension
             # graphemes (dagger alef, mini waw/yaa) become their own tokens, while
             # every other combining mark (the maddah ٓ, …) merges onto the grapheme
@@ -115,6 +134,11 @@ def build_silent_flags(mapping: PhonemizationMapping) -> List[Tuple[str, bool, s
             for i, tok in enumerate(tokens):
                 if tok[0] in _SPLIT_EXTENSIONS:
                     flags.append((tok, tok[0] in _SILAH_EXTENSIONS and word.is_stopping, ""))
-                else:  # the base grapheme (token 0) owns the letter's silent + mark
-                    flags.append((tok, silent if i == 0 else False, mark if i == 0 else ""))
+                elif i == 0:
+                    # The base grapheme (token 0) owns the letter's silent + mark —
+                    # but a carrier waw split from its dagger (صَلَوٰة) is a mute seat:
+                    # the waw is silent, the split-off dagger carries the madd.
+                    flags.append((tok, silent or (carrier_waw and len(tokens) > 1), mark))
+                else:
+                    flags.append((tok, False, ""))
     return flags
