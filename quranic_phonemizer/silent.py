@@ -18,9 +18,10 @@ U+06DF / U+06E0) or ``""`` — surfaced from ``other_symbols`` (which
 
 ``silent`` is the *linguistic* fact: the grapheme produces no audible phoneme at
 its own position in the final (post-redistribution) output. The dagger alef
-(U+0670) is an unconditional madd and always sounds; the silah (mini waw/yaa,
-U+06E5/U+06E6) is a conditional madd that drops at waqf, so it is silent only when
-its word stops. A carrier waw (صَلَوٰة, زَكَوٰة) is a silent seat for a dagger-alef
+(U+0670) is an unconditional madd and always sounds; a silah (mini waw/yaa,
+U+06E5/U+06E6) is the attached pronoun and so is always the WORD-FINAL letter — it
+drops at waqf. A mini-waw that is NOT word-final (وَٱلْغَاوُۥنَ → ``...و ۥ ن``) is a
+stem long vowel, not a silah, and always sounds. A carrier waw (صَلَوٰة, زَكَوٰة) is a silent seat for a dagger-alef
 madd — when the shard splits the dagger off, the waw grapheme is silent and the
 dagger carries the sound. Cross-word idgham mergers are reported by their linguistic silence
 too; keeping both bridge letters highlighted is a rendering choice the consumer
@@ -131,9 +132,18 @@ def build_silent_flags(mapping: PhonemizationMapping) -> List[Tuple[str, bool, s
                     tokens.append(ch)
                 else:
                     tokens[-1] += ch
+            is_word_final = li == len(word.letter_mappings) - 1
             for i, tok in enumerate(tokens):
                 if tok[0] in _SPLIT_EXTENSIONS:
-                    flags.append((tok, tok[0] in _SILAH_EXTENSIONS and word.is_stopping, ""))
+                    # Dagger alef is an unconditional madd — always sounds. A silah
+                    # (mini waw/yaa) drops at waqf, but ONLY a true silah — which is
+                    # always the WORD-FINAL letter (the attached pronoun هُۥ / هِۦ). A
+                    # mini-waw mid-word (وَٱلْغَاوُۥنَ → ...و ۥ ن) is a stem long vowel,
+                    # not a silah, so it always sounds.
+                    silent_ext = (
+                        tok[0] in _SILAH_EXTENSIONS and is_word_final and word.is_stopping
+                    )
+                    flags.append((tok, silent_ext, ""))
                 elif i == 0:
                     # The base grapheme (token 0) owns the letter's silent + mark —
                     # but a carrier waw split from its dagger (صَلَوٰة) is a mute seat:
