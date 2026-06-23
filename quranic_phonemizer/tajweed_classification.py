@@ -167,6 +167,14 @@ NOON_RULE_TAGS: tuple[str, ...] = (
     "iqlab_noon", "ikhfaa_noon",
     "idgham_ghunnah_noon", "idgham_bila_ghunnah_noon",
 )
+# Base-cell rules carried as a SOURCE on the letter itself (not a noon/tanwīn rule
+# routed to a diacritic): plain ghunnah on a mushaddad nūn/mīm, and the two meem-
+# sākin shafawi rules. ``idgham_shafawi`` also co-lights cross-word via
+# ``_link_cross_word`` (which assigns the share_group); this tuple supplies its
+# missing cell tag on the source mīm.
+GHUNNAH_BASE_TAGS: tuple[str, ...] = (
+    "noon_ghunnah", "meem_ghunnah", "ikhfaa_shafawi", "idgham_shafawi",
+)
 
 
 # =============================================================================

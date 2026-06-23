@@ -44,6 +44,7 @@ from .tajweed_classification import (
     CellStatus,
     TANWEEN_RULE_TAGS,
     NOON_RULE_TAGS,
+    GHUNNAH_BASE_TAGS,
     IDGHAM_SOURCE_TAG_VALUES,
     detect_cross_word_mergers,
 )
@@ -170,6 +171,19 @@ def _lafdh_jalalah_indices(word: WordMapping) -> set:
             if mm.is_lafdh_jalalah and mm.phoneme_index >= 0}
 
 
+def _madd_type_indices(word: WordMapping) -> Dict[int, str]:
+    """Word-local phoneme index -> ``madd_<type>`` tag for every CLASSIFIED madd
+    (wajib_muttasil / jaiz_munfasil / lazim / arid_lissukun / leen).
+
+    Regular ṭabīʿī madds (``madd_type is None``) and implicit-only entries
+    (``phoneme_index < 0``) are skipped, so they stay untagged. The carrier cell
+    reads its own phoneme index from this map; the paired haraka is never tagged
+    (a madd colours only the carrier grapheme)."""
+    return {mm.phoneme_index: f"madd_{mm.madd_type}"
+            for mm in word.madd_mappings
+            if getattr(mm, "madd_type", None) and mm.phoneme_index >= 0}
+
+
 # =============================================================================
 # Builder
 # =============================================================================
@@ -194,6 +208,7 @@ def _word_cells(word: WordMapping) -> List[Cell]:
     pairs = _letter_pairs(word)
     n_letters = len(word.letter_mappings)
     lafdh_idx = _lafdh_jalalah_indices(word)
+    madd_types = _madd_type_indices(word)
 
     cells: List[Cell] = []
     # Routed-to-next-letter state, keyed by the *target* letter index.
@@ -279,7 +294,11 @@ def _word_cells(word: WordMapping) -> List[Cell]:
         base_tag = None
         if base_role == BASE:
             base_tag = (_pick_tag(rules, NOON_RULE_TAGS)
+                        or _pick_tag(rules, GHUNNAH_BASE_TAGS)
+                        or (madd_types.get(base_pairs[0][0]) if base_pairs else None)
                         or ("qalqala" if q_pairs else None))
+        elif base_pairs:  # standalone long-vowel carrier (ا/آ/و/ي) — its madd type
+            base_tag = madd_types.get(base_pairs[0][0])
         # Compose the canonical shaddah onto a geminated base (the aligner's bare
         # letter char carries none) so a renderer reads the geminate from chars
         # rather than re-deriving it from the phoneme shape.
@@ -295,19 +314,23 @@ def _word_cells(word: WordMapping) -> List[Cell]:
         ))
 
         # ---- madd extension cell --------------------------------------------
+        # (dagger-alef / mini-waw / mini-yaa carrier on the same letter — its madd type)
         if split and madd_pair is not None:
             cells.append(Cell(
                 chars=madd_chars, role=MADD, status=PRESENT,
                 phonemes=[madd_pair[1]], phoneme_indices=[madd_pair[0]],
+                tag=madd_types.get(madd_pair[0]),
                 source_letter_index=li, source_letter_indices=[li],
             ))
 
         # ---- implicit Allah dagger-alef cell --------------------------------
+        # ṭabīʿī when continuing (tag=allah_dagger_alef); at waqf it becomes madd
+        # ʿāriḍ — the classified madd type wins so the carrier reads its rule.
         if allah_pair is not None:
             cells.append(Cell(
                 chars="", role=MADD, status=INSERTED,
                 phonemes=[allah_pair[1]], phoneme_indices=[allah_pair[0]],
-                tag="allah_dagger_alef",
+                tag=madd_types.get(allah_pair[0], "allah_dagger_alef"),
                 source_letter_index=li, source_letter_indices=[li],
             ))
 

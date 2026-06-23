@@ -201,6 +201,10 @@ Madd rules appear on the **vowel grapheme** that carries the lengthening:
 - Dagger alef (ٰ) / mini waw (ۥ) / mini yaa (ۦ) — split into a separate entry with the madd rule
 - Iwad (fathatan + hamza at stop) — `madd_tabii` is on the hamza entry
 
+The classified subtype lives on `MaddMapping.madd_type` and is **projected onto the cell tag**
+of the carrier grapheme in `character_phoneme_mappings()` (see `docs/character-phoneme-mappings.md`
+§ Tags). Regular ṭabīʿī carries no subtype (cell tag `null`).
+
 ## Multi-Rule Overlap
 
 A single letter can carry multiple rules from different categories simultaneously. The most common overlaps:

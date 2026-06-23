@@ -72,10 +72,21 @@ CharPhonemeResult
 changed from the written form, e.g. madd-ʿiwaḍ); `shortened` (long vowel reduced, carrier
 silenced — iltiqāʾ).
 
-**Tags** — the tajweed rule for rule-driven cases (`iqlab_tanween`, `ikhfaa_tanween`,
-`idgham_ghunnah_tanween`, `idgham_bila_ghunnah_tanween`, `ikhfaa_noon`, …) and a small set
-of structural keys: `hamza_wasl_vowel`, `iltiqaa_kasra`, `iltiqaa`, `madd_iwad`,
-`allah_dagger_alef`, `qalqala`.
+**Tags** — the tajweed rule a consumer switches on. A cell carries at most one:
+
+- **Nūn/tanwīn rules** (on the `base` nūn or the `tanween` cell): `ikhfaa_noon`/`ikhfaa_tanween`,
+  `iqlab_noon`/`iqlab_tanween`, `idgham_ghunnah_noon`/`idgham_ghunnah_tanween`,
+  `idgham_bila_ghunnah_noon`/`idgham_bila_ghunnah_tanween`.
+- **Meem-sākin + plain ghunnah** (on the `base` mīm/nūn): `ikhfaa_shafawi`, `idgham_shafawi`
+  (also share-grouped cross-word to the receiving mīm), `noon_ghunnah`/`meem_ghunnah` (mushaddad
+  نّ/مّ).
+- **Madd subtype** — tags the long-vowel **carrier** grapheme cell (not its haraka, which
+  co-lights via `share_group` but stays untagged): `madd_wajib_muttasil`, `madd_jaiz_munfasil`,
+  `madd_lazim`, `madd_arid_lissukun`, `madd_leen` (on the و/ي base). Regular ṭabīʿī carries **no
+  tag**. Source: `word.madd_mappings[*].madd_type` (NOT the letter's `tajweed_rules`).
+- **Structural keys**: `hamza_wasl_vowel`, `iltiqaa_kasra`, `iltiqaa`, `madd_iwad`,
+  `allah_dagger_alef`, `qalqala`. Exception: the Allah dagger-alef becomes ʿāriḍ at waqf, so its
+  cell carries `madd_arid_lissukun` when stopping and `allah_dagger_alef` when continuing.
 
 ## The `phoneme_indices` invariant
 
@@ -133,6 +144,14 @@ Same for an extension carrier (`ٱلرَّحْمَـٰنِ` → `م`=`m`, fatḥ
 #            ''  madd    inserted ['a:'] tag=madd_iwad   (no written carrier — word ends in hamza;
 #                                                         the ʿiwaḍ alef is implicit, like the dagger-alef)
 ```
+
+### Madd subtype — tags the carrier, not the haraka — `جَآءَ` (wajib muttasil)
+```
+'آ'  madd    present  ['a:'] idx=[1] tag=madd_wajib_muttasil   ← the long-vowel carrier
+'َ'  haraka  present  ['a:'] idx=[1] share_group=…             ← co-lights, but NO tag (no colour)
+```
+The haraka and carrier share the one `a:` index (so they co-highlight); only the carrier
+grapheme carries the madd subtype. Leen tags the و/ي `base` instead (`خَوْفٍ⏹` → و `madd_leen`).
 
 ### Hamza-waṣl pronounced (start) — `ٱلْحَمْدُ`
 ```
