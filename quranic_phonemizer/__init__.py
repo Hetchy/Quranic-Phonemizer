@@ -21,6 +21,7 @@ from .mapping import (
 from .tajweed_rule import TajweedRule, TajweedRuleTag
 from .tajweed_mapping import TajweedMapping, TajweedWordMapping, TajweedEntry
 from .letter_phoneme_mapping import FlatMappingResult
+from .char_phoneme_mapping import Cell, CharWord, CharPhonemeResult
 
 __all__ = [
     'Phonemizer',
@@ -43,4 +44,7 @@ __all__ = [
     'TajweedWordMapping',
     'TajweedEntry',
     'FlatMappingResult',
+    'Cell',
+    'CharWord',
+    'CharPhonemeResult',
 ]

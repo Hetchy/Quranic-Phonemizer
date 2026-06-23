@@ -21,6 +21,9 @@ from .specials import get_tajweed_mapping
 from .letter_phoneme_mapping import (
     FlatMappingResult, build_letter_phoneme_mapping,
 )
+from .char_phoneme_mapping import (
+    CharPhonemeResult, build_char_phoneme_mapping,
+)
 
 DATA_DIR = Path(__file__).resolve().parent / "resources"
 
@@ -461,6 +464,25 @@ class PhonemizeResult:
 
         return result
 
+    def character_phoneme_mappings(self, validate_result: bool = False) -> CharPhonemeResult:
+        """Build character-level (haraka/tanween) phoneme cells.
+
+        One cell per written character (base letter, haraka, tanween, long-vowel
+        carrier) plus rule-inserted implicit units, each carrying word-local
+        ``phoneme_indices`` for per-diacritic highlight timing. See
+        ``char_phoneme_mapping``.
+        """
+        mapping = self.get_mapping()
+        words = build_char_phoneme_mapping(mapping)
+        result = CharPhonemeResult(words=words, mapping=mapping, ref=self.ref)
+
+        if validate_result:
+            violations = result.validate()
+            if violations:
+                raise ValueError("Validation failed:\n" + "\n".join(violations))
+
+        return result
+
     def get_mapping(self) -> PhonemizationMapping:
         """Build the full phonemization mapping with alignment."""
         word_mappings = [word.build_mapping() for word in self._words]
@@ -682,6 +704,8 @@ class PhonemizeResult:
             path.write_text(self.tajweed_mappings().to_json(), encoding="utf-8")
         elif fmt == "letter_phoneme":
             path.write_text(self.letter_phoneme_mappings().to_json(), encoding="utf-8")
+        elif fmt == "char_phoneme":
+            path.write_text(self.character_phoneme_mappings().to_json(), encoding="utf-8")
         else:
             raise ValueError(f"Unknown format: {fmt}")
         return path
