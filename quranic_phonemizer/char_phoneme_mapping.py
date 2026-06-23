@@ -333,21 +333,32 @@ def _word_cells(word: WordMapping) -> List[Cell]:
         diac_char = diacritic_chars().get(diac, "")
         is_tanween = diac in TANWEEN_DIACRITICS
 
-        # madd-iwad: tanween at stop where a madd (a:) is produced and the next
-        # letter is a silent alef/alef-maksura that should carry it.
+        # madd-iwad: tanween-fath at waqf realises a compensating madd (a:); the
+        # fatḥatan drops and the madd rides an alef. When a silent alef / alef-maksura
+        # is WRITTEN after it (عَلِيمًا) that grapheme carries it (force_madd_iwad
+        # routes the madd to the next letter's cell). When none is written — the word
+        # ends in hamza (مَآءً) — the alef is purely implicit: emit it as an INSERTED
+        # graphemeless MADD cell, exactly like the Allah dagger-alef.
         if (is_tanween and word.is_stopping and mod_pairs
-                and is_madd_phoneme(mod_pairs[-1][1])
-                and li + 1 < n_letters
-                and word.letter_mappings[li + 1].char in ("ا", "ى")
-                and not pairs[li + 1]):
+                and is_madd_phoneme(mod_pairs[-1][1])):
             madd_iwad = mod_pairs[-1]
             mod_pairs = [p for p in mod_pairs if p != madd_iwad]
-            force_madd_iwad[li + 1] = madd_iwad
             cells.append(Cell(
                 chars=diac_char, role=TANWEEN, status=DROPPED,
                 phonemes=[], phoneme_indices=[], tag="madd_iwad",
                 source_letter_index=li, source_letter_indices=[li],
             ))
+            if (li + 1 < n_letters
+                    and word.letter_mappings[li + 1].char in ("ا", "ى")
+                    and not pairs[li + 1]):
+                force_madd_iwad[li + 1] = madd_iwad
+            else:
+                cells.append(Cell(
+                    chars="", role=MADD, status=INSERTED,
+                    phonemes=[madd_iwad[1]], phoneme_indices=[madd_iwad[0]],
+                    tag="madd_iwad",
+                    source_letter_index=li, source_letter_indices=[li],
+                ))
             continue
 
         # iltiqaa kasra: izhar tanween + next-word hamza-wasl -> [V, n, i]; the

@@ -129,6 +129,9 @@ Same for an extension carrier (`ٱلرَّحْمَـٰنِ` → `م`=`m`, fatḥ
 # عَظِيمٌ⏹   'ٌ' tanween dropped []            (dammatan/kasratan vanish at waqf)
 # هُدًى⏹     'ً' tanween dropped [] tag=madd_iwad
 #            'ى' madd    replaced ['a:'] tag=madd_iwad   (the long ā moves onto the alef-maksura)
+# مَآءً⏹     'ً' tanween dropped [] tag=madd_iwad
+#            ''  madd    inserted ['a:'] tag=madd_iwad   (no written carrier — word ends in hamza;
+#                                                         the ʿiwaḍ alef is implicit, like the dagger-alef)
 ```
 
 ### Hamza-waṣl pronounced (start) — `ٱلْحَمْدُ`
