@@ -31,6 +31,13 @@ Inspector) derives all of that from the `tag` + the diacritic char. This keeps t
 phonemizer the single source of recitation domain knowledge and lets each renderer own its
 own script conventions (e.g. the Digital Khatt mini-meem for iqlāb).
 
+So the consumer never has to inspect the phonemes themselves, two facts that would
+otherwise require phonology are folded into the cell: a **geminated** base composes the
+canonical shaddah `ّ` into its `chars` (the consumer renders the text verbatim), and an
+**idgham-shafawi** haraka whose vowel the merged base absorbs stays `present` — carrying the
+base's `phoneme_indices` + a `share_group` — so the consumer co-lights it on the merger
+rather than greying it out.
+
 ## Output structure
 
 ```
@@ -46,7 +53,7 @@ CharPhonemeResult
 
 | Field | Meaning |
 |-------|---------|
-| `chars` | the canonical source character(s); `""` if the cell is fully implicit |
+| `chars` | the canonical source character(s) — includes a composed shaddah `ّ` on a geminated base; `""` if the cell is fully implicit |
 | `role` | `base` · `haraka` · `tanween` · `madd` |
 | `status` | `present` · `inserted` · `dropped` · `replaced` · `shortened` |
 | `phonemes` | the phoneme strings this cell sounds (`[]` if silent) |
@@ -87,6 +94,12 @@ phoneme at its index.
 ```
 'ب'  base    present  ['b'] idx=[0]
 'ِ'  haraka  present  ['i'] idx=[1]
+```
+
+### Geminate — shaddah composed into `chars` (`رَبِّ`)
+```
+'ر'   base    present  ['rˤ'] idx=[0]
+'بّ'  base    present  ['bb'] idx=[2]   ← canonical shaddah ◌ّ folded into chars
 ```
 
 ### Long vowel — haraka + carrier share the vowel (`ٱلرَّحِيمِ`, continue)

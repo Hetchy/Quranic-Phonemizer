@@ -136,6 +136,10 @@ TajweedRule, TajweedRuleTag
 TajweedMapping, TajweedWordMapping, TajweedEntry
 FlatMappingResult
 Cell, CharWord, CharPhonemeResult
+CellRole, CellStatus                                   # cell vocab enums (consumers codegen/mirror these)
+MergerClass, detect_cross_word_mergers                 # the single cross-word merger classifier
+is_madd, is_geminate, is_nasalised, is_render_only     # phoneme predicates (YAML-derived)
+BRIDGE_RULE_VALUES, MERGER_ON_PREV_VALUES, TANWEEN_ASSIMILATES_VALUES, diacritic_chars
 ```
 
 ## Architecture Overview
