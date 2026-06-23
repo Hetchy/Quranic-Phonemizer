@@ -52,6 +52,7 @@ from .phonemes import (
     VOWEL_CARRIER_CHARS,
     diacritic_chars,
     is_geminate,
+    is_nasalised,
     is_render_only,
     is_short_vowel,
 )
@@ -299,10 +300,15 @@ def _word_cells(word: WordMapping) -> List[Cell]:
                         or ("qalqala" if q_pairs else None))
         elif base_pairs:  # standalone long-vowel carrier (ا/آ/و/ي) — its madd type
             base_tag = madd_types.get(base_pairs[0][0])
-        # Compose the canonical shaddah onto a geminated base (the aligner's bare
-        # letter char carries none) so a renderer reads the geminate from chars
-        # rather than re-deriving it from the phoneme shape.
-        if base_pairs and is_geminate(base_pairs[0][1]) and SHADDA not in base_chars:
+        # Compose the canonical shaddah onto a mushaddad base (the aligner's bare
+        # letter char carries none) so a renderer reads the gemination from chars.
+        # A plain geminate (rˤrˤ, ll…) is detected from the phoneme; a mushaddad
+        # nūn/mīm sounds a NASALISED geminate (ñ/m̃, which is_geminate misses), so
+        # gate that on the letter's own shaddah — never adds one to an idgham
+        # receiver that merely sounds ñ/m̃ without a written shaddah (يَقُول's yāʾ).
+        if (base_pairs and SHADDA not in base_chars
+                and (is_geminate(base_pairs[0][1])
+                     or (is_nasalised(base_pairs[0][1]) and lm.has_shaddah))):
             base_chars = base_chars + SHADDA
         cells.append(Cell(
             chars=base_chars, role=base_role,
