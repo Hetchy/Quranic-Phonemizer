@@ -18,6 +18,12 @@ from .mapping import (
     WordMapping,
     LetterMapping,
 )
+from .tajweed_classification import (
+    CROSS_WORD_MERGE_RULES,
+    CROSS_WORD_BOTH_MERGE_RULES,
+    CROSS_WORD_NON_MERGE_RULES,
+)
+from .phonemes import SHORT_VOWEL_PHONEMES
 
 
 # =============================================================================
@@ -32,36 +38,19 @@ NEXT_MERGE_TAJWEED_RULES: Set[TajweedRule] = {
     TajweedRule.SILENT_ILTIQAA_SAKINAYN,
 }
 
-# Silent at word-end → cross-word MERGE with next word's first letter
-CROSS_WORD_MERGE_TAJWEED_RULES: Set[TajweedRule] = {
-    TajweedRule.IDGHAM_GHUNNAH_NOON,
-    TajweedRule.IDGHAM_BILA_GHUNNAH_NOON,
-    TajweedRule.IDGHAM_MUTAJANISAYN_KAMIL,
-    TajweedRule.IDGHAM_MUTAMATHILAYN,
-    TajweedRule.IDGHAM_MUTAQARIBAYN,
-}
+# Cross-word merge re-attribution classes — the canonical membership lives in
+# tajweed_classification (the single owner); these are the mutable-set views
+# get_merge_info intersects against.
+CROSS_WORD_MERGE_TAJWEED_RULES: Set[TajweedRule] = set(CROSS_WORD_MERGE_RULES)
+CROSS_WORD_BOTH_MERGE_TAJWEED_RULES: Set[TajweedRule] = set(CROSS_WORD_BOTH_MERGE_RULES)
+CROSS_WORD_NON_MERGE_TAJWEED_RULES: Set[TajweedRule] = set(CROSS_WORD_NON_MERGE_RULES)
 
-# Within-word NEXT merge (same rules as cross-word but at non-final position)
+# Within-word NEXT merge (idgham at non-final position) — a within-word concern,
+# owned here.
 WITHIN_WORD_NEXT_MERGE_TAJWEED_RULES: Set[TajweedRule] = {
     TajweedRule.IDGHAM_MUTAMATHILAYN,
     TajweedRule.IDGHAM_MUTAQARIBAYN,
     TajweedRule.IDGHAM_MUTAJANISAYN_KAMIL,
-}
-
-# Cross-word MERGE where BOTH letters have phonemes (combined into one entry)
-CROSS_WORD_BOTH_MERGE_TAJWEED_RULES: Set[TajweedRule] = {
-    TajweedRule.IDGHAM_SHAFAWI,
-}
-
-# Non-merge cross-word: last letter has phonemes, just add space suffix
-CROSS_WORD_NON_MERGE_TAJWEED_RULES: Set[TajweedRule] = {
-    TajweedRule.IKHFAA_NOON,
-    TajweedRule.IQLAB_NOON,
-    TajweedRule.IKHFAA_TANWEEN,
-    TajweedRule.IQLAB_TANWEEN,
-    TajweedRule.IKHFAA_SHAFAWI,
-    TajweedRule.IDGHAM_GHUNNAH_TANWEEN,
-    TajweedRule.IDGHAM_BILA_GHUNNAH_TANWEEN,
 }
 
 # Vowel letter characters
@@ -70,8 +59,8 @@ VOWEL_LETTER_CHARS: Set[str] = {"ا", "و", "ي", "ى"}
 # Madd extension names eligible for splitting
 MADD_EXTENSION_NAMES: Set[str] = {"DAGGER_ALEF", "MADDAH", "MINI_WAW", "MINI_YA_END"}
 
-# Short vowel phonemes (for iltiqaa detection)
-SHORT_VOWEL_PHONEMES: Set[str] = {"a", "aˤ", "u", "i"}
+# SHORT_VOWEL_PHONEMES is imported from .phonemes (the canonical owner) and
+# re-exported here for existing consumers.
 
 # Tanween diacritic names
 TANWEEN_DIACRITICS: Set[str] = {"FATHATAN", "KASRATAN", "DAMMATAN"}

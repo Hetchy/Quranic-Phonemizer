@@ -15,6 +15,7 @@ import yaml
 DATA_DIR = Path(__file__).resolve().parent / "resources"
 
 _BASE_CACHE: Dict[str, str] = {}
+_DIAC_CACHE: Dict[str, str] = {}
 _RULE_CACHE: Dict[str, Any] = {}
 _INITIALISED = False
 
@@ -23,7 +24,7 @@ _OVERRIDES: Dict[tuple, str] = {}
 
 
 def _init() -> None:
-    global _INITIALISED, _BASE_CACHE, _RULE_CACHE
+    global _INITIALISED, _BASE_CACHE, _DIAC_CACHE, _RULE_CACHE
     if _INITIALISED:
         return
 
@@ -38,6 +39,10 @@ def _init() -> None:
             phoneme = info.get("phoneme", "")
             if char:
                 _BASE_CACHE[char] = phoneme
+        for name, info in base_data.get("diacritics", {}).items():
+            char = info.get("char")
+            if char:
+                _DIAC_CACHE[name] = char
     else:
         raise FileNotFoundError(base_path)
 
@@ -73,6 +78,24 @@ def get_rule_phoneme(rule: str, key: str = "phoneme", default: str = "") -> str:
         return _OVERRIDES[override_key]
     section = _RULE_CACHE.get(rule, {})
     return section.get(key, default)
+
+
+def get_rule_section(rule: str) -> Dict[str, Any]:
+    """Return a whole rule section from ``rule_phonemes.yaml`` (e.g. ``"qalqala"``,
+    ``"idgham"``) as a dict, or ``{}``. Lets callers derive a set of values (the
+    qalqala echo markers, the idgham ``nasalized_map``) from the YAML rather than
+    hardcoding them."""
+    if not _INITIALISED:
+        _init()
+    return _RULE_CACHE.get(rule, {}) or {}
+
+
+def get_diacritic_chars() -> Dict[str, str]:
+    """Return the canonical diacritic name → Unicode char map (FATHA→ َ …) from
+    ``base_phonemes.yaml``."""
+    if not _INITIALISED:
+        _init()
+    return dict(_DIAC_CACHE)
 
 
 def set_phoneme_override(rule: str, key: str, phoneme: str) -> None:

@@ -35,50 +35,51 @@ from .letter_phoneme_mapping import (
     should_split_extension,
     is_madd_phoneme,
     get_full_char,
-    VOWEL_LETTER_CHARS,
     TANWEEN_DIACRITICS,
     SHORT_VOWEL_PHONEMES,
 )
 from .silent import sounding_in_flat
+from .tajweed_classification import (
+    CellRole,
+    CellStatus,
+    TANWEEN_RULE_TAGS,
+    NOON_RULE_TAGS,
+    IDGHAM_SOURCE_TAG_VALUES,
+    detect_cross_word_mergers,
+)
+from .phonemes import (
+    VOWEL_CARRIER_CHARS,
+    diacritic_chars,
+    is_geminate,
+    is_render_only,
+    is_short_vowel,
+)
+
+# Shaddah (gemination mark) — composed onto a geminated base cell's chars so a
+# renderer reads it from the canonical text instead of inferring it from the
+# phoneme shape.
+SHADDA = "ّ"  # U+0651
 
 
 # =============================================================================
-# Vocabulary (canonical, JSON-friendly string constants)
+# Vocabulary — short aliases to the canonical enums (str values unchanged, so
+# the serialized cell rows are byte-identical). The diacritic name→char map,
+# the vowel-carrier set, the render-only marker set, and the tanwīn/noon rule
+# tag tuples now come from phonemes / tajweed_classification (single owners).
 # =============================================================================
 
 # Roles
-BASE = "base"        # consonant / consonantal vowel-letter / hamza / hamza-wasl
-HARAKA = "haraka"    # fatha / damma / kasra / sukun
-TANWEEN = "tanween"  # fathatan / dammatan / kasratan
-MADD = "madd"        # long-vowel carrier: ا و ي ى, mini ۥ ۦ ۧ, dagger-alef ٰ
+BASE = CellRole.BASE          # consonant / consonantal vowel-letter / hamza / hamza-wasl
+HARAKA = CellRole.HARAKA      # fatha / damma / kasra / sukun
+TANWEEN = CellRole.TANWEEN    # fathatan / dammatan / kasratan
+MADD = CellRole.MADD          # long-vowel carrier: ا و ي ى, mini ۥ ۦ ۧ, dagger-alef ٰ
 
 # Statuses
-PRESENT = "present"      # explicit, sounded
-INSERTED = "inserted"    # implicit, no source char
-DROPPED = "dropped"      # source char present but silent in this context
-REPLACED = "replaced"    # sound changed from the written form (madd-iwad)
-SHORTENED = "shortened"  # long vowel reduced; carrier silenced (iltiqaa)
-
-# Diacritic name -> its Unicode char (the phonemizer's canonical text).
-_DIAC_CHAR: Dict[str, str] = {
-    "FATHA": "َ", "DAMMA": "ُ", "KASRA": "ِ", "SUKUN": "ْ",
-    "FATHATAN": "ً", "DAMMATAN": "ٌ", "KASRATAN": "ٍ",
-}
-
-_HARAKA_DIACRITICS = {"FATHA", "DAMMA", "KASRA"}
-_QALQALA_PHONEMES = {"Q", "QQ"}
-# Mini-yaa-middle (U+06E7) behaves as a vowel letter (carrier i: or consonant j).
-_VOWEL_LETTERS = set(VOWEL_LETTER_CHARS) | {"ۧ"}
-
-# Source-rule -> tag priority for picking a cell's canonical case tag.
-_TANWEEN_RULE_TAGS = (
-    "iqlab_tanween", "ikhfaa_tanween",
-    "idgham_ghunnah_tanween", "idgham_bila_ghunnah_tanween",
-)
-_NOON_RULE_TAGS = (
-    "iqlab_noon", "ikhfaa_noon",
-    "idgham_ghunnah_noon", "idgham_bila_ghunnah_noon",
-)
+PRESENT = CellStatus.PRESENT
+INSERTED = CellStatus.INSERTED
+DROPPED = CellStatus.DROPPED
+REPLACED = CellStatus.REPLACED
+SHORTENED = CellStatus.SHORTENED
 
 
 # =============================================================================
@@ -103,6 +104,10 @@ class Cell:
     source_letter_indices: List[int] = field(default_factory=list)
 
     def to_list(self) -> list:
+        """Full 9-field dump (incl. ``phonemes`` + ``source_letter_indices``). This
+        is the phonemizer's own serialization — NOT the 7-slot Timestamps shard
+        row, which a downstream consumer (the SDK) projects in a different field
+        order; do not conflate the two positionally."""
         return [
             self.chars, self.role, self.status,
             list(self.phonemes), list(self.phoneme_indices),
@@ -230,8 +235,8 @@ def _word_cells(word: WordMapping) -> List[Cell]:
             cons_pairs, mod_pairs = lp, []
 
         # Qalqala echo always rides the base cell.
-        q_pairs = [p for p in mod_pairs if p[1] in _QALQALA_PHONEMES]
-        mod_pairs = [p for p in mod_pairs if p[1] not in _QALQALA_PHONEMES]
+        q_pairs = [p for p in mod_pairs if is_render_only(p[1])]
+        mod_pairs = [p for p in mod_pairs if not is_render_only(p[1])]
 
         # Extension split (dagger-alef / mini-waw / mini-yaa carrying a long vowel
         # on the SAME letter): the madd phoneme moves to its own MADD cell.
@@ -267,14 +272,19 @@ def _word_cells(word: WordMapping) -> List[Cell]:
 
         # ---- emit the letter-sound cell (BASE or MADD) ----------------------
         base_is_vowel_carrier = (
-            diac is None and not lm.has_shaddah and lm.char in _VOWEL_LETTERS
+            diac is None and not lm.has_shaddah and lm.char in VOWEL_CARRIER_CHARS
             and all(is_madd_phoneme(p[1]) for p in base_pairs) and base_pairs
         )
         base_role = MADD if base_is_vowel_carrier else BASE
         base_tag = None
         if base_role == BASE:
-            base_tag = (_pick_tag(rules, _NOON_RULE_TAGS)
+            base_tag = (_pick_tag(rules, NOON_RULE_TAGS)
                         or ("qalqala" if q_pairs else None))
+        # Compose the canonical shaddah onto a geminated base (the aligner's bare
+        # letter char carries none) so a renderer reads the geminate from chars
+        # rather than re-deriving it from the phoneme shape.
+        if base_pairs and is_geminate(base_pairs[0][1]) and SHADDA not in base_chars:
+            base_chars = base_chars + SHADDA
         cells.append(Cell(
             chars=base_chars, role=base_role,
             status=PRESENT if base_pairs else DROPPED,
@@ -320,7 +330,7 @@ def _word_cells(word: WordMapping) -> List[Cell]:
         if diac is None:
             continue
 
-        diac_char = _DIAC_CHAR.get(diac, "")
+        diac_char = diacritic_chars().get(diac, "")
         is_tanween = diac in TANWEEN_DIACRITICS
 
         # madd-iwad: tanween at stop where a madd (a:) is produced and the next
@@ -348,7 +358,7 @@ def _word_cells(word: WordMapping) -> List[Cell]:
             mod_pairs = mod_pairs[:-1]
 
         if is_tanween:
-            tan_tag = _pick_tag(rules, _TANWEEN_RULE_TAGS)
+            tan_tag = _pick_tag(rules, TANWEEN_RULE_TAGS)
             status = PRESENT
             if word.is_stopping and not mod_pairs:
                 status = DROPPED  # dammatan/kasratan dropped at waqf
@@ -398,7 +408,7 @@ def _word_cells(word: WordMapping) -> List[Cell]:
         # haraka with no own phoneme: absorbed by the following vowel letter.
         nxt = li + 1
         nxt_pairs = pairs[nxt] if nxt < n_letters else []
-        if nxt_pairs and word.letter_mappings[nxt].char in _VOWEL_LETTERS:
+        if nxt_pairs and word.letter_mappings[nxt].char in VOWEL_CARRIER_CHARS:
             nidx, nph = nxt_pairs[0]
             if sounding_in_flat(word, nxt) and is_madd_phoneme(nph):
                 # long vowel: haraka + carrier share the long-vowel index
@@ -450,74 +460,60 @@ def _assign_intra_word_share_groups(cells: List[Cell], start_gid: int) -> int:
     return gid
 
 
-# Tagged cross-word idgham sources — the cell that carries the rule tag in the
-# CURRENT word. Tanwīn idgham tags a (present) TANWEEN cell; noon idgham tags the
-# (silent, dropped) NOON base. Both should share a co-light group with the
-# receiving word's first sounding base. (ikhfaa / iqlab are cross-word but do NOT
-# fully merge, so they are excluded.)
-_IDGHAM_SOURCE_TAGS = (
-    "idgham_ghunnah_tanween", "idgham_bila_ghunnah_tanween",
-    "idgham_ghunnah_noon", "idgham_bila_ghunnah_noon",
-)
-
-# Cross-word idgham where a CONSONANT at the prev word's tail merges into the
-# next word's first consonant but carries NO tag on its cell — only idgham_shafawi
-# (م|مّ): its merger phoneme (m̃) lands on the prev word's tail, so the prev word's
-# last sounding base carries it while the receiving word's first base carries only
-# the following vowel. (Noon idgham is tag-detected above; its source base is
-# silent and the merger lands on the receiving word's head.)
-_CROSS_WORD_BASE_MERGE_RULES = frozenset({"idgham_shafawi"})
-
-
-def _is_cross_word_base_merge(prev_wm: WordMapping, curr_wm: WordMapping) -> bool:
-    """True if the word boundary is a consonant idgham whose two base graphemes
-    should co-light. Asks the phonemizer's tajweed rules where the merge fires
-    (source on the prev word's tail, target on the curr word's head) — mirrors the
-    cross-word bridge detector so the two stay in lockstep."""
-    if not prev_wm.letter_mappings or not curr_wm.letter_mappings:
-        return False
-    curr_targets = {
-        t.rule.value for t in curr_wm.letter_mappings[0].tajweed_rules if not t.is_source
-    }
-    for e in reversed(prev_wm.letter_mappings):
-        srcs = {t.rule.value for t in e.tajweed_rules if t.is_source}
-        if (srcs & curr_targets) & _CROSS_WORD_BASE_MERGE_RULES:
-            return True
-    return False
-
-
-def _link_cross_word(words: List[CharWord], wmaps: List[WordMapping], start_gid: int) -> int:
+def _link_cross_word(words: List[CharWord], mapping: PhonemizationMapping, start_gid: int) -> int:
     """Co-highlight cross-word idgham mergers: the two graphemes that voice as one
-    sound share a group, so the consumer lights both through the merger. Two shapes:
+    sound share a group, so the consumer lights both through the merger.
 
-      - tanwīn idgham — the tanwīn cell of word N and the first sounding cell of
-        word N+1 (the merger lands on N+1's head).
-      - consonant idgham (idgham shafawi م|مّ) — word N's last sounding BASE and
+    Boundaries come from the single ``detect_cross_word_mergers`` (the same detector
+    the SDK shard bridge tagger uses). Co-lighting is scoped — as before — to the
+    tagged noon/tanwīn idghams and the both-sound shafawi merge:
+
+      - tanwīn / noon idgham (``side == "curr"``, tagged) — the tagged cell of word
+        N and the first sounding base of word N+1 (the merger lands on N+1's head).
+      - consonant idgham shafawi (``both_sound``) — word N's last sounding BASE and
         word N+1's first sounding BASE (the merger m̃ lands on N's tail; N+1's base
-        carries only the following vowel)."""
+        carries only the following vowel).
+
+    (mutamathilayn / mutaqaribayn / mutajanisayn are bridges but not cell co-light
+    sources, matching the historical scope.)"""
     gid = start_gid
-    for wi in range(len(words) - 1):
-        cur, nxt = words[wi], words[wi + 1]
+    for m in detect_cross_word_mergers(mapping):
+        cur, nxt = words[m.prev_word_index], words[m.curr_word_index]
         recv = next((c for c in nxt.cells if c.role == BASE and c.phoneme_indices), None)
         if recv is None:
             continue
-        # Tagged idgham → the source is the tagged cell on the current word: a
-        # tanwīn cell (idgham tanween) or the silent noon base (idgham noon).
-        source = next((c for c in cur.cells if c.tag in _IDGHAM_SOURCE_TAGS), None)
-        # Untagged consonant idgham (shafawi) → the source is the current word's
-        # last sounding base (it carries the merger phoneme; the receiver carries
-        # only the following vowel).
-        if source is None and _is_cross_word_base_merge(wmaps[wi], wmaps[wi + 1]):
+        if m.both_sound:
             source = next((c for c in reversed(cur.cells)
                            if c.role == BASE and c.phoneme_indices), None)
+        elif m.rule in IDGHAM_SOURCE_TAG_VALUES:
+            source = next((c for c in cur.cells if c.tag in IDGHAM_SOURCE_TAG_VALUES), None)
+        else:
+            continue
         if source is None:
             continue
         if source.share_group is None and recv.share_group is None:
-            source.share_group = recv.share_group = gid
+            g = gid
             gid += 1
         else:
             g = source.share_group if source.share_group is not None else recv.share_group
-            source.share_group = recv.share_group = g
+        source.share_group = recv.share_group = g
+        # Absorbed-vowel co-light: when the receiving base sounds a short vowel
+        # (idgham shafawi — the consonant merged, so the base carries only the
+        # following vowel), its dropped haraka on the same letter sounds that
+        # vowel. Point the haraka at the vowel + join the merger group so a
+        # renderer co-lights it instead of greying it (no phoneme inference).
+        if recv.phonemes and is_short_vowel(recv.phonemes[0]):
+            absorbed = next(
+                (c for c in nxt.cells
+                 if c.role == HARAKA and not c.phoneme_indices
+                 and c.source_letter_index == recv.source_letter_index),
+                None,
+            )
+            if absorbed is not None:
+                absorbed.phoneme_indices = list(recv.phoneme_indices)
+                absorbed.phonemes = list(recv.phonemes)
+                absorbed.status = PRESENT
+                absorbed.share_group = g
     return gid
 
 
@@ -531,7 +527,7 @@ def build_char_phoneme_mapping(mapping: PhonemizationMapping) -> List[CharWord]:
             location=wm.location, text=wm.text,
             is_starting=wm.is_starting, is_stopping=wm.is_stopping, cells=cells,
         ))
-    gid = _link_cross_word(words, mapping.words, gid)
+    gid = _link_cross_word(words, mapping, gid)
     return words
 
 
@@ -567,7 +563,7 @@ def validate(words: List[CharWord], mapping: PhonemizationMapping) -> List[str]:
         # (3) char completeness: each letter's diacritic char appears in a cell
         for li, lm in enumerate(wm.letter_mappings):
             if lm.diacritic and not wm.is_special_word:
-                dc = _DIAC_CHAR.get(lm.diacritic, "")
+                dc = diacritic_chars().get(lm.diacritic, "")
                 anchored = [c for c in cw.cells if c.source_letter_index == li]
                 if dc and not any(dc in c.chars for c in anchored):
                     violations.append(
