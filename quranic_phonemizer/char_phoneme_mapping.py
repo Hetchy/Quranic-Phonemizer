@@ -784,11 +784,14 @@ def _link_cross_word(words: List[CharWord], mapping: PhonemizationMapping, start
         else:
             g = source.share_group if source.share_group is not None else recv.share_group
         source.share_group = recv.share_group = g
-        # Absorbed-vowel co-light: when the receiving base sounds a short vowel
-        # (idgham shafawi — the consonant merged, so the base carries only the
-        # following vowel), its dropped haraka on the same letter sounds that
-        # vowel. Point the haraka at the vowel + join the merger group so a
-        # renderer co-lights it instead of greying it (no phoneme inference).
+        # Idgham shafawi convergence: the receiving meem's BASE sounds the following
+        # short vowel (the consonant merged into the source meem's m̃, which carries
+        # the whole geminated nasal). Move that vowel onto the meem's own haraka — its
+        # OWN interval, NOT the merger group — and strip it off the base, so the base
+        # owns no phoneme and co-lights purely through the nasal/share union, exactly
+        # like an idgham-ghunnah/noon receiver. This keeps the vowel off the base
+        # (so it aligns under its haraka) and out of the union (so looping the haraka
+        # no longer intersects either meem's cell span).
         if recv.phonemes and is_short_vowel(recv.phonemes[0]):
             absorbed = next(
                 (c for c in nxt.cells
@@ -800,7 +803,8 @@ def _link_cross_word(words: List[CharWord], mapping: PhonemizationMapping, start
                 absorbed.phoneme_indices = list(recv.phoneme_indices)
                 absorbed.phonemes = list(recv.phonemes)
                 absorbed.status = PRESENT
-                absorbed.share_group = g
+                recv.phoneme_indices = []
+                recv.phonemes = []
     return gid
 
 
