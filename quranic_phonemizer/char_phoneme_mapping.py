@@ -38,7 +38,7 @@ from .letter_phoneme_mapping import (
     TANWEEN_DIACRITICS,
     SHORT_VOWEL_PHONEMES,
 )
-from .silent import sounding_in_flat
+from .silent import sounding_in_flat, _is_carrier_waw
 from .specials import get_tajweed_mapping
 from .tajweed_classification import (
     CellRole,
@@ -412,6 +412,17 @@ def _word_cells(word: WordMapping) -> List[Cell]:
         # Extension split (dagger-alef / mini-waw / mini-yaa carrying a long vowel
         # on the SAME letter): the madd phoneme moves to its own MADD cell.
         split = should_split_extension(lm, word)
+        # A silent carrier-waw seat (صَلَوٰة, زَكَوٰة): should_split_extension suppresses
+        # the split as a vowel-letter-all-madd carrier, but the shard tokenizes the
+        # dagger-alef as its own grapheme and flags the waw silent (silent.py). Force
+        # the same split at the cell tier so the waw greys and the dagger carries the
+        # madd, instead of merging into one وٰ carrier cell.
+        if not split and _is_carrier_waw(lm):
+            dagger = "".join(ext.char for ext in lm.extensions
+                             if ext.name == "DAGGER_ALEF" and ext.char)
+            madd_ph = next((p for p in reversed(lm.phonemes) if is_madd_phoneme(p)), None)
+            if dagger and madd_ph is not None:
+                split = (dagger, madd_ph)
         madd_pair = None
         madd_chars = None
         if split:
@@ -689,7 +700,29 @@ def _word_cells(word: WordMapping) -> List[Cell]:
             source_letter_index=li, source_letter_indices=[li],
         ))
 
+    _reorder_dropped_silah(cells)
     return cells
+
+
+def _reorder_dropped_silah(cells: List[Cell]) -> None:
+    """Move a dropped pronoun-haa ṣilah cell to just after the haa's own haraka.
+
+    The ṣilah glyph is emitted right after its base (before the haa's ḍamma/kasra),
+    but orthographically the haraka sits on the haa and precedes the mini-waw/yaa.
+    At waqf the pair is silent (no shared vowel group to re-sort downstream), so the
+    raw cell order is what renders — reorder to ``[base, haraka, ṣilah]``. The
+    dropped ṣilah is the only MADD cell that is ``DROPPED`` yet keeps its glyph."""
+    for i, c in enumerate(cells):
+        if not (c.role == MADD and c.status == DROPPED and c.chars):
+            continue
+        silah = cells.pop(i)
+        for j in range(i, len(cells)):
+            if (cells[j].role == HARAKA
+                    and cells[j].source_letter_index == silah.source_letter_index):
+                cells.insert(j + 1, silah)
+                return
+        cells.insert(i, silah)  # no haraka on the letter — leave as emitted
+        return
 
 
 def _assign_intra_word_share_groups(cells: List[Cell], start_gid: int) -> int:
