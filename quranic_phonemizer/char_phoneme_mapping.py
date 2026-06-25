@@ -59,6 +59,7 @@ from .phonemes import (
     is_render_only,
     is_short_vowel,
 )
+from .tajweed_mapping import HEAVY_VOWEL_PHONEMES
 
 # Shaddah (gemination mark) — composed onto a geminated base cell's chars so a
 # renderer reads it from the canonical text instead of inferring it from the
@@ -140,7 +141,12 @@ class Cell:
     only on muqaṭṭaʿāt letter cells, whose single bare-letter grapheme sounds out
     a multi-letter name carrying several distinct rules (the merged nasal, the
     long-vowel madd, the leen glide, the qalqala echo). When empty, a consumer
-    falls back to the cell's single ``tag``."""
+    falls back to the cell's single ``tag``.
+
+    ``secondary_tags`` holds extra rules that co-occur on this grapheme but lose
+    the single-``tag`` priority pick — in practice ``["tafkheem"]`` on a heavy
+    madd carrier or qalqala letter, where ``tag`` is the madd/qalqala rule. A
+    consumer renders them as additional badges stacked on the primary ``tag``."""
     chars: str
     role: str
     status: str
@@ -151,20 +157,21 @@ class Cell:
     source_letter_index: int = -1
     source_letter_indices: List[int] = field(default_factory=list)
     phoneme_rule_tags: List[Optional[str]] = field(default_factory=list)
+    secondary_tags: List[str] = field(default_factory=list)
 
     def to_list(self) -> list:
         """Full dump (incl. ``phonemes`` + ``source_letter_indices`` +
         ``phoneme_rule_tags``). This is the phonemizer's own serialization — NOT
         the Timestamps shard row, which a downstream consumer (the SDK) projects
         in a different field order; do not conflate the two positionally.
-        ``phoneme_rule_tags`` is appended last (additive slot) so a reader of an
-        older row tolerates its absence."""
+        ``phoneme_rule_tags`` then ``secondary_tags`` are appended last (additive
+        slots) so a reader of an older row tolerates their absence."""
         return [
             self.chars, self.role, self.status,
             list(self.phonemes), list(self.phoneme_indices),
             self.tag, self.share_group,
             self.source_letter_index, list(self.source_letter_indices),
-            list(self.phoneme_rule_tags),
+            list(self.phoneme_rule_tags), list(self.secondary_tags),
         ]
 
     def to_dict(self) -> dict:
@@ -179,6 +186,7 @@ class Cell:
             "source_letter_index": self.source_letter_index,
             "source_letter_indices": list(self.source_letter_indices),
             "phoneme_rule_tags": list(self.phoneme_rule_tags),
+            "secondary_tags": list(self.secondary_tags),
         }
 
 
@@ -562,6 +570,15 @@ def _word_cells(word: WordMapping) -> List[Cell]:
                 and (is_geminate(base_pairs[0][1])
                      or (is_nasalised(base_pairs[0][1]) and lm.has_shaddah))):
             base_chars = base_chars + SHADDA
+        # Heaviness (tafkheem) co-occurs with a madd / qalqala that wins the single
+        # ``tag`` pick (a heavy ا carrier, a heavy قْ/طْ). Preserve it as a secondary
+        # rule so a renderer can stack the tafkheem badge on the primary one. A heavy
+        # vowel CARRIER (the full alef after a heavy consonant) carries no tafkheem on
+        # its own ``lm`` — its heaviness is the long-vowel phoneme itself — so detect
+        # it from the phoneme too, mirroring tajweed_mapping's HEAVY_VOWEL_PHONEMES.
+        base_heavy = ("tafkheem" in rules
+                      or any(p[1] in HEAVY_VOWEL_PHONEMES for p in base_pairs))
+        base_secondary = ["tafkheem"] if (base_heavy and base_tag != "tafkheem") else []
         cells.append(Cell(
             chars=base_chars, role=base_role,
             status=PRESENT if base_pairs else DROPPED,
@@ -569,16 +586,21 @@ def _word_cells(word: WordMapping) -> List[Cell]:
             phoneme_indices=[i for i, _ in base_pairs],
             tag=base_tag,
             source_letter_index=li, source_letter_indices=[li],
+            secondary_tags=base_secondary,
         ))
 
         # ---- madd extension cell --------------------------------------------
         # (dagger-alef / mini-waw / mini-yaa carrier on the same letter — its madd type)
         if split and madd_pair is not None:
+            # The split madd carrier (dagger-alef / mini-waw/yaa) inherits the
+            # letter's heaviness too (e.g. صٰ): stack tafkheem on its madd tag.
+            madd_secondary = ["tafkheem"] if "tafkheem" in rules else []
             cells.append(Cell(
                 chars=madd_chars, role=MADD, status=PRESENT,
                 phonemes=[madd_pair[1]], phoneme_indices=[madd_pair[0]],
                 tag=madd_types.get(madd_pair[0]),
                 source_letter_index=li, source_letter_indices=[li],
+                secondary_tags=madd_secondary,
             ))
 
         # ---- dropped pronoun-haa ṣilah cell (waqf) --------------------------
