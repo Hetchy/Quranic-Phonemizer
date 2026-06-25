@@ -35,6 +35,7 @@ from .letter_phoneme_mapping import (
     should_split_extension,
     is_madd_phoneme,
     get_full_char,
+    get_merge_info,
     TANWEEN_DIACRITICS,
     SHORT_VOWEL_PHONEMES,
 )
@@ -94,6 +95,12 @@ MADD_RULE_TAGS = frozenset({
 # phone on its own letter, so the receiving مّيٓم letter's nasal carries the tag via
 # its target_rules.
 GLIDE_PHONEMES = frozenset({"j", "w"})
+
+# Qalqala tier order for a base cell: kubra (at waqf / a final sākin) wins over
+# sughra (mid-word). Picked from the letter's OWN source rules — a qalqala letter
+# carries exactly one of these — so the cell names the precise variant instead of
+# the bare "qalqala". Both stay uncoloured downstream (name-only).
+QALQALA_RULE_ORDER = ("qalqala_kubra", "qalqala_sughra")
 
 
 # =============================================================================
@@ -192,6 +199,38 @@ def _source_rules(lm: LetterMapping) -> set:
     return {t.rule.value for t in lm.tajweed_rules if t.is_source}
 
 
+# Flat-builder reasons (get_merge_info) that name a true no-rule silence gap — the
+# letter went silent with no recognised tajweed rule. These map to a single literal
+# ``silent_unclassified`` so a consumer can surface "we couldn't classify this".
+_SILENT_GAP_REASONS = frozenset({
+    "idgham_unknown", "vowel_lengthening_failure", "unknown_silent",
+})
+
+
+def _silent_cell_tag(lm: LetterMapping, word: WordMapping, li: int) -> Optional[str]:
+    """Source silence rule for a raw-silent letter cell (no phoneme at its slot).
+
+    Classified by the SAME flat-builder ``get_merge_info`` the silent-flags path
+    uses, so the cell names exactly why the grapheme went mute:
+
+      - idgham-source silence (noon/meem merging into the next letter), lam_shamsiyah,
+        hamza_wasl_silent, silent_iltiqaa_sakinayn → the rule's own value (meaningful,
+        recoverable),
+      - the ``vowel_silent`` catch-all → ``vowel_silent`` (kept whole — sub-reasons
+        not split),
+      - a true no-rule gap (idgham_unknown / vowel_lengthening_failure / unknown_silent)
+        → the literal ``silent_unclassified``.
+
+    Returns ``None`` for a mundane silence the caller leaves generic (a waqf sukun /
+    silah-drop never reaches here; this path is only the silent BASE letter cell)."""
+    reason = get_merge_info(lm, word, li).rule
+    if not reason:
+        return None
+    if reason in _SILENT_GAP_REASONS:
+        return "silent_unclassified"
+    return reason
+
+
 def _dropped_silah_chars(lm: LetterMapping, word: WordMapping) -> Optional[str]:
     """The mini-waw/mini-yaa ṣilah glyph on a pronoun-haa whose ṣilah dropped at
     waqf (so ``should_split_extension`` finds no madd phoneme to split out). Returns
@@ -234,16 +273,27 @@ def _lafdh_jalalah_indices(word: WordMapping) -> set:
 
 
 def _madd_type_indices(word: WordMapping) -> Dict[int, str]:
-    """Word-local phoneme index -> ``madd_<type>`` tag for every CLASSIFIED madd
-    (wajib_muttasil / jaiz_munfasil / lazim / arid_lissukun / leen).
+    """Word-local phoneme index -> ``madd_<type>`` tag for every madd, classified
+    or ṭabīʿī (wajib_muttasil / jaiz_munfasil / lazim / arid_lissukun / leen, else
+    plain ``madd_tabii``).
 
-    Regular ṭabīʿī madds (``madd_type is None``) and implicit-only entries
-    (``phoneme_index < 0``) are skipped, so they stay untagged. The carrier cell
-    reads its own phoneme index from this map; the paired haraka is never tagged
-    (a madd colours only the carrier grapheme)."""
-    return {mm.phoneme_index: f"madd_{mm.madd_type}"
-            for mm in word.madd_mappings
-            if getattr(mm, "madd_type", None) and mm.phoneme_index >= 0}
+    A ``madd_type is None`` entry is a regular ṭabīʿī madd and maps to
+    ``madd_tabii`` (uncoloured downstream, name-only) — EXCEPT the implicit Allah
+    dagger-alef (``is_lafdh_jalalah``), which keeps its own ``allah_dagger_alef``
+    tag (resolved at the call site) and so is excluded here. Implicit-only entries
+    (``phoneme_index < 0``) are skipped. The carrier cell reads its own phoneme
+    index from this map; the paired haraka is never tagged (a madd colours only the
+    carrier grapheme)."""
+    out: Dict[int, str] = {}
+    for mm in word.madd_mappings:
+        if mm.phoneme_index < 0:
+            continue
+        mtype = getattr(mm, "madd_type", None)
+        if mtype:
+            out[mm.phoneme_index] = f"madd_{mtype}"
+        elif not mm.is_lafdh_jalalah:
+            out[mm.phoneme_index] = "madd_tabii"
+    return out
 
 
 # =============================================================================
@@ -483,13 +533,23 @@ def _word_cells(word: WordMapping) -> List[Cell]:
         )
         base_role = MADD if (base_is_vowel_carrier or waqf_vowel_carrier) else BASE
         base_tag = None
-        if base_role == BASE:
+        if base_role == BASE and not base_pairs:
+            # Raw-silent letter: name the source silence rule (idgham-source merge,
+            # lam_shamsiyah, hamza_wasl_silent, silent_iltiqaa_sakinayn, the
+            # vowel_silent catch-all) or the silent_unclassified no-rule gap.
+            base_tag = _silent_cell_tag(lm, word, li)
+        elif base_role == BASE:
             base_tag = (_pick_tag(rules, NOON_RULE_TAGS)
                         or _pick_tag(rules, GHUNNAH_BASE_TAGS)
                         or (madd_types.get(base_pairs[0][0]) if base_pairs else None)
-                        or ("qalqala" if q_pairs else None))
+                        or (_pick_tag(rules, QALQALA_RULE_ORDER) if q_pairs else None)
+                        or ("tafkheem" if "tafkheem" in rules else None))
         elif waqf_vowel_carrier:
-            base_tag = madd_types.get(base_pairs[0][0], "madd_arid_lissukun")
+            # ʿāriḍ-li-s-sukūn at the stop. A plain ṭabīʿī madd (now mapped to
+            # madd_tabii) does NOT override that — only a CLASSIFIED non-tabii type
+            # (the rare case the mapping already pins it) wins.
+            mtype = madd_types.get(base_pairs[0][0])
+            base_tag = mtype if (mtype and mtype != "madd_tabii") else "madd_arid_lissukun"
         elif base_pairs:  # standalone long-vowel carrier (ا/آ/و/ي) — its madd type
             base_tag = madd_types.get(base_pairs[0][0])
         # Compose the canonical shaddah onto a mushaddad base (the aligner's bare
