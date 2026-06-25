@@ -53,6 +53,7 @@ from .phonemes import (
     VOWEL_CARRIER_CHARS,
     diacritic_chars,
     is_geminate,
+    is_madd,
     is_nasalised,
     is_render_only,
     is_short_vowel,
@@ -85,11 +86,14 @@ MADD_RULE_TAGS = frozenset({
     "madd_tabii", "madd_lazim", "madd_arid_lissukun", "madd_leen",
     "madd_wajib_muttasil", "madd_jaiz_munfasil",
 })
-# Base-cell rule tags a muqaṭṭaʿ letter can carry (noon/ghunnah/idgham/qalqala) —
-# the order is the colour priority when a subword names several.
-SPECIAL_BASE_TAGS = (
-    NOON_RULE_TAGS + GHUNNAH_BASE_TAGS + tuple(IDGHAM_SOURCE_TAG_VALUES) + ("qalqala_kubra",)
-)
+# Per-phoneme rule families for the muqaṭṭaʿ phoneme_rule_tags walk. A nasal-rule
+# lands on the name's nasal phone (the merged m̃ of لَآم's idgham-shafawi, the ŋ of
+# عَيْن's ikhfaa); a madd-rule lands on the long-vowel (or the leen glide when the
+# name has no long vowel — عَيْن's يْ glide). The nasal rules are the noon + ghunnah
+# tag tuples; the merger SOURCE side (the لَآم closing م that merged away) leaves no
+# phone on its own letter, so the receiving مّيٓم letter's nasal carries the tag via
+# its target_rules.
+GLIDE_PHONEMES = frozenset({"j", "w"})
 
 
 # =============================================================================
@@ -123,7 +127,13 @@ class Cell:
 
     ``phoneme_indices`` are **word-local** indices into the word's phoneme
     sequence; ``[]`` means the cell is silent in this context.
-    """
+
+    ``phoneme_rule_tags`` is an OPTIONAL list parallel to ``phoneme_indices``
+    (same length), each entry a per-phoneme tajweed tag or ``None``. It is set
+    only on muqaṭṭaʿāt letter cells, whose single bare-letter grapheme sounds out
+    a multi-letter name carrying several distinct rules (the merged nasal, the
+    long-vowel madd, the leen glide, the qalqala echo). When empty, a consumer
+    falls back to the cell's single ``tag``."""
     chars: str
     role: str
     status: str
@@ -133,17 +143,21 @@ class Cell:
     share_group: Optional[int] = None
     source_letter_index: int = -1
     source_letter_indices: List[int] = field(default_factory=list)
+    phoneme_rule_tags: List[Optional[str]] = field(default_factory=list)
 
     def to_list(self) -> list:
-        """Full 9-field dump (incl. ``phonemes`` + ``source_letter_indices``). This
-        is the phonemizer's own serialization — NOT the 7-slot Timestamps shard
-        row, which a downstream consumer (the SDK) projects in a different field
-        order; do not conflate the two positionally."""
+        """Full dump (incl. ``phonemes`` + ``source_letter_indices`` +
+        ``phoneme_rule_tags``). This is the phonemizer's own serialization — NOT
+        the Timestamps shard row, which a downstream consumer (the SDK) projects
+        in a different field order; do not conflate the two positionally.
+        ``phoneme_rule_tags`` is appended last (additive slot) so a reader of an
+        older row tolerates its absence."""
         return [
             self.chars, self.role, self.status,
             list(self.phonemes), list(self.phoneme_indices),
             self.tag, self.share_group,
             self.source_letter_index, list(self.source_letter_indices),
+            list(self.phoneme_rule_tags),
         ]
 
     def to_dict(self) -> dict:
@@ -157,6 +171,7 @@ class Cell:
             "share_group": self.share_group,
             "source_letter_index": self.source_letter_index,
             "source_letter_indices": list(self.source_letter_indices),
+            "phoneme_rule_tags": list(self.phoneme_rule_tags),
         }
 
 
@@ -235,31 +250,90 @@ def _madd_type_indices(word: WordMapping) -> Dict[int, str]:
 # Builder
 # =============================================================================
 
-def _special_subword_tags(subword: dict) -> Tuple[Optional[str], Optional[str]]:
-    """(base_tag, madd_tag) for one spelled-out muqaṭṭaʿ name (a tajweed_mapping
-    subword). The madd tag colours the long-vowel carrier; the base tag carries any
-    noon/ghunnah/idgham/qalqala the name sounds (e.g. the لَآمْ idgham-shafawi, the
-    عَيْن ikhfaa-noon). qalqala_kubra is normalised to the plain ``qalqala`` the FE
-    duration logic + ``_word_cells`` use."""
-    rules: List[str] = []
+def _special_subword_rules(subword: dict) -> Tuple[set, set]:
+    """(source_rules, target_rules) flattened across a muqaṭṭaʿ name's entries.
+    Both sides matter for the per-phoneme walk: a cross-letter idgham's SOURCE م
+    (the لَآم tail that merged away) leaves no phone on its own letter, so the
+    receiving name's nasal carries the rule via its ``target_rules``."""
+    src: set = set()
+    tgt: set = set()
     for e in subword.get("entries", []):
-        rules.extend(e.get("source_rules", []))
-    madd_tag = next((r for r in rules if r in MADD_RULE_TAGS), None)
-    base_tag = _pick_tag(set(rules), SPECIAL_BASE_TAGS)
-    if base_tag == "qalqala_kubra":
-        base_tag = "qalqala"
-    return base_tag, madd_tag
+        src.update(e.get("source_rules", []))
+        tgt.update(e.get("target_rules", []))
+    return src, tgt
+
+
+def _special_madd_tag(rules: set) -> Optional[str]:
+    """The name's madd subtype (madd_lazim / madd_tabii …) — the muqaṭṭaʿ cell's
+    headline ``tag``. عَيْن's leen is named with a madd_lazim, so even a name with
+    no long-vowel phone reports its madd here (the cell underlines as madd)."""
+    return next((r for r in rules if r in MADD_RULE_TAGS), None)
+
+
+def _special_phoneme_tags(subword: dict, lp: List[Tuple[int, str]]) -> List[Optional[str]]:
+    """Per-phoneme tags for ONE muqaṭṭaʿ letter, parallel to ``lp`` (its
+    (index, phoneme) pairs). The name's rules are placed on the phone each
+    concerns, identified by phone shape within this single letter (each relevant
+    shape occurs at most once per name part):
+
+      - the merged/ikhfaa nasal (m̃ ñ ŋ …) gets the idgham/ikhfaa/ghunnah rule,
+      - the long-vowel madd phone gets the madd rule; a name with no long vowel
+        but a leen glide (عَيْن's يْ → j) puts the madd on the glide,
+      - the qalqala consonant AND its render-only Q echo get qalqala_kubra,
+      - every other phone is None.
+
+    madd_tabii / qalqala / tafkheem ride through here even though the FE palette
+    leaves them uncoloured (a faithful renderer keys the colour, not this list)."""
+    src, tgt = _special_subword_rules(subword)
+    rules = src | tgt
+    madd_tag = _special_madd_tag(rules)
+    nasal_tag = _pick_tag(rules, NOON_RULE_TAGS + GHUNNAH_BASE_TAGS)
+    has_qalqala = "qalqala_kubra" in rules
+    has_long_vowel = any(is_madd(ph) for _, ph in lp)
+
+    # The nasal rule lands on exactly ONE phone — the merger/ikhfaa target. Prefer
+    # a nasalised phone (the idgham m̃), else the first plain nasal (the ikhfaa ŋ);
+    # the name's other meem (مّيٓم's trailing م) is untouched.
+    nasal_pos = -1
+    if nasal_tag:
+        nasal_pos = next((k for k, (_, ph) in enumerate(lp) if is_nasalised(ph)), -1)
+        if nasal_pos < 0:
+            nasal_pos = next(
+                (k for k, (_, ph) in enumerate(lp) if ph in {"ŋ", "n", "m"}), -1)
+
+    tags: List[Optional[str]] = []
+    for k, (_, ph) in enumerate(lp):
+        if has_qalqala and is_render_only(ph):
+            tags.append("qalqala_kubra")
+        elif nasal_tag and k == nasal_pos:
+            tags.append(nasal_tag)
+        elif madd_tag and is_madd(ph):
+            tags.append(madd_tag)
+        elif madd_tag and not has_long_vowel and ph in GLIDE_PHONEMES:
+            tags.append(madd_tag)  # leen glide (عَيْن يْ → j)
+        else:
+            tags.append(None)
+
+    # The qalqala consonant (the phone right before the Q echo) co-carries the rule
+    # so a renderer underlines the dāl/qāf itself, not just the silent echo.
+    if has_qalqala:
+        for k in range(1, len(lp)):
+            if is_render_only(lp[k][1]) and tags[k - 1] is None:
+                tags[k - 1] = "qalqala_kubra"
+    return tags
 
 
 def _special_word_cells(word: WordMapping) -> List[Cell]:
     """Muqaṭṭaʿāt / hardcoded words: one cell per sounding letter. A spelled-out name
     renders as its single bare-letter grapheme (لام is one ل glyph, not ل+phantom-alef),
-    so each letter stays ONE cell — but it now carries a tajweed ``tag`` so the FE
-    underlines it. Tags come from the grapheme-aligned YAML ``tajweed_mapping`` (the
-    same source ``tajweed_mappings()`` trusts): a name with a long vowel becomes a
-    MADD cell tagged with its madd subtype (madd_lazim نُوٓنْ, madd_tabii هَا, …); a
-    pure-consonant name (the leen عَيْن, the closing رَا of الٓر) stays a BASE cell
-    carrying any noon/ghunnah/idgham/qalqala the name sounds."""
+    so each letter stays ONE cell. The cell's headline ``tag`` is the name's LETTER-tier
+    madd (madd_lazim نُوٓنْ / لَآم, madd_tabii هَا, عَيْن's leen → madd_lazim); the new
+    ``phoneme_rule_tags`` then carries the finer per-phone rules the bare-letter cell
+    would otherwise smear — the merged nasal's idgham_shafawi, the ikhfaa nasal's
+    ikhfaa_noon, the long vowel / leen glide's madd, the dāl/Q qalqala. Both come from
+    the grapheme-aligned YAML ``tajweed_mapping`` (the same source ``tajweed_mappings()``
+    trusts). A name with neither madd nor nasal (the أَلِفْ head of الٓم) stays an
+    untagged BASE cell."""
     cells: List[Cell] = []
     pairs = _letter_pairs(word)
     subwords = get_tajweed_mapping(word.location) or []
@@ -270,17 +344,18 @@ def _special_word_cells(word: WordMapping) -> List[Cell]:
             continue  # inert (e.g. trailing stop-sign entry " ۚ")
         subword = subwords[sub_i] if sub_i < len(subwords) else {}
         sub_i += 1
-        base_tag, madd_tag = _special_subword_tags(subword)
 
-        has_madd = any(is_madd_phoneme(ph) for _, ph in lp)
-        role = MADD if has_madd else BASE
-        # A madd name shows its madd colour (the headline 6-count for lazim); a
-        # consonant-only name shows its merge/ikhfaa rule.
-        tag = madd_tag if has_madd else base_tag
+        rule_tags = _special_phoneme_tags(subword, lp)
+        src, tgt = _special_subword_rules(subword)
+        madd_tag = _special_madd_tag(src | tgt)
+        # A named madd (every letter but the bare أَلِفْ head) underlines + groups
+        # as MADD; only a rule-free head stays a plain BASE cell.
+        role = MADD if madd_tag else BASE
         cells.append(Cell(
             chars=get_full_char(lm), role=role, status=PRESENT,
             phonemes=[p for _, p in lp], phoneme_indices=[i for i, _ in lp],
-            tag=tag, source_letter_index=li, source_letter_indices=[li],
+            tag=madd_tag, source_letter_index=li, source_letter_indices=[li],
+            phoneme_rule_tags=rule_tags,
         ))
     return cells
 
