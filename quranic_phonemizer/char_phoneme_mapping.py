@@ -39,6 +39,7 @@ from .letter_phoneme_mapping import (
     SHORT_VOWEL_PHONEMES,
 )
 from .silent import sounding_in_flat
+from .specials import get_tajweed_mapping
 from .tajweed_classification import (
     CellRole,
     CellStatus,
@@ -61,6 +62,34 @@ from .phonemes import (
 # renderer reads it from the canonical text instead of inferring it from the
 # phoneme shape.
 SHADDA = "ّ"  # U+0651
+
+# Pronoun-haa ṣilah extensions (mini-waw ۥ / mini-yaa ۦ). At wasl these carry a
+# long vowel and split into their own madd cell (should_split_extension); at waqf
+# the ṣilah drops, so the extension produces no phoneme and would otherwise stay
+# glued onto the haa base char — B2 splits it into a silent dropped madd cell.
+SILAH_EXTENSION_NAMES = frozenset({"MINI_WAW", "MINI_YA_END"})
+
+# Iqlab tanwīn split — the doubled tanwīn sounds [short-vowel, nasal mīm]. B1
+# decomposes it into a plain haraka (the short vowel) + a mini-meem cell (the
+# nasal), the meem glyph mirroring the renderer's IQLAB_FORM: a small high meem
+# (U+06E2) above a fatḥa/ḍamma, a small low meem (U+06ED) below a kasra.
+MEEM_HI = "ۢ"  # U+06E2 ARABIC SMALL HIGH MEEM ISOLATED FORM
+MEEM_LO = "ۭ"  # U+06ED ARABIC SMALL LOW MEEM
+IQLAB_MINI_MEEM = {"FATHATAN": MEEM_HI, "DAMMATAN": MEEM_HI, "KASRATAN": MEEM_LO}
+# The bare short-vowel mark a doubled tanwīn decomposes to (fatḥatan→fatḥa, …).
+IQLAB_SHORT_VOWEL = {"FATHATAN": "َ", "DAMMATAN": "ُ", "KASRATAN": "ِ"}
+
+# Madd rule tag values (the muqaṭṭaʿāt YAML uses these enum strings verbatim as
+# source_rules; the FE colours madd_lazim/wajib/jaiz/arid/leen, ṭabīʿī uncoloured).
+MADD_RULE_TAGS = frozenset({
+    "madd_tabii", "madd_lazim", "madd_arid_lissukun", "madd_leen",
+    "madd_wajib_muttasil", "madd_jaiz_munfasil",
+})
+# Base-cell rule tags a muqaṭṭaʿ letter can carry (noon/ghunnah/idgham/qalqala) —
+# the order is the colour priority when a subword names several.
+SPECIAL_BASE_TAGS = (
+    NOON_RULE_TAGS + GHUNNAH_BASE_TAGS + tuple(IDGHAM_SOURCE_TAG_VALUES) + ("qalqala_kubra",)
+)
 
 
 # =============================================================================
@@ -148,6 +177,23 @@ def _source_rules(lm: LetterMapping) -> set:
     return {t.rule.value for t in lm.tajweed_rules if t.is_source}
 
 
+def _dropped_silah_chars(lm: LetterMapping, word: WordMapping) -> Optional[str]:
+    """The mini-waw/mini-yaa ṣilah glyph on a pronoun-haa whose ṣilah dropped at
+    waqf (so ``should_split_extension`` finds no madd phoneme to split out). Returns
+    the extension chars when the word is stopping and the ṣilah produced no madd
+    phoneme on this letter, else None — the wasl case keeps going through the normal
+    extension split."""
+    if not word.is_stopping:
+        return None
+    if any(is_madd_phoneme(ph) for ph in lm.phonemes):
+        return None
+    silah = [ext for ext in lm.extensions
+             if ext.char and ext.name in SILAH_EXTENSION_NAMES]
+    if not silah:
+        return None
+    return "".join(ext.char for ext in silah)
+
+
 def _pick_tag(rules: set, order: Tuple[str, ...]) -> Optional[str]:
     for r in order:
         if r in rules:
@@ -189,18 +235,52 @@ def _madd_type_indices(word: WordMapping) -> Dict[int, str]:
 # Builder
 # =============================================================================
 
+def _special_subword_tags(subword: dict) -> Tuple[Optional[str], Optional[str]]:
+    """(base_tag, madd_tag) for one spelled-out muqaṭṭaʿ name (a tajweed_mapping
+    subword). The madd tag colours the long-vowel carrier; the base tag carries any
+    noon/ghunnah/idgham/qalqala the name sounds (e.g. the لَآمْ idgham-shafawi, the
+    عَيْن ikhfaa-noon). qalqala_kubra is normalised to the plain ``qalqala`` the FE
+    duration logic + ``_word_cells`` use."""
+    rules: List[str] = []
+    for e in subword.get("entries", []):
+        rules.extend(e.get("source_rules", []))
+    madd_tag = next((r for r in rules if r in MADD_RULE_TAGS), None)
+    base_tag = _pick_tag(set(rules), SPECIAL_BASE_TAGS)
+    if base_tag == "qalqala_kubra":
+        base_tag = "qalqala"
+    return base_tag, madd_tag
+
+
 def _special_word_cells(word: WordMapping) -> List[Cell]:
-    """Muqaṭṭaʿāt / hardcoded words: one BASE cell per sounding letter."""
+    """Muqaṭṭaʿāt / hardcoded words: one cell per sounding letter. A spelled-out name
+    renders as its single bare-letter grapheme (لام is one ل glyph, not ل+phantom-alef),
+    so each letter stays ONE cell — but it now carries a tajweed ``tag`` so the FE
+    underlines it. Tags come from the grapheme-aligned YAML ``tajweed_mapping`` (the
+    same source ``tajweed_mappings()`` trusts): a name with a long vowel becomes a
+    MADD cell tagged with its madd subtype (madd_lazim نُوٓنْ, madd_tabii هَا, …); a
+    pure-consonant name (the leen عَيْن, the closing رَا of الٓر) stays a BASE cell
+    carrying any noon/ghunnah/idgham/qalqala the name sounds."""
     cells: List[Cell] = []
     pairs = _letter_pairs(word)
+    subwords = get_tajweed_mapping(word.location) or []
+    sub_i = 0
     for li, lm in enumerate(word.letter_mappings):
         lp = pairs[li]
         if not lp:
             continue  # inert (e.g. trailing stop-sign entry " ۚ")
+        subword = subwords[sub_i] if sub_i < len(subwords) else {}
+        sub_i += 1
+        base_tag, madd_tag = _special_subword_tags(subword)
+
+        has_madd = any(is_madd_phoneme(ph) for _, ph in lp)
+        role = MADD if has_madd else BASE
+        # A madd name shows its madd colour (the headline 6-count for lazim); a
+        # consonant-only name shows its merge/ikhfaa rule.
+        tag = madd_tag if has_madd else base_tag
         cells.append(Cell(
-            chars=get_full_char(lm), role=BASE, status=PRESENT,
+            chars=get_full_char(lm), role=role, status=PRESENT,
             phonemes=[p for _, p in lp], phoneme_indices=[i for i, _ in lp],
-            source_letter_index=li, source_letter_indices=[li],
+            tag=tag, source_letter_index=li, source_letter_indices=[li],
         ))
     return cells
 
@@ -275,6 +355,16 @@ def _word_cells(word: WordMapping) -> List[Cell]:
         else:
             base_chars = full
 
+        # Dropped pronoun-haa ṣilah at waqf: the mini-waw/yaa carried a long vowel
+        # at wasl but the ṣilah dropped at the stop, so should_split_extension found
+        # no madd phoneme and the glyph would stay glued onto the haa base. Strip it
+        # off the base and remember it — a silent dropped MADD cell is emitted below.
+        dropped_silah_chars = None
+        if not split:
+            dropped_silah_chars = _dropped_silah_chars(lm, word)
+            if dropped_silah_chars:
+                base_chars = base_chars.replace(dropped_silah_chars, "", 1)
+
         base_pairs = cons_pairs + q_pairs
 
         # Implicit Allah dagger-alef: a madd in mod with no grapheme.
@@ -291,13 +381,29 @@ def _word_cells(word: WordMapping) -> List[Cell]:
             diac is None and not lm.has_shaddah and lm.char in VOWEL_CARRIER_CHARS
             and all(is_madd_phoneme(p[1]) for p in base_pairs) and base_pairs
         )
-        base_role = MADD if base_is_vowel_carrier else BASE
+        # Waqf consonant→vowel carrier: a word-final و/ى lengthened from the
+        # preceding haraka (هُوَ / هِىَ / نِعْمَتِىَ). Its OWN written diacritic
+        # (the trailing fatḥa) is dropped at the stop, so it never qualifies as a
+        # plain vowel carrier (which requires diac is None), yet its base phoneme
+        # is the long vowel. Promote it to a madd carrier so the FE groups it with
+        # the stolen ḍamma/kasra (share_group already forms); the trailing fatḥa
+        # falls out as a separate dropped haraka cell below. Tagged ʿāriḍ-li-s-sukūn
+        # (consistent with the ʿiwaḍ-alef / Allah-dagger carriers at waqf).
+        waqf_vowel_carrier = (
+            not base_is_vowel_carrier and word.is_stopping and not split
+            and not lm.has_shaddah and lm.char in VOWEL_CARRIER_CHARS
+            and diac is not None and not mod_pairs and base_pairs
+            and all(is_madd_phoneme(p[1]) for p in base_pairs)
+        )
+        base_role = MADD if (base_is_vowel_carrier or waqf_vowel_carrier) else BASE
         base_tag = None
         if base_role == BASE:
             base_tag = (_pick_tag(rules, NOON_RULE_TAGS)
                         or _pick_tag(rules, GHUNNAH_BASE_TAGS)
                         or (madd_types.get(base_pairs[0][0]) if base_pairs else None)
                         or ("qalqala" if q_pairs else None))
+        elif waqf_vowel_carrier:
+            base_tag = madd_types.get(base_pairs[0][0], "madd_arid_lissukun")
         elif base_pairs:  # standalone long-vowel carrier (ا/آ/و/ي) — its madd type
             base_tag = madd_types.get(base_pairs[0][0])
         # Compose the canonical shaddah onto a mushaddad base (the aligner's bare
@@ -326,6 +432,18 @@ def _word_cells(word: WordMapping) -> List[Cell]:
                 chars=madd_chars, role=MADD, status=PRESENT,
                 phonemes=[madd_pair[1]], phoneme_indices=[madd_pair[0]],
                 tag=madd_types.get(madd_pair[0]),
+                source_letter_index=li, source_letter_indices=[li],
+            ))
+
+        # ---- dropped pronoun-haa ṣilah cell (waqf) --------------------------
+        # The ṣilah glyph keeps its own MADD cell (status=dropped, no phoneme) so
+        # the renderer shows هـ | (silent haraka + silent ṣilah) instead of gluing
+        # the mini-waw/yaa onto the haa. The dropped haraka rides it as a silent
+        # vowel group below.
+        if dropped_silah_chars:
+            cells.append(Cell(
+                chars=dropped_silah_chars, role=MADD, status=DROPPED,
+                phonemes=[], phoneme_indices=[],
                 source_letter_index=li, source_letter_indices=[li],
             ))
 
@@ -399,6 +517,27 @@ def _word_cells(word: WordMapping) -> List[Cell]:
 
         if is_tanween:
             tan_tag = _pick_tag(rules, TANWEEN_RULE_TAGS)
+
+            # iqlab tanwīn split: the doubled tanwīn sounds [short-vowel, nasal];
+            # emit the vowel as a plain (untagged) haraka and the nasal as its own
+            # mini-meem cell carrying the iqlab tag, both anchored to the base so a
+            # renderer groups them per-column [base, haraka, mini-meem].
+            if (tan_tag == "iqlab_tanween" and len(mod_pairs) == 2
+                    and diac in IQLAB_MINI_MEEM):
+                v_idx, v_ph = mod_pairs[0]
+                n_idx, n_ph = mod_pairs[1]
+                cells.append(Cell(
+                    chars=IQLAB_SHORT_VOWEL[diac], role=HARAKA, status=PRESENT,
+                    phonemes=[v_ph], phoneme_indices=[v_idx], tag=None,
+                    source_letter_index=li, source_letter_indices=[li],
+                ))
+                cells.append(Cell(
+                    chars=IQLAB_MINI_MEEM[diac], role=TANWEEN, status=INSERTED,
+                    phonemes=[n_ph], phoneme_indices=[n_idx], tag="iqlab_tanween",
+                    source_letter_index=li, source_letter_indices=[li],
+                ))
+                continue
+
             status = PRESENT
             if word.is_stopping and not mod_pairs:
                 status = DROPPED  # dammatan/kasratan dropped at waqf
@@ -600,12 +739,17 @@ def validate(words: List[CharWord], mapping: PhonemizationMapping) -> List[str]:
                     violations.append(
                         f"{wm.location}: phoneme index {i} shared by cells without one "
                         f"share_group (groups={groups})")
-        # (3) char completeness: each letter's diacritic char appears in a cell
+        # (3) char completeness: each letter's diacritic char appears in a cell.
+        # An iqlab tanwīn is decomposed into [short-vowel haraka, mini-meem] cells
+        # (B1), so its doubled-tanwīn glyph is intentionally absent — the
+        # iqlab_tanween-tagged mini-meem cell stands in for it.
         for li, lm in enumerate(wm.letter_mappings):
             if lm.diacritic and not wm.is_special_word:
                 dc = diacritic_chars().get(lm.diacritic, "")
                 anchored = [c for c in cw.cells if c.source_letter_index == li]
-                if dc and not any(dc in c.chars for c in anchored):
+                iqlab_split = (lm.diacritic in IQLAB_MINI_MEEM
+                               and any(c.tag == "iqlab_tanween" for c in anchored))
+                if dc and not iqlab_split and not any(dc in c.chars for c in anchored):
                     violations.append(
                         f"{wm.location}: letter {li} ({lm.char!r}) diacritic "
                         f"{lm.diacritic} has no cell")

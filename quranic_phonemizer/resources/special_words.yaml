@@ -97,9 +97,9 @@ special_words:
       - char: "ا"
         phonemes: ["ʔ", "a", "l", "i", "f"]
       - char: "لٓ"
-        phonemes: ["l", "a:"]
+        phonemes: ["l", "a:", "m"]
       - char: "ر"
-        phonemes: ["m", "rˤ", "aˤ:"]
+        phonemes: ["rˤ", "aˤ:"]
       - char: " ۚ"
         phonemes: []
     tajweed_mapping:
