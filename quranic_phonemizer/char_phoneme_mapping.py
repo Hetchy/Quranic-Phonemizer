@@ -342,7 +342,8 @@ def _special_phoneme_tags(subword: dict, lp: List[Tuple[int, str]]) -> List[Opti
       - the merged/ikhfaa nasal (m̃ ñ ŋ …) gets the idgham/ikhfaa/ghunnah rule,
       - the long-vowel madd phone gets the madd rule; a name with no long vowel
         but a leen glide (عَيْن's يْ → j) puts the madd on the glide,
-      - the qalqala consonant AND its render-only Q echo get qalqala_kubra,
+      - the qalqala render-only Q echo gets qalqala_kubra (NOT the consonant — the
+        underline rides the bounce, matching the regular cell path),
       - a heavy istiʿlāʾ consonant ( صٓ's sˤ, طٰ's tˤ, قٓ's q) gets tafkheem on its
         spare slot (the heavy long vowel after it already carries its madd),
       - every other phone is None."""
@@ -376,12 +377,6 @@ def _special_phoneme_tags(subword: dict, lp: List[Tuple[int, str]]) -> List[Opti
         else:
             tags.append(None)
 
-    # The qalqala consonant (the phone right before the Q echo) co-carries the rule
-    # so a renderer underlines the dāl/qāf itself, not just the silent echo.
-    if has_qalqala:
-        for k in range(1, len(lp)):
-            if is_render_only(lp[k][1]) and tags[k - 1] is None:
-                tags[k - 1] = "qalqala_kubra"
     # Tafkheem on the heavy istiʿlāʾ consonant (صٓ's sˤ / قٓ's q / طٰ's tˤ): its slot
     # is otherwise None (the heavy vowel after it already took its madd).
     if "tafkheem" in rules:
