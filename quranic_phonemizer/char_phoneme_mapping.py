@@ -766,17 +766,21 @@ def _link_cross_word(words: List[CharWord], mapping: PhonemizationMapping, start
     gid = start_gid
     for m in detect_cross_word_mergers(mapping):
         cur, nxt = words[m.prev_word_index], words[m.curr_word_index]
-        recv = next((c for c in nxt.cells if c.role == BASE and c.phoneme_indices), None)
-        if recv is None:
-            continue
         if m.both_sound:
+            # Idgham shafawi: the receiver is the next word's FIRST base (the meem),
+            # which may own NO phoneme — the merged consonant lives on the source
+            # meem, and a following long vowel sits on its own alef/madd (مَّا → the
+            # aː is on the alef). Don't require phoneme_indices, else the meem is
+            # never linked and greys out.
+            recv = next((c for c in nxt.cells if c.role == BASE), None)
             source = next((c for c in reversed(cur.cells)
                            if c.role == BASE and c.phoneme_indices), None)
         elif m.rule in IDGHAM_SOURCE_TAG_VALUES:
+            recv = next((c for c in nxt.cells if c.role == BASE and c.phoneme_indices), None)
             source = next((c for c in cur.cells if c.tag in IDGHAM_SOURCE_TAG_VALUES), None)
         else:
             continue
-        if source is None:
+        if recv is None or source is None:
             continue
         if source.share_group is None and recv.share_group is None:
             g = gid
