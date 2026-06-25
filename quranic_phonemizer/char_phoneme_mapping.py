@@ -97,6 +97,11 @@ MADD_RULE_TAGS = frozenset({
 # its target_rules.
 GLIDE_PHONEMES = frozenset({"j", "w"})
 
+# Istiʿlāʾ (heavy) consonant phones — for placing tafkheem on a muqaṭṭaʿ name's
+# heavy letter ( صٓ's sˤ, طٰ's tˤ, قٓ's q). The heavy long vowel after it (aˤ:)
+# already takes its madd tag; only the consonant phone is the spare slot.
+ISTILAA_CONSONANT_PHONES = frozenset({"sˤ", "dˤ", "tˤ", "ðˤ", "q", "x", "ɣ"})
+
 # Qalqala tier order for a base cell: kubra (at waqf / a final sākin) wins over
 # sughra (mid-word). Picked from the letter's OWN source rules — a qalqala letter
 # carries exactly one of these — so the cell names the precise variant instead of
@@ -338,10 +343,9 @@ def _special_phoneme_tags(subword: dict, lp: List[Tuple[int, str]]) -> List[Opti
       - the long-vowel madd phone gets the madd rule; a name with no long vowel
         but a leen glide (عَيْن's يْ → j) puts the madd on the glide,
       - the qalqala consonant AND its render-only Q echo get qalqala_kubra,
-      - every other phone is None.
-
-    madd_tabii / qalqala / tafkheem ride through here even though the FE palette
-    leaves them uncoloured (a faithful renderer keys the colour, not this list)."""
+      - a heavy istiʿlāʾ consonant ( صٓ's sˤ, طٰ's tˤ, قٓ's q) gets tafkheem on its
+        spare slot (the heavy long vowel after it already carries its madd),
+      - every other phone is None."""
     src, tgt = _special_subword_rules(subword)
     rules = src | tgt
     madd_tag = _special_madd_tag(rules)
@@ -378,6 +382,12 @@ def _special_phoneme_tags(subword: dict, lp: List[Tuple[int, str]]) -> List[Opti
         for k in range(1, len(lp)):
             if is_render_only(lp[k][1]) and tags[k - 1] is None:
                 tags[k - 1] = "qalqala_kubra"
+    # Tafkheem on the heavy istiʿlāʾ consonant (صٓ's sˤ / قٓ's q / طٰ's tˤ): its slot
+    # is otherwise None (the heavy vowel after it already took its madd).
+    if "tafkheem" in rules:
+        for k, (_, ph) in enumerate(lp):
+            if tags[k] is None and ph in ISTILAA_CONSONANT_PHONES:
+                tags[k] = "tafkheem"
     return tags
 
 
