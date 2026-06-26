@@ -563,8 +563,8 @@ def _word_cells(word: WordMapping) -> List[Cell]:
         # plain vowel carrier (which requires diac is None), yet its base phoneme
         # is the long vowel. Promote it to a madd carrier so the FE groups it with
         # the stolen ḍamma/kasra (share_group already forms); the trailing fatḥa
-        # falls out as a separate dropped haraka cell below. Tagged ʿāriḍ-li-s-sukūn
-        # (consistent with the ʿiwaḍ-alef / Allah-dagger carriers at waqf).
+        # falls out as a separate dropped haraka cell below. It takes its madd type
+        # from the madd map like any long-vowel carrier (madd_tabii — see below).
         waqf_vowel_carrier = (
             not base_is_vowel_carrier and word.is_stopping and not split
             and not lm.has_shaddah and lm.char in VOWEL_CARRIER_CHARS
@@ -585,13 +585,11 @@ def _word_cells(word: WordMapping) -> List[Cell]:
                         or (_pick_tag(rules, QALQALA_RULE_ORDER) if q_pairs else None)
                         or _pick_tag(rules, CONSONANT_IDGHAM_RULE_TAGS)
                         or ("tafkheem" if "tafkheem" in rules else None))
-        elif waqf_vowel_carrier:
-            # ʿāriḍ-li-s-sukūn at the stop. A plain ṭabīʿī madd (now mapped to
-            # madd_tabii) does NOT override that — only a CLASSIFIED non-tabii type
-            # (the rare case the mapping already pins it) wins.
-            mtype = madd_types.get(base_pairs[0][0])
-            base_tag = mtype if (mtype and mtype != "madd_tabii") else "madd_arid_lissukun"
-        elif base_pairs:  # standalone long-vowel carrier (ا/آ/و/ي) — its madd type
+        elif base_pairs:
+            # Long-vowel carrier (ا/آ/و/ي, incl. the waqf consonant→vowel هُوَ→huː) —
+            # its madd type straight from the map. The waqf carrier is the word's
+            # FINAL sound, so a plain ṭabīʿī madd, NOT ʿāriḍ (nothing after it takes
+            # the waqf sukūn) — mirroring tajweed_mappings, which tags it madd_tabii.
             base_tag = madd_types.get(base_pairs[0][0])
         # Compose the canonical shaddah onto a mushaddad base (the aligner's bare
         # letter char carries none) so a renderer reads the gemination from chars.
