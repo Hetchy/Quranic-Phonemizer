@@ -850,21 +850,21 @@ def _assign_intra_word_share_groups(cells: List[Cell], start_gid: int) -> int:
 
 
 def _link_cross_word(words: List[CharWord], mapping: PhonemizationMapping, start_gid: int) -> int:
-    """Co-highlight cross-word idgham mergers: the two graphemes that voice as one
-    sound share a group, so the consumer lights both through the merger.
+    """Wire up cross-word idgham mergers between graphemes that voice as one sound.
 
     Boundaries come from the single ``detect_cross_word_mergers`` (the same detector
-    the SDK shard bridge tagger uses). Co-lighting is scoped — as before — to the
-    tagged noon/tanwīn idghams and the both-sound shafawi merge:
+    the SDK shard bridge tagger uses). Two outcomes per merger:
 
-      - tanwīn / noon idgham (``side == "curr"``, tagged) — the tagged cell of word
-        N and the first sounding base of word N+1 (the merger lands on N+1's head).
-      - consonant idgham shafawi (``both_sound``) — word N's last sounding BASE and
-        word N+1's first sounding BASE (the merger m̃ lands on N's tail; N+1's base
-        carries only the following vowel).
+      - **co-light** (the tagged noon/tanwīn idghams + the both-sound shafawi merge):
+        source and receiver share a group, so the consumer lights both through the
+        merger and un-greys the silent source.
+      - **target-tag only** (mutaqāribayn / mutajānisayn kāmil): the receiver carries
+        the source's idgham rule as a SECONDARY tag — so it underlines + names the rule
+        (stacking above its own base rule) — but there is NO share group, so the source
+        stays silent/greyed (no co-light), per the desired distinction.
 
-    (mutamathilayn / mutaqaribayn / mutajanisayn are bridges but not cell co-light
-    sources, matching the historical scope.)"""
+    mutāmathilayn is co-light; mutaqāribayn / mutajānisayn are target-tag only.
+    (Within-word mutajānisayn nāqiṣ is handled by ``_tag_within_word_naqis``.)"""
     gid = start_gid
     for m in detect_cross_word_mergers(mapping):
         cur, nxt = words[m.prev_word_index], words[m.curr_word_index]
@@ -877,12 +877,25 @@ def _link_cross_word(words: List[CharWord], mapping: PhonemizationMapping, start
             recv = next((c for c in nxt.cells if c.role == BASE), None)
             source = next((c for c in reversed(cur.cells)
                            if c.role == BASE and c.phoneme_indices), None)
+            co_light = True
         elif m.rule in IDGHAM_SOURCE_TAG_VALUES:
             recv = next((c for c in nxt.cells if c.role == BASE and c.phoneme_indices), None)
             source = next((c for c in cur.cells if c.tag in IDGHAM_SOURCE_TAG_VALUES), None)
+            co_light = True
+        elif m.rule in CONSONANT_IDGHAM_RULE_TAGS:
+            recv = next((c for c in nxt.cells if c.role == BASE and c.phoneme_indices), None)
+            source = next((c for c in cur.cells if c.tag == m.rule), None)
+            co_light = False
         else:
             continue
         if recv is None or source is None:
+            continue
+        if not co_light:
+            # Target-tag only: the receiver underlines + names the rule (a `merge`-layer
+            # secondary, stacking above its own base rule), without sharing a group.
+            if (source.tag and source.tag != recv.tag
+                    and source.tag not in recv.secondary_tags):
+                recv.secondary_tags.append(source.tag)
             continue
         if source.share_group is None and recv.share_group is None:
             g = gid
@@ -914,11 +927,25 @@ def _link_cross_word(words: List[CharWord], mapping: PhonemizationMapping, start
     return gid
 
 
+def _tag_within_word_naqis(cells: List[Cell]) -> None:
+    """Tag the TARGET of a within-word mutajānisayn nāqiṣ (طت: بَسَطتَ) so it underlines
+    + names the rule alongside its sounding source. Both letters sound (nāqiṣ), so this
+    is a pure secondary-tag on the next base — no merger/share-group involved."""
+    NAQIS = "idgham_mutajanisayn_naqis"
+    for i, c in enumerate(cells):
+        if c.tag != NAQIS:
+            continue
+        tgt = next((t for t in cells[i + 1:] if t.role == BASE), None)
+        if tgt and tgt.tag != NAQIS and NAQIS not in tgt.secondary_tags:
+            tgt.secondary_tags.append(NAQIS)
+
+
 def build_char_phoneme_mapping(mapping: PhonemizationMapping) -> List[CharWord]:
     words: List[CharWord] = []
     gid = 0
     for wm in mapping.words:
         cells = (_special_word_cells(wm) if wm.is_special_word else _word_cells(wm))
+        _tag_within_word_naqis(cells)
         gid = _assign_intra_word_share_groups(cells, gid)
         words.append(CharWord(
             location=wm.location, text=wm.text,
