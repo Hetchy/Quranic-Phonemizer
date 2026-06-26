@@ -77,6 +77,12 @@ class MergerClass:
     both_sound: bool
     tanween_assimilates: bool
     flat_attr: str  # "merge" | "both" | "non_merge"
+    # The merger co-lights both graphemes (source ↔ receiver share a group, so the
+    # silent source un-greys + lights through the merger). True for the noon/tanwīn
+    # idghams, shafawi, and — among the consonant idghams — ONLY mutamāthilayn;
+    # mutaqāribayn / mutajānisayn are tagged (underline + tooltip) but NOT co-lit, so
+    # their source stays silent.
+    co_light: bool = False
 
 
 # One entry per cross-word-capable rule. The single source the derived views and
@@ -84,23 +90,23 @@ class MergerClass:
 CROSS_WORD_MERGERS: dict[TajweedRule, MergerClass] = {
     # --- bridges: noon idgham (merger on curr head) ---
     TajweedRule.IDGHAM_GHUNNAH_NOON:
-        MergerClass(bridge=True, side="curr", both_sound=False, tanween_assimilates=False, flat_attr="merge"),
+        MergerClass(bridge=True, side="curr", both_sound=False, tanween_assimilates=False, flat_attr="merge", co_light=True),
     TajweedRule.IDGHAM_BILA_GHUNNAH_NOON:
-        MergerClass(bridge=True, side="curr", both_sound=False, tanween_assimilates=False, flat_attr="merge"),
+        MergerClass(bridge=True, side="curr", both_sound=False, tanween_assimilates=False, flat_attr="merge", co_light=True),
     TajweedRule.IDGHAM_MUTAMATHILAYN:
-        MergerClass(bridge=True, side="curr", both_sound=False, tanween_assimilates=False, flat_attr="merge"),
+        MergerClass(bridge=True, side="curr", both_sound=False, tanween_assimilates=False, flat_attr="merge", co_light=True),
     TajweedRule.IDGHAM_MUTAQARIBAYN:
         MergerClass(bridge=True, side="curr", both_sound=False, tanween_assimilates=False, flat_attr="merge"),
     TajweedRule.IDGHAM_MUTAJANISAYN_KAMIL:
         MergerClass(bridge=True, side="curr", both_sound=False, tanween_assimilates=False, flat_attr="merge"),
     # --- bridge: shafawi (merger on prev tail, both letters sound) ---
     TajweedRule.IDGHAM_SHAFAWI:
-        MergerClass(bridge=True, side="prev", both_sound=True, tanween_assimilates=False, flat_attr="both"),
+        MergerClass(bridge=True, side="prev", both_sound=True, tanween_assimilates=False, flat_attr="both", co_light=True),
     # --- bridges: tanwīn idgham (merger on curr head, tanwīn assimilates) ---
     TajweedRule.IDGHAM_GHUNNAH_TANWEEN:
-        MergerClass(bridge=True, side="curr", both_sound=False, tanween_assimilates=True, flat_attr="non_merge"),
+        MergerClass(bridge=True, side="curr", both_sound=False, tanween_assimilates=True, flat_attr="non_merge", co_light=True),
     TajweedRule.IDGHAM_BILA_GHUNNAH_TANWEEN:
-        MergerClass(bridge=True, side="curr", both_sound=False, tanween_assimilates=True, flat_attr="non_merge"),
+        MergerClass(bridge=True, side="curr", both_sound=False, tanween_assimilates=True, flat_attr="non_merge", co_light=True),
     # --- non-bridges: ikhfaa / iqlab (cross-word but non-merging) ---
     TajweedRule.IKHFAA_TANWEEN:
         MergerClass(bridge=False, side="curr", both_sound=False, tanween_assimilates=True, flat_attr="non_merge"),
@@ -132,12 +138,12 @@ BOTH_SOUND_VALUES: frozenset[str] = frozenset(
     r.value for r, m in CROSS_WORD_MERGERS.items() if m.both_sound
 )
 
-# Bridge idghams whose SOURCE is a noon/tanwīn (these carry a rule tag on the
-# source cell and co-light cross-word; mutamathilayn/mutaqaribayn/mutajanisayn
-# are bridges too but are not cell-tagged sources, matching the historical scope).
+# Idghams whose SOURCE cell is found by its tag in `_link_cross_word` to co-light
+# with the receiver (curr-head mergers): the noon/tanwīn idghams + mutamāthilayn.
+# Shafawi co-lights too but via the `both_sound` branch (prev-tail), so it's excluded
+# here. mutaqāribayn/mutajānisayn are NOT co-lit (`co_light=False`) — tagged only.
 IDGHAM_SOURCE_TAG_VALUES: frozenset[str] = frozenset(
-    r.value for r, m in CROSS_WORD_MERGERS.items()
-    if m.bridge and ("noon" in r.value or "tanween" in r.value)
+    r.value for r, m in CROSS_WORD_MERGERS.items() if m.co_light and not m.both_sound
 )
 
 # Tanwīn rules whose nūn-sound assimilates → a renderer draws the open tanwīn form.
@@ -174,6 +180,14 @@ NOON_RULE_TAGS: tuple[str, ...] = (
 # missing cell tag on the source mīm.
 GHUNNAH_BASE_TAGS: tuple[str, ...] = (
     "noon_ghunnah", "meem_ghunnah", "ikhfaa_shafawi", "idgham_shafawi",
+)
+# Consonant idgham source rules carried on the source letter cell itself. The
+# fully-merged (silent) sources route through ``_silent_cell_tag``; this tuple
+# supplies the cell tag for the one whose source SOUNDS — mutajānisayn nāqiṣ — so it
+# still underlines + names the rule.
+CONSONANT_IDGHAM_RULE_TAGS: tuple[str, ...] = (
+    "idgham_mutamathilayn", "idgham_mutaqaribayn",
+    "idgham_mutajanisayn_kamil", "idgham_mutajanisayn_naqis",
 )
 
 

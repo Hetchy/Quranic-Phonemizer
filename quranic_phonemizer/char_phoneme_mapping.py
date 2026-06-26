@@ -47,6 +47,7 @@ from .tajweed_classification import (
     TANWEEN_RULE_TAGS,
     NOON_RULE_TAGS,
     GHUNNAH_BASE_TAGS,
+    CONSONANT_IDGHAM_RULE_TAGS,
     IDGHAM_SOURCE_TAG_VALUES,
     detect_cross_word_mergers,
 )
@@ -457,6 +458,7 @@ def _word_cells(word: WordMapping) -> List[Cell]:
                 chars=full, role=MADD, status=REPLACED,
                 phonemes=[ph], phoneme_indices=[idx], tag="madd_iwad",
                 source_letter_index=li, source_letter_indices=[li],
+                secondary_tags=["tafkheem"] if ph in HEAVY_VOWEL_PHONEMES else [],
             ))
             continue
         if li in force_dropped:
@@ -565,6 +567,7 @@ def _word_cells(word: WordMapping) -> List[Cell]:
                         or _pick_tag(rules, GHUNNAH_BASE_TAGS)
                         or (madd_types.get(base_pairs[0][0]) if base_pairs else None)
                         or (_pick_tag(rules, QALQALA_RULE_ORDER) if q_pairs else None)
+                        or _pick_tag(rules, CONSONANT_IDGHAM_RULE_TAGS)
                         or ("tafkheem" if "tafkheem" in rules else None))
         elif waqf_vowel_carrier:
             # ʿāriḍ-li-s-sukūn at the stop. A plain ṭabīʿī madd (now mapped to
@@ -672,9 +675,11 @@ def _word_cells(word: WordMapping) -> List[Cell]:
                 and is_madd_phoneme(mod_pairs[-1][1])):
             madd_iwad = mod_pairs[-1]
             mod_pairs = [p for p in mod_pairs if p != madd_iwad]
+            # The dropped fatḥatan carries NO underline — its compensating madd rides
+            # the ʾalif (the carrier cells below), which holds the madd + tafkhīm bars.
             cells.append(Cell(
                 chars=diac_char, role=TANWEEN, status=DROPPED,
-                phonemes=[], phoneme_indices=[], tag="madd_iwad",
+                phonemes=[], phoneme_indices=[], tag=None,
                 source_letter_index=li, source_letter_indices=[li],
             ))
             if (li + 1 < n_letters
@@ -687,6 +692,7 @@ def _word_cells(word: WordMapping) -> List[Cell]:
                     phonemes=[madd_iwad[1]], phoneme_indices=[madd_iwad[0]],
                     tag="madd_iwad",
                     source_letter_index=li, source_letter_indices=[li],
+                    secondary_tags=["tafkheem"] if madd_iwad[1] in HEAVY_VOWEL_PHONEMES else [],
                 ))
             continue
 
