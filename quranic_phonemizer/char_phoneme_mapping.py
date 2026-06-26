@@ -871,16 +871,16 @@ def _link_cross_word(words: List[CharWord], mapping: PhonemizationMapping, start
     Boundaries come from the single ``detect_cross_word_mergers`` (the same detector
     the SDK shard bridge tagger uses). Two outcomes per merger:
 
-      - **co-light** (the tagged noon/tanwīn idghams + the both-sound shafawi merge):
-        source and receiver share a group, so the consumer lights both through the
-        merger and un-greys the silent source.
-      - **target-tag only** (mutaqāribayn / mutajānisayn kāmil): the receiver carries
-        the source's idgham rule as a SECONDARY tag — so it underlines + names the rule
-        (stacking above its own base rule) — but there is NO share group, so the source
-        stays silent/greyed (no co-light), per the desired distinction.
+      - **co-light** (the tagged noon/tanwīn idghams + the both-sound shafawi merge +
+        mutamāthilayn): source and receiver share a group, so the consumer lights both
+        through the merger and un-greys the silent source.
+      - **silent source** (mutaqāribayn / mutajānisayn kāmil): NO share group, so the
+        source stays silent/greyed (no co-light).
 
-    mutāmathilayn is co-light; mutaqāribayn / mutajānisayn are target-tag only.
-    (Within-word mutajānisayn nāqiṣ is handled by ``_tag_within_word_naqis``.)"""
+    Independently, EVERY consonant idgham (mutamāthilayn / mutaqāribayn / mutajānisayn)
+    also puts its rule on the receiver as a SECONDARY tag, so the target underlines +
+    names the rule uniformly. mutamāthilayn is co-light AND secondary-tagged.
+    (Within-word consonant idghams are handled by ``_tag_within_word_idgham``.)"""
     gid = start_gid
     for m in detect_cross_word_mergers(mapping):
         cur, nxt = words[m.prev_word_index], words[m.curr_word_index]
@@ -906,12 +906,17 @@ def _link_cross_word(words: List[CharWord], mapping: PhonemizationMapping, start
             continue
         if recv is None or source is None:
             continue
+        # Every consonant idgham (mutamāthilayn / mutaqāribayn / mutajānisayn) puts its
+        # rule on the receiver as a SECONDARY tag, so the target underlines + names the
+        # rule (a `merge`-layer secondary, above its own base rule) uniformly — whether
+        # or not it also co-lights. The noon/tanwīn/shafawi receivers underline through
+        # their share group instead, so they get no secondary.
+        if (m.rule in CONSONANT_IDGHAM_RULE_TAGS and source.tag
+                and source.tag != recv.tag and source.tag not in recv.secondary_tags):
+            recv.secondary_tags.append(source.tag)
         if not co_light:
-            # Target-tag only: the receiver underlines + names the rule (a `merge`-layer
-            # secondary, stacking above its own base rule), without sharing a group.
-            if (source.tag and source.tag != recv.tag
-                    and source.tag not in recv.secondary_tags):
-                recv.secondary_tags.append(source.tag)
+            # mutaqāribayn / mutajānisayn kāmil: no share group, so the source stays
+            # silent/greyed (no co-light) while the target underlines via the secondary.
             continue
         if source.share_group is None and recv.share_group is None:
             g = gid
@@ -943,17 +948,17 @@ def _link_cross_word(words: List[CharWord], mapping: PhonemizationMapping, start
     return gid
 
 
-def _tag_within_word_naqis(cells: List[Cell]) -> None:
-    """Tag the TARGET of a within-word mutajānisayn nāqiṣ (طت: بَسَطتَ) so it underlines
-    + names the rule alongside its sounding source. Both letters sound (nāqiṣ), so this
-    is a pure secondary-tag on the next base — no merger/share-group involved."""
-    NAQIS = "idgham_mutajanisayn_naqis"
+def _tag_within_word_idgham(cells: List[Cell]) -> None:
+    """Tag the TARGET of a within-word consonant idgham so it underlines + names the rule
+    alongside its source — a pure secondary-tag on the next base, no merger/share-group.
+    Covers mutaqāribayn (قك: نَخْلُقكُّم, source silent) and mutajānisayn nāqiṣ (طت: بَسَطتَ,
+    both letters sound); cross-word boundaries are handled by ``_link_cross_word``."""
     for i, c in enumerate(cells):
-        if c.tag != NAQIS:
+        if c.tag not in CONSONANT_IDGHAM_RULE_TAGS:
             continue
         tgt = next((t for t in cells[i + 1:] if t.role == BASE), None)
-        if tgt and tgt.tag != NAQIS and NAQIS not in tgt.secondary_tags:
-            tgt.secondary_tags.append(NAQIS)
+        if tgt and tgt.tag != c.tag and c.tag not in tgt.secondary_tags:
+            tgt.secondary_tags.append(c.tag)
 
 
 def build_char_phoneme_mapping(mapping: PhonemizationMapping) -> List[CharWord]:
@@ -961,7 +966,7 @@ def build_char_phoneme_mapping(mapping: PhonemizationMapping) -> List[CharWord]:
     gid = 0
     for wm in mapping.words:
         cells = (_special_word_cells(wm) if wm.is_special_word else _word_cells(wm))
-        _tag_within_word_naqis(cells)
+        _tag_within_word_idgham(cells)
         gid = _assign_intra_word_share_groups(cells, gid)
         words.append(CharWord(
             location=wm.location, text=wm.text,
