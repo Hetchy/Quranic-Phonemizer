@@ -650,13 +650,16 @@ def _word_cells(word: WordMapping) -> List[Cell]:
 
         # ---- implicit Allah dagger-alef cell --------------------------------
         # ṭabīʿī when continuing (tag=allah_dagger_alef); at waqf it becomes madd
-        # ʿāriḍ — the classified madd type wins so the carrier reads its rule.
+        # ʿāriḍ — the classified madd type wins so the carrier reads its rule. It is
+        # mufakhkham after the heavy lām (heavy `aˤ:`, light `a:` after a kasra), so
+        # it stacks tafkhīm from the phoneme — exactly like a written madd-alef.
         if allah_pair is not None:
             cells.append(Cell(
                 chars="", role=MADD, status=INSERTED,
                 phonemes=[allah_pair[1]], phoneme_indices=[allah_pair[0]],
                 tag=madd_types.get(allah_pair[0], "allah_dagger_alef"),
                 source_letter_index=li, source_letter_indices=[li],
+                secondary_tags=["tafkheem"] if allah_pair[1] in HEAVY_VOWEL_PHONEMES else [],
             ))
 
         # ---- hamza-wasl pronounced: connecting vowel is implicit ------------
