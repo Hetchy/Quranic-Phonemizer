@@ -25,6 +25,7 @@ Consult existing documentation before answering questions — avoid duplicating 
 | Full API & usage | `.claude/skills/quranic-phonemizer/references/README.md` | Installation, input refs, text search, outputs, stops, phonetic text, tajweed mappings, letter-phoneme mappings, phoneme inventory |
 | Tajweed mapping spec | `.claude/skills/quranic-phonemizer/references/tajweed-mappings.md` | Output structure, source/target rules, all 33 rule definitions, multi-rule overlap, stopping effects, muqattaat, serialization |
 | Letter-phoneme mapping spec | `.claude/skills/quranic-phonemizer/references/letter-phoneme-mappings.md` | Merge rules (PREV/NEXT/CROSS-WORD), extension splitting, stopping effects, validation rules, serialization |
+| Character-phoneme mapping spec | `.claude/skills/quranic-phonemizer/references/character-phoneme-mappings.md` | Per-character (haraka/tanween) cells, roles/statuses/tags, the word-local `phoneme_indices` timing invariant, share groups, implicit/dropped/replaced/shortened families, serialization |
 | Tajweed linguistics | `.claude/skills/quranic-phonemizer/references/tajweed-linguistics.md` | What tajweed is, rule categories, how rules affect pronunciation — for those unfamiliar with Arabic phonetics |
 | DB build / risk register | `dev/README.md` | How `dev/Quran.json` + `surah_info.json` produce `quran_db.bin`, safe vs dangerous edits, CI sync workflow |
 | Phoneme config | `quranic_phonemizer/resources/base_phonemes.yaml` | Character-to-phoneme YAML definitions |
@@ -97,6 +98,21 @@ result.save("out.json", fmt="letter_phoneme")
 
 Returns `FlatMappingResult`. For merge rules, extension splitting, stopping effects, and validation, see `docs/letter-phoneme-mappings.md`.
 
+### Character-Phoneme Mappings
+
+One cell per written character (base letter, each haraka/tanween, the long-vowel carrier) plus rule-inserted implicit units (hamza-waṣl vowel, iltiqāʾ kasra, Allah dagger-alef, madd-ʿiwaḍ alef). Each cell carries word-local `phoneme_indices` for per-diacritic highlight timing. Canonical domain only — no script/visual details.
+
+```python
+cpm = result.character_phoneme_mappings()
+for word in cpm.words:
+    for c in word.cells:                                       # Cell: chars, role, status,
+        print(c.chars, c.role, c.status, c.phonemes, c.phoneme_indices, c.tag, c.share_group)
+violations = cpm.validate()                                    # empty = valid
+result.save("out.json", fmt="char_phoneme")
+```
+
+Returns `CharPhonemeResult` (`words: List[CharWord]`, each with `cells: List[Cell]`). Roles `base/haraka/tanween/madd`; statuses `present/inserted/dropped/replaced/shortened`. For the full family table, the `phoneme_indices` invariant, share groups, and serialization, see `docs/character-phoneme-mappings.md`.
+
 ### PhonemeRegistry (Runtime Customization)
 
 Singleton that caches YAML phoneme definitions and supports runtime overrides:
@@ -119,6 +135,11 @@ LetterMapping, WordMapping, AlignmentEntry, PhonemizationMapping
 TajweedRule, TajweedRuleTag
 TajweedMapping, TajweedWordMapping, TajweedEntry
 FlatMappingResult
+Cell, CharWord, CharPhonemeResult
+CellRole, CellStatus                                   # cell vocab enums (consumers codegen/mirror these)
+MergerClass, detect_cross_word_mergers                 # the single cross-word merger classifier
+is_madd, is_geminate, is_nasalised, is_render_only     # phoneme predicates (YAML-derived)
+BRIDGE_RULE_VALUES, MERGER_ON_PREV_VALUES, TANWEEN_ASSIMILATES_VALUES, diacritic_chars
 ```
 
 ## Architecture Overview

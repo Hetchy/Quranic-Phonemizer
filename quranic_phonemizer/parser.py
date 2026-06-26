@@ -259,12 +259,18 @@ class Parser:
                 letter.index_in_word = len(word.letters)
                 word.letters.append(letter)
 
-            # Populate _tajweed_rules from single-entry tajweed_mapping (non-muqattaat)
+            # Populate _tajweed_rules from the tajweed_mapping. Each subword is one
+            # spelled-out letter name aligned positionally to a sounding letter, so
+            # the letter inherits the union of its subword's per-grapheme source
+            # rules (a name's madd carrier + any noon/ghunnah/idgham it sounds). This
+            # covers the multi-subword muqattaat too, whose entries are per spelled
+            # grapheme — never 1:1 with the YAML letter_mappings.
             tajweed_mapping = special_data.get('tajweed_mapping')
-            if tajweed_mapping and len(tajweed_mapping) == 1:
-                tm_entries = tajweed_mapping[0].get('entries', [])
-                for letter, tm_entry in zip(word.letters, tm_entries):
-                    for rule_str in tm_entry.get('source_rules', []):
+            if tajweed_mapping:
+                for letter, sub_word in zip(word.letters, tajweed_mapping):
+                    rule_strs = [r for entry in sub_word.get('entries', [])
+                                 for r in entry.get('source_rules', [])]
+                    for rule_str in rule_strs:
                         try:
                             letter.add_tajweed_rule(
                                 TajweedRuleTag(rule=TajweedRule(rule_str), is_source=True))

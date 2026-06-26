@@ -97,9 +97,9 @@ special_words:
       - char: "ا"
         phonemes: ["ʔ", "a", "l", "i", "f"]
       - char: "لٓ"
-        phonemes: ["l", "a:"]
+        phonemes: ["l", "a:", "m"]
       - char: "ر"
-        phonemes: ["m", "rˤ", "aˤ:"]
+        phonemes: ["rˤ", "aˤ:"]
       - char: " ۚ"
         phonemes: []
     tajweed_mapping:
@@ -492,3 +492,52 @@ letter_overrides:
     target_char: "ۨ"
     override_phonemes: ["ŋ"]
     override_tajweed: ["ikhfaa_noon"]
+
+  # ٱئْتُونِى — when STARTED on, the hamzat-wasl ٱ sounds its own [ʔ, i:] (a madd
+  # tabii) and the following yaa-hamza ئ goes silent (drops its ʔ), so the word
+  # opens ʔ i: t u: n i: instead of the wasl ʔ t u: n i:. wasl/stop are untouched.
+  - location: "10:79:3"
+    context: "starting"
+    target_char: "ٱ"
+    override_phonemes: ["ʔ", "i:"]
+    override_tajweed: ["madd_tabii"]
+  - location: "10:79:3"
+    context: "starting"
+    target_char: "ئ"
+    override_phonemes: []
+  - location: "12:50:3"
+    context: "starting"
+    target_char: "ٱ"
+    override_phonemes: ["ʔ", "i:"]
+    override_tajweed: ["madd_tabii"]
+  - location: "12:50:3"
+    context: "starting"
+    target_char: "ئ"
+    override_phonemes: []
+  - location: "12:54:3"
+    context: "starting"
+    target_char: "ٱ"
+    override_phonemes: ["ʔ", "i:"]
+    override_tajweed: ["madd_tabii"]
+  - location: "12:54:3"
+    context: "starting"
+    target_char: "ئ"
+    override_phonemes: []
+  - location: "12:59:5"
+    context: "starting"
+    target_char: "ٱ"
+    override_phonemes: ["ʔ", "i:"]
+    override_tajweed: ["madd_tabii"]
+  - location: "12:59:5"
+    context: "starting"
+    target_char: "ئ"
+    override_phonemes: []
+  - location: "46:4:18"
+    context: "starting"
+    target_char: "ٱ"
+    override_phonemes: ["ʔ", "i:"]
+    override_tajweed: ["madd_tabii"]
+  - location: "46:4:18"
+    context: "starting"
+    target_char: "ئ"
+    override_phonemes: []
