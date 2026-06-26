@@ -103,6 +103,11 @@ GLIDE_PHONEMES = frozenset({"j", "w"})
 # already takes its madd tag; only the consonant phone is the spare slot.
 ISTILAA_CONSONANT_PHONES = frozenset({"sˤ", "dˤ", "tˤ", "ðˤ", "q", "x", "ɣ"})
 
+# Every heavy consonant phone that carries tafkheem inside a muqaṭṭaʿ name: the
+# istiʿlāʾ set plus the heavy rāʾ (الٓر / الٓمٓر's ر → rˤ, which is mufakhkham but
+# not istiʿlāʾ).
+MUQ_TAFKHEEM_CONSONANT_PHONES = ISTILAA_CONSONANT_PHONES | {"rˤ", "rˤ:"}
+
 # Qalqala tier order for a base cell: kubra (at waqf / a final sākin) wins over
 # sughra (mid-word). Picked from the letter's OWN source rules — a qalqala letter
 # carries exactly one of these — so the cell names the precise variant instead of
@@ -346,7 +351,7 @@ def _special_phoneme_tags(subword: dict, lp: List[Tuple[int, str]]) -> List[Opti
       - the qalqala consonant carries qalqala_kubra (the render-only Q echo is NOT
         an indexable phone, so a downstream shard drops it — the consonant is the
         only slot the rule can ride; a renderer moves the underline to the echo),
-      - a heavy istiʿlāʾ consonant ( صٓ's sˤ, طٰ's tˤ, قٓ's q) gets tafkheem on its
+      - a heavy consonant ( صٓ's sˤ, طٰ's tˤ, قٓ's q, الٓر's rˤ) gets tafkheem on its
         spare slot (the heavy long vowel after it already carries its madd),
       - every other phone is None."""
     src, tgt = _special_subword_rules(subword)
@@ -387,11 +392,11 @@ def _special_phoneme_tags(subword: dict, lp: List[Tuple[int, str]]) -> List[Opti
         for k in range(1, len(lp)):
             if is_render_only(lp[k][1]) and tags[k - 1] is None:
                 tags[k - 1] = "qalqala_kubra"
-    # Tafkheem on the heavy istiʿlāʾ consonant (صٓ's sˤ / قٓ's q / طٰ's tˤ): its slot
+    # Tafkheem on the heavy consonant (صٓ's sˤ / قٓ's q / طٰ's tˤ / الٓر's rˤ): its slot
     # is otherwise None (the heavy vowel after it already took its madd).
     if "tafkheem" in rules:
         for k, (_, ph) in enumerate(lp):
-            if tags[k] is None and ph in ISTILAA_CONSONANT_PHONES:
+            if tags[k] is None and ph in MUQ_TAFKHEEM_CONSONANT_PHONES:
                 tags[k] = "tafkheem"
     return tags
 
@@ -399,14 +404,17 @@ def _special_phoneme_tags(subword: dict, lp: List[Tuple[int, str]]) -> List[Opti
 def _special_word_cells(word: WordMapping) -> List[Cell]:
     """Muqaṭṭaʿāt / hardcoded words: one cell per sounding letter. A spelled-out name
     renders as its single bare-letter grapheme (لام is one ل glyph, not ل+phantom-alef),
-    so each letter stays ONE cell. The cell's headline ``tag`` is the name's LETTER-tier
-    madd (madd_lazim نُوٓنْ / لَآم, madd_tabii هَا, عَيْن's leen → madd_lazim); the new
-    ``phoneme_rule_tags`` then carries the finer per-phone rules the bare-letter cell
-    would otherwise smear — the merged nasal's idgham_shafawi, the ikhfaa nasal's
-    ikhfaa_noon, the long vowel / leen glide's madd, the dāl/Q qalqala. Both come from
-    the grapheme-aligned YAML ``tajweed_mapping`` (the same source ``tajweed_mappings()``
-    trusts). A name with neither madd nor nasal (the أَلِفْ head of الٓم) stays an
-    untagged BASE cell."""
+    so each letter stays ONE cell. The cell's headline ``tag`` is the name's 6-count
+    LETTER-tier madd (madd_lazim نُوٓنْ / لَآم, عَيْن's leen → madd_lazim); a 2-count
+    madd_tabii name (طَا / هَا / يَا / ḥā / rā) stays a BASE cell so the bare consonant
+    glyph isn't barred, its madd living on the long-vowel phone in ``phoneme_rule_tags``.
+    That same per-phone list carries the finer rules the bare-letter cell would otherwise
+    smear — the merged nasal's idgham_shafawi, the ikhfaa nasal's ikhfaa_noon, the long
+    vowel / leen glide's madd, the heavy consonant's tafkheem, the dāl/Q qalqala. A heavy
+    name (ص ق ط / heavy rāʾ) also carries ``secondary_tags=["tafkheem"]`` so its glyph
+    underlines as mufakhkham. Both come from the grapheme-aligned YAML ``tajweed_mapping``
+    (the same source ``tajweed_mappings()`` trusts). A name with neither madd nor nasal
+    (the أَلِفْ head of الٓم) stays an untagged BASE cell."""
     cells: List[Cell] = []
     pairs = _letter_pairs(word)
     subwords = get_tajweed_mapping(word.location) or []
@@ -421,14 +429,22 @@ def _special_word_cells(word: WordMapping) -> List[Cell]:
         rule_tags = _special_phoneme_tags(subword, lp)
         src, tgt = _special_subword_rules(subword)
         madd_tag = _special_madd_tag(src | tgt)
-        # A named madd (every letter but the bare أَلِفْ head) underlines + groups
-        # as MADD; only a rule-free head stays a plain BASE cell.
-        role = MADD if madd_tag else BASE
+        # The cell's headline madd underlines the whole letter only for a 6-count
+        # madd_lazim (لَآم / نُوٓنْ / عَيْن's leen); a 2-count madd_tabii letter (ṭā / hā /
+        # yā / ḥā / rā) keeps madd_tabii on its long-vowel phone via phoneme_rule_tags
+        # and renders as a BASE cell, so the consonant glyph itself stays unbarred.
+        cell_tag = madd_tag if madd_tag != "madd_tabii" else None
+        role = MADD if cell_tag else BASE
+        # A heavy letter (istiʿlāʾ ص ق ط or the heavy rāʾ) is mufakhkham as a whole —
+        # the letter glyph carries a tafkheem bar (the per-phone tafkheem above is the
+        # phoneme-row twin).
+        heavy = any(ph in MUQ_TAFKHEEM_CONSONANT_PHONES for _, ph in lp)
         cells.append(Cell(
             chars=get_full_char(lm), role=role, status=PRESENT,
             phonemes=[p for _, p in lp], phoneme_indices=[i for i, _ in lp],
-            tag=madd_tag, source_letter_index=li, source_letter_indices=[li],
+            tag=cell_tag, source_letter_index=li, source_letter_indices=[li],
             phoneme_rule_tags=rule_tags,
+            secondary_tags=["tafkheem"] if heavy else [],
         ))
     return cells
 
