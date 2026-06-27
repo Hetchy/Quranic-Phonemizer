@@ -485,6 +485,27 @@ def _word_cells(word: WordMapping) -> List[Cell]:
             ))
             continue
 
+        # ---- contextual transform: a seat re-cast as a madd carrier ----------
+        # A started-on hamzat-waṣl ibtidāʾ ٱئْتُونِى sets display_char on its yaa-hamza
+        # ئ, which sounds the long iː: render it as that glyph (ي) in a single dashed
+        # INSERTED madd cell carrying the override's madd tag on the iː phoneme. The
+        # seat's sukūn rides along as an inert (phonemeless) haraka cell — the FE
+        # filters sukūn cells, so it never shows, but every diacritic keeps a cell.
+        if lm.display_char is not None and lp:
+            madd_tag = _pick_tag(rules, tuple(MADD_RULE_TAGS))
+            cells.append(Cell(
+                chars=lm.display_char, role=MADD, status=INSERTED,
+                phonemes=[p for _, p in lp], phoneme_indices=[i for i, _ in lp],
+                tag=madd_tag, source_letter_index=li, source_letter_indices=[li],
+            ))
+            if diac is not None:
+                cells.append(Cell(
+                    chars=diacritic_chars().get(diac, ""), role=HARAKA, status=PRESENT,
+                    phonemes=[], phoneme_indices=[],
+                    source_letter_index=li, source_letter_indices=[li],
+                ))
+            continue
+
         # ---- split into consonant / modifier --------------------------------
         # A letter may be raw-silent (lp empty) yet still carry a diacritic — e.g.
         # an idgham-shafawi meem whose consonant merged cross-word AND whose vowel

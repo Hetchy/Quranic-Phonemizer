@@ -55,40 +55,61 @@ LETTER_CLASSES: dict[str, type[LetterSymbol]] = {
     "ۧ":  Yaa, # mini yaa
 }
 
-def _load_letter_overrides(yaml_path: str | Path) -> Dict[str, List[Dict[str, Any]]]:
-    """Load letter-level phoneme overrides keyed by location."""
+def _load_contextual_pronunciations(yaml_path: str | Path) -> Dict[str, List[Dict[str, Any]]]:
+    """Load context-dependent / alternative pronunciations, keyed by location.
+
+    Each YAML definition declares a LIST of ``locations`` sharing one set of
+    ``letters`` rules, with a definition-level ``context`` default (a rule may
+    override it). This expands every ``location × letter-rule`` into the flat
+    per-letter dict ``apply_contextual_pronunciations`` consumes:
+    ``{location, context, target_char, index, override_phonemes,
+    override_tajweed?, override_char?}``. ``override_tajweed`` is carried only when
+    a rule sets ``tajweed`` (presence = set / clear-if-[]; absence = leave)."""
     with open(yaml_path, 'r', encoding='utf-8') as file:
         data = yaml.safe_load(file)
 
-    overrides_map: Dict[str, List[Dict[str, Any]]] = {}
-    for entry in data.get('letter_overrides', []):
-        loc = entry['location']
-        overrides_map.setdefault(loc, []).append(entry)
-    return overrides_map
+    out: Dict[str, List[Dict[str, Any]]] = {}
+    for d in data.get('contextual_pronunciations', []):
+        def_ctx = d.get('context', 'always')
+        for loc in d['locations']:
+            for rule in d['letters']:
+                entry: Dict[str, Any] = {
+                    'location': loc,
+                    'context': rule.get('context', def_ctx),
+                    'target_char': rule['char'],
+                    'index': rule.get('index', 1),
+                    'override_phonemes': list(rule['phonemes']),
+                }
+                if 'tajweed' in rule:
+                    entry['override_tajweed'] = list(rule['tajweed'])
+                if 'display_char' in rule:
+                    entry['override_char'] = rule['display_char']
+                out.setdefault(loc, []).append(entry)
+    return out
 
 
-def _load_special_words(yaml_path: str | Path) -> Dict[str, Dict[str, Any]]:
+def _load_muqattaat(yaml_path: str | Path) -> Dict[str, Dict[str, Any]]:
     """
-    Load special words and their letter mappings from YAML file.
-    
+    Load the huroof muqaṭṭaʿāt hard-phonemizations from the muqattaat YAML.
+
     Parameters
     ----------
     yaml_path : str | Path
-        Path to the special_words.yaml file
-        
+        Path to the muqattaat.yaml file
+
     Returns
     -------
     Dict[str, Dict[str, Any]]
-        Dictionary mapping location keys to special word data including:
+        Dictionary mapping location keys to muqaṭṭaʿ data including:
         - 'phonemes': List[str] - word-level phonemes
         - 'letter_mappings': List[Dict] - per-letter mapping with char, phonemes, rules
     """
     with open(yaml_path, 'r', encoding='utf-8') as file:
         data = yaml.safe_load(file)
-    
+
     special_words_map = {}
-    
-    for word_entry in data['special_words']:
+
+    for word_entry in data['muqattaat']:
         text = word_entry['text']
         letter_mappings = word_entry.get('letter_mappings', [])
         
@@ -134,10 +155,15 @@ def _get_special_word_data(location_key: str, special_words_map: Dict[str, Dict[
 class Parser:
     """Parses text into properly associated symbols for Quranic phonemization."""
     
-    def __init__(self, symbol_mappings: Dict[str, Any], special_words_path: str | Path = DATA_DIR / "special_words.yaml"):
+    def __init__(
+        self,
+        symbol_mappings: Dict[str, Any],
+        muqattaat_path: str | Path = DATA_DIR / "muqattaat.yaml",
+        contextual_pronunciations_path: str | Path = DATA_DIR / "contextual_pronunciations.yaml",
+    ):
         self.symbol_mappings = symbol_mappings
-        self.special_words_map = _load_special_words(special_words_path)
-        self.letter_overrides_map = _load_letter_overrides(special_words_path)
+        self.special_words_map = _load_muqattaat(muqattaat_path)
+        self.contextual_pronunciations_map = _load_contextual_pronunciations(contextual_pronunciations_path)
         self._build_lookup_tables()
     
     def _build_lookup_tables(self) -> None:
@@ -283,7 +309,7 @@ class Parser:
 
             return word
         
-        # The Quran DB and special_words.yaml contain no <rule> tags, so the
+        # The Quran DB and the resource YAMLs contain no <rule> tags, so the
         # raw text can be parsed directly without stripping.
         n = len(text)
         outer = self._outer_dispatch
@@ -348,10 +374,10 @@ class Parser:
             word_letters[0].is_first = True
             word_letters[-1].is_last = True
 
-        # Attach letter overrides if any exist for this location
-        overrides = self.letter_overrides_map.get(location.location_key)
-        if overrides:
-            word._letter_overrides = overrides
+        # Attach contextual pronunciations if any exist for this location
+        contextual = self.contextual_pronunciations_map.get(location.location_key)
+        if contextual:
+            word._contextual_pronunciations = contextual
 
         return word
 

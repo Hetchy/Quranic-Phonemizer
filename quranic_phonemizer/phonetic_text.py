@@ -146,7 +146,7 @@ def _build_letter_segment(
     stopping = word.is_stopping
     location_key = word.location.location_key
 
-    # F. Location-specific skip (removed — now handled by letter_overrides)
+    # F. Location-specific skip (removed — now handled by contextual_pronunciations)
 
     letter_char = lt.char
     shaddah = lt.has_shaddah
@@ -215,7 +215,7 @@ def _build_letter_segment(
             if diac_name in _HARAKA_NAMES:
                 diac_name = "SUKUN"
 
-    # F. Location-specific diacritic overrides (removed — now handled by letter_overrides)
+    # F. Location-specific diacritic overrides (removed — now handled by contextual_pronunciations)
 
     # G. Allah dagger alef
     allah_extra = ""
