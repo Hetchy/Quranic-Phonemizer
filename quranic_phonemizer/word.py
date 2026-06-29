@@ -18,7 +18,7 @@ class Word:
     __slots__ = (
         "location", "text", "prev_word", "next_word", "letters",
         "phonemes", "stop_sign", "is_starting", "is_stopping",
-        "_letter_overrides",
+        "_contextual_pronunciations",
     )
 
     def __init__(self, location: Location, text: str = ""):
@@ -31,7 +31,7 @@ class Word:
         self.stop_sign: Optional[StopSymbol] = None
         self.is_starting: bool = False
         self.is_stopping: bool = False
-        self._letter_overrides: Optional[List[Dict[str, Any]]] = None
+        self._contextual_pronunciations: Optional[List[Dict[str, Any]]] = None
 
     def get_prev_letter(self, index: int, n: int = 1) -> Optional[LetterSymbol]:
         target_index = index - n
@@ -61,27 +61,38 @@ class Word:
             if not letter.is_phonemized:
                 letter.phonemize()
 
-    def apply_phoneme_overrides(self) -> None:
-        """Apply letter-level phoneme and tajweed overrides after phonemization."""
-        if not self._letter_overrides:
+    def apply_contextual_pronunciations(self) -> None:
+        """Apply context-dependent phoneme / tajweed / glyph adjustments after
+        phonemization. Each entry targets the ``index``-th occurrence (1-based) of
+        ``target_char`` in the word — so a repeated letter is addressable — gated by
+        ``context`` (always / starting / stopping)."""
+        if not self._contextual_pronunciations:
             return
-        for override in self._letter_overrides:
+        for override in self._contextual_pronunciations:
             context = override.get('context', 'always')
             if context == 'stopping' and not self.is_stopping:
                 continue
             if context == 'starting' and not self.is_starting:
                 continue
             target = override['target_char']
+            want = override.get('index', 1)  # 1-based occurrence of target_char
+            seen = 0
             for letter in self.letters:
-                if letter.char == target:
-                    if 'override_phonemes' in override:
-                        letter.phonemes = list(override['override_phonemes'])
-                    if 'override_tajweed' in override:
-                        letter._tajweed_rules = [
-                            TajweedRuleTag(rule=TajweedRule(r), is_source=True)
-                            for r in override['override_tajweed']
-                        ]
-                    break
+                if letter.char != target:
+                    continue
+                seen += 1
+                if seen != want:
+                    continue
+                if 'override_phonemes' in override:
+                    letter.phonemes = list(override['override_phonemes'])
+                if 'override_tajweed' in override:
+                    letter._tajweed_rules = [
+                        TajweedRuleTag(rule=TajweedRule(r), is_source=True)
+                        for r in override['override_tajweed']
+                    ]
+                if 'override_char' in override:
+                    letter.display_char = override['override_char']
+                break
 
     def get_phonemes(self) -> List[str]:
         if self.phonemes:
@@ -165,6 +176,7 @@ class Word:
                 extensions=extension_mappings,
                 other_symbols=other_symbols_mappings,
                 tajweed_rules=tajweed_tags,
+                display_char=letter.display_char,
             )
             letter_mappings.append(lm)
 

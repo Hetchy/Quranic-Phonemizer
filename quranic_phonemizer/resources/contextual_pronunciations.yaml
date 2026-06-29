@@ -1,0 +1,44 @@
+# Context-dependent / alternative pronunciations — per-location phoneme + tajweed
+# adjustments applied AFTER the default phonemization. One definition declares a LIST
+# of `locations` sharing one set of `letters` rules; `context` (always|starting|stopping)
+# is the definition default (a letter rule may override it). A letter rule:
+#   char        — the grapheme to match
+#   phonemes    — replacement phonemes (may be [])
+#   tajweed     — optional: replacement tajweed tags ([] clears auto-tags; omit = leave)
+#   display_char— optional: render the cell as this glyph (a transform, e.g. ئ→ي)
+#   index       — optional 1-based: which occurrence of `char` (omit = first)
+# (Split out of the former special_words.yaml `letter_overrides:`.)
+
+contextual_pronunciations:
+  - locations: ["41:44:9"]                       # ءَا۬عْجَمِىٌّ — restore hamzas popped by alef lengthening
+    letters:
+      - { char: "ء", phonemes: ["ʔ", "a"] }
+      - { char: "ا", phonemes: ["ʔ", "a"] }      # alef as second hamza
+
+  - locations: ["11:41:6"]                       # مَجْرٜىٰهَا — imala
+    letters:
+      - { char: "ر", phonemes: ["r"],  tajweed: [] }   # raa: no diacritic; clear auto tafkheem
+      - { char: "ى", phonemes: ["i:"], tajweed: [] }   # imala vowel; clear silent-vowel tag
+
+  - locations: ["27:36:8"]                       # ءَاتَىٰنَِۧ — at a stop
+    context: stopping
+    letters:
+      - { char: "ۧ", phonemes: [] }              # skip the mini yaa entirely
+      - { char: "ن", phonemes: ["n"] }           # noon kasra → sukun
+
+  - locations: ["2:72:4"]                        # فَٱدَّٰرَٰ͏ْٔتُمْ — ornamental dagger alef on raa (CGJ)
+    letters:
+      - { char: "ر", phonemes: ["rˤ", "aˤ"] }
+
+  - locations: ["21:88:7"]                       # نُـۨجِى — mini noon carries ikhfaa nasalization
+    letters:
+      - { char: "ۨ", phonemes: ["ŋ"], tajweed: ["ikhfaa_noon"] }
+
+  # ٱئْتُونِى — started-on hamzat-waṣl ibtidāʾ. The ٱ sounds only ʔ; the following yaa-hamza
+  # ئ transforms to a ي madd carrier sounding the i: (madd ṭabīʿī), so the word opens
+  # ʔ i: t u: n i: instead of the waṣl ʔ t u: n i:. waṣl/stop are untouched.
+  - locations: ["10:79:3", "12:50:3", "12:54:3", "12:59:5", "46:4:18"]
+    context: starting
+    letters:
+      - { char: "ٱ", phonemes: ["ʔ"] }
+      - { char: "ئ", phonemes: ["i:"], tajweed: ["madd_tabii"], display_char: "ي" }

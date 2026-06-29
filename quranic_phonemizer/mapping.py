@@ -42,6 +42,10 @@ class LetterMapping:
     # Structured tajweed rule tags.
     tajweed_rules: List[TajweedRuleTag] = field(default_factory=list)
 
+    # Contextual-pronunciation transform glyph (e.g. a started-on ٱئْتُونِى's ئ→ي);
+    # None = render as ``char``. Carried from LetterSymbol.display_char.
+    display_char: Optional[str] = None
+
 @dataclass
 class MaddMapping:
     """Mapping for a single madd (long vowel) occurrence."""

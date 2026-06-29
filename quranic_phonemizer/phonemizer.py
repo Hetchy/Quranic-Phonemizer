@@ -48,22 +48,24 @@ class Phonemizer:
         self,
         db_path: str | Path = DATA_DIR / "quran_db.bin",
         map_path: str | Path = DATA_DIR / "base_phonemes.yaml",
-        special_words_path: str | Path = DATA_DIR / "special_words.yaml",
+        muqattaat_path: str | Path = DATA_DIR / "muqattaat.yaml",
+        contextual_pronunciations_path: str | Path = DATA_DIR / "contextual_pronunciations.yaml",
         extra_symbols: Optional[dict[str, dict]] = None,
     ) -> None:
         self.db_path = str(db_path)
         self.map_path = str(map_path)
-        self.special_words_path = str(special_words_path)
+        self.muqattaat_path = str(muqattaat_path)
+        self.contextual_pronunciations_path = str(contextual_pronunciations_path)
         symbol_mappings = load_symbol_mappings(map_path)
-        
+
         # Merge extra symbols if provided
         if extra_symbols:
             for category, items in extra_symbols.items():
                 if category not in symbol_mappings:
                     symbol_mappings[category] = {}
                 symbol_mappings[category].update(items)
-        
-        self.parser = Parser(symbol_mappings, special_words_path)
+
+        self.parser = Parser(symbol_mappings, muqattaat_path, contextual_pronunciations_path)
         self.text_matcher = TextMatcher(db_path, symbol_mappings)
         with (DATA_DIR / "surah_info.json").open("r", encoding="utf-8") as fh:
             self._surah_info: dict[str, dict] = json.load(fh)
@@ -190,7 +192,7 @@ class Phonemizer:
         for word in words:
             word.phonemize()
         for word in words:
-            word.apply_phoneme_overrides()
+            word.apply_contextual_pronunciations()
 
         all_phonemes = []
         for word in words:

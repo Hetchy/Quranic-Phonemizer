@@ -18,11 +18,11 @@ def get_display_text(location_key: str) -> Optional[str]:
     global _DISPLAY_TEXT_MAP
     if _DISPLAY_TEXT_MAP is None:
         import yaml
-        yaml_path = Path(__file__).resolve().parent / "resources" / "special_words.yaml"
+        yaml_path = Path(__file__).resolve().parent / "resources" / "muqattaat.yaml"
         with yaml_path.open("r", encoding="utf-8") as fh:
             data = yaml.safe_load(fh)
         _DISPLAY_TEXT_MAP = {}
-        for entry in data.get("special_words", []):
+        for entry in data.get("muqattaat", []):
             display = entry.get("display_text")
             if display:
                 for loc in entry.get("locations", []):
@@ -35,11 +35,11 @@ def get_tajweed_mapping(location_key: str) -> Optional[list]:
     global _TAJWEED_MAPPING_MAP
     if _TAJWEED_MAPPING_MAP is None:
         import yaml
-        yaml_path = Path(__file__).resolve().parent / "resources" / "special_words.yaml"
+        yaml_path = Path(__file__).resolve().parent / "resources" / "muqattaat.yaml"
         with yaml_path.open("r", encoding="utf-8") as fh:
             data = yaml.safe_load(fh)
         _TAJWEED_MAPPING_MAP = {}
-        for entry in data.get("special_words", []):
+        for entry in data.get("muqattaat", []):
             tm = entry.get("tajweed_mapping")
             if tm:
                 for loc in entry.get("locations", []):
