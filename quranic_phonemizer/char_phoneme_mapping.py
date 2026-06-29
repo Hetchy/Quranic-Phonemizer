@@ -487,15 +487,24 @@ def _word_cells(word: WordMapping) -> List[Cell]:
 
         # ---- contextual transform: a seat re-cast as a madd carrier ----------
         # A started-on hamzat-waṣl ibtidāʾ ٱئْتُونِى sets display_char on its yaa-hamza
-        # ئ, which sounds the long iː: render it as that glyph (ي) in a single dashed
-        # INSERTED madd cell carrying the override's madd tag on the iː phoneme. The
-        # seat's sukūn rides along as an inert (phonemeless) haraka cell — the FE
-        # filters sukūn cells, so it never shows, but every diacritic keeps a cell.
+        # ئ, which sounds the long iː. Render it as a VOWEL GROUP: the hamza-waṣl
+        # connecting vowel is a bordered INSERTED kasra and the seat becomes that glyph
+        # (ي) in a dashed INSERTED madd cell — both sharing the single iː phoneme index
+        # (exactly like a regular haraka + madd carrier pair, e.g. ُ + و). The seat's
+        # sukūn rides along as an inert (phonemeless) haraka cell — the FE filters
+        # sukūn cells, so it never shows, but every diacritic keeps a cell.
         if lm.display_char is not None and lp:
             madd_tag = _pick_tag(rules, tuple(MADD_RULE_TAGS))
+            ph_list = [p for _, p in lp]
+            idx_list = [i for i, _ in lp]
+            cells.append(Cell(
+                chars="ِ", role=HARAKA, status=INSERTED,
+                phonemes=ph_list, phoneme_indices=idx_list,
+                tag="hamza_wasl_vowel", source_letter_index=li, source_letter_indices=[li],
+            ))
             cells.append(Cell(
                 chars=lm.display_char, role=MADD, status=INSERTED,
-                phonemes=[p for _, p in lp], phoneme_indices=[i for i, _ in lp],
+                phonemes=ph_list, phoneme_indices=idx_list,
                 tag=madd_tag, source_letter_index=li, source_letter_indices=[li],
             ))
             if diac is not None:
