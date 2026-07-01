@@ -1,7 +1,5 @@
 # Warsh Riwaya Abstraction — Plan
 
-Status: proposed. Owner: TBD. Target repo: `Hetchy/Quranic-Phonemizer`.
-
 ## Goal
 
 Generalize the phonemizer so it can support a second riwaya (Warsh, via one
@@ -19,12 +17,6 @@ stop/start transforms, and the corpus shape itself — is **hardcoded in Python*
 keyed off Hafs glyphs. A different script silently no-ops those rules. So the
 real work is a refactor that makes riwaya context, orthography/phoneme relations,
 tajweed rules, and the corpus first-class and data-driven.
-
-## Non-goals
-
-- Not supporting all ten qira'at. One riwaya (Warsh), one tariq, chosen in Epic 1.
-- No downstream qua-sdk changes in this effort (tracked separately).
-- No external/expert sign-off gate as a formal epic (validate via tests + review).
 
 ## Guiding principles
 
@@ -72,13 +64,9 @@ the call.
       variation; pick one line of transmission.
 - [ ] Which script source becomes canonical (candidates surveyed in Epic 1a).
 - [ ] Which display font is the target (drives the compatibility constraints).
-- [ ] Confirmed non-goals (one tariq only; no qua-sdk; no expert-signoff gate).
 - [ ] Refactor ambition: FULL internal-model rework (retire thin Symbol classes,
       first-class diacritics/mini-vowels/stopping, collapse the three re-walks).
       Confirmed.
-
-**Acceptance:** A short decisions record (this doc's "Decisions" appendix, or the
-Epic 0 issue) with each item resolved and dated.
 
 ---
 
