@@ -77,26 +77,25 @@ display-compatible. Engineering-flavored research; runs parallel to 1b.
 
 **Scope / tasks:**
 - [ ] Survey available Warsh scripts and digital sources (Quran.com / King Fahd,
-      Universal Library, Tanzil, and others). Catalogue per source: encoding,
+      QUL, Tanzil, and others). Catalogue per source: encoding,
       Unicode codepoints used, diacritic conventions, verse/word segmentation.
 - [ ] Assess orthography information content: does the script encode phoneme
       hints in the orthography (preferred), or hide them so they must be inferred
       from domain knowledge? Score each candidate.
-- [ ] **Build a Unicode-audit validator (shippable tool, CI-wired).** For a given
+- [ ] **Build a Unicode-audit validator (shippable tool)** For a given
       script file: every codepoint is explainable (in an allowlist with a
       meaning), no stray/random characters, report unknown codepoints with
-      locations. Model it on the existing `sync-quran-db` CI check so a bad
-      script can never land.
-- [ ] Digital-font compatibility: assess how well each script matches the chosen
-      display font (the display font is the constraint). Document the mapping
-      required to go from script -> font agreement, or survey alternative Warsh
-      fonts compatible with the script.
+      locations.
+- [ ] Digital font compatibility: Survey Warsh
+      fonts compatible with the script. Asses if Digital Khatt is compatible with Warsh, or which fonts support Warsh. Assess how well each script matches the chosen
+      display font. Document the mapping
+      required to go from script -> font agreement.
 - [ ] Produce a comparison matrix and a recommendation feeding the Epic 0 script
       and font decisions.
 
 **Acceptance:**
-- [ ] `dev/` validator script + a CI workflow that fails on unexplained codepoints.
-- [ ] Comparison matrix committed under `docs/research/warsh-script-survey.md`.
+- [ ] `dev/` validator script that fails on unexplained codepoints.
+- [ ] Comparison matrix committed under `docs/research/warsh/script-survey.md`.
 - [ ] A recommended (script source, font) pair with the required mapping documented.
 
 **Key existing references:** `dev/README.md` (DB/source contract, risk register),
@@ -114,31 +113,27 @@ since most rules are shared with only contextual differences.
 
 **Scope / tasks:**
 - [ ] For each tajweed rule, document the Warsh rule with 1-2 worked examples,
-      explicitly noting "same as Hafs" or the precise difference. Cover at least:
+      optionally noting "same as Hafs" or the precise difference. Some examples:
       noon/tanween rules (idgham, ikhfaa, iqlab, izhar), meem sakinah, qalqala,
       lam (shamsiyah/qamariyah, lam of the name of Allah), raa heaviness/lightness,
       ghunnah, tafkheem/tarqeeq, and the madd family.
 - [ ] Madd lengths: document Warsh madd measures where they differ from Hafs
-      (e.g. madd lazim, munfasil, badal) — these are a known divergence area.
+      (e.g. madd lazim, munfasil, badal).
 - [ ] Imala and other Warsh-characteristic phenomena: document occurrences and
-      conditioning (Warsh uses imala more than Hafs).
+      conditioning.
 - [ ] Special / contextual pronunciation cases (per-location overrides) for Warsh.
 - [ ] Stopping (waqf) and starting (ibtidaa) rules for Warsh.
-- [ ] Unique phonemes in this riwaya not present in the Hafs inventory.
+- [ ] Unique phonemes in this riwaya not present in the Hafs inventory, and suggested IPA (or otherwise) phoneme symbols.
 - [ ] Orthography differences and how they map to pronunciation.
-- [ ] Cite sources (books, reciters, recordings, videos) per rule so each is
-      independently verifiable.
+- [ ] Cite sources (books, recordings, videos) per rule so each is independently verifiable.
 
 **Acceptance:**
-- [ ] `docs/research/warsh-tajweed.md`, structured rule-by-rule, each entry tagged
-      same-as-Hafs / differs (with the diff), examples, and citations.
-- [ ] An explicit list of "new vs Hafs" deltas that becomes the Epic 2 Warsh test
-      backlog and the Epic 4 implementation backlog.
+- [ ] `docs/research/warsh/[documents].md`, structured rule-by-rule, examples, citations, Hafs relationship.
+- [ ] List of "new vs Hafs" deltas that becomes the Epic 2 Warsh test backlog and the Epic 4 implementation backlog.
 
 **Key existing references:** `quranic_phonemizer/resources/base_phonemes.yaml`,
 `rule_phonemes.yaml`, `muqattaat.yaml`, `contextual_pronunciations.yaml`,
 `quranic_phonemizer/tajweed_rule.py` (the 33-rule enum),
-`.claude/skills/quranic-phonemizer/references/tajweed-linguistics.md` and
 `tajweed-mappings.md`, and the Hafs rule code under
 `quranic_phonemizer/symbols/letters/`.
 
@@ -163,8 +158,7 @@ implementing. Two distinct nets.
 - [ ] Hand-author expected phonemes for 1-2 cases of every tajweed rule and every
       contextual pronunciation, prioritizing the Hafs deltas from 1b (the things
       Hafs does not even test today).
-- [ ] First-class tests for the tajweed rules and for the character<->phoneme and
-      letter<->phoneme mappings under Warsh.
+- [ ] First-class tests for the tajweed rules and mappings under Warsh.
 - [ ] Keep these red (xfail/skip-marked) until Epic 4 turns them green.
 
 **Acceptance:**
@@ -265,10 +259,8 @@ before generalizing. Throwaway-quality; informs/locks the seam design.
 top of the seam. This is the first epic that introduces new behavior.
 
 **Scope / tasks:**
-- [ ] Add the Warsh corpus (`Quran.json` -> `quran_db.bin` + `surah_info.json`)
-      from the Epic 0 script decision, through the Epic 1a validator.
-- [ ] Add Warsh data files (base phonemes, rule phonemes, muqattaat, contextual
-      pronunciations, any new phonemes from 1b) as riwaya-scoped siblings.
+- [ ] Add the Warsh corpus from the Epic 0 script decision, through the Epic 1a validator.
+- [ ] Add Warsh data files, phonemes, rules as riwaya-scoped siblings.
 - [ ] Implement the genuine Warsh rule deltas from 1b (e.g. imala, differing madd
       measures, any orthography-driven differences) via the adapter/fork pattern
       chosen in the 3a ADR.
