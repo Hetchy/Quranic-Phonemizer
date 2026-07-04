@@ -1,331 +1,475 @@
-# ADR-001: Canonical internal model — grapheme-cluster tokenization + rule passes
+# ADR-001 (v2): Canonical internal model — two spines, typed segments, tajweed first-class
 
-Status: **proposed** (Epic 3a design ADR, per `docs/warsh-integration-plan.md`)
+Status: **proposed** (Epic 3a design ADR). v2 is a from-scratch design: it does
+NOT work backwards from today's classes or output contracts. A new public
+contract may replace the six current views (version bump accepted).
 
-Companion: `docs/domain-facts.md` (the domain ground truth this model must
-represent).
+Companion: `docs/domain-facts.md` — the domain ground truth this model encodes.
+Reviewed by three independent design reviews (domain-modeling, adversarial
+edge-case stress test over 16 hard cases, simplicity/API); their forced
+decisions are folded in and credited inline as [D]/[A]/[S].
 
 ---
 
-## 1. Context — what the current model is and why it hurts
+## 1. The core decision: two spines joined by `spelling`
 
-Today's de-facto internal model is `Word → List[LetterSymbol]`, where a
-`LetterSymbol` is *already* a grapheme cluster (base char + diacritic +
-shaddah + extensions + marks). That part is right. The problems are in what
-happens after tokenization:
+The domain facts describe **two independent sequences with a many-to-many
+alignment**, not one tree:
 
-1. **Phonemes are bare strings.** `letter.phonemes: List[str]`. Every property
-   a view needs (is it long? geminate? nasal? render-only?) is re-derived by
-   string inspection (`":" in ph`, doubled-halves checks, membership in
-   hardcoded sets like `LONG_VOWELS` in `madd.py:16`). IPA literals are
-   sprinkled through control flow.
-2. **Realization happens as a side effect of OO dispatch.** Each
-   `LetterSymbol.phonemize()` mutates itself and sometimes its neighbour
-   (`noon.py` marks the next letter phonemized; `vowel.py` pops the previous
-   letter's phoneme; `hamza_wasl.py` rewrites the previous word's last
-   phoneme). Order of evaluation is implicit and fragile.
-3. **Waqf/ibtidaa transforms are computed and thrown away.**
-   `letter.py:143-178` mutates diacritic/shaddah, phonemizes, then *restores*
-   the written state. The recited form survives only in the phoneme strings,
-   so every view re-infers the waqf transform from
-   `(written diacritic, is_stopping)` independently — `phonetic_text.py`,
-   `letter_phoneme_mapping.py:252-295` (`redistribute_waqf_tanween`),
-   `silent.py:91-107` (`sounding_in_flat`), and `char_phoneme_mapping.py`
-   inline, four separate re-implementations.
-4. **Madd is a post-pass that re-walks everything.** `build_madd_mappings` +
-   `classify_madd_types` rebuild `phoneme_to_letter` index maps (three times
-   in `madd.py` alone), scan a re-flattened global phoneme sequence, and store
-   the result in a *parallel* structure (`MaddMapping`) that views then
-   re-project (`_madd_type_indices` in char view, `_apply_madd_rules` in
-   tajweed view — independently).
-5. **Rule tags attach to letters, not sounds.** A letter with several phonemes
-   (a muqatta'a alef sounds five phonemes) cannot say which phoneme carries
-   which rule, so the char view maintains a parallel
-   `phoneme_rule_tags` mechanism and matches rules to phones *by phoneme
-   shape* (`_special_phoneme_tags`).
-6. **Six views re-derive from scratch and drift.** `get_mapping`,
-   `letter_phoneme_mappings`, `character_phoneme_mappings`,
-   `tajweed_mappings`, `silent_flags`, `phonetic_text` each walk the letter
-   graph with overlapping-but-different helpers. Known drift: the
-   extension-split sets differ (letter view splits MADDAH, tajweed view does
-   not, silent/char views split only `ٰ ۥ ۦ`); the iltiqaa and waqf-tanween
-   redistributions exist in three copies; `dev/reconcile_tokenization.py`
-   exists solely to police the divergence.
-7. **Domain data is hardcoded** (trigger sets, idgham pair maps, Allah
-   patterns, hamza-wasl patterns, location literals) — the direct Warsh
-   blocker catalogued in the integration plan.
+- **Written spine**: the text as a flat list of `Grapheme`s (every codepoint
+  that appears, classified by the riwaya's script data). Pure orthography —
+  no phonology, no status, no phonemes. Silent letters stay here untouched
+  (domain-facts §8.3: every grapheme is written whether or not it sounds).
+- **Sound spine**: the recitation as a flat, **utterance-level** list of typed
+  `Segment`s (Consonant / Vowel) — the articulation events. Flat and global,
+  not nested under words, because sounds cross words (cross-word idgham
+  today; Warsh naql moves a vowel spelled in word N+1 to sound in word N —
+  retrofitting a global stream later would be expensive [A]).
 
-Meanwhile the **richest structure in the codebase is built last**: the char
-view's `Cell` (role / status / phonemes / phoneme_indices / tag /
-share_group / source letters) — with a validated coverage invariant — is
-derived at the very end from everything else. It is, almost exactly, the
-canonical model we lack.
+The alignment is **one field**: `Segment.spelling: tuple[grapheme_id, ...]`
+(0..n). This single relation dissolves the entire hard-case ledger with no
+auxiliary structures:
 
-## 2. Decision drivers
-
-From the integration plan's guiding principles:
-
-- One canonical internal model; views are pure projections.
-- Tajweed is first-class (rules, sources/targets, madd subtypes on the model,
-  not re-derived).
-- Riwaya-agnostic shape; riwaya-specific *content* lives in data.
-- Hafs output stays byte-identical through the refactor (including each
-  view's current, deliberately divergent tokenization).
-- Tokenization should give us the grapheme↔phoneme relationship "for free"
-  rather than re-deriving it per view.
-
-## 3. Options considered
-
-### Option A — rich tokenizer: clusters emit phonemes at tokenization time
-
-Tokenize straight into cluster objects that *are* the char-phoneme cells,
-each knowing its phonemes. Rejected as the sole mechanism: realization is not
-a function of the cluster alone. It depends on the next/previous word, the
-boundary state, word patterns, the already-realized sound stream, and
-per-location tables (`docs/domain-facts.md` §3). A tokenizer that resolves all
-of that is just today's entangled phonemize step wearing a new name, and every
-riwaya difference would fork the tokenizer itself.
-
-### Option B — orthographic tokenization + ordered rule passes over one token stream (recommended)
-
-Tokenization is purely orthographic and deterministic (script data only).
-Realization is a fixed, explicit sequence of rule passes that *annotate* the
-token stream in place, producing first-class sound objects attached to the
-units they belong to. The annotated stream — words → clusters → units →
-phonemes — is the canonical model; every view is a stateless projection.
-This is the user-suggested "simple tokenization + post-pass with rules", and
-it matches how the domain actually factors (orthography vs phonology).
-
-### Option C — keep letter-class dispatch, store more on the way through
-
-Minimal change: keep `phonemize()` OO dispatch but persist the waqf-transformed
-state, madd types, and per-phoneme tags. Rejected: it fixes re-derivation but
-keeps domain knowledge in subclass control flow (the Warsh blocker), keeps the
-implicit evaluation order and neighbour mutation, and keeps phonemes as
-strings.
-
-**Decision: Option B.**
-
-## 4. The model
-
-Names are provisional. All classes are plain data (dataclasses); no behaviour
-beyond convenience accessors. Everything glyph- or IPA-valued comes from the
-riwaya's data files, never from literals.
-
-```
-Riwaya                          # the context object threaded everywhere
-├── script: ScriptSpec          # codepoint classification: base letters, harakat,
-│                               #   tanween, shaddah, extensions, silence marks,
-│                               #   stop signs, sakt marks (Epic 1a allowlist)
-├── phonemes: PhonemeInventory  # symbol → PhonemeSpec (features below)
-├── rules: RuleData             # trigger sets, pair maps, word patterns,
-│                               #   rule phonemes, madd lengths
-├── overrides: LocationTable    # muqattaat, contextual pronunciations,
-│                               #   madd overrides — (location, context) → data
-└── corpus: Corpus              # per-riwaya text + addressing (Epic 3b)
-
-Phoneme (interned, from PhonemeInventory)
-├── symbol: str                 # the IPA-ish token, unchanged for output
-└── features: long, geminate, nasal, emphatic_colored, render_only,
-               short_vowel, vowel_quality, simple_form   # kills string parsing
-
-Utterance                       # one phonemize() result, one traversal
-├── riwaya, ref, words: [Word]
-
-Word
-├── location, text, stop_sign
-├── boundary: BoundaryState     # is_starting, is_stopping (+ sakt-after flag)
-├── clusters: [Cluster]
-└── prev/next links
-
-Cluster                         # == today's LetterSymbol, orthographic only
-├── index_in_word
-├── base: Grapheme              # char + script classification
-├── haraka: Grapheme | None     # haraka OR tanween (exclusive), written form
-├── shaddah: bool
-├── extensions: [Grapheme]      # dagger alef, mini waw/yaa, maddah
-├── marks: [Grapheme]           # silence marks, small-high letters, unknowns
-└── units: [Unit]               # filled by realization; empty after tokenize
-
-Unit                            # == today's char-view Cell, now canonical
-├── role: BASE | HARAKA | TANWEEN | MADD | INSERTED
-├── source: which grapheme(s) of the cluster it stands for; [] if inserted
-├── status: PRESENT | SILENT | INSERTED | REPLACED | SHORTENED
-├── silence_reason: RuleRef | orthographic-convention key (when SILENT)
-├── phonemes: [Phoneme]         # [] if silent
-├── rules: [RuleTag]            # per-UNIT tags, source/target, incl. madd
-│                               #   subtype — no parallel MaddMapping
-├── madd: MaddInfo | None       # type + count range, on the madd unit itself
-├── share: ShareGroup | None    # joint ownership: haraka+carrier long vowel,
-│                               #   idgham source+target (may span words)
-└── written_delta: ... | None   # recited-form delta for phonetic_text
-                                #   (waqf sukun, iwad alef, started hamza vowel)
-```
-
-Key commitments:
-
-- **The Unit is the atom.** Today's char-view `Cell` semantics (roles,
-  statuses, share groups, the "raw-walk index" invariant) are promoted from
-  last-derived view to the canonical store. `phoneme_indices` disappear as
-  stored data — a unit *owns* its Phoneme objects, and any flat index space
-  (word-local for the char view, global for alignment) is computed by
-  enumeration at projection time, which makes the invariant true by
-  construction.
-- **Insertions are units with no source** (hamza-wasl vowel, iltiqaa kasra,
-  madd-'iwad alef, Allah dagger, qalqala echo as a render-only phoneme on the
-  base unit). Substitutions are `REPLACED` units keeping their source
-  graphemes. Silences are `SILENT` units with a reason. This is exactly the
-  hard-case list from the char-mapping contract, now representable once.
-- **Cross-word sharing is a ShareGroup**, created by the same pass that
-  performs the merger — `detect_cross_word_mergers`-style reverse engineering
-  from rule tags is deleted.
-- **Waqf/ibtidaa are recorded, not recomputed.** Realization runs for the
-  requested traversal (as today), but every boundary-state effect lands on the
-  model as a unit status/delta. Views stop re-inferring stop transforms.
-- **Rules attach to units**, with `is_source`/`is_target` preserved; madd
-  subtype is just another rule tag on the madd unit (plus `MaddInfo` for the
-  count). The letter-level tag list and `MaddMapping` both retire.
-
-### What tokenization gives us for free
-
-`tokenize(word_text, script) → [Cluster]` is a pure function of the script
-data. Because the Unit skeleton (base unit, haraka unit, extension units) is
-mechanically derivable from a Cluster, the grapheme↔phoneme scaffolding of
-*both* mapping views exists before any rule runs; realization only fills
-phonemes, statuses, insertions, and shares. The TS-shard tokenization and
-`silent_flags` become `for unit in ...` loops.
-
-## 5. Construction pipeline
-
-Explicit ordered passes replace dispatch-order side effects. Each pass is a
-linear scan over the linked word/cluster stream with a bounded window, reads
-the riwaya's `RuleData`, and only *adds* to the model (fills units, sets
-statuses, tags rules). Later passes may read earlier passes' phonemes — this
-matches domain invariant §8 of `domain-facts.md` (assimilation → silencing →
-lengthening → classification → colouring is a genuine dependency order, not an
-implementation accident).
-
-```
-1. tokenize            per word: text → clusters (+ stop sign, marks)
-2. link + boundaries   prev/next links; is_starting/is_stopping from stop
-                       signs / verse ends / stop_refs (as today)
-3. splice specials     locations in the override table get their unit
-                       streams built from data (muqattaat) — same model,
-                       so the "spelled-out vs written" divergence becomes a
-                       projection choice, not a fork
-4. boundary transforms ibtidaa: hamza-wasl vowel insertion, initial-shaddah
-                       drop; waqf: final-cluster transforms (sukun, iwad,
-                       taa-marbuta, hamza+fathatan) — recorded as unit
-                       statuses + written_deltas
-5. assimilation        noon/tanween table, meem sakinah, consonant idgham
-                       pairs, lam shamsiyah — silencing sources, substituting
-                       targets, creating ShareGroups (incl. cross-word)
-6. letter realization  base consonants, shaddah doubling, vowel letters
-                       (lengthen-or-silence), taa marbuta, qalqala echo,
-                       hamza-wasl iltiqaa repairs
-7. colouring           tafkheem (isti'laa, raa tree, Allah-lam), heavy
-                       vowels, ghunnah quality
-8. madd classification one scan of the realized units (long-vowel units are
-                       already first-class — no phoneme_to_letter rebuild):
-                       muttasil/munfasil/lazim/arid/leen/iwad/silah + the
-                       override table
-9. contextual overrides  per-location table, context-gated (always /
-                       starting / stopping)
-10. freeze             model becomes read-only; all views project from it
-```
-
-Passes 4–9 are where letter-subclass logic goes. The *structural* logic stays
-Python (one module per family, operating on units); every set, pair map, word
-pattern, phoneme literal, and location list it consults moves to
-riwaya-scoped data — satisfying the Epic 3a "no glyph/IPA/location literals in
-control flow" gate. A fully declarative rule DSL was considered and rejected
-as over-engineering for ~33 rules; the seam that matters for Warsh is
-data-driven *parameters* + per-riwaya pass composition (a riwaya can add a
-pass, e.g. Warsh imala/naql, or swap one).
-
-## 6. Views as projections
-
-| View | Projection |
+| Domain fact | Representation |
 |---|---|
-| `phonemes_*` | concatenate unit phonemes (simple mode = `phoneme.simple_form`) |
-| `character_phoneme_mappings` | units almost verbatim; word-local indices by enumeration |
-| `letter_phoneme_mappings` | group units by cluster; fold SILENT units into their sounding neighbour using `silence_reason` + share direction (the PREV/NEXT/CROSS-WORD logic becomes one table) |
-| `tajweed_mappings` | rule tags per cluster/extension unit; muqattaat projected spelled-out; synthetic Allah dagger = the inserted unit it already is |
-| `silent_flags` | `(grapheme, unit.status is SILENT-at-position, mark)` per written grapheme |
-| `phonetic_text` | render `written_delta ?? written form` per cluster |
-| alignment / `get_mapping` | enumerate phonemes with back-pointers (unit → cluster → word) |
+| long vowel jointly owned by haraka + carrier | one `Vowel`, `spelling=(haraka, carrier)` |
+| cross-word idgham geminate | one `Consonant`, `spelling` spanning two words |
+| idgham shafawi "both meems sound" | same — both meems in one segment's spelling |
+| inserted sound (hamza-wasl vowel, iltiqaa kasra, 'iwad alef, Allah *aa*) | segment with `spelling=()` |
+| silent grapheme (idgham source, hamza wasl, shamsiyah lam, otiose alef) | grapheme referenced by **no** segment |
+| one grapheme → many sounds (muqatta'a صٓ → *ṣaad*) | many segments, each `spelling=(صٓ,)` |
 
-The three views' *deliberate* tokenization differences (letter view splits
-MADDAH; tajweed view spells muqattaat and injects the Allah dagger; shard
-tokenization splits only `ٰ ۥ ۦ`) are preserved byte-identically as explicit
-per-view projection options over the same units — documented in one place
-instead of encoded in four copies of a split-set constant.
+Consequently the v1 model's `Unit`, `role`, `status`, `share_group`,
+`MaddInfo`, `written_delta`, and the `Phoneme` class are **all deleted** [S].
+Everything they stored is either a link (`spelling`) or an annotation
+(`RuleApplication`, §3), and therefore cannot drift between views:
 
-## 7. Hard-case ledger (must-represent checklist)
+- *silent* = grapheme not in any spelling (attribution = the RuleApplication
+  that names it);
+- *inserted* = empty spelling;
+- *replaced / shortened* = the RuleApplication that did it.
 
-Every case below is representable in the model without special view logic;
-this is the acceptance checklist for the design:
+**The segment IS the phoneme.** No phoneme strings exist inside the model.
+Rules condition on typed features (`.geminate`, `.nasal`, `.quality`) — never
+string parsing. Output tokens (IPA-ish strings, including simple mode) are a
+per-riwaya **render table** keyed on segment features (§6). IPA lives only in
+data files, which is the byte-controllability seam.
 
-| Case | Representation |
+## 2. The Pydantic draft
+
+Minimal by construction: every field below is forced by a case in
+`domain-facts.md` or by a reviewer-verified hard case. Anything speculative
+was explicitly killed (§9). Ids are integer indices into the flat arrays of
+`Recitation` — serializable, acyclic, O(1) to resolve [S].
+
+```python
+from enum import Enum
+from typing import Literal, Annotated, Union
+from pydantic import BaseModel, ConfigDict, Field
+
+
+# ─── written spine ───────────────────────────────────────────────────────
+
+class GraphemeKind(str, Enum):
+    CONSONANT = "consonant"          # incl. all hamza seats
+    VOWEL_LETTER = "vowel_letter"    # ا و ي ى and mini/dagger forms
+    HAMZA_WASL = "hamza_wasl"
+    HARAKA = "haraka"
+    TANWEEN = "tanween"
+    SHADDAH = "shaddah"
+    EXTENSION = "extension"          # dagger alef, mini waw/yaa, maddah
+    SILENCE_MARK = "silence_mark"    # round / rectangular zero
+    MARK = "mark"                    # sakt seen, iqlab meem, other small marks
+    STOP_SIGN = "stop_sign"
+
+class Grapheme(BaseModel):
+    model_config = ConfigDict(frozen=True)
+    id: int                    # == index in Recitation.graphemes
+    char: str                  # the raw codepoint(s)
+    kind: GraphemeKind         # from the riwaya ScriptSpec — only classification
+    word: int                  # index into Recitation.words
+    seat: int                  # letter-grouping index (base + its marks share a
+                               # seat; extensions share the carrier's seat)
+    letter: str | None = None  # LetterId for base letters ("lam", "hamza_wasl");
+                               # None for marks/harakat — the skeleton currency
+    display: str | None = None # contextual display override (ئ rendered as ي)
+```
+
+Extensions and silence marks are **their own graphemes** (first-class): a
+dagger alef can be a segment's sole spelling, which is all "extension
+first-class" requires [D]. There is **no Cluster class**: the seat index *is*
+the grouping, and views that need per-letter grouping do `groupby(seat)` at
+projection time [S]. There is no written-layer fusion for tajweed-fused
+letters — fusion exists only on the sound spine as shared spelling (silent
+letters must remain written; mergers cross words).
+
+```python
+# ─── sound spine ─────────────────────────────────────────────────────────
+
+class Consonant(BaseModel):
+    model_config = ConfigDict(frozen=True)
+    kind: Literal["consonant"] = "consonant"
+    id: int                          # == index in Recitation.segments
+    word: int                        # home word (where the sound lands)
+    spelling: tuple[int, ...]        # grapheme ids; () => inserted
+    ident: str | None                # ConsonantId into the riwaya inventory;
+                                     # None = placeless nasal (ikhfaa/iqlab) [A]
+    geminate: bool = False
+    nasal: bool = False              # ghunnah hold
+    emphatic: bool = False           # tafkheem resolved
+    qalqala: bool = False            # echo release
+
+class Vowel(BaseModel):
+    model_config = ConfigDict(frozen=True)
+    kind: Literal["vowel"] = "vowel"
+    id: int
+    word: int
+    spelling: tuple[int, ...]
+    quality: str                     # VowelQuality into the inventory
+                                     # ("a","i","u"; Warsh adds "e" imala, …)
+    long: bool = False               # short vs long; counts live on the
+                                     # MaddApplication (leen has no vowel) [A]
+    emphatic: bool = False
+
+Segment = Annotated[Union[Consonant, Vowel], Field(discriminator="kind")]
+```
+
+Only two segment types. Reviewed alternatives and why they died: an `Echo`
+segment (qalqala) would reintroduce the skip-Q hack into every scan of "the
+last consonant" — the flag keeps rule code clean and the renderer expands it
+to today's discrete `Q` token (§6) [A]; a `Pause` segment for sakt is
+unnecessary — sakt is a word-boundary fact that *blocks* detectors, carried
+on the Word (below); rawm/ishmam/hams are performance annotations, not
+articulation structure — representable later as annotation rule applications
+if ever produced; `release=UNRELEASED` had no case needing it (naqis = two
+consonants + a non-merging application) [A].
+
+```python
+# ─── tajweed, first-class ────────────────────────────────────────────────
+# Applications are typed by the domain's EFFECT verbs (domain-facts §4), so a
+# participant's role is the field name — never a stringly-typed role [D].
+# The rule id (riwaya-scoped registry key) carries the §5 family identity.
+
+class _App(BaseModel):
+    model_config = ConfigDict(frozen=True)
+    rule: str                        # RuleId, e.g. "ikhfaa_tanween", "madd_lazim"
+
+class Assimilation(_App):            # idgham family, iqlab, lam shamsiyah
+    kind: Literal["assimilation"] = "assimilation"
+    source: tuple[int, ...]          # trigger grapheme ids (the silenced noon /
+                                     # tanween / lam / first letter)
+    target: int                      # the resulting segment id
+    complete: bool = True            # False = mutajanisayn naqis: source keeps
+                                     # its own segment; nothing merges [A]
+
+class Silence(_App):                 # a grapheme sounds nothing, and why
+    kind: Literal["silence"] = "silence"
+    grapheme: int
+    # rule covers both tajweed reasons ("hamza_wasl_silent") and orthographic
+    # conventions ("otiose_alef", "tanween_alef") — closes the known
+    # continuing-tanween-alef attribution gap from the silent-letter audit
+
+class Insertion(_App):               # sound with no written source
+    kind: Literal["insertion"] = "insertion"
+    segment: int                     # ("hamza_wasl_vowel", "iltiqaa_kasra",
+                                     #  "madd_iwad", "allah_alef")
+
+class Madd(_App):                    # length classification (madd + leen)
+    kind: Literal["madd"] = "madd"
+    segment: int                     # the Vowel — or the glide Consonant (leen)
+    counts_min: int                  # resolved from riwaya data per rule
+    counts_max: int                  # (2,2) tabii; (4,5) muttasil; (2,6) arid
+
+class Substitution(_App):            # sounds other than written
+    kind: Literal["substitution"] = "substitution"
+    segment: int                     # ("taa_marbuta_haa", "iltiqaa_shortening",
+    grapheme: int                    #  "alef_maksura_consonant", "tasheel")
+
+class Annotation(_App):              # no structural change: izhar, tafkheem/
+    kind: Literal["annotation"] = "annotation"       # tarqeeq, qalqala degree,
+    graphemes: tuple[int, ...] = ()                  # hamza-wasl vowel choice,
+    segment: int | None = None                       # sakt-blocked-rule record
+
+RuleApplication = Annotated[
+    Union[Assimilation, Silence, Insertion, Madd, Substitution, Annotation],
+    Field(discriminator="kind"),
+]
+```
+
+Six effect shapes cover all 33+ Hafs rules and the known Warsh additions
+(imala = Annotation + Vowel quality; naql = Insertion/Silence pair). Detectors
+*apply* effects to segments **and** append the application; the application is
+the durable annotation (what the tajweed view reads), the segment features
+are the durable result (what the renderer reads). Neither is re-derived.
+
+```python
+# ─── result aggregate ────────────────────────────────────────────────────
+
+class Boundary(str, Enum):
+    WASL = "wasl"; WAQF = "waqf"; IBTIDAA = "ibtidaa"    # ibtidaa may combine
+                                                          # with waqf on one word
+
+class Word(BaseModel):
+    model_config = ConfigDict(frozen=True)
+    index: int
+    location: str                    # riwaya-scoped address ("2:255:3")
+    text: str
+    starting: bool = False           # ibtidaa here
+    stopping: bool = False           # waqf after this word
+    sakt_after: bool = False         # blocks cross-word detectors, no waqf
+    stop_sign: str | None = None
+
+class Recitation(BaseModel):
+    model_config = ConfigDict(frozen=True)
+    ref: str
+    riwaya: str
+    words: tuple[Word, ...]
+    graphemes: tuple[Grapheme, ...]      # id == index
+    segments: tuple[Segment, ...]        # id == index; recitation order
+    rules: tuple[RuleApplication, ...]
+```
+
+One `Recitation` = **one traversal** (one boundary assignment), exactly as
+today. The three renditions of a word differ by the closed §7 transform set,
+so a consumer wanting wasl *and* waqf phonemizes twice; because cross-word
+rules couple neighbours, the Recitation — not the Word — is the only valid
+re-run/cache unit [A]. Simultaneous multi-state representation was
+considered and rejected as scope creep.
+
+## 3. Tajweed first-class: detectors + applications, two axes
+
+The domain has two orthogonal taxonomies and the model keeps them apart [D]:
+
+- **Rule families** (domain-facts §5 — noon/tanween, meem, idgham, qalqala,
+  tafkheem, madd, hamza-wasl, …) are the *decision* axis → **detectors**:
+  one plain function per family in a flat registry, its decision table and
+  trigger sets read from riwaya data. ~12 functions, each one screen.
+- **Effect verbs** (domain-facts §4 — substitute, silence, insert, lengthen,
+  colour, classify) are the *mutation* axis → the **RuleApplication union**
+  above.
+
+Worked detector (noon/tanween family) against the model:
+
+```python
+@register("noon_tanween")
+def detect_noon_tanween(b: Builder, spec: RiwayaSpec) -> None:
+    table = spec.rules.noon_tanween        # exhaustive, mutually exclusive —
+    for trig in b.noon_or_tanween_triggers():          # no priority order
+        nxt = b.next_sounding(trig, cross_word=not trig.word.stopping)
+        if nxt is None:            # waqf: rule self-cancels, no code needed
+            continue
+        if b.sakt_blocks(trig, nxt) or b.izhar_mutlaq(trig, nxt):
+            b.add(Annotation(rule="izhar", graphemes=trig.grapheme_ids)); continue
+        rule, effect = table.classify(nxt.letter)
+        n_seg = b.noon_segment(trig)       # the /n/ this trigger sounds
+        match effect:
+            case "keep":                   # izhar
+                b.add(Annotation(rule=rule, graphemes=trig.grapheme_ids))
+            case "nasalize":               # ikhfaa — placeless nasal
+                b.set(n_seg, ident=None, nasal=True, emphatic=b.heavy(nxt))
+                b.add(Substitution(rule=rule, segment=n_seg.id, grapheme=trig.gid))
+            case "hidden_meem":            # iqlab
+                b.set(n_seg, ident=spec.rules.iqlab_ident, nasal=True)
+                b.add(Substitution(rule=rule, segment=n_seg.id, grapheme=trig.gid))
+            case "merge_nasal" | "merge_plain":        # idgham (may cross word)
+                b.delete(n_seg)
+                tgt = b.first_consonant(nxt)
+                b.set(tgt, geminate=True, nasal=(effect == "merge_nasal"),
+                      spelling=tgt.spelling + trig.grapheme_ids)   # joint ownership
+                b.add(Assimilation(rule=rule, source=trig.grapheme_ids, target=tgt.id))
+```
+
+What this kills from today's code: `mark_phonemized` neighbour-mutation
+hacks, `detect_cross_word_mergers` reverse-engineering, the tanween/noon rule
+duplication (same trigger stream), and the "rules that disappear when
+stopping" special-casing (`next_sounding` returning None *is* the
+cancellation).
+
+## 4. The riwaya seam
+
+Per the maintainer's direction: **a base class holds the shared machinery;
+riwaya subclasses override only deltas** — with the guard that a subclass
+overrides *data and pass composition*, never inlines domain logic (that was
+the original Warsh blocker) [S].
+
+```python
+class RiwayaSpec(BaseModel):             # the entire per-riwaya DATA surface
+    model_config = ConfigDict(frozen=True)
+    name: str
+    script: ScriptSpec                   # codepoint → GraphemeKind (+ LetterId)
+    inventory: PhonemeInventory          # ident/quality + features → token,
+                                         #   simple-mode token (render tables)
+    rules: RuleData                      # trigger sets, pair maps, decision
+                                         #   tables, madd counts, iqlab ident
+    skeletons: tuple[SkeletonEntry, ...] # canonical-form overrides (§5)
+    locations: tuple[LocationEntry, ...] # true per-location residue (§5)
+
+class Riwaya:
+    """Base class: tokenizer, boundary assignment, builder, freeze, and the
+    default detector pipeline. Subclasses provide a spec and may extend or
+    reorder PIPELINE — they do not override detector internals."""
+    spec: RiwayaSpec
+    PIPELINE: tuple[str, ...] = (
+        "specials_splice",       # skeleton-matched words (muqattaat, …)
+        "ibtidaa_repairs",       # hamza-wasl vowel, initial-shaddah drop
+        "waqf_transforms",       # final-cluster transforms, 'iwad, taa marbuta
+        "assimilation",          # noon/tanween, meem, idgham pairs, shamsiyah
+        "letters",               # base realization, shaddah, vowel letters,
+                                 #   iltiqaa, qalqala flag
+        "colouring",             # tafkheem (isti'laa, raa tree, Allah lam)
+        "madd",                  # one scan of the realized segments
+        "overrides",             # skeleton + location tables, context-gated
+    )
+    def phonemize(self, ref, *, stops) -> Recitation: ...   # shared, final
+
+class Hafs(Riwaya):
+    spec = load_spec("resources/hafs")
+
+class Warsh(Riwaya):
+    spec = load_spec("resources/warsh")
+    PIPELINE = Riwaya.PIPELINE[:6] + ("imala", "naql") + Riwaya.PIPELINE[6:]
+```
+
+A new riwaya = a data bundle + optionally a few new *registered* detector
+functions named in its pipeline. Pass ordering is an inspectable tuple
+mirroring the genuine domain dependency chain (domain-facts §8.8), not
+OO dispatch order.
+
+## 5. Overrides: canonical skeletons first, locations last
+
+Locations don't transfer across riwayat (verse numbering differs); word
+shapes do. So the primary override key is the **skeleton**: the tuple of
+base-letter identities (`Grapheme.letter`) of a word, normalized (hamza
+seats → hamza, ى/ي → yaa; hamza-wasl kept distinct), with a structural
+condition:
+
+```python
+class OverrideCondition(str, Enum):
+    ALWAYS = "always"; WHEN_STARTING = "when_starting"
+    WHEN_STOPPING = "when_stopping"; SURAH_INITIAL = "surah_initial"
+
+class SkeletonEntry(BaseModel):
+    model_config = ConfigDict(frozen=True)
+    letters: tuple[str, ...]         # ("hamza_wasl","lam","lam","ha") = ٱللَّه
+    condition: OverrideCondition = OverrideCondition.ALWAYS
+    rule: str                        # detector/patch to apply
+
+class LocationEntry(BaseModel):
+    model_config = ConfigDict(frozen=True)
+    location: str
+    condition: OverrideCondition
+    rule: str
+```
+
+Skeleton-keyed (portable across riwayat): the Allah patterns, hamza-wasl
+special nouns/verbs, the muqatta'at (skeleton + `SURAH_INITIAL`), particle
+words (يَـٰٓ / هَـٰٓ munfasil reclassification). Location-keyed residue (~a
+dozen Hafs entries): imala 11:41, tasheel 41:44, the four sakts, ha'-sakt
+spots, 27:36, the madd-lazim overrides, the yaa-narration exceptions.
+Override *payloads* are expressed in typed segment terms (patch specs), never
+raw phoneme strings — a string escape hatch would gut the no-strings bet [A].
+
+## 6. Rendering: the only place output bytes exist
+
+`render(segment, inventory, mode) -> tuple[str, ...]` — a data-table lookup
+keyed on segment features, expanding one segment to *n* tokens
+deterministically (n>1 exactly for the qalqala echo: `d` → `("d","Q")`;
+geminates are one token `"bb"`; simple mode is a second column of the same
+table, where e.g. `Q` renders to nothing and nasals denasalize) [A].
+
+Phone positions (today's `phoneme_indices`, alignment) are computed by
+enumerating the rendered stream — true by construction, no stored indices.
+**Risk #1 of this whole design** is the fidelity of this table: it must
+regenerate today's token stream byte-identically across 326k letters. It is
+only provable against the Epic 2A characterization net, which therefore gates
+the model, and the first migration step is building this render table and
+diffing it against current output.
+
+## 7. The public contract
+
+`Recitation` replaces the six views. With one precomputed reverse index
+(`spelled = union of all segment spellings`):
+
+| Today's view | Under the new contract |
 |---|---|
-| inserted vowel/grapheme (hamza-wasl vowel, iltiqaa kasra, iwad alef, Allah dagger) | INSERTED unit, `source=[]`, tagged |
-| substitution (iqlab, nasalized idgham target, taa marbuta *h*, consonant ى at waqf) | REPLACED unit keeping source graphemes |
-| silent grapheme (idgham source, hamza wasl, shamsiyah lam, otiose alef) | SILENT unit + `silence_reason` |
-| one grapheme → many phonemes (muqatta'a names, started hamza-wasl, tanween) | one unit, many Phonemes (per-phoneme rules via unit split where the domain splits: tanween = its own unit) |
-| many graphemes → one phoneme (haraka+carrier long vowel; idgham geminate) | ShareGroup |
-| cross-word merger | ShareGroup spanning words, created by pass 5 |
-| waqf-variant output (all of domain-facts §7) | unit status + written_delta recorded by pass 4/8 |
-| tanween-at-waqf redistribution (long vowel moves to the alef) | the alef's madd unit becomes PRESENT with the phoneme; tanween unit REPLACED — no re-derivation |
-| iltiqaa shortening/demotion | SHORTENED unit + share with the consonant that displays it |
-| leen (no long-vowel phoneme) | MaddInfo on the consonantal و/ي unit |
-| qalqala echo (`Q`) | render-only Phoneme on the base unit |
-| sakt | word-level flag from the mark; blocks pass 5 at that boundary |
-| silah drop at waqf | extension unit SILENT-when-stopping |
-| muqattaat | data-built unit streams (pass 3) |
-| per-location overrides incl. imala/tasheel | pass 9 table, context-gated |
-| known gap: continuing tanween-alef has no rule (silent-letter audit finding 1) | `silence_reason` takes an orthographic-convention key, so the fact is stored even where no tajweed rule exists |
+| `phonemes_*` | `[render(s) for s in rec.segments]` — one-liner |
+| `silent_flags` | `[(g.char, g.id not in spelled) for g in rec.graphemes]` — one-liner |
+| `get_mapping` / alignment | segments already carry `spelling`; enumerate — one-liner |
+| `phonetic_text` | render + break on `segment.word` — near one-liner |
+| `character_phoneme_mappings` | thin projection: one cell per grapheme + per inserted segment; indices by enumeration |
+| `letter_phoneme_mappings` | thin projection: `groupby(seat)`, fold silent seats into the neighbour their sound merged into (direction read off `spelling` spans — the three re-implementations die) |
+| `tajweed_mappings` | thin projection: `rules` filtered per grapheme (source/target = typed fields); muqatta'at spelled-out display from riwaya data |
 
-## 8. Migration path (fits Epic 3a scope)
+Three thin projection methods + four one-liners, all reading one frozen
+object — drift is structurally impossible. Whether to keep the old methods as
+compatibility shims is a packaging decision, not a design one.
 
-1. Land the Hafs characterization net first (Epic 2A) — the byte-identical
-   gate for everything below.
-2. Introduce `Phoneme` + `PhonemeInventory` (feature-carrying, interned);
-   replace string-predicate helpers behind the same functions.
-3. Introduce `Unit` construction *inside* the current pipeline: build units
-   from today's letter state at the point the char view builds cells, then
-   port `character_phoneme_mappings` to project from units (its validator is
-   the proof harness).
-4. Port `silent_flags`, `letter_phoneme_mappings`, `tajweed_mappings`,
-   `phonetic_text` to project from units, deleting their private
-   re-derivations one at a time (each deletion gated by the net).
-5. Invert control: replace `LetterSymbol.phonemize()` dispatch with the
-   ordered passes (4–9), moving each letter subclass's logic into its pass and
-   its data into the riwaya files. Madd module folds into pass 8.
-6. Retire `MaddMapping`, letter-level tag lists, `DiacriticSymbol`/
-   `ExtensionSymbol` thinness, and `dev/reconcile_tokenization.py`'s policing
-   role (keep it as a regression test).
+## 8. Worked example — غَفُورٞ رَّحِيمٌ (cross-word idgham bila ghunnah + long vowels)
 
-Step order is chosen so every step is independently shippable and
-regression-locked; the riwaya seam (Epic 3b) then threads `Riwaya` through
-`Phonemizer`/`Parser`/loader without touching the model again.
+Wasl traversal, segments (abbreviated):
 
-## 9. Open questions
+```
+s0 Consonant(ghayn, emphatic)   spelling=(غ,)          Annotation(tafkheem)
+s1 Vowel(a, emphatic)           spelling=(fatha,)
+s2 Consonant(faa)               spelling=(ف,)
+s3 Vowel(u, long)               spelling=(damma, و)     Madd(tabii, 2..2)
+s4 Consonant(raa, emphatic)     spelling=(ر,)          Annotation(tafkheem)
+s5 Vowel(u)                     spelling=(dammatan,)
+s6 Consonant(raa, geminate)     spelling=(dammatan, ر₂, shaddah₂)   ← spans words
+                                 Assimilation(idgham_bila_ghunnah_tanween,
+                                              source=(dammatan,), target=s6)
+s7 Vowel(a) … s9 Vowel(i, long) spelling=(kasra, ي)     Madd(tabii, 2..2)
+s10 Consonant(meem)  s11 Vowel(u)  s12 Consonant(noon)
+```
 
-- **Expose `.tokenize()` publicly?** Recommendation: keep the model internal
-  in 3a; the char view already exposes unit semantics. Decide public exposure
-  after Warsh proves the shape (a public canonical model is a compatibility
-  contract we shouldn't sign twice).
-- **Unit granularity for tanween**: model as one unit (mirrors the written
-  single diacritic; the vowel and noon phonemes both live on it) — the char
-  view currently decomposes iqlab tanween into haraka + mini-meem cells, which
-  becomes a projection split. Confirm during step 3.
-- **Traversal caching**: today one `phonemize()` = one traversal (one
-  boundary assignment). Keep that; representing all three renditions
-  simultaneously (wasl+waqf+ibtidaa per word) is possible in this model
-  (status sets keyed by state) but is scope creep — revisit only if a consumer
-  needs it.
-- **Performance**: LetterSymbol was hand-optimized (slots, flyweights,
-  dispatch tables). Units add allocations (~3–5 per cluster). Keep the
-  characterization net paired with a perf benchmark; interning Phonemes and
-  slotted dataclasses should keep this within budget, but measure before
-  committing to per-unit richness everywhere.
+The tanween's noon sounds nowhere — no segment; its grapheme is named by the
+Assimilation. Waqf traversal on رَّحِيمٌ: identical through s8; s9's madd
+becomes `Madd(arid, 2..6)`; s11/s12 don't exist (`Silence(tanween_drop)`);
+s10 is final. The wasl/waqf diff is three applications — domain invariant
+§8.5 made literal. Ibtidaa on رَّحِيمٌ: no assimilation fired, so s6 is simply
+`Consonant(raa)` — the trace-shaddah's conditionality falls out of whether
+the rule ran.
+
+## 9. Kill list (what died in review, so it stays dead)
+
+From v1: `Unit` (overloaded god-object), `role`/`status` enums (derivable),
+`ShareGroup` (is `spelling`), `MaddInfo`+`MaddMapping` (is the Madd
+application), `written_delta` (phonetic text is a render), `Phoneme` class +
+feature bag (segment IS the phoneme), nested `Cluster` container (seat
+index), per-letter tag lists.
+From review candidates: `Echo`/`Pause` segment types, `Release` enum incl.
+`UNRELEASED`, `Ghunnah` object with counts (bool until a consumer proves it
+needs the hold length), `pausal` field (rawm/ishmam not produced today),
+`RawSegment` string escape hatch, per-state simultaneous segment sets,
+synthetic spelled-grapheme layer for muqatta'at (spelled-name display is
+riwaya data + per-segment rules; revisit only if the tajweed projection
+proves it insufficient).
+
+## 10. Pydantic pragmatics (326k graphemes, ~400k segments)
+
+- Build phase: mutable `@dataclass(slots=True)` builder objects; detectors
+  call builder methods (`b.set/delete/add`), which maintain the reverse
+  indices — segments are only frozen into Pydantic models at `freeze()`.
+- Contract leaves (`Grapheme`, segments, applications): if profiling shows
+  model construction dominating, ship them as frozen slotted dataclasses
+  (Pydantic v2 serializes stdlib dataclasses natively) or construct via
+  `model_construct()`; validate only in tests / `validate=True`.
+- Enums `str`-backed; rule ids and render tokens interned.
+
+## 11. Risks (ranked) and open questions
+
+1. **Render-table fidelity** (§6) — make-or-break, provable only against the
+   characterization net; build it first.
+2. **Muqatta'at projection granularity** — the killed spelled-grapheme layer
+   is the fallback if data-driven spelled display proves insufficient.
+3. **Global stream ownership** — committed now (naql); `segment.word` is the
+   sounding home, spelling is the truth of sharing.
+4. **Placeless nasal** (`ident=None`) — inventory must render it (heavy/light
+   ŋ from `emphatic`), and detectors must not assume `ident` is set.
+5. **Override payload migration** — today's contextual YAML speaks phoneme
+   strings and display chars; rewriting it as typed patches is real work and
+   the likeliest place a string hatch sneaks back in.
+
+Open: exact `RuleData` schema per family; whether `Hafs`/`Warsh` classes stay
+or collapse to `Riwaya(spec)` once real (defer until Warsh lands); whether the
+compat shims for today's six views ship at all.
