@@ -51,8 +51,9 @@ instantiations are marked**. The counts quoted are Hafs (Uthmanic Hafs v2.0).
   doubled when the words are actually joined.
 - The **small letters sound despite their size**: dagger alef = a long *aa*,
   mini waw/yaa at word end = the pronoun silah vowel, mini yaa mid-word = a
-  yaa, maddah = "this vowel is extra-long". The silence marks do the opposite:
-  a big letter that does not sound.
+  yaa. (The maddah is different: a reading aid written over already-long
+  madds, carrying no information the rules don't supply.) The silence marks
+  do the opposite: a big letter that does not sound.
 - Some sounds have **no written letter at all** and must be inserted by rule:
   the helping vowel of hamza al-wasl when starting, the helping kasra at a
   two-sukoon meeting, the long *aa* inside the word Allah, the substitute alef
@@ -254,11 +255,11 @@ vowel (Hafs lengths):
 | **tabii'** (natural) | nothing special follows | 2 |
 | **badal** | hamza *before* the long vowel | 2 (fixed in Hafs) |
 | **wajib muttasil** | hamza follows in the *same* word | 4–5 |
-| **jaiz munfasil** | hamza begins the *next* word ⇄, only in wasl ⏸ | 4–5 |
+| **jaiz munfasil** | hamza begins the *next* word ⇄, only in wasl ⏸ | 2 or 4–5 |
 | **lazim** | permanent sukun/shaddah/ghunnah follows in the same word | 6 |
 | **'arid lil-sukoon** | waqf sukun follows ⏸ | 2/4/6 |
 | **leen** | fatha + consonantal و/ي + waqf sukun ⏸ (not a long vowel!) | 2/4/6 |
-| **silah** | the pronoun's mini waw/yaa — sounds in wasl, drops at waqf ⏸ | 2 (4–5 before hamza) |
+| **silah** | the pronoun's mini waw/yaa — sounds in wasl, drops at waqf ⏸ | 2; before hamza it follows munfasil (2 or 4–5) |
 | **'iwad** | fathatan at waqf → substitute alef ⏸ | 2 |
 
 - Graphically-joined particles (vocative يَـٰٓ, demonstrative هَـٰٓ) look like
@@ -266,8 +267,10 @@ vowel (Hafs lengths):
 - Madd lazim kalimi mukhaffaf exists in exactly one Hafs word (ءَآلۡـَٰٔنَ,
   10:51 & 10:91).
 - At waqf, a munfasil reverts to tabii' (the next word never arrives) ⏸.
-- The dagger alef is an unconditional madd (always sounds); the maddah mark
-  flags an extra-long madd.
+- The dagger alef is an unconditional madd (always sounds). The maddah mark
+  carries **no information of its own** — it is written over madds that the
+  rules above already classify as longer-than-natural; classification never
+  needs it.
 
 ### 5.7 Hamza al-wasl
 
@@ -390,9 +393,9 @@ On a started-on word (ibtidaa):
 
 1. **Tanween is word-final** and is always "short vowel + noon"; every
    noon-sakinah rule has a tanween twin.
-2. **At most one rule of a family fires per trigger** — the noon/tanween
-   decision table is exhaustive and mutually exclusive, with a fixed priority
-   (iqlab and idgham checked before ikhfaa before izhar).
+2. **Exactly one rule of a family fires per trigger** — each family's
+   decision table (e.g. noon/tanween) is exhaustive and its conditions are
+   mutually exclusive, so no priority or evaluation order is needed.
 3. **Every written grapheme either sounds at its own position, or is silent
    with a reason** (a named rule or orthographic convention) — and the set of
    silent graphemes is a function of the boundary state.
