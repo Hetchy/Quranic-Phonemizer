@@ -16,7 +16,7 @@ File layout (little-endian):
     <n_words * u16> word_indices           per-word slot -> unique-text index
 
 Run after editing ``dev/Quran_warsh.json``:
-    $ python dev/scripts/build_quran_db.py <quran_json> <output_bin> <surah_info_json>
+    $ python dev/build_quran_db.py <quran_json> <output_bin> <surah_info_json>
 
 """
 
