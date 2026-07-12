@@ -10,11 +10,11 @@ from.
 | file | purpose |
 |---|---|
 | `Quran.json`, `Quran_warsh.json` | Canonical word-by-word source. Edit this. |
-| `scripts/unicode_validator.py` | Generates 2 files: `unicode_inventory.json` that contains all the authorized and allowed Unicode codepoints, and `flagged.json` that contains the unknown and non-allowed Unicode codepoints. |
-| `scripts/strip_flagged_chars.py` | Removes the flagged Unicode codepoints listed in `flagged.json`. |
-| `scripts/build_quran_db.py` | Regenerates `quranic_phonemizer/resources/{hafs-warsh}/quran_db.bin` from `Quran_{warsh}.json`. |
-| `scripts/compare_coverage.py` | Tests font compatibility. |
-| `scripts/split_script.py` | Split a script data into s:v:w format. |
+| `unicode_validator.py` | Generates 2 files: `unicode_inventory.json` that contains all the authorized and allowed Unicode codepoints, and `flagged.json` that contains the unknown and non-allowed Unicode codepoints. |
+| `strip_flagged_chars.py` | Removes the flagged Unicode codepoints listed in `flagged.json`. |
+| `build_quran_db.py` | Regenerates `quranic_phonemizer/resources/{hafs-warsh}/quran_db.bin` from `Quran_{warsh}.json`. |
+| `compare_coverage.py` | Tests font compatibility. |
+| `split_script.py` | Split a script data into s:v:w format. |
 | `Allah_references.txt`, `unicode_occurences/` | Reference data for tajweed-rule research. Not used at runtime. |
 
 ## Editing workflow
@@ -24,7 +24,7 @@ from.
 $EDITOR dev/Quran.json
 
 # 2. Regenerate the runtime binary
-python dev/scripts/build_quran_db.py dev/Quran_{warsh}.json quranic_phonemizer/resources/{hafs-warsh}/quran_db.bin quranic_phonemizer/resources/{hafs-warsh}/surah_info_warsh.json 
+python dev/build_quran_db.py dev/Quran_{warsh}.json quranic_phonemizer/resources/{hafs-warsh}/quran_db.bin quranic_phonemizer/resources/{hafs-warsh}/surah_info_warsh.json 
 
 # 3. Run tests / phonemize a sanity reference
 python -c "from quranic_phonemizer import Phonemizer; \
@@ -44,16 +44,16 @@ A drifted bin can never reach `main`.
 
 ```bash
 # 1. Generate the `unicode_inventory.json` and `flagged.json` files
-python dev/scripts/unicode_validator.py quranic_phonemizer/resources/{hafs-warsh}/raw_data/quran.json text_field unicode_inventory.json flagged.json
+python dev/unicode_validator.py quranic_phonemizer/resources/{hafs-warsh}/raw_data/quran.json text_field unicode_inventory.json flagged.json
 
 # 2. Remove the flagged codepoints listed in `flagged.json`
-python dev/scripts/strip_flagged_chars.py quranic_phonemizer/resources/{hafs-warsh}/raw_data/quran.json text_field flagged.json quranic_phonemizer/resources/{hafs-warsh}/processed_data/quran_cleaned.json
+python dev/strip_flagged_chars.py quranic_phonemizer/resources/{hafs-warsh}/raw_data/quran.json text_field flagged.json quranic_phonemizer/resources/{hafs-warsh}/processed_data/quran_cleaned.json
 
 # 3. Extract the font's character-map table to see which Unicode characters the font claims to support
 python -m fontTools.ttx -t cmap -o cmap.ttx quranic_phonemizer/resources/{hafs-warsh}/fonts/font.ttf-otf
 
 # 4. Verify font compatibility
-python dev/scripts/compare_coverage.py cmap.ttx unicode_inventory.json
+python dev/compare_coverage.py cmap.ttx unicode_inventory.json
 ```
 
 ## Split Script workflow
