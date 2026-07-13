@@ -1,5 +1,4 @@
-"""Regenerate ``quranic_phonemizer/resources/quran_db.bin`` from
-``dev/Quran.json``.
+"""Regenerates `quranic_phonemizer/resources/{hafs-warsh}/quran_db.bin` from `Quran_{warsh}.json`.
 
 Reads the canonical, human-editable Quran source and emits the runtime
 deduplicated binary blob the package ships. Word texts repeat heavily
@@ -16,22 +15,18 @@ File layout (little-endian):
     <text_blob_len bytes> text_blob        UTF-8 concatenated unique texts
     <n_words * u16> word_indices           per-word slot -> unique-text index
 
-Run after editing ``dev/Quran.json``:
-    $ python dev/build_quran_db.py
+Run after editing ``dev/Quran_warsh.json``:
+    $ python dev/build_quran_db.py <quran_json> <output_bin> <surah_info_json>
+
 """
 
 from __future__ import annotations
 
+import argparse
 import array
 import json
 import struct
 from pathlib import Path
-
-
-REPO_ROOT = Path(__file__).resolve().parent.parent
-SRC = REPO_ROOT / "dev" / "Quran.json"
-DST = REPO_ROOT / "quranic_phonemizer" / "resources" / "quran_db.bin"
-SURAH_INFO = REPO_ROOT / "quranic_phonemizer" / "resources" / "surah_info.json"
 
 
 def _location_tuple(key: str):
@@ -39,8 +34,40 @@ def _location_tuple(key: str):
     return int(s), int(a), int(w)
 
 
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Build quran_db.bin from a Quran.json source file."
+    )
+    parser.add_argument(
+        "quran_json",
+        type=Path,
+        help="Path to the input Quran.json file (canonical, human-editable source)",
+    )
+    parser.add_argument(
+        "output_bin",
+        type=Path,
+        help="Path to write the output quran_db.bin binary file",
+    )
+    parser.add_argument(
+        "surah_info_json",
+        type=Path,
+        help="Path to surah_info.json, used to cross-check the total word count",
+    )
+    return parser.parse_args()
+
+
 def main() -> None:
-    with SRC.open(encoding="utf-8") as fh:
+    args = parse_args()
+    src = args.quran_json
+    dst = args.output_bin
+    surah_info_path = args.surah_info_json
+
+    if not src.is_file():
+        raise SystemExit(f"Input file not found: {src}")
+    if not surah_info_path.is_file():
+        raise SystemExit(f"surah_info.json not found: {surah_info_path}")
+
+    with src.open(encoding="utf-8") as fh:
         raw = json.load(fh)
     keys = sorted(raw.keys(), key=_location_tuple)
     texts = [raw[k]["text"] for k in keys]
@@ -48,12 +75,12 @@ def main() -> None:
 
     # Cross-check against surah_info: the binary's word count must equal
     # the sum of num_words across all verses.
-    with SURAH_INFO.open(encoding="utf-8") as fh:
+    with surah_info_path.open(encoding="utf-8") as fh:
         info = json.load(fh)
     expected = sum(w for s in info.values() for w in s)
     if expected != n:
         raise SystemExit(
-            f"Mismatch: Quran.json has {n} words but surah_info.json implies "
+            f"Mismatch: {src.name} has {n} words but {surah_info_path.name} implies "
             f"{expected}. Update surah_info.json or fix Quran.json."
         )
 
@@ -85,14 +112,15 @@ def main() -> None:
 
     indices = array.array("H", word_idx)
 
-    with DST.open("wb") as fh:
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    with dst.open("wb") as fh:
         fh.write(struct.pack("<II", n, len(unique_texts)))
         fh.write(offsets.tobytes())
         fh.write(struct.pack("<I", len(text_blob)))
         fh.write(text_blob)
         fh.write(indices.tobytes())
 
-    print(f"wrote {DST}: {DST.stat().st_size / 1024:.1f} KB "
+    print(f"wrote {dst}: {dst.stat().st_size / 1024:.1f} KB "
           f"({len(unique_texts):,} unique / {n:,} word slots)")
 
 
