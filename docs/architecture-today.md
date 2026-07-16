@@ -2,8 +2,8 @@
 
 A snapshot of how the existing code works, so a future implementor reading
 `domain-facts.md` and ADR-001/002/003 has today's context and can decide what
-to build on versus restart. Written at the start of Epic 3; nothing here is
-aspirational — this is what ships now.
+to build on versus restart. Written before target-model implementation;
+nothing here is aspirational — this is what ships now.
 
 The package is a Hafs-only grapheme-to-phoneme converter: give it a Quran
 reference (or fuzzy Arabic text), get IPA-ish phonemes plus several mapping
@@ -12,8 +12,8 @@ views for forced alignment, tajweed highlighting, and display.
 ## 1. Tree
 
 ```
-quranic_phonemizer/                (~7,400 lines, 35 py files; no test suite)
-├── __init__.py                    # exports Phonemizer
+quranic_phonemizer/                (~7,400 lines, 35 py files; tests live separately)
+├── __init__.py                    # exports Phonemizer plus many internal helpers/types
 ├── phonemizer.py          (713)   # entry point: Phonemizer + PhonemizeResult (the views)
 ├── parser.py              (462)   # text → Word/LetterSymbol; boundary annotation
 ├── word.py                (234)   # Word: letters, prev/next links, contextual overrides
@@ -40,13 +40,13 @@ quranic_phonemizer/                (~7,400 lines, 35 py files; no test suite)
 ├── tajweed_classification.py (241)# cross-word merger registry (anti-drift module)
 ├── mapping.py             (161)   # WordMapping/LetterMapping/MaddMapping dataclasses
 ├── letter_phoneme_mapping.py (845)# VIEW: letter↔phonemes flat entries (aligner)
-├── char_phoneme_mapping.py (1104) # VIEW: per-character Cells (finest; see ADR-001 §1)
+├── char_phoneme_mapping.py (1104) # VIEW: per-character Cells (finest mapping)
 ├── tajweed_mapping.py     (163)   # VIEW: per-grapheme rule annotations
 ├── phonetic_text.py       (261)   # VIEW: recited-form Arabic re-rendering
 ├── silent.py              (154)   # VIEW: per-grapheme silent flags (TS-shard aligned)
 ├── simple_mode.py          (78)   # simple-vocabulary collapse (string surgery)
 ├── specials.py             (49)   # muqattaat display/tajweed lookups
-└── resources/                     # see ADR-003 §2 for the full audit
+└── resources/                     # see ADR-003 for the target code/resource boundary
     ├── base_phonemes.yaml         # symbol registry: letters/diacritics/extensions/…
     ├── rule_phonemes.yaml         # rule output tokens (ikhfaa ŋ, nasal map, Q, …)
     ├── simple_phonemes.yaml       # simple-mode replace/collapse rules
@@ -128,17 +128,20 @@ renditions; each `phonemize()` call computes exactly one traversal.
 
 ## 3. Where the domain knowledge lives today
 
-Roughly half in data, half in code — the split is catalogued exhaustively in
-ADR-003 §2/§6. Headlines: trigger sets, idgham pair maps, Allah patterns,
+Roughly half in data, half in code. ADR-003 records the revised ownership
+rules for the replacement. Today, trigger sets, idgham pair maps, Allah patterns,
 hamza-wasl patterns, vowel-compatibility lists, the raa tree, waqf
 transforms, and all madd logic are **Python**; letter/diacritic chars and
 rule output tokens are **YAML**; muqattaat and contextual overrides are
-YAML but with raw phoneme-string payloads. Madd counts, the izhar throat
-set, and the sun letters exist nowhere.
+YAML but with raw phoneme-string payloads. The izhar throat set and sun-letter
+set are implicit in control flow rather than named once. The package does not
+store madd performance counts, which the revised ADRs intentionally keep out of
+the phonemizer model.
 
 ## 4. Known problems (why the ADRs exist)
 
-Full indictments live in ADR-001 §1 (model), ADR-003 §2 (data). Summary:
+ADR-001 and ADR-003 record the model and resource decisions. Summary of the
+current problems:
 bare-string phonemes probed by string shape; realization as OO dispatch with
 neighbour mutation; waqf transforms computed then discarded and re-inferred
 by four views; madd as a re-walking post-pass stored in a parallel
@@ -146,48 +149,53 @@ structure; letter-level rule tags forcing per-phoneme re-matching; six views
 that re-derive and measurably drift; hardcoded domain data keyed off Hafs
 glyphs (the Warsh blocker); module-global state (`phoneme_registry`
 overrides, loader singleton); a dual codepoint registry and several latent
-bugs (ADR-003 §2). Also: **no test suite** — the Hafs characterization net
-(Epic 2A) must exist before any of this is touched.
+bugs (see ADR-003). A test suite does exist: it includes full-surah
+letter/phoneme baselines, targeted tajwīd mapping cases, and silent-letter
+tests. The characterization work is to preserve that oracle and fill stable
+public-boundary gaps, not to create a net from nothing.
 
 ## 5. Refactor-on-top vs start fresh — the inputs
 
-What the target design (ADR-001/002/003) condemns outright — i.e. would not
-survive either path:
+What the target design (ADR-001/002/003) requires replacing:
 
-- The `symbols/` hierarchy and per-letter subclasses (replaced by detector
-  functions over a segment stream).
-- `phonemes.py`, `phoneme_registry.py`, `simple_mode.py`, `madd.py`,
-  `mapping.py`, `tajweed_classification.py` (replaced by typed segments,
-  render tables, Madd applications, `spelling` spans).
-- The four big view modules' derivation logic (become thin projections);
-  `silent.py` becomes a one-liner.
-- `base_phonemes.yaml` / `rule_phonemes.yaml` / `simple_phonemes.yaml` and
-  ~90% of `muqattaat.yaml` (ADR-003 migration map).
+- raw-glyph-dependent rule decisions and implicit neighbour mutation in the
+  `symbols/` hierarchy;
+- phoneme-string inspection as the carrier of domain state;
+- madd and tajwīd facts re-derived by output views;
+- global loader/phoneme configuration;
+- hard-coded muqattaʿāt phoneme/tajwīd triples that duplicate a derivable
+  recited spelling.
 
-What is genuinely reusable regardless of path:
+Exact module deletion is deliberately deferred until the side-by-side model
+passes parity. Existing rule functions remain the executable specification,
+and existing resource files are migrated only when their new consumer exists.
 
-- **The corpus layer**: `dev/Quran.json`, `build_quran_db.py`,
-  `quran_db.bin` + `surah_info.json`, and most of `loader.py` — ADR-003
-  keeps the formats, just riwaya-scopes the paths (Epic 3b makes the loader
-  non-singleton).
-- **`text_matcher.py`** — self-contained, feeds the API, only needs its
-  normalization tables re-sourced from the new `script.yaml`.
+What is useful as input/evidence regardless of path:
+
+- **The corpus artifacts and packer behavior**: `dev/Quran.json`,
+  `build_quran_db.py`, `quran_db.bin`, and `surah_info.json`. The target moves
+  build inputs/tools out of `dev/`, adds manifests, and loads the runtime pair
+  through an immutable `RiwayahSpec`; the current global loader is not reused
+  structurally.
+- **`text_matcher.py`** — self-contained, feeds the API, and can consume the
+  canonical script-normalization layer rather than raw-glyph tables.
 - **`location.py`**, the reference grammar and bounds validation in
   `phonemizer.py`.
-- **The public API shape** (`Phonemizer` / `PhonemizeResult` method names)
-  if compatibility shims are wanted — ADR-001 §7 leaves this as a packaging
-  decision.
+- **The public capabilities** exposed by `Phonemizer`/`PhonemizeResult` are a
+  migration checklist. Exact method/DTO/serialization shape may be redesigned;
+  every capability must be retained, intentionally changed, or retired.
 - **The rule *logic* as executable specification**: `letter.py`, `noon.py`,
   `vowel.py`, `raa.py`, `hamza_wasl.py`, `madd.py` encode hundreds of
   verified micro-decisions (edge-case comments included). They should be
   read as the reference implementation while writing detectors, then
   deleted — not ported structurally.
-- **`dev/` analysis harnesses and the `docs/hafs/` contracts** — they are
-  oracle material for the characterization net.
+- **The current analysis harnesses and `docs/hafs/` contracts** are behavior
+  evidence. ADR-003 relocates reviewed material under `evidence/`, exploratory
+  material under `research/`, and runnable tools under `tools/`.
 
-Practical implication: the new model warrants **new foldering** (e.g.
-`model/`, `build/` or `detectors/`, `render/`, `projections/`, `riwaya/`,
-`resources/<riwaya>/` per ADR-003) built alongside the old code, with the
-old pipeline kept runnable until the characterization net passes
-byte-identically against the new one — rather than in-place mutation of
-`symbols/`. The migration sequencing in ADR-001 §8 assumes exactly that.
+Practical implication: the new model warrants **new foldering** (`model/`,
+`script/`, `rules/`, `render/`, `projections/`, `riwayat/`, and layered runtime
+data per ADR-003) built beside the old code for semantic comparison rather
+than in-place mutation of `symbols/`. Exact legacy schema parity is not a gate;
+the old pipeline is deleted after every current responsibility has an approved
+new owner and regression coverage.

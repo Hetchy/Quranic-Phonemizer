@@ -1,11 +1,12 @@
 # Recitation Domain Facts
 
-Pure domain knowledge, stated in domain language, with no reference to code
-structure. Distilled from today's Hafs implementation, the `docs/hafs/` research
-documents, and the mapping contracts — this is the ground truth the internal
-data model (see the companion internal-model proposal) must be able to
-represent. Facts are stated riwaya-agnostically where possible; **Hafs-specific
-instantiations are marked**. The counts quoted are Hafs (Uthmanic Hafs v2.0).
+Domain inventory stated in domain language, with no proposed code structure.
+It is distilled from today's Hafs implementation, the `docs/hafs/` research
+documents, and the mapping contracts. It contains both implemented behavior
+and broader recitation facts; it is **not** a requirement that the first
+riwāyah abstraction model every item. Implemented facts and selected-Warsh
+deltas enter the model only with public behavior and tests. Hafs-specific
+instantiations are marked. Performance duration is not a phonemizer output.
 
 ---
 
@@ -24,8 +25,11 @@ instantiations are marked**. The counts quoted are Hafs (Uthmanic Hafs v2.0).
     **tanween** (fathatan / dammatan / kasratan) — never both, plus
   - optionally a **shaddah** (gemination mark), which combines with a haraka or
     tanween, plus
-  - zero or more **small letters** ("extensions"): dagger alef, mini waw, mini
-    yaa (end and middle forms), maddah — written small but *pronounced*, plus
+  - zero or more first-class **small vowels**: dagger alef, mini waw, and mini
+    yaa — written small but capable of carrying the same vowel sound as a full
+    carrier, plus
+  - zero or more **orthographic signs/hints**, including maddah and the small
+    mīm used to show iqlāb, plus
   - zero or more **silence marks**: the round zero ("always silent") and the
     rectangular zero ("silent when continuing") — written on a big letter to
     say it does *not* sound, plus
@@ -49,9 +53,10 @@ instantiations are marked**. The counts quoted are Hafs (Uthmanic Hafs v2.0).
 - **Word-initial shaddah** is never a root gemination; it is the written trace
   of an idgham from the previous word ("shadda 'aridah"). It only sounds
   doubled when the words are actually joined.
-- The **small letters sound despite their size**: dagger alef = a long *aa*,
+- The **small vowels can sound despite their size**: dagger alef = a long *aa*,
   mini waw/yaa at word end = the pronoun silah vowel, mini yaa mid-word = a
-  yaa. (The maddah is different: a reading aid written over already-long
+  yaa. The same source form may be silenced by boundary rules. (The maddah is
+  different: a reading aid written over already-long
   madds, carrying no information the rules don't supply.) The silence marks
   do the opposite: a big letter that does not sound.
 - Some sounds have **no written letter at all** and must be inserted by rule:
@@ -100,8 +105,8 @@ started-on), and the differences are systematic, not arbitrary.
 
 Every rule in the domain conditions on some subset of:
 
-1. **The cluster itself** — base letter identity, haraka/tanween, shaddah,
-   extensions, marks.
+1. **The cluster itself** — base letter identity, short vowel/tanween/small
+   vowel, shaddah, sukun, and orthographic hints.
 2. **Neighbouring clusters** — usually the immediately next or previous
    letter, occasionally two away (raa looks back two; hamza al-wasl looks at
    the *third* letter of the word). **Neighbour lookups cross word
@@ -247,20 +252,20 @@ closure:
 ### 5.6 Madd (vowel length)
 
 The long vowels are *aa/uu/ii*: a short vowel + matching vowel letter (or
-small letter). Lengths are counted in harakat. Classification of every long
-vowel (Hafs lengths):
+small letter). Performance duration is deliberately absent from the target
+phonemizer model.
 
-| Type | Trigger | Length |
+| Type/context | Trigger | Target-model treatment |
 |---|---|---|
-| **tabii'** (natural) | nothing special follows | 2 |
-| **badal** | hamza *before* the long vowel | 2 (fixed in Hafs) |
-| **wajib muttasil** | hamza follows in the *same* word | 4–5 |
-| **jaiz munfasil** | hamza begins the *next* word ⇄, only in wasl ⏸ | 2 or 4–5 |
-| **lazim** | permanent sukun/shaddah/ghunnah follows in the same word | 6 |
-| **'arid lil-sukoon** | waqf sukun follows ⏸ | 2/4/6 |
-| **leen** | fatha + consonantal و/ي + waqf sukun ⏸ (not a long vowel!) | 2/4/6 |
-| **silah** | the pronoun's mini waw/yaa — sounds in wasl, drops at waqf ⏸ | 2; before hamza it follows munfasil (2 or 4–5) |
-| **'iwad** | fathatan at waqf → substitute alef ⏸ | 2 |
+| **tabii'** (natural) | nothing special follows | supported `MaddType` |
+| **badal** | hamza *before* the long vowel | not a distinct type in current output |
+| **wajib muttasil** | hamza follows in the *same* word | supported `MaddType` |
+| **jaiz munfasil** | hamza begins the *next* word ⇄, only in wasl ⏸ | supported `MaddType` |
+| **lazim** | permanent sukun/shaddah/ghunnah follows in the same word | supported `MaddType` |
+| **'arid lil-sukoon** | waqf sukun follows ⏸ | supported `MaddType` |
+| **leen** | fatha + consonantal و/ي + waqf sukun ⏸ (not a long vowel) | supported `MaddType` |
+| **silah context** | a pronoun/plural small vowel sounds in wasl and drops at waqf ⏸ | realization context, not assumed to be a `MaddType` |
+| **'iwad** | fathatan at waqf → substitute alef ⏸ | realization event, not a distinct current `MaddType` |
 
 - Graphically-joined particles (vocative يَـٰٓ, demonstrative هَـٰٓ) look like
   muttasil but are linguistically munfasil (separate words joined in rasm).
@@ -271,6 +276,11 @@ vowel (Hafs lengths):
   carries **no information of its own** — it is written over madds that the
   rules above already classify as longer-than-natural; classification never
   needs it.
+- Today's public classifier implements tabiiʿ, wājib muttaṣil, jāʾiz munfaṣil,
+  lāzim, ʿāriḍ lil-sukūn, and leen. Badal, silah subcategories, and ʿiwaḍ as a
+  distinct public `MaddType` are not added merely because they are useful
+  linguistic descriptions; a supported riwāyah behavior and tests must
+  require them.
 
 ### 5.7 Hamza al-wasl
 
@@ -416,21 +426,27 @@ On a started-on word (ibtidaa):
 
 ---
 
-## 9. What varies by riwaya (why these facts must be data, not code)
+## 9. What may vary by riwāyah (not a storage mandate)
 
-Everything above is structured the same way in every riwaya, but the
-*contents* differ. Known Warsh-vs-Hafs delta classes (from the integration
-plan's research):
+The same broad phenomena recur across riwāyāt, but their conditions,
+realizations, and source orthographies may differ. This does **not** imply that
+all domain knowledge belongs in data files. Algorithms stay in shared/riwāyah
+Python; only corpora, script inventories, finite tables, token choices, and
+true exception lists are candidates for resources.
 
-- **Trigger sets and closed lists**: different madd measures (e.g. munfasil
-  qasr, badal 2/4/6), different per-location tables, different special words.
-- **New effects**: imala as a *systematic* rule (not one word), taqleel,
-  tashee l variants, naql (moving a hamza's vowel onto a preceding sakin).
+Candidate Warsh-vs-Hafs delta classes to verify are:
+
+- **Conditions and closed lists**: madd classifications/choices, contextual
+  locations, and special words. Duration choices are research context, not
+  fields in the phonemizer result.
+- **Riwāyah-specific algorithms**: imālah/taqlīl, tashīl/ibdāl, naql, and
+  any interactions established by the linguistic delta matrix.
 - **Different orthography**: different rasm, different diacritic conventions,
   different otiose letters, possibly different verse/word segmentation.
 - **Different phoneme inventory**: new vowel qualities (imala *e*), and
   possibly different choices for the rule phonemes (ikhfaa nasal, etc.).
 
-The invariant *shape* — clusters, boundary states, condition axes, effect
-vocabulary, closed exception tables — is riwaya-independent and is what the
-internal model should encode.
+The riwāyah-independent seam is narrower: exact source graphemes normalize to
+canonical letter units; typed sound segments align back to those graphemes;
+named tajwīd/madd occurrences record their participants. The model does not
+encode a universal generic effect vocabulary.

@@ -1,316 +1,350 @@
-# Warsh Riwaya Abstraction — Plan
+# Riwāyah-agnostic refactor and Warsh integration plan
 
-## Goal
+## Outcome
 
-Generalize the phonemizer so it can support a second riwaya (Warsh, via one
-chosen tariq) alongside the current Hafs, with shared logic shared and only the
-genuinely-different parts forked. A new riwaya is "the same content with minor
-surface differences" — different letters for the same words, different
-diacritics, possibly different verse splits and word join/split — plus a smaller
-set of genuinely contextual differences: tajweed rules, orthography, and the
-Unicode representations used to encode them.
+Build a clean canonical phonemizer for Hafs whose source-normalization and
+rule-policy seams are already proved against the available Warsh script. Then
+add Warsh pronunciation only from reviewed Warsh recitation research.
 
-The blocker today is **not** the surface differences (those mostly arrive for
-free from the script). The blocker is that the domain knowledge — tajweed
-trigger sets, special-word tables, vowel-compatibility lists, IPA literals,
-stop/start transforms, and the corpus shape itself — is **hardcoded in Python**,
-keyed off Hafs glyphs. A different script silently no-ops those rules. So the
-real work is a refactor that makes riwaya context, orthography/phoneme relations,
-tajweed rules, and the corpus first-class and data-driven.
+The rework is not a legacy-schema preservation exercise. Today's code is the
+behavior inventory and executable evidence; the target API and internal model
+may be cleaner. The goal is to preserve correct capabilities—phonemes,
+boundaries, Tajwīd, madd classification, letter/character attribution, silent
+letters, recited Arabic, text matching—not every historical DTO field or
+string enum.
 
-## Guiding principles
+Governing documents:
 
-1. **Hafs output stays byte-identical** through the entire refactor (Epics 3a and
-   3b). New behavior only enters in Epic 4 (Warsh data). Every refactor step is
-   regression-locked against a characterization net.
-2. **Domain knowledge lives in data, not code.** No Arabic glyph literals, no IPA
-   literals, no location literals embedded in Python control flow. Everything
-   keyed by a riwaya-scoped, pluggable data contract.
-3. **One canonical internal model; views project from it.** The three output
-   formats must derive from a single source of truth, not re-walk and re-derive.
-4. **Tests before the code they protect.** Characterization net first (locks
-   Hafs), then refactor; Warsh expected-cases authored from research, red until
-   Epic 4.
-5. **Prove the seam on a thin slice before generalizing.** Avoid designing an
-   abstraction against a single example.
+- ADR-001: canonical model and riwāyah policy composition;
+- ADR-002: invariants and implementation gates;
+- ADR-003: code/runtime-data/build/evidence/research ownership;
+- `docs/tajweed-model.md`: concrete models and every implemented Tajwīd family;
+- `docs/warsh-script-codepoint-audit.md`: complete Hafs/Warsh source audit;
+- `docs/current-implementation-mapping.md`: every current module/resource/tool
+  mapped to a target owner.
 
-## Epic overview
+## Readiness verdict
 
-| Epic | Title | Depends on | Can run parallel with |
-|---|---|---|---|
-| 0 | Scope & decisions | — | — |
-| 1a | Script / Unicode / font research (+ CI validator) | 0 | 1b, 2-Hafs |
-| 1b | Tajweed / linguistic research | 0 | 1a, 2-Hafs |
-| 2 | Test nets (Hafs characterization + Warsh red cases) | Hafs-net: 0; Warsh cases: 1b | 1a, 1b |
-| 3a | Internal-model rework (riwaya-agnostic, byte-identical) | 2 (Hafs net), design ADR | — |
-| 3b | Riwaya abstraction seam + corpus/addressing | 3a, Warsh spike | — |
-| 4 | Warsh implementation | 1a, 1b, 3b, 2 (Warsh cases) | — |
-| 5 | Wrap-up & documentation | 4 | — |
+The **Hafs refactor is implementation-ready**. The model, relationship shape,
+Tajwīd vocabulary, data/code split, repository layout, migration ownership,
+and vertical proof slices are decided.
 
-Parallelism: Epic 1a, 1b, and the Hafs characterization net (part of Epic 2) can
-start immediately and concurrently. The refactor (3a -> 3b) is strictly
-sequential and gated. Epic 4 is the only place new behavior lands.
+The **Warsh source adapter is implementation-ready only for the accepted
+families in the codepoint audit**: ordinary shared letters/marks, alternate
+tanween, yeh barree families, reviewed hamzat-al-waṣl sequences, structural
+marks, and iqlāb hints.
 
----
+The **complete Warsh phonemizer is not implementation-ready** because there is
+no reviewed Warsh rule/delta research yet. The unresolved items are now narrow
+and explicit rather than model gaps:
 
-## Epic 0 — Scope & decisions
+- marked `۪` vowels: which sites are imālah versus taqlīl and their exact
+  sound values;
+- plural-mīm/small-wāw realization;
+- Warsh stop-sign convention and boundary policy;
+- Warsh-specific hamza/naql/tashīl/ibdāl behavior;
+- any Warsh-specific rāʾ, lām, madd, waqf, muqaṭṭaʿāt, or exception deltas;
+- minority ambiguous Unicode sequences listed by the script audit.
 
-**Goal:** Pin the scope decisions that gate every downstream epic. These are
-choices, not research deliverables; Epic 1 supplies the evidence, Epic 0 records
-the call.
+Unknown Warsh behavior must fail closed or remain unimplemented; it must not
+inherit Hafs merely because the model can express it.
 
-**Decisions to record:**
-- [ ] Which Warsh tariq (e.g. al-Azraq vs al-Asbahani). Warsh has internal
-      variation; pick one line of transmission.
-- [ ] Which script source becomes canonical (candidates surveyed in Epic 1a).
-- [ ] Which display font is the target (drives the compatibility constraints).
-- [ ] Refactor ambition: FULL internal-model rework (retire thin Symbol classes,
-      first-class diacritics/mini-vowels/stopping, collapse the three re-walks).
-      Confirmed.
+## What the audit established
 
----
+The audit covered all 35 production Python files (7,372 lines), all current
+runtime resources, the five development scripts, workflows, tests/baselines,
+and every codepoint in the current Hafs and PR #37 Warsh word corpora.
 
-## Epic 1a — Script / Unicode / font research (+ CI validator)
+Key consequences:
 
-**Goal:** Choose the Warsh script and prove it is machine-tractable and
-display-compatible. Engineering-flavored research; runs parallel to 1b.
+- the current mutable `LetterSymbol` graph, string-token predicates, madd
+  post-pass, global caches/overrides, and six independent output re-derivers
+  all need replacement;
+- one grapheme↔segment alignment relation can project letter mapping,
+  character mapping, silence, shared ownership, and Tajwīd participants;
+- rules must see canonical letters/marks, not source glyphs;
+- `U+0656` is a Warsh kasratan convention, not imālah;
+- `U+06EC`, `U+06DF`, and `U+06EA` are sequence/context dependent;
+- the Hafs 11:41 imālah hardcode can be replaced by marked-vowel recognition,
+  while the riwāyah policy decides the quality;
+- small mīm is an orthographic iqlāb hint, not the rule engine;
+- 621 aligned plural-mīm cases are likely genuine riwāyah behavior, not a
+  source alias;
+- PR #37's raw cleaner removes 6,228 characters through a generic flagged
+  list and needs a semantic transform manifest;
+- Warsh has a separate address/word shape, including structural-token
+  differences, so corpus selection must be riwāyah-scoped.
 
-**Scope / tasks:**
-- [ ] Survey available Warsh scripts and digital sources (Quran.com / King Fahd,
-      QUL, Tanzil, and others). Catalogue per source: encoding,
-      Unicode codepoints used, diacritic conventions, verse/word segmentation.
-- [ ] Assess orthography information content: does the script encode phoneme
-      hints in the orthography (preferred), or hide them so they must be inferred
-      from domain knowledge? Score each candidate.
-- [ ] **Build a Unicode-audit validator (shippable tool)** For a given
-      script file: every codepoint is explainable (in an allowlist with a
-      meaning), no stray/random characters, report unknown codepoints with
-      locations.
-- [ ] Digital font compatibility: Survey Warsh
-      fonts compatible with the script. Asses if Digital Khatt is compatible with Warsh, or which fonts support Warsh. Assess how well each script matches the chosen
-      display font. Document the mapping
-      required to go from script -> font agreement.
-- [ ] Produce a comparison matrix and a recommendation feeding the Epic 0 script
-      and font decisions.
+## Target flow
 
-**Acceptance:**
-- [ ] `dev/` validator script that fails on unexplained codepoints.
-- [ ] Comparison matrix committed under `docs/research/warsh/script-survey.md`.
-- [ ] A recommended (script source, font) pair with the required mapping documented.
+```text
+request + riwayah id + boundary policy
+  -> riwayah corpus/address resolution
+  -> exact source Graphemes
+  -> source adapter -> canonical LetterUnits
+  -> baseline semantic Segments
+  -> shared rule passes + narrow riwayah policies
+  -> Alignments + TajweedOccurrences + MaddOccurrences + RealizationEvents
+  -> recited Arabic graphemes + rendered tokens
+  -> clean public projections
+```
 
-**Key existing references:** `dev/README.md` (DB/source contract, risk register),
-`dev/build_quran_db.py`, `quranic_phonemizer/resources/surah_info.json`,
-`dev/unicode_occurences/`.
+No projection runs a rule detector. No rule reads output-token strings. No
+source adapter decides Tajwīd merely from an optional hint mark.
 
----
+## Implementation sequence
 
-## Epic 1b — Tajweed / linguistic research
+Each slice lands running code and tests. Do not create every future data file
+up front.
 
-**Goal:** Document Warsh tajweed and orthography rules in a form a domain expert
-can verify and an AI agent can implement against the existing Hafs code. Research
-is written down before any code, and is **diffed against the existing Hafs rules**
-since most rules are shared with only contextual differences.
+### PR 1 — repository and corpus-build foundations
 
-**Scope / tasks:**
-- [ ] For each tajweed rule, document the Warsh rule with 1-2 worked examples,
-      optionally noting "same as Hafs" or the precise difference. Some examples:
-      noon/tanween rules (idgham, ikhfaa, iqlab, izhar), meem sakinah, qalqala,
-      lam (shamsiyah/qamariyah, lam of the name of Allah), raa heaviness/lightness,
-      ghunnah, tafkheem/tarqeeq, and the madd family.
-- [ ] Madd lengths: document Warsh madd measures where they differ from Hafs
-      (e.g. madd lazim, munfasil, badal).
-- [ ] Imala and other Warsh-characteristic phenomena: document occurrences and
-      conditioning.
-- [ ] Special / contextual pronunciation cases (per-location overrides) for Warsh.
-- [ ] Stopping (waqf) and starting (ibtidaa) rules for Warsh.
-- [ ] Unique phonemes in this riwaya not present in the Hafs inventory, and suggested IPA (or otherwise) phoneme symbols.
-- [ ] Orthography differences and how they map to pronunciation.
-- [ ] Cite sources (books, recordings, videos) per rule so each is independently verifiable.
+**Changes**
 
-**Acceptance:**
-- [ ] `docs/research/warsh/[documents].md`, structured rule-by-rule, examples, citations, Hafs relationship.
-- [ ] List of "new vs Hafs" deltas that becomes the Epic 2 Warsh test backlog and the Epic 4 implementation backlog.
+- Raise Python floor/CI/package metadata to 3.11+.
+- Create `corpora/`, `tools/corpus`, `tools/audit`, `evidence/`, `research/`,
+  and ignored `build/` according to ADR-003.
+- Move current `dev/` and runtime evidence by purpose; do not mix moves with
+  phonological changes.
+- Add Hafs corpus manifest, canonical `words.json`, deterministic DB/index
+  build, and hash comparison.
+- Import PR #37 raw Warsh source and canonical word input under a Warsh corpus
+  manifest. Replace generic stripping with an explicit transform manifest.
+- Decide lexical versus structural word slots during build; prove rub-el-hizb
+  cannot become an accidental phonemizer word.
+- Configure recursive package data for `quranic_phonemizer/data/**`.
+- Build/install wheel and sdist and run a Hafs corpus smoke test.
 
-**Key existing references:** `quranic_phonemizer/resources/base_phonemes.yaml`,
-`rule_phonemes.yaml`, `muqattaat.yaml`, `contextual_pronunciations.yaml`,
-`quranic_phonemizer/tajweed_rule.py` (the 33-rule enum),
-`tajweed-mappings.md`, and the Hafs rule code under
-`quranic_phonemizer/symbols/letters/`.
+**Acceptance**
 
----
+- Both runtime corpus pairs reproduce from committed canonical inputs.
+- Raw-to-canonical Warsh counts/removals are explained and hashed.
+- Runtime imports nothing from corpus inputs, evidence, research, or build.
 
-## Epic 2 — Test nets
+### PR 2 — canonical model and source adapters
 
-**Goal:** Build the safety net before refactoring, and the Warsh target before
-implementing. Two distinct nets.
+**Changes**
 
-### 2A — Hafs characterization net (start now, parallel)
-- [ ] Golden tests at the **stable public boundary** only: `phonemes_str`,
-      `letter_phoneme_mappings`, `char_phoneme_mappings`, `tajweed_mappings`,
-      `phonetic_text` — for a broad, representative reference set (incl. stops,
-      muqattaat, lafdh al-jalalah, hamza wasl, tanween-at-waqf, idgham/ikhfaa/iqlab
-      cases).
-- [ ] Lock the outputs so Epic 3a/3b can prove **byte-identical** Hafs behavior.
-- [ ] Do **not** test internal classes slated for restructure (DiacriticSymbol,
-      ExtensionSymbol shapes, etc.) — test behavior, not soon-to-change structure.
+- Add `model/` types from ADR-001 and `tajweed-model.md`.
+- Add `RiwayahSpec`, registry, immutable render config, and riwāyah-keyed
+  corpus/matcher caches.
+- Implement exact grapheme clustering and canonical `LetterUnit` construction.
+- Model short vowels, tanween, and dagger-alef/mini-wāw/mini-yāʾ
+  `SmallVowel`s as first-class composed values; do not port the legacy generic
+  mark category.
+- Implement the complete Hafs source adapter with fixtures for every accepted
+  codepoint/sequence family.
+- Implement only the accepted Warsh adapter subset from the codepoint audit;
+  reject unresolved sequences with location/codepoint diagnostics.
+- Add glyph-first `data/shared/tajweed.yaml`, `render.yaml`, and source scalar
+  aliases only where the code now consumes them.
+- Fix the current `_DB.items()` matcher defect in the new corpus interface;
+  do not preserve the exception.
 
-### 2B — Warsh expected cases (after 1b; red until Epic 4)
-- [ ] Hand-author expected phonemes for 1-2 cases of every tajweed rule and every
-      contextual pronunciation, prioritizing the Hafs deltas from 1b (the things
-      Hafs does not even test today).
-- [ ] First-class tests for the tajweed rules and mappings under Warsh.
-- [ ] Keep these red (xfail/skip-marked) until Epic 4 turns them green.
+**Acceptance**
 
-**Acceptance:**
-- [ ] Hafs characterization net green and wired into CI as the refactor gate.
-- [ ] Warsh expected-case suite committed, red, enumerating the target behavior.
+- Exact source strings reconstruct byte-for-byte.
+- Every grapheme has a role and every sounding candidate belongs to one unit.
+- Hafs `ٱ` and reviewed Warsh alef+mark sequences yield the same hamzat-waṣl
+  unit.
+- Hafs/Warsh tanween and yāʾ-family equivalence fixtures pass.
+- Warsh harakah+mini-mīm and bare-nūn+mini-mīm normalize to canonical
+  tanween/nūn subjects plus a non-driving iqlāb hint.
+- Hafs and Warsh instances coexist in either construction order.
 
----
+### PR 3 — baseline segments, alignment, and nūn/tanwīn vertical slice
 
-## Epic 3a — Internal-model rework (riwaya-agnostic, byte-identical)
+**Changes**
 
-**Goal:** Clean the core so the abstraction seam becomes obvious — **without any
-new domain knowledge and without changing Hafs output**. Gated by a design ADR;
-verified entirely by the Hafs characterization net.
+- Build baseline consonant/vowel segments without per-letter subclasses.
+- Add one `GraphemeAlignment` per source scalar.
+- Implement boundary resolution before cross-word rules.
+- Implement the exhaustive nūn/tanwīn family in shared Python using glyph-first
+  finite sets:
+  iẓhār ḥalqī, ikhfāʾ ḥaqīqī, iqlāb, idghām with and without ghunnah.
+- Record conventional occurrences with subject/condition/target/result and
+  `NoonDetail`.
+- Render semantic segments and expose the first clean source/letter/segment,
+  silence, and Tajwīd projections.
+- Validate (but do not depend on) the Warsh small-mīm iqlāb hint.
 
-**Design ADR (do first):** decide and record the target patterns before coding —
-e.g. domain-adapter vs subclass-per-letter for riwaya-specific behavior; the
-canonical internal model shape; how diacritics/mini-vowels/stopping become
-first-class; how the three views project from one model.
+**Acceptance**
 
-**Scope / tasks:**
-- [ ] **Lift hardcoded domain data into the data contract.** Move the ~26+
-      violations out of Python: tajweed trigger sets (`letter.py:22-25`
-      `_HEAVY_CHARS` / `_QALQALA_CHARS` / `_IKHFAA_CHARS` / `_IDGHAM_GHUNNAH_CHARS`),
-      idgham pair-maps (`letter.py:278-293`), Allah patterns (`lam.py:11-24`),
-      hamza-wasl noun/verb patterns (`hamza_wasl.py:10-25`), vowel-compatibility
-      lists (`vowel.py`), IPA literals (the emphatic and length markers, `["h"]`,
-      `["w"]`, hardcoded short/long vowels in `madd.py`, `silent.py`,
-      `letter_phoneme_mapping.py`, `char_phoneme_mapping.py`, `word.py`).
-- [ ] **First-class diacritics.** Collapse the thin `DiacriticSymbol` data-holder
-      into a clean first-class representation with its own typed rules (keep the
-      flyweight/perf win if measured to matter).
-- [ ] **First-class mini-vowel graphemes.** Promote `ExtensionSymbol` from a
-      metadata bag (whose only effect is `if self.extensions: result += length`)
-      into first-class units carrying their own phonemes and rules; stop manually
-      appending dagger-alef from `Lam`.
-- [ ] **First-class stopping/starting.** Extract waqf/ibtidaa out of the
-      `LetterSymbol.phonemize()` template (`letter.py:149-165`) and the ~12 letter
-      classes (`vowel.py`, `qalqala_letter.py`, `taa_marbuta.py`, `hamza_wasl.py`,
-      `madd.py`, `silent.py`, `phonetic_text.py`) into a single StoppingContext /
-      domain pattern computed once and threaded through.
-- [ ] **One canonical model; collapse the re-walks.** Store phoneme indices, madd
-      types, and rule tags once on the canonical model and have
-      `letter_phoneme_mapping`, `char_phoneme_mapping`, and `tajweed_mapping`
-      project from it instead of independently re-deriving
-      (`char_phoneme_mapping.py` `_letter_pairs` / `_madd_type_indices`, etc.).
-- [ ] Retire the now-unnecessary `Symbol` / `Diacritic` cruft and any remap glue
-      this exposes.
+- Within-word, cross-word, nūn, tanween, all five outcomes, and stopping
+  cancellation pass.
+- Ikhfāʾ has a condition and no false target; idghām has a real target.
+- Source/letter/phoneme/silence views are all projections of the same
+  alignment and occurrence records.
+- At least one different-script/same-shared-rule Warsh fixture passes without
+  Warsh rule code.
 
-**Acceptance:**
-- [ ] ADR committed under `docs/adr/`.
-- [ ] Hafs characterization net **byte-identical**; no behavior change.
-- [ ] No Arabic-glyph / IPA / location literals remain in Python control flow
-      (validator/grep gate in CI).
+### PR 4 — mīm, general idghām, and lām shamsiyyah
 
----
+**Changes**
 
-## Epic 3b — Riwaya abstraction seam + corpus/addressing
+- Implement ghunnah mushaddadah.
+- Implement the exhaustive mīm-sākinah family: iẓhār, ikhfāʾ, idghām shafawī.
+- Port mutamāthilayn, mutaqāribayn, and mutajānisayn pair logic from the
+  current executable behavior into shared modules and reviewed Arabic pair
+  tables.
+- Represent kāmil/nāqiṣ as `IdghamDetail`, not separate rule ids.
+- Implement lām shamsiyyah as an assimilation relationship.
+- Cover muqaṭṭaʿāt cross-name interactions later through the same rules, not
+  special mappings.
 
-**Goal:** Introduce the riwaya axis through the cleaned model, with Hafs still the
-only implementation and **still byte-identical**.
+**Acceptance**
 
-**Warsh spike (do first):** prove the seam end-to-end on a handful of Warsh words
-plus one rule that genuinely differs from Hafs, to validate the chosen pattern
-before generalizing. Throwaway-quality; informs/locks the seam design.
+- Every current pair in `letter.py` and targeted occurrence evidence has a
+  test and one target owner.
+- No duplicated cross-word detector remains in projections.
 
-**Scope / tasks:**
-- [ ] **Riwaya as a first-class context**, threaded through `Phonemizer`,
-      `Parser`, the loader, and `Location` — replacing the module-level singletons.
-- [ ] **Parametrize the data files by riwaya.** Make `PhonemeRegistry` and
-      `specials.py` riwaya-scoped (sibling data sets or a riwaya key); remove the
-      hardcoded single-file paths. Shared rules stay shared; only deltas fork.
-- [ ] **Abstract the corpus + addressing** (the most coupled layer):
-      - Loader is a module-level singleton keyed positionally off `surah_info.json`
-        with `uint16` word indices and a fixed 114-surah / `(surah, ayah, word)`
-        assumption (`loader.py`).
-      - Support a per-riwaya corpus (its own `Quran.json` -> `quran_db.bin` +
-        `surah_info.json`) and per-riwaya verse/word shape, so Warsh's differing
-        verse splits and word join/split are representable.
-      - Make `Location` riwaya-aware and move the hardcoded location references
-        (`madd.py` `LAZIM_OVERRIDE_LOCATIONS` / `NATURAL_MADD_LOCATIONS`, etc.)
-        into riwaya-scoped data.
-- [ ] Make `TajweedRule` riwaya-tolerant (registry / per-riwaya rule set rather
-      than one Hafs-shaped enum), as needed by the data above.
-- [ ] Plug Hafs through the new seam as the sole implementation.
+### PR 5 — vowel carriers, boundaries, and recited writing
 
-**Acceptance:**
-- [ ] Hafs runs entirely through the riwaya seam; characterization net still
-      byte-identical.
-- [ ] Loading a (stub) second corpus with a different verse/word shape does not
-      break addressing — proven by a shape-divergence test.
-- [ ] Spike documented; seam design locked.
+**Changes**
 
----
+- Port alef/wāw/yāʾ/maqṣūrah carrier versus consonant versus silent logic.
+- Realize `SmallVowel` dagger alef/mini wāw/mini yāʾ through the same semantic
+  vowel segments while preserving their own grapheme attribution.
+- Re-evaluate full wāw/yāʾ after waqf vowel removal so the immutable written
+  letter can switch among consonant, carrier, leen, and silent realizations.
+- Implement typed orthographic silence and long-vowel shared alignment.
+- Implement hamzat al-waṣl, iltiqāʾ al-sākinayn, waqf, ibtidāʾ, tāʾ marbūṭah,
+  and sakt boundary behavior as realization events.
+- Add source-linked recited Arabic graphemes.
+- Replace the current `phonetic_text.py`, `silent.py`, and relevant
+  character/letter mapping re-derivations with projections.
+- Implement typed handlers for current boundary exceptions as they are ported.
 
-## Epic 4 — Warsh implementation
+**Acceptance**
 
-**Goal:** Land Warsh by adding data and the minimal Warsh-specific rule code on
-top of the seam. This is the first epic that introduces new behavior.
+- Wasl, starting, and stopping fixtures cover every current transform family.
+- Full and small spellings of the same vowel share a segment shape but retain
+  distinct source alignment; mini ṣilah vowels drop at waqf without mutating
+  the canonical writing.
+- Inserted, removed, shortened, carried, assimilated, and silent cases have
+  explicit provenance.
+- No view independently reconstructs waqf or ibtidāʾ.
 
-**Scope / tasks:**
-- [ ] Add the Warsh corpus from the Epic 0 script decision, through the Epic 1a validator.
-- [ ] Add Warsh data files, phonemes, rules as riwaya-scoped siblings.
-- [ ] Implement the genuine Warsh rule deltas from 1b (e.g. imala, differing madd
-      measures, any orthography-driven differences) via the adapter/fork pattern
-      chosen in the 3a ADR.
-- [ ] Turn the Epic 2B Warsh expected-case suite green.
+### PR 6 — emphasis, qalqalah, and marked vowels
 
-**Acceptance:**
-- [ ] All Warsh expected-cases pass; Hafs characterization net still byte-identical.
-- [ ] `Phonemizer(riwaya="warsh")` (or equivalent) produces verified output for the
-      research-covered cases.
+**Changes**
 
----
+- Implement inherent tafkhīm, exhaustive rāʾ tafkhīm/tarqīq, and lām of Allah.
+- Put rāʾ classification behind the narrow `RaaClassifier` policy.
+- Implement qalqalah with typed sughrā/kubrā detail and attributed rendering.
+- Have the Hafs adapter recognize the 11:41 `۪` marked-vowel sequence; have
+  the Hafs policy return `IMALA`; delete the location-keyed phoneme patch.
+- Preserve Warsh marked-vowel inputs but reject pronunciation until its policy
+  is researched.
 
-## Epic 5 — Wrap-up & documentation
+**Acceptance**
 
-**Goal:** Make the new capability discoverable and maintainable.
+- Rāʾ receives exactly one heavy/light occurrence in supported contexts.
+- The same occurrence schema works with a fixture replacement classifier.
+- Hafs imālah is representation-driven plus riwāyah policy, not location
+  hardcoding.
 
-**Scope / tasks:**
-- [ ] Update `README.md`, the architecture docs, and the
-      `.claude/skills/quranic-phonemizer` references for the riwaya axis.
-- [ ] Document how to add a future riwaya (the data-contract + adapter recipe).
-- [ ] Document the per-riwaya corpus/DB build workflow (extends `dev/README.md`).
-- [ ] Final cleanup pass; ensure CI runs both riwayat and the Unicode validator.
+### PR 7 — madd, exceptions, and muqaṭṭaʿāt
 
-**Acceptance:**
-- [ ] Docs updated and consistent with code; CI green across both riwayat.
+**Changes**
 
----
+- Classify the six supported madd types from semantic segments and boundaries;
+  delete token-string `madd.py` rediscovery.
+- Store no duration/count and add no speculative types.
+- Model waqf ʿiwaḍ as realization context.
+- Replace generic contextual pronunciation patch operations with named typed
+  handlers and location data only where still needed.
+- Reduce muqaṭṭaʿāt data to Arabic compact-letter → recited-spelling and feed
+  the spelling through the normal pipeline.
+- Remove hand-authored muqaṭṭaʿāt phonemes, segments, letter mappings, and
+  Tajwīd mappings.
 
-## Appendix — verified codebase findings (grounding)
+**Acceptance**
 
-Captured during planning to anchor the refactor scope:
+- All six current madd classifications have fixtures and source/segment
+  ownership.
+- `عَيْنْ`, `صَادْ`, and cross-name rule examples derive without segment
+  arrays.
+- No generic resource patch/effect language remains.
 
-- Hardcoded tajweed trigger sets: `symbols/letters/letter.py:22-25`.
-- Idgham pair-maps inside a method: `symbols/letters/letter.py:278-293`.
-- Stop/start transforms baked into the phonemize template:
-  `symbols/letters/letter.py:149-165`; further stop/start logic across
-  `vowel.py`, `qalqala_letter.py`, `taa_marbuta.py`, `hamza_wasl.py`, `madd.py`,
-  `silent.py`, `phonetic_text.py`, set in `parser.py` `_annotate_boundaries`.
-- Special-word tables hardcoded in Python (not even in YAML): `lam.py:11-24`
-  (Allah patterns), `hamza_wasl.py:10-25` (hamza-wasl noun/verb patterns).
-- Thin data-holder classes: `DiacriticSymbol` (flyweight, no rules),
-  `ExtensionSymbol` (metadata only; single `length` effect at `letter.py:217`).
-- Corpus coupling: `loader.py` module-level singleton, positional keying off
-  `surah_info.json`, `uint16` word index, 114-surah / `(surah, ayah, word)`
-  assumption; hardcoded location refs in `madd.py`.
-- Three output views re-walk and re-derive the same data
-  (`char_phoneme_mapping.py` `_letter_pairs` / `_madd_type_indices`;
-  parallel logic in `letter_phoneme_mapping.py` and `tajweed_mapping.py`).
-- ~26+ hardcoded Arabic-glyph / IPA / location literals across `madd.py`,
-  `silent.py`, `letter_phoneme_mapping.py`, `char_phoneme_mapping.py`, `word.py`,
-  and the letter classes.
-- Three divergent tokenizations (tajweed vs letter-phoneme vs TS shard) differ on
-  107/114 surahs: `docs/tokenization-reconciliation.md`.
+### PR 8 — clean API, switch, and old-pipeline removal
+
+**Changes**
+
+- Finalize public `Recitation` projections for text, recited text, tokens,
+  grapheme/letter mapping, silence, Tajwīd, and madd.
+- Decide each current method/export in `current-implementation-mapping.md`:
+  retain as a thin projection, replace with the new API, or retire.
+- Port text matching to the active source adapter and corpus.
+- Remove mutable `symbols/` realization, global phoneme overrides/caches,
+  string predicates used as domain state, old mapping re-derivers, generic
+  contextual patches, and obsolete resource schemas.
+- Run full Hafs semantic regressions and installed-artifact tests.
+- Update README and quranic-phonemizer skill documentation.
+
+**Acceptance**
+
+- Every current capability is represented, intentionally redesigned, or
+  explicitly retired—none is lost accidentally.
+- Projections contain no rule logic or token-string inference.
+- The old pipeline can be deleted completely; there is one source of truth.
+
+### PR 9 — Warsh linguistic matrix and implementation
+
+This work starts with research, not YAML scaffolding.
+
+For each candidate family record:
+
+| Field | Requirement |
+|---|---|
+| canonical phenomenon | conventional name and whether it is Tajwīd, madd, realization, or script |
+| Hafs behavior | current canonical input/output |
+| Warsh behavior | same/different with reviewed source |
+| source representation | exact Warsh sequences and whether they are hints |
+| relationship | subject, condition, target, result |
+| implementation owner | shared code/table, Warsh source adapter, Warsh policy, render override, or exception |
+| tests | location, boundary state, expected segments/occurrences |
+
+Research order:
+
+1. `۪` marked vowels and imālah/taqlīl;
+2. plural mīm/small wāw;
+3. stop signs and boundary behavior;
+4. hamza, naql, tashīl/ibdāl;
+5. rāʾ/lām and madd deltas;
+6. waqf/ibtidāʾ, muqaṭṭaʿāt, and closed exceptions;
+7. minority unresolved script sequences.
+
+Implement shared cases first. Add a Warsh policy/table only for a proved
+difference. The complete Warsh feature is done only when every accepted
+runtime sequence and rule behavior has a fixture and source.
+
+## PR #37 disposition
+
+Keep as intake evidence/source material:
+
+- selected King Fahd raw source and Warsh font provenance;
+- canonical word corpus direction;
+- parameterized DB-builder intent;
+- Unicode/font comparison utilities.
+
+Rework before integration:
+
+- metadata meanings corrected by the codepoint audit;
+- generic block validator becomes semantic inventory validation;
+- generic flagged-character stripping becomes manifest transforms;
+- raw/font/research artifacts move outside runtime package data;
+- structural word/address policy becomes explicit;
+- unrelated formatting changes to shared phoneme/muqattaʿāt YAML are dropped.
+
+## Final architecture test
+
+Every observed Hafs/Warsh difference must have exactly one owner:
+
+1. corpus/address/build difference;
+2. source-script normalization difference;
+3. shared rule/table input;
+4. genuine riwāyah policy/table/render/exception delta.
+
+If two owners both need to "fix" the same difference, the boundary is wrong.
+If none owns it, implementation is not ready for that case.

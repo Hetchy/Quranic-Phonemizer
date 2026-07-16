@@ -1,198 +1,265 @@
-# ADR-002: Model invariants, code rules, and hygiene
+# ADR-002: Invariants, typing, and migration gates
 
-Status: **proposed** — companion to ADR-001 (v2). ADR-001 defines the shapes;
-this document defines the discipline that keeps them honest. Rules are
-organized by *how they are enforced*: by construction (illegal states
-unrepresentable), by validation (checked on every frozen `Recitation`), and
-by CI/lint (code rules). §E ranks them by impact.
+Status: **accepted for implementation** — companion to ADR-001.
 
----
+## 1. Typing conventions
 
-## A. By construction — illegal states unrepresentable
+The package targets Python 3.11 or newer. The first implementation change
+raises `requires-python` and CI accordingly; the current `>=3.8` metadata is
+already false because production code uses newer syntax.
 
-**A1. Every deviation is explained.** A segment may differ from its letter's
-default realization *only* via a builder mutation, and every builder mutation
-requires a `RuleApplication` argument — `Builder.set/delete/insert` have no
-application-less form. The model becomes a self-documenting audit trail:
-"why does this sound this way?" is always answerable, and silent drift from
-the domain is structurally impossible.
+Use `StrEnum` for closed domain vocabularies which code branches on or exposes:
 
-**A2. Detectors can't cheat.** Signature-locked
-`(Builder, RiwayaSpec) -> None`. Detectors receive the Builder, never the
-`Recitation`; they never import each other; they never see render tables
-(phonology must not condition on output tokens). The registry is frozen at
-import time.
+- canonical Arabic letters and marks;
+- segment qualities/features;
+- alignment kinds;
+- Tajwīd rules and typed details;
+- madd types, boundary kinds, and realization reasons.
 
-**A3. No module-level mutable state.** Today's `set_phoneme_override`
-globals die; runtime overrides become fields on a derived `RiwayaSpec`.
-`phonemize(spec, corpus, ref, stops)` is a pure function — which also makes
-concurrent multi-riwaya use trivially safe.
+Use validated strings for registered/extensible identities:
 
-**A4. Enum vs registry split** (the nuance in "enum everything"):
-- `StrEnum` for **closed domain vocabularies**: `GraphemeKind`, `Boundary`,
-  application `kind`s, `OverrideCondition`, `MaddType`, `LetterId` (the
-  alphabet + hamza-wasl is closed).
-- `NewType` + **load-time registry validation** for **open,
-  riwaya-extensible vocabularies**: `RuleId`, `ConsonantId`, `VowelQuality`.
-  Enum-ing these would require a Python release to add a Warsh rule,
-  defeating the data seam.
-- `NewType` all integer ids (`GraphemeId`, `SegmentId`, `WordIndex`) so an
-  index mixup is a type error.
+- riwāyah ids;
+- corpus and source-script ids;
+- renderer/preset ids.
 
-**A5. Pydantic posture:** `frozen=True` and `extra="forbid"` on every model;
-no `Optional` field except the documented ones (`Consonant.ident=None` =
-placeless nasal; `Grapheme.display`). No default value may encode a domain
-fact — counts, lengths, and trigger outcomes always flow from data; Python
-defaults are structural falsy only.
+Arabic-letter enum values are the glyphs themselves. YAML uses Arabic glyph
+keys/strings, not redundant `ba`, `lam`, `raa` identifiers. Code may use
+readable enum member names such as `Letter.BAA`; serialized script data stays
+glyph-first.
 
-**A6. Shaddah accounting (decision).** The shaddah grapheme is included in
-the geminate segment's `spelling`. This makes coverage (B1) total with no
-carve-out, and gives the letter view its composed `بّ` for free.
+Arbitrary strings never drive control flow. Values such as `effect: keep`,
+`merge_plain`, `nasalize`, or a Python function name in YAML are rejected.
 
-**A7. Make defaults explicit (decision).** Emit `Annotation(rule="izhar")`
-for every izhar and `Madd(tabii)` for every natural long vowel — never
-"absence of a rule means X". Costs a few thousand cheap objects; buys the
-exactly-one invariants (B6) and kills the pattern that caused today's
-continuing-tanween-alef attribution gap. Both A6 and A7 change output
-counts, so they must be decided **before** the characterization net locks.
+Use `NewType` only for ids whose accidental mixing is plausible: grapheme,
+letter-unit, segment, Tajwīd occurrence, and realization-event ids. Frozen
+slotted dataclasses are the final model; small mutable slotted builders are
+allowed during realization. No free-form metadata dictionaries exist.
 
----
+## 2. Construction invariants
 
-## B. Recitation invariants — `validate()`
+### I1. Exact source preservation
 
-Run always in tests and property-based suites; opt-in in production.
+Concatenating source graphemes in order reproduces the loaded source word text
+exactly. Normalization never overwrites, NFC-normalizes, silently strips, or
+reorders the source layer.
 
-Structural:
+### I2. Source-script accountability
 
-- **B1. Total coverage.** Every grapheme is (a) in some segment's spelling,
-  **xor** (b) named by exactly one `Silence`, **xor** (c) of an inherently
-  non-sounding kind (`STOP_SIGN`, `SILENCE_MARK`, `MARK`). No unexplained
-  silence, no double-accounting. (The silent-letter audit's Check A,
-  generalized to the whole model.)
-- **B2. Id coherence.** `graphemes[i].id == i`, `segments[i].id == i`; every
-  id in spellings and applications resolves; spelling tuples are in reading
-  order with no duplicates.
-- **B3. Stream order.** `segment.word` is non-decreasing; every spelling
-  grapheme belongs to `segment.word` or an adjacent word (cross-word spans
-  have width ≤ 1).
-- **B4. Insertion coherence.** `spelling == ()` ⟺ an `Insertion` names the
-  segment (both directions).
-- **B5. Kind agreement.** `Madd.segment` is a Vowel or a w/j Consonant;
-  `Assimilation.target` is geminate unless `complete=False`;
-  `Substitution.grapheme` is in some spelling or named by a `Silence`.
+Every scalar in a runtime corpus is recognized as a base, combining mark,
+formatting/attachment mark, stop/structural sign, or explicit source-build
+artifact. Arabic-block membership and font coverage are not semantic
+validation.
 
-Domain (each catches a real detector-bug class):
+Every sequence whose canonical interpretation is source-specific has a
+fixture containing riwāyah, location, raw string/codepoints, expected
+`LetterUnit`, and review status. Contextual scalars such as `۪`, `۟`, and `۬`
+cannot be registered with one global meaning.
 
-- **B6. Exactly-one-per-family.** Every bare noon/tanween trigger has
-  exactly one noon-family application; every long Vowel exactly one `Madd`;
-  every raa and isti'laa consonant exactly one tafkheem/tarqeeq annotation.
-  Catches a detector skipping a site or double-firing.
-- **B7. Feature justification.** `geminate=True` ⟹ shaddah in spelling or
-  an `Assimilation` targets it. `ident=None` ⟹ `nasal=True` and a
-  `Substitution` explains it. Emphatic vowel ⟹ emphatic adjacent consonant
-  or an explaining annotation.
-- **B8. Boundary discipline.** No application or spelling spans a stopping
-  or sakt boundary. A stopping word's last sounding segment is not a short
-  Vowel (golden rule 1). A starting word's first segment is a Consonant and
-  not geminate (golden rule 2 + ibtidaa shaddah drop).
-- **B9. Cross-traversal stability.** For the same ref, the wasl and waqf
-  Recitations have identical `graphemes` arrays (same ids), so consumers can
-  diff traversals by id. Tested explicitly.
-- **B10. Render totality.** Every segment renders under both full and simple
-  tables. Enforced stronger at *spec load*: the render table must cover the
-  full producible feature lattice, so this can never fail per-recitation.
+### I3. Letter-unit coverage
 
----
+Every sounding or potentially sounding grapheme belongs to exactly one
+canonical `LetterUnit`. Structural signs do not become letters. A combining
+mark does not become a letter because its Unicode name contains "ALEF" or
+"HAMZA". A multi-scalar source sequence may form one unit.
 
-## C. Code rules — CI/lint enforced
+### I4. One alignment per source grapheme
 
-- **C1. The literal gate.** A lint script failing on any Arabic-block
-  codepoint (U+0600–06FF and friends), IPA-block character, or
-  `\d+:\d+:\d+` location literal in `*.py` outside `tests/`. Resources are
-  the only home for domain bytes. (Concretizes the Epic 3a acceptance gate.)
-- **C2. No string surgery on model values.** Model fields are never
-  sliced/concatenated/`in`-tested outside the render module (the
-  `":" in ph` sin class). Greppable rule + review checklist.
-- **C3. Layering, enforced by import-linter.** `model` imports nothing local
-  ← `builder` ← `detectors`; `render` and `projections` import `model` +
-  spec only; `riwaya` composes all. No cycles — and *projections cannot
-  import detectors*: a projection needing a detector means the model is
-  missing a fact.
-- **C4. Exhaustiveness.** Every `match` over an enum or discriminated union
-  ends in `assert_never`; pyright/mypy strict in CI. A new segment or
-  application kind then breaks every switch that must handle it — that is
-  the point.
-- **C5. Data schema validation at load.** Every YAML parses into its
-  Pydantic spec with `extra="forbid"`, failing with file+key on error. A
-  typo'd trigger-set key must be a startup crash, never a silent no-op
-  (today's exact failure mode for a second riwaya).
-- **C6. Traceability matrix.** Every numbered fact in `domain-facts.md` maps
-  to at least one test id; every detector's table-driven tests cite their §.
-  CI fails on unmapped facts — the domain doc becomes a checklist, not prose.
-- **C7. Oracles in CI.** The Hafs characterization net (byte-identical
-  gate); `Recitation` JSON round-trip losslessness; property-based tests
-  (random refs × stop selections) asserting the B-invariants; a perf
-  benchmark (full-Quran phonemize, fail on >20% regression — we are
-  replacing hand-optimized code).
-- **C8. Deterministic serialization.** `rules` sorted by a canonical key at
-  freeze; `schema_version` on `Recitation` from day one.
-- **C9. Naming glossary.** One doc mapping Arabic terms → canonical rule-id
-  spellings (Arabic terms for rule ids — idgham, not assimilation; English
-  reserved for effect verbs / class names). Prevents `ikhfa`/`ikhfaa`
-  drift across data files.
-- **C10. Error and I/O policy.** Unknown codepoint at tokenize = hard error
-  (ties into the Epic 1a validator). No detector or builder performs I/O;
-  specs are loaded once and injected.
+Every grapheme has exactly one `GraphemeAlignment`. Audible segments are
+linked through `REALIZES`, `CARRIES`, or `ASSIMILATED`; silence has a typed
+cause; hints and structural marks are explicit. No projection guesses silence
+from an empty phoneme list.
 
----
+### I5. Every sound has provenance
 
-## D. Small decisions to record now
+Every segment either participates in at least one alignment or was inserted by
+one `RealizationEvent`. Cross-word shared segments may align to graphemes in
+both words. No relation crosses a stopping boundary.
 
-- **D1.** A6 (shaddah-in-spelling) and A7 (explicit izhar/tabii) — decide
-  before the characterization net locks, since both change output counts.
-- **D2.** Skeleton normalization is **one data-driven function**
-  (`graphemes → tuple[LetterId]`) shared by the override matcher and any
-  future search — never re-implemented per table.
-- **D3.** The Builder may record an optional **pass-by-pass trace** (which
-  detector did what) for debugging — nearly free given A1, painful to
-  retrofit.
-- **D4.** Khilaf (dual-valid readings) are `Annotation`s with explicit rule
-  ids — never alternate outputs.
+### I6. References and order are valid
 
----
+Ids equal array positions, all references resolve, word ownership is explicit,
+and reading order is monotonic except for a documented shared/inserted
+realization. The final aggregate is immutable.
 
-## E. Priority — what to adopt first
+### I7. One domain decision, many projections
 
-Not everything above is equal. Ranked by impact:
+Tajwīd relationships, madd classifications, alignments, silence causes,
+boundary decisions, and recited-writing transforms are recorded once. A
+public projection may group or serialize them but may not invoke a detector or
+inspect token spelling to rediscover them.
 
-**Tier 1 — load-bearing; the redesign fails without them.**
-- **A1** (no mutation without an application) and **B1** (total grapheme
-  coverage). Together they guarantee the model can never silently drift
-  from the domain — which is the failure mode this entire redesign exists
-  to end. Everything else is defense in depth.
-- **C7's characterization net + B10/render-totality-at-load** — ADR-001's
-  ranked risk #1 is render-table fidelity; these are its only proof.
+### I8. Render attribution
 
-**Tier 2 — cheap now, expensive to retrofit; adopt at first commit.**
-- **A3** (purity / no globals), **A5** (frozen + forbid + no domain
-  defaults), **C3** (layering) — architectural properties that are one-line
-  decisions on day one and rewrites later.
-- **D1** (shaddah-in-spelling, explicit izhar/tabii) — must precede the net.
-- **C1** (literal gate) — already an Epic 3a acceptance item; wire it early
-  so violations never accumulate.
+Every rendered token points to its segment(s), and every audible segment
+renders at least one full-mode token. Word/global token indices are projection
+values, not model fields. Simple output is another renderer/presentation over
+the same segments.
 
-**Tier 3 — high value, adopt during build-out.**
-- **B6–B8** (exactly-one, feature justification, boundary discipline) — the
-  invariants that actually catch detector bugs; grow them alongside the
-  detectors they check.
-- **A4** (enum/registry split) and **C4** (exhaustiveness) — the typing
-  discipline that makes extension safe.
-- **C5** (spec validation at load), **C6** (traceability matrix).
+### I9. Recited-writing provenance
 
-**Tier 4 — worthwhile polish; schedule, don't block on.**
-- B2–B5, B9 structural checks beyond coverage; C2, C8, C9, C10; D2–D4;
-  property-based testing and the perf benchmark (add once the net is green).
+Every recited Arabic grapheme points to source graphemes or one realization
+event. Muqaṭṭaʿāt expansion maps each recited name to its compact source
+letter. The exact source remains independently reconstructable.
 
-Rule of thumb embedded in the ranking: prefer **unrepresentable** over
-**validated** over **linted** — each tier down catches the same bug later
-and more expensively.
+### I10. Riwāyah isolation
+
+Corpus/address data, source adapter, searchable-text normalization,
+exceptions, policies, render configuration, and caches are keyed by immutable
+riwāyah/config identity. Hafs→Warsh and Warsh→Hafs construction order produces
+the same isolated results.
+
+## 3. Tajwīd invariants
+
+### T1. Conventional names
+
+Every `TajweedOccurrence.rule` is a conventional Tajwīd phenomenon.
+Orthographic silence, hamzat-al-waṣl vowel choice, `keep`, `replace`, and madd
+are not Tajwīd ids.
+
+### T2. Relationship semantics
+
+- every occurrence has a subject;
+- condition means context used to select/explain the rule;
+- target is present only for actual assimilation;
+- result references the realized sound;
+- detail is absent or one allowed typed variant for that rule.
+
+Tests must cover ikhfāʾ (condition, no target), iqlāb, idghām with and without
+ghunnah (real target), shafawī rules, general idghām, qalqalah, tafkhīm, and
+tarqīq, including cross-word ownership.
+
+### T3. Exhaustive family decisions
+
+Nūn/tanwīn has exactly one of iẓhār ḥalqī, ikhfāʾ ḥaqīqī, iqlāb, idghām
+bi-ghunnah, or idghām bilā-ghunnah when the required context is present.
+Mīm sākinah has exactly one of iẓhār, ikhfāʾ, or idghām shafawī. Rāʾ receives
+exactly one of tafkhīm or tarqīq. Stopping boundaries cancel cross-boundary
+decisions before these families are evaluated.
+
+### T4. Trigger/detail is not rule identity
+
+Nūn sākinah versus tanween is `NoonDetail`; kāmil versus nāqiṣ is
+`IdghamDetail`; sughrā versus kubrā is `QalqalahDetail`. Invalid combinations
+fail at occurrence construction.
+
+### T5. Madd scope
+
+Every supported long-vowel/leen site has at most one `MaddOccurrence` for the
+current realization. The record stores type, vowel segment, carrier, and
+optional cause; never performance duration/count. New types require a real
+riwāyah behavior, API need, and tests.
+
+## 4. Dependency boundaries
+
+```text
+model
+  <- source adapters
+  <- corpus/request/boundary resolver
+  <- baseline segment builder
+  <- shared rules + narrow riwāyah policies
+  <- renderer and public projections
+```
+
+- `rules/` sees canonical letters/marks, boundaries, and segments; it never
+  sees raw source glyph conventions or output tokens.
+- `script/` is the only package allowed to interpret source-specific Unicode
+  sequences.
+- `render/` is the only package allowed to assign output token strings.
+- `riwayat/<id>/rules.py` contains only proven policy replacements; shared
+  modules do not import riwāyah modules.
+- rules and projections perform no file I/O.
+- runtime configuration is immutable and instance-local.
+
+A targeted lint may prohibit raw Arabic source literals and IPA-like token
+literals in shared `rules/`. A repository-wide ban is wrong: adapters,
+glyph-first data, fixtures, docs, and tests legitimately contain Arabic.
+
+## 5. Resource/build validation
+
+At runtime-data load:
+
+1. the riwāyah id and referenced corpus/script/render ids agree;
+2. all files exist and declare a supported schema version;
+3. every glyph key is exactly one intended scalar or an explicitly allowed
+   sequence;
+4. glyph keys convert to known canonical enums where required;
+5. finite family sets are complete/disjoint when the domain says they are;
+6. a riwāyah replacement table replaces one whole named family, never a deep
+   merge of ambiguous fragments;
+7. exception locations exist in that riwāyah corpus;
+8. duplicate keys and unknown fields fail.
+
+At corpus build:
+
+1. raw input, licence/provenance, and hash are recorded;
+2. every removal/replacement is in a transformation manifest with counts;
+3. structural tokens are removed from lexical addressing deliberately;
+4. the normalized editable corpus, packed database, and address index are
+   reproducible;
+5. the generated codepoint report has no unknown/unreviewed runtime scalar.
+
+## 6. Migration gates
+
+Exact legacy schema parity is not required. Semantic coverage is.
+
+### Gate A — behavior inventory
+
+Keep today's full-surah flat mappings, targeted Tajwīd suite, silent tests, and
+audited module map as an executable behavior inventory. Add missing fixtures
+for phoneme output, cross-word ownership, waqf/ibtidāʾ, character mapping,
+phonetic Arabic, text matching, muqaṭṭaʿāt, contextual exceptions, and all six
+madd classifications.
+
+For each existing output field/method, decide explicitly: represented by the
+new aggregate, retained as a thin projection, redesigned, or retired. Known
+bugs are fixed rather than enshrined.
+
+### Gate B — source normalization
+
+Commit a Hafs fixture for every accepted source family and a Warsh fixture for
+every family allowed by `warsh-script-codepoint-audit.md`. Unknown or
+unreviewed Warsh sequences fail closed. Prove at least one different-byte,
+same-canonical case end to end.
+
+### Gate C — vertical Tajwīd slice
+
+Implement nūn/tanwīn through source graphemes, units, baseline segments,
+occurrences, alignments, rendering, silence, and the new mapping API. It must
+exercise within-word, cross-word, stop cancellation, all five family outcomes,
+and both nūn/tanween details.
+
+### Gate D — representation slices
+
+Before porting every rule, prove:
+
+- one waqf/ibtidāʾ transform with recited-writing provenance;
+- one qalqalah result which renders multiple/configured tokens;
+- one inserted sound;
+- one long vowel with haraka+carrier sharing;
+- one muqaṭṭaʿāt name derived solely from Arabic recited spelling.
+
+### Gate E — full Hafs semantic migration
+
+Every implemented behavior in the audit map has a new owner and regression
+test. Projections contain no rule detectors. Only then switch Hafs to the new
+pipeline and remove the old mutable graph/re-derivers.
+
+### Gate F — installed-artifact proof
+
+Build wheel and sdist, install each in a clean environment, and run Hafs plus
+Warsh-normalization smoke tests. Runtime code must not depend on `dev/`,
+`research/`, `evidence/`, `build/`, or repository-relative paths.
+
+### Gate G — Warsh pronunciation
+
+For every implemented Warsh delta, require a reviewed source, canonical input,
+expected segment change, expected occurrence/realization, and test. Script
+difference alone never authorizes a rule fork.
+
+## 7. Implementation readiness
+
+The Hafs refactor and the proved Warsh source-adapter subset are ready to
+implement after these ADRs. A complete Warsh phonemizer is not: stop-sign
+semantics, marked-vowel interpretation, plural-mīm realization, and other
+riwāyah-specific rules still need research. The code must represent those
+unknowns without guessing them.

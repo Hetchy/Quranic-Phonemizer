@@ -1,475 +1,243 @@
-# ADR-001 (v2): Canonical internal model — two spines, typed segments, tajweed first-class
+# ADR-001: Canonical internal model for multiple riwāyāt
 
-Status: **proposed** (Epic 3a design ADR). v2 is a from-scratch design: it does
-NOT work backwards from today's classes or output contracts. A new public
-contract may replace the six current views (version bump accepted).
+Status: **accepted for implementation** for the Hafs refactor and Warsh script
+normalization. Warsh pronunciation remains gated by research identified in the
+integration plan.
 
-Companion: `docs/domain-facts.md` — the domain ground truth this model encodes.
-Reviewed by three independent design reviews (domain-modeling, adversarial
-edge-case stress test over 16 hard cases, simplicity/API); their forced
-decisions are folded in and credited inline as [D]/[A]/[S].
+Companions:
 
----
+- `docs/tajweed-model.md` is the concrete type and occurrence contract.
+- `docs/warsh-script-codepoint-audit.md` is the source-encoding evidence.
+- ADR-002 defines invariants and migration gates.
+- ADR-003 defines code, runtime-data, build, evidence, and research ownership.
 
-## 1. The core decision: two spines joined by `spelling`
+## 1. Decision
 
-The domain facts describe **two independent sequences with a many-to-many
-alignment**, not one tree:
+Replace the mutable `LetterSymbol`/neighbour-mutation pipeline with one
+utterance result containing five connected layers:
 
-- **Written spine**: the text as a flat list of `Grapheme`s (every codepoint
-  that appears, classified by the riwaya's script data). Pure orthography —
-  no phonology, no status, no phonemes. Silent letters stay here untouched
-  (domain-facts §8.3: every grapheme is written whether or not it sounds).
-- **Sound spine**: the recitation as a flat, **utterance-level** list of typed
-  `Segment`s (Consonant / Vowel) — the articulation events. Flat and global,
-  not nested under words, because sounds cross words (cross-word idgham
-  today; Warsh naql moves a vowel spelled in word N+1 to sound in word N —
-  retrofitting a global stream later would be expensive [A]).
+1. exact source `Grapheme`s;
+2. source-normalized `LetterUnit`s;
+3. realized sound `Segment`s;
+4. explicit grapheme-to-segment `Alignment`s;
+5. stored Tajwīd, madd, realization, recited-writing, and rendered-token facts.
 
-The alignment is **one field**: `Segment.spelling: tuple[grapheme_id, ...]`
-(0..n). This single relation dissolves the entire hard-case ledger with no
-auxiliary structures:
+Each result belongs to one registered `RiwayahSpec`. The package identity is
+only the riwāyah id (`hafs`, `warsh`, and future registered ids). The model has
+no qirāʾah or ṭarīq fields.
 
-| Domain fact | Representation |
-|---|---|
-| long vowel jointly owned by haraka + carrier | one `Vowel`, `spelling=(haraka, carrier)` |
-| cross-word idgham geminate | one `Consonant`, `spelling` spanning two words |
-| idgham shafawi "both meems sound" | same — both meems in one segment's spelling |
-| inserted sound (hamza-wasl vowel, iltiqaa kasra, 'iwad alef, Allah *aa*) | segment with `spelling=()` |
-| silent grapheme (idgham source, hamza wasl, shamsiyah lam, otiose alef) | grapheme referenced by **no** segment |
-| one grapheme → many sounds (muqatta'a صٓ → *ṣaad*) | many segments, each `spelling=(صٓ,)` |
+The new API may be clean rather than shape-compatible with every existing
+mapping DTO. Existing outputs are evidence for behavior which must be mapped
+or deliberately retired, not schemas which dictate the new internal model.
 
-Consequently the v1 model's `Unit`, `role`, `status`, `share_group`,
-`MaddInfo`, `written_delta`, and the `Phoneme` class are **all deleted** [S].
-Everything they stored is either a link (`spelling`) or an annotation
-(`RuleApplication`, §3), and therefore cannot drift between views:
+## 2. Why the layers are separate
 
-- *silent* = grapheme not in any spelling (attribution = the RuleApplication
-  that names it);
-- *inserted* = empty spelling;
-- *replaced / shortened* = the RuleApplication that did it.
+### Exact source
 
-**The segment IS the phoneme.** No phoneme strings exist inside the model.
-Rules condition on typed features (`.geminate`, `.nasal`, `.quality`) — never
-string parsing. Output tokens (IPA-ish strings, including simple mode) are a
-per-riwaya **render table** keyed on segment features (§6). IPA lives only in
-data files, which is the byte-controllability seam.
+The loaded corpus must remain byte-reconstructable. Normalization never edits
+the source sequence. This preserves codepoint attribution, orthographic hints,
+stop signs, and corpus provenance.
 
-## 2. The Pydantic draft
+### Canonical spelling
 
-Minimal by construction: every field below is forced by a case in
-`domain-facts.md` or by a reviewer-verified hard case. Anything speculative
-was explicitly killed (§9). Ids are integer indices into the flat arrays of
-`Recitation` — serializable, acyclic, O(1) to resolve [S].
+Rules cannot operate directly on source scalars. PR #37 proves that:
 
-```python
-from enum import Enum
-from typing import Literal, Annotated, Union
-from pydantic import BaseModel, ConfigDict, Field
+- Hafs `ٱ` and several Warsh initial-alef sequences can represent hamzat
+  al-waṣl;
+- Warsh uses three nonstandard Unicode marks for the three tanween values;
+- `۪`, `۟`, and `۬` are context-dependent and cannot have one global meaning;
+- Warsh yeh barree frequently corresponds to Hafs alef maqṣūrah/yāʾ family.
 
+Each source adapter tokenizes grapheme clusters and emits canonical
+`LetterUnit`s composed with first-class `ShortVowel`, `Tanween`, `SmallVowel`,
+sukun, shaddah, and orthographic-hint values. Dagger alef and mini wāw/yāʾ are
+`SmallVowel`s, not a generic modifier category. Shared rule code starts at this
+boundary and never inspects raw script glyphs.
 
-# ─── written spine ───────────────────────────────────────────────────────
+Normalization is many-to-one: several tanween scalars and a reviewed
+harakah+mini-mīm composition can all produce one canonical `Tanween`. It is
+also sequence-sensitive: the same scalar may normalize differently in
+different clusters. Exact `Grapheme`s always preserve which source convention
+was written.
 
-class GraphemeKind(str, Enum):
-    CONSONANT = "consonant"          # incl. all hamza seats
-    VOWEL_LETTER = "vowel_letter"    # ا و ي ى and mini/dagger forms
-    HAMZA_WASL = "hamza_wasl"
-    HARAKA = "haraka"
-    TANWEEN = "tanween"
-    SHADDAH = "shaddah"
-    EXTENSION = "extension"          # dagger alef, mini waw/yaa, maddah
-    SILENCE_MARK = "silence_mark"    # round / rectangular zero
-    MARK = "mark"                    # sakt seen, iqlab meem, other small marks
-    STOP_SIGN = "stop_sign"
+### Sound
 
-class Grapheme(BaseModel):
-    model_config = ConfigDict(frozen=True)
-    id: int                    # == index in Recitation.graphemes
-    char: str                  # the raw codepoint(s)
-    kind: GraphemeKind         # from the riwaya ScriptSpec — only classification
-    word: int                  # index into Recitation.words
-    seat: int                  # letter-grouping index (base + its marks share a
-                               # seat; extensions share the carrier's seat)
-    letter: str | None = None  # LetterId for base letters ("lam", "hamza_wasl");
-                               # None for marks/harakat — the skeleton currency
-    display: str | None = None # contextual display override (ئ rendered as ي)
-```
+Rules work on typed consonant/vowel segments, not token strings. A segment can
+carry gemination, nasalization/hidden realization, emphasis, qalqalah, vowel
+quality, and vowel length. Output strings exist only in the renderer.
 
-Extensions and silence marks are **their own graphemes** (first-class): a
-dagger alef can be a segment's sole spelling, which is all "extension
-first-class" requires [D]. There is **no Cluster class**: the seat index *is*
-the grouping, and views that need per-letter grouping do `groupby(seat)` at
-projection time [S]. There is no written-layer fusion for tajweed-fused
-letters — fusion exists only on the sound spine as shared spelling (silent
-letters must remain written; mergers cross words).
+### Alignment
+
+Every source grapheme has one typed relationship to sound: realizes, carries,
+assimilated, silent, orthographic hint, or structural. Many graphemes may
+share one segment and one grapheme may contribute to multiple segments.
+
+This relation is required, not optional metadata. It is what makes letter and
+character mapping, silent-letter explanation, cross-word mergers, long-vowel
+ownership, and Tajwīd highlighting simple projections rather than separate
+detectors.
+
+### Occurrences and derived writing
+
+The builder records named Tajwīd occurrences, madd classifications, and
+non-Tajwīd realization events while it knows why the sound changed. It also
+records source-linked recited Arabic graphemes for waqf/ibtidāʾ and lexical
+expansion. Rendered tokens point to segment ids.
+
+## 3. Identity and configuration
 
 ```python
-# ─── sound spine ─────────────────────────────────────────────────────────
-
-class Consonant(BaseModel):
-    model_config = ConfigDict(frozen=True)
-    kind: Literal["consonant"] = "consonant"
-    id: int                          # == index in Recitation.segments
-    word: int                        # home word (where the sound lands)
-    spelling: tuple[int, ...]        # grapheme ids; () => inserted
-    ident: str | None                # ConsonantId into the riwaya inventory;
-                                     # None = placeless nasal (ikhfaa/iqlab) [A]
-    geminate: bool = False
-    nasal: bool = False              # ghunnah hold
-    emphatic: bool = False           # tafkheem resolved
-    qalqala: bool = False            # echo release
-
-class Vowel(BaseModel):
-    model_config = ConfigDict(frozen=True)
-    kind: Literal["vowel"] = "vowel"
-    id: int
-    word: int
-    spelling: tuple[int, ...]
-    quality: str                     # VowelQuality into the inventory
-                                     # ("a","i","u"; Warsh adds "e" imala, …)
-    long: bool = False               # short vs long; counts live on the
-                                     # MaddApplication (leen has no vowel) [A]
-    emphatic: bool = False
-
-Segment = Annotated[Union[Consonant, Vowel], Field(discriminator="kind")]
+@dataclass(frozen=True, slots=True)
+class RiwayahSpec:
+    id: str
+    corpus: CorpusSpec
+    script: ScriptAdapter
+    policies: RulePolicies
+    render: RenderConfig
 ```
 
-Only two segment types. Reviewed alternatives and why they died: an `Echo`
-segment (qalqala) would reintroduce the skip-Q hack into every scan of "the
-last consonant" — the flag keeps rule code clean and the renderer expands it
-to today's discrete `Q` token (§6) [A]; a `Pause` segment for sakt is
-unnecessary — sakt is a word-boundary fact that *blocks* detectors, carried
-on the Word (below); rawm/ishmam/hams are performance annotations, not
-articulation structure — representable later as annotation rule applications
-if ever produced; `release=UNRELEASED` had no case needing it (naqis = two
-consonants + a non-merging application) [A].
+The id is a validated registry key rather than an enum because installed
+riwāyāt are extensible identities. Closed linguistic concepts—letters, vowel
+qualities, small-vowel kinds, rule names, alignment kinds, madd types—use
+Python 3.11 `StrEnum`.
 
-```python
-# ─── tajweed, first-class ────────────────────────────────────────────────
-# Applications are typed by the domain's EFFECT verbs (domain-facts §4), so a
-# participant's role is the field name — never a stringly-typed role [D].
-# The rule id (riwaya-scoped registry key) carries the §5 family identity.
+Corpus, address metadata, searchable-text normalization, script adapter,
+exceptions, rule policies, render configuration, and caches are instance-local
+or keyed by immutable riwāyah/config identity. Hafs and Warsh must coexist in
+one process without global overrides.
 
-class _App(BaseModel):
-    model_config = ConfigDict(frozen=True)
-    rule: str                        # RuleId, e.g. "ikhfaa_tanween", "madd_lazim"
+A reference such as `2:255:3` is interpreted in the active riwāyah corpus. No
+assumption is made that two corpora have the same verse numbering or word
+shape.
 
-class Assimilation(_App):            # idgham family, iqlab, lam shamsiyah
-    kind: Literal["assimilation"] = "assimilation"
-    source: tuple[int, ...]          # trigger grapheme ids (the silenced noon /
-                                     # tanween / lam / first letter)
-    target: int                      # the resulting segment id
-    complete: bool = True            # False = mutajanisayn naqis: source keeps
-                                     # its own segment; nothing merges [A]
+## 4. Tajwīd vocabulary and relationships
 
-class Silence(_App):                 # a grapheme sounds nothing, and why
-    kind: Literal["silence"] = "silence"
-    grapheme: int
-    # rule covers both tajweed reasons ("hamza_wasl_silent") and orthographic
-    # conventions ("otiose_alef", "tanween_alef") — closes the known
-    # continuing-tanween-alef attribution gap from the silent-letter audit
+The canonical Tajwīd rule set is made of conventional named phenomena, not
+implementation mutations:
 
-class Insertion(_App):               # sound with no written source
-    kind: Literal["insertion"] = "insertion"
-    segment: int                     # ("hamza_wasl_vowel", "iltiqaa_kasra",
-                                     #  "madd_iwad", "allah_alef")
+- ghunnah mushaddadah;
+- iẓhār ḥalqī, ikhfāʾ ḥaqīqī, iqlāb, idghām with/without ghunnah;
+- iẓhār, ikhfāʾ, and idghām shafawī;
+- idghām mutamāthilayn, mutaqāribayn, and mutajānisayn;
+- lām shamsiyyah;
+- qalqalah;
+- tafkhīm and tarqīq.
 
-class Madd(_App):                    # length classification (madd + leen)
-    kind: Literal["madd"] = "madd"
-    segment: int                     # the Vowel — or the glide Consonant (leen)
-    counts_min: int                  # resolved from riwaya data per rule
-    counts_max: int                  # (2,2) tabii; (4,5) muttasil; (2,6) arid
+Noon sākinah versus tanween is a trigger detail of the same named rule.
+Kāmil/naqis and sughrā/kubrā are typed details. The following letter in ikhfāʾ
+is a condition, not an assimilation target. Iẓhār and tarqīq are explicit in
+the new annotation model even when pronunciation stays plain, because an
+exhaustive Tajwīd projection cannot represent only mutations.
 
-class Substitution(_App):            # sounds other than written
-    kind: Literal["substitution"] = "substitution"
-    segment: int                     # ("taa_marbuta_haa", "iltiqaa_shortening",
-    grapheme: int                    #  "alef_maksura_consonant", "tasheel")
+`TajweedOccurrence` stores `subject`, `condition`, `target`, `result`, and an
+optional validated detail union. There is no generic `effect`, `source/target`
+boolean, free-form detail dictionary, or rule subclass tree.
 
-class Annotation(_App):              # no structural change: izhar, tafkheem/
-    kind: Literal["annotation"] = "annotation"       # tarqeeq, qalqala degree,
-    graphemes: tuple[int, ...] = ()                  # hamza-wasl vowel choice,
-    segment: int | None = None                       # sakt-blocked-rule record
+## 5. Madd and other realization
 
-RuleApplication = Annotated[
-    Union[Assimilation, Silence, Insertion, Madd, Substitution, Annotation],
-    Field(discriminator="kind"),
-]
+Madd is a separate classification linked to the affected sound segment(s),
+written carrier graphemes, and cause. Plural segments are required because
+leen is not simply a long-vowel segment. The initial set is exactly what
+current implemented output needs:
+
+- ṭabīʿī;
+- wājib muttaṣil;
+- jāʾiz munfaṣil;
+- lāzim;
+- ʿāriḍ li-s-sukūn;
+- leen.
+
+The phonemizer stores no minimum, maximum, count, or duration. It does not add
+badal or ṣilah sughrā/kubrā without a supported behavior and API requirement.
+Ṣilah may be the context of a pronoun-hāʾ or plural-mīm realization; it is not
+automatically a madd type. Waqf ʿiwaḍ is a realization event which yields a
+long vowel, not a new stored madd classification.
+
+Hamzat al-waṣl, iltiqāʾ al-sākinayn, orthographic silence, waqf/ibtidāʾ,
+tāʾ-marbūṭah at waqf, inserted sounds, and named contextual exceptions are
+typed `RealizationEvent`s. They are not Tajwīd enum members.
+
+## 6. Rule execution and riwāyah variation
+
+Complex rules remain typed Python modules. Shared passes implement shared
+behavior. A `RulePolicies` composition object provides narrow strategies only
+where conditions genuinely vary—for example rāʾ emphasis, marked-vowel
+quality, or plural-mīm realization.
+
+The pattern is:
+
+```text
+shared pass -> call active policy -> produce canonical segment
+            -> record the same canonical occurrence relationship
 ```
 
-Six effect shapes cover all 33+ Hafs rules and the known Warsh additions
-(imala = Annotation + Vowel quality; naql = Insertion/Silence pair). Detectors
-*apply* effects to segments **and** append the application; the application is
-the durable annotation (what the tajweed view reads), the segment features
-are the durable result (what the renderer reads). Neither is re-derived.
+Hafs can supply `classify_hafs_raa`; Warsh can later supply
+`classify_warsh_raa`. They return the same `Emphasis` type and the shared pass
+records `TAFKHEEM` or `TARQIQ`. No profile subclasses, scattered
+`if riwayah == ...`, or data-file function names are allowed.
 
-```python
-# ─── result aggregate ────────────────────────────────────────────────────
+Source representation variation is resolved before this point. A Warsh mark
+which merely spells the same tanween differently cannot fork a Tajwīd rule.
+A source hint such as small mīm validates a derived iqlāb decision but does not
+drive it. A likely genuine difference such as plural-mīm ṣilah stays pending
+until riwāyah research supplies its policy and tests.
 
-class Boundary(str, Enum):
-    WASL = "wasl"; WAQF = "waqf"; IBTIDAA = "ibtidaa"    # ibtidaa may combine
-                                                          # with waqf on one word
+## 7. Muqaṭṭaʿāt
 
-class Word(BaseModel):
-    model_config = ConfigDict(frozen=True)
-    index: int
-    location: str                    # riwaya-scoped address ("2:255:3")
-    text: str
-    starting: bool = False           # ibtidaa here
-    stopping: bool = False           # waqf after this word
-    sakt_after: bool = False         # blocks cross-word detectors, no waqf
-    stop_sign: str | None = None
+Store only the compact-letter-to-recited-spelling mapping, keyed by Arabic:
 
-class Recitation(BaseModel):
-    model_config = ConfigDict(frozen=True)
-    ref: str
-    riwaya: str
-    words: tuple[Word, ...]
-    graphemes: tuple[Grapheme, ...]      # id == index
-    segments: tuple[Segment, ...]        # id == index; recitation order
-    rules: tuple[RuleApplication, ...]
+```yaml
+names:
+  "ص": "صَادْ"
+  "م": "مِيمْ"
+  "ع": "عَيْنْ"
 ```
 
-One `Recitation` = **one traversal** (one boundary assignment), exactly as
-today. The three renditions of a word differ by the closed §7 transform set,
-so a consumer wanting wasl *and* waqf phonemizes twice; because cross-word
-rules couple neighbours, the Recitation — not the Word — is the only valid
-re-run/cache unit [A]. Simultaneous multi-state representation was
-considered and rejected as scope creep.
+The displayed form, consonants, vowels, length, leen, madd, qalqalah, and
+cross-name Tajwīd are derived by feeding the recited spelling through the same
+pipeline. Hand-written `segments`, `letter_mappings`, and `tajweed_mapping`
+blocks are deleted. A separate display value exists only when a demonstrated
+requirement differs from the recited spelling.
 
-## 3. Tajweed first-class: detectors + applications, two axes
+## 8. Final aggregate and projections
 
-The domain has two orthogonal taxonomies and the model keeps them apart [D]:
+The immutable `Recitation` owns words/addresses, source graphemes, canonical
+letters, segments, alignments, boundaries, Tajwīd occurrences, madd
+occurrences, realization events, recited graphemes, and rendered tokens.
 
-- **Rule families** (domain-facts §5 — noon/tanween, meem, idgham, qalqala,
-  tafkheem, madd, hamza-wasl, …) are the *decision* axis → **detectors**:
-  one plain function per family in a flat registry, its decision table and
-  trigger sets read from riwaya data. ~12 functions, each one screen.
-- **Effect verbs** (domain-facts §4 — substitute, silence, insert, lengthen,
-  colour, classify) are the *mutation* axis → the **RuleApplication union**
-  above.
+New public projections should expose these facts directly:
 
-Worked detector (noon/tanween family) against the model:
+- source/normalized/recited text;
+- ordered semantic segments and rendered phoneme tokens;
+- grapheme and letter mappings through the one alignment relation;
+- silent/assimilated/structural graphemes with causes;
+- conventional Tajwīd occurrences and their participants;
+- madd classifications.
 
-```python
-@register("noon_tanween")
-def detect_noon_tanween(b: Builder, spec: RiwayaSpec) -> None:
-    table = spec.rules.noon_tanween        # exhaustive, mutually exclusive —
-    for trig in b.noon_or_tanween_triggers():          # no priority order
-        nxt = b.next_sounding(trig, cross_word=not trig.word.stopping)
-        if nxt is None:            # waqf: rule self-cancels, no code needed
-            continue
-        if b.sakt_blocks(trig, nxt) or b.izhar_mutlaq(trig, nxt):
-            b.add(Annotation(rule="izhar", graphemes=trig.grapheme_ids)); continue
-        rule, effect = table.classify(nxt.letter)
-        n_seg = b.noon_segment(trig)       # the /n/ this trigger sounds
-        match effect:
-            case "keep":                   # izhar
-                b.add(Annotation(rule=rule, graphemes=trig.grapheme_ids))
-            case "nasalize":               # ikhfaa — placeless nasal
-                b.set(n_seg, ident=None, nasal=True, emphatic=b.heavy(nxt))
-                b.add(Substitution(rule=rule, segment=n_seg.id, grapheme=trig.gid))
-            case "hidden_meem":            # iqlab
-                b.set(n_seg, ident=spec.rules.iqlab_ident, nasal=True)
-                b.add(Substitution(rule=rule, segment=n_seg.id, grapheme=trig.gid))
-            case "merge_nasal" | "merge_plain":        # idgham (may cross word)
-                b.delete(n_seg)
-                tgt = b.first_consonant(nxt)
-                b.set(tgt, geminate=True, nasal=(effect == "merge_nasal"),
-                      spelling=tgt.spelling + trig.grapheme_ids)   # joint ownership
-                b.add(Assimilation(rule=rule, source=trig.grapheme_ids, target=tgt.id))
-```
+Token indices, view grouping, table cells, and JSON layout are presentation
+choices. They are never stored as linguistic truth and never rediscovered by
+phoneme-string inspection.
 
-What this kills from today's code: `mark_phonemized` neighbour-mutation
-hacks, `detect_cross_word_mergers` reverse-engineering, the tanween/noon rule
-duplication (same trigger stream), and the "rules that disappear when
-stopping" special-casing (`next_sounding` returning None *is* the
-cancellation).
+## 9. Rejected alternatives
 
-## 4. The riwaya seam
+- Preserve the current output DTOs as the internal object graph.
+- One universal `codepoint -> meaning` registry.
+- A generic YAML rule/effect engine.
+- One subclass per letter or rule.
+- A copied Hafs/Warsh rules tree.
+- Profile identity split into qirāʾah/riwāyah/ṭarīq fields.
+- Madd timing/count fields.
+- Duplicate muqaṭṭaʿāt spelling plus segment/Tajwīd expansions.
+- Inferring silence from an empty token list.
+- Inferring rules from output-token spelling.
 
-Per the maintainer's direction: **a base class holds the shared machinery;
-riwaya subclasses override only deltas** — with the guard that a subclass
-overrides *data and pass composition*, never inlines domain logic (that was
-the original Warsh blocker) [S].
+## 10. Proof order
 
-```python
-class RiwayaSpec(BaseModel):             # the entire per-riwaya DATA surface
-    model_config = ConfigDict(frozen=True)
-    name: str
-    script: ScriptSpec                   # codepoint → GraphemeKind (+ LetterId)
-    inventory: PhonemeInventory          # ident/quality + features → token,
-                                         #   simple-mode token (render tables)
-    rules: RuleData                      # trigger sets, pair maps, decision
-                                         #   tables, madd counts, iqlab ident
-    skeletons: tuple[SkeletonEntry, ...] # canonical-form overrides (§5)
-    locations: tuple[LocationEntry, ...] # true per-location residue (§5)
-
-class Riwaya:
-    """Base class: tokenizer, boundary assignment, builder, freeze, and the
-    default detector pipeline. Subclasses provide a spec and may extend or
-    reorder PIPELINE — they do not override detector internals."""
-    spec: RiwayaSpec
-    PIPELINE: tuple[str, ...] = (
-        "specials_splice",       # skeleton-matched words (muqattaat, …)
-        "ibtidaa_repairs",       # hamza-wasl vowel, initial-shaddah drop
-        "waqf_transforms",       # final-cluster transforms, 'iwad, taa marbuta
-        "assimilation",          # noon/tanween, meem, idgham pairs, shamsiyah
-        "letters",               # base realization, shaddah, vowel letters,
-                                 #   iltiqaa, qalqala flag
-        "colouring",             # tafkheem (isti'laa, raa tree, Allah lam)
-        "madd",                  # one scan of the realized segments
-        "overrides",             # skeleton + location tables, context-gated
-    )
-    def phonemize(self, ref, *, stops) -> Recitation: ...   # shared, final
-
-class Hafs(Riwaya):
-    spec = load_spec("resources/hafs")
-
-class Warsh(Riwaya):
-    spec = load_spec("resources/warsh")
-    PIPELINE = Riwaya.PIPELINE[:6] + ("imala", "naql") + Riwaya.PIPELINE[6:]
-```
-
-A new riwaya = a data bundle + optionally a few new *registered* detector
-functions named in its pipeline. Pass ordering is an inspectable tuple
-mirroring the genuine domain dependency chain (domain-facts §8.8), not
-OO dispatch order.
-
-## 5. Overrides: canonical skeletons first, locations last
-
-Locations don't transfer across riwayat (verse numbering differs); word
-shapes do. So the primary override key is the **skeleton**: the tuple of
-base-letter identities (`Grapheme.letter`) of a word, normalized (hamza
-seats → hamza, ى/ي → yaa; hamza-wasl kept distinct), with a structural
-condition:
-
-```python
-class OverrideCondition(str, Enum):
-    ALWAYS = "always"; WHEN_STARTING = "when_starting"
-    WHEN_STOPPING = "when_stopping"; SURAH_INITIAL = "surah_initial"
-
-class SkeletonEntry(BaseModel):
-    model_config = ConfigDict(frozen=True)
-    letters: tuple[str, ...]         # ("hamza_wasl","lam","lam","ha") = ٱللَّه
-    condition: OverrideCondition = OverrideCondition.ALWAYS
-    rule: str                        # detector/patch to apply
-
-class LocationEntry(BaseModel):
-    model_config = ConfigDict(frozen=True)
-    location: str
-    condition: OverrideCondition
-    rule: str
-```
-
-Skeleton-keyed (portable across riwayat): the Allah patterns, hamza-wasl
-special nouns/verbs, the muqatta'at (skeleton + `SURAH_INITIAL`), particle
-words (يَـٰٓ / هَـٰٓ munfasil reclassification). Location-keyed residue (~a
-dozen Hafs entries): imala 11:41, tasheel 41:44, the four sakts, ha'-sakt
-spots, 27:36, the madd-lazim overrides, the yaa-narration exceptions.
-Override *payloads* are expressed in typed segment terms (patch specs), never
-raw phoneme strings — a string escape hatch would gut the no-strings bet [A].
-
-## 6. Rendering: the only place output bytes exist
-
-`render(segment, inventory, mode) -> tuple[str, ...]` — a data-table lookup
-keyed on segment features, expanding one segment to *n* tokens
-deterministically (n>1 exactly for the qalqala echo: `d` → `("d","Q")`;
-geminates are one token `"bb"`; simple mode is a second column of the same
-table, where e.g. `Q` renders to nothing and nasals denasalize) [A].
-
-Phone positions (today's `phoneme_indices`, alignment) are computed by
-enumerating the rendered stream — true by construction, no stored indices.
-**Risk #1 of this whole design** is the fidelity of this table: it must
-regenerate today's token stream byte-identically across 326k letters. It is
-only provable against the Epic 2A characterization net, which therefore gates
-the model, and the first migration step is building this render table and
-diffing it against current output.
-
-## 7. The public contract
-
-`Recitation` replaces the six views. With one precomputed reverse index
-(`spelled = union of all segment spellings`):
-
-| Today's view | Under the new contract |
-|---|---|
-| `phonemes_*` | `[render(s) for s in rec.segments]` — one-liner |
-| `silent_flags` | `[(g.char, g.id not in spelled) for g in rec.graphemes]` — one-liner |
-| `get_mapping` / alignment | segments already carry `spelling`; enumerate — one-liner |
-| `phonetic_text` | render + break on `segment.word` — near one-liner |
-| `character_phoneme_mappings` | thin projection: one cell per grapheme + per inserted segment; indices by enumeration |
-| `letter_phoneme_mappings` | thin projection: `groupby(seat)`, fold silent seats into the neighbour their sound merged into (direction read off `spelling` spans — the three re-implementations die) |
-| `tajweed_mappings` | thin projection: `rules` filtered per grapheme (source/target = typed fields); muqatta'at spelled-out display from riwaya data |
-
-Three thin projection methods + four one-liners, all reading one frozen
-object — drift is structurally impossible. Whether to keep the old methods as
-compatibility shims is a packaging decision, not a design one.
-
-## 8. Worked example — غَفُورٞ رَّحِيمٌ (cross-word idgham bila ghunnah + long vowels)
-
-Wasl traversal, segments (abbreviated):
-
-```
-s0 Consonant(ghayn, emphatic)   spelling=(غ,)          Annotation(tafkheem)
-s1 Vowel(a, emphatic)           spelling=(fatha,)
-s2 Consonant(faa)               spelling=(ف,)
-s3 Vowel(u, long)               spelling=(damma, و)     Madd(tabii, 2..2)
-s4 Consonant(raa, emphatic)     spelling=(ر,)          Annotation(tafkheem)
-s5 Vowel(u)                     spelling=(dammatan,)
-s6 Consonant(raa, geminate)     spelling=(dammatan, ر₂, shaddah₂)   ← spans words
-                                 Assimilation(idgham_bila_ghunnah_tanween,
-                                              source=(dammatan,), target=s6)
-s7 Vowel(a) … s9 Vowel(i, long) spelling=(kasra, ي)     Madd(tabii, 2..2)
-s10 Consonant(meem)  s11 Vowel(u)  s12 Consonant(noon)
-```
-
-The tanween's noon sounds nowhere — no segment; its grapheme is named by the
-Assimilation. Waqf traversal on رَّحِيمٌ: identical through s8; s9's madd
-becomes `Madd(arid, 2..6)`; s11/s12 don't exist (`Silence(tanween_drop)`);
-s10 is final. The wasl/waqf diff is three applications — domain invariant
-§8.5 made literal. Ibtidaa on رَّحِيمٌ: no assimilation fired, so s6 is simply
-`Consonant(raa)` — the trace-shaddah's conditionality falls out of whether
-the rule ran.
-
-## 9. Kill list (what died in review, so it stays dead)
-
-From v1: `Unit` (overloaded god-object), `role`/`status` enums (derivable),
-`ShareGroup` (is `spelling`), `MaddInfo`+`MaddMapping` (is the Madd
-application), `written_delta` (phonetic text is a render), `Phoneme` class +
-feature bag (segment IS the phoneme), nested `Cluster` container (seat
-index), per-letter tag lists.
-From review candidates: `Echo`/`Pause` segment types, `Release` enum incl.
-`UNRELEASED`, `Ghunnah` object with counts (bool until a consumer proves it
-needs the hold length), `pausal` field (rawm/ishmam not produced today),
-`RawSegment` string escape hatch, per-state simultaneous segment sets,
-synthetic spelled-grapheme layer for muqatta'at (spelled-name display is
-riwaya data + per-segment rules; revisit only if the tajweed projection
-proves it insufficient).
-
-## 10. Pydantic pragmatics (326k graphemes, ~400k segments)
-
-- Build phase: mutable `@dataclass(slots=True)` builder objects; detectors
-  call builder methods (`b.set/delete/add`), which maintain the reverse
-  indices — segments are only frozen into Pydantic models at `freeze()`.
-- Contract leaves (`Grapheme`, segments, applications): if profiling shows
-  model construction dominating, ship them as frozen slotted dataclasses
-  (Pydantic v2 serializes stdlib dataclasses natively) or construct via
-  `model_construct()`; validate only in tests / `validate=True`.
-- Enums `str`-backed; rule ids and render tokens interned.
-
-## 11. Risks (ranked) and open questions
-
-1. **Render-table fidelity** (§6) — make-or-break, provable only against the
-   characterization net; build it first.
-2. **Muqatta'at projection granularity** — the killed spelled-grapheme layer
-   is the fallback if data-driven spelled display proves insufficient.
-3. **Global stream ownership** — committed now (naql); `segment.word` is the
-   sounding home, spelling is the truth of sharing.
-4. **Placeless nasal** (`ident=None`) — inventory must render it (heavy/light
-   ŋ from `emphatic`), and detectors must not assume `ident` is set.
-5. **Override payload migration** — today's contextual YAML speaks phoneme
-   strings and display chars; rewriting it as typed patches is real work and
-   the likeliest place a string hatch sneaks back in.
-
-Open: exact `RuleData` schema per family; whether `Hafs`/`Warsh` classes stay
-or collapse to `Riwaya(spec)` once real (defer until Warsh lands); whether the
-compat shims for today's six views ship at all.
+1. Exact source preservation and full Hafs/Warsh codepoint accountability.
+2. Hafs and proved-Warsh sequence normalization fixtures.
+3. One nūn/tanwīn vertical slice producing segments, alignments, Tajwīd, and
+   new projections.
+4. A waqf/ibtidāʾ slice and a muqaṭṭaʿāt expansion proving recited writing.
+5. Port every current Hafs behavior with semantic regression tests.
+6. Make the new Hafs pipeline the default and remove old re-derivers.
+7. Add only researched Warsh rule deltas.
