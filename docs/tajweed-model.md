@@ -7,24 +7,27 @@ unimplemented textbook madd types or performance counts.
 
 ## 1. What is first-class
 
-"Tajwīd is first-class" means one rule decision is stored once with:
+"Tajwīd is first-class" means one rule decision is stored once as a typed
+occurrence variant with:
 
 - its conventional rule name;
 - the written subject governed by the rule;
-- the context which selected the rule;
+- the rule-specific facts which selected the rule;
 - an assimilation target only where assimilation actually occurs;
 - the resulting sound segments;
 - a small typed detail only when the named rule has a real subtype.
 
 It does not mean every pronunciation mechanic is a Tajwīd rule. Hamzat
 al-waṣl, iltiqāʾ al-sākinayn, an otiose alef, waqf vowel removal, and inserted
-sounds are `RealizationEvent`s. Madd classification is a `MaddOccurrence`.
-Source marks such as the Warsh small mīm are orthographic hints.
+sounds are `RealizationEvent`s. Madd is Tajwīd and `MaddOccurrence` is one
+variant of `TajweedOccurrence`, not a parallel annotation system. Source marks
+such as the Warsh small mīm are orthographic hints.
 
 ## 2. Canonical object graph
 
-The model uses composition. There is no subclass per Arabic letter, no rule
-object hierarchy, no free-form details dictionary, and no YAML effect engine.
+The model uses composition and a small tagged union of occurrence records.
+There is no subclass per Arabic letter, executable condition tree, free-form
+details dictionary, or YAML effect engine.
 
 ```python
 from dataclasses import dataclass
@@ -34,9 +37,13 @@ from typing import NewType, TypeAlias
 GraphemeId = NewType("GraphemeId", int)
 GraphemeClusterId = NewType("GraphemeClusterId", int)
 LetterUnitId = NewType("LetterUnitId", int)
+RecitedWordId = NewType("RecitedWordId", int)
+RecitedLetterId = NewType("RecitedLetterId", int)
+RecitedGraphemeId = NewType("RecitedGraphemeId", int)
 SegmentId = NewType("SegmentId", int)
 TajweedOccurrenceId = NewType("TajweedOccurrenceId", int)
 RealizationEventId = NewType("RealizationEventId", int)
+BoundaryId = NewType("BoundaryId", int)
 
 
 class Letter(StrEnum):
@@ -50,12 +57,24 @@ class Letter(StrEnum):
     # ...the remaining canonical Arabic letters
 
 
+class Riwayah(StrEnum):
+    HAFS = "hafs"
+    WARSH = "warsh"
+
+
 class VowelQuality(StrEnum):
     A = "a"
     I = "i"
     U = "u"
     IMALA = "imala"
     TAQLIL = "taqlil"
+
+
+class HarakahKind(StrEnum):
+    FATHA = "fatha"
+    DAMMA = "damma"
+    KASRA = "kasra"
+    SUKUN = "sukun"
 
 
 class TanweenQuality(StrEnum):
@@ -95,8 +114,8 @@ class GraphemeCluster:
 
 
 @dataclass(frozen=True, slots=True)
-class ShortVowel:
-    quality: VowelQuality
+class Harakah:
+    kind: HarakahKind
     graphemes: tuple[GraphemeId, ...]
 
 
@@ -113,9 +132,6 @@ class SmallVowel:
     graphemes: tuple[GraphemeId, ...]
 
 
-Vocalization: TypeAlias = ShortVowel | Tanween | SmallVowel
-
-
 @dataclass(frozen=True, slots=True)
 class OrthographicHint:
     kind: HintKind
@@ -127,9 +143,10 @@ class LetterUnit:
     id: LetterUnitId
     letter: Letter
     base_graphemes: tuple[GraphemeId, ...]
-    vocalizations: tuple[Vocalization, ...] = ()
+    harakah: Harakah | None = None
+    tanween: Tanween | None = None
+    small_vowels: tuple[SmallVowel, ...] = ()
     shaddah: tuple[GraphemeId, ...] = ()
-    sukun: tuple[GraphemeId, ...] = ()
     hints: tuple[OrthographicHint, ...] = ()
 ```
 
@@ -137,10 +154,18 @@ class LetterUnit:
 and its combining scalars, or another source-defined cluster. It assigns no
 pronunciation and does not collapse semantic values into a generic mark bucket.
 
-`LetterUnit` is the canonical written letter plus first-class vocalization
-values composed onto it. Dagger alef, mini wāw, and mini yāʾ are explicit
-`SmallVowel` values with their own source grapheme ids. A letter may carry both
-a `ShortVowel` and a `SmallVowel`, as the script requires.
+`LetterUnit` is source-only. `base_graphemes` is non-empty and every referenced
+grapheme must be in the same source cluster. Package code constructs it only
+through the source adapter; a lexical expansion or rule may not manufacture a
+`LetterUnit`. This closes the ambiguity where a manually added letter could
+look as if it came from the mushaf.
+
+It contains the canonical written letter plus first-class written values.
+Dagger alef, mini wāw, and mini yāʾ are explicit `SmallVowel` values with their
+own source grapheme ids. A letter may carry both a `Harakah` and a
+`SmallVowel`, as the script requires. `Harakah` is the conventional written
+category, so it honestly includes sukūn; calling the type `ShortVowel` would
+incorrectly imply that sukūn is a vowel.
 
 Hafs `ٱ` and a reviewed Warsh `اَ۬` sequence can yield the same
 hamzat-al-waṣl `LetterUnit` even though their source graphemes differ. Warsh
@@ -148,9 +173,9 @@ hamzat-al-waṣl `LetterUnit` even though their source graphemes differ. Warsh
 `Tanween(quality=KASR, ...)`. Source graphemes are never replaced or
 discarded.
 
-`ShortVowel`, `Tanween`, and `sukun` are mutually exclusive on one letter;
-`SmallVowel` may accompany a short vowel. All three absent means
-orthographically bare, which remains distinct from explicit sukun. A
+`harakah` and `tanween` are mutually exclusive on one letter; `SmallVowel` may
+accompany a fatha/damma/kasra. Both absent means orthographically bare, which
+remains distinct from `Harakah(SUKUN)`. A
 multi-scalar initial-alef cluster may normalize to one hamzat-al-waṣl unit;
 the semantic parts of that unit still retain the exact grapheme ids which
 licensed them.
@@ -170,6 +195,55 @@ directions:
 
 Thus semantic normalization loses no source provenance, while shared rules
 are independent of whether a mushaf uses open/closed or other visual forms.
+
+### Source units versus inserted/expanded writing
+
+Rules operate on an explicit recited stream. Ordinary source letters are
+copied into that stream; muqaṭṭaʿāt expansion and implicit rule output add
+recited letters through a `RealizationEvent`:
+
+```python
+@dataclass(frozen=True, slots=True)
+class LetterForm:
+    letter: Letter
+    harakah: HarakahKind | None = None
+    tanween: TanweenQuality | None = None
+    small_vowels: tuple[SmallVowelKind, ...] = ()
+    shaddah: bool = False
+
+
+@dataclass(frozen=True, slots=True)
+class RecitedLetter:
+    id: RecitedLetterId
+    form: LetterForm
+    word: RecitedWordId
+    graphemes: tuple[RecitedGraphemeId, ...]
+    source_letters: tuple[LetterUnitId, ...] = ()
+    event: RealizationEventId | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class RecitedWord:
+    id: RecitedWordId
+    source_word_indexes: tuple[int, ...]
+    letters: tuple[RecitedLetterId, ...]
+    expansion: RealizationEventId | None = None
+```
+
+Construction requires exactly one provenance route: one or more
+`source_letters`, or one `event`. The normal source path derives `LetterForm`
+from `LetterUnit`; it is not a second normalization table. A muqaṭṭaʿāt event
+parses the trusted Arabic name into `LetterForm`s and links every generated
+letter back to the compact source grapheme through that event. This is how
+non-script/implicit writing is allowed explicitly without weakening source
+reconstruction.
+
+`RecitedWord` supplies the lexical boundary needed by the rules. An ordinary
+source word creates one recited word. Compact `الم` creates three recited words
+(`أَلِفْ`, `لَامْ`, `مِيمْ`) joined by recited boundaries; the final recited
+word receives the source/request boundary before the following Qurʾānic word.
+This lets madd distinguish “same letter name” from “across names” without
+location hacks.
 
 ### Composite iqlāb spelling
 
@@ -226,7 +300,7 @@ class Consonant(StrEnum):
 class ConsonantSegment:
     id: SegmentId
     consonant: Consonant | None    # None only for a placeless/hidden nasal
-    word_index: int
+    word: RecitedWordId
     geminated: bool = False
     nasalized: bool = False
     hidden: bool = False
@@ -239,7 +313,7 @@ class VowelSegment:
     id: SegmentId
     quality: VowelQuality
     length: VowelLength
-    word_index: int
+    word: RecitedWordId
     emphasis: Emphasis = Emphasis.PLAIN
 
 
@@ -390,53 +464,136 @@ class EmphasisSubject(StrEnum):
 
 
 @dataclass(frozen=True, slots=True)
-class NoonDetail:
-    trigger: NoonTrigger
+class OccurrenceCore:
+    id: TajweedOccurrenceId
+    rule: TajweedRule
+    subject: tuple[RecitedLetterId, ...]
+    result: tuple[SegmentId, ...]
 
 
 @dataclass(frozen=True, slots=True)
-class IdghamDetail:
+class GhunnahOccurrence:
+    core: OccurrenceCore
+
+
+@dataclass(frozen=True, slots=True)
+class NoonOccurrence:
+    core: OccurrenceCore
+    trigger: NoonTrigger
+    following: RecitedLetterId
+    target: RecitedLetterId | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class MeemOccurrence:
+    core: OccurrenceCore
+    following: RecitedLetterId
+    target: RecitedLetterId | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class IdghamOccurrence:
+    core: OccurrenceCore
+    target: RecitedLetterId
     completeness: IdghamCompleteness
 
 
 @dataclass(frozen=True, slots=True)
-class QalqalahDetail:
+class QalqalahOccurrence:
+    core: OccurrenceCore
     degree: QalqalahDegree
+    boundary: BoundaryId | None
 
 
 @dataclass(frozen=True, slots=True)
-class EmphasisDetail:
-    subject: EmphasisSubject
+class DirectHarakahReason:
+    harakah: HarakahKind
 
 
-RuleDetail: TypeAlias = (
-    NoonDetail | IdghamDetail | QalqalahDetail | EmphasisDetail
+@dataclass(frozen=True, slots=True)
+class SakinAfterHarakahReason:
+    previous: RecitedLetterId
+    harakah: HarakahKind
+
+
+@dataclass(frozen=True, slots=True)
+class SakinAfterSakinReason:
+    intervening: RecitedLetterId
+    vowel_bearer: RecitedLetterId
+    harakah: HarakahKind
+
+
+@dataclass(frozen=True, slots=True)
+class KasrahBeforeIstilaaReason:
+    previous: RecitedLetterId
+    following: RecitedLetterId
+
+
+@dataclass(frozen=True, slots=True)
+class WaqfLookbackReason:
+    boundary: BoundaryId
+    vowel_bearer: RecitedLetterId
+    harakah: HarakahKind
+
+
+@dataclass(frozen=True, slots=True)
+class InherentEmphasisReason:
+    pass
+
+
+@dataclass(frozen=True, slots=True)
+class LamAllahReason:
+    previous_vowel: SegmentId
+
+
+EmphasisReason: TypeAlias = (
+    DirectHarakahReason
+    | SakinAfterHarakahReason
+    | SakinAfterSakinReason
+    | KasrahBeforeIstilaaReason
+    | WaqfLookbackReason
+    | InherentEmphasisReason
+    | LamAllahReason
 )
 
 
 @dataclass(frozen=True, slots=True)
-class TajweedOccurrence:
-    id: TajweedOccurrenceId
-    rule: TajweedRule
-    subject: tuple[GraphemeId, ...]
-    condition: tuple[GraphemeId, ...]
-    target: tuple[GraphemeId, ...]
-    result: tuple[SegmentId, ...]
-    detail: RuleDetail | None = None
+class EmphasisOccurrence:
+    core: OccurrenceCore
+    subject_kind: EmphasisSubject
+    reason: EmphasisReason
+
+
+NonMaddOccurrence: TypeAlias = (
+    GhunnahOccurrence
+    | NoonOccurrence
+    | MeemOccurrence
+    | IdghamOccurrence
+    | QalqalahOccurrence
+    | EmphasisOccurrence
+)
 ```
 
-These are named relationships, not generic effects:
+There is deliberately no generic `condition` tuple. It was too vague to say
+whether the referenced graphemes were a following trigger, a look-back vowel,
+a boundary, or an assimilation target, and it could not represent the rāʾ
+algorithm without an undocumented convention.
 
-- `subject` is what the rule governs;
-- `condition` selects/explains the decision but is not falsely called an
-  assimilation target;
-- `target` is populated only when the subject's sound assimilates into it;
-- `result` is the sound produced by the occurrence.
+Each occurrence variant stores only the facts its rule family uses:
 
-Constructors validate the permitted detail for each rule. For example,
-`QALQALAH` requires `QalqalahDetail`, and `IKHFAA_HAQIQI` may take
-`NoonDetail` but can never take `IdghamDetail`. This is stricter and smaller
-than either rule subclasses or a `dict[str, object]`.
+- `OccurrenceCore.subject` is what the rule governs and `result` is the sound;
+- nūn/tanween and mīm records name the following recited letter directly;
+- only an actual idghām record has a required assimilation `target`;
+- ikhfāʾ/iqlāb records have `target=None` because the following letter is a
+  trigger, not something the subject assimilates into;
+- rāʾ/lām decisions carry one tagged `EmphasisReason`, including the actual
+  look-back letters or boundary which selected the result.
+
+These are explanatory snapshots produced by Python rule code, not executable
+conditions and not a second rule language. Constructors validate rule/variant
+pairings; for example `IKHFAA_HAQIQI` requires `NoonOccurrence(target=None)`,
+while `IDGHAM_BI_GHUNNAH` requires a target. This is more explicit than a
+free-form dictionary without creating one class per individual rule.
 
 ## 6. Concrete rule-family mapping
 
@@ -446,21 +603,21 @@ selected from the audited corpus during implementation.
 | Family | Example | Stored relationship and sound |
 |---|---|---|
 | ghunnah mushaddadah | `إِنَّ`, `ثُمَّ` | mushaddad nūn/mīm is `subject`; nasal geminate segment is `result`; no target |
-| iẓhār ḥalqī | `مِنْ هَادٍ` | nūn is `subject`, `ه` is `condition`, clear nūn is `result`; no target |
-| ikhfāʾ ḥaqīqī | `مِنْ شَرِّ` | nūn/tanween is `subject`, `ش` is `condition`, hidden nasal is `result`; `ش` is not a target |
-| iqlāb | `مِنۢ بَعْدِ` | nūn/tanween is `subject`, `ب` is `condition`, hidden/placeless mīm-like nasal is `result`; small mīm is a hint |
+| iẓhār ḥalqī | `مِنْ هَادٍ` | `NoonOccurrence`: nūn is `subject`, `following=ه`, clear nūn is `result`, `target=None` |
+| ikhfāʾ ḥaqīqī | `مِنْ شَرِّ` | `NoonOccurrence`: nūn/tanween is `subject`, `following=ش`, hidden nasal is `result`, `target=None` |
+| iqlāb | `مِنۢ بَعْدِ` | `NoonOccurrence`: nūn/tanween is `subject`, `following=ب`, hidden/placeless mīm-like nasal is `result`, `target=None`; small mīm is a hint |
 | idghām bi-ghunnah | `مَن يَقُولُ` | nūn/tanween is `subject`, `ي` is `target`, merged nasalized target segment is `result` |
 | idghām bilā-ghunnah | `مِن رَّبِّهِمْ` | nūn/tanween is `subject`, `ر` is `target`, merged non-nasal target segment is `result` |
-| iẓhār shafawī | `هُمْ فِيهَا` | sākin mīm is `subject`, following letter is `condition`, clear mīm is `result` |
-| ikhfāʾ shafawī | `تَرْمِيهِم بِحِجَارَةٍ` | sākin mīm is `subject`, `ب` is `condition`, hidden bilabial nasal is `result`; no target |
+| iẓhār shafawī | `هُمْ فِيهَا` | `MeemOccurrence`: sākin mīm is `subject`, following letter is explicit, clear mīm is `result`, `target=None` |
+| ikhfāʾ shafawī | `تَرْمِيهِم بِحِجَارَةٍ` | `MeemOccurrence`: sākin mīm is `subject`, `following=ب`, hidden bilabial nasal is `result`, `target=None` |
 | idghām shafawī | `لَهُم مَّا` | first mīm is `subject`, next mīm is `target`, nasal geminate is `result` |
 | idghām mutamāthilayn | sākin letter followed by the same letter | first is `subject`, second is `target`, merged segment is `result`, detail is normally `KAMIL` |
 | idghām mutaqāribayn | implemented pairs such as `لْ` into `ر` | first is `subject`, second is `target`, merged result; pair membership is a reviewed finite table |
 | idghām mutajānisayn | implemented same-articulation pairs | first is `subject`, second is `target`; detail records `KAMIL` or `NAQIS` instead of creating two rule ids |
 | lām shamsiyyah | `ٱلشَّمْسِ` | article lām is `subject`, sun letter is `target`, doubled sun-letter segment is `result` |
 | qalqalah | medial sākin `ق/ط/ب/ج/د`; stopped final `أَحَدْ` | qalqalah letter is `subject`; result links the consonant/release; detail is `SUGHRA` or `KUBRA` |
-| tafkhīm | inherent istiʿlāʾ letter, heavy rāʾ, or heavy lām of Allah | affected grapheme is `subject`, deciding vowels/neighbours are `condition`, emphatic segment(s) are `result`, detail states subject family |
-| tarqīq | light rāʾ or light lām of Allah | same shape as tafkhīm with a plain segment result; it is explicit so annotation is exhaustive |
+| tafkhīm | inherent istiʿlāʾ letter, heavy rāʾ, or heavy lām of Allah | `EmphasisOccurrence`: affected recited letter is `subject`, emphatic segment(s) are `result`, and one typed reason records the exact direct/look-back/Allah facts |
+| tarqīq | light rāʾ or light lām of Allah | same typed emphasis shape with a plain segment result; it is explicit so annotation is exhaustive |
 
 The old enum splits nūn versus tanween and kamil versus naqis into different
 rule names. The new model stores the conventional rule once and puts the real
@@ -468,7 +625,7 @@ distinction in `detail`. Conversely, it stores iẓhār and tarqīq even though 
 old code often treats them as "nothing happened"; an annotation API cannot be
 complete if only mutations are first-class.
 
-## 7. Madd is classification, not duration
+## 7. Madd is a Tajwīd occurrence, not duration
 
 ```python
 class MaddType(StrEnum):
@@ -480,25 +637,102 @@ class MaddType(StrEnum):
     LEEN = "leen"
 
 
+class MaddContext(StrEnum):
+    ORDINARY = "ordinary"
+    ALLAH_DAGGER_ALEF = "allah_dagger_alef"
+    WAQF_IWAD = "waqf_iwad"
+    PRONOUN_HAA_SILAH = "pronoun_haa_silah"
+    PLURAL_MEEM_SILAH = "plural_meem_silah"
+    MUQATTAAT = "muqattaat"
+
+
+class MaddCarrierForm(StrEnum):
+    VOWEL = "vowel"
+    LEEN = "leen"
+
+
+class PermanentSukunRealization(StrEnum):
+    PLAIN = "plain"
+    GEMINATED = "geminated"
+    ASSIMILATED = "assimilated"
+
+
+@dataclass(frozen=True, slots=True)
+class NoSpecialMaddCause:
+    pass
+
+
+@dataclass(frozen=True, slots=True)
+class HamzaMaddCause:
+    hamza: RecitedLetterId
+    same_word: bool
+
+
+@dataclass(frozen=True, slots=True)
+class PermanentSukunCause:
+    consonant: RecitedLetterId
+    realization: PermanentSukunRealization
+    carrier_form: MaddCarrierForm = MaddCarrierForm.VOWEL
+
+
+@dataclass(frozen=True, slots=True)
+class BoundarySukunCause:
+    boundary: BoundaryId
+    consonant: RecitedLetterId
+
+
+@dataclass(frozen=True, slots=True)
+class LeenMaddCause:
+    boundary: BoundaryId
+    semivowel: RecitedLetterId
+    following_consonant: RecitedLetterId
+
+
+MaddCause: TypeAlias = (
+    NoSpecialMaddCause
+    | HamzaMaddCause
+    | PermanentSukunCause
+    | BoundarySukunCause
+    | LeenMaddCause
+)
+
+
 @dataclass(frozen=True, slots=True)
 class MaddOccurrence:
+    id: TajweedOccurrenceId
     madd_type: MaddType
+    subject: tuple[RecitedLetterId, ...]
     segments: tuple[SegmentId, ...]
-    carrier: tuple[GraphemeId, ...]
-    cause: tuple[GraphemeId, ...] = ()
+    carrier: tuple[RecitedGraphemeId, ...]
+    cause: MaddCause
+    context: MaddContext = MaddContext.ORDINARY
+
+
+TajweedOccurrence: TypeAlias = NonMaddOccurrence | MaddOccurrence
 ```
 
-There is no minimum, maximum, count, or duration. Waqf ʿiwaḍ is a realization
-event which creates a long vowel; it is not a seventh stored madd type in the
-current product. Ṣilah is context for realizing a pronoun-hāʾ or plural-mīm;
-it is not automatically a madd classification. Badal and silah
-sughrā/kubrā are not added until a supported riwāyah, behavior, and API need
-them.
+There is no minimum, maximum, count, or duration. `MaddType` answers the
+phonological classification; `MaddContext` explains how this site arose. The
+axes are intentionally separate:
+
+- the implicit dagger alef of the name of Allah is normally
+  `TABII + ALLAH_DAGGER_ALEF`;
+- stopping on fathatan can produce `TABII + WAQF_IWAD`, linked to the waqf
+  realization event which inserted/replaced the long vowel;
+- pronoun-hāʾ or plural-mīm ṣilah is context, while the surrounding hamza can
+  still make the actual classification `JAIZ_MUNFASIL`;
+- a three-letter muqaṭṭaʿ name is `LAZIM + MUQATTAAT`; `ʿAYN` records
+  `carrier_form=LEEN` without pretending its yāʾ is an ordinary long vowel.
+
+This gives ṣilah/ʿiwaḍ/Allah/muqaṭṭaʿāt useful detail without inventing
+`silah_sughra`, `silah_kubra`, or `allah` as mutually exclusive madd types.
+Badal is not added until a supported behavior and API need it.
 
 `segments` is plural deliberately: ordinary madd points to a long-vowel
 segment, while leen may involve the fatha plus a semivowel/diphthong
 realization. Calling the field `vowel` would misrepresent the existing leen
-case.
+case. `MaddOccurrence` is in the `TajweedOccurrence` union, so the aggregate
+has one Tajwīd collection; `recitation.madd()` is only a filtered projection.
 
 ## 8. Non-Tajwīd realization
 
@@ -522,6 +756,8 @@ class RealizationEvent:
     source: tuple[GraphemeId, ...]
     removed: tuple[SegmentId, ...]
     added: tuple[SegmentId, ...]
+    removed_letters: tuple[RecitedLetterId, ...] = ()
+    added_letters: tuple[RecitedLetterId, ...] = ()
 ```
 
 Inserted segments have an event origin. Removed/silent graphemes align back to
@@ -529,48 +765,80 @@ the event. This represents hamzat al-waṣl vowel choice, otiose letters,
 waqf/ibtidāʾ changes, iltiqāʾ repairs, and true contextual exceptions without
 calling them Tajwīd rules or encoding `effect: silence/replace` in YAML.
 
+Boundary realization is deliberately upstream of Tajwīd annotation. The
+selected request follows this dependency order:
+
+```text
+source normalization
+  -> lexical expansion (including muqaṭṭaʿāt)
+  -> boundary projection onto the recited stream
+  -> waqf/ibtidāʾ/hamzat-al-waṣl/carrier realization events
+  -> baseline segments
+  -> nūn/mīm/idghām and other context rules
+  -> qalqalah, madd, and emphasis over the resolved result
+  -> renderers/projections
+```
+
+Therefore waqf can remove a cross-word idghām, create qalqalah kubrā, change a
+carrier into madd ʿiwaḍ, or create ʿāriḍ/leen. The aggregate stores only the
+occurrences valid for that selected realization. It does not create an
+occurrence and later mark it deleted. A separate debug trace can be added if a
+real need appears; it is not part of the domain model.
+
 ## 9. Same rule, different riwāyah logic
 
-The stable model and rule name are shared. Only the classifier/realizer is a
-strategy when research proves different conditions:
+`Riwayah` is a Python 3.11 `StrEnum`. The package intentionally supports a
+closed set, currently `HAFS` and `WARSH`; adding another riwāyah is a code and
+test change, so extending the enum is the clearest YAGNI choice. There are no
+qirāʾah or ṭarīq fields.
+
+The earlier `RulePolicies` object is removed. It named speculative seams
+(`plural_meem`, generic marked vowels, and rāʾ) before a second implementation
+existed and leaked implementation wiring into the domain model. Resources are
+still grouped explicitly:
 
 ```python
-RaaClassifier = Callable[[RuleContext, LetterUnitId], Emphasis]
-MarkedVowelClassifier = Callable[[RuleContext, LetterUnitId], VowelQuality]
-PluralMeemRealizer = Callable[[RuleContext, LetterUnitId], None]
-
-
 @dataclass(frozen=True, slots=True)
-class RulePolicies:
-    raa: RaaClassifier
-    marked_vowel: MarkedVowelClassifier
-    plural_meem: PluralMeemRealizer
-
-
-@dataclass(frozen=True, slots=True)
-class RiwayahSpec:
-    id: str
+class RiwayahResources:
+    riwayah: Riwayah
     corpus: CorpusSpec
     script: ScriptAdapter
-    policies: RulePolicies
     render: RenderConfig
 ```
 
-The registry id is a validated string (`"hafs"`, `"warsh"`) because supported
-riwāyāt are registered identities, not a closed linguistic enum. There are no
-qirāʾah or ṭarīq fields in this package model.
+When research proves the same rule has different logic, ordinary Python
+composition supplies the one varying classifier at pipeline construction. For
+example:
 
-For rāʾ, the shared pass asks `riwayah.policies.raa(...)`, writes either
-`TAFKHEEM` or `TARQIQ`, and aligns the same subject/condition/result shape.
-Hafs supplies `classify_hafs_raa`; Warsh supplies a different function only
-after its conditions are researched. No `if riwayah == ...` spreads through
-the rule module, no subclass is required, and no YAML contains executable
-branching.
+```python
+def apply_raa(context: RuleContext, classify: RaaClassifier) -> EmphasisOccurrence:
+    decision = classify(context)
+    return build_raa_occurrence(context, decision)
 
-The same pattern handles the marked `۪` vowel: the script adapter identifies
-the source sequence; the Hafs policy can return `IMALA` for its one occurrence;
-the Warsh policy can return `TAQLIL` or `IMALA` as evidence requires. The
-renderer only maps the resulting `VowelQuality` to tokens.
+
+def build_hafs_pipeline() -> RulePipeline:
+    return RulePipeline(raa=classify_hafs_raa, passes=SHARED_PASSES)
+
+
+def build_warsh_pipeline() -> RulePipeline:
+    # This constructor is not enabled until research proves whether the Hafs
+    # classifier is shared or supplies classify_warsh_raa with fixtures.
+    raise UnsupportedRiwayahRule("warsh", "raa")
+```
+
+This is not a generic policy framework: `RulePipeline` is internal execution
+wiring, and a varying callable is introduced only with its first concrete
+second implementation. Once supported, both classifiers return the same
+`EmphasisDecision`, and the shared builder creates the same
+`EmphasisOccurrence` shape. Unknown Warsh behavior does not silently inherit
+Hafs.
+
+Representation-only variation never reaches this seam. Hafs `ٱ` and a
+reviewed Warsh alef sequence normalize to the same hamzat-al-waṣl form and use
+the same rule. A marked `۪` sequence normalizes to a typed marked-vowel input;
+Hafs binds its implemented imālah classifier, while Warsh pronunciation stays
+rejected until its taqlīl/imālah behavior is researched. A token-only
+difference belongs in `RenderConfig`.
 
 ## 10. Where letters, rule data, and phonemes live
 
@@ -590,23 +858,132 @@ renderer only maps the resulting `VowelQuality` to tokens.
 A finite set is data; "if the rāʾ is sākin and the previous consonant is also
 sākin, inspect the preceding vowel..." is code.
 
+### Render maps and Arabic text options
+
+All **token selection** can be declarative once rules have produced semantic
+segments. The map is keyed by semantic features, not by an Arabic glyph plus
+an assumed context:
+
+```yaml
+consonants:
+  "n": "n"
+  "nasal:hidden": "ŋ"
+  "w:geminated": "ww"
+  "w:nasalized": "w̃"
+  "j:geminated": "jj"
+  "j:nasalized": "j̃"
+releases:
+  qalqalah: "Q"
+```
+
+Qalqalah does not require a rule-specific renderer branch: the rule produces
+a consonant plus an attributed release feature/segment and the renderer maps
+both. A map from written state such as “bare nūn means ikhfāʾ” is rejected.
+Bare versus explicit sukūn is a source convention; nūn/tanween may interact
+across a boundary; idghām of wāw/yāʾ depends on the preceding subject; rāʾ and
+full wāw/yāʾ depend on look-back and waqf. Rule code must first produce
+`hidden`, `nasalized`, `geminated`, `emphasis`, and `qalqalah` features.
+
+Arabic rendering is a projection over stored source/recited writing:
+
+```python
+class TextLayer(StrEnum):
+    SOURCE = "source"
+    RECITED = "recited"
+
+
+class SilentMode(StrEnum):
+    KEEP = "keep"
+    OMIT = "omit"
+
+
+class ExpansionMode(StrEnum):
+    COMPACT = "compact"
+    EXPANDED = "expanded"
+
+
+@dataclass(frozen=True, slots=True)
+class ArabicRenderOptions:
+    layer: TextLayer
+    silent: SilentMode
+    include_inserted: bool
+    expansion: ExpansionMode
+```
+
+Named presets prevent callers from rediscovering today's workarounds:
+
+| Preset | Options | Use |
+|---|---|---|
+| `SOURCE_EXACT` | source, keep silence, no inserted, compact | exact mushaf/source text |
+| `RECITED_ARABIC` | recited, omit silence, include inserted, expanded | current “phonetic text”, including hamzat-al-waṣl vowels, ʿiwaḍ, Allah dagger alef, and muqaṭṭaʿāt names |
+| `RECITED_WITH_SILENT` | recited, keep silence, include inserted, expanded | inspection/highlighting |
+
+The renderer never decides what is silent or inserted; alignments and events
+already do. Tokenizer round-trip is tested even earlier with a dedicated
+source serializer:
+
+```python
+assert source_serializer(recitation.graphemes) == loaded_source_text
+assert source_serializer(recitation.graphemes).encode("utf-8") == loaded_bytes
+```
+
+`SOURCE_EXACT` must produce the same result and is a useful integration test,
+but byte reconstruction is fundamentally a source-tokenization invariant, not
+proof that recitation rendering is correct.
+
 ## 11. Muqaṭṭaʿāt are derived from spelling
 
 The earlier proposed segment lists are redundant. The minimal resource is:
 
 ```yaml
+schema_version: 1
 names:
+  "ا": "أَلِفْ"
+  "ح": "حَا"
+  "ر": "رَا"
   "ص": "صَادْ"
   "م": "مِيمْ"
   "ع": "عَيْنْ"
+  # plus ك ه ي ط س ق ن ل: all fourteen names, once
 ```
 
 The Arabic value is both the recited spelling and default display. The normal
 tokenizer, vowel/carrier logic, Tajwīd passes, and madd classifier derive the
 segments—including the leen in `عَيْنْ`. A separate display value is added
-only if a real requirement differs. Location lists are unnecessary where the
-compact corpus text already identifies the opening; any riwāyah exception is
-a sparse override with a test.
+only if a real requirement differs.
+
+The madd-lāzim predicate is semantic and works for ordinary words and letter
+names:
+
+```text
+long-vowel carrier followed by a permanent sākin consonant in the same
+lexical unit -> LAZIM
+```
+
+The consonant may realize plainly, as part of a shaddah/geminate, or assimilate
+into the next name. `PermanentSukunCause.realization` records which occurred;
+geminated/assimilated causes provide the conventional muthaqqal detail, but
+they are not the only way to recognize lāzim. `عَيْنْ` uses the same
+permanent-sukūn test with `carrier_form=LEEN`, preserving its special carrier
+shape while keeping the currently supported `LAZIM` classification.
+
+The expansion creates joined recited-name units and retains the boundary
+after the final name, so ordinary rules also see the following Qurʾānic word.
+The complete current-Hafs audit is in
+`docs/internal-model-worked-examples.md`; it includes:
+
+- lām→mīm idghām shafawī and sīn→mīm idghām bi-ghunnah;
+- ʿayn→ṣād, ʿayn→sīn, sīn→qāf, and continued ṭā-sīn→`تِلْكَ`
+  ikhfāʾ;
+- qalqalah on the stopped dāl of ṣād;
+- the clear-nūn exceptions before wāw after `يسٓ` and `نٓ`;
+- connected `الم`→`اللَّهُ` in 3:1–2, where the final mīm-name realization
+  receives fatha before hamzat-al-waṣl.
+
+The compact corpus text identifies ordinary openings, so the shared names
+table has no copied phonemes, segments, or Tajwīd. Only demonstrated
+location/boundary exceptions use a sparse typed Hafs exception record. Any
+Warsh override waits for Warsh recitation research.
 
 ## 12. Final result and projections
 
@@ -616,8 +993,10 @@ strings:
 ```python
 @dataclass(frozen=True, slots=True)
 class RecitedGrapheme:
+    id: RecitedGraphemeId
     char: str
-    word_index: int
+    word: RecitedWordId
+    segments: tuple[SegmentId, ...]
     source: tuple[GraphemeId, ...]
     event: RealizationEventId | None = None
 
@@ -625,7 +1004,7 @@ class RecitedGrapheme:
 @dataclass(frozen=True, slots=True)
 class RenderedToken:
     value: str
-    word_index: int
+    word: RecitedWordId
     segments: tuple[SegmentId, ...]
 ```
 
@@ -641,6 +1020,13 @@ class BoundaryCause(StrEnum):
     SAKT_SIGN = "sakt_sign"
 
 
+class BoundaryMode(StrEnum):
+    JOIN = "join"
+    STOP = "stop"
+    SAKT = "sakt"
+    EDGE = "edge"
+
+
 @dataclass(frozen=True, slots=True)
 class SourceWord:
     index: int
@@ -649,41 +1035,48 @@ class SourceWord:
 
 
 @dataclass(frozen=True, slots=True)
-class WordBoundaryState:
-    word_index: int
-    starts_here: bool
-    stops_here: bool
-    sakt_after: bool
+class RecitedBoundary:
+    id: BoundaryId
+    left: RecitedWordId | None
+    right: RecitedWordId | None
+    mode: BoundaryMode
     causes: tuple[BoundaryCause, ...]
     signs: tuple[GraphemeId, ...] = ()
 ```
 
-Validation prevents `stops_here` and `sakt_after` from describing the same
-after-word boundary. The next included word starts after a stop; a request's
-first word starts. Rules consume this stored state rather than recomputing
-verse edges or raw stop signs.
+There is one boundary before the first recited word, between every adjacent
+pair, and after the last. `EDGE` is valid only when one side is `None`.
+`SAKT` blocks cross-boundary rules without applying waqf transforms; `STOP`
+blocks them and applies waqf/ibtidāʾ on its sides; `JOIN` allows interaction.
+Muqaṭṭaʿāt name boundaries are `JOIN`; the boundary after the final name is the
+projected source/request boundary. Rules consume this stored state rather than
+recomputing verse edges or raw stop signs.
 
 ```python
 @dataclass(frozen=True, slots=True)
 class Recitation:
-    riwayah: str
+    riwayah: Riwayah
     ref: str
     words: tuple[SourceWord, ...]
     graphemes: tuple[Grapheme, ...]
     clusters: tuple[GraphemeCluster, ...]
     letters: tuple[LetterUnit, ...]
+    recited_words: tuple[RecitedWord, ...]
+    recited_letters: tuple[RecitedLetter, ...]
     segments: tuple[Segment, ...]
-    boundaries: tuple[WordBoundaryState, ...]
+    boundaries: tuple[RecitedBoundary, ...]
     alignments: tuple[GraphemeAlignment, ...]
     tajweed: tuple[TajweedOccurrence, ...]
-    madd: tuple[MaddOccurrence, ...]
     realizations: tuple[RealizationEvent, ...]
     recited_graphemes: tuple[RecitedGrapheme, ...]
     rendered_tokens: tuple[RenderedToken, ...]
 ```
 
 `RecitedGrapheme` preserves the source-linked Arabic form after waqf/ibtidāʾ
-or lexical expansion. `RenderedToken` points to its source `SegmentId`s.
+or lexical expansion. It must have either non-empty `source` or one `event`,
+never neither/both. Its segment links let annotations address a generated
+muqaṭṭaʿāt carrier or an inserted vowel without pretending it was a source
+scalar. `RenderedToken` points to its source `SegmentId`s.
 Public APIs may be new and cleaner; they project this graph and never re-run a
 phonological detector. Exact legacy JSON field compatibility is not a design
 constraint.

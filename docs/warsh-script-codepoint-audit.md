@@ -42,6 +42,32 @@ corpus build must decide which source items are lexical word slots before it
 assigns `sura:ayah:word`; it must never let a display mark accidentally become
 a phonemizer word.
 
+### Direct answer: how much is actually shared?
+
+Of the 63 scalar values present in the selected Warsh word corpus, 57 also
+occur in the current Hafs corpus. The six Warsh-only scalars are combining
+hamza below (`U+0655`), the three alternate tanween marks (`U+0656/U+0657/
+U+065E`), yeh barree (`U+06D2`), and mini mīm above (`U+06E2`). Ordinary
+letters and standard harakāt are therefore mostly byte-identical, and many
+remaining differences are many-to-one spelling conventions.
+
+That summary must not be shortened to “only count deltas.” Several
+high-frequency differences are sequence-semantic:
+
+- Warsh lacks Hafs `U+0671` and spells hamzat al-waṣl with multi-scalar initial
+  alef sequences;
+- the same `U+06EA/U+06EC/U+06DF` scalar can have a different role by source
+  and sequence;
+- harakah+mini-mīm creates canonical tanween even though no tanween scalar is
+  present;
+- shared mini-wāw/maddah scalars include a likely plural-mīm realization
+  delta;
+- stop/structural attachment changes address and boundary handling.
+
+So the correct implementation conclusion is “mostly shared ordinary
+inventory, small scalar delta, important sequence/convention delta,” not a
+copied Warsh rule tree and not one universal codepoint map.
+
 ## 2. Decisions by representation family
 
 ### 2.1 Byte-identical and canonically shared
@@ -134,15 +160,15 @@ hardcodes the imālah pronunciation. The Warsh corpus uses it 2,569 times:
 This yields two concrete design consequences:
 
 - Hafs 11:41 no longer needs a location-keyed phoneme patch. Its adapter can
-  recognize the marked-vowel sequence and its Hafs vowel-quality policy can
+  recognize the marked-vowel sequence and its Hafs vowel-quality classifier can
   classify it as `IMALA`.
 - Warsh occurrences must not automatically receive that Hafs value. The
-  Warsh policy must decide `IMALA`, `TAQLIL`, or another supported quality from
+  Warsh classifier must decide `IMALA`, `TAQLIL`, or another supported quality from
   reviewed recitation evidence. The source mark is evidence; it is not itself
   a universal Tajweed rule.
 
 The canonical tokenizer may retain a typed `MarkedVowel` input between script
-normalization and riwāyah policy. It must not call the mark "silent-letter /
+normalization and riwāyah classification. It must not call the mark "silent-letter /
 pause indicator" as the PR metadata currently does.
 
 ### 2.5 Yāʾ family: different base scalar, same letter unit
@@ -209,7 +235,7 @@ validate them, but do not turn glyph presence into the pronunciation engine.
 | either source | stop/sakt sign | structural/boundary input | normalize through source convention | boundary policy, never Tajwīd glyph logic |
 
 Each future source adapter must maintain the same table under
-`evidence/script/<riwayah>/conventions.md`: raw sequence, canonical value,
+`docs/script-conventions/<riwayah>.md`: raw sequence, canonical value,
 whether a mark is semantic/hint/structural/ignored, validation rule, examples,
 and citation/review status. Runtime code contains only the mappings which have
 passed that review.
@@ -221,7 +247,7 @@ Warsh sites show a plural mīm cluster with damma + small wāw (+ often maddah)
 where Hafs has mīm + sukun. That is not a byte-only spelling alias. It is a
 likely Warsh mīm-al-jamʿ/ṣilah realization difference and belongs in the
 linguistic delta matrix. The script adapter preserves the written small wāw;
-Warsh rule policy determines the sound after research.
+Warsh rule implementation determines the sound after research.
 
 This is exactly why scalar counts cannot decide ownership: `U+06E5` is shared
 orthography in some contexts, source-specific spelling in others, and evidence
@@ -281,7 +307,7 @@ a distribution that needs riwāyah research, not an implemented Warsh rule.
 | `U+0642` | ق | 7,034 | 7,034 | same | qāf |
 | `U+0643` | ك | 10,497 | 10,497 | same | kāf |
 | `U+0644` | ل | 38,102 | 38,098 | same | lām |
-| `U+0645` | م | 26,735 | 26,733 | same/delta | mīm; plural-mīm realization is riwāyah policy |
+| `U+0645` | م | 26,735 | 26,733 | same/delta | mīm; plural-mīm realization is a riwāyah classifier delta candidate |
 | `U+0646` | ن | 27,268 | 27,279 | same | nūn |
 | `U+0647` | ه | 14,850 | 14,847 | same | hāʾ |
 | `U+0648` | و | 24,970 | 25,486 | same | wāw; consonant/carrier decided contextually |

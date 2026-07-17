@@ -1,4 +1,4 @@
-# ADR-003: Code, runtime data, corpus builds, evidence, and research
+# ADR-003: Code, runtime data, corpus builds, documentation, and research
 
 Status: **accepted for implementation** — companion to ADR-001/002.
 
@@ -33,12 +33,16 @@ loaded without executing an algorithm:
 - locations for a named typed exception;
 - provenance/schema ids.
 
-Put a fact in **evidence** when it directly justifies a shipped behavior but is
-not loaded at runtime: occurrence lists, reviewed script fixtures, comparison
-reports, screenshots, citations, and audit outputs.
+Put a reviewed conclusion needed to explain shipped behavior in **docs**. Put
+its small executable examples in **tests/fixtures**. There is no top-level
+`evidence/` taxonomy: it adds a second judgement system without improving the
+runtime boundary.
 
-Put exploratory material in **research**. Nothing in research is authoritative
-or importable by the package.
+Put exploratory/source material in **research**. `research/phonemizer/` is for
+material directly related to future phonemizer behavior; unrelated Qurʾānic
+study belongs under `research/quranic-studies/`. Screenshots, bulk occurrence
+lists, source PDFs, and unreviewed notes live here. Nothing in research is
+authoritative or importable by the package.
 
 Put reproducible generated intermediates/reports in **build**. Nothing in
 build is a hand-maintained source of truth or imported at runtime.
@@ -55,9 +59,9 @@ quranic_phonemizer/
 ├── script/                        # tokenizer + source adapters
 ├── rules/                         # shared rule implementations
 ├── riwayat/
-│   ├── registry.py                # RiwayahSpec registration
-│   ├── hafs/                      # only Hafs policy/adapter code
-│   └── warsh/                     # only proved Warsh policy/adapter code
+│   ├── registry.py                # Riwayah enum -> resources/pipeline lookup
+│   ├── hafs/                      # only Hafs classifier/adapter code
+│   └── warsh/                     # only proved Warsh classifier/adapter code
 ├── render/                        # semantic segment -> output token
 ├── projections/                   # new public views
 └── data/                          # only files shipped in wheel
@@ -87,22 +91,20 @@ tools/
 ├── corpus/                        # clean/split/pack/reproduce commands
 └── audit/                         # Unicode, alignment, coverage reports
 
-evidence/                          # reviewed product evidence; not shipped
-├── script/
-│   ├── hafs/conventions.md        # semantic/hint/ignored source conventions
-│   ├── warsh/conventions.md
-│   └── hafs-warsh/                # comparison matrices/fixtures
-├── tajweed/hafs/
-└── exceptions/hafs/
-
 research/                          # exploratory notes/assets; not authoritative
-├── domain/
-├── sources/
-└── experiments/
+├── phonemizer/
+│   ├── script-sources/
+│   ├── tajweed-occurrences/
+│   ├── exceptions/
+│   └── experiments/
+└── quranic-studies/               # pure research unrelated to package behavior
 
-tests/fixtures/                    # small executable expected cases
+tests/fixtures/                    # small executable source/rule expected cases
 build/                             # ignored/generated intermediates and reports
-docs/                              # decisions, contracts, explanations
+docs/                              # decisions, contracts, reviewed conventions
+└── script-conventions/
+    ├── hafs.md
+    └── warsh.md
 ```
 
 There is no generic `dev/`. Existing files move by purpose:
@@ -113,10 +115,11 @@ There is no generic `dev/`. Existing files move by purpose:
 | PR raw/cleaned/split Warsh corpus | raw under `corpora/warsh/source`; reviewed canonical words under `canonical`; generated cleaned/split copies under `build` |
 | `dev/build_quran_db.py` | `tools/corpus/build_db.py` |
 | Unicode/silence/catalog scripts | `tools/audit/` |
-| reviewed Tajwīd occurrence lists and screenshots | `evidence/tajweed/hafs/` |
-| exploratory prose or unrelated Qurʾānic study | `research/domain/` or `research/sources/` |
-| full-corpus generated comparisons | `build/reports/`; commit only a reviewed summary under `evidence/` when needed |
-| runtime `resources/tajweed_occurences/` | move to evidence; it must not ship |
+| reviewed convention conclusions | `docs/script-conventions/` with executable cases in `tests/fixtures/` |
+| Tajwīd occurrence lists and screenshots | `research/phonemizer/tajweed-occurrences/`; promote only conclusions/tests |
+| unrelated Qurʾānic study | `research/quranic-studies/` |
+| full-corpus generated comparisons | `build/reports/`; copy a concise conclusion into the relevant doc only when needed |
+| runtime `resources/tajweed_occurences/` | move to `research/phonemizer/tajweed-occurrences/`; it must not ship |
 
 ## 3. Shared code and sparse riwāyah deltas
 
@@ -126,7 +129,7 @@ live once under `data/shared/`. A riwāyah directory contains only:
 - its corpus and source-script aliases;
 - its true location exceptions;
 - its renderer differences, if any;
-- policy functions or replacement tables proven to differ.
+- classifier functions or replacement tables proven to differ.
 
 There is no `data/riwayat/hafs/rules/` mirrored into
 `data/riwayat/warsh/rules/`. If both riwāyāt use the same nūn/tanwīn table,
@@ -134,9 +137,10 @@ Warsh has no copy. If research proves a whole finite family differs, the
 riwāyah replaces that named table as a complete validated unit; recursive deep
 merging is forbidden.
 
-Complex variation uses policy functions in `riwayat/<id>/rules.py`, composed
-through `RulePolicies`. Functions are imported by Python registration, never
-named as YAML strings.
+Complex variation uses ordinary typed functions in `riwayat/<id>/rules.py`,
+bound by explicit Python pipeline construction only after a second
+implementation is proved. There is no generic `RulePolicies` domain object.
+Functions are imported by Python, never named as YAML strings.
 
 ## 4. Glyph-first data
 
@@ -201,19 +205,26 @@ use `"ب": "b"`, `"ر": "r"`, and Arabic vowel-mark keys. Non-written semantic
 sounds use typed semantic ids because there is no honest source glyph for a
 placeless nasal or qalqalah release.
 
+The baseline map does not encode contextual rules with keys such as “nūn
+without sukūn” or “yāʾ after nūn”. Rule code first produces semantic features
+(`hidden`, `nasalized`, `geminated`, `emphatic`, qalqalah release); render data
+may then map every resulting feature combination, including nasal/plain
+wāw/yāʾ and the qalqalah release, to one or more output tokens.
+
 Changing a token never changes a rule decision or occurrence. Rule code never
 searches for `:`, `~`, `Q`, or another token convention.
 
 ## 6. Madd
 
 There is no madd duration data and no `min`/`max`. The six supported
-`MaddType`s are code enums; the shared Python classifier records a type, vowel
-segment, carrier, and cause.
+`MaddType`s are code enums; `MaddOccurrence` is a Tajwīd occurrence variant and
+the shared Python classifier records type, segment(s), carrier, typed cause,
+and an orthogonal context.
 
-No `silah_sughra`, `silah_kubra`, or `badal` row is added because it exists in
-a textbook. Ṣilah context belongs to the relevant realization policy. A new
-madd type lands only with a supported riwāyah example, implementation, API
-need, and regression test.
+No `silah_sughra`, `silah_kubra`, or `badal` row is added merely because it
+exists in a textbook. `MaddContext` may record Allah dagger alef, waqf ʿiwaḍ,
+pronoun/plural-mīm ṣilah, or muqaṭṭaʿāt. A new madd type lands only with a
+supported riwāyah example, implementation, API need, and regression test.
 
 ## 7. Muqaṭṭaʿāt
 
@@ -222,9 +233,13 @@ Store the only non-derivable input: the Arabic recited name.
 ```yaml
 schema_version: 1
 names:
+  "ا": "أَلِفْ"
+  "ح": "حَا"
+  "ر": "رَا"
   "ص": "صَادْ"
   "م": "مِيمْ"
   "ع": "عَيْنْ"
+  # plus ك ه ي ط س ق ن ل
 ```
 
 `display`, `segments`, long-vowel flags, leen flags, phoneme arrays,
@@ -234,7 +249,15 @@ needed to derive its short vowel, yāʾ/leen relationship, and final nūn.
 
 The compact corpus text identifies the opening, so location lists are omitted
 unless a demonstrated ambiguity requires them. A riwāyah-specific recited
-name is a sparse override.
+name is a sparse override. Hafs location/boundary exceptions (`يسٓ`, `نٓ`, and
+connected Āl ʿImrān `الم`→`اللَّهُ`) are named typed exception ids, not copied
+phoneme arrays.
+
+Madd lāzim is derived when the name's long-vowel or leen carrier is followed
+by a permanent sākin consonant. The consonant may remain plain, be represented
+by shaddah/gemination, or assimilate across a name boundary; that realization
+changes the typed harfī detail, not the basic predicate. The expanded final name remains connected to the following
+Qurʾānic word so ordinary boundary rules are not lost.
 
 ## 8. Typed exceptions, not patches
 
@@ -259,7 +282,7 @@ schema and Python handler for that family only.
 
 Hafs 11:41 imālah should not remain a location exception once the source
 adapter recognizes its marked `۪` vowel sequence. The mark produces a typed
-marked-vowel input and the Hafs policy classifies it. This same seam permits
+marked-vowel input and the Hafs classifier classifies it. This same seam permits
 Warsh marked vowels without copying the hardcoded Hafs location.
 
 ## 9. Corpus build contract
@@ -324,12 +347,12 @@ Only `quranic_phonemizer/data/**` ships. Package-data configuration must be
 recursive for YAML/JSON/BIN files. Wheel and sdist are installed in clean
 environments and smoke-tested for Hafs plus a Warsh source-normalization case.
 
-Runtime imports from `corpora/`, `tools/`, `evidence/`, `research/`, `build/`,
-or repository-relative paths are forbidden.
+Runtime imports from `corpora/`, `tools/`, `research/`, `build/`, `docs/`, or
+repository-relative paths are forbidden.
 
 ## 12. Migration order
 
-1. Create the target folders and move evidence/research/tooling without
+1. Create the target folders and move research/tooling without
    changing runtime behavior.
 2. Add corpus manifests and a reproducible Hafs build; import PR Warsh inputs
    under the same contract.
@@ -340,4 +363,4 @@ or repository-relative paths are forbidden.
 6. Port remaining Hafs behavior; replace generic contextual patches as their
    typed handlers land.
 7. Switch to the new API/pipeline and remove old resources/re-derivers.
-8. Add only researched Warsh policy/table/render deltas.
+8. Add only researched Warsh classifier/table/render deltas.

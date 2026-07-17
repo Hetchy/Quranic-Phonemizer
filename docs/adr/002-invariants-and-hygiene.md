@@ -10,15 +10,15 @@ already false because production code uses newer syntax.
 
 Use `StrEnum` for closed domain vocabularies which code branches on or exposes:
 
+- supported riwāyāt;
 - canonical Arabic letters and marks;
 - segment qualities/features;
 - alignment kinds;
 - Tajwīd rules and typed details;
 - madd types, boundary kinds, and realization reasons.
 
-Use validated strings for registered/extensible identities:
+Use validated strings for non-domain resource identities:
 
-- riwāyah ids;
 - corpus and source-script ids;
 - renderer/preset ids.
 
@@ -60,7 +60,10 @@ cannot be registered with one global meaning.
 Every sounding or potentially sounding grapheme belongs to exactly one
 canonical `LetterUnit`. Structural signs do not become letters. A combining
 mark does not become a letter because its Unicode name contains "ALEF" or
-"HAMZA". A multi-scalar source sequence may form one unit.
+"HAMZA". A multi-scalar source sequence may form one unit. Every `LetterUnit`
+has non-empty base source graphemes; inserted/expanded writing is represented
+only by a provenance-bearing `RecitedLetter` created by a
+`RealizationEvent`.
 
 ### I4. One alignment per source grapheme
 
@@ -69,11 +72,18 @@ linked through `REALIZES`, `CARRIES`, or `ASSIMILATED`; silence has a typed
 cause; hints and structural marks are explicit. No projection guesses silence
 from an empty phoneme list.
 
-### I5. Every sound has provenance
+### I5. Every recited unit and sound has provenance
 
-Every segment either participates in at least one alignment or was inserted by
-one `RealizationEvent`. Cross-word shared segments may align to graphemes in
-both words. No relation crosses a stopping boundary.
+Every `RecitedLetter` is copied from source `LetterUnit`s or created by exactly
+one `RealizationEvent`. Every segment either participates in at least one
+alignment or was inserted by one event. Cross-word shared segments may align
+to graphemes in both words. No relation crosses a stopping boundary.
+
+Every `RecitedLetter` belongs to exactly one `RecitedWord`. An ordinary source
+word produces one recited word; lexical expansion may produce several. There
+are exactly `len(recited_words) + 1` `RecitedBoundary` records, including
+request edges. Expanded-name boundaries are joined and the final name inherits
+the source/request boundary.
 
 ### I6. References and order are valid
 
@@ -104,7 +114,7 @@ letter. The exact source remains independently reconstructable.
 ### I10. Riwāyah isolation
 
 Corpus/address data, source adapter, searchable-text normalization,
-exceptions, policies, render configuration, and caches are keyed by immutable
+exceptions, pipeline construction, render configuration, and caches are keyed by immutable
 riwāyah/config identity. Hafs→Warsh and Warsh→Hafs construction order produces
 the same isolated results.
 
@@ -112,19 +122,21 @@ the same isolated results.
 
 ### T1. Conventional names
 
-Every `TajweedOccurrence.rule` is a conventional Tajwīd phenomenon.
-Orthographic silence, hamzat-al-waṣl vowel choice, `keep`, `replace`, and madd
-are not Tajwīd ids.
+Every non-madd `OccurrenceCore.rule` and every `MaddOccurrence.madd_type` is a
+conventional Tajwīd phenomenon.
+Orthographic silence, hamzat-al-waṣl vowel choice, `keep`, and `replace` are
+not Tajwīd ids. Madd is represented by the specialized `MaddOccurrence`
+variant of `TajweedOccurrence`.
 
 ### T2. Relationship semantics
 
-- every occurrence has a subject;
-- condition means context used to select/explain the rule;
+- every occurrence has a typed variant and a subject;
+- each variant names its rule-specific trigger/reason fields;
 - target is present only for actual assimilation;
 - result references the realized sound;
-- detail is absent or one allowed typed variant for that rule.
+- no generic `condition` tuple or free-form detail dictionary exists.
 
-Tests must cover ikhfāʾ (condition, no target), iqlāb, idghām with and without
+Tests must cover ikhfāʾ (following trigger, no target), iqlāb, idghām with and without
 ghunnah (real target), shafawī rules, general idghām, qalqalah, tafkhīm, and
 tarqīq, including cross-word ownership.
 
@@ -138,15 +150,17 @@ decisions before these families are evaluated.
 
 ### T4. Trigger/detail is not rule identity
 
-Nūn sākinah versus tanween is `NoonDetail`; kāmil versus nāqiṣ is
-`IdghamDetail`; sughrā versus kubrā is `QalqalahDetail`. Invalid combinations
-fail at occurrence construction.
+Nūn sākinah versus tanween is `NoonOccurrence.trigger`; kāmil versus nāqiṣ is
+`IdghamOccurrence.completeness`; sughrā versus kubrā is
+`QalqalahOccurrence.degree`. Invalid rule/variant combinations fail at
+occurrence construction.
 
 ### T5. Madd scope
 
 Every supported long-vowel/leen site has at most one `MaddOccurrence` for the
-current realization. The record stores type, vowel segment, carrier, and
-optional cause; never performance duration/count. New types require a real
+current realization. The record stores type, segment(s), carrier, typed cause,
+and orthogonal context such as Allah dagger alef, ʿiwaḍ, ṣilah, or
+muqaṭṭaʿāt; never performance duration/count. New types require a real
 riwāyah behavior, API need, and tests.
 
 ## 4. Dependency boundaries
@@ -154,9 +168,10 @@ riwāyah behavior, API need, and tests.
 ```text
 model
   <- source adapters
-  <- corpus/request/boundary resolver
+  <- lexical expansion + corpus/request/boundary resolver
+  <- boundary/structural realization
   <- baseline segment builder
-  <- shared rules + narrow riwāyah policies
+  <- shared rules + explicit riwāyah pipeline wiring
   <- renderer and public projections
 ```
 
@@ -165,7 +180,7 @@ model
 - `script/` is the only package allowed to interpret source-specific Unicode
   sequences.
 - `render/` is the only package allowed to assign output token strings.
-- `riwayat/<id>/rules.py` contains only proven policy replacements; shared
+- `riwayat/<id>/rules.py` contains only proven classifier replacements; shared
   modules do not import riwāyah modules.
 - rules and projections perform no file I/O.
 - runtime configuration is immutable and instance-local.
@@ -232,11 +247,17 @@ and both nūn/tanween details.
 
 Before porting every rule, prove:
 
+- source serializer and `SOURCE_EXACT` renderer reconstruct every Hafs source
+  word byte-for-byte and the accepted Warsh normalization fixture bytes;
 - one waqf/ibtidāʾ transform with recited-writing provenance;
+- that the same boundary transform removes/adds the expected cross-word,
+  qalqalah, and madd occurrences before rendering;
 - one qalqalah result which renders multiple/configured tokens;
 - one inserted sound;
 - one long vowel with haraka+carrier sharing;
-- one muqaṭṭaʿāt name derived solely from Arabic recited spelling.
+- every one of the fourteen muqaṭṭaʿāt names derived solely from Arabic
+  recited spelling, plus all fourteen compact opening forms and their next-word
+  boundary cases from the worked-example audit.
 
 ### Gate E — full Hafs semantic migration
 
@@ -248,7 +269,7 @@ pipeline and remove the old mutable graph/re-derivers.
 
 Build wheel and sdist, install each in a clean environment, and run Hafs plus
 Warsh-normalization smoke tests. Runtime code must not depend on `dev/`,
-`research/`, `evidence/`, `build/`, or repository-relative paths.
+`research/`, `build/`, `docs/`, or repository-relative paths.
 
 ### Gate G — Warsh pronunciation
 

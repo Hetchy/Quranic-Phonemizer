@@ -339,9 +339,15 @@ phonemizer model.
 - Within the spelled names, the ordinary rules apply *between* names: madd
   lazim (6) on the ل م س ك ع ص ن ق names, natural madd (2) on ح ي ط ه ر,
   idgham/ikhfaa between a name's final noon/meem and the next name's first
-  letter, qalqala kubra on صٓ's *d*, tafkheem on the heavy names — plus two
+  letter, boundary-dependent qalqala on صٓ's *d* (kubrā when stopped),
+  tafkheem on the heavy names — plus two
   narration exceptions (يسٓ and نٓ keep a clear noon before a following waw).
-- These pronunciations are per-location facts (29 surah openings).
+- The final expanded name remains connected to the following Qurʾānic word
+  unless the selected boundary stops. This exposes continued طسٓ→تِلْكَ
+  ikhfāʾ and the special connected Āl ʿImrān الم→اللَّهُ realization.
+- The shared spellings cover fourteen names and fourteen compact resource
+  forms at thirty source locations across 29 surah openings; only demonstrated
+  boundary/location exceptions are per-location facts.
 
 ### 5.12 Per-location exceptions (Hafs closed lists)
 
