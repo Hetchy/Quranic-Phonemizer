@@ -4,8 +4,6 @@ __pycache__/
 .pytest_cache
 *.py[cod]
 out
-quranic_phonemizer/resources/tajweed_occurences
-quranic_phonemizer/resources/archive
 mappings.md
 test.ipynb
 .windsurf
@@ -22,6 +20,3 @@ build/
 *.egg
 
 docs/mualem_conversion.md
-scripts/
-tests/
-dev/helpers.py

@@ -1,0 +1,54 @@
+schema_version: 1
+
+consonants:
+  ء: ʔ
+  ٱ: ʔ
+  ب: b
+  ت: t
+  ث: θ
+  ج: ʒ
+  ح: ħ
+  خ: x
+  د: d
+  ذ: ð
+  ر: r
+  ز: z
+  س: s
+  ش: ʃ
+  ص: sˤ
+  ض: dˤ
+  ط: tˤ
+  ظ: ðˤ
+  ع: ʕ
+  غ: ɣ
+  ف: f
+  ق: q
+  ك: k
+  ل: l
+  م: m
+  ن: n
+  ه: h
+  ة: t
+  و: w
+  ي: j
+  ى: j
+
+emphatic:
+  ر: rˤ
+  ل: lˤ
+
+nasalized:
+  ن: ñ
+  م: m̃
+  ي: j̃
+  و: w̃
+
+vowels:
+  a: a
+  u: u
+  i: i
+  imala: i
+
+nasal: ŋ
+nasal_emphatic: ŋ
+qalqala: Q

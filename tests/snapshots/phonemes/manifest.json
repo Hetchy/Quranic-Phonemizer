@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "source_revision": "b3bc53ad8ec7a3058b9ee3d7056f30e3427a26c4",
+  "reference": "1-114",
+  "word_count": 77433,
+  "encoding": "utf-8 JSON array per source word, gzip compressed",
+  "modes": {
+    "continuous": {
+      "file": "continuous.jsonl.gz",
+      "bytes": 2285752,
+      "sha256": "eab3ce9ce055061badd35ebe682f82ab9b53f03b787e0daaf985a166ae7d5250"
+    },
+    "verse": {
+      "file": "verse.jsonl.gz",
+      "bytes": 2264215,
+      "sha256": "116ca78deceef264bc87dc655bd6f8af8847c9eb9310ed480919400d226e35f7"
+    },
+    "word": {
+      "file": "word.jsonl.gz",
+      "bytes": 2208316,
+      "sha256": "824bcba17ecc25fd1c61d25294968c77a7c3128dbd2b73653100844e12b36c54"
+    }
+  }
+}

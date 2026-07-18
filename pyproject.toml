@@ -5,10 +5,10 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "quranic-phonemizer"
 dynamic = ["version"]
-description = "A Grapheme-to-Phoneme converter (G2P) for the Qurʾan (Hafs riwaya), converting text to phoneme sequences with comprehensive support for all tajweed rules and waqf phonetic effects."
+description = "A riwayah-aware grapheme-to-phoneme converter for Quranic recitation."
 readme = "README.md"
 license = "MIT"
-requires-python = ">=3.8"
+requires-python = ">=3.11"
 authors = [
     { name = "Ahmed Ibrahim", email = "ahmed.ibrahim8165@gmail.com" },
 ]
@@ -19,9 +19,6 @@ classifiers = [
     "Intended Audience :: Science/Research",
     "Intended Audience :: Education",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
@@ -42,7 +39,6 @@ Issues = "https://github.com/Hetchy/Quranic-Phonemizer/issues"
 
 [tool.setuptools.packages.find]
 include = ["quranic_phonemizer*"]
-exclude = ["tests*", "out", "docs*", "dev*"]
 
 [tool.setuptools.package-data]
-quranic_phonemizer = ["resources/*.json", "resources/*.yaml", "resources/*.bin"]
+quranic_phonemizer = ["data/**/*.json", "data/**/*.yaml", "data/**/*.bin"]

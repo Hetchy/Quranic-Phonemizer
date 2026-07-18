@@ -1,0 +1,38 @@
+schema_version: 1
+
+aliases:
+  أ: ء
+  إ: ء
+  ٔ: ء
+  ٕ: ء
+  ؤ: ء
+  ئ: ء
+  ۧ: ي
+  ۨ: ن
+
+letter_hints:
+  ۧ: small_ya_letter
+
+marks:
+  ٓ: madd
+  ۟: silent_always
+  ۠: silent_in_wasl
+  ۪: imala
+  ۬: second_hamza
+
+structural:
+  - ـ
+  - ۞
+  - ۩
+  - ۜ
+  - ۫
+  - ‏
+  - ۣ
+
+stop_signs:
+  ۖ: preferred_continue
+  ۗ: preferred_stop
+  ۚ: optional_stop
+  ۘ: compulsory_stop
+  ۙ: prohibited_stop
+  ۛ: either_stop
