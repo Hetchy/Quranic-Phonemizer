@@ -19,7 +19,7 @@ from ...rules.boundary import (
 from ...rules.idgham import Idgham
 from ...rules.lam_shamsiyyah import ArticleLam
 from ...rules.madd import PausalGlide
-from ...rules.meem_sakinah import GhunnahMushaddadah
+from ...rules.meem_sakinah import GhunnahMushaddadah, MeemSakinah
 from ...rules.noon_sakinah import NoonSakinah
 from ...rules.qalqala import Qalqala
 from ...rules.tafkheem import Emphasis
@@ -27,7 +27,13 @@ from ...rules.tafkheem import Emphasis
 HAFS = RuleSet(
     {
         Phase.BOUNDARY: (WaslHamza(), TanweenAtWaqf(), WaqfEnding(), TaaMarbutaAtWaqf()),
-        Phase.MERGE: (NoonSakinah(), ArticleLam(), GhunnahMushaddadah(), Idgham()),
+        Phase.MERGE: (
+            NoonSakinah(),
+            MeemSakinah(),
+            ArticleLam(),
+            GhunnahMushaddadah(),
+            Idgham(),
+        ),
         Phase.LENGTH: (PausalGlide(),),
         Phase.COLOUR: (Emphasis(),),
         Phase.RELEASE: (Qalqala(),),

@@ -69,6 +69,12 @@ class Idgham:
             # must be mutually exclusive rather than ranked — E1 exists to
             # catch the day they overlap, and it did.
             return None
+        if here.letter is L.MEEM:
+            # A mīm sākinah before a mīm is idghām shafawī, which is the mīm
+            # family's own named rule, not a member of like-into-like. E1
+            # caught this the moment `MeemSakinah` was wired in — the nūn was
+            # already excluded from `triggers` for exactly the same reason.
+            return None
         following = near.after(at)
         if following is None:
             return None
