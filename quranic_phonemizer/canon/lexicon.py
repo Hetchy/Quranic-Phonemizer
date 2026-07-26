@@ -73,10 +73,16 @@ class Lexicon:
         for stem in entries:
             if any(skeleton == stem + clitic for clitic in CLITIC_PRONOUNS):
                 return True
-            # A stem of three or more canonical letters is specific enough to
-            # match a prefix: `ألقى`, `ألقينا`, `ألقوا` are one lexeme with
-            # ordinary verbal inflection. Shorter stems stay exact, because
-            # two letters would swallow whole classes.
+            # A stem of three or more canonical letters is specific enough
+            # to match a prefix: `ألقى`, `ألقينا`, `ألقوا` are one lexeme
+            # with ordinary verbal inflection. Shorter stems stay exact.
+            #
+            # An entry beginning hamza + lām is safe here **only because
+            # `is_wasl` consults the article before it**: the article puts a
+            # lām at that position in every word it prefixes, so reordering
+            # those two checks makes `ءلق` swallow `القرآن`. Measured: it
+            # takes the residue from 23 to 671. See the ordering comment in
+            # canon/derive/wasl.py.
             if len(stem) >= _PREFIX_MIN and skeleton.startswith(stem):
                 return True
         return False

@@ -34,8 +34,6 @@ wasl_exempt:
   - "ءت"         # أوتوا
   - "ءل"         # أولو
   - "ءثم"        # إثم
-  - "ءلم"        # a muqattaʿat form, expanded in canon/spell.py
-  - "ءلر"
   - "ءلحق"      # ألحق
   - "ءتء"       # إيتاء
   - "ءطعم"      # إطعام

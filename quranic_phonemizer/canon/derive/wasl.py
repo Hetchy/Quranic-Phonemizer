@@ -66,7 +66,14 @@ PROCLITICS = frozenset(
 
 
 def is_wasl(context: Context) -> bool:
-    """The decision procedure. `canon.build` names it for every bare ālif."""
+    """The decision procedure. `canon.build` names it for every bare ālif.
+
+    **The order of the checks below is load-bearing, not stylistic.** The
+    article is consulted before the lexeme list, because the article puts a
+    lām at the second position of every word it prefixes and several lexeme
+    entries begin hamza + lām. Swapping those two makes `ءلق` match `القرآن`
+    and takes the L1 residue from 108 to 671. Measured, twice.
+    """
     cluster = context.cluster
     if cluster.letter not in (CanonLetter.ALIF, CanonLetter.HAMZA):
         return False
@@ -94,6 +101,13 @@ def is_wasl(context: Context) -> bool:
         return False
     if following.letter is CanonLetter.LAM:
         return True  # the article, with its helping vowel written out
+    if _is_form_four_masdar(context):
+        # `إفعال` — إكراه، إصلاح، إسراف، إعراض، إلحاف. A long ā in the second
+        # syllable is the shape's signature and no imperative has one:
+        # `اذهب`, `انظر`, `اجتنبوا` are short throughout. Form X's masdar
+        # (`استكبارًا`) keeps its waṣl because its long vowel comes later.
+        # Checked after the article, which also often carries a long ā.
+        return False
     if _is_nunated(context):
         # A word carrying tanwīn is a fully inflected noun, and no prosthetic
         # hamza begins one — the ten nouns are definite or annexed wherever
@@ -176,6 +190,15 @@ def _is_nunated(context: Context) -> bool:
             context.word_bounds[0] : context.word_bounds[1]
         ]
     )
+
+
+def _is_form_four_masdar(context: Context) -> bool:
+    second, third = context.ahead(1), context.ahead(3)
+    if second is None or third is None:
+        return False
+    if second.marks and not second.has("sukun"):
+        return False
+    return third.letter is CanonLetter.ALIF and _is_bare_carrier(third)
 
 
 def _is_bare_carrier(cluster) -> bool:
