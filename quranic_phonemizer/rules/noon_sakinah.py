@@ -67,7 +67,7 @@ class NoonSakinah:
         if letter in IZHAR:
             return _classification(Rule.IZHAR_HALQI, at, following.id)
         if letter in IQLAB:
-            return _nasal(Rule.IQLAB, at, following.id, NasalPlace.BILABIAL)
+            return _nasal(Rule.IQLAB, at, following.id, NasalPlace.ASSIMILATED)
         if letter in IDGHAM_GHUNNAH:
             return _merge(Rule.IDGHAM_BI_GHUNNAH, at, following, nasal=True)
         if letter in IDGHAM_NO_GHUNNAH:
@@ -85,6 +85,10 @@ def _classification(rule: Rule, at: SlotId, other: SlotId) -> Verdict:
 
 def _nasal(rule: Rule, at: SlotId, other: SlotId, place: NasalPlace) -> Verdict:
     """Iqlāb and ikhfāʾ replace the nūn's onset with a nasal.
+
+    **The Hafs default is `ASSIMILATED` for both**, which is what the frozen
+    snapshot contains; `BILABIAL` is selectable at the 986 measured sites
+    once `VariantSelection` reaches this rule.
 
     `place` is the whole content of the realization khilāf (ADR-006 §3): the
     caller's choice between a hidden mīm and the generic nasal is a

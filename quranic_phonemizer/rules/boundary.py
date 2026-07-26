@@ -156,11 +156,15 @@ class TanweenAtWaqf:
         base = _previous(near, at)
         if base is None or base.nucleus.kind is not NucleusKind.SHORT:
             return None
-        if base.letter is CanonLetter.TAA_MARBUTA:
-            return None  # the tāʾ marbūṭa rule owns this ending
-
         effects = [Silence(at, Aspect.ONSET)]
         rule = Rule.WAQF_ENDING
+        if base.letter is CanonLetter.TAA_MARBUTA:
+            # A tāʾ marbūṭa stops as a hāʾ and takes no ʿiwaḍ — but the
+            # nūn is still silent, which this rule owes regardless.
+            return Verdict(
+                Occurrence(mint(rule, at), rule, Participants((at, base.id))),
+                tuple(effects),
+            )
         if base.nucleus.quality is Quality.A:
             rule = Rule.IWAD
             effects.append(Relength(base.id, Length.LONG))

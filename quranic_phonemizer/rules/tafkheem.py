@@ -39,17 +39,19 @@ class Emphasis:
         self, near: Neighbourhood, plan: Plan, at: SlotId,
         boundaries: BoundaryPlan,
     ) -> Verdict | None:
-        del plan, boundaries
+        del boundaries
         slot = near.slot(at)
         if slot is None:
             return None
-        heavy = slot.letter in ALWAYS_HEAVY or _conditionally_heavy(near, slot)
+        heavy = slot.letter in ALWAYS_HEAVY or _conditionally_heavy(
+            near, slot, plan
+        )
         if not heavy:
             return None
         effects = [
             Recolour(at, Aspect.ONSET, SoundFeature.EMPHATIC, True)
         ]
-        if _quality(slot) is Quality.A:
+        if _quality(slot) is Quality.A and not _silenced(plan, slot):
             # Emphasis spreads onto a following `a` only. The frozen alphabet
             # has emphatic `a` tokens and no emphatic `i` or `u`.
             effects.append(
@@ -62,22 +64,40 @@ class Emphasis:
         )
 
 
-def _conditionally_heavy(near: Neighbourhood, slot) -> bool:
+def _conditionally_heavy(near: Neighbourhood, slot, plan) -> bool:
     if slot.letter is L.RA:
-        own = _quality(slot)
+        own = None if _silenced(plan, slot) else _quality(slot)
         if own is not None:
             return own in (Quality.A, Quality.U)
+        before = _before(near, slot)
+        if (
+            before is not None
+            and before.letter is L.YA
+            and before.nucleus.kind is NucleusKind.SILENT
+        ):
+            # A rāʾ after a leen yāʾ follows the yāʾ and stays light.
+            # Looking past the yāʾ to the fatha calls it heavy.
+            return False
         # A quiescent rāʾ takes its weight from the vowel before it: `ٱلْأَرْضَ`
         # is heavy after a fatha, `قَدِيرٌ` light after a long ī. Without the
         # look-back the rule sees no vowel at all and calls every sākin rāʾ
         # light.
-        return _preceding_quality(near, slot) in (Quality.A, Quality.U)
+        return _preceding_quality(near, slot, plan) in (Quality.A, Quality.U)
     if slot.letter is L.LAM:
-        return _is_divine_lam(near, slot)
+        return _is_divine_lam(near, slot, plan)
     return False
 
 
-def _is_divine_lam(near: Neighbourhood, slot) -> bool:
+def _silenced(plan, slot) -> bool:
+    """A nucleus a `BOUNDARY` rule removed.
+
+    `COLOUR` runs after `BOUNDARY`, so a rāʾ that lost its kasra at a stop is
+    governed by the vowel before it instead.
+    """
+    return plan.merged_away(slot.id, Aspect.NUCLEUS)
+
+
+def _is_divine_lam(near: Neighbourhood, slot, plan) -> bool:
     """The lām of `ٱللَّه`, heavy after a fatha or a damma and light after a
     kasra — `بِٱللَّهِ` is the light case.
 
@@ -90,6 +110,11 @@ def _is_divine_lam(near: Neighbourhood, slot) -> bool:
 
     The single lām of `إِلَٰه` matches neither, which is what keeps it light.
     """
+    if slot.nucleus.kind is not NucleusKind.LONG:
+        # The name carries a **long** ā. A geminate lām with a short a and a
+        # following hāʾ is an ordinary verb, and requiring only "an a" made
+        # every one of them heavy.
+        return False
     if _quality(slot) is not Quality.A:
         return False
     following = near.after(slot.id)
@@ -97,7 +122,7 @@ def _is_divine_lam(near: Neighbourhood, slot) -> bool:
         return False
     if not _doubled(near, slot):
         return False
-    return _preceding_quality(near, slot) in (Quality.A, Quality.U)
+    return _preceding_quality(near, slot, plan) in (Quality.A, Quality.U)
 
 
 def _doubled(near: Neighbourhood, slot) -> bool:
@@ -113,12 +138,22 @@ def _doubled(near: Neighbourhood, slot) -> bool:
     )
 
 
-def _preceding_quality(near: Neighbourhood, slot):
-    """The vowel actually heard before the lām, skipping the silent article."""
+def _preceding_quality(near: Neighbourhood, slot, plan):
+    """The vowel actually *heard* before this slot.
+
+    Skips a canonically silent slot, and skips one a `BOUNDARY` rule elided:
+    the waṣl hamza has a canonical helping vowel that is not spoken mid-word,
+    and reading it makes the rāʾ light where the preceding fatha governs.
+    """
     before = _before(near, slot)
-    if before is not None and before.nucleus.kind is NucleusKind.SILENT:
+    for _ in range(3):
+        if before is None:
+            return None
+        silent = before.nucleus.kind is NucleusKind.SILENT
+        if not (silent or _silenced(plan, before)):
+            return _quality(before)
         before = _before(near, before)
-    return _quality(before) if before is not None else None
+    return None
 
 
 def _before(near: Neighbourhood, slot):
