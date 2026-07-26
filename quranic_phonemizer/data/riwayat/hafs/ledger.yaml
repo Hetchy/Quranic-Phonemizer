@@ -27,6 +27,12 @@ supplies:
   - {slot: "18:53:1#2", skeleton: "ورء", fact: NUCLEUS,
      value: {kind: Long, quality: A}, citation: "Hafs; wa-ra'aa"}
 
+  # 18:38 `لَّـٰكِنَّا۠` — a pausal long that its own vocalised skeleton cannot
+  # distinguish from `لَٰكِنَّ`. One site, so a rule would be inventing a class.
+  - {slot: "18:38:1#3", skeleton: "لكن", fact: NUCLEUS,
+     value: {kind: PausalLong, quality: A},
+     citation: "Hafs; one of the seven alifs"}
+
 asserts:
   - {script: uthmani, slot: "6:77:2#1", skeleton: "رء", fact: NUCLEUS,
      value: {kind: Long, quality: A}}
