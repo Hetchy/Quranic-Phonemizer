@@ -66,7 +66,13 @@ class ArticleLam:
                 Realize(
                     following.id,
                     Aspect.ONSET,
-                    (Consonant(following.letter, geminate=True),),
+                    (
+                        Consonant(
+                            following.letter,
+                            geminate=True,
+                            nasal=following.letter in (L.NOON, L.MEEM),
+                        ),
+                    ),
                 ),
                 MergeInto(at, Aspect.ONSET, following.id, Aspect.ONSET),
             ),
@@ -86,5 +92,7 @@ def _is_article_lam(near: Neighbourhood, at: SlotId) -> bool:
     for index, slot in enumerate(slots):
         if slot.id != at:
             continue
-        return index == 1 and slots[0].onset is Onset.WASL
+        # Immediately after the waṣl hamza, wherever the word starts — a
+        # proclitic puts `بِٱللَّهِ`'s article at index 2, not 1.
+        return index > 0 and slots[index - 1].onset is Onset.WASL
     return False

@@ -64,9 +64,14 @@ class Emphasis:
 
 def _conditionally_heavy(near: Neighbourhood, slot) -> bool:
     if slot.letter is L.RA:
-        # Heavy with fatha or damma, light with kasra. The pausal cases and
-        # the look-back through a sākin belong to phase 5's fuller treatment.
-        return _quality(slot) in (Quality.A, Quality.U)
+        own = _quality(slot)
+        if own is not None:
+            return own in (Quality.A, Quality.U)
+        # A quiescent rāʾ takes its weight from the vowel before it: `ٱلْأَرْضَ`
+        # is heavy after a fatha, `قَدِيرٌ` light after a long ī. Without the
+        # look-back the rule sees no vowel at all and calls every sākin rāʾ
+        # light.
+        return _preceding_quality(near, slot) in (Quality.A, Quality.U)
     if slot.letter is L.LAM:
         return _is_divine_lam(near, slot)
     return False

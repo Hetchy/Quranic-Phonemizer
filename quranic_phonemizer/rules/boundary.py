@@ -63,11 +63,15 @@ class WaqfEnding:
         word = near.word_of(at)
         if slot is None or word is None or not boundaries.stopped_on(word):
             return None
-        if not _is_last_of_word(near, at, word):
+        if not _is_final_letter(near, at, word):
             return None
-
-        if _followed_by_tanween_noon(near, at, word):
-            return None  # TanweenAtWaqf owns this word's ending
+        if _followed_by_tanween_noon(near, at, word) and (
+            slot.letter is not CanonLetter.TAA_MARBUTA
+        ):
+            # TanweenAtWaqf owns the ending, because it may leave the ʿiwaḍ
+            # rather than a silence. The tāʾ marbūṭa is the exception: it
+            # becomes a hāʾ and takes no ʿiwaḍ, so its vowel is dropped here.
+            return None
 
         effects = []
         if slot.nucleus.kind is NucleusKind.SHORT:
@@ -152,6 +156,8 @@ class TanweenAtWaqf:
         base = _previous(near, at)
         if base is None or base.nucleus.kind is not NucleusKind.SHORT:
             return None
+        if base.letter is CanonLetter.TAA_MARBUTA:
+            return None  # the tāʾ marbūṭa rule owns this ending
 
         effects = [Silence(at, Aspect.ONSET)]
         rule = Rule.WAQF_ENDING
@@ -184,21 +190,32 @@ class TaaMarbutaAtWaqf:
         slot, word = near.slot(at), near.word_of(at)
         if slot is None or word is None or not boundaries.stopped_on(word):
             return None
-        if not _is_last_of_word(near, at, word):
+        if not _is_final_letter(near, at, word):
             return None
+        # `بِسُورَةٍ` stops as a hāʾ with no ʿiwaḍ: the tanwīn nūn after the
+        # tāʾ marbūṭa is still the word's last slot, so "final" here means the
+        # last slot that is not nunation.
         return Verdict(
-            Occurrence(mint(Rule.WAQF_ENDING, at), Rule.WAQF_ENDING, Participants((at,))),
+            Occurrence(mint(Rule.WAQF_ENDING, at), Rule.WAQF_ENDING,
+                       Participants((at,))),
             (Realize(at, Aspect.ONSET, (Consonant(CanonLetter.HEH),)),),
         )
 
 
+def _is_final_letter(near: Neighbourhood, at: SlotId, word: int) -> bool:
+    """The last slot that is not a tanwīn nūn."""
+    slots = [
+        slot
+        for slot in near.score.words[word].slots
+        if slot.origin is not SlotOrigin.NUNATION
+    ]
+    return bool(slots) and slots[-1].id == at
+
+
 def _followed_by_tanween_noon(near: Neighbourhood, at: SlotId, word: int) -> bool:
+    del at
     slots = near.score.words[word].slots
-    return (
-        len(slots) >= 2
-        and slots[-1].id == at
-        and slots[-1].origin is SlotOrigin.NUNATION
-    )
+    return bool(slots) and slots[-1].origin is SlotOrigin.NUNATION
 
 
 def _previous(near: Neighbourhood, at: SlotId):
