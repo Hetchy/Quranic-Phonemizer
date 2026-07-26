@@ -434,13 +434,35 @@ def _apply_cross_word_noon(reading, drafts, right_context, scribe) -> None:
 
 # ------------------------------------------------------------------ finishing
 def _apply_ledger(reading: Reading, drafts, ledger: Ledger, track) -> None:
+    """An entry for *this* verse that does not resolve is an error.
+
+    It used to be a bare `continue`, which put the skeleton check -- the thing
+    documented as catching ordinal drift -- behind the failure it exists to
+    catch. Four of ten shipped entries silently did nothing, and one of them
+    named a word whose skeleton would have rejected it outright. A Ledger with
+    entries that never fire is worse than no Ledger: it reads as coverage.
+    """
     for supply in ledger.supplies:
+        if not _addresses(supply.ref, reading.verse):
+            continue
         ordinal = _ordinal(reading, drafts, supply.ref)
         if ordinal is None or ordinal >= len(drafts):
-            continue
+            raise BuildError(
+                f"{reading.verse}: ledger entry {supply.ref} does not resolve "
+                f"to a slot -- the verse has {len(drafts)} slots. The index is "
+                f"zero-based within its word; check the word number too."
+            )
         _check_skeleton(reading, drafts, ordinal, supply)
         _set(drafts[ordinal], drafts, supply.fact, supply.value, Target.HERE)
         track.from_ledger += 1
+
+
+def _addresses(ref, verse: VerseRef) -> bool:
+    """Is this entry about this verse at all? Separating the two meanings of
+    an unresolved address is what lets the second one be loud."""
+    if isinstance(ref, VerseSlot):
+        return ref.verse == verse
+    return isinstance(ref, WordSlot) and ref.location.verse == verse
 
 
 def _ordinal(reading: Reading, drafts, ref) -> int | None:

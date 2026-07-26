@@ -172,3 +172,69 @@ def test_rejects_a_duplicate_yaml_key(tmp_path: Path) -> None:
     path.write_text(HEADER + "riwayah: warsh\n", encoding="utf-8")
     with pytest.raises(ValueError, match="Duplicate YAML key"):
         load_ledger(path)
+
+
+def test_an_entry_for_this_verse_that_does_not_resolve_is_an_error(
+    packed, shared
+) -> None:
+    """The address is checked, not skipped.
+
+    Falsifier: if `_apply_ledger` goes back to skipping an unresolvable
+    address, the mandatory skeleton check sits behind the failure it exists to
+    catch. Four of ten shipped entries silently did nothing that way, and one
+    named a word whose skeleton would have rejected it outright.
+    """
+    from conftest import words_of
+
+    from quranic_phonemizer.canon.build import BuildError, build
+    from quranic_phonemizer.canon.ledger import Ledger, Supply, WordSlot
+    from quranic_phonemizer.model.address import Location, Script, VerseRef
+    from quranic_phonemizer.model.canon import Long
+    from quranic_phonemizer.riwayat.hafs import script_adapter
+
+    reading = script_adapter(Script.UTHMANI).read(
+        VerseRef(112, 2), words_of(packed, 112, 2)
+    )
+    beyond = Ledger(
+        supplies=(
+            Supply(
+                ref=WordSlot(Location(112, 2, 1), 99),
+                skeleton="ءلله",
+                fact=SlotFact.NUCLEUS,
+                value=Long(Quality.A),
+                citation="deliberately out of range",
+            ),
+        ),
+        asserts=(),
+    )
+    with pytest.raises(BuildError, match="does not resolve"):
+        build(reading, lexicon=shared["lexicon"], ledger=beyond)
+
+
+def test_an_entry_for_another_verse_is_not_an_error(packed, shared) -> None:
+    """The two meanings of an unresolved address must stay separate, or every
+    verse raises on every other verse's entries."""
+    from conftest import words_of
+
+    from quranic_phonemizer.canon.build import build
+    from quranic_phonemizer.canon.ledger import Ledger, Supply, WordSlot
+    from quranic_phonemizer.model.address import Location, Script, VerseRef
+    from quranic_phonemizer.model.canon import Long
+    from quranic_phonemizer.riwayat.hafs import script_adapter
+
+    reading = script_adapter(Script.UTHMANI).read(
+        VerseRef(112, 2), words_of(packed, 112, 2)
+    )
+    elsewhere = Ledger(
+        supplies=(
+            Supply(
+                ref=WordSlot(Location(2, 1, 1), 99),
+                skeleton="whatever",
+                fact=SlotFact.NUCLEUS,
+                value=Long(Quality.A),
+                citation="a different verse entirely",
+            ),
+        ),
+        asserts=(),
+    )
+    build(reading, lexicon=shared["lexicon"], ledger=elsewhere)
