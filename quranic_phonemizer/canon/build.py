@@ -24,6 +24,7 @@ from ..model.canon import (
     PausalLong,
     Quality,
     Score,
+    Short,
     ScoreWord,
     Silent,
     Slot,
@@ -313,9 +314,52 @@ def _skip_iwad_carrier(reading: Reading, index: int, bounds) -> set[int]:
     return set()
 
 
+def _split_tanween_words(reading: Reading) -> set[int]:
+    """Words whose *predecessor* carries a tanwīn this script drew here.
+
+    IndoPak splits the tanwīn across the boundary: the vowel stays on word *n*
+    with the mark dropped, and the nūn-plus-kasra is depicted on word *n+1* as
+    `ࣙ`. Under A1 that is ordinary evidence, because the tanwīn nūn is a slot
+    — IndoPak was writing the correct model all along (ADR-003 §6.5).
+    """
+    out = set()
+    for cluster in reading.clusters:
+        if cluster.has(tanween.CROSS_WORD_ROLE):
+            out.add(cluster.word)
+    return out
+
+
 def _apply_cross_word_noon(reading, drafts, right_context) -> None:
-    """IndoPak's `ࣙ`: a nūn drawn on the word *after* the one it belongs to."""
-    del reading, drafts, right_context  # resolved by the adapter's evidence
+    """Give word *n* the nūn slot that word *n+1* is carrying for it.
+
+    54 sites, of which 34 are inside a verse and **20 cross a verse boundary**
+    — which is why verse scope is necessary and not sufficient, and why this
+    takes one word of right context.
+    """
+    marked = _split_tanween_words(reading)
+    if right_context is not None and 0 in _split_tanween_words(right_context):
+        marked.add(len(reading.words))
+    for word_index in sorted(marked):
+        donor = word_index - 1
+        if donor < 0:
+            continue
+        span = [d for d in drafts if _word_of(reading, d) == donor]
+        if not span:
+            continue
+        last = span[-1]
+        if last.letter is CanonLetter.NOON and last.nucleus.kind is NucleusKind.SILENT:
+            continue  # already a tanwīn nūn; nothing was split
+        quality = getattr(last.nucleus, "quality", Quality.A)
+        last.nucleus = Short(quality)
+        drafts.insert(
+            drafts.index(last) + 1,
+            _Draft(
+                letter=CanonLetter.NOON,
+                onset=Onset.PLAIN,
+                nucleus=Silent(),
+                cluster=last.cluster,
+            ),
+        )
 
 
 # ------------------------------------------------------------------ finishing

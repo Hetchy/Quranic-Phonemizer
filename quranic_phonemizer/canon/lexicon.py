@@ -30,6 +30,10 @@ CLITIC_PRONOUNS: frozenset[str] = frozenset(
 )
 
 
+#: Below this length a stem is not specific enough to match a prefix.
+_PREFIX_MIN = 3
+
+
 class LexiconError(ValueError):
     pass
 
@@ -66,11 +70,16 @@ class Lexicon:
         """
         if skeleton in entries:
             return True
-        return any(
-            skeleton == stem + clitic
-            for stem in entries
-            for clitic in CLITIC_PRONOUNS
-        )
+        for stem in entries:
+            if any(skeleton == stem + clitic for clitic in CLITIC_PRONOUNS):
+                return True
+            # A stem of three or more canonical letters is specific enough to
+            # match a prefix: `ألقى`, `ألقينا`, `ألقوا` are one lexeme with
+            # ordinary verbal inflection. Shorter stems stay exact, because
+            # two letters would swallow whole classes.
+            if len(stem) >= _PREFIX_MIN and skeleton.startswith(stem):
+                return True
+        return False
 
     def is_pausal(self, skeleton: str) -> bool:
         """Matched as a suffix, because only proclitics attach on the left:

@@ -53,6 +53,12 @@ def iwad_carrier(context: Context) -> Outcome:
     return Absent(shows=Target.PREVIOUS)
 
 
+#: The role an inventory gives IndoPak's `ࣙ`. `canon.build` looks for it by
+#: name when it needs to know whether the *previous* word ends in a tanwīn the
+#: script drew on this one.
+CROSS_WORD_ROLE = "cross_word_noon"
+
+
 @register("cross_word_noon")
 def cross_word_noon(context: Context) -> Outcome:
     """IndoPak's `ࣙ` U+08D9 — a nūn with a kasra drawn on the *following* word.
@@ -66,4 +72,4 @@ def cross_word_noon(context: Context) -> Outcome:
     boundary** — which is why `read` is verse-scoped *and* why `canon.build`
     takes one word of right context.
     """
-    return Sets(SlotFact.LETTER, CanonLetter.NOON)
+    return Absent(shows=Target.PREVIOUS)

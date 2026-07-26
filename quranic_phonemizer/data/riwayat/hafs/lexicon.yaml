@@ -36,6 +36,10 @@ wasl_exempt:
   - "ءثم"        # إثم
   - "ءلم"        # a muqattaʿat form, expanded in canon/spell.py
   - "ءلر"
+  - "ءلحق"      # ألحق
+  - "ءتء"       # إيتاء
+  - "ءطعم"      # إطعام
+  - "ءليس"      # إلياس
 
 # The ten nouns: kasra regardless of the third letter. `اسم` would otherwise
 # derive damma from the mīm.

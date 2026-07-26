@@ -86,8 +86,21 @@ def is_wasl(context: Context) -> bool:
     written = _written_vowel(cluster)
     if written is None:
         return True  # a bare prosthetic ālif; both scripts write it that way
+    if context.lexicon.is_wasl_exempt(_skeleton(context)):
+        # Checked before the article branch, not after. `ألقى`, `ألف`,
+        # `ألسنة` and `ألوان` all begin hamza + lām and none of them is the
+        # article; nothing orthographic separates them from it, which is
+        # precisely why the lexeme list exists.
+        return False
     if following.letter is CanonLetter.LAM:
         return True  # the article, with its helping vowel written out
+    if _is_nunated(context):
+        # A word carrying tanwīn is a fully inflected noun, and no prosthetic
+        # hamza begins one — the ten nouns are definite or annexed wherever
+        # they occur. This is what separates `إفك`, `إنس`, `إخوة`, `إملاق`
+        # and every form-IV verbal noun from the imperatives they otherwise
+        # look exactly like: quiescent second radical, voweled third.
+        return False
     if written is Quality.A:
         return False  # the helping vowel is fatha only for the article
     if context.lexicon.is_wasl_exempt(_skeleton(context)):
@@ -154,6 +167,15 @@ def _after_proclitics(context: Context) -> bool:
         if cluster.letter not in PROCLITICS or not cluster.has(*VOWEL_ROLES):
             return False
     return True
+
+
+def _is_nunated(context: Context) -> bool:
+    return any(
+        cluster.has("fathatan", "dammatan", "kasratan")
+        for cluster in context.clusters[
+            context.word_bounds[0] : context.word_bounds[1]
+        ]
+    )
 
 
 def _is_bare_carrier(cluster) -> bool:

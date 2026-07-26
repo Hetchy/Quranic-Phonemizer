@@ -74,6 +74,10 @@ def compare(a, b) -> list[tuple[int, str, str, str]]:
     return rows
 
 
+def _successors(order) -> dict:
+    return {key: order[i + 1] for i, key in enumerate(order[:-1])}
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--limit", type=int, default=0)
@@ -82,6 +86,8 @@ def main() -> int:
     args = parser.parse_args()
 
     uthmani, indopak = load_verses("uthmani"), load_verses("indopak")
+    order = sorted(uthmani)
+    successor = _successors(order)
     assert set(uthmani) == set(indopak), "the two corpora disagree on verses"
 
     adapters = {s: script_adapter(s) for s in Script}
@@ -99,8 +105,14 @@ def main() -> int:
         scores = {}
         for script, source in ((Script.UTHMANI, uthmani), (Script.INDOPAK, indopak)):
             reading = adapters[script].read(verse, tuple(source[key]))
+            following = successor.get(key)
+            right = (
+                adapters[script].read(VerseRef(*following), tuple(source[following]))
+                if following
+                else None
+            )
             scores[script] = build(
-                reading, provenance=tracks[script], **shared
+                reading, provenance=tracks[script], right_context=right, **shared
             )
         words_seen += len(uthmani[key])
         slots_seen += len(scores[Script.UTHMANI].slots())
