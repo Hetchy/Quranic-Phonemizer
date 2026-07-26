@@ -1,0 +1,31 @@
+# Closed classes of Arabic, not of this corpus. Every key is canonical
+# letters, so one entry serves every script of the riwayah.
+#
+# The waṣl sections replace a 575-skeleton table that had been learned from
+# Uthmani's own U+0671 positions. Three morphological rules now reach 98.19%
+# on their own (canon/derive/wasl.py); what is left is these six named
+# classes. A rise past the ADR-008 §4.2 budget means a rule is missing.
+schema_version: 1
+
+# Hamza-initial particles that look prosthetic and are not.
+wasl_particles: ["ءن", "ءذ", "ءذن"]
+
+# Proper nouns and form-IV verbal nouns the three rules over-accept.
+wasl_exempt:
+  - "ءبرهيم"
+  - "ءبرهم"
+  - "ءسرءيل"
+  - "ءبليس"
+  - "ءسحق"
+  - "ءثم"
+  - "ءثمن"
+  - "ءيمن"
+  - "ءمنن"
+  - "ءحسنن"
+  - "ءلق"
+  - "ءلف"
+  - "ءحدهم"
+
+# The ten nouns: kasra regardless of the third letter. `اسم` would otherwise
+# derive damma from the mīm.
+wasl_nouns: ["ءسم", "ءبن", "ءبنة", "ءمرء", "ءمرءة", "ءثنن", "ءثنتن", "ءست"]

@@ -51,6 +51,20 @@ class CanonLetter(StrEnum):
     TAA_MARBUTA = "taa_marbuta"
 
 
+#: The canonical spelling of each letter — the abstract letter itself, not any
+#: script's rendering of it. It exists so a `skeleton` stays human-checkable:
+#: a verse-scoped ordinal is robust and unreadable, and every Ledger and
+#: lexicon entry is reviewed by eye (ADR-001 §5.1).
+ABJAD: dict[str, str] = {
+    "alif": "ا", "ba": "ب", "ta": "ت", "tha": "ث", "jeem": "ج", "ha": "ح",
+    "kha": "خ", "dal": "د", "thal": "ذ", "ra": "ر", "zay": "ز", "seen": "س",
+    "sheen": "ش", "sad": "ص", "dad": "ض", "tah": "ط", "zah": "ظ", "ain": "ع",
+    "ghain": "غ", "fa": "ف", "qaf": "ق", "kaf": "ك", "lam": "ل", "meem": "م",
+    "noon": "ن", "heh": "ه", "waw": "و", "ya": "ي", "hamza": "ء",
+    "taa_marbuta": "ة",
+}
+
+
 class Onset(StrEnum):
     """The closed set of mutually exclusive onset states.
 
