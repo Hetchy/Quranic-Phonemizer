@@ -1,4 +1,6 @@
 """Phase 6's gate: phoneme parity against the frozen snapshots.
+from __future__ import annotations
+
 
 Skipped until `render/` exists. Kept rather than deleted because it is
 the oracle the whole refactor is measured against — the snapshots are
@@ -11,7 +13,6 @@ pytest.skip(
     allow_module_level=True,
 )
 
-from __future__ import annotations
 
 import gzip
 import hashlib
