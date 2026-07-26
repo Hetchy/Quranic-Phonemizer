@@ -74,8 +74,5 @@ wasl_nouns: ["ءسم", "ءبن", "ءبنة", "ءمرء", "ءمرءة", "ءثنن
 # `لَٰكِنَّ` and `لَّـٰكِنَّا۠` share a key even with the vowels and the
 # gemination spelled, so the second is a Ledger entry rather than a
 # lexeme: one site, and no rule can reach it.
-pausal_lexemes: ["ءaنa",                  "ءaلظuنuنa",
-                 "ءaلرaسuلa",
-                 "ءaلسaبiلa",
-                 "قaوaرiرa",
+pausal_lexemes: ["ءaنa",                  "قaوaرiرa",
                  "سaلسaبiلa"]

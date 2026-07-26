@@ -33,6 +33,16 @@ supplies:
      value: {kind: PausalLong, quality: A},
      citation: "Hafs; one of the seven alifs"}
 
+  # 33:66-67 — `ٱلرَّسُولَا۠`, `ٱلسَّبِيلَا۠`, `ٱلظُّنُونَا۠`. Each shares a vocalised
+  # skeleton with its ordinary accusative, which occurs far more often, so a
+  # lexeme entry would break 27 words to fix one.
+  - {slot: "33:66:6#7", skeleton: "الرسل", fact: NUCLEUS,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "33:67:8#7", skeleton: "السبل", fact: NUCLEUS,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "33:10:14#8", skeleton: "الظنن", fact: NUCLEUS,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+
 asserts:
   - {script: uthmani, slot: "6:77:2#1", skeleton: "رء", fact: NUCLEUS,
      value: {kind: Long, quality: A}}
