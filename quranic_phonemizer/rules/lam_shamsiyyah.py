@@ -44,7 +44,7 @@ class ArticleLam:
         slot = near.slot(at)
         if slot is None or slot.nucleus.kind is not NucleusKind.SILENT:
             return None
-        if not _is_article_lam(near, at):
+        if not is_article_lam(near, at):
             return None
         following = near.after(at)
         if following is None:
@@ -85,7 +85,7 @@ class ArticleLam:
         )
 
 
-def _is_article_lam(near: Neighbourhood, at: SlotId) -> bool:
+def is_article_lam(near: Neighbourhood, at: SlotId) -> bool:
     """A lām immediately after a waṣl hamza, at the head of its word.
 
     Asked of the Score, not of a glyph: `Onset.WASL` is canonical, so this

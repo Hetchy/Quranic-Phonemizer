@@ -327,6 +327,10 @@ CLASSIFICATION_ONLY: frozenset[Rule] = frozenset(
         # its canonical onset and nucleus are already correct (ADR-003 §6.3).
         # The occurrence records *that the waṣl was started on*, which is a
         # classification and is what a projection needs to find it.
+        Rule.IDGHAM_MUTAJANISAYN_NAQIS,
+        # The first letter survives as a colour on the second rather than
+        # vanishing into it, so nothing merges. The notation has no symbol for
+        # that trace today, which is a render-map gap and not a model one.
         Rule.IZHAR_HALQI,
         Rule.IZHAR_MUTLAQ,
         Rule.IZHAR_SHAFAWI,
