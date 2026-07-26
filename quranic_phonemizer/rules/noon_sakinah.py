@@ -68,6 +68,15 @@ class NoonSakinah:
             return _classification(Rule.IZHAR_HALQI, at, following.id)
         if letter in IQLAB:
             return _nasal(Rule.IQLAB, at, following.id, NasalPlace.ASSIMILATED)
+        if letter in IDGHAM_GHUNNAH and near.crosses_word(at):
+            pass
+        elif letter in IDGHAM_GHUNNAH:
+            # Izhar mutlaq: a nun sakinah before waw or yaa **inside one
+            # word** does not assimilate. The four idgham letters merge only
+            # across a word boundary, and دنيا، بنيان، قنوان، صنوان are the
+            # measured cases. Without this the same nun assimilates in a word
+            # where the reading keeps it.
+            return _classification(Rule.IZHAR_MUTLAQ, at, following.id)
         if letter in IDGHAM_GHUNNAH:
             return _merge(Rule.IDGHAM_BI_GHUNNAH, at, following, nasal=True)
         if letter in IDGHAM_NO_GHUNNAH:

@@ -96,9 +96,19 @@ class Lexicon:
         return False
 
     def is_pausal(self, skeleton: str) -> bool:
-        """Matched as a suffix, because only proclitics attach on the left:
-        `وَأَنَا` is `أَنَا` with a wāw, not a different lexeme."""
-        return any(skeleton.endswith(entry) for entry in self.pausal_lexemes)
+        """Matched exactly, or after a single proclitic.
+
+        Suffix matching was too loose: `ٱلْـَٔـٰنَ` ends in the same three
+        symbols as `أَنَا` and is not it. A proclitic is one letter with one
+        vowel, so allowing that and nothing more keeps `وَأَنَا` covered without
+        matching a whole word that happens to end the same way.
+        """
+        if skeleton in self.pausal_lexemes:
+            return True
+        return any(
+            len(skeleton) - len(entry) in (2, 3) and skeleton.endswith(entry)
+            for entry in self.pausal_lexemes
+        )
 
     def is_wasl_noun(self, skeleton: str) -> bool:
         return skeleton in self.wasl_nouns

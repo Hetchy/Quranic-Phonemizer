@@ -71,6 +71,9 @@ wasl_exempt:
 wasl_nouns: ["ءسم", "ءبن", "ءبنة", "ءمرء", "ءمرءة", "ءثنن", "ءثنتن", "ءست"]
 
 # The seven alifs (ADR-003 §6.2): short in wasl, long at pause.
-pausal_lexemes: ["ءaنa", "لaكiنa", "لظuنuنa",
-                 "لرaسuلa", "لسaبiلa",
-                 "قaوaرiرa", "سaلسaبiلa"]
+pausal_lexemes: ["ءaنa", "لaكiن~a",
+                 "ءaلظuنuنa",
+                 "ءaلرaسuلa",
+                 "ءaلسaبiلa",
+                 "قaوaرiرa",
+                 "سaلسaبiلa"]

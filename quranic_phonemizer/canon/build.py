@@ -104,7 +104,7 @@ def build(
     track = provenance if provenance is not None else Provenance()
     drafts = _drafts(reading, lexicon, track, right_context)
     _apply_ledger(reading, drafts, ledger, track)
-    _apply_allah_lexeme(drafts)
+    _apply_allah_lexeme(reading, drafts)
     _apply_pausal_lexemes(reading, drafts, lexicon)
     return _assemble(reading, drafts, riwayah, selection)
 
@@ -403,11 +403,19 @@ def _check_skeleton(reading: Reading, drafts, ordinal: int, supply) -> None:
         )
 
 
-def _apply_allah_lexeme(drafts) -> None:
-    letters = [d.letter for d in drafts]
-    nuclei = [d.nucleus for d in drafts]
-    for index in lexeme.allah_long_a(letters, nuclei):
-        drafts[index].nucleus = lexeme.relengthened(drafts[index].nucleus)
+def _apply_allah_lexeme(reading: Reading, drafts) -> None:
+    """Word by word, not verse by verse.
+
+    The lexeme is a property of one word. Run over the whole verse, a word
+    ending in lām or hamza lends its last slot to the next word's opening lām
+    and `لَّهُم` acquires the divine name's long ā.
+    """
+    for word_index in range(len(reading.words)):
+        span = [d for d in drafts if _word_of(reading, d) == word_index]
+        letters = [d.letter for d in span]
+        nuclei = [d.nucleus for d in span]
+        for index in lexeme.allah_long_a(letters, nuclei):
+            span[index].nucleus = lexeme.relengthened(span[index].nucleus)
 
 
 def _apply_pausal_lexemes(reading: Reading, drafts, lexicon: Lexicon) -> None:
@@ -434,7 +442,11 @@ def _vocalised(span) -> str:
     out = []
     for draft in span:
         quality = getattr(draft.nucleus, "quality", None)
-        out.append(ABJAD[draft.letter.value] + (quality.value if quality else ""))
+        out.append(
+            ABJAD[draft.letter.value]
+            + ("~" if draft.onset is Onset.GEMINATE else "")
+            + (quality.value if quality else "")
+        )
     return "".join(out)
 
 
