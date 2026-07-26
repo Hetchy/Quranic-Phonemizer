@@ -16,9 +16,17 @@ SCHEMA_VERSION = 1
 
 #: ADR-008 §4.2. Exceeding one of these fails the build rather than being
 #: absorbed quietly, which is how a derivation turns into curation.
+#:
+#: `wasl_exempt` was budgeted at 30 from an analysis that counted only the
+#: sites where IndoPak writes the helping vowel. Implementation raised it to
+#: 60: `ال` is genuinely ambiguous between the article and a root lām — `ألف`
+#: and `الفجر` begin identically — and no orthographic test separates them.
+#: That is a lexical fact about Arabic, which is what the list is for. The
+#: guard did its job by making the gap visible instead of letting the list
+#: grow quietly. See docs/adr/phase-1-report.md §6.
 BUDGETS = {
     "wasl_particles": 10,
-    "wasl_exempt": 30,
+    "wasl_exempt": 60,
     "silah_exempt": 200,
     "pausal_lexemes": 10,
 }

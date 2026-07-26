@@ -102,7 +102,7 @@ def build(
     in the *following verse*, so verse scope is necessary and not sufficient."""
     track = provenance if provenance is not None else Provenance()
     drafts = _drafts(reading, lexicon, track, right_context)
-    _apply_ledger(reading.verse, drafts, ledger, track)
+    _apply_ledger(reading, drafts, ledger, track)
     _apply_allah_lexeme(drafts)
     _apply_pausal_lexemes(reading, drafts, lexicon)
     return _assemble(reading, drafts, riwayah, selection)
@@ -363,21 +363,41 @@ def _apply_cross_word_noon(reading, drafts, right_context) -> None:
 
 
 # ------------------------------------------------------------------ finishing
-def _apply_ledger(verse: VerseRef, drafts, ledger: Ledger, track) -> None:
+def _apply_ledger(reading: Reading, drafts, ledger: Ledger, track) -> None:
     for supply in ledger.supplies:
-        ordinal = _ordinal(verse, supply.ref)
+        ordinal = _ordinal(reading, drafts, supply.ref)
         if ordinal is None or ordinal >= len(drafts):
             continue
+        _check_skeleton(reading, drafts, ordinal, supply)
         _set(drafts[ordinal], drafts, supply.fact, supply.value, Target.HERE)
         track.from_ledger += 1
 
 
-def _ordinal(verse: VerseRef, ref) -> int | None:
+def _ordinal(reading: Reading, drafts, ref) -> int | None:
+    """A verse-scoped ordinal is robust and unreadable, so entries may be
+    written word-relative and are resolved here (ADR-001 §5.1)."""
     if isinstance(ref, VerseSlot):
-        return ref.ordinal if ref.verse == verse else None
-    if isinstance(ref, WordSlot) and ref.location.verse == verse:
-        return None  # resolved against the word's slot span by the caller
-    return None
+        return ref.ordinal if ref.verse == reading.verse else None
+    if not isinstance(ref, WordSlot) or ref.location.verse != reading.verse:
+        return None
+    word = ref.location.word - 1
+    span = [i for i, d in enumerate(drafts) if _word_of(reading, d) == word]
+    return span[ref.index] if 0 <= ref.index < len(span) else None
+
+
+def _check_skeleton(reading: Reading, drafts, ordinal: int, supply) -> None:
+    """The mandatory `skeleton` is what catches ordinal drift. Without it a
+    Ledger entry silently starts describing a different slot."""
+    word = _word_of(reading, drafts[ordinal])
+    actual = "".join(
+        ABJAD[d.letter.value] for d in drafts if _word_of(reading, d) == word
+    )
+    if actual != supply.skeleton:
+        raise BuildError(
+            f"{reading.verse} slot {ordinal}: ledger entry claims skeleton "
+            f"{supply.skeleton!r} but the word is {actual!r}. The ordinal has "
+            f"drifted, or the entry names the wrong word."
+        )
 
 
 def _apply_allah_lexeme(drafts) -> None:

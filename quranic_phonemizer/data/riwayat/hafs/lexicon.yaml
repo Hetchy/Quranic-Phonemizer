@@ -38,6 +38,33 @@ wasl_exempt:
   - "ءتء"       # إيتاء
   - "ءطعم"      # إطعام
   - "ءليس"      # إلياس
+  # hamza + lām roots. These collide with the article and only a dictionary
+  # separates them, so they are listed. `is_wasl` consults the article first,
+  # which is what keeps a three-letter entry from swallowing the definite
+  # class — see the ordering note there.
+  - "ءلف"       # ألّف، ألف، ألفينا
+  - "ءلن"       # ألّا، ألّن
+  - "ءلزم"      # ألزم
+  - "ءله"       # ألهم، ألهاكم
+  - "ءلوح"      # ألواح
+  - "ءلسن"      # ألسنة
+  - "ءلحف"      # إلحاف
+  - "ءلحد"      # إلحاد
+  - "ءلد"       # ألدّ
+  # nouns and form-IV verbs
+  - "ءخو"       # إخوة
+  - "ءخت"       # أخت
+  - "ءدرس"      # إدريس
+  - "ءفك"       # إفك
+  - "ءصر"       # إصر
+  - "ءعط"       # أعطى
+  - "ءد"        # إدّ
+  - "ءنتم"      # أنتم
+  # muqattaʿat forms, until canon/spell.py expands them in phase 4
+  - "ءلم"
+  - "ءلر"
+  - "ءلمص"
+  - "ءلمر"
 
 # The ten nouns: kasra regardless of the third letter. `اسم` would otherwise
 # derive damma from the mīm.

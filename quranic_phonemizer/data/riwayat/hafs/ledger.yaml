@@ -1,0 +1,34 @@
+# Facts neither script determines on its own, and the witnesses that agree.
+#
+# Every entry is a canonical value — the same closed union the adapters emit
+# — so there is no syntax here for "do something" and the Ledger cannot grow
+# into a rule engine. `skeleton` is mandatory and validated against the built
+# word, which is what catches ordinal drift.
+#
+# The list is deliberately short. Everything a rule can reach is a rule; see
+# canon/derive/. What is left is genuinely per-location.
+schema_version: 1
+riwayah: hafs
+
+supplies:
+  # رَءَا — Uthmani writes the hamza with a following alif, IndoPak writes a
+  # bare alif that carries nothing. The long a is the recitation fact both
+  # are spelling.
+  - {slot: "6:77:2#1", skeleton: "رء", fact: NUCLEUS,
+     value: {kind: Long, quality: A}, citation: "Hafs; ra'aa"}
+  - {slot: "6:78:2#1", skeleton: "رء", fact: NUCLEUS,
+     value: {kind: Long, quality: A}, citation: "Hafs; ra'aa"}
+  - {slot: "16:85:2#1", skeleton: "رء", fact: NUCLEUS,
+     value: {kind: Long, quality: A}, citation: "Hafs; ra'aa"}
+  - {slot: "16:86:2#1", skeleton: "رء", fact: NUCLEUS,
+     value: {kind: Long, quality: A}, citation: "Hafs; ra'aa"}
+  - {slot: "33:22:2#1", skeleton: "رء", fact: NUCLEUS,
+     value: {kind: Long, quality: A}, citation: "Hafs; ra'aa"}
+  - {slot: "18:53:1#2", skeleton: "ورء", fact: NUCLEUS,
+     value: {kind: Long, quality: A}, citation: "Hafs; wa-ra'aa"}
+
+asserts:
+  - {script: uthmani, slot: "6:77:2#1", skeleton: "رء", fact: NUCLEUS,
+     value: {kind: Long, quality: A}}
+  - {script: uthmani, slot: "6:78:2#1", skeleton: "رء", fact: NUCLEUS,
+     value: {kind: Long, quality: A}}
