@@ -1,9 +1,11 @@
 """Tanwīn is two slots (A1, ADR-001 §3.5b).
 
 One grapheme evidences facts on two: a `Short(q)` nucleus on the base slot, and
-`LETTER = NOON` + `NUCLEUS = Silent` on a new following slot. The nūn sounds as
-a plain *n* at its own position wherever iẓhār applies — `عَذَابٌ` →
-`ʕ a ð aː b u n` — so by the unit-hood criterion it always was a slot.
+`LETTER = NOON` + `NUCLEUS = Silent` on a new following slot. Wherever iẓhār
+applies the nūn sounds as a plain nūn **at its own position** — `عَذَابٌ` and
+`سَوَآءٌ` are the measured cases — so by the unit-hood criterion it always was
+a slot. (The output notation for that lives in `render/`, which is the only
+place in the package allowed to spell a phoneme.)
 
 What that buys: the nūn family gets **one shape**, since tanwīn and nūn sākinah
 become literally the same rule on the same trigger; the iltiqāʾ kasra stops
