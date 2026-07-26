@@ -1,3 +1,16 @@
+"""Phase 6's gate: phoneme parity against the frozen snapshots.
+
+Skipped until `render/` exists. Kept rather than deleted because it is
+the oracle the whole refactor is measured against — the snapshots are
+files, so they outlive the implementation that produced them.
+"""
+import pytest
+
+pytest.skip(
+    "render/ lands in phase 6; the snapshots are the gate for it",
+    allow_module_level=True,
+)
+
 from __future__ import annotations
 
 import gzip
