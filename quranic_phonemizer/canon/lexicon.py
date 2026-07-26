@@ -111,7 +111,7 @@ class Lexicon:
         )
 
     def is_wasl_noun(self, skeleton: str) -> bool:
-        return skeleton in self.wasl_nouns
+        return self._matches(self.wasl_nouns, skeleton)
 
     def is_silah_exempt(self, skeleton: str) -> bool:
         return skeleton in self.silah_exempt

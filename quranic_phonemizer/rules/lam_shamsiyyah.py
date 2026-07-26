@@ -16,6 +16,12 @@ from ..model.canon import NucleusKind, Onset, Phase, Rule
 from ..model.performance import Aspect, Consonant, Occurrence, Participants
 
 #: The fourteen sun letters. The article's lām assimilates into each.
+#: The particles that may carry the article with no hamza written.
+PROCLITICS = frozenset({L.LAM, L.BA, L.KAF, L.WAW, L.FA, L.TA})
+
+#: The particles that may carry the article with no hamza written.
+PROCLITICS = frozenset({L.LAM, L.BA, L.KAF, L.WAW, L.FA, L.TA})
+
 SUN = frozenset(
     {
         L.TA, L.THA, L.DAL, L.THAL, L.RA, L.ZAY, L.SEEN, L.SHEEN,
@@ -92,7 +98,20 @@ def _is_article_lam(near: Neighbourhood, at: SlotId) -> bool:
     for index, slot in enumerate(slots):
         if slot.id != at:
             continue
-        # Immediately after the waṣl hamza, wherever the word starts — a
-        # proclitic puts `بِٱللَّهِ`'s article at index 2, not 1.
-        return index > 0 and slots[index - 1].onset is Onset.WASL
+        if index == 0:
+            return False
+        before = slots[index - 1]
+        if before.onset is Onset.WASL:
+            # The ordinary shape, wherever the word starts: a proclitic puts
+            # `بِٱللَّهِ`'s article at index 2, not 1.
+            return True
+        # `لِلنَّاسِ` writes no hamza at all — the lām proclitic swallows it and
+        # the article survives only as a quiescent lām. The proclitic has to
+        # be named, or `قُلْنَا` matches the same shape and assimilates a root
+        # lām that never assimilates.
+        return (
+            index == 1
+            and before.letter in PROCLITICS
+            and before.nucleus.kind is not NucleusKind.SILENT
+        )
     return False

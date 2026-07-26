@@ -17,7 +17,7 @@ from __future__ import annotations
 
 from ...model.canon import CanonLetter, Long, Quality, Silah
 from ...model.inscription import SlotFact
-from . import Context, Outcome, Sets, register
+from . import Context, Outcome, Sets, Shows, Target, register
 
 
 @register("silah_waw")
@@ -35,6 +35,11 @@ def silah_ya(context: Context) -> Outcome:
 
 
 def _silah_or_long(context: Context, quality: Quality) -> Outcome:
+    if context.cluster.has("shadda"):
+        # A doubled yāʾ is a consonant with its own vowel. The small mark on
+        # it shows the reading rather than supplying a nucleus, and folding it
+        # to a long ī loses the gemination the script wrote.
+        return Shows(Target.HERE)
     if _is_pronoun_haa(context):
         return Sets(SlotFact.NUCLEUS, Silah(quality))
     return Sets(SlotFact.NUCLEUS, Long(quality))
