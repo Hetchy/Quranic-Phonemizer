@@ -16,7 +16,7 @@ from ..engine.neighbourhood import Neighbourhood
 from ..engine.plan import MergeInto, Plan, Realize, Verdict, mint
 from ..model.address import BoundaryPlan, SlotId
 from ..model.canon import CanonLetter as L
-from ..model.canon import NucleusKind, Phase, Quality, Rule
+from ..model.canon import NucleusKind, Onset, Phase, Quality, Rule
 from ..model.performance import Aspect, Occurrence, Participants, Vowel
 
 #: Which glide lengthens which vowel.
@@ -39,6 +39,10 @@ class PausalGlide:
             return None
         slots = near.score.words[word].slots
         if not slots or slots[-1].id != at:
+            return None
+        if slot.onset is Onset.GEMINATE:
+            # A doubled glide is a consonant — `ٱلْعَلِىُّ` ends `-iyy`, not
+            # `-ii`. Only a single glide carries the vowel before it.
             return None
         before = _before(near, at)
         if before is None or before.nucleus.kind is not NucleusKind.SHORT:
