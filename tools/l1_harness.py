@@ -113,7 +113,7 @@ def main() -> int:
             )
             scores[script] = build(
                 reading, provenance=tracks[script], right_context=right, **shared
-            )
+            ).score
         words_seen += len(uthmani[key])
         slots_seen += len(scores[Script.UTHMANI].slots())
 

@@ -21,6 +21,16 @@ def shared():
     return {"lexicon": lexicon(), "ledger": ledger()}
 
 
+@pytest.fixture(scope="session")
+def alphabet():
+    from pathlib import Path
+
+    from quranic_phonemizer.render.alphabet import load_alphabet
+
+    root = Path(__file__).resolve().parent.parent
+    return load_alphabet(root / "quranic_phonemizer" / "data" / "render" / "ipa.yaml")
+
+
 def words_of(packed, surah: int, ayah: int) -> tuple:
     """The verse's words, sized from `surah_info` rather than probed for.
 
@@ -34,11 +44,15 @@ def words_of(packed, surah: int, ayah: int) -> tuple:
     )
 
 
-def score_for(packed, shared, surah: int, ayah: int, script=Script.UTHMANI):
+def built_for(packed, shared, surah: int, ayah: int, script=Script.UTHMANI):
     reading = script_adapter(script).read(
         VerseRef(surah, ayah), words_of(packed, surah, ayah)
     )
     return build(reading, **shared)
+
+
+def score_for(packed, shared, surah: int, ayah: int, script=Script.UTHMANI):
+    return built_for(packed, shared, surah, ayah, script).score
 
 
 def performance_for(packed, shared, surah: int, ayah: int, rules: RuleSet,

@@ -25,7 +25,10 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from quranic_phonemizer.canon.build import build  # noqa: E402
-from quranic_phonemizer.engine.laws import check_performance  # noqa: E402
+from quranic_phonemizer.engine.laws import (  # noqa: E402
+    check_inscription,
+    check_performance,
+)
 from quranic_phonemizer.engine.run import perform  # noqa: E402
 from quranic_phonemizer.model.address import (  # noqa: E402
     BoundaryPlan,
@@ -89,9 +92,11 @@ def main() -> int:
                     (Location(surah, ayah, w), packed.word(Location(surah, ayah, w)))
                     for w in range(1, count + 1)
                 )
-                score = build(
+                built = build(
                     adapter.read(VerseRef(surah, ayah), words), **shared
                 )
+                score = built.score
+                check_inscription(built.inscription, score)
                 performance = perform(
                     score, HAFS, plan_for(args.mode, len(score.words))
                 )

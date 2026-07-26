@@ -30,7 +30,7 @@ from ..model.canon import (
     Silent,
     Slot,
 )
-from ..model.inscription import SlotFact
+from ..model.inscription import Inscription, SlotFact
 from ..orthography.adapter import Cluster, Reading
 from . import derive
 from .derive import Absent, AddsSlot, Attests, Sets, Shows, Target
@@ -41,6 +41,7 @@ from .lexicon import EMPTY as EMPTY_LEXICON
 from .lexicon import Lexicon
 from .ledger import EMPTY as EMPTY_LEDGER
 from .ledger import Ledger, VerseSlot, WordSlot
+from .scribe import Scribe
 
 #: The two derivations the builder names itself. Both are properties of the
 #: canonical layer rather than of any script: the length clause of the
@@ -54,6 +55,20 @@ _VOWEL_ROLES = _length.VOWEL_ROLES
 
 class BuildError(ValueError):
     """Names the address and the two disagreeing sources."""
+
+
+@dataclass(frozen=True, slots=True)
+class Built:
+    """One verse, one script: the canonical layer and the edges up into it.
+
+    Two objects rather than one because the reference is one-directional
+    (ADR-001 §1) — an `Inscription` names slots, and a `Score` may not name a
+    grapheme. Returning them together is what stops the Inscription from being
+    optional machinery that nothing populates.
+    """
+
+    score: Score
+    inscription: Inscription
 
 
 @dataclass(slots=True)
@@ -86,6 +101,11 @@ class _Draft:
     cluster: int = -1
     onset_declared: bool = False
     nucleus_declared: bool = False
+    sakt_after: bool = False
+    """A word-level fact carried on the slot that ends the word; `_assemble`
+    lifts it onto the `ScoreWord`. Before this, `SlotFact.SAKT` reached `_set`
+    and fell through a `match` with no case for it, so 18:1 -- one of Hafs'
+    four canonical sakt sites -- never reached the Score."""
 
 
 def build(
@@ -97,16 +117,23 @@ def build(
     selection: VariantSelection = VariantSelection(),
     provenance: Provenance | None = None,
     right_context: Reading | None = None,
-) -> Score:
+) -> Built:
     """`right_context` is the next verse's reading, and it is not optional
     machinery: 20 of IndoPak's 54 cross-word tanwīn sites put the nūn on a word
     in the *following verse*, so verse scope is necessary and not sufficient."""
     track = provenance if provenance is not None else Provenance()
-    drafts = _drafts(reading, lexicon, track, right_context)
+    scribe = Scribe(reading.verse)
+    drafts = _drafts(reading, lexicon, track, right_context, scribe)
     _apply_ledger(reading, drafts, ledger, track)
     _apply_allah_lexeme(reading, drafts)
     _apply_pausal_lexemes(reading, drafts, lexicon)
-    return _assemble(reading, drafts, riwayah, selection)
+    score, ordinals = _assemble(reading, drafts, riwayah, selection)
+    return Built(score, scribe.finish(reading, drafts, ordinals))
+
+
+def score_of(reading: Reading, **kwargs) -> Score:
+    """The Score alone, for callers that genuinely do not want the edges."""
+    return build(reading, **kwargs).score
 
 
 # ------------------------------------------------------------------- drafting
@@ -115,6 +142,7 @@ def _drafts(
     lexicon: Lexicon,
     track: Provenance,
     right_context: Reading | None,
+    scribe: Scribe,
 ) -> list[_Draft]:
     by_cluster = _evidence_by_cluster(reading)
     silenced = {d.cluster for d in reading.decorations if d.silences}
@@ -133,7 +161,8 @@ def _drafts(
             # the slot before it — Uthmani writes `تَـٰ`, with the alif on the
             # tatweel. Skipping the cluster must not skip its evidence.
             _apply_rows(rows, _Draft(letter=CanonLetter.ALIF), drafts, context,
-                        track, force=Target.PREVIOUS)
+                        track, scribe, cluster.offset, force=Target.PREVIOUS)
+            scribe.decoration(cluster.offset, drafts[-1] if drafts else None)
             track.decorated += 1
             continue
 
@@ -141,7 +170,8 @@ def _drafts(
             # The script wrote a silence sign on this letter — Uthmani's `۟`.
             # A mark that says "this is rasm" outranks any derivation.
             _apply_rows(rows, _Draft(letter=letter), drafts, context, track,
-                        force=Target.PREVIOUS)
+                        scribe, cluster.offset, force=Target.PREVIOUS)
+            scribe.decoration(cluster.offset, drafts[-1] if drafts else None)
             track.decorated += 1
             continue
 
@@ -150,8 +180,11 @@ def _drafts(
             # A carrier still has a fact to contribute: it lengthens the slot
             # before it. Skipping the cluster must not skip its evidence.
             if isinstance(rasm, Sets):
-                _set(None, drafts, rasm.fact, rasm.value, Target.PREVIOUS)
+                _set(None, drafts, rasm.fact, rasm.value, Target.PREVIOUS,
+                     scribe, cluster.offset)
                 track.from_derivation += 1
+            else:
+                scribe.decoration(cluster.offset, drafts[-1] if drafts else None)
             track.decorated += 1
             continue
 
@@ -159,19 +192,23 @@ def _drafts(
         if cluster.onset is not None:
             draft.onset, draft.onset_declared = cluster.onset, True
             track.from_evidence += 1
+            scribe.evidence(cluster.offset, draft, SlotFact.ONSET)
+        scribe.evidence(cluster.offset, draft, SlotFact.LETTER)
 
-        extra = _apply_rows(rows, draft, drafts, context, track)
+        extra = _apply_rows(rows, draft, drafts, context, track, scribe,
+                            cluster.offset)
         _apply_wasl(context, cluster, draft, track)
         drafts.append(draft)
         if extra is not None:
             drafts.append(extra)
             consumed |= _skip_iwad_carrier(reading, index, bounds)
 
-    _apply_cross_word_noon(reading, drafts, right_context)
+    _apply_cross_word_noon(reading, drafts, right_context, scribe)
     return drafts
 
 
-def _apply_rows(rows, draft, drafts, context, track, force=None) -> _Draft | None:
+def _apply_rows(rows, draft, drafts, context, track, scribe, base_offset,
+                force=None) -> _Draft | None:
     """`force` redirects every fact to the previous slot. A seat has no slot of
     its own, so what it carries belongs to the one before it — which is how
     Uthmani writes `تَـٰ` and `هِـۧم`."""
@@ -179,8 +216,10 @@ def _apply_rows(rows, draft, drafts, context, track, force=None) -> _Draft | Non
     for row in rows:
         if row.fact is SlotFact.LETTER:
             continue
+        offset = row.offset if row.offset >= 0 else base_offset
         if row.value is not None:
-            _set(draft, drafts, row.fact, row.value, force or Target.HERE)
+            _set(draft, drafts, row.fact, row.value, force or Target.HERE,
+                 scribe, offset)
             track.from_evidence += 1
             continue
         outcome = derive.resolve(row.derivation, context)
@@ -188,9 +227,10 @@ def _apply_rows(rows, draft, drafts, context, track, force=None) -> _Draft | Non
         track.used(row.derivation)
         match outcome:
             case Sets(fact=fact, value=value, target=target):
-                _set(draft, drafts, fact, value, force or target)
+                _set(draft, drafts, fact, value, force or target, scribe, offset)
             case AddsSlot() as adds:
-                _set(draft, drafts, adds.fact, adds.value, Target.HERE)
+                _set(draft, drafts, adds.fact, adds.value, Target.HERE,
+                     scribe, offset)
                 extra = _Draft(
                     letter=adds.letter,
                     onset=adds.onset,
@@ -198,19 +238,28 @@ def _apply_rows(rows, draft, drafts, context, track, force=None) -> _Draft | Non
                     cluster=draft.cluster,
                     origin=SlotOrigin.NUNATION,
                 )
-            case Attests():
+                # The tanween mark writes *both* slots: the host's vowel and
+                # the noon. Without this edge the noon is a slot no grapheme
+                # reaches, which is the I7 violation the projection spike
+                # measured at 5,831 Uthmani slots -- all of them this one.
+                scribe.evidence(offset, extra, SlotFact.LETTER)
+                scribe.evidence(offset, extra, SlotFact.NUCLEUS)
+            case Attests(family=family):
+                scribe.attestation(offset, family, draft)
                 track.attested += 1
             case Shows() | Absent():
+                scribe.decoration(offset, draft)
                 track.decorated += 1
     return extra
 
 
-def _set(draft, drafts, fact: SlotFact, value, target: Target) -> None:
+def _set(draft, drafts, fact: SlotFact, value, target: Target,
+         scribe: Scribe | None = None, offset: int = -1) -> None:
     subject = draft if target is Target.HERE else (drafts[-1] if drafts else None)
-    if target is Target.PREVIOUS:
-        subject = drafts[-1] if drafts else None
     if subject is None:
         return
+    if scribe is not None:
+        scribe.evidence(offset, subject, fact)
     match fact:
         case SlotFact.LETTER:
             subject.letter = value
@@ -218,6 +267,8 @@ def _set(draft, drafts, fact: SlotFact, value, target: Target) -> None:
             subject.onset, subject.onset_declared = value, True
         case SlotFact.NUCLEUS:
             subject.nucleus, subject.nucleus_declared = value, True
+        case SlotFact.SAKT:
+            subject.sakt_after = bool(value)
 
 
 def _apply_wasl(context, cluster: Cluster, draft: _Draft, track) -> None:
@@ -331,7 +382,18 @@ def _split_tanween_words(reading: Reading) -> set[int]:
     return out
 
 
-def _apply_cross_word_noon(reading, drafts, right_context) -> None:
+def _split_tanween_offset(reading: Reading, word: int) -> int:
+    """Where the mark that supplies the noon is actually written."""
+    for cluster in reading.clusters:
+        if cluster.word != word:
+            continue
+        mark = cluster.mark(tanween.CROSS_WORD_ROLE)
+        if mark is not None:
+            return mark.offset
+    return -1
+
+
+def _apply_cross_word_noon(reading, drafts, right_context, scribe) -> None:
     """Give word *n* the nūn slot that word *n+1* is carrying for it.
 
     54 sites, of which 34 are inside a verse and **20 cross a verse boundary**
@@ -353,16 +415,21 @@ def _apply_cross_word_noon(reading, drafts, right_context) -> None:
             continue  # already a tanwīn nūn; nothing was split
         quality = getattr(last.nucleus, "quality", Quality.A)
         last.nucleus = Short(quality)
-        drafts.insert(
-            drafts.index(last) + 1,
-            _Draft(
-                letter=CanonLetter.NOON,
-                onset=Onset.PLAIN,
-                nucleus=Silent(),
-                cluster=last.cluster,
-                origin=SlotOrigin.NUNATION,
-            ),
+        noon = _Draft(
+            letter=CanonLetter.NOON,
+            onset=Onset.PLAIN,
+            nucleus=Silent(),
+            cluster=last.cluster,
+            origin=SlotOrigin.NUNATION,
         )
+        drafts.insert(drafts.index(last) + 1, noon)
+        # The noon is written on the *next* word -- that is what makes this
+        # cross-word -- so the grapheme that reaches it is that word's mark,
+        # not the donor's. Without this the slot is one no grapheme reaches.
+        offset = _split_tanween_offset(reading, word_index)
+        if offset >= 0:
+            scribe.evidence(offset, noon, SlotFact.LETTER)
+            scribe.evidence(offset, noon, SlotFact.NUCLEUS)
 
 
 # ------------------------------------------------------------------ finishing
@@ -454,9 +521,14 @@ def _word_of(reading: Reading, draft) -> int:
     return reading.clusters[draft.cluster].word if draft.cluster >= 0 else -1
 
 
-def _assemble(reading: Reading, drafts, riwayah, selection) -> Score:
+def _assemble(
+    reading: Reading, drafts, riwayah, selection,
+) -> tuple[Score, dict[int, int]]:
     by_word: dict[int, list[Slot]] = {}
+    ordinals: dict[int, int] = {}
+    sakt: set[int] = set()
     for ordinal, draft in enumerate(drafts):
+        ordinals[id(draft)] = ordinal
         slot = Slot(
             id=SlotId(reading.verse, ordinal),
             letter=draft.letter,
@@ -466,9 +538,15 @@ def _assemble(reading: Reading, drafts, riwayah, selection) -> Score:
         )
         word = reading.clusters[draft.cluster].word if draft.cluster >= 0 else 0
         by_word.setdefault(word, []).append(slot)
+        if draft.sakt_after:
+            sakt.add(word)
 
     words = tuple(
-        ScoreWord(location=location, slots=tuple(by_word.get(index, ())))
+        ScoreWord(
+            location=location,
+            slots=tuple(by_word.get(index, ())),
+            sakt_after=index in sakt,
+        )
         for index, location in enumerate(reading.words)
     )
     return Score(
@@ -476,7 +554,7 @@ def _assemble(reading: Reading, drafts, riwayah, selection) -> Score:
         words=words,
         selection=selection,
         digest=_digest(words),
-    )
+    ), ordinals
 
 
 def _digest(words: tuple[ScoreWord, ...]) -> str:

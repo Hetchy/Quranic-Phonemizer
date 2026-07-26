@@ -9,6 +9,7 @@ from collections.abc import Iterable
 
 from ..model.address import BoundaryPlan, SlotId
 from ..model.canon import CLASSIFICATION_ONLY, FAMILY_OF, RuleFamily, Score
+from ..model.inscription import Attests, Decorates, Evidences, Inscription
 from ..model.performance import (
     Aspect,
     Hosts,
@@ -106,6 +107,39 @@ def _every_occurrence_produced_or_declared(performance: Performance) -> None:
             f"E4: occurrence {occurrence.id} ({occurrence.rule.value}) left no "
             f"attribution at all and is not declared classification-only"
         )
+
+
+def check_inscription(inscription: Inscription, score: Score) -> None:
+    """I7 and I8 (ADR-003 §4.0): the Score is **reachable from the writing**.
+
+    Every slot must be the target of at least one `Spelling`. This is the law
+    that makes a grapheme-anchored projection possible at all — a slot no
+    grapheme reaches is a sound the consumer cannot point at in the text.
+
+    It is the direction S1 cannot cover. S1 catches a carrier wrongly promoted
+    to slot-hood, because such a slot hosts nothing; it cannot catch a slot
+    that no writing accounts for. The tanwīn nūn was exactly that for the whole
+    first draft — the projection spike measured 5,831 unreached Uthmani slots
+    and every one was this — and it is reached now because the tanwīn mark
+    evidences both the host's vowel and the nūn, which is what A1's ruling says
+    it does.
+    """
+    reached: set[SlotId] = set()
+    for spelling in inscription.spellings:
+        match spelling:
+            case Evidences(slot=slot) | Decorates(slot=slot):
+                reached.add(slot)
+            case Attests(anchor=anchor):
+                reached.add(anchor)
+    for word in score.words:
+        for slot in word.slots:
+            if slot.id not in reached:
+                raise LawError(
+                    f"I7: slot {slot.id} ({slot.letter.value}, "
+                    f"origin={slot.origin.value}) is the target of no Spelling "
+                    f"in {inscription.script.value} — no grapheme accounts for "
+                    f"it, so no projection can point at it"
+                )
 
 
 def check_attestations(

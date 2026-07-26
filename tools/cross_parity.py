@@ -39,7 +39,10 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 from l1_harness import load_verses  # noqa: E402
 
 from quranic_phonemizer.canon.build import build  # noqa: E402
-from quranic_phonemizer.engine.laws import check_performance  # noqa: E402
+from quranic_phonemizer.engine.laws import (  # noqa: E402
+    check_inscription,
+    check_performance,
+)
 from quranic_phonemizer.engine.run import perform  # noqa: E402
 from quranic_phonemizer.model.address import (  # noqa: E402
     BoundaryPlan,
@@ -75,7 +78,9 @@ def plan_for(mode: str, words: int) -> BoundaryPlan:
 
 
 def render_verse(adapter, ref: VerseRef, words, shared, mode: str, alphabet):
-    score = build(adapter.read(ref, words), **shared)
+    built = build(adapter.read(ref, words), **shared)
+    score = built.score
+    check_inscription(built.inscription, score)
     performance = perform(score, HAFS, plan_for(mode, len(score.words)))
     check_performance(performance, score)
     return [list(word) for word in phonemes_by_word(performance, score, alphabet)]
