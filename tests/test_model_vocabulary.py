@@ -67,7 +67,6 @@ def test_deleted_names_stay_deleted() -> None:
     for module, name in (
         (canon, "Nunated"),
         (canon, "Colouring"),
-        (canon, "SlotOrigin"),
         (canon, "Condition"),
         (canon, "SPELLING_EXPANSION"),
         (performance, "Attach"),
@@ -81,6 +80,31 @@ def test_deleted_names_stay_deleted() -> None:
         )
     assert not hasattr(canon.Rule, "SPELLING_EXPANSION")
     assert not hasattr(canon.Onset, "COLOUR")
+
+
+def test_slot_origin_meets_the_conditions_that_let_it_return() -> None:
+    """ADR-001 §3.2 deleted an earlier `SlotOrigin` and set two conditions for
+    reinstating one: a **script-independent definition** and a **real
+    consumer**. Both now hold, so the guard tests the conditions rather than
+    the absence.
+
+    The definition names the producing module, which is shared code, so no
+    member can encode which script was read — that was the fatal property of
+    the version that was deleted. And there are two consumers: the muqaṭṭaʿāt
+    toggle, and waqf, which must tell `هُدًى` from `مِن` and has nothing else
+    to tell them apart with.
+    """
+    members = {member.value for member in canon.SlotOrigin}
+    assert members == {"written", "spelled", "nunation"}
+    assert not hasattr(canon.SlotOrigin, "LEXICAL"), (
+        "LEXICAL was the script-relative member: it meant 'some script writes "
+        "a base letter for it', a quantifier canon.build cannot evaluate"
+    )
+    slot = canon.Slot(
+        id=None, letter=canon.CanonLetter.NOON, onset=canon.Onset.PLAIN,
+        nucleus=canon.SILENT, origin=canon.SlotOrigin.SPELLED,
+    )
+    assert slot.spelled, "the old flag stays readable through the enum"
 
 
 def test_nucleus_union_covers_the_conditionality_table() -> None:

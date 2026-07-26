@@ -1,5 +1,6 @@
 from .resources import RIWAYAH, adapters_for, corpus, ledger, lexicon, script_adapter
+from .rules import HAFS, rules_for
 
 __all__ = [
-    "RIWAYAH", "adapters_for", "corpus", "ledger", "lexicon", "script_adapter",
+    "HAFS", "RIWAYAH", "adapters_for", "corpus", "ledger", "lexicon", "rules_for", "script_adapter",
 ]

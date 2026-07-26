@@ -1,0 +1,126 @@
+"""Phase 6's gate: phoneme parity against the frozen snapshots.
+
+Parity does not prove correctness — both evidence §4 defects are baked into
+every frozen view. What it proves is that the rebuild reproduces the behaviour
+the old implementation had, so any later change is a deliberate one.
+
+Run:  python tools/parity.py [--mode word|verse|continuous] [--limit N]
+"""
+from __future__ import annotations
+
+import argparse
+import collections
+import gzip
+import json
+import pathlib
+import sys
+
+ROOT = pathlib.Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+
+from quranic_phonemizer.canon.build import build  # noqa: E402
+from quranic_phonemizer.engine.laws import check_performance  # noqa: E402
+from quranic_phonemizer.engine.run import perform  # noqa: E402
+from quranic_phonemizer.model.address import (  # noqa: E402
+    BoundaryPlan,
+    Junction,
+    Location,
+    Script,
+    VerseRef,
+)
+from quranic_phonemizer.render.alphabet import load_alphabet  # noqa: E402
+from quranic_phonemizer.render.recite import phonemes_by_word  # noqa: E402
+from quranic_phonemizer.riwayat.hafs import (  # noqa: E402
+    HAFS,
+    corpus,
+    ledger,
+    lexicon,
+    script_adapter,
+)
+
+SNAPSHOTS = ROOT / "tests" / "snapshots" / "phonemes"
+ALPHABET = ROOT / "quranic_phonemizer" / "data" / "render" / "ipa.yaml"
+
+
+def plan_for(mode: str, words: int) -> BoundaryPlan:
+    """`word` stops after every word; `verse` joins within a verse and stops at
+    its end; `continuous` is the same here, since the harness runs verse by
+    verse."""
+    if mode == "word":
+        return BoundaryPlan((Junction.STOP,) * (words - 1) + (Junction.EDGE,))
+    return BoundaryPlan((Junction.JOIN,) * (words - 1) + (Junction.EDGE,))
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--mode", default="word",
+                        choices=["word", "verse", "continuous"])
+    parser.add_argument("--limit", type=int, default=0)
+    parser.add_argument("--show", type=int, default=12)
+    args = parser.parse_args()
+
+    packed, alphabet = corpus(), load_alphabet(ALPHABET)
+    shared = {"lexicon": lexicon(), "ledger": ledger()}
+    adapter = script_adapter(Script.UTHMANI)
+
+    matched = total = 0
+    mismatches: list[tuple[str, list, list]] = []
+    diffs: collections.Counter[str] = collections.Counter()
+
+    with gzip.open(SNAPSHOTS / f"{args.mode}.jsonl.gz", "rt", encoding="utf-8") as fh:
+        expected = (json.loads(line) for line in fh)
+        for surah in range(1, 115):
+            for ayah in range(1, len(packed.surah_info[str(surah)]) + 1):
+                count = packed.surah_info[str(surah)][ayah - 1]
+                words = tuple(
+                    (Location(surah, ayah, w), packed.word(Location(surah, ayah, w)))
+                    for w in range(1, count + 1)
+                )
+                score = build(
+                    adapter.read(VerseRef(surah, ayah), words), **shared
+                )
+                performance = perform(
+                    score, HAFS, plan_for(args.mode, len(score.words))
+                )
+                check_performance(performance, score)
+                produced = phonemes_by_word(performance, score, alphabet)
+                for index, got in enumerate(produced):
+                    want = next(expected)
+                    total += 1
+                    if list(got) == want:
+                        matched += 1
+                    else:
+                        diffs[_signature(list(got), want)] += 1
+                        if len(mismatches) < args.show:
+                            mismatches.append(
+                                (f"{surah}:{ayah}:{index + 1}", list(got), want)
+                            )
+                if args.limit and total >= args.limit:
+                    break
+            if args.limit and total >= args.limit:
+                break
+
+    print(f"{args.mode}: {matched}/{total} words match "
+          f"({100 * matched / total:.3f}%)")
+    if diffs:
+        print("\nmismatch shapes:")
+        for signature, count in diffs.most_common(15):
+            print(f"   {count:6d}  {signature}")
+        print("\nexamples:")
+        for location, got, want in mismatches:
+            print(f"   {location:12s} got  {got}")
+            print(f"   {'':12s} want {want}")
+    return 0 if matched == total else 1
+
+
+def _signature(got: list, want: list) -> str:
+    if len(got) != len(want):
+        extra = [t for t in want if t not in got][:2]
+        missing = [t for t in got if t not in want][:2]
+        return f"len {len(got)}v{len(want)} want+{extra} got+{missing}"
+    pairs = [(g, w) for g, w in zip(got, want) if g != w][:2]
+    return " ".join(f"{g}->{w}" for g, w in pairs)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

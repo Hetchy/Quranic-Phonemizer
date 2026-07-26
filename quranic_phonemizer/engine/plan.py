@@ -96,6 +96,17 @@ def conflict_key(effect: Effect) -> tuple:
             return (effect.slot, effect.aspect)
 
 
+#: Occurrence ids are minted from the rule and the site that caused it, so two
+#: rules firing on one slot stay distinguishable. `SoundId` and `OccurrenceId`
+#: are request-local, so any injection is fine as long as it is a function.
+_RULE_SLOT_STRIDE = 1_000_000
+
+
+def mint(rule: Rule, at: SlotId) -> OccurrenceId:
+    ordinal = list(Rule).index(rule) * _RULE_SLOT_STRIDE + at.ordinal
+    return OccurrenceId(at.verse, ordinal)
+
+
 class ConflictError(ValueError):
     """Names both occurrence tags and both rules. Never last-writer-wins."""
 

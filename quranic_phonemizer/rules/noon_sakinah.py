@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from ..model.address import BoundaryPlan, OccurrenceId, SlotId
+from ..model.address import BoundaryPlan, SlotId
 from ..model.canon import CanonLetter as L
 from ..model.canon import NucleusKind, Phase, Rule, Score
 from ..model.performance import (
@@ -26,7 +26,7 @@ from ..model.performance import (
     Participants,
 )
 from ..engine.neighbourhood import Neighbourhood
-from ..engine.plan import MergeInto, Plan, Realize, Verdict
+from ..engine.plan import MergeInto, Plan, Realize, Verdict, mint
 
 #: The six throat letters. The nūn stays itself.
 IZHAR = frozenset({L.HAMZA, L.HEH, L.AIN, L.HA, L.GHAIN, L.KHA})
@@ -63,31 +63,27 @@ class NoonSakinah:
             return None
 
         letter = following.letter
-        mint = _Mint(at)
+
         if letter in IZHAR:
-            return _classification(Rule.IZHAR_HALQI, at, following.id, mint)
+            return _classification(Rule.IZHAR_HALQI, at, following.id)
         if letter in IQLAB:
-            return _nasal(Rule.IQLAB, at, following.id, mint, NasalPlace.BILABIAL)
+            return _nasal(Rule.IQLAB, at, following.id, NasalPlace.BILABIAL)
         if letter in IDGHAM_GHUNNAH:
-            return _merge(Rule.IDGHAM_BI_GHUNNAH, at, following, mint, nasal=True)
+            return _merge(Rule.IDGHAM_BI_GHUNNAH, at, following, nasal=True)
         if letter in IDGHAM_NO_GHUNNAH:
-            return _merge(
-                Rule.IDGHAM_BILA_GHUNNAH, at, following, mint, nasal=False
-            )
+            return _merge(Rule.IDGHAM_BILA_GHUNNAH, at, following, nasal=False)
         del plan  # pure by signature; this family needs no accumulated plan
-        return _nasal(
-            Rule.IKHFAA_HAQIQI, at, following.id, mint, NasalPlace.ASSIMILATED
-        )
+        return _nasal(Rule.IKHFAA_HAQIQI, at, following.id, NasalPlace.ASSIMILATED)
 
 
-def _classification(rule: Rule, at: SlotId, other: SlotId, mint) -> Verdict:
+def _classification(rule: Rule, at: SlotId, other: SlotId) -> Verdict:
     """Iẓhār produces no sound of its own — the nūn is realized plainly by the
     engine's default. The occurrence still exists, because every attribution
     must have a `by` and a projection must be able to find the iẓhār."""
-    return Verdict(Occurrence(mint, rule, Participants((at, other))), ())
+    return Verdict(Occurrence(mint(rule, at), rule, Participants((at, other))), ())
 
 
-def _nasal(rule: Rule, at: SlotId, other: SlotId, mint, place: NasalPlace) -> Verdict:
+def _nasal(rule: Rule, at: SlotId, other: SlotId, place: NasalPlace) -> Verdict:
     """Iqlāb and ikhfāʾ replace the nūn's onset with a nasal.
 
     `place` is the whole content of the realization khilāf (ADR-006 §3): the
@@ -96,12 +92,12 @@ def _nasal(rule: Rule, at: SlotId, other: SlotId, mint, place: NasalPlace) -> Ve
     the renderer.
     """
     return Verdict(
-        Occurrence(mint, rule, Participants((at, other))),
+        Occurrence(mint(rule, at), rule, Participants((at, other))),
         (Realize(at, Aspect.ONSET, (Nasal(place),)),),
     )
 
 
-def _merge(rule: Rule, at: SlotId, host, mint, *, nasal: bool) -> Verdict:
+def _merge(rule: Rule, at: SlotId, host, *, nasal: bool) -> Verdict:
     """Idghām: the nūn's onset *is* the following onset, geminated.
 
     The rule realizes **both** halves. The merged sound belongs to the idghām,
@@ -114,7 +110,7 @@ def _merge(rule: Rule, at: SlotId, host, mint, *, nasal: bool) -> Verdict:
     than inferred later from the rule name.
     """
     return Verdict(
-        Occurrence(mint, rule, Participants((at, host.id))),
+        Occurrence(mint(rule, at), rule, Participants((at, host.id))),
         (
             Realize(
                 host.id,
@@ -124,8 +120,3 @@ def _merge(rule: Rule, at: SlotId, host, mint, *, nasal: bool) -> Verdict:
             MergeInto(at, Aspect.ONSET, host.id, Aspect.ONSET),
         ),
     )
-
-
-def _Mint(at: SlotId) -> OccurrenceId:
-    """One occurrence per trigger site, addressed by the slot that caused it."""
-    return OccurrenceId(at.verse, at.ordinal)

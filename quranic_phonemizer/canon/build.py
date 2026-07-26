@@ -25,6 +25,7 @@ from ..model.canon import (
     Quality,
     Score,
     Short,
+    SlotOrigin,
     ScoreWord,
     Silent,
     Slot,
@@ -81,7 +82,7 @@ class _Draft:
     letter: CanonLetter
     onset: Onset = Onset.PLAIN
     nucleus: Nucleus = field(default_factory=Silent)
-    spelled: bool = False
+    origin: SlotOrigin = SlotOrigin.WRITTEN
     cluster: int = -1
     onset_declared: bool = False
     nucleus_declared: bool = False
@@ -195,6 +196,7 @@ def _apply_rows(rows, draft, drafts, context, track, force=None) -> _Draft | Non
                     onset=adds.onset,
                     nucleus=adds.nucleus,
                     cluster=draft.cluster,
+                    origin=SlotOrigin.NUNATION,
                 )
             case Attests():
                 track.attested += 1
@@ -358,6 +360,7 @@ def _apply_cross_word_noon(reading, drafts, right_context) -> None:
                 onset=Onset.PLAIN,
                 nucleus=Silent(),
                 cluster=last.cluster,
+                origin=SlotOrigin.NUNATION,
             ),
         )
 
@@ -447,7 +450,7 @@ def _assemble(reading: Reading, drafts, riwayah, selection) -> Score:
             letter=draft.letter,
             onset=draft.onset,
             nucleus=draft.nucleus,
-            spelled=draft.spelled,
+            origin=draft.origin,
         )
         word = reading.clusters[draft.cluster].word if draft.cluster >= 0 else 0
         by_word.setdefault(word, []).append(slot)

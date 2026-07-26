@@ -119,9 +119,13 @@ def _fill_plain(plan: Plan, score: Score, mint: _Mint) -> list[tuple]:
     question. `PLAIN` occurrences are internable to one object per traversal,
     which is what makes this cheap (ADR-008 §7.7).
     """
+    # Only effects that *produce or remove* a sound claim the slot. `Recolour`
+    # and `Relength` modify one, so counting them here would leave the sound
+    # they modify unrealized — P3 caught exactly that.
     claimed = {
-        (getattr(e, "slot", None), getattr(e, "aspect", None))
-        for e in plan.effects()
+        (effect.slot, effect.aspect)
+        for effect in plan.effects()
+        if isinstance(effect, (Realize, MergeInto, Silence))
     }
     filled = []
     for slot in score.slots():
@@ -189,9 +193,10 @@ def _materialise(
                              verdict.occurrence.id)
                 )
 
+    lengths = {e.slot: e.length for e in plan.effects() if isinstance(e, Relength)}
     for slot, aspect in _fill_plain(plan, score, mint):
         sound_id = mint.sound()
-        sounds.append((sound_id, _plain_sound(slot, aspect, colours)))
+        sounds.append((sound_id, _plain_sound(slot, aspect, colours, lengths)))
         hosted[(slot.id, aspect)] = sound_id
         attributions.append(Hosts((slot.id,), aspect, sound_id, plain.id))
 
@@ -225,7 +230,7 @@ def _materialise(
     )
 
 
-def _plain_sound(slot: Slot, aspect: Aspect, colours) -> Sound:
+def _plain_sound(slot: Slot, aspect: Aspect, colours, lengths=None) -> Sound:
     features = colours.get((slot.id, aspect), {})
     emphatic = bool(features.get(SoundFeature.EMPHATIC, False))
     if aspect is Aspect.ONSET:
@@ -235,12 +240,13 @@ def _plain_sound(slot: Slot, aspect: Aspect, colours) -> Sound:
             emphatic=emphatic,
             nasal=bool(features.get(SoundFeature.NASAL, False)),
         )
-    return Vowel(
-        slot.nucleus.quality,
-        long=slot.nucleus.kind in (NucleusKind.LONG, NucleusKind.SILAH,
-                                   NucleusKind.PAUSAL_LONG),
-        emphatic=emphatic,
+    long = slot.nucleus.kind in (
+        NucleusKind.LONG, NucleusKind.SILAH, NucleusKind.PAUSAL_LONG
     )
+    override = (lengths or {}).get(slot.id)
+    if override is not None:
+        long = override is Length.LONG
+    return Vowel(slot.nucleus.quality, long=long, emphatic=emphatic)
 
 
 def _colours(plan: Plan) -> dict[tuple[SlotId, Aspect], dict[SoundFeature, bool]]:

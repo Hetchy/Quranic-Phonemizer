@@ -138,6 +138,27 @@ Nucleus: TypeAlias = Silent | Short | Long | Silah | PausalLong
 SILENT = Silent()
 
 
+class SlotOrigin(StrEnum):
+    """Which part of `canon.build` produced the slot.
+
+    ADR-001 §3.2 deleted an earlier `SlotOrigin` and said to reinstate one only
+    with a **script-independent definition and a real consumer**. This has
+    both. The definition names the producing module, so it is identical across
+    every script by construction; and there are two consumers:
+
+      * `SPELLED` — the muqaṭṭaʿāt toggle of ADR-005 §1, the old `spelled` flag;
+      * `NUNATION` — waqf. Under A1 the tanwīn nūn and a root nūn are the same
+        shape, which is the ruling's whole point, but at a stop they differ:
+        `هُدًى` drops its nūn and leaves the ʿiwaḍ, and `مِن` keeps its own.
+        Nothing else in the Score can tell them apart, and asking the
+        orthography would put a glyph back inside a rule.
+    """
+
+    WRITTEN = "written"
+    SPELLED = "spelled"
+    NUNATION = "nunation"
+
+
 @dataclass(frozen=True, slots=True)
 class Slot:
     """A canonical position: something that can sound at its own position in at
@@ -147,7 +168,11 @@ class Slot:
     letter: CanonLetter
     onset: Onset
     nucleus: Nucleus
-    spelled: bool = False
+    origin: SlotOrigin = SlotOrigin.WRITTEN
+
+    @property
+    def spelled(self) -> bool:
+        return self.origin is SlotOrigin.SPELLED
 
 
 @dataclass(frozen=True, slots=True)
@@ -291,6 +316,17 @@ FAMILY_OF: dict[Rule, RuleFamily] = {
 CLASSIFICATION_ONLY: frozenset[Rule] = frozenset(
     {
         Rule.TARQEEQ,
+        Rule.TAFKHEEM,
+        # ADR-002 §5.1 lists TARQEEQ here and not its twin. Both emit
+        # `Recolour`, which modifies a sound rather than producing one, so
+        # neither owns an attribution — a projection finds them through
+        # `Occurrence.parts`. Listing one and not the other was the same
+        # asymmetry the set removes everywhere else.
+        Rule.WASL_START,
+        # At ibtidāʾ the waṣl hamza sounds — but by the plain default, because
+        # its canonical onset and nucleus are already correct (ADR-003 §6.3).
+        # The occurrence records *that the waṣl was started on*, which is a
+        # classification and is what a projection needs to find it.
         Rule.IZHAR_HALQI,
         Rule.IZHAR_MUTLAQ,
         Rule.IZHAR_SHAFAWI,

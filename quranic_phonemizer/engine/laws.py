@@ -92,19 +92,19 @@ def _every_merge_has_its_host(performance: Performance) -> None:
 
 
 def _every_occurrence_produced_or_declared(performance: Performance) -> None:
-    producing = {
-        attribution.by
-        for attribution in performance.attributions
-        if not isinstance(attribution, Silent)
-    }
+    # A `Silent` edge counts. Deletion-with-a-reason is a legitimate output —
+    # `WAQF_ENDING` and `WASL_ELISION` exist to remove sounds, and excluding
+    # them here made E4 fire on rules that were working correctly. What E4 is
+    # for is a rule that fires and leaves no edge of any kind.
+    producing = {attribution.by for attribution in performance.attributions}
     for occurrence in performance.occurrences:
         if occurrence.id in producing:
             continue
         if occurrence.rule in CLASSIFICATION_ONLY:
             continue
         raise LawError(
-            f"E4: occurrence {occurrence.id} ({occurrence.rule.value}) "
-            f"produced no sound and is not declared classification-only"
+            f"E4: occurrence {occurrence.id} ({occurrence.rule.value}) left no "
+            f"attribution at all and is not declared classification-only"
         )
 
 
