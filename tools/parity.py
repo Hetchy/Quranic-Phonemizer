@@ -4,7 +4,13 @@ Parity does not prove correctness — both evidence §4 defects are baked into
 every frozen view. What it proves is that the rebuild reproduces the behaviour
 the old implementation had, so any later change is a deliberate one.
 
-Run:  python tools/parity.py [--mode word|verse|continuous] [--limit N]
+It is **not** a cross-script test — it runs Uthmani only. `tools/cross_parity.py`
+is the one that asks whether the two scripts agree, and the two harnesses are
+insensitive to opposite failures: this one cannot see a script fact leaking,
+because it runs one script; that one cannot see a missing rule, because a rule
+absent from both scripts leaves them agreeing. Neither substitutes for the other.
+
+Run:  python tools/parity.py [--mode word|verse] [--limit N]
 """
 from __future__ import annotations
 
@@ -42,10 +48,18 @@ SNAPSHOTS = ROOT / "tests" / "snapshots" / "phonemes"
 ALPHABET = ROOT / "quranic_phonemizer" / "data" / "render" / "ipa.yaml"
 
 
+#: Modes this harness can actually produce. `continuous` is deliberately not
+#: here: it joins *across* verse boundaries, and a harness that runs verse by
+#: verse cannot build that plan. It used to be offered anyway, against the
+#: continuous snapshot, and reported 84.379% — a number that measured the
+#: harness's own limitation and not the pipeline. 1:2:4 is the worked example:
+#: the verse oracle ends `…n`, the continuous oracle ends `…n a`.
+MODES = ("word", "verse")
+
+
 def plan_for(mode: str, words: int) -> BoundaryPlan:
     """`word` stops after every word; `verse` joins within a verse and stops at
-    its end; `continuous` is the same here, since the harness runs verse by
-    verse."""
+    its end."""
     if mode == "word":
         return BoundaryPlan((Junction.STOP,) * (words - 1) + (Junction.EDGE,))
     return BoundaryPlan((Junction.JOIN,) * (words - 1) + (Junction.EDGE,))
@@ -53,8 +67,7 @@ def plan_for(mode: str, words: int) -> BoundaryPlan:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--mode", default="word",
-                        choices=["word", "verse", "continuous"])
+    parser.add_argument("--mode", default="word", choices=MODES)
     parser.add_argument("--limit", type=int, default=0)
     parser.add_argument("--show", type=int, default=12)
     args = parser.parse_args()
