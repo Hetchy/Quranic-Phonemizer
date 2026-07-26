@@ -16,7 +16,7 @@ from dataclasses import dataclass
 
 from ..model.address import BoundaryPlan, SlotId
 from ..model.canon import CanonLetter as L
-from ..model.canon import NucleusKind, Phase, Rule, Score
+from ..model.canon import Phase, Rule, Score
 from ..model.performance import (
     Aspect,
     Consonant,
@@ -27,6 +27,7 @@ from ..model.performance import (
 )
 from ..engine.neighbourhood import Neighbourhood
 from ..engine.plan import MergeInto, Plan, Realize, Verdict, mint
+from .ownership import is_quiescent
 
 #: The six throat letters. The nūn stays itself.
 IZHAR = frozenset({L.HAMZA, L.HEH, L.AIN, L.HA, L.GHAIN, L.KHA})
@@ -56,7 +57,7 @@ class NoonSakinah:
     ) -> Verdict | None:
         del boundaries  # `near` already refuses to look across a junction
         here = near.slot(at)
-        if here is None or here.nucleus.kind is not NucleusKind.SILENT:
+        if not is_quiescent(here):
             return None
         following = near.after(at)
         if following is None:

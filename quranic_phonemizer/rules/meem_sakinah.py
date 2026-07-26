@@ -18,7 +18,7 @@ from ..engine.neighbourhood import Neighbourhood
 from ..engine.plan import MergeInto, Plan, Realize, Verdict, mint
 from ..model.address import BoundaryPlan, SlotId
 from ..model.canon import CanonLetter as L
-from ..model.canon import NucleusKind, Onset, Phase, Rule
+from ..model.canon import Onset, Phase, Rule
 from ..model.performance import (
     Aspect,
     Consonant,
@@ -27,6 +27,7 @@ from ..model.performance import (
     Occurrence,
     Participants,
 )
+from .ownership import is_quiescent
 
 NASAL_LETTERS = frozenset({L.NOON, L.MEEM})
 
@@ -84,12 +85,7 @@ class MeemSakinah:
     ) -> Verdict | None:
         del plan, boundaries  # `near` already refuses to look across a junction
         here = near.slot(at)
-        if here is None or here.nucleus.kind is not NucleusKind.SILENT:
-            return None
-        if here.onset is Onset.GEMINATE:
-            # A doubled mīm is `GhunnahMushaddadah`'s, and both rules would
-            # otherwise realize the same onset in the same phase — which E1
-            # would report as a conflict rather than let either win.
+        if not is_quiescent(here):
             return None
         following = near.after(at)
         if following is None:
