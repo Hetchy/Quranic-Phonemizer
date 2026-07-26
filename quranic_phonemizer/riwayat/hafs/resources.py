@@ -15,6 +15,7 @@ from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
 
+from ...canon import derive
 from ...canon.ledger import EMPTY as EMPTY_LEDGER
 from ...canon.ledger import Ledger, load_ledger
 from ...canon.lexicon import EMPTY as EMPTY_LEXICON
@@ -45,7 +46,16 @@ class Adapter:
 
 @lru_cache(maxsize=None)
 def _inventory(script: Script) -> Inventory:
-    return load_inventory(DATA / "scripts" / f"{script.value}.yaml")
+    """The assembly point is where the two halves of the role contract meet.
+
+    `orthography` cannot import `canon`, so what a derivation needs from an
+    inventory is passed in here rather than looked up there.
+    """
+    return load_inventory(
+        DATA / "scripts" / f"{script.value}.yaml",
+        derivations=frozenset(derive.registered()),
+        roles=derive.required_roles(),
+    )
 
 
 def script_adapter(script: Script) -> Adapter:

@@ -154,7 +154,12 @@ def _fact_value(fact: SlotFact, raw: Any, *, where: str) -> object:
 
 
 # --------------------------------------------------------------------- loading
-def load_inventory(path: Path) -> Inventory:
+def load_inventory(
+    path: Path,
+    *,
+    derivations: frozenset[str] | None = None,
+    roles: frozenset[str] | None = None,
+) -> Inventory:
     data = load_yaml(path)
     require_keys(
         data,
@@ -185,6 +190,7 @@ def load_inventory(path: Path) -> Inventory:
             f"{path}: {overlap} are declared both as letters and as marks; a "
             f"scalar resolves to exactly one classification"
         )
+    _check_contract(path, letters, marks, derivations, roles)
     return Inventory(
         script=_member(Script, data["script"], where=str(path)),
         riwayah=_member(Riwayah, data["riwayah"], where=str(path)),
@@ -194,6 +200,50 @@ def load_inventory(path: Path) -> Inventory:
         combining_hamza=frozenset(data.get("combining_hamza") or ()),
         source=path,
     )
+
+
+def _check_contract(path, letters, marks, derivations, roles) -> None:
+    """The two halves of the Python-to-YAML contract, checked at load.
+
+    Neither had anything behind it. `Cluster.has(role)` returns `False` for a
+    role nobody declared and never raises, so renaming `fatha` to `fathah`
+    here loads clean, runs clean, and silently changes the output -- measured
+    at 99.83% word parity on a 250-verse slice, which is exactly the failure
+    that passes a smoke test and surfaces on verse 3,000. And an unregistered
+    `derivation:` used to raise only at *run* time, on first use, so a typo on
+    a rare mark passed every smoke test too.
+
+    Both are injected rather than imported: `orthography` may not import
+    `canon`, and inverting that to keep the check would cost more than the
+    check is worth (ADR-007 section 2).
+    """
+    if derivations is not None:
+        named = {
+            entry.derivation
+            for entry in marks.values()
+            if getattr(entry, "derivation", None)
+        }
+        named |= {
+            spec.derivation
+            for spec in letters.values()
+            if getattr(spec, "derivation", None)
+        }
+        unknown = sorted(named - derivations)
+        if unknown:
+            raise InventoryError(
+                f"{path}: names derivation(s) {unknown} that canon/derive/ "
+                f"does not register. Known: {sorted(derivations)}"
+            )
+    if roles is not None:
+        declared = {entry.role for entry in marks.values() if entry.role}
+        missing = sorted(roles - declared)
+        if missing:
+            raise InventoryError(
+                f"{path}: declares no mark with role(s) {missing}, which a "
+                f"registered derivation reads. A role no inventory declares "
+                f"is silently absent, never an error at use -- so it is one "
+                f"here. Declared: {sorted(declared)}"
+            )
 
 
 def _letter(spec: Any, *, where: str) -> LetterEntry:

@@ -113,16 +113,34 @@ class Context:
 Derivation: TypeAlias = Callable[[Context], Outcome]
 
 _REGISTRY: dict[str, Derivation] = {}
+_REQUIRED_ROLES: dict[str, frozenset[str]] = {}
 
 
-def register(name: str) -> Callable[[Derivation], Derivation]:
+def register(
+    name: str, *, requires: tuple[str, ...] = ()
+) -> Callable[[Derivation], Derivation]:
+    """`requires` names the inventory roles this derivation reads.
+
+    Roles are a contract between Python and YAML with no schema behind it:
+    `Cluster.has` returns `False` for a role nobody declared and never raises,
+    so renaming `fatha` to `fathah` in a script inventory loads clean, runs
+    clean, and silently changes the output. Declaring the dependency here lets
+    `required_roles` turn that into a load-time error naming the file.
+    """
+
     def decorate(fn: Derivation) -> Derivation:
         if name in _REGISTRY:
             raise ValueError(f"derivation {name!r} is already registered")
         _REGISTRY[name] = fn
+        _REQUIRED_ROLES[name] = frozenset(requires)
         return fn
 
     return decorate
+
+
+def required_roles() -> frozenset[str]:
+    """Every role any registered derivation reads."""
+    return frozenset().union(*_REQUIRED_ROLES.values()) if _REQUIRED_ROLES else frozenset()
 
 
 def resolve(name: str, context: Context) -> Outcome:
@@ -137,3 +155,25 @@ def resolve(name: str, context: Context) -> Outcome:
 
 def registered() -> tuple[str, ...]:
     return tuple(sorted(_REGISTRY))
+
+
+def _load_all() -> None:
+    """Import every derivation module so the registry is complete.
+
+    At the bottom because the modules import the vocabulary defined above.
+    Before this, the registry's contents depended on somebody having imported
+    `canon.build` first, which meant `registered()` answered differently
+    depending on the caller — and a validator that asks an empty registry
+    passes everything.
+    """
+    from . import (  # noqa: F401
+        gemination,
+        length,
+        lexeme,
+        silah,
+        tanween,
+        wasl,
+    )
+
+
+_load_all()

@@ -20,7 +20,7 @@ from ...model.inscription import SlotFact
 from . import Context, Outcome, Sets, Shows, Target, register
 
 
-@register("silah_waw")
+@register("silah_waw", requires=("shadda",))
 def silah_waw(context: Context) -> Outcome:
     """The wāw side is a clean 1:1 — U+06E5 ×1,257 and U+0657 ×1,257 at the
     same 1,257 words — but it is resolved the same way, because a rule that
@@ -29,7 +29,7 @@ def silah_waw(context: Context) -> Outcome:
     return _silah_or_long(context, Quality.U)
 
 
-@register("silah_ya")
+@register("silah_ya", requires=("shadda",))
 def silah_ya(context: Context) -> Outcome:
     return _silah_or_long(context, Quality.I)
 

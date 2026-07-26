@@ -35,8 +35,7 @@ from ..orthography.adapter import Cluster, Reading
 from . import derive
 from .derive import Absent, AddsSlot, Attests, Sets, Shows, Target
 from .derive import length as _length
-from .derive import lexeme, silah, tanween, wasl  # noqa: F401  register them
-from .derive import gemination  # noqa: F401
+from .derive import lexeme, silah, tanween, wasl
 from .lexicon import EMPTY as EMPTY_LEXICON
 from .lexicon import Lexicon
 from .ledger import EMPTY as EMPTY_LEDGER

@@ -161,14 +161,22 @@ def _helping_vowel(context: Context) -> Quality:
     return Quality.I
 
 
-@register("hamzat_wasl")
+@register("hamzat_wasl", requires=(
+    "fatha", "damma", "kasra", "fathatan", "dammatan", "kasratan",
+        "shadda", "silah_waw", "silah_ya",
+    "sukun", "dagger", "combining_hamza",
+))
 def hamzat_wasl(context: Context) -> Outcome:
     """The waṣl slot: a hamza whose onset sounds only at ibtidāʾ."""
     del context
     return Sets(SlotFact.ONSET, Onset.WASL)
 
 
-@register("wasl_helping_vowel")
+@register("wasl_helping_vowel", requires=(
+    "fatha", "damma", "kasra", "fathatan", "dammatan", "kasratan",
+        "shadda", "silah_waw", "silah_ya",
+    "sukun", "dagger", "combining_hamza",
+))
 def wasl_helping_vowel(context: Context) -> Outcome:
     return Sets(SlotFact.NUCLEUS, Short(_helping_vowel(context)))
 

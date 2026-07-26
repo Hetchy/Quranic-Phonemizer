@@ -38,7 +38,10 @@ LONG_KINDS = frozenset(
 )
 
 
-@register("length_a")
+@register("length_a", requires=(
+    "fatha", "damma", "kasra", "fathatan", "dammatan", "kasratan",
+        "shadda", "silah_waw", "silah_ya",
+))
 def dagger(context: Context) -> Outcome:
     """The superscript alif.
 
@@ -62,7 +65,11 @@ def dagger(context: Context) -> Outcome:
     return Sets(SlotFact.NUCLEUS, Long(Quality.A))
 
 
-@register("carrier")
+@register("carrier", requires=(
+    "fatha", "damma", "kasra", "fathatan", "dammatan", "kasratan",
+        "shadda", "silah_waw", "silah_ya",
+    "sukun",
+))
 def carrier(context: Context) -> Outcome:
     """Is this bare ālif/wāw/yāʾ a slot, or does it lengthen the previous one?
 
@@ -93,7 +100,10 @@ def carrier(context: Context) -> Outcome:
     return Sets(SlotFact.LETTER, letter)
 
 
-@register("pausal_length")
+@register("pausal_length", requires=(
+    "fatha", "damma", "kasra", "fathatan", "dammatan", "kasratan",
+        "shadda", "silah_waw", "silah_ya",
+))
 def pausal_length(context: Context) -> Outcome:
     """Uthmani's `۠`, on the ālif of the seven alifs.
 
