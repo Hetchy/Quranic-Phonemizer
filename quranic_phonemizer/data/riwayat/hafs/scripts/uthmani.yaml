@@ -73,7 +73,7 @@ evidences:
   "ۧ": {fact: NUCLEUS, cls: small_vowel, role: silah_ya,
        derivation: silah_ya}
   "۠": {fact: NUCLEUS, cls: small_vowel, role: pausal,
-       value: {kind: PausalLong, quality: A}}   # the seven alifs
+       derivation: pausal_length}   # the seven alifs
   "۪": {fact: NUCLEUS, cls: annotation, role: imala,
        value: {kind: Long, quality: IMALA}}
   "۫": {fact: NUCLEUS, cls: annotation, role: ishmam,
@@ -86,7 +86,7 @@ evidences:
 decorates:
   "ٓ": {slot: long_nucleus, cls: madd_sign}   # the maddah: it shows a
                                                    # madd and supplies nothing
-  "۟": {slot: host, cls: silence_sign}        # the rounded zero
+  "۟": {slot: host, cls: silence_sign, silences: true}
 
 advice:
   "ۖ": PREFERRED_CONTINUE

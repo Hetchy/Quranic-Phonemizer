@@ -8,7 +8,7 @@ length and does not.
 """
 from __future__ import annotations
 
-from ...model.canon import CanonLetter, Long, NucleusKind, Quality
+from ...model.canon import CanonLetter, Long, NucleusKind, PausalLong, Quality
 from ...model.inscription import SlotFact
 from . import Absent, Context, Outcome, Sets, Shows, Target, register
 
@@ -74,6 +74,10 @@ def carrier(context: Context) -> Outcome:
     previous = context.previous_nucleus
     if letter is None or letter not in CARRIERS or previous is None:
         return Sets(SlotFact.LETTER, letter) if letter else Absent()
+    if letter is CanonLetter.ALIF and cluster.has("sukun"):
+        # A carrier bears no mark of its own. IndoPak writes `اْ` for a hamza
+        # whose seat Uthmani precomposes.
+        return Sets(SlotFact.LETTER, letter)
 
     if previous.kind is NucleusKind.SHORT:
         if letter is CARRIER_OF[previous.quality]:
@@ -87,6 +91,19 @@ def carrier(context: Context) -> Outcome:
     if previous.kind is NucleusKind.SILENT and letter is not CanonLetter.ALIF:
         return Absent()
     return Sets(SlotFact.LETTER, letter)
+
+
+@register("pausal_length")
+def pausal_length(context: Context) -> Outcome:
+    """Uthmani's `۠`, on the ālif of the seven alifs.
+
+    Like the dagger, the mark sits on a carrier and the length belongs to the
+    slot before it. Uthmani writes it at 66 sites and IndoPak at none — which
+    is why the canonical supplier is the lexeme list and this mark is the
+    witness that agrees with it (L2).
+    """
+    del context
+    return Sets(SlotFact.NUCLEUS, PausalLong(Quality.A), Target.PREVIOUS)
 
 
 @register("shows_long")

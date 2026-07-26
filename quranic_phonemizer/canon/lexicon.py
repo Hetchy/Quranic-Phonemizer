@@ -16,7 +16,18 @@ SCHEMA_VERSION = 1
 
 #: ADR-008 §4.2. Exceeding one of these fails the build rather than being
 #: absorbed quietly, which is how a derivation turns into curation.
-BUDGETS = {"wasl_particles": 10, "wasl_exempt": 30, "silah_exempt": 200}
+BUDGETS = {
+    "wasl_particles": 10,
+    "wasl_exempt": 30,
+    "silah_exempt": 200,
+    "pausal_lexemes": 10,
+}
+
+#: The attached pronouns, in canonical letters. Closed in Arabic, so a lexeme
+#: entry covers its whole inflectional family without enumerating it.
+CLITIC_PRONOUNS: frozenset[str] = frozenset(
+    {"ه", "هم", "هما", "هن", "ك", "كم", "كما", "كن", "نا", "ي", "ني", "همء"}
+)
 
 
 class LexiconError(ValueError):
@@ -33,10 +44,38 @@ class Lexicon:
     """The ten nouns, whose helping vowel is kasra regardless of the third
     letter — `اسم` would otherwise derive damma."""
     silah_exempt: frozenset[str] = frozenset()
+    pausal_lexemes: frozenset[str] = frozenset()
+    """The seven alifs: words whose final ālif is short in waṣl and long at
+    pause. IndoPak's inventory has no grapheme that distinguishes them, so it
+    gives no evidence and this is not a contradiction (ADR-008 §4.1)."""
     source: Path | None = field(default=None, compare=False)
 
     def is_wasl_exempt(self, skeleton: str) -> bool:
-        return skeleton in self.wasl_particles or skeleton in self.wasl_exempt
+        return self._matches(self.wasl_particles, skeleton) or self._matches(
+            self.wasl_exempt, skeleton
+        )
+
+    @staticmethod
+    def _matches(entries: frozenset[str], skeleton: str) -> bool:
+        """A lexeme, with or without a clitic pronoun.
+
+        `إيمان`, `إيمانكم`, `إيمانهم` and `إيمانها` are one lexical fact, and
+        listing four skeletons for it would be the location table this design
+        keeps arguing against. Arabic's clitic pronouns are a closed set, so
+        the stem plus that set is a rule.
+        """
+        if skeleton in entries:
+            return True
+        return any(
+            skeleton == stem + clitic
+            for stem in entries
+            for clitic in CLITIC_PRONOUNS
+        )
+
+    def is_pausal(self, skeleton: str) -> bool:
+        """Matched as a suffix, because only proclitics attach on the left:
+        `وَأَنَا` is `أَنَا` with a wāw, not a different lexeme."""
+        return any(skeleton.endswith(entry) for entry in self.pausal_lexemes)
 
     def is_wasl_noun(self, skeleton: str) -> bool:
         return skeleton in self.wasl_nouns

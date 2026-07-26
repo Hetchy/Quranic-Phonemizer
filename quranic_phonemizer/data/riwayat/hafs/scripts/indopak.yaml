@@ -76,8 +76,7 @@ evidences:
 decorates:
   "ٓ": {slot: long_nucleus, cls: madd_sign}
   "࢜": {slot: long_nucleus, cls: madd_sign}   # madda waajib
-  "۟": {slot: host, cls: silence_sign}
-  "͏": {slot: host, cls: structural}          # combining grapheme joiner
+  "۟": {slot: host, cls: silence_sign, silences: true}
   "ۢ": {slot: host, cls: annotation}          # iqlab, upper
   "ۭ": {slot: host, cls: annotation}          # iqlab, lower
   "ؔ": {slot: host, cls: annotation}          # takhallus: a generic flag
@@ -97,7 +96,7 @@ advice:
   "ࣟ": PERMITTED_STOP
   "ࣝ": PERMITTED_STOP
 
-structural: [" ", "‮", "٦"]
+structural: [" ", "‮", "٦", "͏"]
 
 polysemous:
   "ٖ": [SILAH, LONG_VOWEL]

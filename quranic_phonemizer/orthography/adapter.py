@@ -103,6 +103,9 @@ class Decoration:
     offset: int
     target: str = "host"
     """Which slot it decorates, resolved by `canon.build`."""
+    silences: bool = False
+    """The mark declares its host rasm. A mark that says so outranks any
+    derivation — it is the script stating a fact, not hinting at one."""
 
 
 @dataclass(frozen=True, slots=True)

@@ -60,6 +60,7 @@ PROCLITICS = frozenset(
         CanonLetter.TA,
         CanonLetter.SEEN,
         CanonLetter.HAMZA,
+        CanonLetter.ALIF,
     }
 )
 
@@ -155,6 +156,16 @@ def _after_proclitics(context: Context) -> bool:
     return True
 
 
+def _is_bare_carrier(cluster) -> bool:
+    """A length carrier spells no letter of the skeleton — which is what lets
+    one lexicon entry cover `إسرائيل` and `اِسْرَاءِيْلَ` alike."""
+    return cluster.letter in (
+        CanonLetter.ALIF,
+        CanonLetter.WAW,
+        CanonLetter.YA,
+    ) and not cluster.has("fatha", "damma", "kasra", "shadda")
+
+
 def _written_vowel(cluster) -> Quality | None:
     for role, quality in (
         ("fatha", Quality.A),
@@ -169,7 +180,17 @@ def _written_vowel(cluster) -> Quality | None:
 def _skeleton(context: Context) -> str:
     """Canonical letters from this cluster to the end of the word. Keyed by
     letters, never by glyphs, so the two scripts produce the same key."""
-    return "".join(
-        ABJAD[cluster.letter.value] if cluster.letter else ""
-        for cluster in context.clusters[context.index : context.word_bounds[1]]
-    )
+    span = context.clusters[context.index : context.word_bounds[1]]
+    letters = [
+        cluster.letter
+        for offset, cluster in enumerate(span)
+        if cluster.letter is not None
+        and not (offset and _is_bare_carrier(cluster))
+    ]
+    if not letters:
+        return ""
+    # The candidate position is the hamza under question, whichever seat the
+    # script drew it on. Normalising it is what lets one lexicon entry serve
+    # `إن` and `اِنْ` alike.
+    letters[0] = CanonLetter.HAMZA
+    return "".join(ABJAD[letter.value] for letter in letters)

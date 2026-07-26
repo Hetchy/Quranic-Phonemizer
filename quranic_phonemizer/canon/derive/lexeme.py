@@ -46,23 +46,20 @@ def otiose_waw(context: Context) -> bool:
     disagree at ~240 words. One shape covers them all: a prosthetic-looking
     hamza with damma, a bare wāw, then a lām or rāʾ.
     """
-    start = context.word_bounds[0]
-    for i in range(start, min(start + 3, context.index)):
-        head = context.clusters[i]
-        if head.letter not in (CanonLetter.ALIF, CanonLetter.HAMZA):
-            break
-        if not head.has("damma"):
-            break
-        if i + 1 != context.index:
-            continue
-        following = context.ahead()
-        return (
-            context.cluster.letter is CanonLetter.WAW
-            and not context.cluster.marks
-            and following is not None
-            and following.letter in (CanonLetter.LAM, CanonLetter.RA)
-        )
-    return False
+    if context.index == context.word_bounds[0]:
+        return False
+    head = context.clusters[context.index - 1]
+    if head.letter not in (CanonLetter.ALIF, CanonLetter.HAMZA):
+        return False
+    if not head.has("damma"):
+        return False
+    following = context.ahead()
+    return (
+        context.cluster.letter is CanonLetter.WAW
+        and not context.cluster.has("fatha", "damma", "kasra", "shadda")
+        and following is not None
+        and following.letter in (CanonLetter.LAM, CanonLetter.RA)
+    )
 
 
 def otiose_alif(context: Context) -> bool:

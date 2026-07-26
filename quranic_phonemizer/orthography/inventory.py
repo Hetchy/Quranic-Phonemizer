@@ -67,6 +67,9 @@ class MarkEntry:
     value: object | None = None
     derivation: str | None = None
     decorates: str | None = None
+    silences: bool = False
+    """The mark declares its host to be rasm — Uthmani's `۟`. An annotation
+    that merely points at a live letter must not set this."""
     advice: StopAdvice | None = None
     structural: bool = False
     polysemous: tuple[str, ...] = ()
@@ -240,11 +243,14 @@ def _load_evidences(data: Any, path: Path, marks: dict[str, MarkEntry]) -> None:
 def _load_decorates(data: Any, path: Path, marks: dict[str, MarkEntry]) -> None:
     for char, spec in (data.get("decorates") or {}).items():
         where = f"{path} decorates[{char!r}]"
-        require_keys(spec, {"slot", "cls"}, name=where, optional={"role"})
+        require_keys(
+            spec, {"slot", "cls"}, name=where, optional={"role", "silences"}
+        )
         marks[char] = MarkEntry(
             role=f"decorates:{spec['slot']}",
             cls=_member(GraphemeClass, spec["cls"], where=where),
             decorates=str(spec["slot"]),
+            silences=bool(spec.get("silences", False)),
         )
 
 
@@ -283,6 +289,7 @@ def _load_polysemous(data: Any, path: Path, marks: dict[str, MarkEntry]) -> None
             value=base.value,
             derivation=base.derivation,
             decorates=base.decorates,
+            silences=base.silences,
             advice=base.advice,
             structural=base.structural,
             polysemous=tuple(str(s) for s in senses),

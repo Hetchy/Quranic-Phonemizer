@@ -16,9 +16,13 @@ from dataclasses import dataclass, field, replace
 
 from ..model.address import Location, Riwayah, SlotId, VariantSelection, VerseRef
 from ..model.canon import (
+    ABJAD,
     CanonLetter,
     Nucleus,
+    NucleusKind,
     Onset,
+    PausalLong,
+    Quality,
     Score,
     ScoreWord,
     Silent,
@@ -99,6 +103,7 @@ def build(
     drafts = _drafts(reading, lexicon, track, right_context)
     _apply_ledger(reading.verse, drafts, ledger, track)
     _apply_allah_lexeme(drafts)
+    _apply_pausal_lexemes(reading, drafts, lexicon)
     return _assemble(reading, drafts, riwayah, selection)
 
 
@@ -110,6 +115,7 @@ def _drafts(
     right_context: Reading | None,
 ) -> list[_Draft]:
     by_cluster = _evidence_by_cluster(reading)
+    silenced = {d.cluster for d in reading.decorations if d.silences}
     drafts: list[_Draft] = []
     consumed: set[int] = set()
 
@@ -124,7 +130,16 @@ def _drafts(
             # A bare seat is not a slot, but it may still carry a dagger for
             # the slot before it — Uthmani writes `تَـٰ`, with the alif on the
             # tatweel. Skipping the cluster must not skip its evidence.
-            _apply_rows(rows, _Draft(letter=CanonLetter.ALIF), drafts, context, track)
+            _apply_rows(rows, _Draft(letter=CanonLetter.ALIF), drafts, context,
+                        track, force=Target.PREVIOUS)
+            track.decorated += 1
+            continue
+
+        if index in silenced and cluster.letter is not None:
+            # The script wrote a silence sign on this letter — Uthmani's `۟`.
+            # A mark that says "this is rasm" outranks any derivation.
+            _apply_rows(rows, _Draft(letter=letter), drafts, context, track,
+                        force=Target.PREVIOUS)
             track.decorated += 1
             continue
 
@@ -154,13 +169,16 @@ def _drafts(
     return drafts
 
 
-def _apply_rows(rows, draft, drafts, context, track) -> _Draft | None:
+def _apply_rows(rows, draft, drafts, context, track, force=None) -> _Draft | None:
+    """`force` redirects every fact to the previous slot. A seat has no slot of
+    its own, so what it carries belongs to the one before it — which is how
+    Uthmani writes `تَـٰ` and `هِـۧم`."""
     extra: _Draft | None = None
     for row in rows:
         if row.fact is SlotFact.LETTER:
             continue
         if row.value is not None:
-            _set(draft, drafts, row.fact, row.value, Target.HERE)
+            _set(draft, drafts, row.fact, row.value, force or Target.HERE)
             track.from_evidence += 1
             continue
         outcome = derive.resolve(row.derivation, context)
@@ -168,7 +186,7 @@ def _apply_rows(rows, draft, drafts, context, track) -> _Draft | None:
         track.used(row.derivation)
         match outcome:
             case Sets(fact=fact, value=value, target=target):
-                _set(draft, drafts, fact, value, target)
+                _set(draft, drafts, fact, value, force or target)
             case AddsSlot() as adds:
                 _set(draft, drafts, adds.fact, adds.value, Target.HERE)
                 extra = _Draft(
@@ -228,10 +246,22 @@ def _rasm_outcome(context, cluster: Cluster, rows):
     Returns `None` when the cluster is a slot; otherwise the outcome, which may
     carry a fact for the *previous* slot — a length carrier is silent at its own
     position and still decides the vowel before it.
+
+    Order matters, and getting it wrong is subtle: rasm-hood cannot be decided
+    before the cluster's own nucleus is resolved. A dagger is the case that
+    proves it — on IndoPak's ālif it is madd badal and the cluster is a slot;
+    on Uthmani's wāw in `ٱلصَّلَوٰةَ` the same mark lengthens the slot before it
+    and the cluster is rasm. Nothing about the glyph says which; only where its
+    nucleus lands does.
     """
     if wasl.is_wasl(context):
         return None   # a prosthetic hamza is a slot, not rasm
-    if _has_vowel_evidence(rows, cluster):
+    own, carried = _nucleus_destination(rows, context)
+    if own:
+        return None
+    if carried is not None:
+        return carried
+    if cluster.has(*_VOWEL_ROLES):
         return None
     if lexeme.otiose_waw(context) or lexeme.otiose_alif(context):
         return Absent()
@@ -245,12 +275,29 @@ def _rasm_outcome(context, cluster: Cluster, rows):
     return None
 
 
-def _has_vowel_evidence(rows, cluster: Cluster) -> bool:
-    """A sukūn deliberately does not count. IndoPak writes one on its length
+def _nucleus_destination(rows, context) -> tuple[bool, object | None]:
+    """Where do this cluster's nucleus rows land — here, or on the slot before?
+
+    A sukūn deliberately counts as neither. IndoPak writes one on its length
     carriers — `يْ` for a long ī — and the absence of a vowel cannot be what
-    disqualifies a cluster from carrying one."""
-    del rows
-    return cluster.has(*_VOWEL_ROLES)
+    makes a cluster a slot.
+    """
+    carried = None
+    for row in rows:
+        if row.fact is not SlotFact.NUCLEUS:
+            continue
+        if row.value is not None:
+            if row.value.kind is not NucleusKind.SILENT:
+                return True, None
+            continue
+        outcome = derive.resolve(row.derivation, context)
+        if isinstance(outcome, AddsSlot):
+            return True, None
+        if isinstance(outcome, Sets):
+            if outcome.target is Target.HERE:
+                return True, None
+            carried = outcome
+    return False, carried
 
 
 def _skip_iwad_carrier(reading: Reading, index: int, bounds) -> set[int]:
@@ -259,7 +306,9 @@ def _skip_iwad_carrier(reading: Reading, index: int, bounds) -> set[int]:
     if nxt >= bounds[1]:
         return set()
     cluster = reading.clusters[nxt]
-    if cluster.letter is CanonLetter.ALIF and not cluster.marks:
+    if cluster.letter is CanonLetter.ALIF and not cluster.has(*_VOWEL_ROLES):
+        # IndoPak draws its iqlāb mark on this ālif. An annotation does not
+        # turn the ʿiwaḍ carrier into a slot.
         return {nxt}
     return set()
 
@@ -292,6 +341,38 @@ def _apply_allah_lexeme(drafts) -> None:
     nuclei = [d.nucleus for d in drafts]
     for index in lexeme.allah_long_a(letters, nuclei):
         drafts[index].nucleus = lexeme.relengthened(drafts[index].nucleus)
+
+
+def _apply_pausal_lexemes(reading: Reading, drafts, lexicon: Lexicon) -> None:
+    """The seven alifs. Uthmani marks them `۠` at 66 sites; IndoPak writes a
+    plain final ālif, indistinguishable by any IndoPak grapheme from an
+    ordinary length carrier — so the fact is lexical, not orthographic."""
+    if not lexicon.pausal_lexemes:
+        return
+    for word_index in range(len(reading.words)):
+        span = [d for d in drafts if _word_of(reading, d) == word_index]
+        if not span:
+            continue
+        if lexicon.is_pausal(_vocalised(span)):
+            span[-1].nucleus = PausalLong(Quality.A)
+
+
+def _vocalised(span) -> str:
+    """A skeleton that also spells its vowels.
+
+    Plain letters are not enough here: `أَنَا` and `إِنَّا` share the letters
+    ء-ن, and only the vowels tell them apart. Still one string, still keyed by
+    canonical facts, still readable in the YAML.
+    """
+    out = []
+    for draft in span:
+        quality = getattr(draft.nucleus, "quality", None)
+        out.append(ABJAD[draft.letter.value] + (quality.value if quality else ""))
+    return "".join(out)
+
+
+def _word_of(reading: Reading, draft) -> int:
+    return reading.clusters[draft.cluster].word if draft.cluster >= 0 else -1
 
 
 def _assemble(reading: Reading, drafts, riwayah, selection) -> Score:

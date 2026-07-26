@@ -117,7 +117,9 @@ class _ReadState:
             self._fold_to_hamza(index, offset)
             return
         if entry.decorates is not None:
-            self.decorations.append(Decoration(index, offset, entry.decorates))
+            self.decorations.append(
+                Decoration(index, offset, entry.decorates, entry.silences)
+            )
             return
         if entry.fact is not None:
             self.evidence.append(
