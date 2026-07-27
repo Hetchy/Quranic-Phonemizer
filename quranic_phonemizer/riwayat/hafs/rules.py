@@ -11,6 +11,7 @@ from ...engine.classifier import RuleSet
 from ...model.address import Riwayah
 from ...model.canon import Phase
 from .resources import lexicon
+from ...rules.annotation import CanonicalColour, Sakt, Silah, Tarqeeq
 from ...rules.boundary import (
     TaaMarbutaAtWaqf,
     TanweenAtWaqf,
@@ -19,7 +20,7 @@ from ...rules.boundary import (
 )
 from ...rules.idgham import Idgham
 from ...rules.lam_shamsiyyah import ArticleLam
-from ...rules.madd import IltiqaRepair, PausalGlide
+from ...rules.madd import IltiqaRepair, MaddClass, MaddLeen, PausalGlide
 from ...rules.meem_sakinah import GhunnahMushaddadah, MeemSakinah
 from ...rules.noon_sakinah import NoonSakinah
 from ...rules.qalqala import Qalqala
@@ -27,7 +28,10 @@ from ...rules.tafkheem import Emphasis
 
 HAFS = RuleSet(
     {
-        Phase.BOUNDARY: (WaslHamza(), TanweenAtWaqf(), WaqfEnding(), TaaMarbutaAtWaqf()),
+        Phase.BOUNDARY: (
+            WaslHamza(), TanweenAtWaqf(), WaqfEnding(), TaaMarbutaAtWaqf(),
+            Sakt(),
+        ),
         Phase.MERGE: (
             NoonSakinah(),
             MeemSakinah(),
@@ -35,8 +39,10 @@ HAFS = RuleSet(
             GhunnahMushaddadah(),
             Idgham(),
         ),
-        Phase.LENGTH: (PausalGlide(), IltiqaRepair()),
-        Phase.COLOUR: (Emphasis(),),
+        Phase.LENGTH: (
+            PausalGlide(), IltiqaRepair(), MaddClass(), MaddLeen(), Silah(),
+        ),
+        Phase.COLOUR: (Emphasis(), Tarqeeq(), CanonicalColour()),
         Phase.RELEASE: (Qalqala(),),
     }
 )

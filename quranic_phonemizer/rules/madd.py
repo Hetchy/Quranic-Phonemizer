@@ -149,3 +149,119 @@ def _before(near: Neighbourhood, at: SlotId):
         if slot.id == at:
             return flat[index - 1] if index else None
     return None
+
+
+@dataclass(frozen=True, slots=True)
+class MaddClass:
+    """Which madd this long vowel is — one classifier, five outcomes.
+
+    The model stores no duration (ADR-006 §5), so every outcome here is
+    classification-only and none of them changes a sound. That is exactly why
+    they are worth having: the *length* is the one thing a phoneme string
+    cannot carry, so a consumer that wants to know whether a madd is two counts
+    or six has to read the occurrence. Five members of the vocabulary were
+    declared for this and none of them fired.
+
+    `MADD_TABII`, the natural two-count madd, is deliberately not emitted here.
+    It is the default that holds wherever none of these five applies, and
+    naming it at every long vowel in the Qurʾān would add ~10^5 occurrences per
+    traversal to say "nothing special is happening" (ADR-008 open question 7).
+    `PausalGlide` emits it where it is a *rule* rather than a default.
+    """
+
+    rule: Rule = Rule.MADD_LAZIM
+    phase: Phase = Phase.LENGTH
+    triggers: frozenset = frozenset(
+        {NucleusKind.LONG, NucleusKind.PAUSAL_LONG, NucleusKind.SILAH}
+    )
+
+    def look(
+        self, near: Neighbourhood, plan: Plan, at: SlotId,
+        boundaries: BoundaryPlan,
+    ) -> Verdict | None:
+        del plan
+        slot, word = near.slot(at), near.word_of(at)
+        if slot is None or word is None:
+            return None
+        if slot.nucleus.kind not in self.triggers:
+            return None
+        slots = near.score.words[word].slots
+        final = bool(slots) and slots[-1].id == at
+
+        if final and boundaries.stopped_on(word):
+            # Nothing follows inside the word and the boundary ends it, so the
+            # madd stands alone. `WaqfEnding` owns what happens to the letter.
+            return None
+
+        following = near.after(at)
+        if following is None:
+            return None
+
+        if following.letter is L.HAMZA:
+            # Muttaṣil when the hamza is in the same word, munfaṣil when it
+            # opens the next. The distinction is *joined-ness*, which is why
+            # this is one rule with two names rather than two rules.
+            rule = (
+                Rule.MADD_JAIZ_MUNFASIL if final else Rule.MADD_WAJIB_MUTTASIL
+            )
+            return _classify(rule, at, following.id)
+
+        if following.nucleus.kind is NucleusKind.SILENT:
+            # A sākin that is there in the Score is permanent — `ٱلضَّآلِّينَ`,
+            # and every muqaṭṭaʿ letter whose name ends in one. Lāzim.
+            return _classify(Rule.MADD_LAZIM, at, following.id)
+
+        after = near.after(following.id)
+        if after is None and boundaries.stopped_on(near.word_of(following.id)):
+            # The following letter is voweled in the Score and loses that vowel
+            # only because the reciter stops here. ʿĀriḍ li-s-sukūn: the same
+            # shape as lāzim, made temporary by the boundary plan alone.
+            return _classify(Rule.MADD_ARID_LIL_SUKUN, at, following.id)
+        return None
+
+
+@dataclass(frozen=True, slots=True)
+class MaddLeen:
+    """A wāw or yāʾ sākin after a fatha, before a letter made sākin by the stop.
+
+    Not a long vowel — `خَوْف`, `بَيْت` — so it is not in `MaddClass`'s trigger
+    set and cannot be a branch of it. The diphthong lengthens at a pause and
+    stays short otherwise, which is why the boundary plan is the whole
+    condition.
+    """
+
+    rule: Rule = Rule.MADD_LEEN
+    phase: Phase = Phase.LENGTH
+    triggers: frozenset = frozenset({L.WAW, L.YA})
+
+    def look(
+        self, near: Neighbourhood, plan: Plan, at: SlotId,
+        boundaries: BoundaryPlan,
+    ) -> Verdict | None:
+        del plan
+        slot, word = near.slot(at), near.word_of(at)
+        if slot is None or word is None:
+            return None
+        if slot.nucleus.kind is not NucleusKind.SILENT:
+            return None
+        if slot.onset is Onset.GEMINATE:
+            return None
+        before = _before(near, at)
+        if before is None or before.nucleus.kind is not NucleusKind.SHORT:
+            return None
+        if before.nucleus.quality is not Quality.A:
+            return None
+        following = near.after(at)
+        if following is None or not boundaries.stopped_on(word):
+            return None
+        slots = near.score.words[word].slots
+        if not slots or slots[-1].id != following.id:
+            # Only the letter the stop actually silences counts.
+            return None
+        return _classify(Rule.MADD_LEEN, at, following.id)
+
+
+def _classify(rule: Rule, at: SlotId, other: SlotId) -> Verdict:
+    return Verdict(
+        Occurrence(mint(rule, at), rule, Participants((at, other))), ()
+    )

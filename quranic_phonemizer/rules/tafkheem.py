@@ -43,10 +43,7 @@ class Emphasis:
         slot = near.slot(at)
         if slot is None:
             return None
-        heavy = slot.letter in ALWAYS_HEAVY or _conditionally_heavy(
-            near, slot, plan
-        )
-        if not heavy:
+        if not is_heavy(near, slot, plan):
             return None
         effects = [
             Recolour(at, Aspect.ONSET, SoundFeature.EMPHATIC, True)
@@ -62,6 +59,12 @@ class Emphasis:
                        Participants((at,))),
             tuple(effects),
         )
+
+
+def is_heavy(near: Neighbourhood, slot, plan) -> bool:
+    """Shared with `rules/annotation.py::Tarqeeq`, which needs the same
+    question answered the other way round. One statement of the rule."""
+    return slot.letter in ALWAYS_HEAVY or _conditionally_heavy(near, slot, plan)
 
 
 def _conditionally_heavy(near: Neighbourhood, slot, plan) -> bool:

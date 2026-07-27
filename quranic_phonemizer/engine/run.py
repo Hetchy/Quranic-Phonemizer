@@ -133,7 +133,14 @@ def _fill_plain(plan: Plan, score: Score, mint: _Mint) -> list[tuple]:
 
 
 def _triggered(classifier, slot: Slot) -> bool:
-    """One index, keyed on whichever closed set the rule declared."""
+    """One index, keyed on whichever closed set the rule declared.
+
+    `Quality` is in the list because it is one of the Slot's closed
+    vocabularies like the others, and leaving it out silently disabled every
+    rule that keys on one: `CanonicalColour` declares `Quality.IMALA` and
+    `Quality.ISHMAM`, matched nothing, and made two rule members look absent
+    from the corpus when the Score was carrying the fact all along.
+    """
     triggers = classifier.triggers
     if not triggers:
         return True
@@ -141,6 +148,7 @@ def _triggered(classifier, slot: Slot) -> bool:
         slot.letter in triggers
         or slot.nucleus.kind in triggers
         or slot.onset in triggers
+        or getattr(slot.nucleus, "quality", None) in triggers
     )
 
 

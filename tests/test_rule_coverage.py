@@ -36,6 +36,12 @@ SITES = [
     (6, 99),    # قِنْوَانٌ
     (9, 109),   # بُنْيَٰن
     (2, 85),    # دُنْيَا
+    (11, 41),   # مَجْر۪ىٰهَا — imāla, the only site
+    (12, 11),   # تَأْمَ۫نَّا — ishmām, the only site
+    (41, 44),   # ءَا۬عْجَمِىٌّ — tashīl, the only site
+    (75, 27),   # مَنْ ۜ — sakt; 18:1's entry waits on an L1 row
+    (7, 1),     # الٓمٓصٓ — muqaṭṭaʿāt, and madd lāzim with them
+    (1, 7),     # ٱلضَّآلِّينَ — madd lāzim in an ordinary word
 ]
 
 #: Plus a broad sweep for the common families: nūn and mīm in all their
@@ -50,30 +56,12 @@ SAMPLE = (
 
 #: Declared absent, with the reason. A member here is a promise, not an
 #: excuse: it must move out of this list or out of `Rule`.
-DEFERRED = {
-    # Classification-only: the model stores no duration (ADR-006 §5), so these
-    # annotate rather than change a sound. Pure projection value, no parity
-    # risk, and the reason they are cheap to add together rather than one at
-    # a time.
-    Rule.MADD_WAJIB_MUTTASIL,
-    Rule.MADD_JAIZ_MUNFASIL,
-    Rule.MADD_LAZIM,
-    Rule.MADD_ARID_LIL_SUKUN,
-    Rule.MADD_LEEN,
-    # Recorded and projectable but not rendered — the notation has no symbols
-    # for them (ADR-002 §6.2, ADR-008 open question 10).
-    Rule.IMALA,
-    Rule.TASHIL,
-    Rule.ISHMAM,
-    # `Emphasis` emits TAFKHEEM but never its twin; ADR-002 §5.1 lists only
-    # TARQEEQ, which is the asymmetry recorded in the phase-3-6 report §5.3.
-    Rule.TARQEEQ,
-    # Both are canonical in the Score (`Nucleus.Silah`, `ScoreWord.sakt_after`)
-    # and neither has a classifier that records the occurrence a projection
-    # would look for.
-    Rule.SILAH,
-    Rule.SAKT,
-}
+#: Empty, and that is the point. Every member of `Rule` is produced by some
+#: classifier somewhere in the corpus. It held 12 entries when this file was
+#: written and 15 members were dead; anything added back needs a reason next
+#: to it, and `test_the_deferred_list_does_not_rot` fails if the reason
+#: stops being true.
+DEFERRED: set[Rule] = set()
 
 
 def _fired(packed, shared, surah, ayah):

@@ -344,5 +344,15 @@ CLASSIFICATION_ONLY: frozenset[Rule] = frozenset(
         Rule.ILTIQA_REPAIR,
         # Emits `Relength`, which modifies a sound rather than producing one,
         # so it owns no attribution — the same footing as TAFKHEEM/TARQEEQ.
+        Rule.IMALA,
+        Rule.TASHIL,
+        Rule.ISHMAM,
+        Rule.SILAH,
+        Rule.SAKT,
+        # Canonical Score facts. `canon.build` and the Ledger decide them and
+        # the plain default realizes them already coloured, so these rules
+        # exist to give a projection a *name* for what it is looking at —
+        # which is the whole reason ADR-002 §5 requires an occurrence at all.
+        # See `rules/annotation.py`.
     }
 )
