@@ -80,6 +80,7 @@ def main() -> int:
     adapter = script_adapter(Script.UTHMANI)
 
     matched = total = 0
+    bucketed = 0
     mismatches: list[tuple[str, list, list]] = []
     diffs: collections.Counter[str] = collections.Counter()
 
@@ -102,17 +103,25 @@ def main() -> int:
                 )
                 check_performance(performance, score)
                 produced = phonemes_by_word(performance, score, alphabet)
-                for index, got in enumerate(produced):
-                    want = next(expected)
-                    total += 1
-                    if list(got) == want:
-                        matched += 1
-                    else:
-                        diffs[_signature(list(got), want)] += 1
-                        if len(mismatches) < args.show:
-                            mismatches.append(
-                                (f"{surah}:{ayah}:{index + 1}", list(got), want)
-                            )
+                got_words = [list(word) for word in produced]
+                want_words = [next(expected) for _ in got_words]
+                wrong = [
+                    index
+                    for index, (got, want) in enumerate(zip(got_words, want_words))
+                    if got != want
+                ]
+                total += len(got_words)
+                matched += len(got_words) - len(wrong)
+                if _same_sequence(got_words, want_words):
+                    bucketed += len(wrong)
+                    continue
+                for index in wrong:
+                    got, want = got_words[index], want_words[index]
+                    diffs[_signature(got, want)] += 1
+                    if len(mismatches) < args.show:
+                        mismatches.append(
+                            (f"{surah}:{ayah}:{index + 1}", got, want)
+                        )
                 if args.limit and total >= args.limit:
                     break
             if args.limit and total >= args.limit:
@@ -120,6 +129,19 @@ def main() -> int:
 
     print(f"{args.mode}: {matched}/{total} words match "
           f"({100 * matched / total:.3f}%)")
+    if bucketed:
+        # A sound merged across a word boundary has to land in one bucket or
+        # the other, and this harness and the old implementation disagree
+        # about which -- `قُلُوبِهِم مَّرَضٌ` puts the merged mim on the second
+        # word here and on the first there. The verse reads identically. It is
+        # a projection API question, not a phoneme one, and counting it as a
+        # defect left 1,439 benign rows in a detector whose whole job is to
+        # make a real change stand out.
+        phonemes = matched + bucketed
+        print(f"   of which {bucketed} differ only in which word owns a sound "
+              f"merged across a boundary; the verse sequence is identical")
+        print(f"   phoneme sequence: {phonemes}/{total} "
+              f"({100 * phonemes / total:.3f}%)")
     if diffs:
         print("\nmismatch shapes:")
         for signature, count in diffs.most_common(15):
@@ -129,6 +151,11 @@ def main() -> int:
             print(f"   {location:12s} got  {got}")
             print(f"   {'':12s} want {want}")
     return 0 if matched == total else 1
+
+
+def _same_sequence(got: list[list], want: list[list]) -> bool:
+    """Same phonemes in the same order, ignoring where the words are cut."""
+    return [t for word in got for t in word] == [t for word in want for t in word]
 
 
 def _signature(got: list, want: list) -> str:

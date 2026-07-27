@@ -341,5 +341,8 @@ CLASSIFICATION_ONLY: frozenset[Rule] = frozenset(
         Rule.MADD_LAZIM,
         Rule.MADD_ARID_LIL_SUKUN,
         Rule.MADD_LEEN,
+        Rule.ILTIQA_REPAIR,
+        # Emits `Relength`, which modifies a sound rather than producing one,
+        # so it owns no attribution — the same footing as TAFKHEEM/TARQEEQ.
     }
 )

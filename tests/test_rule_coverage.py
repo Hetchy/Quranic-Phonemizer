@@ -51,10 +51,6 @@ SAMPLE = (
 #: Declared absent, with the reason. A member here is a promise, not an
 #: excuse: it must move out of this list or out of `Rule`.
 DEFERRED = {
-    # The largest single class in the regression residue — 2,688 words. The
-    # madd letter drops when two sākins meet (`ٱهْدِنَا ٱلصِّرَٰطَ`). Named in the
-    # vocabulary, never implemented.
-    Rule.ILTIQA_REPAIR,
     # Classification-only: the model stores no duration (ADR-006 §5), so these
     # annotate rather than change a sound. Pure projection value, no parity
     # risk, and the reason they are cheap to add together rather than one at

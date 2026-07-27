@@ -18,7 +18,7 @@ from ...rules.boundary import (
 )
 from ...rules.idgham import Idgham
 from ...rules.lam_shamsiyyah import ArticleLam
-from ...rules.madd import PausalGlide
+from ...rules.madd import IltiqaRepair, PausalGlide
 from ...rules.meem_sakinah import GhunnahMushaddadah, MeemSakinah
 from ...rules.noon_sakinah import NoonSakinah
 from ...rules.qalqala import Qalqala
@@ -34,7 +34,7 @@ HAFS = RuleSet(
             GhunnahMushaddadah(),
             Idgham(),
         ),
-        Phase.LENGTH: (PausalGlide(),),
+        Phase.LENGTH: (PausalGlide(), IltiqaRepair()),
         Phase.COLOUR: (Emphasis(),),
         Phase.RELEASE: (Qalqala(),),
     }

@@ -13,7 +13,15 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from ..engine.neighbourhood import Neighbourhood
-from ..engine.plan import MergeInto, Plan, Realize, Verdict, mint
+from ..engine.plan import (
+    Length,
+    MergeInto,
+    Plan,
+    Realize,
+    Relength,
+    Verdict,
+    mint,
+)
 from ..model.address import BoundaryPlan, SlotId
 from ..model.canon import CanonLetter as L
 from ..model.canon import NucleusKind, Onset, Phase, Quality, Rule
@@ -67,6 +75,71 @@ class PausalGlide:
                 ),
                 MergeInto(at, Aspect.ONSET, before.id, Aspect.NUCLEUS),
             ),
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class IltiqaRepair:
+    """Two sākins meet, so the madd letter goes.
+
+    `ٱهْدِنَا ٱلصِّرَٰطَ` is read `ihdina-ṣ-ṣirāṭ`: the ālif of `نَا` is itself
+    sākin, the lām of the article behind the elided waṣl hamza is sākin, and
+    Arabic does not begin a syllable with two of them. The long vowel shortens.
+
+    This is one rule and it is 2,688 words — `a:`→`a` at 1,413 sites, `i:`→`i`
+    at 764, `u:`→`u` at 511 — which was 57% of the whole regression residue and
+    read as a long tail of unrelated defects. It needs no corpus: every tajwīd
+    primer states it.
+
+    It emits `Relength` rather than realizing the vowel itself. The vowel is
+    still plainly realized — nothing merges, nothing is deleted, only its
+    length changes — so unlike `PausalGlide` this rule does not own a sound,
+    which is why `ILTIQA_REPAIR` is declared classification-only alongside
+    `TAFKHEEM` and `TARQEEQ`.
+    """
+
+    rule: Rule = Rule.ILTIQA_REPAIR
+    phase: Phase = Phase.LENGTH
+    triggers: frozenset = frozenset({NucleusKind.LONG, NucleusKind.SILAH})
+
+    def look(
+        self, near: Neighbourhood, plan: Plan, at: SlotId,
+        boundaries: BoundaryPlan,
+    ) -> Verdict | None:
+        del plan, boundaries
+        slot, word = near.slot(at), near.word_of(at)
+        if slot is None or word is None:
+            return None
+        if slot.nucleus.kind not in (NucleusKind.LONG, NucleusKind.SILAH):
+            return None
+        slots = near.score.words[word].slots
+        if not slots or slots[-1].id != at:
+            return None
+        following = near.after(at)
+        if following is None:
+            # `after` already refuses to look across a stop, which is the whole
+            # boundary condition: at a pause there is no second sākin to meet,
+            # and the madd stands. No rule here reads the plan.
+            return None
+        if following.onset is Onset.WASL:
+            # The waṣl hamza and its helping vowel are exactly what a join
+            # removes, so the sākin the madd actually meets is the consonant
+            # behind it — the lām of `ٱلصِّرَٰطَ`. Read from the Score rather
+            # than from the plan: `Onset.WASL` *means* "absent when joined to",
+            # so this is the canonical statement of the same fact and does not
+            # make a LENGTH rule depend on what BOUNDARY happened to record.
+            following = near.after(following.id)
+            if following is None:
+                return None
+        if following.nucleus.kind is not NucleusKind.SILENT:
+            return None
+        return Verdict(
+            Occurrence(
+                mint(Rule.ILTIQA_REPAIR, at),
+                Rule.ILTIQA_REPAIR,
+                Participants((at, following.id)),
+            ),
+            (Relength(at, Length.SHORT),),
         )
 
 
