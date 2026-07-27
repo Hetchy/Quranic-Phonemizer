@@ -60,20 +60,20 @@ def relengthened(nucleus) -> Long:
 def otiose_waw(context: Context) -> bool:
     """`أُو۟لَـٰٓئِكَ`, `أُو۟لِى` - a waw in the rasm that never sounds.
 
-    Uthmani marks it with `۟`; IndoPak writes nothing. One shape covers
-    both: a hamza with damma, a bare waw, then a lam or raa.
+    A script that marks its silent letters never reaches here; one that marks
+    what it sounds leaves this waw bare, and `ٱلْأُولَىٰ` is the same shape.
     """
+    cluster = context.cluster
+    if cluster.marks or not cluster.marked_script:
+        return False
     if context.index == context.word_bounds[0]:
         return False
     head = context.clusters[context.index - 1]
-    if head.letter not in (CanonLetter.ALIF, CanonLetter.HAMZA):
-        return False
-    if not head.has("damma"):
-        return False
     following = context.ahead()
     return (
-        context.cluster.letter is CanonLetter.WAW
-        and not context.cluster.has("fatha", "damma", "kasra", "shadda")
+        head.letter in (CanonLetter.ALIF, CanonLetter.HAMZA)
+        and head.has("damma")
+        and cluster.letter is CanonLetter.WAW
         and following is not None
         and following.letter in (CanonLetter.LAM, CanonLetter.RA)
     )
@@ -99,6 +99,19 @@ def alif_in_leen(context: Context) -> bool:
     )
 
 
+def _alif_al_fasila(context: Context, previous) -> bool:
+    """The alif written after a verb's waw and never said: `قَالُوا۟`,
+    `يَعْفُوَا۟`. The dual's alif is written the same and is read, and what
+    tells them apart is the vowel before the waw."""
+    if context.previous_letter is not CanonLetter.WAW:
+        return False
+    if previous.kind is not NucleusKind.SHORT:
+        return True   # the quiescent plural waw
+    # `يَعْفُوَا۟` carries the stem's damma; `ذَوَا` and `دَعَوَا` a fatha.
+    before = context.index - 2
+    return before >= context.word_bounds[0] and context.clusters[before].has("damma")
+
+
 def otiose_alif(context: Context) -> bool:
     """The alif of the plural waw (`قَالُوا۟`), and the alif no vowel can carry.
 
@@ -116,7 +129,7 @@ def otiose_alif(context: Context) -> bool:
     if previous is None:
         return False
     if context.word_final and (
-        context.previous_letter is CanonLetter.WAW
+        _alif_al_fasila(context, previous)
         or (previous.kind is NucleusKind.SHORT and previous.quality is Quality.U)
     ):
         return True

@@ -28,6 +28,7 @@ from ..model.inscription import GraphemeClass, SlotFact, StopAdvice
 SCHEMA_VERSION = 1
 
 _SECTIONS = {
+    "marks_what_it_sounds",
     "letters",
     "seats",
     "combining_hamza",
@@ -87,6 +88,11 @@ class Inventory:
     marks: dict[str, MarkEntry]
     seats: frozenset[str]
     combining_hamza: frozenset[str]
+    marks_what_it_sounds: bool
+    """Every letter this script sounds carries a haraka, a sukun or a shadda,
+    so a letter with no mark at all is rasm. Scripts that leave their length
+    carriers bare say `false` and mark the silent letters instead."""
+
     source: Path
 
     #: A seat is a base position with no letter identity of its own. It shows
@@ -200,6 +206,7 @@ def load_inventory(
         marks=marks,
         seats=frozenset(data.get("seats") or ()),
         combining_hamza=frozenset(data.get("combining_hamza") or ()),
+        marks_what_it_sounds=bool(data.get("marks_what_it_sounds", False)),
         source=path,
     )
 

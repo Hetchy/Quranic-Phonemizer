@@ -131,7 +131,7 @@ def _helping_vowel(context: Context) -> Quality:
     following = context.ahead()
     if following is not None and following.letter is CanonLetter.LAM:
         return Quality.A
-    if context.lexicon.is_wasl_noun(_skeleton(context)):
+    if context.lexicon.takes_wasl_kasra(_skeleton(context)):
         return Quality.I
     third = context.ahead(2)
     if third is not None and third.has("damma"):

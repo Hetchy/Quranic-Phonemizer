@@ -47,7 +47,7 @@ def test_closed_sets_have_the_sizes_their_arguments_depend_on() -> None:
         "Aspect is the slot's own field partition; a third member would mean "
         "the slot gained a third field"
     )
-    assert len(canon.RuleFamily) == 6
+    assert len(canon.RuleFamily) == 7
 
 
 def test_every_rule_declares_a_family() -> None:

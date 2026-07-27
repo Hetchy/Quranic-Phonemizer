@@ -83,9 +83,15 @@ def carrier(context: Context) -> Outcome:
     if previous.kind is NucleusKind.SHORT:
         if letter is CARRIER_OF[previous.quality]:
             return Sets(SlotFact.NUCLEUS, Long(previous.quality), Target.PREVIOUS)
-        if cluster.bare_rasm and context.word_final and previous.quality is Quality.A:
+        if (
+            cluster.bare_rasm
+            and context.word_final
+            and previous.quality is Quality.A
+            and not cluster.has("sukun")
+        ):
             # IndoPak writes the alif maqsura as a plain yaa; Uthmani writes
-            # `ى`. Both stand for an alif nobody wrote.
+            # `ى`. Both stand for an alif nobody wrote - unless a sukun says
+            # the yaa is the consonant of a diphthong, as in `ٱثْنَىْ`.
             return Sets(SlotFact.NUCLEUS, Long(Quality.A), Target.PREVIOUS)
     if previous.kind in LONG_KINDS:
         return Absent()

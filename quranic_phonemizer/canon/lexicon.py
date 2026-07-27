@@ -33,6 +33,10 @@ CLITIC_PRONOUNS: frozenset[str] = frozenset(
 #: Below this length a stem is not specific enough to match a prefix.
 _PREFIX_MIN = 3
 
+#: One letter and its vowel, in the vocalised notation `_vocalised` writes.
+#: `الآن` is three past `أنا` and is not it.
+_PROCLITIC = 2
+
 
 class LexiconError(ValueError):
     pass
@@ -46,9 +50,9 @@ class Lexicon:
     """Proper nouns and form-IV verbal nouns the three rules over-accept."""
     wasl_exempt_doubled: frozenset[str] = frozenset()
     """`ألَّف`, `إلَّم` - hamza plus a doubled lam that is not the article."""
-    wasl_nouns: frozenset[str] = frozenset()
-    """The ten nouns, whose helping vowel is kasra regardless of the third
-    letter - `اسم` would otherwise derive damma."""
+    wasl_kasra: frozenset[str] = frozenset()
+    """Words whose wasl hamza takes kasra although their third letter carries
+    damma, because that damma is not the stem's: `اسم`, `ٱمْشُوا۟`."""
     pausal_lexemes: frozenset[str] = frozenset()
     """The seven alifs: words whose final alif is short in wasl and long at
     pause. IndoPak's script has no grapheme that distinguishes them, so the
@@ -60,53 +64,53 @@ class Lexicon:
     source: Path | None = field(default=None, compare=False)
 
     def is_wasl_exempt(self, skeleton: str) -> bool:
-        return self._matches(self.wasl_particles, skeleton) or self._matches(
+        return _inflected(self.wasl_particles, skeleton) or _inflected(
             self.wasl_exempt, skeleton
         )
 
-    @staticmethod
-    def _matches(entries: frozenset[str], skeleton: str) -> bool:
-        """A lexeme, with or without a clitic pronoun.
-
-        Arabic's clitic pronouns are a closed set, so matching stem + pronoun
-        avoids enumerating every inflected form of `إيمان` separately.
-        """
-        if skeleton in entries:
-            return True
-        for stem in entries:
-            if any(skeleton == stem + clitic for clitic in CLITIC_PRONOUNS):
-                return True
-            # A 3+ letter stem is specific enough to match as a prefix, e.g.
-            # `ألقى`, `ألقينا`, `ألقوا`; shorter stems must match exactly.
-            #
-            # A hamza+lam entry is safe here only because `is_wasl` checks
-            # the article first; swapping that order lets `ءلق` match
-            # `القرآن`. See the ordering comment in canon/derive/wasl.py.
-            if len(stem) >= _PREFIX_MIN and skeleton.startswith(stem):
-                return True
-        return False
-
     def is_wasl_exempt_doubled(self, skeleton: str) -> bool:
-        return self._matches(self.wasl_exempt_doubled, skeleton)
+        return _inflected(self.wasl_exempt_doubled, skeleton)
 
     def is_pausal(self, skeleton: str) -> bool:
-        """Matched exactly, or after a single proclitic.
-
-        A proclitic is one letter with one vowel, which keeps `وَأَنَا` matched
-        without matching any longer word ending the same way.
-        """
+        """Matched exactly, or after a single proclitic: `وَأَنَا` is `أنا`."""
         if skeleton in self.pausal_lexemes:
             return True
         return any(
-            len(skeleton) - len(entry) in (2, 3) and skeleton.endswith(entry)
+            len(skeleton) - len(entry) == _PROCLITIC and skeleton.endswith(entry)
             for entry in self.pausal_lexemes
         )
 
-    def is_wasl_noun(self, skeleton: str) -> bool:
-        return self._matches(self.wasl_nouns, skeleton)
+    def takes_wasl_kasra(self, skeleton: str) -> bool:
+        """Matched as it stands: `است` heads every form-X verb, whose helping
+        vowel its own third letter decides."""
+        return _bare(self.wasl_kasra, skeleton)
 
     def is_form_eight_lam(self, skeleton: str) -> bool:
-        return self._matches(self.form_eight_lam, skeleton)
+        """Matched as it stands: `ٱلتَّقْوَىٰ` and `ٱلتَّمَاثِيل` extend the
+        stems of `ٱلْتَقَى` and `ٱلْتَمِسُوا` and are not them."""
+        return _bare(self.form_eight_lam, skeleton)
+
+
+def _bare(entries: frozenset[str], skeleton: str) -> bool:
+    """A lexeme, with or without a clitic pronoun.
+
+    Arabic's clitic pronouns are a closed set, so matching stem plus pronoun
+    avoids enumerating every inflected form of `إيمان` separately.
+    """
+    return skeleton in entries or any(
+        skeleton == stem + clitic
+        for stem in entries
+        for clitic in CLITIC_PRONOUNS
+    )
+
+
+def _inflected(entries: frozenset[str], skeleton: str) -> bool:
+    """That, or a stem long enough to be specific as a prefix -- `ألقى`,
+    `ألقينا`, `ألقوا` are one entry."""
+    return _bare(entries, skeleton) or any(
+        len(stem) >= _PREFIX_MIN and skeleton.startswith(stem)
+        for stem in entries
+    )
 
 
 EMPTY = Lexicon()
@@ -118,7 +122,7 @@ def load_lexicon(path: Path) -> Lexicon:
         data,
         {"schema_version"},
         name=str(path),
-        optional=set(BUDGETS) | {"wasl_nouns"},
+        optional=set(BUDGETS) | {"wasl_kasra"},
     )
     if data["schema_version"] != SCHEMA_VERSION:
         raise LexiconError(
@@ -127,7 +131,7 @@ def load_lexicon(path: Path) -> Lexicon:
         )
     sections = {
         name: frozenset(data.get(name) or ())
-        for name in (*BUDGETS, "wasl_nouns")
+        for name in (*BUDGETS, "wasl_kasra")
     }
     for name, ceiling in BUDGETS.items():
         size = len(sections[name])

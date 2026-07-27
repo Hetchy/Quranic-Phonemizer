@@ -37,8 +37,8 @@ class Qalqala:
         slot, word = near.slot(at), near.word_of(at)
         if slot is None or word is None:
             return None
-        if plan.merged_away(at, Aspect.ONSET):
-            return None  # nothing to release: the closure did not survive MERGE
+        if plan.merged_away(at, Aspect.ONSET) or plan.assimilated_from(at):
+            return None  # an assimilated closure is held, never released
 
         # The echo needs a real closure: either canonically silent, or
         # silenced by a BOUNDARY rule. A long final vowel is neither.

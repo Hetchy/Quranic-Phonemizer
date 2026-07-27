@@ -47,6 +47,8 @@ class Cluster:
     dagger for the previous slot (Uthmani `ى`, `و`)."""
     bare_rasm: bool = False
     """Bare and word-final, the glyph stands for an unwritten alif."""
+    marked_script: bool = False
+    """This script marks every letter it sounds, so no mark at all is rasm."""
 
     def mark(self, role: str) -> Mark | None:
         for mark in self.marks:

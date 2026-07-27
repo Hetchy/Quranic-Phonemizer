@@ -41,13 +41,15 @@ class ArticleShape:
         word = near.word_of(at)
         slots = () if word is None else near.score.words[word].slots
         index = next((i for i, slot in enumerate(slots) if slot.id == at), 0)
-        if index == 0:
+        if index == 0 or slots[index].letter is not L.LAM:
             return False
         before = slots[index - 1]
         if before.onset is Onset.WASL:
-            # Form VIII lam-initial verbs are the same shape -- `ٱلْتَقَى`
-            # against `ٱلتَّوْبَة` -- so a lexeme fact tells them apart.
-            return not self.is_form_eight_lam(_skeleton(slots))
+            # Form VIII lam-initial verbs are the same shape and the same
+            # Score -- `ٱلْتَقَى` against `ٱلتَّقْوَىٰ` -- because the shadda
+            # of an assimilation is attested, not canonical. Read from the
+            # article's own slot so a proclitic does not hide the stem.
+            return not self.is_form_eight_lam(_skeleton(slots[index - 1:]))
         if _is_ibdal_alif(before):
             # `ءَآلذَّكَرَيْنِ`: after an interrogative hamza the article's own
             # hamza is not written as one, it is the length that replaced it.

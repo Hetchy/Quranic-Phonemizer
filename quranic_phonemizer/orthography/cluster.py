@@ -77,6 +77,7 @@ class _ReadState:
             onset=entry.onset,
             dagger_host=entry.dagger_host,
             bare_rasm=entry.bare_rasm,
+            marked_script=self.inventory.marks_what_it_sounds,
         )
         self.letter_index += 1
         self.clusters.append(cluster)

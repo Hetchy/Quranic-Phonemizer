@@ -55,8 +55,8 @@ jobs:
       - run: pip install -e .
       - name: regression oracle, both modes
         run: |
-          python tools/floor.py regression word 99.809
-          python tools/floor.py regression verse 97.564
+          python tools/floor.py regression word 99.919
+          python tools/floor.py regression verse 97.653
 
   roundtrip:
     # Every Score can be spelled and spells back to itself. The floor is the
@@ -82,8 +82,8 @@ jobs:
       - run: pip install -e .
       - name: unmet attestations, both scripts
         run: |
-          python tools/floor.py attest uthmani 186
-          python tools/floor.py attest indopak 247
+          python tools/floor.py attest uthmani 178
+          python tools/floor.py attest indopak 239
 
   l1:
     # Score-level script equality. The ceiling stops the residue growing.

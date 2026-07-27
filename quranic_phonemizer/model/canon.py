@@ -204,6 +204,9 @@ class RuleFamily(StrEnum):
     LENGTHENING = "lengthening"
     EMPHASIS = "emphasis"
     RELEASE = "release"
+    ELISION = "elision"
+    """A sound a boundary removes. No script attests one, so it appears in
+    `FAMILY_OF` and never in an inventory."""
 
 
 class Phase(StrEnum):
@@ -302,13 +305,13 @@ FAMILY_OF: dict[Rule, RuleFamily] = {
     Rule.MADD_ARID_LIL_SUKUN: RuleFamily.LENGTHENING,
     Rule.MADD_LEEN: RuleFamily.LENGTHENING,
     Rule.IWAD: RuleFamily.LENGTHENING,
-    Rule.WASL_ELISION: RuleFamily.ASSIMILATION,
+    Rule.WASL_ELISION: RuleFamily.ELISION,
     Rule.WASL_START: RuleFamily.INSERTION,
     Rule.ILTIQA_REPAIR: RuleFamily.INSERTION,
-    Rule.WAQF_ENDING: RuleFamily.ASSIMILATION,
+    Rule.WAQF_ENDING: RuleFamily.ELISION,
     Rule.SILAH: RuleFamily.LENGTHENING,
     Rule.SAKT: RuleFamily.RELEASE,
-    Rule.PLAIN: RuleFamily.ASSIMILATION,
+    Rule.PLAIN: RuleFamily.ELISION,
 }
 
 #: Rules that classify without producing a sound of their own.

@@ -67,9 +67,14 @@ wasl_exempt_doubled:
   - "ءلف"       # ألّف
   - "ءلم"       # إلّم
 
-# The ten nouns: kasra regardless of the third letter. `اسم` would otherwise
-# derive damma from the mīm.
-wasl_nouns: ["ءسم", "ءبن", "ءبنة", "ءمرء", "ءمرءة", "ءثنن", "ءثنتن", "ءست"]
+# Kasra although the third letter carries damma, because that damma is not
+# the stem's. Two closed classes, one behaviour: the ten nouns, where the
+# damma is an inflectional ending, and the defective verbs of `يَمْشِى`,
+# `يَقْضِى`, `يَبْنِى` and `يَأْتِى`, where it belongs to the plural waw that
+# replaced their dropped final radical. `ٱدْعُوا۟` keeps its damma: `يَدْعُو`
+# has one of its own, and nothing in the rasm shows the difference.
+wasl_kasra: ["ءسم", "ءبن", "ءبنة", "ءمرء", "ءمرءة", "ءثنن", "ءثنتن", "ءست",
+             "ءمش", "ءقض", "ءءت", "ءءتن"]
 
 # The seven alifs: short in wasl, long at pause.
 # `لَٰكِنَّ` and `لَّـٰكِنَّا۠` share a key even with the vowels and the
@@ -87,4 +92,4 @@ pausal_lexemes: ["ءaنa",                  "قaوaرiرa",
 #   لقي  التقى، التقت، التقيتم، التقطه، التقمه
 #   لمس  التمسوا
 #   لفف  التفت
-form_eight_lam: ["ءلتق", "ءلتم", "ءلتف"]
+form_eight_lam: ["ءلتق", "ءلتقط", "ءلتقم", "ءلتمس", "ءلتفت"]

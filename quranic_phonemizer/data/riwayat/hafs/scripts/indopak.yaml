@@ -4,6 +4,11 @@ schema_version: 1
 script: indopak
 riwayah: hafs
 
+# Every sounded letter carries a haraka, a sukun or a shadda, so a letter
+# with none at all is rasm. Uthmani leaves its carriers bare instead and
+# marks the rasm with `۟`.
+marks_what_it_sounds: true
+
 letters:
   "ب": BA
   "ت": TA
