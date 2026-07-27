@@ -1,8 +1,7 @@
 """The phase driver: run the rules, then turn the Plan into a Performance.
 
-Phases are closed and ordered; within a phase rules are unordered and conflicts
-are errors. That turns domain-facts invariant 2 — exactly one rule of a family
-fires per trigger — from a comment into something that fails loudly.
+Phases are closed and ordered; within a phase, rules are unordered and any
+conflict between them raises rather than resolving silently.
 """
 from __future__ import annotations
 
@@ -102,21 +101,12 @@ def perform(
 
 
 def _fill_plain(plan: Plan, score: Score, mint: _Mint) -> list[tuple]:
-    """Plain realization, as a default rather than a classifier.
+    """Realize every (slot, aspect) no verdict claimed, tagged `Rule.PLAIN`.
 
-    `PLAIN` cannot be a rule in the phase list: it would collide with every
-    merging family on the same conflict key, and resolving that would need an
-    ordering *within* a phase, which ADR-004 §3 rules out. So the engine fills
-    whatever no verdict claimed and tags it `Rule.PLAIN`.
-
-    The invariant survives intact — no sound exists except as the output of a
-    named occurrence — and E1 stays a genuine error rather than a precedence
-    question. `PLAIN` occurrences are internable to one object per traversal,
-    which is what makes this cheap (ADR-008 §7.7).
+    `PLAIN` can't be a classifier: it would conflict with every claiming rule.
     """
-    # Only effects that *produce or remove* a sound claim the slot. `Recolour`
-    # and `Relength` modify one, so counting them here would leave the sound
-    # they modify unrealized — P3 caught exactly that.
+    # Only effects that produce or remove a sound claim the slot; Recolour
+    # and Relength modify an existing one and must not count as claiming it.
     claimed = {
         (effect.slot, effect.aspect)
         for effect in plan.effects()
@@ -133,13 +123,10 @@ def _fill_plain(plan: Plan, score: Score, mint: _Mint) -> list[tuple]:
 
 
 def _triggered(classifier, slot: Slot) -> bool:
-    """One index, keyed on whichever closed set the rule declared.
+    """Whether a slot matches a classifier's declared trigger set.
 
-    `Quality` is in the list because it is one of the Slot's closed
-    vocabularies like the others, and leaving it out silently disabled every
-    rule that keys on one: `CanonicalColour` declares `Quality.IMALA` and
-    `Quality.ISHMAM`, matched nothing, and made two rule members look absent
-    from the corpus when the Score was carrying the fact all along.
+    Checks letter, nucleus kind, onset, and quality; no triggers declared
+    means the classifier always fires.
     """
     triggers = classifier.triggers
     if not triggers:
@@ -149,6 +136,7 @@ def _triggered(classifier, slot: Slot) -> bool:
         or slot.nucleus.kind in triggers
         or slot.onset in triggers
         or getattr(slot.nucleus, "quality", None) in triggers
+        or bool(slot.annotations & triggers)
     )
 
 
@@ -161,12 +149,8 @@ def _materialise(
     selection: VariantSelection,
 ) -> Performance:
     mint = _Mint(score.words[0].location.verse if score.words else None)
-    # Minted the same way every other occurrence is. It used to come from a
-    # sequential counter sharing one number space with `plan.mint`'s computed
-    # ordinals, so the plain occurrence took id `verse!1` and collided with
-    # whatever rule sits at index 0 firing on slot 1 -- 20:55 `مِنْهَا`, where
-    # izhar halqi does. Two minting schemes in one space is the defect; the
-    # 405 waqf duplicates were the other half of it.
+    # Minted through the same `plan_mint` scheme as every other occurrence,
+    # so its id cannot collide with one a rule mints independently.
     plain = Occurrence(
         plan_mint(Rule.PLAIN, SlotId(score.words[0].location.verse, 0)),
         Rule.PLAIN,
@@ -182,10 +166,8 @@ def _materialise(
         occurrences.append(verdict.occurrence)
     occurrences.append(plain)
 
-    # Order matters. Explicit realizations, then the plain default, and only
-    # then the merges — a merge target is usually realized by the default, so
-    # resolving merges first leaves half a merger behind. P3 caught exactly
-    # that, which is the argument for asserting the laws at all.
+    # Merges resolve last: a merge target is usually realized by the plain
+    # fill, so merging first would leave it half-hosted.
     for _, verdict in plan.entries:
         for effect in verdict.effects:
             if isinstance(effect, Realize):
@@ -313,9 +295,8 @@ def lengthened(plan: Plan, slot: SlotId) -> Length | None:
 
 
 def has_content(slot: Slot, aspect: Aspect) -> bool:
-    """ADR-002 §7.4, stated precisely: `ONSET` always has canonical content;
-    `NUCLEUS` has it unless the nucleus is `Silent`. A canonically absent
-    nucleus is not a silenced one and requires no edge."""
+    """`ONSET` always has canonical content; `NUCLEUS` has it unless the
+    nucleus is `Silent`. A canonically absent nucleus needs no Silent edge."""
     if aspect is Aspect.ONSET:
         return True
     return slot.nucleus.kind is not NucleusKind.SILENT

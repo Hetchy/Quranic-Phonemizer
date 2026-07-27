@@ -1,12 +1,7 @@
-"""Two things no law could see, asserted over the assembled ruleset.
+"""Every declared rule must actually fire, and no two rules may collide.
 
-E4 inspects occurrences that *fired*, so a rule that never fires is invisible
-to every law in `engine/laws.py`. 15 of 38 `Rule` members were dead and the
-suite was green — including the whole mīm sākinah family, in a module whose
-docstring named it. And E1 only ran when somebody ran a harness by hand.
-
-Both run here, over the real `HAFS` ruleset. Every other engine test binds a
-one-rule `RuleSet`, which is why neither was visible.
+Runs over the real `HAFS` ruleset rather than a single-rule set, since both
+checks depend on the full rule interaction.
 """
 from __future__ import annotations
 
@@ -21,9 +16,8 @@ from quranic_phonemizer.riwayat.hafs import HAFS
 
 from conftest import score_for
 
-#: Verses chosen to reach every implemented rule, not verses that happened to
-#: be convenient. The named ones below are the *only* sites some families
-#: have, and a sample without them was green while four rules were unreached.
+#: Chosen to reach every implemented rule; the named ones are the only known
+#: site for some rule families.
 SITES = [
     (2, 256),   # قَد تَّبَيَّنَ — mutajanisayn kamil, dāl into tāʾ
     (11, 42),   # ٱرْكَب مَّعَنَا — kamil, bāʾ into mīm
@@ -44,8 +38,8 @@ SITES = [
     (1, 7),     # ٱلضَّآلِّينَ — madd lāzim in an ordinary word
 ]
 
-#: Plus a broad sweep for the common families: nūn and mīm in all their
-#: outcomes, the article lām, qalqala, emphasis, waqf.
+#: Plus a broad sweep for the common families: noon and meem in all their
+#: outcomes, the article lam, qalqala, emphasis, waqf.
 SAMPLE = (
     [(1, n) for n in range(1, 8)]
     + [(2, n) for n in range(1, 26)]
@@ -54,13 +48,10 @@ SAMPLE = (
     + SITES
 )
 
-#: Declared absent, with the reason. A member here is a promise, not an
-#: excuse: it must move out of this list or out of `Rule`.
-#: Empty, and that is the point. Every member of `Rule` is produced by some
-#: classifier somewhere in the corpus. It held 12 entries when this file was
-#: written and 15 members were dead; anything added back needs a reason next
-#: to it, and `test_the_deferred_list_does_not_rot` fails if the reason
-#: stops being true.
+#: Rules declared absent, each with a reason. Every member of `Rule` must be
+#: produced by some classifier in the corpus; a member here needs a reason,
+#: and `test_the_deferred_list_does_not_rot` fails once the reason no longer
+#: holds.
 DEFERRED: set[Rule] = set()
 
 
@@ -76,8 +67,8 @@ def _fired(packed, shared, surah, ayah):
 
 
 def test_every_rule_not_declared_deferred_actually_fires(packed, shared):
-    """Falsifier: a `Rule` member with no classifier, like the whole mīm
-    sākinah family was. Add a member without a rule and this fails."""
+    """Falsifier: a `Rule` member with no classifier. Add one without an
+    implementation and this fails."""
     fired: set[Rule] = set()
     for surah, ayah in SAMPLE:
         fired |= _fired(packed, shared, surah, ayah)
@@ -101,12 +92,8 @@ def test_the_deferred_list_does_not_rot(packed, shared):
 
 @pytest.mark.parametrize(("surah", "ayah"), SAMPLE)
 def test_no_two_rules_claim_the_same_slot_and_aspect(packed, shared, surah, ayah):
-    """E1, in the suite rather than only in a harness somebody remembers to run.
-
-    It has caught three genuine overlaps so far, and each was fixed by making
-    the conditions mutually exclusive rather than by ranking them. The next
-    family to overlap should fail here, on the first test run, not on verse
-    3,000 of a manual parity pass.
+    """No two rules may claim the same slot and aspect; overlaps must be
+    resolved by mutually exclusive conditions, not by ranking.
     """
     score = score_for(packed, shared, surah, ayah)
     try:

@@ -1,8 +1,7 @@
-"""Phase 3's gate: the nūn family end to end, on both scripts.
+"""The noon family end to end, on both scripts.
 
-Proves the effect model, E1, and — the point of the slice — that nūn sākinah
-and tanwīn are **the same rule on the same trigger**. If that is wrong it fails
-here, at ~4,671 sites (ADR-004 §8).
+Noon sakinah and tanween must be the same rule on the same trigger, and no
+two effects may claim the same slot and aspect.
 """
 from __future__ import annotations
 
@@ -12,7 +11,6 @@ import pytest
 
 from conftest import performance_for, score_for
 from quranic_phonemizer.engine.classifier import RuleSet
-from quranic_phonemizer.engine.laws import LawError, check_performance
 from quranic_phonemizer.engine.plan import ConflictError, Plan, Realize
 from quranic_phonemizer.model.address import Script, SlotId, VerseRef
 from quranic_phonemizer.model.canon import CanonLetter, NucleusKind, Phase, Rule
@@ -24,45 +22,33 @@ from quranic_phonemizer.model.performance import (
     Occurrence,
     Participants,
 )
-from quranic_phonemizer.rules.noon_sakinah import (
-    IDGHAM_GHUNNAH,
-    IDGHAM_NO_GHUNNAH,
-    IKHFAA,
-    IQLAB,
-    IZHAR,
-    NOT_A_FOLLOWER,
-    NoonSakinah,
-)
+from quranic_phonemizer.engine.laws import check_performance
+from quranic_phonemizer.riwayat.hafs import rule_tables
+from quranic_phonemizer.rules.noon_sakinah import NoonSakinah
 
-RULES = RuleSet({Phase.MERGE: (NoonSakinah(),)})
+FOLLOWERS = rule_tables().followers_of_noon
+RULES = RuleSet({Phase.MERGE: (NoonSakinah(followers=FOLLOWERS),)})
 
 
 def test_the_five_outcomes_partition_the_alphabet() -> None:
-    """Mutually exclusive by construction, which is why E1 can never fire in
-    this family — a sixth branch would be a partition error, not a precedence
-    question."""
-    sets = (IZHAR, IQLAB, IDGHAM_GHUNNAH, IDGHAM_NO_GHUNNAH, IKHFAA)
+    """A sixth branch would be a partition error, not a precedence question."""
+    sets = (*FOLLOWERS.by_rule.values(), FOLLOWERS.remainder())
     union: set = set()
     for one in sets:
         assert not (union & one), f"overlap at {union & one}"
         union |= one
-    assert union == set(CanonLetter) - NOT_A_FOLLOWER
+    assert union == set(CanonLetter) - FOLLOWERS.never_follows
 
 
 def test_the_outcome_sets_have_the_counts_the_domain_gives_them() -> None:
-    """The coverage half of the previous test was a tautology: `IKHFAA` is
-    *defined* as the complement, so the union always equalled the alphabet
-    however wrong the members were. It was, and nobody could see it — the
-    complement swept in the ālif and the tāʾ marbūṭa and made the fifteen
-    seventeen.
-
-    Counts are what a primer states, so counts are what this asserts.
-    """
-    assert len(IZHAR) == 6, "the six throat letters"
-    assert len(IQLAB) == 1, "only the bāʾ"
-    assert len(IDGHAM_GHUNNAH) == 4, "يرملون minus the two without ghunnah"
-    assert len(IDGHAM_NO_GHUNNAH) == 2, "lām and rāʾ"
-    assert len(IKHFAA) == 15, "the fifteen"
+    """Ikhfaa is the remainder, so a union check alone cannot catch a
+    miscounted member."""
+    by_rule = FOLLOWERS.by_rule
+    assert len(by_rule[Rule.IZHAR_HALQI]) == 6, "the six throat letters"
+    assert len(by_rule[Rule.IQLAB]) == 1, "only the baa"
+    assert len(by_rule[Rule.IDGHAM_BI_GHUNNAH]) == 4, "يرملون minus two"
+    assert len(by_rule[Rule.IDGHAM_BILA_GHUNNAH]) == 2, "lam and raa"
+    assert len(FOLLOWERS.remainder()) == 15, "the fifteen"
 
 
 @pytest.mark.parametrize("script", list(Script))
@@ -78,8 +64,8 @@ def test_laws_hold_over_a_sample_of_the_corpus(packed, shared, script) -> None:
 
 
 def test_tanween_and_noon_sakinah_are_one_rule(packed, shared) -> None:
-    """2:5 carries both: `مِّن رَّبِّهِمْ` is a nūn sākinah and `هُدًى` a tanwīn,
-    and both must be produced by the same classifier and the same trigger."""
+    """2:5 carries both: `مِّن رَّبِّهِمْ` is a noon sakinah and `هُدًى` a
+    tanween, produced by the same classifier and the same trigger."""
     score, performance = performance_for(packed, shared, 2, 5, RULES)
     fired = {o.rule for o in performance.occurrences}
     assert Rule.IDGHAM_BILA_GHUNNAH in fired  # min + ra
@@ -95,15 +81,15 @@ def test_tanween_and_noon_sakinah_are_one_rule(packed, shared) -> None:
         if o.rule is not Rule.PLAIN
         for parts in o.parts.slots
     }
-    assert triggers & named, "no nūn slot participated in any occurrence"
+    assert triggers & named, "no noon slot participated in any occurrence"
 
 
 def test_a_merger_is_a_pair_of_edges(packed, shared) -> None:
-    """`مِّن رَّبِّهِمْ` — `MergedInto` and `Hosts` share a `SoundId` and an
-    `OccurrenceId`. There is no source/target boolean anywhere."""
+    """`MergedInto` and `Hosts` share a sound and an occurrence, with no
+    source/target boolean anywhere."""
     _, performance = performance_for(packed, shared, 2, 5, RULES)
     merges = [a for a in performance.attributions if isinstance(a, MergedInto)]
-    assert merges, "2:5 has an idghām"
+    assert merges, "2:5 has an idgham"
     hosts = {
         (a.sound, a.by) for a in performance.attributions if isinstance(a, Hosts)
     }
@@ -112,19 +98,19 @@ def test_a_merger_is_a_pair_of_edges(packed, shared) -> None:
 
 
 def test_izhar_is_classification_only(packed, shared) -> None:
-    """It produces no sound of its own and still exists, because every
-    attribution needs a `by` and a projection must be able to find it."""
+    """It produces no sound of its own and still exists, so a projection can
+    find it."""
     _, performance = performance_for(packed, shared, 2, 6, RULES)
     izhar = [o for o in performance.occurrences if o.rule is Rule.IZHAR_HALQI]
     if not izhar:
-        pytest.skip("no iẓhār in this verse")
+        pytest.skip("no izhar in this verse")
     owned = {a.by for a in performance.attributions}
     assert all(o.id not in owned for o in izhar)
 
 
 def test_no_cross_word_effect_crosses_a_stop(packed, shared) -> None:
-    """E2. Under an all-stop plan the family may still fire inside a word but
-    never across one."""
+    """Under an all-stop plan the family may fire inside a word but never
+    across one."""
     from quranic_phonemizer.engine.run import perform
     from quranic_phonemizer.model.address import BoundaryPlan, Junction
 
@@ -143,7 +129,7 @@ def test_no_cross_word_effect_crosses_a_stop(packed, shared) -> None:
 
 
 def test_two_effects_on_one_key_raise_with_both_tags() -> None:
-    """E1, directly. Last-writer-wins is what this replaces."""
+    """Two effects claiming the same key must raise, naming both."""
     plan = Plan()
     slot = SlotId(VerseRef(1, 1), 0)
     sound = (Consonant(CanonLetter.NOON),)
@@ -168,7 +154,7 @@ def _verdict(rule: Rule, slot: SlotId, sounds):
 
 
 def test_every_sound_has_a_named_occurrence(packed, shared) -> None:
-    """The invariant ADR-002 §5 calls the one most worth keeping."""
+    """Every attribution must name an occurrence that actually exists."""
     _, performance = performance_for(packed, shared, 2, 2, RULES)
     known = {o.id for o in performance.occurrences}
     assert all(a.by in known for a in performance.attributions)

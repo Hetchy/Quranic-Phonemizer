@@ -1,14 +1,7 @@
-"""The script boundary: what an adapter emits, and what it may not decide.
+"""The script boundary: what an adapter may emit, and what it may not decide.
 
-An adapter extracts **evidence**. It does not author the Score. Everything a
-script under-specifies is supplied by `canon.build`, which is shared and
-script-independent (ADR-001 §2).
-
-The seam is narrow on purpose. A mark either carries a **literal canonical
-value** — "in Uthmani, U+064E on a slot's base evidences `NUCLEUS = Short(A)`"
-— or it names a **derivation**, which is a module under `canon/derive/`. The
-adapter never computes the second kind; it declares which one applies. That is
-what keeps "how thin the adapters are" a measurement rather than a promise.
+An adapter extracts evidence; `canon.build` authors the Score. A mark either
+carries a literal value or names a derivation -- the adapter never computes it.
 """
 from __future__ import annotations
 
@@ -32,10 +25,10 @@ class Mark:
 
 @dataclass(slots=True)
 class Cluster:
-    """A base scalar and the marks written on it — the draft slot sequence.
+    """A base scalar and the marks written on it -- the draft slot sequence.
 
-    A cluster is *not* a slot. Deciding which clusters become slots is the
-    unit-hood criterion, and that is `canon.build`'s job (ADR-001 §3.1).
+    Not itself a slot: deciding which clusters become slots is `canon.build`'s
+    job, not this module's.
     """
 
     base: str
@@ -43,7 +36,7 @@ class Cluster:
     marks: list[Mark] = field(default_factory=list)
     word: int = 0
     index: int = 0
-    """Ordinal within its word — the frozen baseline's `source_letter_index`."""
+    """Ordinal within its word."""
 
     letter: CanonLetter | None = None
     """What the inventory says this base scalar is. `None` for a bare seat."""
@@ -86,9 +79,9 @@ class Evidence:
 
 @dataclass(frozen=True, slots=True)
 class Attestation:
-    """A grapheme witnessing a performance outcome. Names a family, never a
-    rule: choosing between ≥7 idghām members is tajweed classification and does
-    not belong here (ADR-003 §4.1)."""
+    """A grapheme witnessing a performance outcome. Names a rule family,
+    never a specific rule -- choosing among idgham variants is tajweed
+    classification and belongs elsewhere."""
 
     cluster: int
     family: RuleFamily
@@ -104,8 +97,8 @@ class Decoration:
     target: str = "host"
     """Which slot it decorates, resolved by `canon.build`."""
     silences: bool = False
-    """The mark declares its host rasm. A mark that says so outranks any
-    derivation — it is the script stating a fact, not hinting at one."""
+    """The mark declares its host to be rasm, outranking any derivation --
+    a stated fact rather than a hint."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -132,10 +125,3 @@ class Reading:
             lo = i if lo < 0 else lo
             hi = i
         return lo, hi + 1
-
-
-# `ScriptAdapter` and `SpellStyle` were deleted here. The Protocol had no
-# implementations and its `read` signature did not match the concrete
-# `riwayat.hafs.Adapter`, so it documented a contract that was not the one in
-# force -- worse than no Protocol, because a second script would have been
-# written against it. `write` belongs to phase 2 and comes back with it.

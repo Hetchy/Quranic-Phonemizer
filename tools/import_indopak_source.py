@@ -1,20 +1,8 @@
 """Import the Digital Khatt IndoPak Hafs text as a second editable script source.
 
-The upstream file is a flat ``{"s:a:w": {...}}`` map of 83,668 word slots. It
-differs from the packaged Uthmani source in two structural ways, both of which
-this importer resolves so that the two scripts are word-aligned:
+Drops each ayah's end-of-ayah token and applies listed word splits to word-align with Uthmani.
 
-1. Every ayah carries a trailing end-of-ayah token (U+06DD plus Arabic-Indic
-   digits). It is a verse marker, not a recited word, so it is dropped.
-2. 37:130 writes ``اِلْيَاسِيْنَ`` as one word where the Uthmani source splits
-   ``إِلْ`` + ``يَاسِينَ``. It is split at the sukun boundary.
-
-The result is validated against ``surah_info.json``: identical total word count
-and identical per-ayah word counts. Alignment is a precondition for using the
-two scripts as a same-riwayah, different-orthography conformance pair.
-
-Run once after placing the upstream JSON somewhere readable:
-    $ python tools/import_indopak_source.py --input path/to/digital-khatt-indopak.json
+Run: python tools/import_indopak_source.py --input path/to/source.json
 """
 
 from __future__ import annotations
@@ -41,9 +29,7 @@ SURAH_INFO = (
 END_OF_AYAH = "\N{ARABIC END OF AYAH}"
 SUKUN = "\N{ARABIC SUKUN}"
 
-# (surah, ayah, upstream word number) -> number of leading letters that belong
-# to the first word after splitting. Keyed numerically so the entry survives a
-# re-import; the boundary itself is verified to be a sukun before splitting.
+# (surah, ayah, upstream word) -> leading prefix that becomes the first split word.
 SPLIT_WORDS = {(37, 130, 3): "اِلْ"}
 
 

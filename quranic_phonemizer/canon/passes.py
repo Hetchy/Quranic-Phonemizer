@@ -1,10 +1,7 @@
 """Verse-level passes: the Ledger, and a riwayah's word-level lexemes.
 
-Split from `canon/build.py`, which does the per-cluster drafting and had grown
-past the size this project holds itself to. The seam is real rather than
-arbitrary: everything here runs **after** every cluster has been drafted and
-reads a whole word or verse at once, which is exactly what the per-cluster
-derivation registry cannot express.
+Runs after every cluster is drafted, over a whole word or verse at once -
+which the per-cluster derivation registry cannot express.
 """
 from __future__ import annotations
 
@@ -12,7 +9,7 @@ from collections.abc import Callable
 from typing import TypeAlias
 
 from ..model.address import VerseRef
-from ..model.canon import ABJAD, Onset, PausalLong, Quality
+from ..model.canon import Annotation, ABJAD, Onset, PausalLong, Quality
 from ..model.inscription import SlotFact
 from ..orthography.adapter import Reading
 from .derive import Target, lexeme
@@ -34,19 +31,16 @@ def word_of(reading: Reading, draft) -> int:
 #: derivation has run. `(reading, drafts, lexicon, scribe) -> None`.
 #:
 #: The scribe is in the signature because a pass may *create* slots -- spelling
-#: `الٓمٓصٓ` turns three into seven -- and a slot no grapheme reaches fails I7.
-#: A pass that only mutates ignores it.
+#: `الٓمٓصٓ` turns three into seven -- and every slot must trace to a grapheme.
+#: A pass that only mutates existing slots can ignore it.
 LexemePass: TypeAlias = Callable[[Reading, list, object, object], None]
 
 
 def apply_ledger(reading: Reading, drafts, ledger: Ledger, track) -> None:
-    """An entry for *this* verse that does not resolve is an error.
+    """Applies each Ledger entry for this verse; raises if one fails to resolve.
 
-    It used to be a bare `continue`, which put the skeleton check -- the thing
-    documented as catching ordinal drift -- behind the failure it exists to
-    catch. Four of ten shipped entries silently did nothing, and one of them
-    named a word whose skeleton would have rejected it outright. A Ledger with
-    entries that never fire is worse than no Ledger: it reads as coverage.
+    An entry that silently matches nothing is worse than no entry: it reads
+    as coverage that was never checked.
     """
     for supply in ledger.supplies:
         if not _addresses(supply.ref, reading.verse):
@@ -72,8 +66,8 @@ def _addresses(ref, verse: VerseRef) -> bool:
 
 
 def _ordinal(reading: Reading, drafts, ref) -> int | None:
-    """A verse-scoped ordinal is robust and unreadable, so entries may be
-    written word-relative and are resolved here (ADR-001 §5.1)."""
+    """A verse-scoped ordinal is robust but unreadable, so entries may also
+    be written word-relative and are resolved to a verse ordinal here."""
     if isinstance(ref, VerseSlot):
         return ref.ordinal if ref.verse == reading.verse else None
     if not isinstance(ref, WordSlot) or ref.location.verse != reading.verse:
@@ -99,27 +93,29 @@ def _check_skeleton(reading: Reading, drafts, ordinal: int, supply) -> None:
 
 
 def _apply_allah_lexeme(reading: Reading, drafts, lexicon=None, scribe=None) -> None:
-    """Word by word, not verse by verse.
+    """Word by word, not verse by verse: the lexeme is a property of one word.
 
-    The lexeme is a property of one word. Run over the whole verse, a word
-    ending in lām or hamza lends its last slot to the next word's opening lām
-    and `لَّهُم` acquires the divine name's long ā.
+    Run over the whole verse instead, a word ending in lam or hamza would
+    lend its last slot to the next word's opening lam.
     """
     del lexicon, scribe
     for word_index in range(len(reading.words)):
         span = [d for d in drafts if word_of(reading, d) == word_index]
         letters = [d.letter for d in span]
         nuclei = [d.nucleus for d in span]
-        for index in lexeme.allah_long_a(letters, nuclei):
+        onsets = [d.onset for d in span]
+        for index in lexeme.divine_name(letters, nuclei, onsets):
+            span[index].annotations |= {Annotation.DIVINE_NAME}
+        for index in lexeme.allah_long_a(letters, nuclei, onsets):
             span[index].nucleus = lexeme.relengthened(span[index].nucleus)
 
 
 def _apply_pausal_lexemes(
     reading: Reading, drafts, lexicon: Lexicon, scribe=None
 ) -> None:
-    """The seven alifs. Uthmani marks them `۠` at 66 sites; IndoPak writes a
-    plain final ālif, indistinguishable by any IndoPak grapheme from an
-    ordinary length carrier — so the fact is lexical, not orthographic."""
+    """The seven alifs. Uthmani marks them `۠`; IndoPak writes a plain final
+    alif, indistinguishable from an ordinary length carrier - so the fact is
+    lexical, not orthographic."""
     if not lexicon.pausal_lexemes:
         return
     for word_index in range(len(reading.words)):
@@ -133,9 +129,8 @@ def _apply_pausal_lexemes(
 def _vocalised(span) -> str:
     """A skeleton that also spells its vowels.
 
-    Plain letters are not enough here: `أَنَا` and `إِنَّا` share the letters
-    ء-ن, and only the vowels tell them apart. Still one string, still keyed by
-    canonical facts, still readable in the YAML.
+    Plain letters are not enough: `أَنَا` and `إِنَّا` share the letters ء-ن,
+    and only the vowels tell them apart.
     """
     out = []
     for draft in span:
@@ -147,12 +142,9 @@ def _vocalised(span) -> str:
         )
     return "".join(out)
 
-#: Hafs' word-level lexeme passes, in order. A parameter rather than three
-#: calls inside `build`, because these are the one part of `canon/` that is a
-#: riwayah's facts rather than the shared mechanism: the divine name's shape
-#: and the seven alifs are Hafs, and a second riwayah replaces the list instead
-#: of editing the builder. `_apply_ledger` stays in `build` -- the Ledger is
-#: already a parameter, so it is generic.
+#: Hafs' word-level lexeme passes, in order. A list rather than a hardcoded
+#: sequence in `build`, because this is riwayah-specific: a second riwayah
+#: swaps the list instead of editing the builder.
 LEXEME_PASSES: tuple[LexemePass, ...] = (
     _apply_allah_lexeme,
     _apply_pausal_lexemes,

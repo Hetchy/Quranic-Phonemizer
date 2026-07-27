@@ -1,11 +1,7 @@
-"""Waqf and ibtidāʾ: what the edges of a reading do to it.
+"""Waqf and ibtidaa: what the edges of a reading do to it.
 
-The module is named for its scope rather than for one term, because it spans
-both waqf *and* ibtidāʾ and no single tajweed word covers that. Inventing one
-would be worse than an English structural name (ADR-007 §4.0).
-
-Everything here reads the `BoundaryPlan`. The Score is boundary-free, so these
-are the only rules that may ask where the reciter stops.
+Everything here reads the `BoundaryPlan`. The Score is boundary-free, so
+these are the only rules that may ask where the reciter stops.
 """
 from __future__ import annotations
 
@@ -44,10 +40,8 @@ from ..model.performance import (
 class WaqfEnding:
     """The last slot of a word stopped on loses its vowel.
 
-    `كِتَٰبٌ` at waqf is the case `Aspect` exists for: the bāʾ's onset still
-    sounds and its nucleus drops, and without an aspect the slot would satisfy
-    "appears in at least one attribution" through its consonant edge while the
-    dropped nucleus went unrecorded (ADR-002 §2).
+    `كِتَٰبٌ` at waqf: the onset still sounds while the nucleus drops, so
+    `Aspect` records the two separately.
     """
 
     rule: Rule = Rule.WAQF_ENDING
@@ -68,26 +62,21 @@ class WaqfEnding:
         if _followed_by_tanween_noon(near, at, word) and (
             slot.letter is not CanonLetter.TAA_MARBUTA
         ):
-            # TanweenAtWaqf owns the ending, because it may leave the ʿiwaḍ
-            # rather than a silence. The tāʾ marbūṭa is the exception: it
-            # becomes a hāʾ and takes no ʿiwaḍ, so its vowel is dropped here.
+            # TanweenAtWaqf owns the ending; taa marbuta drops its vowel here instead.
             return None
 
         effects = []
         if slot.nucleus.kind is NucleusKind.SHORT:
             effects.append(Silence(at, Aspect.NUCLEUS))
         elif slot.nucleus.kind is NucleusKind.SILAH:
-            # Ṣilah is long in waṣl and absent at pause — the mirror of
-            # `Onset.WASL`, and canonical rather than a rule's invention.
+            # Silah is long in wasl and absent at pause, mirroring `Onset.WASL`.
             effects.append(Silence(at, Aspect.NUCLEUS))
         elif slot.nucleus.kind is NucleusKind.PAUSAL_LONG:
             effects.append(
                 Realize(at, Aspect.NUCLEUS, (Vowel(slot.nucleus.quality, True),))
             )
         if slot.onset is Onset.SILAH:
-            # 27:36:8: at waqf the pronoun yāʾ's **onset** disappears as well
-            # as its nucleus. Silencing only the nucleus leaves a stray glide,
-            # which is the error `Onset.SILAH` was added to make expressible.
+            # The pronoun yaa's onset must go too, or a stray glide remains.
             effects.append(Silence(at, Aspect.ONSET))
         if not effects:
             return None
@@ -101,9 +90,8 @@ class WaqfEnding:
 class WaslHamza:
     """The prosthetic hamza sounds only when started on.
 
-    Its nucleus *is* the helping vowel, supplied by `canon.build` — so at waṣl
-    this silences both aspects and at ibtidāʾ it does nothing, because the
-    canonical value is already right (ADR-003 §6.3).
+    Its nucleus is the helping vowel: joining silences both aspects,
+    starting leaves the canonical value untouched.
     """
 
     rule: Rule = Rule.WASL_ELISION
@@ -130,11 +118,10 @@ class WaslHamza:
 
 @dataclass(frozen=True, slots=True)
 class TanweenAtWaqf:
-    """The tanwīn nūn is silent at a stop; after a fatha it leaves the ʿiwaḍ.
+    """The tanween noon is silent at a stop; after a fatha it leaves the iwad.
 
-    Under A1 this is two ordinary effects on two slots rather than a special
-    case: `Silence` on the nūn slot, and — for fathatan only — `Relength` on
-    the base. Dammatan and kasratan are simply two silences (ADR-004 §8.3).
+    Two effects on two slots: `Silence` on the noon, and -- for fathatan
+    only -- `Relength` on the base. Dammatan and kasratan are just silences.
     """
 
     rule: Rule = Rule.IWAD
@@ -159,8 +146,7 @@ class TanweenAtWaqf:
         effects = [Silence(at, Aspect.ONSET)]
         rule = Rule.WAQF_ENDING
         if base.letter is CanonLetter.TAA_MARBUTA:
-            # A tāʾ marbūṭa stops as a hāʾ and takes no ʿiwaḍ — but the
-            # nūn is still silent, which this rule owes regardless.
+            # Taa marbuta stops as haa and takes no iwad, but the noon is still silent.
             return Verdict(
                 Occurrence(mint(rule, at), rule, Participants((at, base.id))),
                 tuple(effects),
@@ -178,9 +164,8 @@ class TanweenAtWaqf:
 
 @dataclass(frozen=True, slots=True)
 class TaaMarbutaAtWaqf:
-    """`ة` is a tāʾ in connection and a hāʾ at pause. Its alternation is
-    canonical and rasm-conditioned, which is why the letter survived into
-    `CanonLetter` at all (ADR-001 §4)."""
+    """`ة` is a taa in connection and a haa at pause -- a canonical,
+    rasm-conditioned alternation."""
 
     rule: Rule = Rule.WAQF_ENDING
     phase: Phase = Phase.BOUNDARY
@@ -196,15 +181,10 @@ class TaaMarbutaAtWaqf:
             return None
         if not _is_final_letter(near, at, word):
             return None
-        # `بِسُورَةٍ` stops as a hāʾ with no ʿiwaḍ: the tanwīn nūn after the
-        # tāʾ marbūṭa is still the word's last slot, so "final" here means the
-        # last slot that is not nunation.
+        # `بِسُورَةٍ` stops as haa with no iwad; "final" here excludes the tanween noon slot.
         return Verdict(
-            # `variant=1` because `WaqfEnding` declares the same rule and both
-            # fire on this slot -- on different aspects, so E1 is right not to
-            # complain and both are correct. Sharing an id made 405 pairs of
-            # occurrences indistinguishable to any projection asking which
-            # classifier produced an attribution.
+            # variant=1 distinguishes this from `WaqfEnding`, which also
+            # fires on this slot, on a different aspect.
             Occurrence(mint(Rule.WAQF_ENDING, at, variant=1), Rule.WAQF_ENDING,
                        Participants((at,))),
             (Realize(at, Aspect.ONSET, (Consonant(CanonLetter.HEH),)),),
@@ -212,7 +192,7 @@ class TaaMarbutaAtWaqf:
 
 
 def _is_final_letter(near: Neighbourhood, at: SlotId, word: int) -> bool:
-    """The last slot that is not a tanwīn nūn."""
+    """The last slot that is not a tanween noon."""
     slots = [
         slot
         for slot in near.score.words[word].slots

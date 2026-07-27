@@ -1,7 +1,7 @@
-"""ADR-008 fixture 5: the Ledger loader's rejection cases, one test each.
+"""The Ledger loader's rejection cases, one test each.
 
-Each has a stated falsifier: if the loader stops raising, an authored file can
-quietly become the authority for a fact it must only witness.
+Each test states its falsifier: if the loader stops raising, an authored
+file could quietly become the authority for a fact it should only witness.
 """
 from __future__ import annotations
 
@@ -146,8 +146,7 @@ def test_rejects_a_missing_skeleton(tmp_path: Path) -> None:
 
 
 def test_rejects_a_value_in_output_vocabulary(tmp_path: Path) -> None:
-    """The Ledger holds canonical facts. A phoneme string is a rule engine
-    trying to be born."""
+    """A phoneme string belongs to the output vocabulary, not the Ledger's."""
     path = write(
         tmp_path,
         """
@@ -177,12 +176,10 @@ def test_rejects_a_duplicate_yaml_key(tmp_path: Path) -> None:
 def test_an_entry_for_this_verse_that_does_not_resolve_is_an_error(
     packed, shared
 ) -> None:
-    """The address is checked, not skipped.
+    """An unresolvable ledger address is an error, not a skip.
 
-    Falsifier: if `_apply_ledger` goes back to skipping an unresolvable
-    address, the mandatory skeleton check sits behind the failure it exists to
-    catch. Four of ten shipped entries silently did nothing that way, and one
-    named a word whose skeleton would have rejected it outright.
+    Falsifier: if `_apply_ledger` skips an unresolvable address instead of
+    raising, the skeleton check behind it never runs.
     """
     from conftest import words_of
 

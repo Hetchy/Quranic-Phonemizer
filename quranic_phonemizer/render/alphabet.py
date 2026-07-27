@@ -1,13 +1,7 @@
-"""Sound feature tuple → token. A total lookup, and nothing else.
+"""Maps a sound-feature tuple to a notation token.
 
-`render` may not import `rules`, `canon` or `engine` (ADR-007 §2), so a
-projection cannot re-detect a rule even if it wanted to: it reads the same edge
-set the engine produced. That is the packaging half of ADR-002 §5's guarantee
-that a projection cannot disagree with the engine.
-
-The map performs **no composition**. It maps a complete tuple to a token and
-may map two distinct tuples to one symbol — the notation is allowed to be
-coarser than the model; the reverse is not.
+The lookup is total and performs no composition: it may map two distinct
+tuples to the same token, never the reverse.
 """
 from __future__ import annotations
 

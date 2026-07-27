@@ -1,0 +1,45 @@
+"""A shadda the script writes must be produced by some occurrence.
+
+The full-corpus residue is a ratchet in CI; these are the sites that were
+silently unmet because a rule was never reached.
+"""
+from __future__ import annotations
+
+import pytest
+
+from conftest import built_for
+from quranic_phonemizer.engine.boundary_plan import all_join
+from quranic_phonemizer.engine.laws import check_attestations
+from quranic_phonemizer.engine.run import perform
+from quranic_phonemizer.model.canon import Rule
+from quranic_phonemizer.model.inscription import Attests
+from quranic_phonemizer.riwayat.hafs import HAFS
+
+#: Cross-word idgham mutamathilayn on letters outside the pair table.
+MERGERS = [(17, 33), (18, 78), (18, 82), (2, 137)]
+
+
+def _performed(packed, shared, surah: int, ayah: int):
+    built = built_for(packed, shared, surah, ayah)
+    score = built.score
+    plan = all_join(len(score.words))
+    attested = [
+        (s.anchor, s.family)
+        for s in built.inscription.spellings
+        if isinstance(s, Attests)
+    ]
+    return attested, perform(score, HAFS, plan), plan
+
+
+@pytest.mark.parametrize("surah,ayah", MERGERS)
+def test_a_written_shadda_is_accounted_for(packed, shared, surah, ayah) -> None:
+    attested, performance, plan = _performed(packed, shared, surah, ayah)
+    assert not check_attestations(attested, performance, plan)
+
+
+@pytest.mark.parametrize("surah,ayah", MERGERS)
+def test_like_into_like_fires_at_these_sites(packed, shared, surah, ayah) -> None:
+    """Every letter can repeat, so the rule cannot key on a pair table."""
+    _, performance, _ = _performed(packed, shared, surah, ayah)
+    fired = {o.rule for o in performance.occurrences}
+    assert Rule.IDGHAM_MUTAMATHILAYN in fired

@@ -1,17 +1,7 @@
-"""Ṣilah, and the polysemy of the small yāʾ.
+"""Silah, and the polysemy of the small yaa mark.
 
-`Nucleus.Silah` is long in waṣl and absent at pause; `Onset.SILAH` is its
-mirror on the other axis. Both are canonical, so neither needs a boundary rule
-to exist — conditionality lives in the vocabulary (ADR-001 §3.6).
-
-The mark is polysemous in **both** scripts, which the first draft missed. Equal
-counts are not evidence of a 1:1 mapping: Uthmani `ۦ` ×956 against IndoPak `ٖ`
-×993, the 956 shared plus 37 IndoPak-only, and at least three of those write an
-ordinary long ī (11:41:6 `مَجْرٖىهَا`, 17:55:10 and 19:58:7 `النَّبِيّٖنَ`).
-Uthmani's `ۧ` is the same story at ~38 of its 39 sites.
-
-So the discriminator is canonical, not glyphic: the ṣilah vowel belongs to the
-**pronoun hāʾ**. Anywhere else the mark writes a long vowel nobody spelled.
+Ambiguous in both scripts: the silah vowel belongs to the pronoun haa;
+anywhere else the mark is an ordinary long vowel.
 """
 from __future__ import annotations
 
@@ -22,10 +12,8 @@ from . import Context, Outcome, Sets, Shows, Target, register
 
 @register("silah_waw", requires=("shadda",))
 def silah_waw(context: Context) -> Outcome:
-    """The wāw side is a clean 1:1 — U+06E5 ×1,257 and U+0657 ×1,257 at the
-    same 1,257 words — but it is resolved the same way, because a rule that
-    holds for one side and not the other is the asymmetry this design exists
-    to remove."""
+    """The waw side is unambiguous, but resolved the same way as `silah_ya`
+    so one rule covers both."""
     return _silah_or_long(context, Quality.U)
 
 
@@ -36,9 +24,9 @@ def silah_ya(context: Context) -> Outcome:
 
 def _silah_or_long(context: Context, quality: Quality) -> Outcome:
     if context.cluster.has("shadda"):
-        # A doubled yāʾ is a consonant with its own vowel. The small mark on
-        # it shows the reading rather than supplying a nucleus, and folding it
-        # to a long ī loses the gemination the script wrote.
+        # A doubled yaa is a consonant with its own vowel; the small mark
+        # shows the reading rather than supplying a nucleus, and folding it
+        # to a long vowel would lose the gemination the script wrote.
         return Shows(Target.HERE)
     if _is_pronoun_haa(context):
         return Sets(SlotFact.NUCLEUS, Silah(quality))

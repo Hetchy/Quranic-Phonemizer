@@ -1,14 +1,7 @@
 """The Ledger: authored canonical facts, and the witnesses that agree with them.
 
-The value type is a canonical `SlotFact` value — the same closed union the
-adapters emit. There is no syntax for "do something", so the Ledger cannot grow
-into a rule engine (ADR-003 §7).
-
-Two roles, and the difference is the whole point of L2:
-
-  * `Supply` is script-independent and carries a citation. Exactly one per
-    `(SlotId, SlotFact)` per build.
-  * `Assert` is script-scoped and carries none. It must agree with its supply.
+Values are closed `SlotFact` variants only, with no syntax for "do something",
+so the Ledger cannot grow into a rule engine.
 """
 from __future__ import annotations
 
@@ -33,10 +26,9 @@ from ..model.inscription import SlotFact
 
 SCHEMA_VERSION = 1
 
-#: Every canonical value spells as a lowercase ASCII identifier. Testing for
-#: that — rather than for the notation characters of some alphabet — keeps the
-#: check a statement about the *canonical* vocabulary, which is what `canon/`
-#: is allowed to know (ADR-007 §4.9).
+#: Every canonical value spells as a lowercase ASCII identifier. Checking that,
+#: rather than any script's notation, keeps this a statement about canonical
+#: vocabulary alone.
 _CANONICAL_SPELLING = frozenset("abcdefghijklmnopqrstuvwxyz_")
 
 
@@ -46,7 +38,7 @@ class LedgerError(ValueError):
 
 @dataclass(frozen=True, slots=True)
 class VerseSlot:
-    """`2:245#17` — the normal form."""
+    """`2:5#7` - the normal form."""
 
     verse: VerseRef
     ordinal: int
@@ -57,7 +49,7 @@ class VerseSlot:
 
 @dataclass(frozen=True, slots=True)
 class WordSlot:
-    """`2:245:14#5` — a reviewable alias the builder resolves and normalizes."""
+    """`2:5:4#1` - a reviewable alias the builder resolves and normalizes."""
 
     location: Location
     index: int
@@ -71,6 +63,8 @@ SlotRef: TypeAlias = VerseSlot | WordSlot
 
 @dataclass(frozen=True, slots=True)
 class Supply:
+    """Script-independent and cited; exactly one per `(SlotId, SlotFact)`."""
+
     ref: SlotRef
     fact: SlotFact
     value: object
@@ -80,6 +74,8 @@ class Supply:
 
 @dataclass(frozen=True, slots=True)
 class Assert:
+    """Script-scoped and uncited; must agree with its matching `Supply`."""
+
     script: Script
     ref: SlotRef
     fact: SlotFact

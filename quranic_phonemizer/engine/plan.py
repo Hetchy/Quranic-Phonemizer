@@ -1,8 +1,7 @@
-"""Effects, the Plan, and conflict.
+"""Effects, the Plan that accumulates them, and conflict detection.
 
-A rule affects a neighbour by **declaring an effect naming it**, never by
-writing to it. That is the whole of ADR-004 §2, and it is what makes the
-`owner.segments.pop(index)` class of bug unwriteable: there is nothing to pop.
+A rule affects a neighbour only by declaring an effect naming it, never by
+writing to it directly -- there is no shared mutable structure to corrupt.
 """
 from __future__ import annotations
 
@@ -42,7 +41,8 @@ class MergeInto:
 
 @dataclass(frozen=True, slots=True)
 class Silence:
-    """The reason is the verdict's own `Occurrence.rule` (ADR-002 §4.1)."""
+    """Removes a slot's sound. The occurrence's own rule is the reason;
+    there is no separate reason field."""
 
     slot: SlotId
     aspect: Aspect
@@ -57,8 +57,8 @@ class Insert:
 
 @dataclass(frozen=True, slots=True)
 class Recolour:
-    """Carries a feature, not a bare boolean: a boolean covered one of the two
-    things the `COLOUR` phase decides, and ghunnah quality had no member."""
+    """Sets one named feature rather than a single boolean, since the
+    COLOUR phase decides more than one feature per sound."""
 
     slot: SlotId
     aspect: Aspect
@@ -84,9 +84,11 @@ class Verdict:
 
 
 def conflict_key(effect: Effect) -> tuple:
-    """Per ADR-004 §4. `Relength` keys on the nucleus because that is the only
-    aspect it can touch; `Insert` keys on the anchor and side, because two
-    rules inserting on the same side of the same slot is the conflict."""
+    """The (target, aspect) an effect claims, for conflict detection.
+
+    `Relength` always keys on NUCLEUS, its only aspect; `Insert` keys on its
+    anchor and side instead of a slot and aspect.
+    """
     match effect:
         case Relength(slot=slot):
             return (slot, Aspect.NUCLEUS)
@@ -96,26 +98,20 @@ def conflict_key(effect: Effect) -> tuple:
             return (effect.slot, effect.aspect)
 
 
-#: Occurrence ids are minted from the rule and the site that caused it, so two
-#: rules firing on one slot stay distinguishable. `SoundId` and `OccurrenceId`
-#: are request-local, so any injection is fine as long as it is a function.
+#: Spaces ordinals by rule, so two rules firing on the same slot mint
+#: distinct occurrence ids.
 _RULE_SLOT_STRIDE = 1_000_000
 
-#: Two *classifiers* may legitimately declare the same `Rule` -- `WaqfEnding`
-#: and `TaaMarbutaAtWaqf` both produce `WAQF_ENDING`, on different aspects of
-#: one slot, so E1 does not fire and both are correct. Keyed on rule and slot
-#: alone they minted one id for two occurrences: 405 collisions over the
-#: corpus, every attribution citing one of them ambiguous about which
-#: classifier produced it. That defeats the whole reason occurrences exist.
+#: Separates two classifiers that legitimately declare the same `Rule` on
+#: the same slot (different aspects) -- rule plus slot alone is not unique.
 _VARIANT_STRIDE = 100_000_000
 
 
 def mint(rule: Rule, at: SlotId, variant: int = 0) -> OccurrenceId:
-    """`variant` separates two classifiers that share a `Rule`.
+    """Mint a stable occurrence id from rule, slot, and variant.
 
-    A small integer rather than the classifier's identity, because the id has
-    to be stable across runs and a class name is not an address. A classifier
-    that needs one declares it next to its rule.
+    `variant` is a small integer, not the classifier's identity -- ids must
+    stay stable across runs.
     """
     ordinal = (
         variant * _VARIANT_STRIDE

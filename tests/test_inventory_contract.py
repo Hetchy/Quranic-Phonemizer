@@ -1,12 +1,7 @@
-"""The Python-to-YAML role contract, which had nothing behind it.
+"""The Python-to-YAML role contract for script inventories.
 
-`Cluster.has(role)` returns `False` for a role nobody declared and never
-raises. Renaming `role: fatha` to `fathah` in a script inventory therefore
-loaded clean, ran clean, and silently changed the output — measured at 99.83%
-word parity over a 250-verse slice. That is the failure mode that passes a
-smoke test and surfaces on verse 3,000.
-
-Each test below is the spike that found it, pinned.
+`Cluster.has(role)` returns `False` for an undeclared role rather than
+raising, so a typo in a role name can silently change output.
 """
 from __future__ import annotations
 
@@ -52,8 +47,7 @@ def test_a_renamed_role_is_a_load_error(tmp_path, role):
 
 
 def test_an_unregistered_derivation_is_a_load_error(tmp_path):
-    """It used to raise at *run* time, on first use — so a typo on a rare mark
-    passed every smoke test and surfaced on whichever verse first wrote it."""
+    """An unregistered derivation must fail at load time, not on first use."""
     text = _inventory_text("uthmani").replace(
         "derivation: length_a", "derivation: no_such_thing", 1
     )
@@ -69,8 +63,7 @@ def test_a_script_specific_role_is_not_required_of_every_script(tmp_path):
 
 
 def test_the_registry_is_complete_without_importing_the_builder():
-    """The registry used to fill only as a side effect of importing
-    `canon.build`, so `registered()` answered differently depending on who
-    asked — and a validator that asks an empty registry passes everything."""
+    """The registry must be populated without importing `canon.build`, or a
+    validator that inspects it first would see it empty."""
     assert len(derive.registered()) >= 12
     assert "length_a" in derive.registered()

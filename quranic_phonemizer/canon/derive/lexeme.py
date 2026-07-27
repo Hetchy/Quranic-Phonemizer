@@ -1,37 +1,55 @@
-"""Lexical facts: the name of God, and the wāw that is written but never said.
+"""Lexical facts: the name of God, and the waw that is written but never said.
 
-Both are places where one script writes what the other leaves to knowledge, so
-both are derivations rather than script conventions. Neither may consult a
-`Script` — a canonical field that silently encodes which script you happened to
-read is the failure this design keeps catching (R9's seven alifs, `SlotOrigin`,
-`ScoreWord.advice`).
+Both are places where one script writes what the other leaves to knowledge,
+so both are derivations, never a `Script` consulted directly.
 """
 from __future__ import annotations
 
-from ...model.canon import CanonLetter, Long, NucleusKind, Quality
+from ...model.canon import CanonLetter, Long, NucleusKind, Onset, Quality
 from . import Context, register  # noqa: F401  (registry import kept explicit)
 
+#: The name is a lam before a haa, and the lam before it or the wasl hamza.
 ALLAH_TAIL = (CanonLetter.LAM, CanonLetter.HEH)
+ALLAH_HEAD = (CanonLetter.LAM, CanonLetter.HAMZA)
 
 
-def allah_long_a(letters: list[CanonLetter], nuclei: list) -> list[int]:
-    """Indices whose nucleus must become `Long(A)`.
+def divine_name(letters: list[CanonLetter], nuclei: list, onsets: list) -> list[int]:
+    """Indices of the lam of the divine name, from the letters alone.
 
-    Uthmani writes `ٱللَّهِ` with no ālif at all; IndoPak writes the dagger.
-    The lexeme is the shared fact both are spelling. 2,704 words, 12 skeletons.
+    Script-independent by construction: one script writes the alif and the
+    other does not, so keying on the nucleus would tag only one of them.
     """
     out: list[int] = []
     for i, letter in enumerate(letters):
-        if letter is not CanonLetter.LAM or i == 0 or i + 1 >= len(letters):
+        if letter is not ALLAH_TAIL[0] or i == 0 or i + 1 >= len(letters):
             continue
-        if letters[i + 1] is not CanonLetter.HEH:
+        if letters[i + 1] is not ALLAH_TAIL[1]:
             continue
-        if letters[i - 1] not in (CanonLetter.LAM, CanonLetter.HAMZA):
+        if letters[i - 1] not in ALLAH_HEAD:
             continue
-        nucleus = nuclei[i]
-        if nucleus.kind is NucleusKind.SHORT and nucleus.quality is Quality.A:
-            out.append(i)
+        if getattr(nuclei[i], "quality", None) is not Quality.A:
+            continue
+        doubled = onsets[i] is Onset.GEMINATE or (
+            letters[i - 1] is CanonLetter.LAM
+            and nuclei[i - 1].kind is NucleusKind.SILENT
+        )
+        if not doubled:
+            continue
+        out.append(i)
     return out
+
+
+def allah_long_a(letters: list[CanonLetter], nuclei: list, onsets: list) -> list[int]:
+    """Of those, the ones whose nucleus must still become `Long(A)`.
+
+    Uthmani writes `ٱللَّهِ` with no alif at all; IndoPak writes the dagger.
+    """
+    return [
+        i
+        for i in divine_name(letters, nuclei, onsets)
+        if nuclei[i].kind is NucleusKind.SHORT
+        and nuclei[i].quality is Quality.A
+    ]
 
 
 def relengthened(nucleus) -> Long:
@@ -40,11 +58,10 @@ def relengthened(nucleus) -> Long:
 
 
 def otiose_waw(context: Context) -> bool:
-    """`أُو۟لَـٰٓئِكَ`, `أُو۟لِى` — a wāw in the rasm that never sounds.
+    """`أُو۟لَـٰٓئِكَ`, `أُو۟لِى` - a waw in the rasm that never sounds.
 
-    Uthmani marks it with `۟`; IndoPak writes nothing, so without this the two
-    disagree at ~240 words. One shape covers them all: a prosthetic-looking
-    hamza with damma, a bare wāw, then a lām or rāʾ.
+    Uthmani marks it with `۟`; IndoPak writes nothing. One shape covers
+    both: a hamza with damma, a bare waw, then a lam or raa.
     """
     if context.index == context.word_bounds[0]:
         return False
@@ -63,11 +80,10 @@ def otiose_waw(context: Context) -> bool:
 
 
 def otiose_alif(context: Context) -> bool:
-    """The ālif of the plural wāw — `قَالُوا۟` — and the ālif no vowel can carry.
+    """The alif of the plural waw (`قَالُوا۟`), and the alif no vowel can carry.
 
-    Uthmani marks 3,722 of them with `۟`; IndoPak marks 26. Word-finally after
-    a wāw or a short *u*, or anywhere after a short vowel that is not *a*, a
-    bare ālif is rasm.
+    Word-finally after a waw or a short u, or anywhere after a short vowel
+    that is not a, a bare alif is rasm.
     """
     cluster = context.cluster
     if cluster.letter is not CanonLetter.ALIF or cluster.marks:

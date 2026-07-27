@@ -7,7 +7,7 @@
 # seeing this corpus. Entries are stems: the loader also matches a stem plus
 # any clitic pronoun, so `إيمان` covers `إيمانكم` and `إيمانهم` too.
 #
-# ADR-008 §4.2 budgets these. A rise past the ceiling means a rule is
+# A rise past the declared budget means a rule is
 # missing, not that the corpus is irregular.
 schema_version: 1
 
@@ -70,7 +70,7 @@ wasl_exempt:
 # derive damma from the mīm.
 wasl_nouns: ["ءسم", "ءبن", "ءبنة", "ءمرء", "ءمرءة", "ءثنن", "ءثنتن", "ءست"]
 
-# The seven alifs (ADR-003 §6.2): short in wasl, long at pause.
+# The seven alifs: short in wasl, long at pause.
 # `لَٰكِنَّ` and `لَّـٰكِنَّا۠` share a key even with the vowels and the
 # gemination spelled, so the second is a Ledger entry rather than a
 # lexeme: one site, and no rule can reach it.

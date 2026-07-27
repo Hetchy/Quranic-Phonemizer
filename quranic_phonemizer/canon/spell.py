@@ -1,23 +1,7 @@
-"""The muqaṭṭaʿāt: letters that are *named* rather than read.
+"""Muqattaat: letters that are named rather than read.
 
-`الٓمٓ` is not a word — it is three letters said by their names, `ʔalif laam
-miim`. ADR-005 §1 calls it the spelled toggle and ADR-001 §3.5b counts it as
-the extreme case of one grapheme fanning to many slots: three compact
-graphemes become seven.
-
-Two things make it fit the design rather than fight it.
-
-**It is a verse-level pass, not a derivation.** A per-cluster derivation
-resolves one cluster to at most one extra slot (`AddsSlot`), and `ص` alone
-becomes three. The pass list `canon/passes.py` introduced is exactly the shape
-this needs, and this is its second member rather than its excuse.
-
-**The names are slots, and the ordinary rules then apply to them.** Nothing
-here knows that 2:1 reads `ʔalif laam-miim` with a ghunnah: the lām's final
-mīm and the mīm's first mīm are two ordinary adjacent slots, and the mīm
-family assimilates them because that is what it does. 7:1 gets its qalqala on
-the ṣād's final dāl the same way. If the spelled letters needed special rules
-the model would be wrong; they do not.
+`الٓمٓ` is not a word - it is letters said by their names (`alif laam miim`),
+expanded by a verse-level pass into ordinary slots.
 """
 from __future__ import annotations
 
@@ -47,7 +31,7 @@ class SpellingError(ValueError):
 
 @dataclass(frozen=True, slots=True)
 class Names:
-    """Canonical letter → the slots its name is made of."""
+    """Canonical letter to the slots its name is made of."""
 
     by_letter: dict[CanonLetter, tuple[tuple[CanonLetter, object], ...]]
 
@@ -117,10 +101,9 @@ def spell_muqattaat(names: Names):
                 drafts.remove(draft)
             drafts[first:first] = spelled
             if scribe is not None:
-                # ADR-001 section 3.5b's extreme case, stated as edges: the
-                # compact grapheme evidences every slot its name expands to,
-                # so `الٓمٓصٓ` gives three graphemes reaching seven slots and
-                # I7 holds without a special case for spelled words.
+                # The compact grapheme evidences every slot its name expands
+                # to, so `الٓمٓصٓ` gives three graphemes reaching seven slots,
+                # keeping every slot traceable to a grapheme.
                 for draft in spelled:
                     offset = reading.clusters[draft.cluster].offset
                     scribe.evidence(offset, draft, SlotFact.LETTER)
@@ -132,14 +115,8 @@ def spell_muqattaat(names: Names):
 def _is_muqattaat(reading: Reading, word: int) -> bool:
     """A word in which nothing is voweled at all.
 
-    Asked of the *clusters* rather than the drafted slots, because by then the
-    waṣl derivation has given `ٱ` a helping vowel and `الٓمٓ` no longer looks
-    bare — which is why an all-silent test over slots finds 17 of the 30 sites
-    and misses every ālif-initial one.
-
-    Not a location table. Which sūrahs open this way is a fact about the text
-    and would need listing; *that a word of bare letters is named rather than
-    read* is a rule, and it is the rule that does the work here.
+    Checked over the clusters, not the drafted slots, because by then the
+    wasl derivation has already given `ٱ` a helping vowel that would hide it.
     """
     clusters = [c for c in reading.clusters if c.word == word]
     if not clusters:
@@ -148,14 +125,9 @@ def _is_muqattaat(reading: Reading, word: int) -> bool:
 
 
 def _spelled(reading: Reading, word: int, names: Names) -> list | None:
-    """Spelled from the **clusters**, not from the drafted slots.
-
-    By drafting time a derivation has already reshaped them: 19:1 `كٓهيعٓصٓ`
-    loses its yāʾ, which the length rule absorbs into the hāʾ as a long vowel,
-    and spelling the drafts gives `kaaf haa ʕayn saad` with the yāʾ's name
-    missing. Nothing should be derived from these letters at all -- they are
-    named, not read -- so the rasm is the right source and the absorption is
-    simply not applicable here.
+    """Spelled from the clusters, not the drafted slots: a derivation may
+    have already absorbed a bare yaa into a neighboring long vowel there,
+    but these letters are named, not read, so that absorption does not apply.
     """
     out: list[_Draft] = []
     for index, cluster in enumerate(reading.clusters):
@@ -163,7 +135,7 @@ def _spelled(reading: Reading, word: int, names: Names) -> list | None:
             continue
         letters = names.spell(cluster.letter)
         if letters is None:
-            # A bare word whose letter has no name is not muqaṭṭaʿāt, so the
+            # A bare word whose letter has no name is not muqattaat, so the
             # whole word is left alone rather than half-spelled.
             return None
         for letter, nucleus in letters:

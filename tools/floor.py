@@ -1,16 +1,8 @@
-"""Run a gate and compare it against a floor it may only rise above.
+"""Run a gate harness and check its number against a ratchet floor/ceiling.
 
-The three harnesses each print their own number and exit 1 unless perfect,
-which is honest for a human reading the output and useless for CI: every run
-is red, so nothing is learned from a run going red. This turns each into a
-ratchet — the number is allowed to be short of 100%, and not allowed to get
-worse than it is today.
+Floors live in `.github/workflows/gates.yml` next to the job that checks them.
 
-The floors live in `.github/workflows/gates.yml` next to the job that checks
-them, so raising one is a visible edit in the same diff as the improvement
-that earned it.
-
-Run:  python tools/floor.py cross|regression|l1 word|verse|- FLOOR
+Run: python tools/floor.py cross|regression|l1 word|verse|- FLOOR
 """
 from __future__ import annotations
 
@@ -26,6 +18,7 @@ HARNESS = {
     "regression": ("parity.py", "words match"),
     "l1": ("l1_harness.py", "L1 residue"),
     "roundtrip": ("roundtrip.py", "verses round-trip"),
+    "attest": ("attest.py", "unmet attestations"),
 }
 
 
@@ -41,7 +34,8 @@ def main(argv: list[str]) -> int:
 
     command = [sys.executable, str(ROOT / "tools" / script), "--show", "0"]
     if mode != "-":
-        command += ["--mode", mode] if gate != "roundtrip" else ["--script", mode]
+        flag = "--script" if gate in ("roundtrip", "attest") else "--mode"
+        command += [flag, mode]
     result = subprocess.run(command, capture_output=True, text=True, cwd=ROOT)
     output = result.stdout + result.stderr
     print(output)
@@ -50,7 +44,7 @@ def main(argv: list[str]) -> int:
         return result.returncode
 
     label = f"{gate} {mode}".strip(" -")
-    if gate == "l1":
+    if gate in ("l1", "attest"):
         return _ceiling(output, label, int(floor_text))
     return _floor(output, label, float(floor_text))
 
@@ -73,7 +67,7 @@ def _floor(output: str, label: str, floor: float) -> int:
 
 def _ceiling(output: str, label: str, ceiling: int) -> int:
     """A residue count that may only fall."""
-    found = re.search(r"L1 residue:\s*(\d+)", output)
+    found = re.search(r"(?:L1 residue|unmet attestations):\s*(\d+)", output)
     if not found:
         print(f"{label}: no residue count in the harness output")
         return 2

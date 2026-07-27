@@ -1,13 +1,7 @@
 """Derivations: the facts no script writes, resolved in one shared place.
 
-A scalar either carries a canonical value outright — declared in the
-inventory — or names a derivation here. There is no third way, and no
-derivation may consult a `Script`: doing so would make the canonical layer
-script-relative, which is the failure R9 clause 2 fires on.
-
-Each derivation is one module, so each is one testable unit and each appears
-**by name** in the L1 residue report (ADR-007 §5). A residue row whose class is
-`UNCLASSIFIED` is a failed equality proof, not a rounding error.
+A scalar either carries a canonical value outright or names a derivation
+here; no derivation may consult a `Script`.
 """
 from __future__ import annotations
 
@@ -38,10 +32,10 @@ class Sets:
 
 @dataclass(frozen=True, slots=True)
 class AddsSlot:
-    """One grapheme evidencing facts on **two** slots.
+    """One grapheme evidencing facts on two slots.
 
-    Routine rather than exotic: the tanwīn mark does it at 8,893 words and
-    three compact muqaṭṭaʿāt graphemes fan to seven slots (ADR-001 §3.5b).
+    Routine rather than exotic: the tanween mark does this, as does a
+    compact muqattaat grapheme fanning to several slots.
     """
 
     fact: SlotFact
@@ -61,16 +55,15 @@ class Attests:
 
 @dataclass(frozen=True, slots=True)
 class Shows:
-    """Supplies nothing; decorates the named slot so a projection can point at
-    it. The maddah is the case that forced this to exist separately from
-    'contributes nothing' (ADR-003 §4.0)."""
+    """Supplies nothing; decorates the named slot so a projection can point
+    at it, unlike `Absent`, which names a cluster with no slot at all."""
 
     target: Target = Target.HERE
 
 
 @dataclass(frozen=True, slots=True)
 class Absent:
-    """The cluster produces no slot at all — a length carrier, an otiose seat.
+    """The cluster produces no slot at all - a length carrier, an otiose seat.
     `shows` names the slot a projection should attribute it to."""
 
     shows: Target = Target.PREVIOUS
@@ -121,11 +114,8 @@ def register(
 ) -> Callable[[Derivation], Derivation]:
     """`requires` names the inventory roles this derivation reads.
 
-    Roles are a contract between Python and YAML with no schema behind it:
-    `Cluster.has` returns `False` for a role nobody declared and never raises,
-    so renaming `fatha` to `fathah` in a script inventory loads clean, runs
-    clean, and silently changes the output. Declaring the dependency here lets
-    `required_roles` turn that into a load-time error naming the file.
+    `Cluster.has` returns `False`, never raises, for an undeclared role, so
+    a typo would silently change output instead of failing at load time.
     """
 
     def decorate(fn: Derivation) -> Derivation:
@@ -160,11 +150,8 @@ def registered() -> tuple[str, ...]:
 def _load_all() -> None:
     """Import every derivation module so the registry is complete.
 
-    At the bottom because the modules import the vocabulary defined above.
-    Before this, the registry's contents depended on somebody having imported
-    `canon.build` first, which meant `registered()` answered differently
-    depending on the caller — and a validator that asks an empty registry
-    passes everything.
+    At the bottom because these modules import the vocabulary defined above.
+    An empty registry would make a validator pass everything silently.
     """
     from . import (  # noqa: F401
         gemination,

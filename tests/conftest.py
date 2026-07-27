@@ -38,11 +38,8 @@ def alphabet():
 
 
 def words_of(packed, surah: int, ayah: int) -> tuple:
-    """The verse's words, sized from `surah_info` rather than probed for.
-
-    Probing with try/except walks into the next verse instead of stopping,
-    which is why the first version of this helper appeared to hang.
-    """
+    """The verse's words, sized from `surah_info`."""
+    # Probing with try/except would walk into the next verse instead of stopping.
     count = packed.surah_info[str(surah)][ayah - 1]
     return tuple(
         (Location(surah, ayah, word), packed.word(Location(surah, ayah, word)))

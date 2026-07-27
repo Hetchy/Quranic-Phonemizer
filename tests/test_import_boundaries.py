@@ -1,14 +1,4 @@
-"""ADR-007 §2: the dependency direction, checked over the AST.
-
-This is the only defence that survives a careless refactor. Two of the rules
-carry design weight rather than tidiness:
-
-  * `rules` must not import `orthography` — the packaging expression of
-    ADR-001 §1's one-way reference, and a second independent guard on the
-    absent grapheme field.
-  * `render` must not import `rules`, `canon` or `engine` — a projection
-    cannot re-detect a rule if it cannot import a classifier.
-"""
+"""The dependency direction between packages, checked over the AST."""
 from __future__ import annotations
 
 import ast
@@ -18,15 +8,17 @@ import pytest
 
 PACKAGE = pathlib.Path(__file__).resolve().parent.parent / "quranic_phonemizer"
 
-#: package -> what it may import from this package. `riwayat` is the assembly
-#: point and may import anything; nothing imports *it*, which is what keeps a
-#: second riwayah additive.
+#: What each package may import from this package. `riwayat` is the assembly
+#: point and may import anything; nothing imports it, so a second riwayah
+#: stays additive.
 ALLOWED: dict[str, frozenset[str]] = {
     "model": frozenset(),
     "orthography": frozenset({"model"}),
     "canon": frozenset({"model", "orthography"}),
     "engine": frozenset({"model"}),
+    # Guards against reintroducing the grapheme field that orthography dropped.
     "rules": frozenset({"model", "engine"}),
+    # A projection must not re-detect a rule, so it cannot import a classifier.
     "render": frozenset({"model"}),
     "riwayat": frozenset(
         {"model", "orthography", "canon", "engine", "rules", "render", "corpus"}
@@ -45,8 +37,8 @@ MODULE_ALLOWED: dict[tuple[str, str], frozenset[str]] = {
     ("canon", "orthography"): frozenset({"adapter"}),
 }
 
-#: Modules from the superseded implementation, pending deletion (ADR-007 §7).
-#: The set only shrinks. A new module must never be added here.
+#: Modules pending deletion. The set only shrinks; a new module must never
+#: be added here.
 LEGACY: frozenset[str] = frozenset()
 
 
@@ -85,7 +77,7 @@ def test_module_imports_only_what_it_may(path: pathlib.Path) -> None:
     parts = key.split("/")
     own = parts[0] if len(parts) > 1 else ""
     if own and own not in ALLOWED:
-        pytest.fail(f"{key}: package {own!r} is not in the ADR-007 §2 table")
+        pytest.fail(f"{key}: package {own!r} is not in the dependency table")
 
     permitted = ALLOWED.get(own, frozenset())
     tree = ast.parse(path.read_text(encoding="utf-8"))
@@ -93,7 +85,7 @@ def test_module_imports_only_what_it_may(path: pathlib.Path) -> None:
         if package == own or package not in ALLOWED:
             continue
         assert package in permitted, (
-            f"{key} imports {package!r}, which ADR-007 §2 forbids "
+            f"{key} imports {package!r}, which the dependency table forbids "
             f"(allowed: {sorted(permitted)})"
         )
         narrow = MODULE_ALLOWED.get((own, package))
@@ -105,7 +97,7 @@ def test_module_imports_only_what_it_may(path: pathlib.Path) -> None:
 
 
 def test_no_phoneme_strings_outside_render() -> None:
-    """ADR-007 §4.9. The output alphabet is data, and it lives in one place."""
+    """The output alphabet is data, and it lives in one place."""
     offenders = []
     for path in _modules():
         key = _key(path)

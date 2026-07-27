@@ -52,7 +52,7 @@ supplies:
   # `ۜ` is declared polysemous -- it is also a khilaf site -- so the adapter
   # defers rather than deciding, which is what polysemous is for. Four
   # locations, no rule can reach them, and every tajwid source lists exactly
-  # these four: the Ledger's own definition (ADR-006 section 4).
+  # these four: the Ledger's own definition.
   # 18:1:11 `عِوَجَاۜ` is deliberately absent. Its skeleton is not the same in
   # the two scripts -- IndoPak builds the tanwin nun and Uthmani does not, which
   # is one of the L1 rows -- so a mandatory skeleton cannot match both. The

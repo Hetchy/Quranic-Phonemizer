@@ -1,60 +1,45 @@
-"""The idghām families that are not the nūn's: like into like, near into near.
+"""The idgham families that are not the noon's: like into like, near into near.
 
-The old implementation collapsed four named rules into one condition — a bare
-consonant followed by a silent one — and the rule names were lost. Each is
-separate here, because a projection that cannot say *which* idghām fired is
-not a tajweed projection, and because the four have different outcomes.
-
-Only cross-boundary assimilation lives here. A geminate written in the rasm is
-canonical (`Onset.GEMINATE`) and needs no rule at all.
+Only cross-boundary assimilation. A geminate written in the rasm is canonical
+and needs no rule.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from ..engine.neighbourhood import Neighbourhood
 from ..engine.plan import MergeInto, Plan, Realize, Verdict, mint
 from ..model.address import BoundaryPlan, SlotId
 from ..model.canon import CanonLetter as L
-from ..model.canon import NucleusKind, Phase, Rule
+from ..model.canon import CanonLetter, NucleusKind, Phase, Rule
 from ..model.performance import Aspect, Consonant, Occurrence, Participants
 from .lam_shamsiyyah import is_article_lam
+from .tables import Pairs
 
-#: Pairs that share a place of articulation and merge completely.
-KAMIL: dict[tuple[L, L], Rule] = {
-    (L.DAL, L.TA): Rule.IDGHAM_MUTAJANISAYN_KAMIL,
-    (L.TA, L.TAH): Rule.IDGHAM_MUTAJANISAYN_KAMIL,
-    (L.THAL, L.ZAH): Rule.IDGHAM_MUTAJANISAYN_KAMIL,
-    (L.THA, L.THAL): Rule.IDGHAM_MUTAJANISAYN_KAMIL,
-    (L.BA, L.MEEM): Rule.IDGHAM_MUTAJANISAYN_KAMIL,
-}
 
-#: Pairs that merge while the first keeps a trace of itself.
-NAQIS: dict[tuple[L, L], Rule] = {
-    (L.TAH, L.TA): Rule.IDGHAM_MUTAJANISAYN_NAQIS,
-}
-
-#: Neighbours in place, not identical: lām into rāʾ, and the qāf of `نَخْلُقكُّم`.
-MUTAQARIBAYN: dict[tuple[L, L], Rule] = {
-    (L.LAM, L.RA): Rule.IDGHAM_MUTAQARIBAYN,
-    (L.QAF, L.KAF): Rule.IDGHAM_MUTAQARIBAYN,
-}
+#: Noon and meem have their own families, which handle their same-letter case.
+OWNED_ELSEWHERE = frozenset({L.NOON, L.MEEM})
 
 
 @dataclass(frozen=True, slots=True)
 class Idgham:
-    """One classifier, three tables — the shape is identical, so the code is.
+    """One classifier over the pair table; which family a pair falls in is
+    data, so a per-family `look` would be the same body three times."""
 
-    Which table a pair falls in is data. Giving each family its own `look`
-    would reintroduce the per-letter dispatch that ADR-004 §1 removes.
-    """
-
+    pairs: Pairs
+    never_follows: frozenset[CanonLetter] = frozenset()
     rule: Rule = Rule.IDGHAM_MUTAMATHILAYN
     phase: Phase = Phase.MERGE
-    triggers: frozenset = frozenset(
-        {letter for pair in (*KAMIL, *NAQIS, *MUTAQARIBAYN) for letter in pair}
-        | {L.DAL, L.TA, L.TAH, L.THAL, L.THA, L.BA, L.LAM, L.QAF, L.MEEM}
-    )
+    triggers: frozenset = field(default=frozenset())
+
+    def __post_init__(self) -> None:
+        # Like into like fires on any repeated letter, so the trigger set is
+        # the alphabet rather than whatever letters the pair table mentions.
+        object.__setattr__(
+            self,
+            "triggers",
+            frozenset(set(CanonLetter) - OWNED_ELSEWHERE - self.never_follows),
+        )
 
     def look(
         self, near: Neighbourhood, plan: Plan, at: SlotId,
@@ -65,42 +50,27 @@ class Idgham:
         if here is None or here.nucleus.kind is not NucleusKind.SILENT:
             return None
         if is_article_lam(near, at):
-            # `ٱللَّهِ` is lām shamsiyyah, not like-into-like. The two families
-            # must be mutually exclusive rather than ranked — E1 exists to
-            # catch the day they overlap, and it did.
-            return None
-        if here.letter is L.MEEM:
-            # A mīm sākinah before a mīm is idghām shafawī, which is the mīm
-            # family's own named rule, not a member of like-into-like. E1
-            # caught this the moment `MeemSakinah` was wired in — the nūn was
-            # already excluded from `triggers` for exactly the same reason.
-            return None
+            return None  # lam shamsiyyah owns this slot
         following = near.after(at)
         if following is None:
             return None
 
-        pair = (here.letter, following.letter)
         if here.letter is following.letter:
             rule = Rule.IDGHAM_MUTAMATHILAYN
-        elif pair in KAMIL:
-            rule = KAMIL[pair]
-        elif pair in NAQIS:
-            rule = NAQIS[pair]
-        elif pair in MUTAQARIBAYN:
-            rule = MUTAQARIBAYN[pair]
         else:
-            return None
+            rule = self.pairs.of(here.letter, following.letter)
+            if rule is None:
+                return None
 
+        occurrence = Occurrence(
+            mint(rule, at), rule, Participants((at, following.id))
+        )
         if rule is Rule.IDGHAM_MUTAJANISAYN_NAQIS:
-            # The first letter survives as a colour on the second rather than
-            # vanishing into it, so nothing merges and the pair is recorded
-            # for the projection alone.
-            return Verdict(
-                Occurrence(mint(rule, at), rule, Participants((at, following.id))),
-                (),
-            )
+            # The first letter survives as a colour on the second, so nothing
+            # merges and the pair is recorded for the projection alone.
+            return Verdict(occurrence, ())
         return Verdict(
-            Occurrence(mint(rule, at), rule, Participants((at, following.id))),
+            occurrence,
             (
                 Realize(
                     following.id,

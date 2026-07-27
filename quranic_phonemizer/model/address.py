@@ -1,8 +1,7 @@
 """Addresses, identities and the request-scoped selections that key on them.
 
-Every stable reference in the system is a `SlotId` (ADR-001 §5). Never a
-`SoundId`, which is request-local; never a byte offset; never "the nth
-occurrence of glyph X".
+Every stable reference is a `SlotId`, never a `SoundId` (request-local),
+a byte offset, or "the nth occurrence of glyph X".
 """
 from __future__ import annotations
 
@@ -91,7 +90,7 @@ class OccurrenceId:
 
 
 class Junction(StrEnum):
-    """What happens after a word (ADR-004 §5)."""
+    """What happens after a word."""
 
     JOIN = "join"
     SAKT = "sakt"
@@ -120,10 +119,8 @@ class BoundaryPlan:
 
 
 class KhilafId(StrEnum):
-    """Named points of legitimate disagreement within one riwayah.
-
-    Kind 1 (token choice) and kind 2 (per-location lexical) only; see
-    ADR-006. The set grows with `variants.yaml`, never with code.
+    """Named points of legitimate disagreement within one riwayah: token
+    choice or per-location lexical only. Grows with `variants.yaml`, not code.
     """
 
     SEEN_SAD = "seen_sad"
@@ -133,7 +130,7 @@ class KhilafId(StrEnum):
 
 @dataclass(frozen=True, slots=True)
 class Option:
-    """One legal reading of one khilāf point."""
+    """One legal reading of one khilaf point."""
 
     khilaf: KhilafId
     name: str
@@ -141,7 +138,7 @@ class Option:
 
 @dataclass(frozen=True, slots=True)
 class VariantSelection:
-    """Which option is taken at each khilāf point. Part of the Score's identity."""
+    """Which option is taken at each khilaf point. Part of the Score's identity."""
 
     options: tuple[Option, ...] = ()
 

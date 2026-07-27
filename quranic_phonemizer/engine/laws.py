@@ -1,7 +1,7 @@
-"""Totality and agreement, asserted over a completed `Performance`.
+"""Invariant checks over a completed `Performance`.
 
-These are the domain-facts invariants made structural. Every failure names the
-address and the two disagreeing sources; none returns a sentinel.
+Every failure raises, naming the address and the two disagreeing sources;
+none returns a sentinel.
 """
 from __future__ import annotations
 
@@ -104,10 +104,8 @@ def _every_merge_has_its_host(performance: Performance) -> None:
 
 
 def _every_occurrence_produced_or_declared(performance: Performance) -> None:
-    # A `Silent` edge counts. Deletion-with-a-reason is a legitimate output —
-    # `WAQF_ENDING` and `WASL_ELISION` exist to remove sounds, and excluding
-    # them here made E4 fire on rules that were working correctly. What E4 is
-    # for is a rule that fires and leaves no edge of any kind.
+    # A `Silent` edge counts as production: deleting a sound for a stated
+    # reason (waqf ending, wasl elision) is a legitimate output.
     producing = {attribution.by for attribution in performance.attributions}
     for occurrence in performance.occurrences:
         if occurrence.id in producing:
@@ -121,19 +119,10 @@ def _every_occurrence_produced_or_declared(performance: Performance) -> None:
 
 
 def check_inscription(inscription: Inscription, score: Score) -> None:
-    """I7 and I8 (ADR-003 §4.0): the Score is **reachable from the writing**.
+    """Every slot must be the target of at least one `Spelling`.
 
-    Every slot must be the target of at least one `Spelling`. This is the law
-    that makes a grapheme-anchored projection possible at all — a slot no
-    grapheme reaches is a sound the consumer cannot point at in the text.
-
-    It is the direction S1 cannot cover. S1 catches a carrier wrongly promoted
-    to slot-hood, because such a slot hosts nothing; it cannot catch a slot
-    that no writing accounts for. The tanwīn nūn was exactly that for the whole
-    first draft — the projection spike measured 5,831 unreached Uthmani slots
-    and every one was this — and it is reached now because the tanwīn mark
-    evidences both the host's vowel and the nūn, which is what A1's ruling says
-    it does.
+    Complements the check that catches a carrier wrongly promoted to a slot;
+    this instead catches a slot that no grapheme reaches at all.
     """
     reached: set[SlotId] = set()
     for spelling in inscription.spellings:
@@ -158,16 +147,10 @@ def check_attestations(
     performance: Performance,
     boundaries: BoundaryPlan,
 ) -> list[str]:
-    """The attestation law (A1), one-directional.
+    """Every family a script attests must be produced by some occurrence.
 
-    If a script attests family `F` at slot `s`, the engine must produce an
-    occurrence of *some* rule in `F` with `s` among its participants. Never the
-    reverse: word-initial shadda ʿāriḍah is 3,722 Uthmani against 5,761
-    IndoPak, agreeing on 3,534, and neither inventory is a superset — a
-    bidirectional law fails on 2,415 words.
-
-    Returns the disagreements rather than raising, so a caller can report them
-    all at once.
+    One-directional: an occurrence family with no matching attestation is
+    not an error. Returns disagreements instead of raising them individually.
     """
     del boundaries
     produced: dict[SlotId, set[RuleFamily]] = {}

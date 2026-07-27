@@ -1,8 +1,7 @@
 """The Performance layer: sounds, and the one relation that produces them.
 
-No grapheme field and no script field anywhere below. A rule that wants to
-inspect a glyph has nowhere to look — the property the design exists to obtain
-(ADR-001 §1), and it is structural rather than a tested discipline.
+No grapheme field and no script field anywhere below: a rule that wants
+to inspect a glyph has nowhere to look.
 """
 from __future__ import annotations
 
@@ -23,7 +22,7 @@ from .canon import CanonLetter, Quality, Rule
 
 class Aspect(StrEnum):
     """Exactly two members, because a `Slot` is definitionally an onset plus a
-    nucleus. A third would mean the slot gained a third field (ADR-002 §2)."""
+    nucleus. A third would mean the slot gained a third field."""
 
     ONSET = "onset"
     NUCLEUS = "nucleus"
@@ -35,8 +34,8 @@ class Side(StrEnum):
 
 
 class NasalPlace(StrEnum):
-    """A place of articulation, not a rule name — and the whole content of the
-    realization khilāf, which is therefore set in `rules/`, never in `render/`."""
+    """A place of articulation, not a rule name. The realization khilaf is
+    resolved in `rules/`, never in `render/`."""
 
     BILABIAL = "bilabial"
     ASSIMILATED = "assimilated"
@@ -74,9 +73,8 @@ class Release:
 
 Sound: TypeAlias = Consonant | Vowel | Nasal | Release
 
-#: A `Sound` whose context-dependent features are not yet decided. The
-#: materialiser fills `emphatic` and `nasal` from later-phase `Recolour`
-#: effects, so a rule states only what it knows (ADR-004 §2).
+#: A `Sound` whose context-dependent features are not yet decided; the
+#: materialiser fills `emphatic` and `nasal` from later `Recolour` effects.
 SoundSpec: TypeAlias = Sound
 
 
@@ -106,8 +104,8 @@ class Hosts:
 
 @dataclass(frozen=True, slots=True)
 class Inserted:
-    """No slot owns the sound; `anchor` places it. The 3:1 iltiqāʾ fatha is
-    the only genuinely slot-less sound in the design (ADR-002 §4.2)."""
+    """No slot owns the sound; `anchor` places it. The 3:1 iltiqa fatha is
+    the only genuinely slot-less sound in the design."""
 
     anchor: tuple[SlotId, Side]
     aspect: Aspect
@@ -118,7 +116,7 @@ class Inserted:
 @dataclass(frozen=True, slots=True)
 class MergedInto:
     """The source half of a merger. The pair sharing a `SoundId` and an
-    `OccurrenceId` *is* the merger — there is no `assimilated` flag."""
+    `OccurrenceId` *is* the merger; there is no `assimilated` flag."""
 
     slots: tuple[SlotId, ...]
     aspect: Aspect
@@ -128,7 +126,7 @@ class MergedInto:
 
 @dataclass(frozen=True, slots=True)
 class Silent:
-    """Deletion with a reason. The reason is `by.rule` (ADR-002 §4.1)."""
+    """Deletion with a reason. The reason is `by.rule`."""
 
     slots: tuple[SlotId, ...]
     aspect: Aspect

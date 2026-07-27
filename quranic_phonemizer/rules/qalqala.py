@@ -1,37 +1,34 @@
 """Qalqala: the echo on a quiescent plosive, and its three degrees.
 
-The degrees are separate `Rule` members rather than one collapsed tag. The
-frozen vocabulary distinguishes them — measured, 3,413 `qalqala_sughra` against
-424 `qalqala_kubra` — and collapsing them would be the same failure this design
-indicts at `idgham.py:28`, committed in the opposite direction (ADR-002 §5.1).
+The degrees are separate Rule members because a projection that cannot say
+which one fired is not a tajweed projection.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from ..engine.neighbourhood import Neighbourhood
 from ..engine.plan import Plan, Realize, Verdict, mint
 from ..model.address import BoundaryPlan, SlotId
-from ..model.canon import CanonLetter as L
-from ..model.canon import NucleusKind, Onset, Phase, Rule
+from ..model.canon import CanonLetter, NucleusKind, Onset, Phase, Rule
 from ..model.performance import (
     Aspect,
-    Consonant,
     Occurrence,
     Participants,
     Release,
     ReleaseKind,
 )
 
-#: `قطب جد` — the five letters that echo when they close a syllable.
-QALQALA = frozenset({L.QAF, L.TAH, L.BA, L.JEEM, L.DAL})
-
 
 @dataclass(frozen=True, slots=True)
 class Qalqala:
+    letters: frozenset[CanonLetter]
     rule: Rule = Rule.QALQALA_SUGHRA
     phase: Phase = Phase.RELEASE
-    triggers: frozenset = frozenset(QALQALA)
+    triggers: frozenset = field(default=frozenset())
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "triggers", frozenset(self.letters))
 
     def look(
         self, near: Neighbourhood, plan: Plan, at: SlotId,
@@ -43,10 +40,8 @@ class Qalqala:
         if plan.merged_away(at, Aspect.ONSET):
             return None  # nothing to release: the closure did not survive MERGE
 
-        # The echo needs an actual closure, so the slot must end up voiceless.
-        # Canonically silent is one way; a `BOUNDARY` rule having silenced it
-        # is the other. A long final vowel is neither — reading only the stop
-        # made qalqala eat it.
+        # The echo needs a real closure: either canonically silent, or
+        # silenced by a BOUNDARY rule. A long final vowel is neither.
         canonically = slot.nucleus.kind is NucleusKind.SILENT
         silenced = plan.merged_away(at, Aspect.NUCLEUS)
         if not (canonically or silenced):
@@ -63,13 +58,7 @@ class Qalqala:
 
         return Verdict(
             Occurrence(mint(degree, at), degree, Participants((at,))),
-            (
-                Realize(
-                    at,
-                    Aspect.NUCLEUS,
-                    (Release(ReleaseKind.QALQALA),),
-                ),
-            ),
+            (Realize(at, Aspect.NUCLEUS, (Release(ReleaseKind.QALQALA),)),),
         )
 
 

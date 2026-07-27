@@ -1,12 +1,6 @@
-# The two gates, and the suite. None of them ran automatically before this:
-# `pytest` appeared in no workflow, and both parity harnesses were scripts
-# somebody remembered to run by hand.
-#
-# The thresholds are floors that may only rise. That is deliberate — the
-# residues are real and named in docs/adr/, so requiring zero would mean a red
-# build with nothing to do about it, and requiring nothing would mean a
-# regression lands silently. A floor catches the regression and lets the
-# remaining work be finished on purpose.
+# Thresholds are floors that may only rise. The residues are real and named in
+# docs/, so requiring zero would mean a red build with nothing to do about it,
+# and requiring nothing would let a regression land silently.
 name: gates
 
 on:
@@ -25,8 +19,18 @@ jobs:
       - run: pip install -e . pytest
       - run: python -m pytest tests/ -q
 
+  comments:
+    # The comment rules in CLAUDE.md, checked rather than remembered.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: python tools/comment_lint.py
+
   cross-script:
-    # The claim the rebuild is named for: two scripts, same phonemes.
+    # The claim the design is named for: two scripts, same phonemes.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -36,12 +40,12 @@ jobs:
       - run: pip install -e .
       - name: cross-script parity, both modes
         run: |
-          python tools/floor.py cross word 99.910
+          python tools/floor.py cross word 99.911
           python tools/floor.py cross verse 99.889
 
   regression:
-    # Not a target — the oracle is the old implementation with its defects
-    # frozen in. A change detector.
+    # Not a target. The oracle is the previous implementation with its defects
+    # frozen in, so this is a change detector.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -51,13 +55,12 @@ jobs:
       - run: pip install -e .
       - name: regression oracle, both modes
         run: |
-          python tools/floor.py regression word 99.787
-          python tools/floor.py regression verse 97.080
+          python tools/floor.py regression word 99.800
+          python tools/floor.py regression verse 97.553
 
   roundtrip:
-    # ADR-005 section 4: every Score can be spelled, and spells back to itself.
-    # The floor is the digest round-trip; `unspellable` is the gate proper and
-    # is zero, which the harness prints.
+    # Every Score can be spelled and spells back to itself. The floor is the
+    # digest round-trip; the gate proper is `unspellable`, which is zero.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -65,11 +68,25 @@ jobs:
         with:
           python-version: "3.13"
       - run: pip install -e .
-      - run: python tools/floor.py roundtrip uthmani 98.797
+      - run: python tools/floor.py roundtrip uthmani 98.813
+
+  attestation:
+    # A shadda a script writes must be produced by some occurrence. One
+    # directional: an occurrence with no attestation behind it is not an error.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: pip install -e .
+      - name: unmet attestations, both scripts
+        run: |
+          python tools/floor.py attest uthmani 190
+          python tools/floor.py attest indopak 259
 
   l1:
-    # Score-level script equality. Red by design until the residue is closed;
-    # the ceiling stops it growing.
+    # Score-level script equality. The ceiling stops the residue growing.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -77,4 +94,4 @@ jobs:
         with:
           python-version: "3.13"
       - run: pip install -e .
-      - run: python tools/floor.py l1 - 106
+      - run: python tools/floor.py l1 - 105

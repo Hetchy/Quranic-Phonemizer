@@ -1,8 +1,7 @@
 """The Inscription layer: what a script wrote, and what each mark is doing.
 
-`Spelling` points *up* from a grapheme into the Score. Nothing points down at
-a grapheme (ADR-001 §1) — which is why deleting this layer breaks only
-source-text projections.
+`Spelling` points *up* from a grapheme into the Score; nothing points
+down at a grapheme.
 """
 from __future__ import annotations
 
@@ -16,7 +15,7 @@ from .canon import RuleFamily
 
 class GraphemeClass(StrEnum):
     """What the grapheme *is*. `Spelling` says what it *does*; the two axes
-    are independent and a projection's `role` reads the second (ADR-007 §6.1)."""
+    are independent and a projection's `role` reads the second."""
 
     BASE = "base"
     HARAKA = "haraka"
@@ -45,6 +44,7 @@ class SlotFact(StrEnum):
     ONSET = "onset"
     NUCLEUS = "nucleus"
     SAKT = "sakt"
+    ANNOTATION = "annotation"
 
 
 @dataclass(frozen=True, slots=True)
@@ -60,9 +60,8 @@ class Evidences:
 class Attests:
     """This grapheme witnesses a *performance* outcome at an anchor slot.
 
-    Names a `RuleFamily`, never a `Rule`: deciding which of seven idghām
-    members a shadda attests is tajweed classification and does not belong in
-    a script adapter (ADR-003 §4.1).
+    Names a `RuleFamily`, never a `Rule`: choosing among idgham members is
+    tajweed classification, not a script adapter's job.
     """
 
     grapheme: GraphemeId
@@ -74,10 +73,8 @@ class Attests:
 class Decorates:
     """Supplies no canonical fact, but is bound to the slot it shows.
 
-    The slot is mandatory. Its predecessor `Inert` asserted two things at
-    once — *supplies no fact* and *shows nothing* — and the maddah is the
-    first without being the second: 5,044 cells in the frozen baseline give it
-    a long vowel and a madd tag (ADR-003 §4.0).
+    The slot is mandatory: unlike `Structural`, a `Decorates` grapheme is
+    tied to a slot even though it asserts nothing about it.
     """
 
     grapheme: GraphemeId
@@ -108,7 +105,7 @@ class StopAdvice(StrEnum):
     PERMITTED_STOP = "permitted_stop"
     """A stop is allowed, class unspecified. IndoPak's `ؕ` absorbs three
     Uthmani classes; mapping it to any one would invent a distinction the
-    source does not make (ADR-003 §5)."""
+    source does not make."""
 
 
 @dataclass(frozen=True, slots=True)

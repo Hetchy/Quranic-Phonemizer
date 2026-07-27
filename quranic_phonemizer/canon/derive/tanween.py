@@ -1,15 +1,7 @@
-"""Tanwīn is two slots (A1, ADR-001 §3.5b).
+"""Tanween is two slots: one grapheme evidences facts on both.
 
-One grapheme evidences facts on two: a `Short(q)` nucleus on the base slot, and
-`LETTER = NOON` + `NUCLEUS = Silent` on a new following slot. Wherever iẓhār
-applies the nūn sounds as a plain nūn **at its own position** — `عَذَابٌ` and
-`سَوَآءٌ` are the measured cases — so by the unit-hood criterion it always was
-a slot. (The output notation for that lives in `render/`, which is the only
-place in the package allowed to spell a phoneme.)
-
-What that buys: the nūn family gets **one shape**, since tanwīn and nūn sākinah
-become literally the same rule on the same trigger; the iltiqāʾ kasra stops
-being a slot-less insertion; and IndoPak's `ࣙ` becomes ordinary evidence.
+A `Short(q)` nucleus lands on the base slot; `NOON` plus a silent nucleus
+lands on a new slot, so tanween and noon-sakinah share one rule.
 """
 from __future__ import annotations
 
@@ -43,19 +35,17 @@ def tanween(context: Context) -> Outcome:
 
 @register("iwad_carrier")
 def iwad_carrier(context: Context) -> Outcome:
-    """The ālif written after a fathatan.
+    """The alif written after a fathatan.
 
-    It is not a fourth slot and not a length carrier in waṣl; at waqf it is the
-    ʿiwaḍ, which is a `Relength` on the base plus a `Silence` on the nūn slot.
-    `role` reports it as **madd** — what it contributes — while
-    `Grapheme.cls` keeps `TANWEEN`, which is what it is (ADR-007 §6.1).
+    Not a fourth slot and not a length carrier in wasl; at waqf it is the
+    iwad, lengthening the base while silencing the noon slot.
     """
     return Absent(shows=Target.PREVIOUS)
 
 
-#: The role an inventory gives IndoPak's `ࣙ`. `canon.build` looks for it by
-#: name when it needs to know whether the *previous* word ends in a tanwīn the
-#: script drew on this one.
+#: The role an inventory gives IndoPak's cross-word noon-kasra mark.
+#: `canon.build` looks for it by name to know whether the previous word
+#: ends in a tanween the script drew on this one.
 CROSS_WORD_ROLE = "cross_word_noon"
 
 
@@ -67,15 +57,9 @@ CROSS_WORD_ROLE = "cross_word_noon"
 # return the slot itself rather than for the builder to look for the mark.
 @register("cross_word_noon")
 def cross_word_noon(context: Context) -> Outcome:
-    """IndoPak's `ࣙ` U+08D9 — a nūn with a kasra drawn on the *following* word.
+    """IndoPak's noon-kasra mark drawn on the following word.
 
-    IndoPak splits the tanwīn across the boundary: the vowel stays on word *n*
-    with the tanwīn mark dropped, and the nūn is depicted on word *n+1*. Under
-    A1 that is not an attestation at all but ordinary evidence, because the
-    tanwīn nūn is a slot. IndoPak was writing the correct model all along.
-
-    Measured: 54 sites, of which 34 are inside a verse and **20 cross a verse
-    boundary** — which is why `read` is verse-scoped *and* why `canon.build`
-    takes one word of right context.
+    IndoPak splits the tanween across the boundary: the vowel stays on
+    word n with the mark dropped, and the noon is depicted on word n+1.
     """
     return Absent(shows=Target.PREVIOUS)

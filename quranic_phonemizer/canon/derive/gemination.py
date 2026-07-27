@@ -1,23 +1,7 @@
 """The shadda: canonical gemination, or a witness to an assimilation.
 
-ADR-003 §4.1 first stated this positionally — *word-initial* shadda attests.
-Measured, position is the wrong axis: 5:28:2 `بَسَطْتَ` / `بَسَطْتَّ` writes an
-IndoPak-only shadda word-**internally**, attesting idghām mutajānisayn.
-
-The canonical statement covers both and needs no glyph positions:
-
-> A shadda on a slot whose preceding **sound** is silent attests
-> `ASSIMILATION`. Anywhere else it is `Onset.GEMINATE`.
-
-It is a Performance predicate, evaluated under the all-join plan — which is
-what §4.1 property 2 ("a mushaf writes the connected reading") and invariant A1
-("under the all-join boundary plan") already said. The three readings differ by
-2,440 sites per script, all of them the article before a geminated lām, whose
-helping vowel is elided in waṣl but present in the Score.
-
-Word-initial gemination is deliberately **not** a Score fact: it is waṣl-only,
-it drops at ibtidāʾ, and making it canonical would put the measured 2,415-word
-disagreement between the two scripts into the L1 residue.
+A shadda whose preceding sound is silent attests `ASSIMILATION`; otherwise
+it is `Onset.GEMINATE`. Decided by the sound, never by glyph position.
 """
 from __future__ import annotations
 
@@ -35,6 +19,8 @@ def gemination(context: Context) -> Outcome:
 
 def _preceded_by_silence(context: Context) -> bool:
     if context.word_initial:
+        # A word-initial shadda's helping vowel is elided in wasl, so the
+        # preceding sound is silent even though it is not canonically absent.
         return True
     previous = context.previous_nucleus
     return previous is not None and previous.kind is NucleusKind.SILENT

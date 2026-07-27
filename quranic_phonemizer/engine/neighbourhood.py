@@ -1,12 +1,7 @@
-"""Where a rule may look: the slot after this one, and what lies between.
+"""Where a rule may look: the next slot, and what lies between.
 
-Rules ask here rather than indexing the Score themselves, so "no cross-word
-effect crosses a STOP or SAKT junction" (E2) is enforced in one place instead
-of being remembered in each family.
-
-The maps are built once per (Score, BoundaryPlan) and reused. A rule calls this
-once per slot, so rebuilding them per call is quadratic — measured, it took a
-100-verse run past two minutes.
+Rules query this instead of indexing the Score directly, so a boundary
+junction blocks cross-word effects in one place. Built once and reused.
 """
 from __future__ import annotations
 

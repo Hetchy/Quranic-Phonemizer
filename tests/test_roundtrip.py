@@ -1,13 +1,7 @@
-"""Phase 2: ADR-005 §4. Every Score can be spelled, and spells back to itself.
+"""Every Score can be spelled, and spells back to itself.
 
-The gate §4 states is **totality** — no Score holds a fact the orthography
-cannot express — and that is what `WriteError` would report. The digest
-round-trip is a stronger claim layered on top, and its residue is named in
-`docs/adr/phase-2-report.md` rather than hidden.
-
-Not byte-identity with the source. `read` deliberately discards what the Score
-does not need, so demanding `text' == text` would demand that the canonical
-layer keep script detail — the opposite of the design.
+Not byte-identity with the source: `read` discards script detail the
+Score does not need.
 """
 from __future__ import annotations
 
@@ -29,9 +23,8 @@ def pen() -> Pen:
 
 @pytest.mark.parametrize(("surah", "ayah"), VERSES)
 def test_every_score_can_be_spelled(packed, shared, pen, surah, ayah):
-    """Totality — the gate itself. A `WriteError` means the canonical layer is
-    holding something no orthography can express, which is the shape of a
-    missing layer."""
+    """A `WriteError` means the canonical layer holds a fact no orthography
+    can express."""
     score = built_for(packed, shared, surah, ayah).score
     spelled = write_verse(score, pen)
     assert len(spelled) == len(score.words)

@@ -2,7 +2,7 @@
 #
 # Shared rather than per-riwayah: what the letter ا is *called* is a fact about
 # Arabic, and every riwayah spells it the same. What differs between riwāyāt is
-# the madd length, which this model does not store (ADR-006 §5).
+# the madd length, which this model does not store.
 #
 # Written in the vocalised canonical notation `canon/passes.py::_vocalised`
 # already uses -- `ABJAD` letters, a lowercase vowel for a short nucleus, an

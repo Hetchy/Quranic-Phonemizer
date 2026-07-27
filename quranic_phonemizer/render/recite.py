@@ -1,9 +1,7 @@
-"""The phoneme projection: sounds in recitation order.
+"""Orders performed sounds into recitation sequence.
 
-Order is `(slot ordinal, aspect)` with the onset before the nucleus, and an
-inserted sound placed by its anchor and side. That is the whole of it — the
-sequence is a *view* of the attribution edges, never a second computation, so
-it cannot disagree with the engine (ADR-002 §5).
+Sorted by `(slot ordinal, aspect)`, with an inserted sound placed by its
+anchor and side; a view over the attribution edges, not a computation.
 """
 from __future__ import annotations
 
@@ -52,11 +50,10 @@ def phonemes(
 def phonemes_by_word(
     performance: Performance, score: Score, alphabet: Alphabet
 ) -> tuple[tuple[str, ...], ...]:
-    """The same sequence, cut at word boundaries.
+    """The same sequence, split at word boundaries.
 
-    A sound merged across a boundary belongs to the word that *hosts* it, which
-    is why this reads `Hosts` edges and not slot membership: `مِّن رَّبِّهِمْ`
-    puts the nūn's sound on the second word, and so does the projection.
+    A sound merged across a boundary belongs to the word that hosts it: in
+    `مِّن رَّبِّهِمْ` the noon's sound lands on the second word.
     """
     by_id = dict(performance.sounds)
     owner: dict[int, int] = {}

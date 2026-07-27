@@ -1,8 +1,6 @@
 """Shared grapheme clustering: scalars in, a `Reading` out.
 
-Both adapters run this. What differs between them is their inventory, not their
-code — which is what makes "how thin is the adapter" answerable with a number
-rather than an opinion (ADR-008 §5).
+Both adapters run this same code; only their inventory differs.
 """
 from __future__ import annotations
 
@@ -149,8 +147,8 @@ class _ReadState:
         self.decorations.append(Decoration(index, offset, "host"))
 
     def _fold_to_hamza(self, index: int, offset: int) -> None:
-        """A seat bearing a combining hamza *is* a hamza. Hamza seats fold into
-        the hamza's letter identity (ADR-001 §4)."""
+        """A seat bearing a combining hamza is a hamza: fold the seat into
+        the hamza's letter identity."""
         self.evidence = [
             e
             for e in self.evidence

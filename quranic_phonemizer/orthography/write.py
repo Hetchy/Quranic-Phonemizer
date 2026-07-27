@@ -1,21 +1,7 @@
-"""Score → Arabic. The other direction across the script boundary.
+"""Score -> text: the inverse of reading.
 
-`read` extracts evidence from a script; `write` spells a Score back into one.
-ADR-005 §4 makes the second a gate rather than a convenience: **if some Score
-cannot be spelled, the canonical layer is holding something no orthography can
-express**, and that is the shape of a missing layer.
-
-The gate is not byte-identity with the source, which would be false by design —
-`read` deliberately discards what the Score does not need, so `write` cannot
-put it back and should not pretend to. The invariant that is both true and
-worth having is **Score → text → Score**: spelling a Score and reading the
-result must give the same Score. That proves `write` covers the whole canonical
-vocabulary, which is what §4 actually asks.
-
-Nothing here is a table of its own. The spelling is the script's own inventory
-read backwards: the inventory already says "this scalar evidences `Short(A)`",
-so `write` asks it which scalar evidences `Short(A)`. A second table would be
-the same facts written twice, and the two would drift.
+Correctness is round-trip closure, not byte identity -- spelling a Score
+and reading it back must reproduce it.
 """
 from __future__ import annotations
 
@@ -28,13 +14,9 @@ from .inventory import Inventory, InventoryError
 #: Which role writes each nucleus quality, and which carrier lengthens it.
 _SHORT_ROLE = {Quality.A: "fatha", Quality.U: "damma", Quality.I: "kasra"}
 
-#: Imāla and ishmām are *colourings a reciter applies* to an ordinary vowel,
-#: not vowels in their own right, and the scripts that mark them write an
-#: annotation on top of the ordinary haraka. So they spell as their base and
-#: the annotation belongs to recited writing rather than to this. Without the
-#: mapping a long imāla vowel raised `KeyError` instead of a `WriteError`,
-#: which is the difference between a bug and a stated gap.
-_BASE = {Quality.IMALA: Quality.A, Quality.ISHMAM: Quality.I}
+#: Imala and ishmam are colourings a reciter applies to an ordinary vowel,
+#: not vowels of their own, so they spell as their base quality.
+_BASE = {Quality.IMALA: Quality.A}
 _CARRIER = {
     Quality.A: CanonLetter.ALIF,
     Quality.U: CanonLetter.WAW,
@@ -54,13 +36,8 @@ class Pen:
     roles: dict[str, str]
     onsets: dict[Onset, str]
     carriers: dict[CanonLetter, str]
-    """The scalar that lengthens rather than the one that consonants.
-
-    `dagger_host` is exactly the inventory's word for "this glyph may stand
-    for length rather than for itself", so the carrier map is the entries the
-    letter map takes second. Spelling a long ī with the consonantal `ي`
-    instead of the bare `ى` made 71 verses read back with a short vowel --
-    the carrier was no longer recognised as one.
+    """The scalar that lengthens a vowel, as opposed to the one that spells
+    the same letter as a consonant -- `dagger_host` scalars can do either.
     """
 
     def letter(self, letter: CanonLetter) -> str:
@@ -80,15 +57,12 @@ class Pen:
 
 
 def pen_for(inventory: Inventory) -> Pen:
-    """Invert an inventory. Ambiguity is resolved by *first declared wins*,
-    which is why the YAML lists the ordinary scalar before its variants."""
+    """Invert an inventory. Ambiguity resolves to the first scalar declared
+    for a given letter or role."""
     letters: dict[CanonLetter, str] = {}
     onsets: dict[Onset, str] = {}
-    # Two passes. `dagger_host` and `bare_rasm` describe scalars that *may*
-    # stand for something else as well -- Uthmani's `و` can carry a dagger for
-    # the slot before it -- but they are still the letter, so they are a
-    # fallback rather than an exclusion. Skipping them outright left wāw and
-    # yāʾ with no spelling at all.
+    # Two passes: plain letters first, then dagger_host/bare_rasm scalars as
+    # a fallback -- they are still valid letters, just not the first choice.
     carriers: dict[CanonLetter, str] = {}
     for plain in (True, False):
         for scalar, entry in inventory.letters.items():
@@ -125,7 +99,13 @@ def _slot(slot, pen: Pen) -> str:
         out = pen.letter(slot.letter)
     if slot.onset is Onset.GEMINATE:
         out += pen.role("shadda")
-    return out + _nucleus(slot, pen)
+    out += _nucleus(slot, pen)
+    for annotation in sorted(slot.annotations):
+        # An annotation a script writes has a role; one the builder derives
+        # has none and is re-derived on the way back in.
+        if annotation.value in pen.roles:
+            out += pen.role(annotation.value)
+    return out
 
 
 def _nucleus(slot, pen: Pen) -> str:
@@ -139,10 +119,8 @@ def _nucleus(slot, pen: Pen) -> str:
         case NucleusKind.SHORT:
             return pen.role(_short_role(quality))
         case NucleusKind.LONG | NucleusKind.PAUSAL_LONG:
-            # A long vowel is its haraka plus the carrier that lengthens it.
-            # Written out rather than as a dagger, because the dagger is a
-            # script's *abbreviation* of exactly this and reading it back
-            # gives the same slot either way.
+            # Always write the full haraka plus carrier rather than the
+            # dagger abbreviation; both read back to the same slot.
             carrier = _CARRIER[quality]
             return pen.role(_short_role(quality)) + (
                 pen.carriers.get(carrier) or pen.letter(carrier)

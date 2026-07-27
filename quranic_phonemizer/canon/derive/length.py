@@ -1,10 +1,7 @@
 """Length: which clusters are carriers, and where a dagger's alif lands.
 
-The length clause of the unit-hood criterion (ADR-001 §3.1): *contributing
-length to a neighbouring slot's nucleus is not sound at its own position*. So a
-carrier is not a slot, and the same glyph is decided by the preceding nucleus —
-a sākin wāw after a fatha is a leen glide and sounds; after a damma it carries
-length and does not.
+A carrier contributes length to the slot before it rather than sounding
+at its own position, decided by the preceding nucleus, not the glyph.
 """
 from __future__ import annotations
 
@@ -45,11 +42,8 @@ LONG_KINDS = frozenset(
 def dagger(context: Context) -> Outcome:
     """The superscript alif.
 
-    On a glyph the script declares as rasm — Uthmani's tatweel seat, its alif
-    maqṣūra and its wāw — it lengthens the open short *a* of the previous slot.
-    On any other host the dagger's own cluster is the slot and the alif is its
-    nucleus. Measured: Uthmani writes alif+dagger **0** times and IndoPak
-    **1,543**, where it is always madd badal, never a carrier.
+    On a glyph the script declares as rasm, it lengthens the previous
+    slot's open short a. On any other host, it is its own slot.
     """
     cluster = context.cluster
     previous = context.previous_nucleus
@@ -71,7 +65,7 @@ def dagger(context: Context) -> Outcome:
     "sukun",
 ))
 def carrier(context: Context) -> Outcome:
-    """Is this bare ālif/wāw/yāʾ a slot, or does it lengthen the previous one?
+    """Is this bare alif/waw/yaa a slot, or does it lengthen the previous one?
 
     `canon.build` names this derivation itself, because the length clause is a
     property of the canonical layer rather than of any one script.
@@ -90,7 +84,7 @@ def carrier(context: Context) -> Outcome:
         if letter is CARRIER_OF[previous.quality]:
             return Sets(SlotFact.NUCLEUS, Long(previous.quality), Target.PREVIOUS)
         if cluster.bare_rasm and context.word_final and previous.quality is Quality.A:
-            # IndoPak writes the alif maqṣūra as a plain yāʾ; Uthmani writes
+            # IndoPak writes the alif maqsura as a plain yaa; Uthmani writes
             # `ى`. Both stand for an alif nobody wrote.
             return Sets(SlotFact.NUCLEUS, Long(Quality.A), Target.PREVIOUS)
     if previous.kind in LONG_KINDS:
@@ -105,12 +99,10 @@ def carrier(context: Context) -> Outcome:
         "shadda", "silah_waw", "silah_ya",
 ))
 def pausal_length(context: Context) -> Outcome:
-    """Uthmani's `۠`, on the ālif of the seven alifs.
+    """Uthmani's `۠`, on the alif of the seven alifs.
 
-    Like the dagger, the mark sits on a carrier and the length belongs to the
-    slot before it. Uthmani writes it at 66 sites and IndoPak at none — which
-    is why the canonical supplier is the lexeme list and this mark is the
-    witness that agrees with it (L2).
+    Like the dagger, the mark sits on a carrier and the length belongs to
+    the slot before it; IndoPak writes no equivalent mark at all.
     """
     del context
     return Sets(SlotFact.NUCLEUS, PausalLong(Quality.A), Target.PREVIOUS)
@@ -118,7 +110,6 @@ def pausal_length(context: Context) -> Outcome:
 
 @register("shows_long")
 def shows_long(context: Context) -> Outcome:
-    """The maddah. It supplies nothing the rules do not already have, and it
-    is still the grapheme a reader points at to see a madd — 5,044 cells in the
-    frozen baseline give it a long vowel and a madd tag (ADR-003 §4.0)."""
+    """The maddah: supplies nothing the rules do not already have, but is
+    still the grapheme a reader points at to see a madd."""
     return Shows(Target.HERE)

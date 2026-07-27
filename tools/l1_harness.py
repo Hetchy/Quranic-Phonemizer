@@ -1,19 +1,8 @@
-"""The L1 harness (ADR-008 §3). Phase 1's gate.
+"""Compare Uthmani and IndoPak canon-built scores field by field; residue should be empty.
 
-    for each verse in the riwayah:
-        a = canon.build(uthmani.read(...))
-        b = canon.build(indopak.read(...))
-        compare a.slots with b.slots, field by field
+Also reports the provenance split and the `Decorates` count alongside the residue.
 
-The report must be **empty**. A nonzero residue is a failed equality proof, not
-"mostly named".
-
-It also reports what §3.1 requires besides the residue — the provenance split
-and the `Decorates` count — because a residue driven to zero by a rising
-`Decorates` count is not a proof of script-independence, it is the same fact
-being discarded twice.
-
-Run:  python tools/l1_harness.py [--limit N] [--show CLASS]
+Run: python tools/l1_harness.py [--limit N] [--show CLASS]
 """
 from __future__ import annotations
 
@@ -132,7 +121,7 @@ def main() -> int:
     for field, count in residue.most_common():
         print(f"   {field:10s} {count}")
 
-    print("\nprovenance (ADR-008 §3.1) — a zero residue reached by a rising")
+    print("\nprovenance - a zero residue reached by a rising")
     print("Decorates count is not a proof of script-independence:")
     for script, track in tracks.items():
         print(

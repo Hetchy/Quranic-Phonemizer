@@ -1,8 +1,7 @@
 """The scalar inventory: schema, not content.
 
-Total over a script's scalars — an unlisted scalar is a parse error (L3). This
-module knows the *shape* of an inventory and nothing about any writing system;
-every scalar lives in `data/riwayat/<r>/scripts/<script>.yaml`.
+Total over a script's scalars: an unlisted scalar is a parse error. Scalars
+themselves live in `data/riwayat/<r>/scripts/<script>.yaml`.
 """
 from __future__ import annotations
 
@@ -13,6 +12,7 @@ from typing import Any
 from ..dataio import load_yaml, require_keys
 from ..model.address import Riwayah, Script
 from ..model.canon import (
+    Annotation,
     CanonLetter,
     Long,
     Nucleus,
@@ -51,8 +51,8 @@ class LetterEntry:
     letter: CanonLetter
     onset: Onset | None = None
     dagger_host: bool = False
-    """The glyph may carry a lengthening dagger for the previous slot — it is
-    rasm with no letter identity of its own (Uthmani `ى`, `و`)."""
+    """The glyph may carry a lengthening dagger for the previous slot: rasm
+    with no letter identity of its own (Uthmani `ى`, `و`)."""
     bare_rasm: bool = False
     """Bare, word-finally, the glyph stands for an unwritten alif."""
 
@@ -68,7 +68,7 @@ class MarkEntry:
     derivation: str | None = None
     decorates: str | None = None
     silences: bool = False
-    """The mark declares its host to be rasm — Uthmani's `۟`. An annotation
+    """The mark declares its host to be rasm (Uthmani's `۟`); an annotation
     that merely points at a live letter must not set this."""
     advice: StopAdvice | None = None
     structural: bool = False
@@ -150,6 +150,8 @@ def _fact_value(fact: SlotFact, raw: Any, *, where: str) -> object:
             return _nucleus(raw, where=where)
         case SlotFact.SAKT:
             return bool(raw)
+        case SlotFact.ANNOTATION:
+            return _member(Annotation, raw, where=where)
     raise InventoryError(f"{where}: unhandled fact {fact!r}")
 
 
@@ -203,19 +205,10 @@ def load_inventory(
 
 
 def _check_contract(path, letters, marks, derivations, roles) -> None:
-    """The two halves of the Python-to-YAML contract, checked at load.
+    """Verify every named derivation and required role actually exists.
 
-    Neither had anything behind it. `Cluster.has(role)` returns `False` for a
-    role nobody declared and never raises, so renaming `fatha` to `fathah`
-    here loads clean, runs clean, and silently changes the output -- measured
-    at 99.83% word parity on a 250-verse slice, which is exactly the failure
-    that passes a smoke test and surfaces on verse 3,000. And an unregistered
-    `derivation:` used to raise only at *run* time, on first use, so a typo on
-    a rare mark passed every smoke test too.
-
-    Both are injected rather than imported: `orthography` may not import
-    `canon`, and inverting that to keep the check would cost more than the
-    check is worth (ADR-007 section 2).
+    `derivations` and `roles` are injected, not imported: `orthography` may
+    not depend on `canon`.
     """
     if derivations is not None:
         named = {
@@ -322,8 +315,8 @@ def _load_structural(data: Any, path: Path, marks: dict[str, MarkEntry]) -> None
 
 
 def _load_polysemous(data: Any, path: Path, marks: dict[str, MarkEntry]) -> None:
-    """Declaring the ambiguity forces the adapter to defer to the Ledger
-    rather than guess (ADR-007 §3)."""
+    """Declaring a scalar polysemous forces the adapter to defer to the
+    Ledger instead of guessing which sense applies."""
     for char, senses in (data.get("polysemous") or {}).items():
         where = f"{path} polysemous[{char!r}]"
         if char not in marks:

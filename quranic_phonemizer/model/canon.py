@@ -1,7 +1,7 @@
 """The Score: canonical positions, and the closed rule vocabulary.
 
-The Score is boundary-free and script-free. It varies with the riwayah and the
-variant selection, and with nothing else (ADR-001 §1).
+Boundary-free and script-free: varies only with the riwayah and the
+variant selection.
 """
 from __future__ import annotations
 
@@ -13,10 +13,10 @@ from .address import Location, Riwayah, SlotId, VariantSelection
 
 
 class CanonLetter(StrEnum):
-    """The 28 letters, plus HAMZA, plus TAA_MARBUTA. Thirty members.
+    """The 28 letters, plus HAMZA and TAA_MARBUTA.
 
-    No ALEF_WASLA — that is an `Onset`. No ALIF_MAQSURA — that is a glyph.
-    Letter identity is phonological, not glyphic (ADR-001 §3.1).
+    No ALEF_WASLA (that is an `Onset`); no ALIF_MAQSURA (that is a glyph).
+    Letter identity is phonological, not glyphic.
     """
 
     ALIF = "alif"
@@ -51,10 +51,8 @@ class CanonLetter(StrEnum):
     TAA_MARBUTA = "taa_marbuta"
 
 
-#: The canonical spelling of each letter — the abstract letter itself, not any
-#: script's rendering of it. It exists so a `skeleton` stays human-checkable:
-#: a verse-scoped ordinal is robust and unreadable, and every Ledger and
-#: lexicon entry is reviewed by eye (ADR-001 §5.1).
+#: The canonical spelling of each letter, not any script's rendering of it.
+#: Used so a `skeleton` stays human-checkable instead of a bare ordinal.
 ABJAD: dict[str, str] = {
     "alif": "ا", "ba": "ب", "ta": "ت", "tha": "ث", "jeem": "ج", "ha": "ح",
     "kha": "خ", "dal": "د", "thal": "ذ", "ra": "ر", "zay": "ز", "seen": "س",
@@ -84,7 +82,17 @@ class Quality(StrEnum):
     U = "u"
     I = "i"
     IMALA = "imala"
+
+
+class Annotation(StrEnum):
+    """A canonical fact that changes no sound.
+
+    Ishmam is lips rounding to show a vowel that is not pronounced, so it has
+    no phoneme and cannot be a Quality. It is here so a projection can name it.
+    """
+
     ISHMAM = "ishmam"
+    DIVINE_NAME = "divine_name"
 
 
 class NucleusKind(StrEnum):
@@ -119,7 +127,7 @@ class Long:
 
 @dataclass(frozen=True, slots=True)
 class Silah:
-    """Long in waṣl, absent at pause."""
+    """Long in wasl, absent at pause."""
 
     quality: Quality
     kind: NucleusKind = NucleusKind.SILAH
@@ -127,7 +135,7 @@ class Silah:
 
 @dataclass(frozen=True, slots=True)
 class PausalLong:
-    """Short in waṣl, long at pause. The seven alifs."""
+    """Short in wasl, long at pause. The seven alifs."""
 
     quality: Quality
     kind: NucleusKind = NucleusKind.PAUSAL_LONG
@@ -141,17 +149,8 @@ SILENT = Silent()
 class SlotOrigin(StrEnum):
     """Which part of `canon.build` produced the slot.
 
-    ADR-001 §3.2 deleted an earlier `SlotOrigin` and said to reinstate one only
-    with a **script-independent definition and a real consumer**. This has
-    both. The definition names the producing module, so it is identical across
-    every script by construction; and there are two consumers:
-
-      * `SPELLED` — the muqaṭṭaʿāt toggle of ADR-005 §1, the old `spelled` flag;
-      * `NUNATION` — waqf. Under A1 the tanwīn nūn and a root nūn are the same
-        shape, which is the ruling's whole point, but at a stop they differ:
-        `هُدًى` drops its nūn and leaves the ʿiwaḍ, and `مِن` keeps its own.
-        Nothing else in the Score can tell them apart, and asking the
-        orthography would put a glyph back inside a rule.
+    `SPELLED` marks a muqattaat letter; `NUNATION` distinguishes a tanween
+    nun from a root nun, which the Score cannot otherwise tell apart.
     """
 
     WRITTEN = "written"
@@ -161,14 +160,15 @@ class SlotOrigin(StrEnum):
 
 @dataclass(frozen=True, slots=True)
 class Slot:
-    """A canonical position: something that can sound at its own position in at
-    least one boundary state or reading (ADR-001 §3.1)."""
+    """A canonical position: something that can sound in at least one
+    boundary state or reading."""
 
     id: SlotId
     letter: CanonLetter
     onset: Onset
     nucleus: Nucleus
     origin: SlotOrigin = SlotOrigin.WRITTEN
+    annotations: frozenset[Annotation] = frozenset()
 
     @property
     def spelled(self) -> bool:
@@ -195,8 +195,8 @@ class Score:
 
 class RuleFamily(StrEnum):
     """What a script adapter can genuinely see. Attestation names one of
-    these, never a `Rule` — choosing between ≥7 idghām members needs the
-    previous word, the pair tables and the ghunnah split (ADR-003 §4.1)."""
+    these, never a `Rule`: choosing among idgham members needs the
+    previous word, the pair tables and the ghunnah split."""
 
     ASSIMILATION = "assimilation"
     NASALIZATION = "nasalization"
@@ -207,8 +207,8 @@ class RuleFamily(StrEnum):
 
 
 class Phase(StrEnum):
-    """Closed and ordered. Within a phase rules are unordered and conflicts
-    are errors (ADR-004 §3)."""
+    """Closed and ordered. Within a phase, rules are unordered and
+    conflicts are errors."""
 
     BOUNDARY = "boundary"
     MERGE = "merge"
@@ -268,8 +268,8 @@ class Rule(StrEnum):
     PLAIN = "plain"
 
 
-#: Every `Rule` declares its family (ADR-002 §5.1). A family gives projections
-#: a coarse grouping for free and is what a script may attest.
+#: Every `Rule` declares its family, which is what a script may attest
+#: and gives projections a coarse grouping for free.
 FAMILY_OF: dict[Rule, RuleFamily] = {
     Rule.IZHAR_HALQI: RuleFamily.NASALIZATION,
     Rule.IZHAR_MUTLAQ: RuleFamily.NASALIZATION,
@@ -311,26 +311,20 @@ FAMILY_OF: dict[Rule, RuleFamily] = {
     Rule.PLAIN: RuleFamily.ASSIMILATION,
 }
 
-#: Rules that classify without producing a sound of their own. Invariant E4
-#: checks a rule's emissions against its declaration here.
+#: Rules that classify without producing a sound of their own.
 CLASSIFICATION_ONLY: frozenset[Rule] = frozenset(
     {
         Rule.TARQEEQ,
         Rule.TAFKHEEM,
-        # ADR-002 §5.1 lists TARQEEQ here and not its twin. Both emit
-        # `Recolour`, which modifies a sound rather than producing one, so
-        # neither owns an attribution — a projection finds them through
-        # `Occurrence.parts`. Listing one and not the other was the same
-        # asymmetry the set removes everywhere else.
+        # Both emit `Recolour`, which modifies a sound rather than
+        # producing one, so neither owns an attribution.
         Rule.WASL_START,
-        # At ibtidāʾ the waṣl hamza sounds — but by the plain default, because
-        # its canonical onset and nucleus are already correct (ADR-003 §6.3).
-        # The occurrence records *that the waṣl was started on*, which is a
-        # classification and is what a projection needs to find it.
+        # The wasl hamza sounds by the plain default already; the
+        # occurrence only records that wasl was started, itself a
+        # classification.
         Rule.IDGHAM_MUTAJANISAYN_NAQIS,
-        # The first letter survives as a colour on the second rather than
-        # vanishing into it, so nothing merges. The notation has no symbol for
-        # that trace today, which is a render-map gap and not a model one.
+        # The first letter colours the second rather than merging into
+        # it, so there is no separate sound to attribute.
         Rule.IZHAR_HALQI,
         Rule.IZHAR_MUTLAQ,
         Rule.IZHAR_SHAFAWI,
@@ -342,17 +336,15 @@ CLASSIFICATION_ONLY: frozenset[Rule] = frozenset(
         Rule.MADD_ARID_LIL_SUKUN,
         Rule.MADD_LEEN,
         Rule.ILTIQA_REPAIR,
-        # Emits `Relength`, which modifies a sound rather than producing one,
-        # so it owns no attribution — the same footing as TAFKHEEM/TARQEEQ.
+        # Emits `Relength`, which modifies a sound rather than producing
+        # one - the same footing as TAFKHEEM/TARQEEQ.
         Rule.IMALA,
         Rule.TASHIL,
         Rule.ISHMAM,
         Rule.SILAH,
         Rule.SAKT,
-        # Canonical Score facts. `canon.build` and the Ledger decide them and
-        # the plain default realizes them already coloured, so these rules
-        # exist to give a projection a *name* for what it is looking at —
-        # which is the whole reason ADR-002 §5 requires an occurrence at all.
-        # See `rules/annotation.py`.
+        # Canonical Score facts, realized already coloured by the plain
+        # default; these rules exist only to give a projection a name for
+        # what it sees. See `rules/annotation.py`.
     }
 )

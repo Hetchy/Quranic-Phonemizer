@@ -1,9 +1,7 @@
-"""Turning a stop request into a `BoundaryPlan`.
+"""Build a `BoundaryPlan` from a stop request.
 
-Advice lives in the Inscription layer, so this takes an `Inscription` and not a
-`Score` (ADR-003 §5). Two scripts yield two plans from one request; that is
-correct and stated, and it is why phoneme identity across scripts holds per
-*boundary plan* rather than per call.
+Operates on per-word advice already extracted from the writing, not on a
+`Score` -- phoneme identity across scripts is compared per boundary plan.
 """
 from __future__ import annotations
 
@@ -19,8 +17,8 @@ class UnknownStopError(ValueError):
 
 
 ALL_JOIN = "all_join"
-"""The traversal the attestation law is evaluated under: a mushaf writes the
-connected reading, so a witness is checked against it (ADR-003 §4.1)."""
+"""The traversal used to check attestation: the connected reading, since
+that is what a mushaf writes."""
 
 
 def plan_from_request(
@@ -46,9 +44,7 @@ def plan_from_request(
         elif word_advice is not None and word_advice in requested:
             junctions.append(Junction.STOP)
         elif sakt[index]:
-            # `ScoreWord.sakt_after` forces SAKT unless the plan selects STOP.
-            # It may never be JOIN — which makes 75:27 a domain fact rather
-            # than a glyph shortcut.
+            # `sakt_after` forces SAKT even with no stop requested; never JOIN.
             junctions.append(Junction.SAKT)
         else:
             junctions.append(Junction.JOIN)

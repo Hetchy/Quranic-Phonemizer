@@ -1,0 +1,45 @@
+# Which letters each rule applies to. These are facts of tajweed, not of one
+# riwayah, so they live here; a riwayah that disagrees overrides the single key
+# it disagrees on in its own rules.yaml and inherits the rest.
+#
+# Keys under `followers_of_*` and `pairs` are Rule members. Values are letters,
+# written as in data/shared/letters.yaml. Both are checked at load.
+schema_version: 1
+
+# The letter after a quiescent noon or tanween noon decides the outcome. The
+# four sets are disjoint; ikhfaa haqiqi is everything they leave.
+followers_of_noon:
+  izhar_halqi: [ء, ه, ع, ح, غ, خ]     # حروف الحلق
+  idgham_bi_ghunnah: [ي, ن, م, و]      # ينمو
+  idgham_bila_ghunnah: [ل, ر]
+  iqlab: [ب]
+
+# Same shape for a quiescent meem. Izhar shafawi is the remainder.
+followers_of_meem:
+  ikhfaa_shafawi: [ب]
+  idgham_shafawi: [م]
+
+# Never opens a syllable after a quiescent letter, so it belongs to no
+# remainder: alif only ever carries length here, and taa marbuta is final.
+never_follows: [ا, ة]
+
+# Echoes when it closes a syllable.
+qalqala: [ق, ط, ب, ج, د]              # قطب جد
+
+# Heavy wherever they stand. Raa and lam are heavy conditionally and are
+# decided by rules/tafkheem.py, not listed here.
+always_heavy: [خ, ص, ض, ط, ظ, غ, ق]    # حروف الاستعلاء
+
+# An adjacent pair that assimilates, first letter into second.
+pairs:
+  idgham_mutajanisayn_kamil:
+    - [د, ت]
+    - [ت, ط]
+    - [ذ, ظ]
+    - [ث, ذ]
+    - [ب, م]
+  idgham_mutajanisayn_naqis:
+    - [ط, ت]
+  idgham_mutaqaribayn:
+    - [ل, ر]
+    - [ق, ك]

@@ -1,13 +1,7 @@
 """Hafs: where its data lives, and how its adapters are assembled.
 
-`riwayat` is the only package that may import anything, because it is the
-assembly point. Nothing imports *it*, which is what keeps a second riwayah
-additive: adding Warsh adds `riwayat/warsh/` plus its YAML and touches nothing
-above (ADR-007 §1.1, §2).
-
-Resources are **instance-local** (ADR-007 §4.12). Two riwayāt, two scripts and
-two notations must coexist in one process, keyed by immutable identity — so
-there is no module-level cache and no process-global override here.
+Resources are instance-local: two riwayat, two scripts, and two notations
+can coexist in one process, so there is no module-level cache here.
 """
 from __future__ import annotations
 
@@ -23,6 +17,7 @@ from ...canon.lexicon import Lexicon, load_lexicon
 from ...canon.spell import Names, load_names
 from ...corpus import PackedCorpus, load_corpus
 from ...model.address import Location, Riwayah, Script, VerseRef
+from ..tables import RuleTables, load_rule_tables
 from ...orthography.adapter import Reading
 from ...orthography.cluster import read_verse
 from ...orthography.inventory import Inventory, load_inventory
@@ -79,6 +74,12 @@ def lexicon() -> Lexicon:
     return load_lexicon(path) if path.exists() else EMPTY_LEXICON
 
 
+def rule_tables() -> RuleTables:
+    """Shared tajweed tables, plus whatever this riwayah overrides."""
+    shared = DATA.parents[1] / "shared" / "rules.yaml"
+    return load_rule_tables(shared, DATA / "rules.yaml")
+
+
 def letter_names() -> Names:
     """Shared across riwayat: what a letter is *called* is a fact about Arabic."""
     return load_names(DATA.parents[1] / "shared" / "muqattaat.yaml")
@@ -87,9 +88,8 @@ def letter_names() -> Names:
 def lexeme_passes() -> tuple:
     """Hafs' verse-level passes, in order.
 
-    The riwayah owns this list the way it owns its `RuleSet`. `canon` supplies
-    the shared two; spelling the muqaṭṭaʿāt needs the letter-name table, so it
-    is bound here rather than reached for from inside the builder.
+    `canon` supplies the shared two; spelling the muqattaat needs the
+    letter-name table, so it is bound here instead.
     """
     from ...canon.passes import LEXEME_PASSES
     from ...canon.spell import spell_muqattaat

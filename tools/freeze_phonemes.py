@@ -1,3 +1,7 @@
+"""Freeze current phoneme output as the regression snapshot for tools/parity.py.
+
+Run: python tools/freeze_phonemes.py [--output PATH]
+"""
 from __future__ import annotations
 
 import argparse

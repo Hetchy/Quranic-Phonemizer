@@ -1,12 +1,7 @@
 """Length at the edges: the glide that becomes the vowel before it.
 
-`هُوَ` is R5's case. At a stop the fatha drops and Hafs does not leave a bare
-glide — the wāw merges into the damma before it and the word ends long. A final
-yāʾ after a kasra does the same.
-
-It is a `MergedInto` rather than a `Relength` plus a `Silence`, because the two
-sounds are one: the pair of edges sharing a `SoundId` *is* the merger, and a
-projection asking which letters produced the long vowel gets both of them.
+`هُوَ` at a stop: the fatha drops and the waw merges into the damma before
+it, so the word ends long. A final yaa after a kasra does the same.
 """
 from __future__ import annotations
 
@@ -49,8 +44,7 @@ class PausalGlide:
         if not slots or slots[-1].id != at:
             return None
         if slot.onset is Onset.GEMINATE:
-            # A doubled glide is a consonant — `ٱلْعَلِىُّ` ends `-iyy`, not
-            # `-ii`. Only a single glide carries the vowel before it.
+            # A doubled glide is a consonant -- `ٱلْعَلِىُّ` ends `-iyy`, not `-ii`.
             return None
         before = _before(near, at)
         if before is None or before.nucleus.kind is not NucleusKind.SHORT:
@@ -64,10 +58,7 @@ class PausalGlide:
                 Participants((before.id, at)),
             ),
             (
-                # The rule realizes the merged sound itself. `Relength` would
-                # leave the long vowel owned by plain realization, and then
-                # the two halves of the merger would not share an occurrence
-                # — which is exactly what P4 asserts they must.
+                # Realizes the merged sound itself, so both halves share one occurrence.
                 Realize(
                     before.id,
                     Aspect.NUCLEUS,
@@ -80,22 +71,10 @@ class PausalGlide:
 
 @dataclass(frozen=True, slots=True)
 class IltiqaRepair:
-    """Two sākins meet, so the madd letter goes.
+    """Two sakins meet, so the madd letter shortens.
 
-    `ٱهْدِنَا ٱلصِّرَٰطَ` is read `ihdina-ṣ-ṣirāṭ`: the ālif of `نَا` is itself
-    sākin, the lām of the article behind the elided waṣl hamza is sākin, and
-    Arabic does not begin a syllable with two of them. The long vowel shortens.
-
-    This is one rule and it is 2,688 words — `a:`→`a` at 1,413 sites, `i:`→`i`
-    at 764, `u:`→`u` at 511 — which was 57% of the whole regression residue and
-    read as a long tail of unrelated defects. It needs no corpus: every tajwīd
-    primer states it.
-
-    It emits `Relength` rather than realizing the vowel itself. The vowel is
-    still plainly realized — nothing merges, nothing is deleted, only its
-    length changes — so unlike `PausalGlide` this rule does not own a sound,
-    which is why `ILTIQA_REPAIR` is declared classification-only alongside
-    `TAFKHEEM` and `TARQEEQ`.
+    Emits `Relength`, not a realization: the vowel is still plainly
+    produced, only its length changes, so this rule owns no sound.
     """
 
     rule: Rule = Rule.ILTIQA_REPAIR
@@ -117,21 +96,17 @@ class IltiqaRepair:
             return None
         following = near.after(at)
         if following is None:
-            # `after` already refuses to look across a stop, which is the whole
-            # boundary condition: at a pause there is no second sākin to meet,
-            # and the madd stands. No rule here reads the plan.
+            # `after` already refuses to look across a stop, so at a pause
+            # there is no second sakin to meet and the madd stands.
             return None
         if following.onset is Onset.WASL:
-            # The waṣl hamza and its helping vowel are exactly what a join
-            # removes, so the sākin the madd actually meets is the consonant
-            # behind it — the lām of `ٱلصِّرَٰطَ`. Read from the Score rather
-            # than from the plan: `Onset.WASL` *means* "absent when joined to",
-            # so this is the canonical statement of the same fact and does not
-            # make a LENGTH rule depend on what BOUNDARY happened to record.
+            # A joined wasl hamza vanishes, so the sakin the madd meets is
+            # the consonant behind it -- read from the Score, since
+            # `Onset.WASL` means exactly "absent when joined to".
             following = near.after(following.id)
             if following is None:
                 return None
-        if following.nucleus.kind is not NucleusKind.SILENT:
+        if not _opens_on_a_sakin(following):
             return None
         return Verdict(
             Occurrence(
@@ -141,6 +116,15 @@ class IltiqaRepair:
             ),
             (Relength(at, Length.SHORT),),
         )
+
+
+def _opens_on_a_sakin(slot) -> bool:
+    """A geminate consonant is a sakin plus a voweled one, so `ٱلَّذِى` meets a
+    preceding madd with a sakin exactly as a written sukun would."""
+    return (
+        slot.nucleus.kind is NucleusKind.SILENT
+        or slot.onset is Onset.GEMINATE
+    )
 
 
 def _before(near: Neighbourhood, at: SlotId):
@@ -153,20 +137,10 @@ def _before(near: Neighbourhood, at: SlotId):
 
 @dataclass(frozen=True, slots=True)
 class MaddClass:
-    """Which madd this long vowel is — one classifier, five outcomes.
+    """Which madd this long vowel is -- one classifier, five outcomes.
 
-    The model stores no duration (ADR-006 §5), so every outcome here is
-    classification-only and none of them changes a sound. That is exactly why
-    they are worth having: the *length* is the one thing a phoneme string
-    cannot carry, so a consumer that wants to know whether a madd is two counts
-    or six has to read the occurrence. Five members of the vocabulary were
-    declared for this and none of them fired.
-
-    `MADD_TABII`, the natural two-count madd, is deliberately not emitted here.
-    It is the default that holds wherever none of these five applies, and
-    naming it at every long vowel in the Qurʾān would add ~10^5 occurrences per
-    traversal to say "nothing special is happening" (ADR-008 open question 7).
-    `PausalGlide` emits it where it is a *rule* rather than a default.
+    `MADD_TABII` is deliberately not emitted here: it is the default that
+    holds wherever none of the five outcomes applies.
     """
 
     rule: Rule = Rule.MADD_LAZIM
@@ -189,8 +163,7 @@ class MaddClass:
         final = bool(slots) and slots[-1].id == at
 
         if final and boundaries.stopped_on(word):
-            # Nothing follows inside the word and the boundary ends it, so the
-            # madd stands alone. `WaqfEnding` owns what happens to the letter.
+            # Nothing follows inside the word and the stop ends it; `WaqfEnding` owns the letter.
             return None
 
         following = near.after(at)
@@ -198,36 +171,29 @@ class MaddClass:
             return None
 
         if following.letter is L.HAMZA:
-            # Muttaṣil when the hamza is in the same word, munfaṣil when it
-            # opens the next. The distinction is *joined-ness*, which is why
-            # this is one rule with two names rather than two rules.
+            # Muttasil in the same word, munfasil across a boundary -- joined-ness only, so one rule serves both names.
             rule = (
                 Rule.MADD_JAIZ_MUNFASIL if final else Rule.MADD_WAJIB_MUTTASIL
             )
             return _classify(rule, at, following.id)
 
         if following.nucleus.kind is NucleusKind.SILENT:
-            # A sākin that is there in the Score is permanent — `ٱلضَّآلِّينَ`,
-            # and every muqaṭṭaʿ letter whose name ends in one. Lāzim.
+            # A sakin already in the Score is permanent -- `ٱلضَّآلِّينَ` and any muqattaat letter ending in one. Lazim.
             return _classify(Rule.MADD_LAZIM, at, following.id)
 
         after = near.after(following.id)
         if after is None and boundaries.stopped_on(near.word_of(following.id)):
-            # The following letter is voweled in the Score and loses that vowel
-            # only because the reciter stops here. ʿĀriḍ li-s-sukūn: the same
-            # shape as lāzim, made temporary by the boundary plan alone.
+            # Voweled in the Score, sakin only because the stop lands here -- aridah lissukun, same shape as lazim.
             return _classify(Rule.MADD_ARID_LIL_SUKUN, at, following.id)
         return None
 
 
 @dataclass(frozen=True, slots=True)
 class MaddLeen:
-    """A wāw or yāʾ sākin after a fatha, before a letter made sākin by the stop.
+    """A waw or yaa sakin after a fatha, before a letter the stop makes sakin.
 
-    Not a long vowel — `خَوْف`, `بَيْت` — so it is not in `MaddClass`'s trigger
-    set and cannot be a branch of it. The diphthong lengthens at a pause and
-    stays short otherwise, which is why the boundary plan is the whole
-    condition.
+    Not a long vowel -- `خَوْف`, `بَيْت` -- so `MaddClass` does not trigger on
+    it; the diphthong lengthens only at a pause.
     """
 
     rule: Rule = Rule.MADD_LEEN

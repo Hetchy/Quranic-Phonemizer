@@ -1,8 +1,7 @@
-"""One rule shape, and the index that dispatches to it.
+"""A classifier's interface, and the `RuleSet` that dispatches to it.
 
-Every rule has the same signature, because *the switch is the asymmetry*: a
-per-letter dispatch decides by authorship which letters deserve a module, and
-that is how rāʾ won one while the lām of Allah lost an inline `if`-branch.
+Every rule shares one signature, so per-letter handling is a matter of
+authorship rather than a growing if/elif chain.
 """
 from __future__ import annotations
 
@@ -10,19 +9,26 @@ from dataclasses import dataclass
 from typing import Protocol, TypeAlias
 
 from ..model.address import BoundaryPlan, SlotId
-from ..model.canon import CanonLetter, NucleusKind, Onset, Phase, Rule
+from ..model.canon import (
+    Annotation,
+    CanonLetter,
+    NucleusKind,
+    Onset,
+    Phase,
+    Rule,
+)
 from .neighbourhood import Neighbourhood
 from .plan import Plan, Verdict
 
 Trigger: TypeAlias = (
     frozenset[CanonLetter] | frozenset[NucleusKind] | frozenset[Onset]
+    | frozenset[Annotation]
 )
 
 
 class Classifier(Protocol):
-    """`look` is pure: a read-only `Score`, a read-only accumulated `Plan`, an
-    address, and the traversal. It returns a `Verdict` or `None`. It never
-    writes, and it cannot — nothing it is handed is mutable."""
+    """`look` is pure: it reads `Score`, `Plan`, and the traversal, and
+    returns a `Verdict` or `None` without mutating any of them."""
 
     rule: Rule
     phase: Phase
@@ -39,8 +45,11 @@ class Classifier(Protocol):
 
 @dataclass(frozen=True, slots=True)
 class RuleSet:
-    """What a riwayah binds. Swapping one classifier is how a riwayah delta
-    is expressed — no profile subclasses, no `if riwayah == …` inside a rule."""
+    """The classifiers bound to each phase for one riwayah.
+
+    A riwayah difference is expressed by swapping a classifier, never by a
+    branch inside one.
+    """
 
     phases: dict[Phase, tuple[Classifier, ...]]
 

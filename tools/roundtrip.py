@@ -1,22 +1,8 @@
-"""ADR-005 §4's gate: every Score can be spelled, and spells back to itself.
+"""Check that every Score can be spelled and read back to an identical Score.
 
-    text -> read -> build -> Score
-                              |
-                            write -> text' -> read -> build -> Score'
-    assert Score == Score'
+    text -> read -> build -> Score -> write -> text' -> read -> build -> Score'
 
-Not byte-identity with the source. `read` deliberately discards what the Score
-does not need — Uthmani's dagger is an abbreviation of a haraka plus a carrier
-and both give the same slot — so demanding `text' == text` would be demanding
-that the canonical layer keep script detail, which is the opposite of the
-design. What §4 actually asks is whether the layer holds anything no
-orthography can express, and Score → text → Score answers exactly that.
-
-A `WriteError` is the real failure: it means a canonical fact this script has
-no scalar for. A digest mismatch is weaker — the spelling was legal but was
-read back as a different Score — and its shapes are reported separately.
-
-Run:  python tools/roundtrip.py [--script uthmani|indopak] [--limit N]
+Run: python tools/roundtrip.py [--script uthmani|indopak] [--limit N]
 """
 from __future__ import annotations
 

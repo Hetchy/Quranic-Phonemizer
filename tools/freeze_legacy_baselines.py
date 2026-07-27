@@ -1,22 +1,7 @@
-"""Freeze the pre-refactor public projections as a coverage corpus.
+"""Freeze legacy public projections as an information-coverage corpus.
 
-The refactor at ``e0d9fb9`` removed every projection except phonemes. Those
-removed views are the only full-corpus record of which graphemes the old
-engine believed participated in which Tajweed rule, which were silent, and how
-the recited Arabic differed from the source. They are needed as an
-*information-coverage* reference for the new internal model: the question they
-answer is "can the new model reconstruct this", not "is the old output right".
-Several of these views have known defects, catalogued in the design evidence.
-
-The legacy package is not in the working tree. Export it first, then point this
-tool at the export:
-
-    $ git archive b3bc53a | tar -x -C /tmp/legacy
-    $ python tools/freeze_legacy_baselines.py --legacy-root /tmp/legacy \\
-          --revision b3bc53a
-
-Each view is written as gzip-compressed JSON Lines, one line per source word,
-plus a manifest recording byte length and SHA-256 for every file.
+    $ git archive <revision> | tar -x -C /tmp/legacy
+    $ python tools/freeze_legacy_baselines.py --legacy-root /tmp/legacy --revision <revision>
 """
 
 from __future__ import annotations
@@ -49,14 +34,10 @@ def _as_plain(value: Any) -> Any:
 
 
 def _views(result: Any) -> dict[str, Callable[[], Any]]:
-    """Projections keyed by the name they had in the legacy API.
+    """Projections keyed by their legacy API names, each in its native row shape.
 
-    Row granularity is deliberately not normalised. ``phonemes`` and
-    ``character_phoneme_mappings`` are one row per source word;
-    ``tajweed_mappings`` emits extra rows for expanded muqattaat sub-words;
-    ``letter_phoneme_mappings`` is a flat entry stream. Preserving each view's
-    own shape is the point, since the divergence between them is itself
-    evidence about what the old model could and could not express.
+    Per-word for ``phonemes``/``character_phoneme_mappings``; expanded
+    sub-words for ``tajweed_mappings``; flat entries for ``letter_phoneme_mappings``.
     """
     return {
         "phonemes": lambda: result.phonemes_list("word"),

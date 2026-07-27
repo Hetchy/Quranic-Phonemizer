@@ -1,12 +1,8 @@
-"""Generate `data/render/<notation>.yaml` — the only file with output symbols.
+"""Regenerate `quranic_phonemizer/data/render/ipa.yaml`, the output alphabet.
 
-The render map is a **total lookup over the complete `Sound` feature tuple**,
-with no composition performed at runtime (ADR-007 §3). Composition happens
-here, once, so that a case like `(NOON, geminate, nasal) -> ñ` can simply be
-written down: the frozen snapshot has 4,098 `ñ` and zero `nn`, so any runtime
-rule that doubled a symbol would break parity.
+A row per feature tuple the model can actually produce, composed here once.
 
-Run:  python tools/build_render_map.py
+Run: python tools/build_render_map.py
 """
 from __future__ import annotations
 
@@ -19,8 +15,7 @@ sys.path.insert(0, str(ROOT))
 from quranic_phonemizer.model.canon import CanonLetter as L  # noqa: E402
 from quranic_phonemizer.model.canon import Quality  # noqa: E402
 
-#: The plain token of each letter. Four letters are inherently emphatic and
-#: carry their mark here rather than acquiring it from a rule.
+#: Plain token per letter; four are inherently emphatic and carry the mark here.
 BASE: dict[L, str] = {
     L.HAMZA: "ʔ", L.BA: "b", L.TA: "t", L.THA: "θ", L.JEEM: "ʒ",
     L.HA: "ħ", L.KHA: "x", L.DAL: "d", L.THAL: "ð", L.RA: "r",
@@ -30,63 +25,75 @@ BASE: dict[L, str] = {
     L.HEH: "h", L.WAW: "w", L.YA: "j", L.ALIF: "ʔ", L.TAA_MARBUTA: "t",
 }
 
-#: Letters whose emphatic realization is a separate token rather than the
-#: plain one. The four above are emphatic already; these two acquire it.
+#: Emphatic token for the two letters whose plain and emphatic forms differ.
 EMPHATIC = {L.RA: "rˤ", L.LAM: "lˤ"}
 
-#: Nasalized consonants. Measured in the frozen continuous snapshot: `ñ`
-#: 4,098, `m̃` 3,254, `w̃` 2,192, `j̃` 1,123 — and `w̃` and `ww` are distinct
-#: tokens from the same letter with the same gemination, which is the whole
-#: argument for keying on the complete tuple.
+#: Nasalized consonants; unlike plain ones, gemination does not double the token.
 NASALIZED = {L.NOON: "ñ", L.MEEM: "m̃", L.WAW: "w̃", L.YA: "j̃"}
 
-VOWEL = {Quality.A: "a", Quality.U: "u", Quality.I: "i",
-         Quality.IMALA: "e", Quality.ISHMAM: "u"}
+#: Only these can be recoloured emphatic: the seven letters of istilaa, plus
+#: raa and the divine lam. Generating the axis for the rest gave every wrong
+#: tuple a plausible token and made `NotationError` unreachable.
+HEAVY_CAPABLE = frozenset(
+    {L.KHA, L.SAD, L.DAD, L.TAH, L.ZAH, L.GHAIN, L.QAF, L.RA, L.LAM}
+)
+
+#: Emphasis spreads onto a following `a` and onto no other vowel.
+EMPHATIC_VOWEL = frozenset({Quality.A})
+
+VOWEL = {Quality.A: "a", Quality.U: "u", Quality.I: "i", Quality.IMALA: "e"}
+
+#: Ghunnah has no emphatic form: no rule recolours a nasal.
+NASAL_PLACES = {"bilabial": "m̃", "assimilated": "ŋ"}
 
 
 def consonant_rows() -> list[str]:
     rows = []
     for letter in L:
         for geminate in (False, True):
-            for emphatic in (False, True):
-                for nasal in (False, True):
-                    token = _consonant(letter, geminate, emphatic, nasal)
+            for emphatic in _axis(letter in HEAVY_CAPABLE):
+                for nasal in _axis(letter in NASALIZED):
                     key = (
                         f"{letter.value}|{int(geminate)}|"
                         f"{int(emphatic)}|{int(nasal)}"
                     )
+                    token = _consonant(letter, geminate, emphatic, nasal)
                     rows.append(f'  "{key}": "{token}"')
     return rows
 
 
+def _axis(possible: bool) -> tuple[bool, ...]:
+    return (False, True) if possible else (False,)
+
+
 def _consonant(letter: L, geminate: bool, emphatic: bool, nasal: bool) -> str:
     if nasal:
-        base = NASALIZED.get(letter, BASE[letter])
-        return base if letter in NASALIZED else base * (2 if geminate else 1)
+        return NASALIZED[letter]
     base = EMPHATIC[letter] if (emphatic and letter in EMPHATIC) else BASE[letter]
     return base * 2 if geminate else base
 
 
 def vowel_rows() -> list[str]:
     rows = []
-    for quality in Quality:
+    for quality in VOWEL:
         for long in (False, True):
-            for emphatic in (False, True):
-                token = VOWEL[quality] + ("ˤ" if emphatic else "") + (":" if long else "")
-                key = f"{quality.value}|{int(long)}|{int(emphatic)}"
-                rows.append(f'  "{key}": "{token}"')
+            for emphatic in _axis(quality in EMPHATIC_VOWEL):
+                token = (
+                    VOWEL[quality] + ("ˤ" if emphatic else "") + (":" if long else "")
+                )
+                rows.append(
+                    f'  "{quality.value}|{int(long)}|{int(emphatic)}": "{token}"'
+                )
     return rows
 
 
 def main() -> int:
     out = [
-        "# The output alphabet. The only file in the package that contains a",
-        "# phoneme string, and no rule may read it (ADR-007 §3).",
+        "# The output alphabet: the only file in the package holding a phoneme",
+        "# string. Generated by tools/build_render_map.py.",
         "#",
-        "# Generated by tools/build_render_map.py. Keyed on the complete Sound",
-        "# feature tuple so the lookup is total and performs no composition:",
-        "# the snapshot has 4,098 `ñ` and zero `nn`, so a runtime rule that",
-        "# doubled a symbol would break parity.",
+        "# One row per feature tuple the model can produce, and no others -- a",
+        "# tuple with no row is a NotationError, which is the point.",
         "schema_version: 1",
         "notation: ipa",
         "",
@@ -97,10 +104,7 @@ def main() -> int:
         *vowel_rows(),
         "",
         "nasals:",
-        '  "bilabial|0": "m̃"',
-        '  "bilabial|1": "m̃"',
-        '  "assimilated|0": "ŋ"',
-        '  "assimilated|1": "ŋ"',
+        *[f'  "{place}|0": "{token}"' for place, token in NASAL_PLACES.items()],
         "",
         "releases:",
         '  "qalqala": "Q"',

@@ -1,8 +1,7 @@
 """The Spelling relation and the projection it exists for.
 
-These are behavioural tests over the assembled `HAFS` ruleset, deliberately.
-Every other engine test in this suite binds a one-rule `RuleSet`, which is why
-cross-family interactions were invisible to all of them.
+Runs against the assembled `HAFS` ruleset rather than a single rule, so
+cross-family interactions are exercised too.
 """
 from __future__ import annotations
 
@@ -19,8 +18,8 @@ from quranic_phonemizer.riwayat.hafs import HAFS
 
 from conftest import built_for
 
-#: A spread rather than a favourite: an article lām that assimilates, a verse
-#: with cross-word nūn, the muqaṭṭaʿāt, and one of the four sakt sites.
+#: Chosen to cover distinct cases: an article lam that assimilates, a verse
+#: with cross-word noon, the muqattaat, and one of the four sakt sites.
 VERSES = [(112, 2), (2, 20), (1, 1), (7, 1), (18, 1), (33, 10)]
 
 
@@ -32,22 +31,17 @@ def _view(packed, shared, surah, ayah, alphabet):
 
 @pytest.mark.parametrize(("surah", "ayah"), VERSES)
 def test_every_slot_is_reachable_from_the_writing(packed, shared, surah, ayah):
-    """I7. Falsified by a slot no grapheme accounts for — which the tanwīn nūn
-    was for the whole first draft, at 5,831 Uthmani sites.
+    """Every slot in the score must be accounted for by some grapheme.
 
-    Uthmani only, and not parametrised over `Script`: the packaged corpus is
-    Uthmani, so an IndoPak parameter here would skip and read as two-script
-    coverage while being one. IndoPak's I7 is asserted for real by
-    `tools/cross_parity.py`, which runs `check_inscription` on both scripts
-    over every verse.
+    Uthmani only: the packaged corpus is Uthmani. IndoPak coverage is
+    checked separately by `tools/cross_parity.py`.
     """
     built = built_for(packed, shared, surah, ayah)
     check_inscription(built.inscription, built.score)
 
 
 def test_i7_fails_when_a_slot_is_unreachable(packed, shared):
-    """The law is only worth having if it can fail. Drop the edges that reach
-    the last slot and it must say so, naming the slot."""
+    """Dropping the edges that reach the last slot must raise, naming that slot."""
     built = built_for(packed, shared, 112, 2)
     last = built.score.words[-1].slots[-1].id
     stripped = tuple(
@@ -68,9 +62,8 @@ def test_i7_fails_when_a_slot_is_unreachable(packed, shared):
 
 
 def test_a_merged_sound_names_both_its_letters(packed, shared, alphabet):
-    """`ٱللَّهُ` — the article lām merges into the shadda'd lām, and the sound
-    the merger produces must point at *both*, not only the survivor. This is
-    the question `Occurrence.parts` alone cannot answer."""
+    """`ٱللَّهُ`: the article lam merges into the shadda'd lam, and the merged
+    sound must point at both letters, not only the survivor."""
     _, view = _view(packed, shared, 112, 2, alphabet)
     merged = [sound for sound in view.sounds if sound.merged_from]
     assert merged, "112:2 has an assimilating article lam"
@@ -107,10 +100,9 @@ def test_the_inverse_lookup_covers_the_sounds(packed, shared, alphabet):
 def test_derived_facts_have_no_grapheme_and_that_is_correct(
     packed, shared, alphabet
 ):
-    """The waṣl helping vowel is supplied by `canon.build`, not written. Its
-    sound legitimately names no grapheme, and the projection must say so
-    rather than inventing one — otherwise a highlight points at the wrong
-    letter. I7 is a law about *slots*, not about every aspect."""
+    """The wasl helping vowel is supplied by `canon.build`, not written, so
+    its sound names no grapheme. The projection must say so rather than
+    invent one, or a highlight would point at the wrong letter."""
     _, view = _view(packed, shared, 112, 2, alphabet)
     assert any(not sound.graphemes for sound in view.sounds)
 

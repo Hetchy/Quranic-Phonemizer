@@ -1,19 +1,7 @@
-"""The projection the design is actually for: sounds anchored to the writing.
+"""Anchors performed sounds and silent letters back onto the written text.
 
-A consumer holding script text wants three answers, and until `Spelling` was
-built only two of them existed:
-
-    which rule fired here        -> `Occurrence.parts`      (always worked)
-    which letters are silent     -> `Silent(..., by=...)`   (always worked)
-    which graphemes made this    -> needed `Spelling`       (this module)
-
-The third is the one that lets an application highlight the letters that
-produced a sound, or show why a letter is silent by pointing at the mark that
-silenced it. It is a *lookup*, never a second detection: every edge read here
-was recorded by the layer that decided it (ADR-002 §5).
-
-The traversal is `sound -> attribution -> (slot, aspect) -> Spelling`, one
-direction only, exactly as ADR-002 §5 specifies it.
+A lookup only, traversing `sound -> attribution -> (slot, aspect) ->
+Spelling`: every edge here was recorded by the layer that decided it.
 """
 from __future__ import annotations
 
@@ -41,10 +29,8 @@ from ..model.performance import (
 from .alphabet import Alphabet
 from .recite import sounds_in_order
 
-#: Which `SlotFact` a `Spelling` must carry to count as writing a given aspect.
-#: A grapheme that evidences the letter is writing the onset; one that
-#: evidences the nucleus is writing the nucleus. `Decorates` and `Attests`
-#: name a slot without naming an aspect, so they answer for both.
+#: Which `SlotFact`s count as writing each `Aspect`. `Decorates` and
+#: `Attests` don't name an aspect, so they satisfy either one.
 _FACT_OF_ASPECT = {
     Aspect.ONSET: (SlotFact.LETTER, SlotFact.ONSET),
     Aspect.NUCLEUS: (SlotFact.NUCLEUS,),
@@ -80,10 +66,10 @@ class AnchoredView:
     silent: tuple[SilentLetter, ...]
 
     def by_grapheme(self) -> dict[GraphemeId, tuple[SoundId, ...]]:
-        """The inverse: what each written grapheme ended up producing.
+        """The inverse: which sounds each written grapheme produced.
 
-        Empty for a grapheme that produced nothing — a silence sign, a stop
-        mark — which is a fact worth having rather than an absence.
+        Empty for a grapheme that produced nothing, such as a silence sign
+        or a stop mark.
         """
         out: dict[GraphemeId, list[SoundId]] = {}
         for anchored in self.sounds:
@@ -158,8 +144,8 @@ def graphemes_by_id(inscription: Inscription) -> dict[GraphemeId, Grapheme]:
 def _writers(
     inscription: Inscription,
 ) -> dict[SlotId, dict[SlotFact | None, list[GraphemeId]]]:
-    """slot -> fact -> the graphemes that wrote it. `None` means "names the
-    slot without naming a fact", which is what `Decorates` and `Attests` do."""
+    """Maps slot -> fact -> graphemes that wrote it. `None` is the fact used
+    by `Decorates` and `Attests`, which don't name one."""
     out: dict[SlotId, dict[SlotFact | None, list[GraphemeId]]] = {}
     for spelling in inscription.spellings:
         match spelling:

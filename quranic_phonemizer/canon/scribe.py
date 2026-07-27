@@ -1,19 +1,7 @@
-"""Recording `Spelling` edges while the Score is being decided.
+"""Records `Spelling` edges - grapheme to Score - while the Score is decided.
 
-`Spelling` points *up* from a grapheme into the Score, and it is the relation
-the whole design is for: without it a consumer can ask which rule fired and
-which letters are silent, but not **which graphemes produced this sound** —
-which is the question an application holding script text actually has.
-
-The edges are recorded here rather than reconstructed afterwards. Which slot a
-mark lands on is decided by `_set`'s target — a dagger on Uthmani's tatweel
-lengthens the slot *before* it — and a second pass that worked that out again
-would be a second derivation of the same fact, which is what ADR-002 §5
-forbids. So the scribe is handed the subject at the moment it is chosen.
-
-Drafts are identified by `id()`. They are held alive by `build`'s own list for
-the whole pass, so the identities are stable; nothing outside this module may
-hold a `Scribe` past `finish`.
+Recorded here, not reconstructed afterwards, because which slot a mark lands
+on is only known at the moment `_set` picks its target.
 """
 from __future__ import annotations
 
@@ -34,7 +22,11 @@ from ..model.inscription import (
 
 @dataclass(slots=True)
 class Scribe:
-    """Collects the edges. One per `build` call, discarded after `finish`."""
+    """Collects the edges. One per `build` call, discarded after `finish`.
+
+    Drafts are identified by `id()`, valid only while `build`'s own list
+    keeps them alive.
+    """
 
     verse: VerseRef
     evidences: list[tuple[int, int, SlotFact]] = field(default_factory=list)
@@ -84,9 +76,8 @@ class Scribe:
 
     def _decorations(self, reading, drafts, ordinals):
         """`Decoration` carries a cluster, not a slot, because the adapter does
-        not know which clusters become slots. Binding it is a lookup, not a
-        second derivation: the slot it shows is the one built from its own
-        cluster, or — for a mark on rasm — the last slot before it."""
+        not know which clusters become slots. A mark on rasm has no cluster
+        of its own, so it falls back to the last slot before it."""
         by_cluster = {
             draft.cluster: ordinals[id(draft)]
             for draft in drafts

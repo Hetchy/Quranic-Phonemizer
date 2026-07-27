@@ -1,27 +1,6 @@
-"""Hamzat al-waṣl: three morphological rules, and a lexicon of ~30.
-
-The first draft of this design carried a **575-skeleton lexicon**, learned from
-Uthmani's own `ٱ` positions. That is not a derivation — a list learned from one
-script's glyph positions can only ever be confirmed by the corpus that produced
-it, which is what ADR-008 open question 2b was about.
-
-Two measurements dissolved it.
-
-**A bare initial ālif in IndoPak *is* a hamzat al-waṣl**: 13,274 bare-waṣl
-against 16 bare-qaṭʿ, all of them muqaṭṭaʿāt. So the fact is declared by both
-scripts and needs deriving only where IndoPak writes the helping vowel — 186
-sites, of which the article rule takes 121.
-
-And the remaining 64 are all imperatives or form VII–X verbs, so they are a
-rule too. The three below reach **98.19%** as a total decision procedure over
-all 20,894 word-initial ālif sites, with exactly two misses (46:4:18 and
-49:11:30, both already Ledger entries). What is left over is six named closed
-classes of Arabic — particles, proper nouns, form-IV verbal nouns — none of
-them specific to this corpus.
-
-The distinction that matters is not the residue count. It is that a rule can be
-checked against a grammar by someone who has never seen this corpus, and a list
-cannot.
+"""Hamzat al-wasl: three morphological rules, plus a small lexicon for what
+no orthographic test can separate from them. A rule can be checked against
+grammar; a list cannot.
 """
 from __future__ import annotations
 
@@ -32,9 +11,9 @@ from . import Context, Outcome, Sets, register
 VOWEL_ROLES = frozenset({"fatha", "damma", "kasra"})
 QUIESCENT_BLOCKERS = frozenset(VOWEL_ROLES | {"fathatan", "dammatan", "kasratan"})
 
-#: The letters the form-VIII infixed tāʾ assimilates into. A geminate drawn
+#: The letters the form-VIII infixed taa assimilates into. A geminate drawn
 #: from this set after a prosthetic hamza is `افتعل`; a geminate outside it is
-#: a particle — `إنّ`, `إلّا`, `إيّاك`.
+#: a particle - `إنّ`, `إلّا`, `إيّاك`.
 FORM_EIGHT = frozenset(
     {
         CanonLetter.TA,
@@ -49,7 +28,7 @@ FORM_EIGHT = frozenset(
     }
 )
 
-#: Letters that may carry a proclitic before a medial waṣl.
+#: Letters that may carry a proclitic before a medial wasl.
 PROCLITICS = frozenset(
     {
         CanonLetter.WAW,
@@ -66,13 +45,10 @@ PROCLITICS = frozenset(
 
 
 def is_wasl(context: Context) -> bool:
-    """The decision procedure. `canon.build` names it for every bare ālif.
+    """The decision procedure. `canon.build` names it for every bare alif.
 
-    **The order of the checks below is load-bearing, not stylistic.** The
-    article is consulted before the lexeme list, because the article puts a
-    lām at the second position of every word it prefixes and several lexeme
-    entries begin hamza + lām. Swapping those two makes `ءلق` match `القرآن`
-    and takes the L1 residue from 108 to 671. Measured, twice.
+    Check order is load-bearing: the article is checked before the lexeme
+    list, because swapping them lets `ءلق` match `القرآن`.
     """
     cluster = context.cluster
     if cluster.letter not in (CanonLetter.ALIF, CanonLetter.HAMZA):
@@ -95,22 +71,21 @@ def is_wasl(context: Context) -> bool:
         return True  # a bare prosthetic ālif; both scripts write it that way
     if context.lexicon.is_wasl_exempt(_skeleton(context)):
         # Checked before the article branch, not after. `ألقى`, `ألف`,
-        # `ألسنة` and `ألوان` all begin hamza + lām and none of them is the
-        # article; nothing orthographic separates them from it, which is
-        # precisely why the lexeme list exists.
+        # `ألسنة` and `ألوان` all begin hamza + lam and none of them is the
+        # article; nothing orthographic separates them from it.
         return False
     if following.letter is CanonLetter.LAM:
         return True  # the article, with its helping vowel written out
     if _is_form_four_masdar(context):
-        # `إفعال` — إكراه، إصلاح، إسراف، إعراض، إلحاف. A long ā in the second
+        # `إفعال` - إكراه، إصلاح، إسراف، إعراض، إلحاف. A long aa in the second
         # syllable is the shape's signature and no imperative has one:
         # `اذهب`, `انظر`, `اجتنبوا` are short throughout. Form X's masdar
-        # (`استكبارًا`) keeps its waṣl because its long vowel comes later.
-        # Checked after the article, which also often carries a long ā.
+        # (`استكبارًا`) keeps its wasl because its long vowel comes later.
+        # Checked after the article, which also often carries a long aa.
         return False
     if _is_nunated(context):
-        # A word carrying tanwīn is a fully inflected noun, and no prosthetic
-        # hamza begins one — the ten nouns are definite or annexed wherever
+        # A word carrying tanween is a fully inflected noun, and no prosthetic
+        # hamza begins one - the ten nouns are definite or annexed wherever
         # they occur. This is what separates `إفك`, `إنس`, `إخوة`, `إملاق`
         # and every form-IV verbal noun from the imperatives they otherwise
         # look exactly like: quiescent second radical, voweled third.
@@ -125,8 +100,8 @@ def is_wasl(context: Context) -> bool:
 def _geminate_case(context: Context, cluster, following) -> bool:
     written = _written_vowel(cluster)
     if following.letter is CanonLetter.LAM:
-        # `الَّذين` is the article before a lām-initial word; `إلَّا` is a
-        # particle. Something real has to follow the lām for it to be the one.
+        # `الَّذين` is the article before a lam-initial word; `إلَّا` is a
+        # particle. Something real has to follow the lam for it to be the one.
         return any(
             c.letter not in (CanonLetter.ALIF, CanonLetter.WAW, CanonLetter.YA)
             or c.has(*VOWEL_ROLES)
@@ -138,13 +113,10 @@ def _geminate_case(context: Context, cluster, following) -> bool:
 
 
 def helping_vowel(context: Context) -> Quality:
-    """Domain-facts §5.7's three-branch grammatical decision.
+    """The three-branch grammatical decision for the wasl helping vowel.
 
-    IndoPak evidences all three branches: fatha at 118 sites, kasra at 44,
-    damma at 19 (ADR-003 §6.3). The canonical nucleus of a waṣl slot *is* this
-    vowel, silenced by `WASL_ELISION` in connection and realized at ibtidāʾ —
-    if it were `Silent`, IndoPak's fatha at 1:2:1 would contradict it and L2
-    would fail the build at 186 sites.
+    The canonical nucleus of a wasl slot is this vowel, silenced by
+    `WASL_ELISION` in connection and realized at ibtida.
     """
     return _helping_vowel(context)
 
@@ -167,7 +139,7 @@ def _helping_vowel(context: Context) -> Quality:
     "sukun", "dagger", "combining_hamza",
 ))
 def hamzat_wasl(context: Context) -> Outcome:
-    """The waṣl slot: a hamza whose onset sounds only at ibtidāʾ."""
+    """The wasl slot: a hamza whose onset sounds only at ibtida."""
     del context
     return Sets(SlotFact.ONSET, Onset.WASL)
 
@@ -210,7 +182,7 @@ def _is_form_four_masdar(context: Context) -> bool:
 
 
 def _is_bare_carrier(cluster) -> bool:
-    """A length carrier spells no letter of the skeleton — which is what lets
+    """A length carrier spells no letter of the skeleton - which is what lets
     one lexicon entry cover `إسرائيل` and `اِسْرَاءِيْلَ` alike."""
     return cluster.letter in (
         CanonLetter.ALIF,

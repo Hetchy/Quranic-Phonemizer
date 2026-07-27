@@ -1,9 +1,7 @@
-"""Phase 4: letters that are named rather than read.
+"""Muqattaat letters: named rather than read.
 
-The point of the test is not that the names are right — it is that nothing in
-`canon/spell.py` knows what happens *after* the names are laid down. The
-ghunnah in 2:1 and the qalqala in 7:1 come from the ordinary rules acting on
-ordinary slots. If they needed a special case the model would be wrong.
+`canon/spell.py` lays down the names only; the ghunnah in 2:1 and the
+qalqala in 7:1 must come from the ordinary rules, with no special case.
 """
 from __future__ import annotations
 
@@ -51,17 +49,16 @@ def test_the_openings_are_spelled_out(packed, shared, alphabet, site, expected):
 
 
 def test_the_spelled_slots_are_marked_as_such(packed, shared, alphabet):
-    """`SlotOrigin.SPELLED` had no producer at all — it was declared, asserted
-    by a vocabulary test, and cited by ADR-001 §3.2 as a satisfied condition
-    for reinstating `SlotOrigin`. It has one now."""
+    """A spelled-out muqattaat letter must produce `SlotOrigin.SPELLED`
+    slots."""
     score, _, _ = _first_word(packed, shared, alphabet, 7, 1)
     origins = {slot.origin for slot in score.words[0].slots}
     assert origins == {SlotOrigin.SPELLED}
 
 
 def test_the_ordinary_rules_act_on_the_spelled_letters(packed, shared, alphabet):
-    """2:1's ghunnah is the lām's final mīm meeting the mīm's first, and 7:1's
-    qalqala is on the ṣād's final dāl. Neither is known to `canon/spell.py`."""
+    """2:1's ghunnah and 7:1's qalqala both come from ordinary rules, not
+    from `canon/spell.py`."""
     _, performance, _ = _first_word(packed, shared, alphabet, 7, 1)
     fired = {o.rule for o in performance.occurrences}
     assert Rule.QALQALA_KUBRA in fired or Rule.QALQALA_SUGHRA in fired

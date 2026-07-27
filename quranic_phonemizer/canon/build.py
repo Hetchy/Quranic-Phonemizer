@@ -1,13 +1,7 @@
-"""`Reading` → `Score`. The one place a canonical fact is decided.
+"""`Reading` to `Score`: the one place a canonical fact is decided.
 
-The builder is shared and script-independent, which is the whole architecture
-in one sentence: L1 equality compares the object rules actually read, not an
-intermediate the adapters happen to agree on.
-
-The cost of that, stated because it is easy to forget: **every fact this module
-supplies is identical across both builds by construction**, so L1 does not test
-it. L1 tests only facts that come from adapter evidence. See ADR-008 §3.1 and
-the provenance split the harness reports.
+Shared and script-independent, so equivalent evidence from either script
+must resolve to the same Score.
 """
 from __future__ import annotations
 
@@ -62,10 +56,8 @@ class BuildError(ValueError):
 class Built:
     """One verse, one script: the canonical layer and the edges up into it.
 
-    Two objects rather than one because the reference is one-directional
-    (ADR-001 §1) — an `Inscription` names slots, and a `Score` may not name a
-    grapheme. Returning them together is what stops the Inscription from being
-    optional machinery that nothing populates.
+    Two objects, not one: an `Inscription` names slots, but a `Score` may
+    not name a grapheme, so the reference only runs one way.
     """
 
     score: Score
@@ -74,10 +66,10 @@ class Built:
 
 @dataclass(slots=True)
 class Provenance:
-    """What ADR-008 §3.1 requires the harness to report besides the residue.
+    """Counts the harness reports besides the residue.
 
-    A residue of zero reached by a rising `Decorates` count is not a proof of
-    script-independence; it is the same fact being discarded twice.
+    A residue of zero reached by a rising `Decorates` count is not proof of
+    script-independence; it is the same fact discarded twice.
     """
 
     from_evidence: int = 0
@@ -102,9 +94,9 @@ def build(
     right_context: Reading | None = None,
     passes: tuple[LexemePass, ...] | None = None,
 ) -> Built:
-    """`right_context` is the next verse's reading, and it is not optional
-    machinery: 20 of IndoPak's 54 cross-word tanwīn sites put the nūn on a word
-    in the *following verse*, so verse scope is necessary and not sufficient."""
+    """`right_context` is the next verse's reading and is not optional: some
+    cross-word tanween sites put the noon on a word in the following verse,
+    so verse scope alone is not sufficient."""
     track = provenance if provenance is not None else Provenance()
     scribe = Scribe(reading.verse)
     drafts = _drafts(reading, lexicon, track, right_context, scribe)
@@ -142,7 +134,7 @@ def _drafts(
         letter = _letter_of(rows, cluster)
         if letter is None:
             # A bare seat is not a slot, but it may still carry a dagger for
-            # the slot before it — Uthmani writes `تَـٰ`, with the alif on the
+            # the slot before it - Uthmani writes `تَـٰ`, with the alif on the
             # tatweel. Skipping the cluster must not skip its evidence.
             _apply_rows(rows, _Draft(letter=CanonLetter.ALIF), drafts, context,
                         track, scribe, cluster.offset, force=Target.PREVIOUS)
@@ -151,7 +143,7 @@ def _drafts(
             continue
 
         if index in silenced and cluster.letter is not None:
-            # The script wrote a silence sign on this letter — Uthmani's `۟`.
+            # The script wrote a silence sign on this letter - Uthmani's `۟`.
             # A mark that says "this is rasm" outranks any derivation.
             _apply_rows(rows, _Draft(letter=letter), drafts, context, track,
                         scribe, cluster.offset, force=Target.PREVIOUS)
@@ -194,7 +186,7 @@ def _drafts(
 def _apply_rows(rows, draft, drafts, context, track, scribe, base_offset,
                 force=None) -> _Draft | None:
     """`force` redirects every fact to the previous slot. A seat has no slot of
-    its own, so what it carries belongs to the one before it — which is how
+    its own, so what it carries belongs to the one before it - which is how
     Uthmani writes `تَـٰ` and `هِـۧم`."""
     extra: _Draft | None = None
     for row in rows:
@@ -223,9 +215,8 @@ def _apply_rows(rows, draft, drafts, context, track, scribe, base_offset,
                     origin=SlotOrigin.NUNATION,
                 )
                 # The tanween mark writes *both* slots: the host's vowel and
-                # the noon. Without this edge the noon is a slot no grapheme
-                # reaches, which is the I7 violation the projection spike
-                # measured at 5,831 Uthmani slots -- all of them this one.
+                # the noon. Without this edge the noon would be a slot no
+                # grapheme reaches.
                 scribe.evidence(offset, extra, SlotFact.LETTER)
                 scribe.evidence(offset, extra, SlotFact.NUCLEUS)
             case Attests(family=family):
@@ -237,13 +228,10 @@ def _apply_rows(rows, draft, drafts, context, track, scribe, base_offset,
     return extra
 
 
-#: The two derivations `_apply_wasl` resolves by name. Named here rather than
-#: called directly, because calling the function and then recording that a
-#: derivation ran are two statements that can disagree -- and did: the report
-#: claimed `hamzat_wasl` twice where `derive.resolve` had never been asked for
-#: it at all, and `wasl_helping_vowel` 1,258 times for the same reason. A
-#: fabricated provenance entry is worse than a missing one, because §3.1 exists
-#: to tell a real derivation from a relocated fact.
+#: The two derivations `_apply_wasl` resolves by name rather than calling
+#: directly, because "the derivation ran" and "the call happened" are two
+#: statements that can drift apart, and a fabricated provenance entry is
+#: worse than a missing one.
 WASL_ONSET = "hamzat_wasl"
 WASL_VOWEL = "wasl_helping_vowel"
 
@@ -276,21 +264,16 @@ def _apply_wasl(context, cluster: Cluster, draft: _Draft, track) -> None:
 
 
 def _rasm_outcome(context, cluster: Cluster, rows, track):
-    """Is this cluster written-but-not-a-slot, and if so what does it still say?
+    """Is this cluster written but not a slot, and if so what fact does it
+    still contribute to the previous slot?
 
-    Returns `None` when the cluster is a slot; otherwise the outcome, which may
-    carry a fact for the *previous* slot — a length carrier is silent at its own
-    position and still decides the vowel before it.
-
-    Order matters, and getting it wrong is subtle: rasm-hood cannot be decided
-    before the cluster's own nucleus is resolved. A dagger is the case that
-    proves it — on IndoPak's ālif it is madd badal and the cluster is a slot;
-    on Uthmani's wāw in `ٱلصَّلَوٰةَ` the same mark lengthens the slot before it
-    and the cluster is rasm. Nothing about the glyph says which; only where its
-    nucleus lands does.
+    Returns `None` when the cluster is a slot.
     """
     if wasl.is_wasl(context):
         return None   # a prosthetic hamza is a slot, not rasm
+    # A dagger's own script decides whether it is this cluster's nucleus or
+    # a carried one for the slot before it; only nucleus destination can
+    # tell, not the letter itself.
     own, carried = _nucleus_destination(rows, context)
     if own:
         return None
@@ -312,11 +295,10 @@ def _rasm_outcome(context, cluster: Cluster, rows, track):
 
 
 def _nucleus_destination(rows, context) -> tuple[bool, object | None]:
-    """Where do this cluster's nucleus rows land — here, or on the slot before?
+    """Where do this cluster's nucleus rows land: here, or on the slot before?
 
-    A sukūn deliberately counts as neither. IndoPak writes one on its length
-    carriers — `يْ` for a long ī — and the absence of a vowel cannot be what
-    makes a cluster a slot.
+    A sukun counts as neither - IndoPak writes one on length carriers like
+    `يْ`, and absence of a vowel cannot be what makes a cluster a slot.
     """
     carried = None
     for row in rows:
@@ -337,25 +319,23 @@ def _nucleus_destination(rows, context) -> tuple[bool, object | None]:
 
 
 def _skip_iwad_carrier(reading: Reading, index: int, bounds) -> set[int]:
-    """The ālif written after a fathatan is the ʿiwaḍ, not a fourth slot."""
+    """The alif written after a fathatan is the iwad, not a fourth slot."""
     nxt = index + 1
     if nxt >= bounds[1]:
         return set()
     cluster = reading.clusters[nxt]
     if cluster.letter is CanonLetter.ALIF and not cluster.has(*_VOWEL_ROLES):
-        # IndoPak draws its iqlāb mark on this ālif. An annotation does not
-        # turn the ʿiwaḍ carrier into a slot.
+        # IndoPak draws its iqlab mark on this alif. An annotation does not
+        # turn the iwad carrier into a slot.
         return {nxt}
     return set()
 
 
 def _split_tanween_words(reading: Reading) -> set[int]:
-    """Words whose *predecessor* carries a tanwīn this script drew here.
+    """Words whose predecessor carries a tanween this script drew here.
 
-    IndoPak splits the tanwīn across the boundary: the vowel stays on word *n*
-    with the mark dropped, and the nūn-plus-kasra is depicted on word *n+1* as
-    `ࣙ`. Under A1 that is ordinary evidence, because the tanwīn nūn is a slot
-    — IndoPak was writing the correct model all along (ADR-003 §6.5).
+    IndoPak splits it across the boundary: the vowel stays on word n, and
+    the noon-plus-kasra is drawn as a mark on word n+1.
     """
     out = set()
     for cluster in reading.clusters:
@@ -376,11 +356,10 @@ def _split_tanween_offset(reading: Reading, word: int) -> int:
 
 
 def _apply_cross_word_noon(reading, drafts, right_context, scribe) -> None:
-    """Give word *n* the nūn slot that word *n+1* is carrying for it.
+    """Give word n the noon slot that word n+1 is carrying for it.
 
-    54 sites, of which 34 are inside a verse and **20 cross a verse boundary**
-    — which is why verse scope is necessary and not sufficient, and why this
-    takes one word of right context.
+    Some cross-word tanween sites span a verse boundary, so this pass needs
+    one word of right context.
     """
     marked = _split_tanween_words(reading)
     if right_context is not None and 0 in _split_tanween_words(right_context):
@@ -394,7 +373,7 @@ def _apply_cross_word_noon(reading, drafts, right_context, scribe) -> None:
             continue
         last = span[-1]
         if last.letter is CanonLetter.NOON and last.nucleus.kind is NucleusKind.SILENT:
-            continue  # already a tanwīn nūn; nothing was split
+            continue  # already a tanween noon; nothing was split
         quality = getattr(last.nucleus, "quality", Quality.A)
         last.nucleus = Short(quality)
         noon = _Draft(
@@ -405,9 +384,8 @@ def _apply_cross_word_noon(reading, drafts, right_context, scribe) -> None:
             origin=SlotOrigin.NUNATION,
         )
         drafts.insert(drafts.index(last) + 1, noon)
-        # The noon is written on the *next* word -- that is what makes this
-        # cross-word -- so the grapheme that reaches it is that word's mark,
-        # not the donor's. Without this the slot is one no grapheme reaches.
+        # The noon is written on the next word, so the grapheme that reaches
+        # it is that word's mark, not the donor's.
         offset = _split_tanween_offset(reading, word_index)
         if offset >= 0:
             scribe.evidence(offset, noon, SlotFact.LETTER)
@@ -429,6 +407,7 @@ def _assemble(
             onset=draft.onset,
             nucleus=draft.nucleus,
             origin=draft.origin,
+            annotations=frozenset(draft.annotations),
         )
         word = reading.clusters[draft.cluster].word if draft.cluster >= 0 else 0
         by_word.setdefault(word, []).append(slot)

@@ -1,14 +1,19 @@
-"""The mutable slot under construction, and the one place a fact lands on it.
+"""The mutable slot under construction, and where a decided fact is written.
 
-Both `canon/build.py` (per-cluster drafting) and `canon/passes.py` (verse-level
-passes) write to a draft, so neither can own it. Extracted when the split made
-the dependency explicit rather than because a third caller appeared.
+Shared by `build.py`'s per-cluster drafting and `passes.py`'s verse-level passes.
 """
 from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from ..model.canon import CanonLetter, Nucleus, Onset, Silent, SlotOrigin
+from ..model.canon import (
+    Annotation,
+    CanonLetter,
+    Nucleus,
+    Onset,
+    Silent,
+    SlotOrigin,
+)
 from ..model.inscription import SlotFact
 from .derive import Target
 
@@ -25,10 +30,10 @@ class _Draft:
     onset_declared: bool = False
     nucleus_declared: bool = False
     sakt_after: bool = False
-    """A word-level fact carried on the slot that ends the word; `_assemble`
-    lifts it onto the `ScoreWord`. Before this, `SlotFact.SAKT` reached `_set`
-    and fell through a `match` with no case for it, so 18:1 -- one of Hafs'
-    four canonical sakt sites -- never reached the Score."""
+    """A word-level fact carried on the word's final slot; `_assemble` lifts
+    it onto the `ScoreWord`."""
+
+    annotations: frozenset[Annotation] = frozenset()
 
 
 def set_fact(draft, drafts, fact: SlotFact, value, target: Target,
@@ -47,3 +52,5 @@ def set_fact(draft, drafts, fact: SlotFact, value, target: Target,
             subject.nucleus, subject.nucleus_declared = value, True
         case SlotFact.SAKT:
             subject.sakt_after = bool(value)
+        case SlotFact.ANNOTATION:
+            subject.annotations = subject.annotations | {value}

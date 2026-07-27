@@ -1,29 +1,6 @@
-"""The gate the rebuild exists for: **the two scripts must sound the same**.
+"""Compare Uthmani and IndoPak, performed and rendered, word by word.
 
-`tools/parity.py` is a regression oracle — one script against the output the
-old implementation froze. `tools/l1_harness.py` is script-equality one layer
-too early, at the Score. Neither one asks the question the design is named
-after, which is whether Uthmani and IndoPak, performed and rendered, produce
-the same phonemes.
-
-    for each verse, for each boundary plan:
-        a = render(perform(build(uthmani.read(...))))
-        b = render(perform(build(indopak.read(...))))
-        compare a with b, word by word
-
-A disagreement here is a script fact that reached the Performance. That is the
-failure L1 is meant to make impossible, so a residue here that L1 does not also
-report means a script fact is entering *after* `canon.build` — which is the
-more serious of the two directions.
-
-This harness and `tools/parity.py` are insensitive to opposite failures, so
-neither substitutes for the other. A rule that is *missing* is invisible here,
-because it is missing from both scripts and they agree without it — which is
-why this number barely moves between modes while the regression oracle drops
-six points. A *script fact leaking* is invisible there, because it runs one
-script. Quote both or neither.
-
-Run:  python tools/cross_parity.py [--mode word|verse] [--limit N]
+Run: python tools/cross_parity.py [--mode word|verse] [--limit N]
 """
 from __future__ import annotations
 
@@ -65,14 +42,12 @@ ALPHABET = ROOT / "quranic_phonemizer" / "data" / "render" / "ipa.yaml"
 #: Which script's residue rows are shown, and which side of a pair is "got".
 LEFT, RIGHT = Script.UTHMANI, Script.INDOPAK
 
-#: Same two modes `tools/parity.py` offers, and for the same reason: a harness
-#: that runs verse by verse cannot build a plan that joins across verses.
+#: Same two modes as tools/parity.py, for the same reason: verse by verse cannot join across verses.
 MODES = ("word", "verse")
 
 
 def plan_for(mode: str, words: int) -> BoundaryPlan:
-    """Identical to `tools/parity.py`'s, deliberately — the two harnesses must
-    disagree about the *scripts*, never about the boundary plan."""
+    """Same boundary-plan construction as tools/parity.py."""
     if mode == "word":
         return BoundaryPlan((Junction.STOP,) * (words - 1) + (Junction.EDGE,))
     return BoundaryPlan((Junction.JOIN,) * (words - 1) + (Junction.EDGE,))
@@ -119,8 +94,7 @@ def main() -> int:
         }
         left, right = rendered[LEFT], rendered[RIGHT]
         if len(left) != len(right):
-            # A word-count disagreement is a join/split difference, not a
-            # phoneme one. Counting it as N mismatches would hide its shape.
+            # A word-count disagreement is a join/split difference, not a phoneme one.
             skipped_verses += 1
             diffs[f"word count {len(left)}v{len(right)}"] += 1
             continue
