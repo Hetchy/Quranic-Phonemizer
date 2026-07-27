@@ -74,8 +74,8 @@ evidences:
   "ۜ": {fact: LETTER, cls: annotation, role: seen_over, value: SEEN}
 
 decorates:
-  "ٓ": {slot: long_nucleus, cls: madd_sign}
-  "࢜": {slot: long_nucleus, cls: madd_sign}   # madda waajib
+  "ٓ": {slot: long_nucleus, cls: madd_sign, role: madd}
+  "࢜": {slot: long_nucleus, cls: madd_sign, role: madd}   # madda waajib
   "۟": {slot: host, cls: silence_sign, silences: true}
   "ۢ": {slot: host, cls: annotation}          # iqlab, upper
   "ۭ": {slot: host, cls: annotation}          # iqlab, lower

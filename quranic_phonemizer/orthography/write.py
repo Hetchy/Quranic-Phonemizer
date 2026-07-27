@@ -17,6 +17,9 @@ _SHORT_ROLE = {Quality.A: "fatha", Quality.U: "damma", Quality.I: "kasra"}
 #: Imala and ishmam are colourings a reciter applies to an ordinary vowel,
 #: not vowels of their own, so they spell as their base quality.
 _BASE = {Quality.IMALA: Quality.A}
+
+#: The mark that says a carrier lengthens the vowel before it.
+MADD = "madd"
 _CARRIER = {
     Quality.A: CanonLetter.ALIF,
     Quality.U: CanonLetter.WAW,
@@ -77,7 +80,7 @@ def pen_for(inventory: Inventory) -> Pen:
                 carriers.setdefault(entry.letter, scalar)
     roles: dict[str, str] = {}
     for scalar, mark in inventory.marks.items():
-        if mark.role and mark.fact is not None:
+        if mark.role and (mark.fact is not None or mark.decorates is not None):
             roles.setdefault(mark.role, scalar)
     return Pen(letters=letters, roles=roles, onsets=onsets,
                carriers=carriers)
@@ -120,10 +123,15 @@ def _nucleus(slot, pen: Pen) -> str:
             return pen.role(_short_role(quality))
         case NucleusKind.LONG | NucleusKind.PAUSAL_LONG:
             # Always write the full haraka plus carrier rather than the
-            # dagger abbreviation; both read back to the same slot.
+            # dagger abbreviation; both read back to the same slot. The madd
+            # sign says the carrier lengthens rather than standing for a
+            # letter, which is what keeps a bare alif from reading back as a
+            # prosthetic hamza.
             carrier = _CARRIER[quality]
-            return pen.role(_short_role(quality)) + (
-                pen.carriers.get(carrier) or pen.letter(carrier)
+            return (
+                pen.role(_short_role(quality))
+                + (pen.carriers.get(carrier) or pen.letter(carrier))
+                + pen.roles.get(MADD, "")
             )
         case NucleusKind.SILAH:
             return pen.role("silah_waw" if quality is Quality.U else "silah_ya")

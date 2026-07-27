@@ -2,8 +2,8 @@
 # riwayah, so they live here; a riwayah that disagrees overrides the single key
 # it disagrees on in its own rules.yaml and inherits the rest.
 #
-# Keys under `followers_of_*` and `pairs` are Rule members. Values are letters,
-# written as in data/shared/letters.yaml. Both are checked at load.
+# Keys under `followers_of_*` and `pairs` are Rule members. Values are Arabic
+# letters. Both are checked at load.
 schema_version: 1
 
 # The letter after a quiescent noon or tanween noon decides the outcome. The
@@ -29,6 +29,14 @@ qalqala: [ق, ط, ب, ج, د]              # قطب جد
 # Heavy wherever they stand. Raa and lam are heavy conditionally and are
 # decided by rules/tafkheem.py, not listed here.
 always_heavy: [خ, ص, ض, ط, ظ, غ, ق]    # حروف الاستعلاء
+
+# The article's lam assimilates into these and is pronounced before the rest.
+sun_letters: [ت, ث, د, ذ, ر, ز, س, ش, ص, ض, ط, ظ, ل, ن]
+
+# `لِلنَّاسِ` writes the article without its alif, and only these may stand
+# before that lam proclitic, which is what separates it from a stem's own
+# pair of lams in `يُضْلِلْ`.
+proclitics: [و, ف]
 
 # An adjacent pair that assimilates, first letter into second.
 pairs:

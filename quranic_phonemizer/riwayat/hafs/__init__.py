@@ -3,7 +3,7 @@ from .resources import (
     adapters_for,
     corpus,
     ledger,
-    letter_names,
+    muqattaat,
     lexeme_passes,
     lexicon,
     rule_tables,
@@ -12,6 +12,6 @@ from .resources import (
 from .rules import HAFS, rules_for
 
 __all__ = [
-    "HAFS", "RIWAYAH", "adapters_for", "corpus", "ledger", "letter_names",
+    "HAFS", "RIWAYAH", "adapters_for", "corpus", "ledger", "muqattaat",
     "lexeme_passes", "lexicon", "rule_tables", "rules_for", "script_adapter",
 ]

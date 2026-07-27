@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from ...model.canon import ABJAD, CanonLetter, Onset, Quality, Short
 from ...model.inscription import SlotFact
-from . import Context, Outcome, Sets, register
+from . import Context, Outcome, Sets, lexeme, register
 
 VOWEL_ROLES = frozenset({"fatha", "damma", "kasra"})
 QUIESCENT_BLOCKERS = frozenset(VOWEL_ROLES | {"fathatan", "dammatan", "kasratan"})
@@ -47,16 +47,20 @@ PROCLITICS = frozenset(
 def is_wasl(context: Context) -> bool:
     """The decision procedure. `canon.build` names it for every bare alif.
 
-    Check order is load-bearing: the article is checked before the lexeme
-    list, because swapping them lets `ءلق` match `القرآن`.
+    Check order is load-bearing: written evidence of the article outranks the
+    lexeme list, and the list outranks the shape alone.
     """
     cluster = context.cluster
     if cluster.letter not in (CanonLetter.ALIF, CanonLetter.HAMZA):
         return False
-    if cluster.has("dagger", "combining_hamza", "shadda"):
-        return False  # madd badal, or a seated hamza: neither is prosthetic
+    if cluster.has("dagger", "combining_hamza", "shadda", "madd"):
+        # Madd badal, a seated hamza, or the ibdal alif that replaces the
+        # article's hamza after an interrogative one in `ءَآلذَّكَرَيْنِ`.
+        return False
     if not (context.word_initial or _after_proclitics(context)):
         return False
+    if lexeme.alif_in_leen(context):
+        return False  # rasm inside a diphthong, not a prop for a quiescent letter
     following = context.ahead()
     if following is None:
         return False
@@ -69,10 +73,12 @@ def is_wasl(context: Context) -> bool:
     written = _written_vowel(cluster)
     if written is None:
         return True  # a bare prosthetic ālif; both scripts write it that way
+    if following.letter is CanonLetter.LAM and _assimilated_sun_letter(context):
+        return True  # only the article puts a geminate after a vowelless lam
     if context.lexicon.is_wasl_exempt(_skeleton(context)):
-        # Checked before the article branch, not after. `ألقى`, `ألف`,
-        # `ألسنة` and `ألوان` all begin hamza + lam and none of them is the
-        # article; nothing orthographic separates them from it.
+        # `ألقى`, `ألف`, `ألسنة` and `ألوان` all begin hamza + lam and none of
+        # them is the article; nothing orthographic separates them from it, so
+        # the list is consulted before the lam branch below.
         return False
     if following.letter is CanonLetter.LAM:
         return True  # the article, with its helping vowel written out
@@ -92,14 +98,14 @@ def is_wasl(context: Context) -> bool:
         return False
     if written is Quality.A:
         return False  # the helping vowel is fatha only for the article
-    if context.lexicon.is_wasl_exempt(_skeleton(context)):
-        return False
     return written is _helping_vowel(context)
 
 
 def _geminate_case(context: Context, cluster, following) -> bool:
     written = _written_vowel(cluster)
     if following.letter is CanonLetter.LAM:
+        if context.lexicon.is_wasl_exempt_doubled(_skeleton(context)):
+            return False
         # `الَّذين` is the article before a lam-initial word; `إلَّا` is a
         # particle. Something real has to follow the lam for it to be the one.
         return any(
@@ -136,7 +142,7 @@ def _helping_vowel(context: Context) -> Quality:
 @register("hamzat_wasl", requires=(
     "fatha", "damma", "kasra", "fathatan", "dammatan", "kasratan",
         "shadda", "silah_waw", "silah_ya",
-    "sukun", "dagger", "combining_hamza",
+    "sukun", "dagger", "combining_hamza", "madd",
 ))
 def hamzat_wasl(context: Context) -> Outcome:
     """The wasl slot: a hamza whose onset sounds only at ibtida."""
@@ -147,7 +153,7 @@ def hamzat_wasl(context: Context) -> Outcome:
 @register("wasl_helping_vowel", requires=(
     "fatha", "damma", "kasra", "fathatan", "dammatan", "kasratan",
         "shadda", "silah_waw", "silah_ya",
-    "sukun", "dagger", "combining_hamza",
+    "sukun", "dagger", "combining_hamza", "madd",
 ))
 def wasl_helping_vowel(context: Context) -> Outcome:
     return Sets(SlotFact.NUCLEUS, Short(_helping_vowel(context)))
@@ -161,6 +167,11 @@ def _after_proclitics(context: Context) -> bool:
         if cluster.letter not in PROCLITICS or not cluster.has(*VOWEL_ROLES):
             return False
     return True
+
+
+def _assimilated_sun_letter(context: Context) -> bool:
+    third = context.ahead(2)
+    return third is not None and third.has("shadda")
 
 
 def _is_nunated(context: Context) -> bool:

@@ -290,7 +290,7 @@ def _load_decorates(data: Any, path: Path, marks: dict[str, MarkEntry]) -> None:
             spec, {"slot", "cls"}, name=where, optional={"role", "silences"}
         )
         marks[char] = MarkEntry(
-            role=f"decorates:{spec['slot']}",
+            role=str(spec.get("role", f"decorates:{spec['slot']}")),
             cls=_member(GraphemeClass, spec["cls"], where=where),
             decorates=str(spec["slot"]),
             silences=bool(spec.get("silences", False)),

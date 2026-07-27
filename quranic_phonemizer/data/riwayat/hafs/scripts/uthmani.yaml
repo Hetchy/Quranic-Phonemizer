@@ -83,8 +83,7 @@ evidences:
   "ۣ": {fact: LETTER, cls: annotation, role: seen_over, value: SEEN}
 
 decorates:
-  "ٓ": {slot: long_nucleus, cls: madd_sign}   # the maddah: it shows a
-                                                   # madd and supplies nothing
+  "ٓ": {slot: long_nucleus, cls: madd_sign, role: madd}
   "۟": {slot: host, cls: silence_sign, silences: true}
 
 advice:

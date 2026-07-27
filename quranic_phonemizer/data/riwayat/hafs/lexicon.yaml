@@ -43,7 +43,6 @@ wasl_exempt:
   # which is what keeps a three-letter entry from swallowing the definite
   # class — see the ordering note there.
   - "ءلف"       # ألّف، ألف، ألفينا
-  - "ءلن"       # ألّا، ألّن
   - "ءلزم"      # ألزم
   - "ءله"       # ألهم، ألهاكم
   - "ءلوح"      # ألواح
@@ -60,11 +59,13 @@ wasl_exempt:
   - "ءعط"       # أعطى
   - "ءد"        # إدّ
   - "ءنتم"      # أنتم
-  # muqattaʿat forms, until canon/spell.py expands them in phase 4
-  - "ءلم"
-  - "ءلر"
-  - "ءلمص"
-  - "ءلمر"
+
+# Hamza + doubled lam, where the hamza is not prosthetic. Its own list: the
+# ambiguity here is `ألَّف` and `إلَّم` against `الَّذى` and `اللَّه`, which is
+# not the ambiguity `wasl_exempt` resolves, and the two collide on `ءلت`.
+wasl_exempt_doubled:
+  - "ءلف"       # ألّف
+  - "ءلم"       # إلّم
 
 # The ten nouns: kasra regardless of the third letter. `اسم` would otherwise
 # derive damma from the mīm.

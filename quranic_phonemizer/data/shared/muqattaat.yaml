@@ -19,6 +19,17 @@
 # engine produces it because the slots are ordinary slots.
 schema_version: 1
 
+# The twenty-nine openings, as the fourteen distinct letter skeletons they are
+# written with. A closed class of the Quran, so it is named rather than derived:
+# no orthographic test separates `الٓمٓ` from `أَلَمْ`, which shares its letters.
+#
+# An opening is written with none of its letters voweled, with two exceptions
+# that are not vowels of the reading. IndoPak draws a shadda on the mim of
+# `الم` for the idgham the names `laam` and `miim` make between them, and 3:1
+# carries a fatha on that mim, which is the vowel the wasl hamza of the
+# `ٱللَّهُ` opening 3:2 gives it.
+openings: [الم, المص, المر, الر, كهيعص, طه, طسم, طس, يس, ص, حم, عسق, ق, ن]
+
 names:
   ء: "ءaلiف"
   ا: "ءaلiف"

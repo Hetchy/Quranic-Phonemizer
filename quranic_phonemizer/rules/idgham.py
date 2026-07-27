@@ -13,7 +13,7 @@ from ..model.address import BoundaryPlan, SlotId
 from ..model.canon import CanonLetter as L
 from ..model.canon import CanonLetter, NucleusKind, Phase, Rule
 from ..model.performance import Aspect, Consonant, Occurrence, Participants
-from .lam_shamsiyyah import is_article_lam
+from .lam_shamsiyyah import ArticleShape
 from .tables import Pairs
 
 
@@ -28,6 +28,7 @@ class Idgham:
 
     pairs: Pairs
     never_follows: frozenset[CanonLetter] = frozenset()
+    article: ArticleShape = field(default_factory=ArticleShape)
     rule: Rule = Rule.IDGHAM_MUTAMATHILAYN
     phase: Phase = Phase.MERGE
     triggers: frozenset = field(default=frozenset())
@@ -49,7 +50,7 @@ class Idgham:
         here = near.slot(at)
         if here is None or here.nucleus.kind is not NucleusKind.SILENT:
             return None
-        if is_article_lam(near, at):
+        if self.article(near, at):
             return None  # lam shamsiyyah owns this slot
         following = near.after(at)
         if following is None:

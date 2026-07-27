@@ -12,11 +12,16 @@ from ..dataio import load_yaml, require_keys
 from ..model.canon import ABJAD, CanonLetter, Long, Quality, Short, Silent, SlotOrigin
 from ..model.inscription import SlotFact
 from ..orthography.adapter import Reading
-from .derive.length import VOWEL_ROLES
 from .draft import _Draft
 from .passes import word_of
 
 SCHEMA_VERSION = 1
+
+#: A vowel of the reading. Excludes the shadda, which records an assimilation
+#: between two letter names rather than a nucleus.
+HARAKAT = frozenset(
+    {"fatha", "damma", "kasra", "fathatan", "dammatan", "kasratan", "sukun"}
+)
 
 #: Letter, then an optional vowel: lowercase short, uppercase long, absent
 #: silent. The same notation the pausal lexemes are written in.
@@ -30,21 +35,28 @@ class SpellingError(ValueError):
 
 
 @dataclass(frozen=True, slots=True)
-class Names:
-    """Canonical letter to the slots its name is made of."""
+class Muqattaat:
+    """Which openings are named rather than read, and how each letter is
+    called."""
+
+    openings: frozenset[str]
+    """Letter skeletons, in `ABJAD` glyphs."""
 
     by_letter: dict[CanonLetter, tuple[tuple[CanonLetter, object], ...]]
+
+    def is_opening(self, skeleton: str) -> bool:
+        return skeleton in self.openings
 
     def spell(self, letter: CanonLetter):
         return self.by_letter.get(letter)
 
 
-EMPTY = Names({})
+EMPTY = Muqattaat(frozenset(), {})
 
 
-def load_names(path: Path) -> Names:
+def load_muqattaat(path: Path) -> Muqattaat:
     data = load_yaml(path)
-    require_keys(data, {"schema_version", "names"}, name=str(path))
+    require_keys(data, {"schema_version", "openings", "names"}, name=str(path))
     if data["schema_version"] != SCHEMA_VERSION:
         raise SpellingError(
             f"{path}: schema_version {data['schema_version']!r}, expected "
@@ -54,7 +66,11 @@ def load_names(path: Path) -> Names:
     for glyph, spelled in data["names"].items():
         letter = _canon(glyph, path)
         by_letter[letter] = tuple(_parse(spelled, path))
-    return Names(by_letter)
+    openings = frozenset(data["openings"])
+    for skeleton in openings:
+        for glyph in skeleton:
+            _canon(glyph, path)
+    return Muqattaat(openings, by_letter)
 
 
 def _canon(glyph: str, path: Path) -> CanonLetter:
@@ -82,13 +98,13 @@ def _parse(spelled: str, path: Path):
             yield letter, Silent()
 
 
-def spell_muqattaat(names: Names):
+def spell_muqattaat(names: Muqattaat):
     """Build the pass. Bound by the riwayah like the other lexeme passes."""
 
     def apply(reading: Reading, drafts: list, lexicon, scribe=None) -> None:
         del lexicon
         for word in range(len(reading.words)):
-            if not _is_muqattaat(reading, word):
+            if not _is_muqattaat(reading, word, names):
                 continue
             span = [d for d in drafts if word_of(reading, d) == word]
             if not span:
@@ -112,19 +128,19 @@ def spell_muqattaat(names: Names):
     return apply
 
 
-def _is_muqattaat(reading: Reading, word: int) -> bool:
-    """A word in which nothing is voweled at all.
-
-    Checked over the clusters, not the drafted slots, because by then the
-    wasl derivation has already given `ٱ` a helping vowel that would hide it.
-    """
+def _is_muqattaat(reading: Reading, word: int, names: Muqattaat) -> bool:
+    """One of the named openings, voweled nowhere but its last letter. Read
+    from the clusters, where `ٱ` has not yet been given a helping vowel."""
     clusters = [c for c in reading.clusters if c.word == word]
-    if not clusters:
+    if not clusters or any(cluster.has(*HARAKAT) for cluster in clusters[:-1]):
         return False
-    return not any(cluster.has(*VOWEL_ROLES) for cluster in clusters)
+    skeleton = "".join(
+        ABJAD[c.letter.value] for c in clusters if c.letter is not None
+    )
+    return names.is_opening(skeleton)
 
 
-def _spelled(reading: Reading, word: int, names: Names) -> list | None:
+def _spelled(reading: Reading, word: int, names: Muqattaat) -> list | None:
     """Spelled from the clusters, not the drafted slots: a derivation may
     have already absorbed a bare yaa into a neighboring long vowel there,
     but these letters are named, not read, so that absorption does not apply.

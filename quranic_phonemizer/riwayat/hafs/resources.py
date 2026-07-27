@@ -14,7 +14,7 @@ from ...canon.ledger import EMPTY as EMPTY_LEDGER
 from ...canon.ledger import Ledger, load_ledger
 from ...canon.lexicon import EMPTY as EMPTY_LEXICON
 from ...canon.lexicon import Lexicon, load_lexicon
-from ...canon.spell import Names, load_names
+from ...canon.spell import Muqattaat, load_muqattaat
 from ...corpus import PackedCorpus, load_corpus
 from ...model.address import Location, Riwayah, Script, VerseRef
 from ..tables import RuleTables, load_rule_tables
@@ -80,21 +80,22 @@ def rule_tables() -> RuleTables:
     return load_rule_tables(shared, DATA / "rules.yaml")
 
 
-def letter_names() -> Names:
-    """Shared across riwayat: what a letter is *called* is a fact about Arabic."""
-    return load_names(DATA.parents[1] / "shared" / "muqattaat.yaml")
+def muqattaat() -> Muqattaat:
+    """Shared across riwayat: which openings are named, and what each letter is
+    called, are facts about Arabic."""
+    return load_muqattaat(DATA.parents[1] / "shared" / "muqattaat.yaml")
 
 
 def lexeme_passes() -> tuple:
     """Hafs' verse-level passes, in order.
 
     `canon` supplies the shared two; spelling the muqattaat needs the
-    letter-name table, so it is bound here instead.
+    opening and letter-name tables, so it is bound here instead.
     """
     from ...canon.passes import LEXEME_PASSES
     from ...canon.spell import spell_muqattaat
 
-    return (*LEXEME_PASSES, spell_muqattaat(letter_names()))
+    return (*LEXEME_PASSES, spell_muqattaat(muqattaat()))
 
 
 def corpus() -> PackedCorpus:

@@ -47,6 +47,34 @@ def words_of(packed, surah: int, ayah: int) -> tuple:
     )
 
 
+@pytest.fixture(scope="session")
+def sources():
+    """Both scripts' editable text. The packed corpus holds only Uthmani, so
+    anything comparing the two has to read from here."""
+    import json
+    from collections import defaultdict
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parent.parent
+    base = root / "corpus_sources" / "riwayat" / "hafs" / "scripts"
+    out: dict = {}
+    for script in Script:
+        raw = json.loads(
+            (base / script.value / "quran.json").read_text(encoding="utf-8")
+        )
+        verses: dict = defaultdict(list)
+        for key, record in raw.items():
+            surah, ayah, word = (int(part) for part in key.split(":"))
+            verses[(surah, ayah)].append(
+                (Location(surah, ayah, word), record["text"])
+            )
+        out[script] = {
+            key: tuple(sorted(words, key=lambda pair: pair[0].word))
+            for key, words in verses.items()
+        }
+    return out
+
+
 def built_for(packed, shared, surah: int, ayah: int, script=Script.UTHMANI):
     reading = script_adapter(script).read(
         VerseRef(surah, ayah), words_of(packed, surah, ayah)

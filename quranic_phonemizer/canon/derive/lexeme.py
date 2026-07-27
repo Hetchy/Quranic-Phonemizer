@@ -79,6 +79,26 @@ def otiose_waw(context: Context) -> bool:
     )
 
 
+#: The two letters that carry a leen with a preceding fatha.
+LEEN_CARRIERS = (CanonLetter.YA, CanonLetter.WAW)
+
+
+def alif_in_leen(context: Context) -> bool:
+    """`تَا۟يْـَٔسُوا۟` - a bare alif inside a leen, which needs neither a
+    carrier nor a prosthetic hamza. Uthmani marks it, IndoPak does not."""
+    cluster = context.cluster
+    following = context.ahead()
+    return (
+        cluster.letter is CanonLetter.ALIF
+        and not cluster.has("fatha", "damma", "kasra", "shadda")
+        and not context.word_initial
+        and context.clusters[context.index - 1].has("fatha")
+        and following is not None
+        and following.letter in LEEN_CARRIERS
+        and following.has("sukun")
+    )
+
+
 def otiose_alif(context: Context) -> bool:
     """The alif of the plural waw (`قَالُوا۟`), and the alif no vowel can carry.
 
@@ -90,6 +110,8 @@ def otiose_alif(context: Context) -> bool:
         return False
     if context.word_initial:
         return False   # the previous nucleus belongs to another word
+    if alif_in_leen(context):
+        return True
     previous = context.previous_nucleus
     if previous is None:
         return False

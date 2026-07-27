@@ -5,7 +5,7 @@ as readily as the shamsiyyah one.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from collections.abc import Callable
 
@@ -14,27 +14,58 @@ from ..engine.plan import MergeInto, Plan, Realize, Verdict, mint
 from ..model.address import BoundaryPlan, SlotId
 from ..model.canon import ABJAD
 from ..model.canon import CanonLetter as L
-from ..model.canon import NucleusKind, Onset, Phase, Rule
+from ..model.canon import CanonLetter, NucleusKind, Onset, Phase, Quality, Rule
 from ..model.performance import Aspect, Consonant, Occurrence, Participants
 
-#: The fourteen sun letters. The article's lam assimilates into each.
-SUN = frozenset(
-    {
-        L.TA, L.THA, L.DAL, L.THAL, L.RA, L.ZAY, L.SEEN, L.SHEEN,
-        L.SAD, L.DAD, L.TAH, L.ZAH, L.LAM, L.NOON,
-    }
-)
+
+def _never(_skeleton: str) -> bool:
+    return False
+
+
+@dataclass(frozen=True, slots=True)
+class ArticleShape:
+    """Is this vowelless lam the article's? Asked of the Score, never of a
+    glyph, so the answer holds in any script.
+
+    Held by both rules that need it, so the shape is stated once.
+    """
+
+    prefixes: frozenset[CanonLetter] = frozenset()
+    """Letters that may stand between the word's head and the lam proclitic."""
+
+    is_form_eight_lam: Callable[[str], bool] = _never
+    """Takes the one lexeme fact it needs as a predicate rather than importing
+    `Lexicon`: rules/ may not depend on canon/."""
+
+    def __call__(self, near: Neighbourhood, at: SlotId) -> bool:
+        word = near.word_of(at)
+        slots = () if word is None else near.score.words[word].slots
+        index = next((i for i, slot in enumerate(slots) if slot.id == at), 0)
+        if index == 0:
+            return False
+        before = slots[index - 1]
+        if before.onset is Onset.WASL:
+            # Form VIII lam-initial verbs are the same shape -- `ٱلْتَقَى`
+            # against `ٱلتَّوْبَة` -- so a lexeme fact tells them apart.
+            return not self.is_form_eight_lam(_skeleton(slots))
+        if _is_ibdal_alif(before):
+            # `ءَآلذَّكَرَيْنِ`: after an interrogative hamza the article's own
+            # hamza is not written as one, it is the length that replaced it.
+            return True
+        if before.letter is not L.LAM or before.nucleus.kind is NucleusKind.SILENT:
+            return False
+        # `لِلنَّاسِ` writes no hamza: the lam proclitic swallows the article's
+        # alif. `يُضْلِلْ` is the same pair of lams inside a stem, so what
+        # separates them is whether the first lam heads the word.
+        return all(slot.letter in self.prefixes for slot in slots[: index - 1])
 
 
 @dataclass(frozen=True, slots=True)
 class ArticleLam:
-    """Takes the one lexeme fact it needs as a predicate rather than
-    importing `Lexicon` directly -- rules/ may not depend on canon/.
+    sun: frozenset[CanonLetter] = frozenset()
+    """The letters the article's lam assimilates into."""
 
-    Defaults to "no", so the rule works untuned on its own.
-    """
-
-    is_form_eight_lam: Callable[[str], bool] = lambda _skeleton: False
+    article: ArticleShape = field(default_factory=ArticleShape)
     rule: Rule = Rule.LAM_SHAMSIYYAH
     phase: Phase = Phase.MERGE
     triggers: frozenset = frozenset({L.LAM})
@@ -47,13 +78,13 @@ class ArticleLam:
         slot = near.slot(at)
         if slot is None or slot.nucleus.kind is not NucleusKind.SILENT:
             return None
-        if not is_article_lam(near, at, self.is_form_eight_lam):
+        if not self.article(near, at):
             return None
         following = near.after(at)
         if following is None:
             return None
 
-        if following.letter not in SUN:
+        if following.letter not in self.sun:
             # Izhar of the lam: realized by the default; the occurrence names
             # it so a projection can find it.
             return Verdict(
@@ -87,42 +118,12 @@ class ArticleLam:
         )
 
 
-def is_article_lam(
-    near: Neighbourhood,
-    at: SlotId,
-    is_form_eight_lam: Callable[[str], bool] | None = None,
-) -> bool:
-    """A lam immediately after a wasl hamza, at the head of its word.
-
-    Asked of the Score, not of a glyph, so this holds in any script;
-    two shapes are excluded below.
-    """
-    word = near.word_of(at)
-    if word is None:
-        return False
-    slots = near.score.words[word].slots
-    for index, slot in enumerate(slots):
-        if slot.id != at:
-            continue
-        if index == 0:
-            return False
-        before = slots[index - 1]
-        if before.onset is Onset.WASL:
-            # The ordinary shape, wherever the word starts. Form VIII
-            # lam-initial verbs look identical -- `ٱلْتَقَى` vs `ٱلتَّوْبَة` --
-            # so a lexeme predicate is what tells them apart.
-            return not (
-                is_form_eight_lam is not None
-                and is_form_eight_lam(_skeleton(slots))
-            )
-        # `لِلنَّاسِ` has no hamza -- the lam proclitic swallows it. Only the
-        # lam does this, since لـ + ال alone collapses to لل.
-        return (
-            index == 1
-            and before.letter is L.LAM
-            and before.nucleus.kind is not NucleusKind.SILENT
-        )
-    return False
+def _is_ibdal_alif(slot) -> bool:
+    return (
+        slot.letter is L.HAMZA
+        and slot.nucleus.kind is NucleusKind.LONG
+        and slot.nucleus.quality is Quality.A
+    )
 
 
 def _skeleton(slots) -> str:

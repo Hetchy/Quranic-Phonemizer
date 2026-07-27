@@ -16,7 +16,7 @@ from ...rules.boundary import (
     WaslHamza,
 )
 from ...rules.idgham import Idgham
-from ...rules.lam_shamsiyyah import ArticleLam
+from ...rules.lam_shamsiyyah import ArticleLam, ArticleShape
 from ...rules.madd import IltiqaRepair, MaddClass, MaddLeen, PausalGlide
 from ...rules.meem_sakinah import GhunnahMushaddadah, MeemSakinah
 from ...rules.noon_sakinah import NoonSakinah
@@ -27,6 +27,10 @@ from .resources import lexicon, rule_tables
 
 def _build() -> RuleSet:
     tables = rule_tables()
+    article = ArticleShape(
+        prefixes=tables.proclitics,
+        is_form_eight_lam=lexicon().is_form_eight_lam,
+    )
     return RuleSet(
         {
             Phase.BOUNDARY: (
@@ -36,10 +40,11 @@ def _build() -> RuleSet:
             Phase.MERGE: (
                 NoonSakinah(followers=tables.followers_of_noon),
                 MeemSakinah(followers=tables.followers_of_meem),
-                ArticleLam(is_form_eight_lam=lexicon().is_form_eight_lam),
+                ArticleLam(sun=tables.sun_letters, article=article),
                 GhunnahMushaddadah(),
                 Idgham(pairs=tables.pairs,
-                       never_follows=tables.never_follows),
+                       never_follows=tables.never_follows,
+                       article=article),
             ),
             Phase.LENGTH: (
                 PausalGlide(), IltiqaRepair(), MaddClass(), MaddLeen(), Silah(),

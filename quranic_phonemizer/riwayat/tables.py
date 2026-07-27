@@ -10,7 +10,9 @@ from ..rules.tables import Followers, Pairs
 
 SCHEMA_VERSION = 1
 
-LETTER_SETS = ("never_follows", "qalqala", "always_heavy")
+LETTER_SETS = (
+    "never_follows", "qalqala", "always_heavy", "sun_letters", "proclitics",
+)
 FOLLOWER_SETS = ("followers_of_noon", "followers_of_meem")
 KEYS = {*LETTER_SETS, *FOLLOWER_SETS, "pairs"}
 
@@ -26,6 +28,8 @@ class RuleTables:
     never_follows: frozenset[CanonLetter]
     qalqala: frozenset[CanonLetter]
     always_heavy: frozenset[CanonLetter]
+    sun_letters: frozenset[CanonLetter]
+    proclitics: frozenset[CanonLetter]
     pairs: Pairs
 
 
@@ -53,6 +57,8 @@ def load_rule_tables(shared: Path, riwayah: Path | None = None) -> RuleTables:
         never_follows=never,
         qalqala=_letters(data["qalqala"], where),
         always_heavy=_letters(data["always_heavy"], where),
+        sun_letters=_letters(data["sun_letters"], where),
+        proclitics=_letters(data["proclitics"], where),
         pairs=Pairs(_pairs(data["pairs"], where)),
     )
 

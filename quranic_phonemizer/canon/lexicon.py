@@ -18,6 +18,7 @@ SCHEMA_VERSION = 1
 BUDGETS = {
     "wasl_particles": 10,
     "wasl_exempt": 60,
+    "wasl_exempt_doubled": 10,
     "pausal_lexemes": 10,
     "form_eight_lam": 10,
 }
@@ -43,6 +44,8 @@ class Lexicon:
     """`إن`, `إذ`, `إذا` - hamza-initial particles that look prosthetic."""
     wasl_exempt: frozenset[str] = frozenset()
     """Proper nouns and form-IV verbal nouns the three rules over-accept."""
+    wasl_exempt_doubled: frozenset[str] = frozenset()
+    """`ألَّف`, `إلَّم` - hamza plus a doubled lam that is not the article."""
     wasl_nouns: frozenset[str] = frozenset()
     """The ten nouns, whose helping vowel is kasra regardless of the third
     letter - `اسم` would otherwise derive damma."""
@@ -82,6 +85,9 @@ class Lexicon:
             if len(stem) >= _PREFIX_MIN and skeleton.startswith(stem):
                 return True
         return False
+
+    def is_wasl_exempt_doubled(self, skeleton: str) -> bool:
+        return self._matches(self.wasl_exempt_doubled, skeleton)
 
     def is_pausal(self, skeleton: str) -> bool:
         """Matched exactly, or after a single proclitic.

@@ -1,33 +1,26 @@
-"""Silah, and the polysemy of the small yaa mark.
+"""Silah, and the polysemy of the small madd letters.
 
-Ambiguous in both scripts: the silah vowel belongs to the pronoun haa;
-anywhere else the mark is an ordinary long vowel.
+Ambiguous in both scripts: the vowel is a silah when it belongs to the
+pronoun haa; anywhere else the mark is an ordinary long vowel.
 """
 from __future__ import annotations
 
 from ...model.canon import CanonLetter, Long, Quality, Silah
 from ...model.inscription import SlotFact
-from . import Context, Outcome, Sets, Shows, Target, register
+from . import Context, Outcome, Sets, register
 
 
-@register("silah_waw", requires=("shadda",))
+@register("silah_waw")
 def silah_waw(context: Context) -> Outcome:
-    """The waw side is unambiguous, but resolved the same way as `silah_ya`
-    so one rule covers both."""
     return _silah_or_long(context, Quality.U)
 
 
-@register("silah_ya", requires=("shadda",))
+@register("silah_ya")
 def silah_ya(context: Context) -> Outcome:
     return _silah_or_long(context, Quality.I)
 
 
 def _silah_or_long(context: Context, quality: Quality) -> Outcome:
-    if context.cluster.has("shadda"):
-        # A doubled yaa is a consonant with its own vowel; the small mark
-        # shows the reading rather than supplying a nucleus, and folding it
-        # to a long vowel would lose the gemination the script wrote.
-        return Shows(Target.HERE)
     if _is_pronoun_haa(context):
         return Sets(SlotFact.NUCLEUS, Silah(quality))
     return Sets(SlotFact.NUCLEUS, Long(quality))
