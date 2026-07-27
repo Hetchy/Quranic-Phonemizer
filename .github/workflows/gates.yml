@@ -40,7 +40,7 @@ jobs:
       - run: pip install -e .
       - name: cross-script parity, both modes
         run: |
-          python tools/floor.py cross word 99.975
+          python tools/floor.py cross word 99.987
           python tools/floor.py cross verse 99.963
 
   regression:
@@ -57,7 +57,7 @@ jobs:
       - run: pip install -e .
       - name: regression oracle, both modes
         run: |
-          python tools/floor.py regression word 99.906
+          python tools/floor.py regression word 99.910
           python tools/floor.py regression verse 97.652
 
   roundtrip:
@@ -96,4 +96,4 @@ jobs:
         with:
           python-version: "3.13"
       - run: pip install -e .
-      - run: python tools/floor.py l1 - 43
+      - run: python tools/floor.py l1 - 33

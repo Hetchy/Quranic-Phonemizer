@@ -5,9 +5,17 @@ at its own position, decided by the preceding nucleus, not the glyph.
 """
 from __future__ import annotations
 
-from ...model.canon import CanonLetter, Long, NucleusKind, PausalLong, Quality
+from ...model.canon import (
+    CanonLetter,
+    Long,
+    NucleusKind,
+    PausalLong,
+    Quality,
+    Silah,
+)
 from ...model.inscription import SlotFact
 from . import Absent, Context, Outcome, Sets, Shows, Target, register
+from .silah import carries_silah
 
 CARRIER_OF: dict[Quality, CanonLetter] = {
     Quality.A: CanonLetter.ALIF,
@@ -83,7 +91,10 @@ def carrier(context: Context) -> Outcome:
 
     if previous.kind is NucleusKind.SHORT:
         if letter is CARRIER_OF[previous.quality]:
-            return Sets(SlotFact.NUCLEUS, Long(previous.quality), Target.PREVIOUS)
+            # The pronoun haa's vowel is absent when the word is stopped on,
+            # so the carrier the rasm omits there spells a conditional length.
+            length = Silah if carries_silah(context) else Long
+            return Sets(SlotFact.NUCLEUS, length(previous.quality), Target.PREVIOUS)
         if (
             cluster.bare_rasm
             and context.word_final

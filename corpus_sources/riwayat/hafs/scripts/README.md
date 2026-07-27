@@ -33,6 +33,23 @@ and then validates the result against `surah_info.json`:
 
 After both, 6,236 of 6,236 ayahs match Uthmani word-for-word.
 
+### Three words corrected against the rest of the same file
+
+Each contradicts the same word spelled the other way elsewhere in `indopak/`,
+so the evidence for the correction is internal to the source and not a
+judgement about which script is right.
+
+| Ref | Was | Now | Evidence |
+|---|---|---|---|
+| 30:45:5 | `الصَّلِحٰتِ` | `الصّٰلِحٰتِ` | the shadda'd saad carries a fatha where the other **60** occurrences carry the superscript alef |
+| 20:71:18 | `وَّلَاُوصَلِّبَنَّكُمْ` | `وَّلَاُصَلِّبَنَّكُمْ` | a waw between the damma and the saad that 7:124:7 does not write |
+| 26:49:20 | `وَّلَاُوصَلِّبَنَّكُمْ` | `وَّلَاُصَلِّبَنَّكُمْ` | as above |
+
+**26:61:2 `تَرَاءَ` is left alone.** Uthmani writes the final alif and IndoPak
+does not, but `تَرَاءَا ٱلْجَمْعَانِ` meets a quiescent letter across the
+boundary, so the alif is elided by iltiqa al-sakinayn and never sounds. The
+spelling is the reading, not an omission.
+
 ### Why this pair is a useful adversary
 
 The two scripts disagree in ways that break any rule reading source glyphs

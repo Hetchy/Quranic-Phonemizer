@@ -281,7 +281,11 @@ def _rasm_outcome(context, cluster: Cluster, rows, track):
         return carried
     if cluster.has(*_VOWEL_ROLES):
         return None
-    if lexeme.otiose_waw(context) or lexeme.otiose_alif(context):
+    if (
+        lexeme.hamza_seat(context)
+        or lexeme.otiose_waw(context)
+        or lexeme.otiose_alif(context)
+    ):
         return Absent()
     if cluster.letter not in _length.CARRIERS:
         return None

@@ -29,6 +29,9 @@ SITES = [
     ((12, 87, 14), "jajʔas", "the alif inside a leen, marked only by Uthmani"),
     ((22, 72, 23), "ʔaña:rˤ", "IndoPak writes the article's helping vowel"),
     ((12, 101, 14), "walijji:", "a small yaa on a doubled yaa is its vowel"),
+    ((46, 33, 15), "juħji:", "a small yaa that is a consonant, not a length"),
+    ((56, 23, 2), "ʔalluʔluʔ", "IndoPak writes the hamza's seat out"),
+    ((35, 43, 5), "ʔassajjiʔ", "the seat is a maqsura, and silent"),
 ]
 
 
@@ -47,13 +50,14 @@ def test_both_scripts_read_the_same_word(
     assert got[Script.INDOPAK] == reading, difference
 
 
-def _phonemes(sources, script, surah, ayah, shared, alphabet):
+def _phonemes(sources, script, surah, ayah, shared, alphabet,
+              junction=Junction.STOP):
     words = sources[script][(surah, ayah)]
     score = build(
         script_adapter(script).read(VerseRef(surah, ayah), words), **shared
     ).score
     plan = BoundaryPlan(
-        (Junction.STOP,) * (len(score.words) - 1) + (Junction.EDGE,)
+        (junction,) * (len(score.words) - 1) + (Junction.EDGE,)
     )
     performance = perform(score, HAFS, plan)
     return [list(w) for w in phonemes_by_word(performance, score, alphabet)]
@@ -66,3 +70,21 @@ def test_a_stem_writes_the_same_pair_of_lams_as_the_article(
     writes in `لِلنَّاسِ`. Only the head of the word tells them apart."""
     got = _phonemes(sources, Script.UTHMANI, 2, 209, shared, alphabet)
     assert "".join(got[1]) == "zalaltum"
+
+
+def test_the_silah_is_still_conditional(sources, shared, alphabet) -> None:
+    """The pronoun haa's vowel is a `Silah`, not a `Long`: it sounds joined
+    and is absent at a stop. The small waw is a letter now, and that must
+    not have turned it into an ordinary length."""
+    for script in Script:
+        joined = _phonemes(
+            sources, script, 2, 26, shared, alphabet, Junction.JOIN
+        )
+        assert "".join(joined[29]) == "bihi:", script
+    stopped = {
+        script: "".join(
+            _phonemes(sources, script, 2, 26, shared, alphabet)[29]
+        )
+        for script in Script
+    }
+    assert stopped[Script.UTHMANI] == stopped[Script.INDOPAK] == "bih"

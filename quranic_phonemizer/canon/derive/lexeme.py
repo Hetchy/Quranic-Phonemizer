@@ -82,6 +82,24 @@ def otiose_waw(context: Context) -> bool:
 #: The two letters that carry a leen with a preceding fatha.
 LEEN_CARRIERS = (CanonLetter.YA, CanonLetter.WAW)
 
+#: The letters a hamza may be seated on.
+SEATS = (CanonLetter.ALIF, CanonLetter.WAW, CanonLetter.YA)
+
+
+def hamza_seat(context: Context) -> bool:
+    """`ٱللُّؤْلُؤِ`, `ٱلسَّيِّئِ` - the letter a hamza sits on, which spells
+    no sound of its own. A script that precomposes the seat never gets here;
+    one that writes it out leaves it bare, since it marks what it sounds."""
+    cluster = context.cluster
+    following = context.ahead()
+    return (
+        cluster.marked_script
+        and cluster.letter in SEATS
+        and not cluster.marks
+        and following is not None
+        and following.letter is CanonLetter.HAMZA
+    )
+
 
 def alif_in_leen(context: Context) -> bool:
     """`تَا۟يْـَٔسُوا۟` - a bare alif inside a leen, which needs neither a

@@ -41,6 +41,15 @@ _SECTIONS = {
 }
 
 
+#: Derivations `canon.build` names itself, for every script.
+ALWAYS_RUN = frozenset({"carrier", "hamzat_wasl", "wasl_helping_vowel"})
+
+#: Roles one script spells and another has no mark for. `ٖ` writes a kasra
+#: and its yaa together where Uthmani writes the two separately, so only
+#: IndoPak can declare it.
+SCRIPT_OPTIONAL = frozenset({"silah_waw", "silah_ya", "small_waw", "small_ya"})
+
+
 class InventoryError(ValueError):
     """Names the scalar and the file. Never a sentinel."""
 
@@ -71,6 +80,10 @@ class MarkEntry:
     silences: bool = False
     """The mark declares its host to be rasm (Uthmani's `۟`); an annotation
     that merely points at a live letter must not set this."""
+    omitted: bool = False
+    """A letter of the reading the rasm leaves out, written small: Uthmani's
+    `ۥ ۦ ۧ ۨ`. It is a letter, so it takes a position of its own rather than
+    saying something about the one before it."""
     advice: StopAdvice | None = None
     structural: bool = False
     polysemous: tuple[str, ...] = ()
@@ -166,7 +179,7 @@ def load_inventory(
     path: Path,
     *,
     derivations: frozenset[str] | None = None,
-    roles: frozenset[str] | None = None,
+    roles: dict[str, frozenset[str]] | None = None,
 ) -> Inventory:
     data = load_yaml(path)
     require_keys(
@@ -236,12 +249,15 @@ def _check_contract(path, letters, marks, derivations, roles) -> None:
             )
     if roles is not None:
         declared = {entry.role for entry in marks.values() if entry.role}
-        missing = sorted(roles - declared)
+        needed: set[str] = set()
+        for derivation in named | ALWAYS_RUN:
+            needed |= roles.get(derivation, frozenset())
+        missing = sorted(needed - declared - SCRIPT_OPTIONAL)
         if missing:
             raise InventoryError(
-                f"{path}: declares no mark with role(s) {missing}, which a "
-                f"registered derivation reads. A role no inventory declares "
-                f"is silently absent, never an error at use -- so it is one "
+                f"{path}: names a derivation reading role(s) {missing} and "
+                f"declares no mark with them. A role nothing declares is "
+                f"silently absent, never an error at use -- so it is one "
                 f"here. Declared: {sorted(declared)}"
             )
 
@@ -271,7 +287,7 @@ def _load_evidences(data: Any, path: Path, marks: dict[str, MarkEntry]) -> None:
             spec,
             {"fact", "cls"},
             name=where,
-            optional={"value", "derivation", "role"},
+            optional={"value", "derivation", "role", "omitted"},
         )
         fact = _member(SlotFact, spec["fact"], where=where)
         has_value, has_derivation = "value" in spec, "derivation" in spec
@@ -287,6 +303,7 @@ def _load_evidences(data: Any, path: Path, marks: dict[str, MarkEntry]) -> None:
             fact=fact,
             value=_fact_value(fact, spec["value"], where=where) if has_value else None,
             derivation=str(spec["derivation"]) if has_derivation else None,
+            omitted=bool(spec.get("omitted", False)),
         )
 
 
@@ -340,6 +357,7 @@ def _load_polysemous(data: Any, path: Path, marks: dict[str, MarkEntry]) -> None
             derivation=base.derivation,
             decorates=base.decorates,
             silences=base.silences,
+            omitted=base.omitted,
             advice=base.advice,
             structural=base.structural,
             polysemous=tuple(str(s) for s in senses),

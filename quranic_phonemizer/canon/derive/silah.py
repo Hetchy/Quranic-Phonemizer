@@ -28,3 +28,13 @@ def _silah_or_long(context: Context, quality: Quality) -> Outcome:
 
 def _is_pronoun_haa(context: Context) -> bool:
     return context.cluster.letter is CanonLetter.HEH and context.word_final
+
+
+def carries_silah(context: Context) -> bool:
+    """The same question asked of the letter that carries the vowel rather
+    than of the haa: a script that writes the waw out reaches here instead."""
+    return (
+        context.cluster.omitted
+        and context.previous_letter is CanonLetter.HEH
+        and context.word_final
+    )

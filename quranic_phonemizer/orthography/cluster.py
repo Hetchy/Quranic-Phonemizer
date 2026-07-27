@@ -103,6 +103,9 @@ class _ReadState:
         if char in self.inventory.seats:
             self._seat(char, offset)
             return
+        if entry.omitted:
+            self._omitted_letter(char, offset, entry)
+            return
         if not self.clusters or len(self.clusters) <= self._word_start:
             raise InventoryError(
                 f"{self.verse}: U+{ord(char):04X} {char!r} opens a word; a "
@@ -130,6 +133,39 @@ class _ReadState:
                     offset=offset,
                 )
             )
+
+    def _omitted_letter(self, char: str, offset: int, entry: MarkEntry) -> None:
+        """A letter of the reading the rasm leaves out, written small.
+
+        It takes the position before it if that one has no letter of its own
+        -- Uthmani draws `ۧ` on a seat -- and a position of its own otherwise.
+        """
+        self._grapheme(char, offset, entry.cls)
+        held = self.clusters[-1] if self.clusters else None
+        if (
+            held is None
+            or held.letter is not None
+            or len(self.clusters) <= self._word_start
+        ):
+            self.clusters.append(
+                Cluster(
+                    base=char,
+                    offset=offset,
+                    word=self.word_index,
+                    index=self.letter_index,
+                    marked_script=self.inventory.marks_what_it_sounds,
+                )
+            )
+            self.letter_index += 1
+        index = len(self.clusters) - 1
+        self.clusters[index].letter = entry.value
+        self.clusters[index].omitted = True
+        self.clusters[index].dagger_host = False
+        self.clusters[index].marks.append(_mark_of(char, offset, entry))
+        self.decorations = [d for d in self.decorations if d.cluster != index]
+        self.evidence.append(
+            Evidence(index, SlotFact.LETTER, value=entry.value, offset=offset)
+        )
 
     def _seat(self, char: str, offset: int) -> None:
         """A base position with no letter identity: it can host a hamza or a

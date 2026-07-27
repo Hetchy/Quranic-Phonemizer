@@ -49,6 +49,8 @@ class Cluster:
     """Bare and word-final, the glyph stands for an unwritten alif."""
     marked_script: bool = False
     """This script marks every letter it sounds, so no mark at all is rasm."""
+    omitted: bool = False
+    """A letter of the reading the rasm leaves out, written small."""
 
     def mark(self, role: str) -> Mark | None:
         for mark in self.marks:

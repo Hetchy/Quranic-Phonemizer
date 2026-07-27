@@ -128,9 +128,13 @@ def register(
     return decorate
 
 
-def required_roles() -> frozenset[str]:
-    """Every role any registered derivation reads."""
-    return frozenset().union(*_REQUIRED_ROLES.values()) if _REQUIRED_ROLES else frozenset()
+def required_roles() -> dict[str, frozenset[str]]:
+    """Which roles each registered derivation reads.
+
+    Per derivation, not a union: a mark one script writes and another does
+    not carries a role only the first can declare.
+    """
+    return dict(_REQUIRED_ROLES)
 
 
 def resolve(name: str, context: Context) -> Outcome:

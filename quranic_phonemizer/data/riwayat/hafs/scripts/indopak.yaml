@@ -71,11 +71,12 @@ evidences:
        derivation: silah_waw}
   "ٖ": {fact: NUCLEUS, cls: small_vowel, role: silah_ya,
        derivation: silah_ya}
-  "ۦ": {fact: NUCLEUS, cls: small_vowel, role: silah_ya,
-       derivation: silah_ya}
+  # A yaa the rasm leaves out, written small. `ٖ` above is not the same mark:
+  # it spells the kasra and its yaa together, so it stays a nucleus.
+  "ۦ": {fact: LETTER, cls: base, role: small_ya, value: YA, omitted: true}
   "ࣙ": {fact: LETTER, cls: base, role: cross_word_noon,
        derivation: cross_word_noon}   # a noon drawn on the NEXT word
-  "ۨ": {fact: LETTER, cls: base, role: mini_noon, value: NOON}
+  "ۨ": {fact: LETTER, cls: base, role: mini_noon, value: NOON, omitted: true}
   "ۜ": {fact: LETTER, cls: annotation, role: seen_over, value: SEEN}
 
 decorates:

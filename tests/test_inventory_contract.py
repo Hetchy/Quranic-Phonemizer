@@ -56,10 +56,13 @@ def test_an_unregistered_derivation_is_a_load_error(tmp_path):
 
 
 def test_a_script_specific_role_is_not_required_of_every_script(tmp_path):
-    """`cross_word_noon` is IndoPak's convention. Requiring it globally would
-    reject Uthmani for not writing something Uthmani does not write."""
-    assert "cross_word_noon" not in derive.required_roles()
+    """`cross_word_noon` is IndoPak's convention and `small_ya` is Uthmani's.
+    Requiring either globally rejects a script for not writing something it
+    does not write, so the contract is checked per named derivation."""
+    read = derive.required_roles()
+    assert "cross_word_noon" not in read.get("carrier", frozenset())
     _load(tmp_path, _inventory_text("uthmani"))
+    _load(tmp_path, _inventory_text("indopak"))
 
 
 def test_the_registry_is_complete_without_importing_the_builder():

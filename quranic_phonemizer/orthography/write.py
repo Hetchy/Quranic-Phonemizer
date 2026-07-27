@@ -20,6 +20,12 @@ _BASE = {Quality.IMALA: Quality.A}
 
 #: The mark that says a carrier lengthens the vowel before it.
 MADD = "madd"
+
+#: How each script spells the pronoun haa's conditional vowel.
+_SILAH_ROLES = {
+    Quality.U: ("silah_waw", "small_waw"),
+    Quality.I: ("silah_ya", "small_ya"),
+}
 _CARRIER = {
     Quality.A: CanonLetter.ALIF,
     Quality.U: CanonLetter.WAW,
@@ -134,7 +140,12 @@ def _nucleus(slot, pen: Pen) -> str:
                 + pen.roles.get(MADD, "")
             )
         case NucleusKind.SILAH:
-            return pen.role("silah_waw" if quality is Quality.U else "silah_ya")
+            # One script spells the pronoun's vowel and its carrier in a
+            # single mark; the other writes the vowel and then the carrier.
+            composite, carrier = _SILAH_ROLES[quality]
+            if composite in pen.roles:
+                return pen.role(composite)
+            return pen.role(_short_role(quality)) + pen.role(carrier)
     raise WriteError(f"no spelling for nucleus kind {nucleus.kind.value}")
 
 
