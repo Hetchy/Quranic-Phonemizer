@@ -10,6 +10,15 @@ from ..model.inscription import Grapheme, GraphemeClass, SlotFact, StopAdvice
 from .adapter import Attestation, Cluster, Decoration, Evidence, Reading
 from .inventory import Inventory, InventoryError, LetterEntry, MarkEntry
 
+#: The small alif, which is a hamza's rest as readily as a seat is.
+DAGGER = "dagger"
+
+#: What a hamza may be written on. `None` is a bare seat; the three carriers
+#: spell no sound of their own when they hold one.
+SEATABLE = frozenset(
+    {None, CanonLetter.ALIF, CanonLetter.WAW, CanonLetter.YA}
+)
+
 
 def read_verse(
     inventory: Inventory,
@@ -116,7 +125,12 @@ class _ReadState:
         self.clusters[index].marks.append(_mark_of(char, offset, entry))
 
         if char in self.inventory.combining_hamza:
-            self._fold_to_hamza(index, offset)
+            if self.clusters[index].letter in SEATABLE:
+                self._fold_to_hamza(index, offset)
+            else:
+                self.clusters[index].marks.pop()
+                self._release_dagger_seat(index)
+                self._omitted_letter(char, offset, entry)
             return
         if entry.decorates is not None:
             self.decorations.append(
@@ -133,6 +147,18 @@ class _ReadState:
                     offset=offset,
                 )
             )
+
+    def _release_dagger_seat(self, index: int) -> None:
+        """A hamza drawn on a small alif rather than on a letter: the alif is
+        its rest, so it lengthens nothing. 2:72 `فَٱدَّٰرَٰٔتُمْ`."""
+        marks = self.clusters[index].marks
+        if not marks or marks[-1].role != DAGGER:
+            return
+        seat = marks.pop()
+        self.evidence = [
+            e for e in self.evidence
+            if not (e.cluster == index and e.offset == seat.offset)
+        ]
 
     def _omitted_letter(self, char: str, offset: int, entry: MarkEntry) -> None:
         """A letter of the reading the rasm leaves out, written small.

@@ -82,6 +82,10 @@ def carrier(context: Context) -> Outcome:
     cluster = context.cluster
     letter = cluster.letter
     previous = context.previous_nucleus
+    if context.word_initial:
+        # The slot before it belongs to another word, and no carrier reaches
+        # across a boundary to lengthen one.
+        return Sets(SlotFact.LETTER, letter) if letter else Absent()
     if letter is None or letter not in CARRIERS or previous is None:
         return Sets(SlotFact.LETTER, letter) if letter else Absent()
     if letter is CanonLetter.ALIF and cluster.has("sukun"):

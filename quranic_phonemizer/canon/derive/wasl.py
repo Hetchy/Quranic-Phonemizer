@@ -53,6 +53,8 @@ def is_wasl(context: Context) -> bool:
     cluster = context.cluster
     if cluster.letter not in (CanonLetter.ALIF, CanonLetter.HAMZA):
         return False
+    if cluster.has("sukun"):
+        return False  # a prosthetic hamza exists to be started on
     if cluster.has("dagger", "combining_hamza", "shadda", "madd"):
         # Madd badal, a seated hamza, or the ibdal alif that replaces the
         # article's hamza after an interrogative one in `ءَآلذَّكَرَيْنِ`.

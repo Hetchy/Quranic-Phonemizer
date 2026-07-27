@@ -174,6 +174,7 @@ def _drafts(
         extra = _apply_rows(rows, draft, drafts, context, track, scribe,
                             cluster.offset)
         _apply_wasl(context, cluster, draft, track)
+        _apply_tashil(draft)
         drafts.append(draft)
         if extra is not None:
             drafts.append(extra)
@@ -261,6 +262,13 @@ def _apply_wasl(context, cluster: Cluster, draft: _Draft, track) -> None:
             helping_vowel()
     else:
         draft.letter = CanonLetter.HAMZA  # a non-carrier ālif is a hamza seat
+
+
+def _apply_tashil(draft: _Draft) -> None:
+    """A facilitated hamza is voweled: the alif the mark is written on stands
+    for a hamza with fatha, and the mark says how to say it, not whether."""
+    if draft.onset is Onset.TASHIL and not draft.nucleus_declared:
+        draft.nucleus = Short(Quality.A)
 
 
 def _rasm_outcome(context, cluster: Cluster, rows, track):

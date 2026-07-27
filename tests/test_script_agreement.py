@@ -32,6 +32,10 @@ SITES = [
     ((46, 33, 15), "juħji:", "a small yaa that is a consonant, not a length"),
     ((56, 23, 2), "ʔalluʔluʔ", "IndoPak writes the hamza's seat out"),
     ((35, 43, 5), "ʔassajjiʔ", "the seat is a maqsura, and silent"),
+    ((2, 72, 4), "fadda:rˤaˤʔtum", "a hamza drawn on a small alif, not on the raa"),
+    ((41, 44, 9), "ʔaʔaʕʒamijj", "the facilitated hamza is voweled"),
+    ((18, 16, 7), "faʔwu:", "a prosthetic hamza never carries a sukun"),
+    ((49, 11, 29), "biʔs", "a carrier does not lengthen across a word boundary"),
 ]
 
 
