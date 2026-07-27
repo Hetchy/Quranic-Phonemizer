@@ -25,6 +25,7 @@ HARNESS = {
     "cross": ("cross_parity.py", "words agree across scripts"),
     "regression": ("parity.py", "words match"),
     "l1": ("l1_harness.py", "L1 residue"),
+    "roundtrip": ("roundtrip.py", "verses round-trip"),
 }
 
 
@@ -40,7 +41,7 @@ def main(argv: list[str]) -> int:
 
     command = [sys.executable, str(ROOT / "tools" / script), "--show", "0"]
     if mode != "-":
-        command += ["--mode", mode]
+        command += ["--mode", mode] if gate != "roundtrip" else ["--script", mode]
     result = subprocess.run(command, capture_output=True, text=True, cwd=ROOT)
     output = result.stdout + result.stderr
     print(output)
