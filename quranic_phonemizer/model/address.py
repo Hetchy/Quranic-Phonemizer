@@ -126,6 +126,8 @@ class KhilafId(StrEnum):
     SEEN_SAD = "seen_sad"
     IQLAB_NASAL = "iqlab_nasal"
     IKHFAA_SHAFAWI_NASAL = "ikhfaa_shafawi_nasal"
+    RAA_TAFKHEEM = "raa_tafkheem"
+    NUCLEUS_VOWEL = "nucleus_vowel"
 
 
 @dataclass(frozen=True, slots=True)
@@ -134,6 +136,9 @@ class Option:
 
     khilaf: KhilafId
     name: str
+    site: str = ""
+    """One word of a khilaf that recurs word by word, named by its canonical
+    letters. Empty means every site of the point."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -142,8 +147,11 @@ class VariantSelection:
 
     options: tuple[Option, ...] = ()
 
-    def chosen(self, khilaf: KhilafId) -> str | None:
-        for option in self.options:
-            if option.khilaf is khilaf:
-                return option.name
+    def chosen(self, khilaf: KhilafId, site: str = "") -> str | None:
+        """A choice made for this site outranks one made for the whole point,
+        so a reader can take one wajh throughout and another in one word."""
+        for scope in (site, "") if site else ("",):
+            for option in self.options:
+                if option.khilaf is khilaf and option.site == scope:
+                    return option.name
         return None

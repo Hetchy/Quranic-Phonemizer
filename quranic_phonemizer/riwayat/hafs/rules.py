@@ -21,12 +21,13 @@ from ...rules.madd import IltiqaRepair, MaddClass, MaddLeen, PausalGlide
 from ...rules.meem_sakinah import GhunnahMushaddadah, MeemSakinah
 from ...rules.noon_sakinah import NoonSakinah
 from ...rules.qalqala import Qalqala
-from ...rules.tafkheem import Emphasis
-from .resources import lexicon, rule_tables
+from ...rules.tafkheem import Emphasis, Weight
+from .resources import khilaf, lexicon, rule_tables
 
 
 def _build() -> RuleSet:
     tables = rule_tables()
+    weight = Weight(always_heavy=tables.always_heavy, raa=khilaf().raa)
     article = ArticleShape(
         prefixes=tables.proclitics,
         is_form_eight_lam=lexicon().is_form_eight_lam,
@@ -50,8 +51,8 @@ def _build() -> RuleSet:
                 PausalGlide(), IltiqaRepair(), MaddClass(), MaddLeen(), Silah(),
             ),
             Phase.COLOUR: (
-                Emphasis(always_heavy=tables.always_heavy),
-                Tarqeeq(always_heavy=tables.always_heavy),
+                Emphasis(weight=weight),
+                Tarqeeq(weight=weight),
                 CanonicalColour(),
             ),
             Phase.RELEASE: (Qalqala(letters=tables.qalqala),),

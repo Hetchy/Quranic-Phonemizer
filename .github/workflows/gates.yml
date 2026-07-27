@@ -40,12 +40,14 @@ jobs:
       - run: pip install -e .
       - name: cross-script parity, both modes
         run: |
-          python tools/floor.py cross word 99.972
-          python tools/floor.py cross verse 99.959
+          python tools/floor.py cross word 99.975
+          python tools/floor.py cross verse 99.963
 
   regression:
     # Not a target. The oracle is the previous implementation with its defects
-    # frozen in, so this is a change detector.
+    # frozen in, so this is a change detector and its floor may fall when the
+    # oracle is the one that is wrong -- 12 disputed raa now read as
+    # docs/hafs/research/tafkheem_tarqeeq.md says and the oracle does not.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -55,8 +57,8 @@ jobs:
       - run: pip install -e .
       - name: regression oracle, both modes
         run: |
-          python tools/floor.py regression word 99.919
-          python tools/floor.py regression verse 97.653
+          python tools/floor.py regression word 99.906
+          python tools/floor.py regression verse 97.652
 
   roundtrip:
     # Every Score can be spelled and spells back to itself. The floor is the
@@ -94,4 +96,4 @@ jobs:
         with:
           python-version: "3.13"
       - run: pip install -e .
-      - run: python tools/floor.py l1 - 46
+      - run: python tools/floor.py l1 - 43

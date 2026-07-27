@@ -28,12 +28,13 @@ def word_of(reading: Reading, draft) -> int:
     return reading.clusters[draft.cluster].word if draft.cluster >= 0 else -1
 
 #: A pass over the drafted slots of a whole verse, after every per-cluster
-#: derivation has run. `(reading, drafts, lexicon, scribe) -> None`.
+#: derivation has run. `(reading, drafts, lexicon, scribe, selection) -> None`.
 #:
 #: The scribe is in the signature because a pass may *create* slots -- spelling
 #: `الٓمٓصٓ` turns three into seven -- and every slot must trace to a grapheme.
-#: A pass that only mutates existing slots can ignore it.
-LexemePass: TypeAlias = Callable[[Reading, list, object, object], None]
+#: The selection is, because a khilaf can put a different vowel in the Score.
+#: A pass that needs neither can ignore them.
+LexemePass: TypeAlias = Callable[[Reading, list, object, object, object], None]
 
 
 def apply_ledger(reading: Reading, drafts, ledger: Ledger, track) -> None:
@@ -92,7 +93,9 @@ def _check_skeleton(reading: Reading, drafts, ordinal: int, supply) -> None:
         )
 
 
-def _apply_allah_lexeme(reading: Reading, drafts, lexicon=None, scribe=None) -> None:
+def _apply_allah_lexeme(
+    reading: Reading, drafts, lexicon=None, scribe=None, selection=None
+) -> None:
     """Word by word, not verse by verse: the lexeme is a property of one word.
 
     Run over the whole verse instead, a word ending in lam or hamza would
@@ -111,7 +114,7 @@ def _apply_allah_lexeme(reading: Reading, drafts, lexicon=None, scribe=None) -> 
 
 
 def _apply_pausal_lexemes(
-    reading: Reading, drafts, lexicon: Lexicon, scribe=None
+    reading: Reading, drafts, lexicon: Lexicon, scribe=None, selection=None
 ) -> None:
     """The seven alifs. Uthmani marks them `۠`; IndoPak writes a plain final
     alif, indistinguishable from an ordinary length carrier - so the fact is
@@ -122,11 +125,11 @@ def _apply_pausal_lexemes(
         span = [d for d in drafts if word_of(reading, d) == word_index]
         if not span:
             continue
-        if lexicon.is_pausal(_vocalised(span)):
+        if lexicon.is_pausal(vocalised(span)):
             span[-1].nucleus = PausalLong(Quality.A)
 
 
-def _vocalised(span) -> str:
+def vocalised(span) -> str:
     """A skeleton that also spells its vowels.
 
     Plain letters are not enough: `أَنَا` and `إِنَّا` share the letters ء-ن,

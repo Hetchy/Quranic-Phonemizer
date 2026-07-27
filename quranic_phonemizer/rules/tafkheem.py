@@ -11,6 +11,7 @@ from ..engine.plan import Plan, Recolour, SoundFeature, Verdict, mint
 from ..model.address import BoundaryPlan, SlotId
 from ..model.canon import CanonLetter as L
 from ..model.canon import (
+    ABJAD,
     Annotation,
     CanonLetter,
     NucleusKind,
@@ -20,6 +21,7 @@ from ..model.canon import (
     Rule,
 )
 from ..model.performance import Aspect, Occurrence, Participants
+from .khilaf import RaaKhilaf
 
 #: Raa and the lam of the divine name are heavy only under the conditions
 #: below, so they trigger the rule without belonging to any heavy set.
@@ -30,26 +32,57 @@ MAX_LOOKBACK = 3
 
 
 @dataclass(frozen=True, slots=True)
+class Weight:
+    """Which sounds are heavy. Held by both rules that ask, so the question
+    is stated once and the two cannot drift apart."""
+
+    always_heavy: frozenset[CanonLetter] = frozenset()
+    raa: RaaKhilaf = field(default_factory=RaaKhilaf)
+
+    def is_heavy(self, near, slot, plan, boundaries) -> bool:
+        if slot.letter in self.always_heavy:
+            return True
+        if slot.letter is L.RA:
+            return self._raa(near, slot, plan, boundaries)
+        if slot.letter is L.LAM:
+            return _is_divine_lam(near, slot, plan)
+        return False
+
+    def _raa(self, near, slot, plan, boundaries) -> bool:
+        own = None if _silenced(plan, slot) else _quality(slot)
+        if own is not None:
+            return own in (Quality.A, Quality.U)
+        word = near.word_of(slot.id)
+        disputed = None if word is None else self.raa.weight(
+            _vocalised(near.score.words[word]),
+            boundaries.stopped_on(word),
+            near.score.selection,
+        )
+        if disputed is not None:
+            return disputed
+        return _raa_is_heavy(near, slot, plan, self.always_heavy)
+
+
+@dataclass(frozen=True, slots=True)
 class Emphasis:
-    always_heavy: frozenset[CanonLetter]
+    weight: Weight = field(default_factory=Weight)
     rule: Rule = Rule.TAFKHEEM
     phase: Phase = Phase.COLOUR
     triggers: frozenset = field(default=frozenset())
 
     def __post_init__(self) -> None:
         object.__setattr__(
-            self, "triggers", frozenset(self.always_heavy | CONDITIONAL)
+            self, "triggers", frozenset(self.weight.always_heavy | CONDITIONAL)
         )
 
     def look(
         self, near: Neighbourhood, plan: Plan, at: SlotId,
         boundaries: BoundaryPlan,
     ) -> Verdict | None:
-        del boundaries
         slot = near.slot(at)
         if slot is None:
             return None
-        if not is_heavy(near, slot, plan, self.always_heavy):
+        if not self.weight.is_heavy(near, slot, plan, boundaries):
             return None
         effects = [Recolour(at, Aspect.ONSET, SoundFeature.EMPHATIC, True)]
         if _quality(slot) is Quality.A and not _silenced(plan, slot):
@@ -63,28 +96,22 @@ class Emphasis:
         )
 
 
-def is_heavy(
-    near: Neighbourhood, slot, plan, always_heavy: frozenset[CanonLetter]
-) -> bool:
-    """Shared with rules/annotation.py::Tarqeeq, which asks the same question
-    the other way round."""
-    return slot.letter in always_heavy or _conditionally_heavy(
-        near, slot, plan, always_heavy
-    )
-
-
-def _conditionally_heavy(near, slot, plan, always_heavy) -> bool:
-    if slot.letter is L.RA:
-        return _raa_is_heavy(near, slot, plan, always_heavy)
-    if slot.letter is L.LAM:
-        return _is_divine_lam(near, slot, plan)
-    return False
+def _vocalised(word) -> str:
+    """The word as a khilaf names its sites: letters and their vowels. Read
+    from the Score, so a vowel a stop removes is still in the key."""
+    out = []
+    for slot in word.slots:
+        quality = _quality(slot)
+        out.append(
+            ABJAD[slot.letter.value]
+            + ("~" if slot.onset is Onset.GEMINATE else "")
+            + (quality.value if quality else "")
+        )
+    return "".join(out)
 
 
 def _raa_is_heavy(near, slot, plan, always_heavy) -> bool:
-    own = None if _silenced(plan, slot) else _quality(slot)
-    if own is not None:
-        return own in (Quality.A, Quality.U)
+    """The quiescent raa, whose vowel is gone or was never there."""
     before = _before(near, slot)
     if (
         before is not None

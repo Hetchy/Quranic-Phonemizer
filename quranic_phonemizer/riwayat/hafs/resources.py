@@ -17,6 +17,7 @@ from ...canon.lexicon import Lexicon, load_lexicon
 from ...canon.spell import Muqattaat, load_muqattaat
 from ...corpus import PackedCorpus, load_corpus
 from ...model.address import Location, Riwayah, Script, VerseRef
+from ..khilaf import Khilaf, load_khilaf
 from ..tables import RuleTables, load_rule_tables
 from ...orthography.adapter import Reading
 from ...orthography.cluster import read_verse
@@ -80,6 +81,11 @@ def rule_tables() -> RuleTables:
     return load_rule_tables(shared, DATA / "rules.yaml")
 
 
+def khilaf() -> Khilaf:
+    """Where this riwayah disagrees with itself, and by default how."""
+    return load_khilaf(DATA / "khilaf.yaml")
+
+
 def muqattaat() -> Muqattaat:
     """Shared across riwayat: which openings are named, and what each letter is
     called, are facts about Arabic."""
@@ -92,10 +98,15 @@ def lexeme_passes() -> tuple:
     `canon` supplies the shared two; spelling the muqattaat needs the
     opening and letter-name tables, so it is bound here instead.
     """
+    from ...canon.khilaf import apply_vowel_khilaf
     from ...canon.passes import LEXEME_PASSES
     from ...canon.spell import spell_muqattaat
 
-    return (*LEXEME_PASSES, spell_muqattaat(muqattaat()))
+    return (
+        *LEXEME_PASSES,
+        spell_muqattaat(muqattaat()),
+        apply_vowel_khilaf(khilaf().vowel),
+    )
 
 
 def corpus() -> PackedCorpus:

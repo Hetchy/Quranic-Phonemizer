@@ -47,15 +47,16 @@ def dagger(context: Context) -> Outcome:
     """
     cluster = context.cluster
     previous = context.previous_nucleus
-    carries_for_previous = (
-        cluster.dagger_host
-        and not cluster.has(*VOWEL_ROLES)
-        and previous is not None
-        and previous.kind is NucleusKind.SHORT
-        and previous.quality is Quality.A
-    )
-    if carries_for_previous:
+    if not (cluster.dagger_host and not cluster.has(*VOWEL_ROLES)):
+        return Sets(SlotFact.NUCLEUS, Long(Quality.A))
+    if previous is None:
+        return Sets(SlotFact.NUCLEUS, Long(Quality.A))
+    if previous.kind is NucleusKind.SHORT and previous.quality is Quality.A:
         return Sets(SlotFact.NUCLEUS, Long(Quality.A), Target.PREVIOUS)
+    if previous.kind in LONG_KINDS:
+        # The rasm carrier of a length already written: `مَجْر۪ىٰهَا` puts the
+        # imala on the raa and draws the yaa that carries it.
+        return Absent()
     return Sets(SlotFact.NUCLEUS, Long(Quality.A))
 
 

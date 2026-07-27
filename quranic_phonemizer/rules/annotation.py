@@ -20,6 +20,7 @@ from ..model.canon import (
     Rule,
 )
 from ..model.performance import Occurrence, Participants
+from .tafkheem import Weight
 
 
 def _classification(rule: Rule, at: SlotId, *others: SlotId) -> Verdict:
@@ -113,7 +114,7 @@ class Tarqeeq:
     Scoped to raa -- the lam's light case would fire on every lam in the text.
     """
 
-    always_heavy: frozenset[CanonLetter]
+    weight: Weight = field(default_factory=Weight)
     rule: Rule = Rule.TARQEEQ
     phase: Phase = Phase.COLOUR
     triggers: frozenset = field(default=frozenset({L.RA}))
@@ -122,12 +123,9 @@ class Tarqeeq:
         self, near: Neighbourhood, plan: Plan, at: SlotId,
         boundaries: BoundaryPlan,
     ) -> Verdict | None:
-        del boundaries
-        from .tafkheem import is_heavy
-
         slot = near.slot(at)
         if slot is None or slot.letter is not L.RA:
             return None
-        if is_heavy(near, slot, plan, self.always_heavy):
+        if self.weight.is_heavy(near, slot, plan, boundaries):
             return None
         return _classification(Rule.TARQEEQ, at)
