@@ -1,0 +1,67 @@
+# The two gates, and the suite. None of them ran automatically before this:
+# `pytest` appeared in no workflow, and both parity harnesses were scripts
+# somebody remembered to run by hand.
+#
+# The thresholds are floors that may only rise. That is deliberate — the
+# residues are real and named in docs/adr/, so requiring zero would mean a red
+# build with nothing to do about it, and requiring nothing would mean a
+# regression lands silently. A floor catches the regression and lets the
+# remaining work be finished on purpose.
+name: gates
+
+on:
+  push:
+    branches: [main, "riwayah/**"]
+  pull_request:
+
+jobs:
+  suite:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: pip install -e . pytest
+      - run: python -m pytest tests/ -q
+
+  cross-script:
+    # The claim the rebuild is named for: two scripts, same phonemes.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: pip install -e .
+      - name: cross-script parity, both modes
+        run: |
+          python tools/floor.py cross word 99.899
+          python tools/floor.py cross verse 99.879
+
+  regression:
+    # Not a target — the oracle is the old implementation with its defects
+    # frozen in. A change detector.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: pip install -e .
+      - name: regression oracle, both modes
+        run: |
+          python tools/floor.py regression word 99.695
+          python tools/floor.py regression verse 96.968
+
+  l1:
+    # Score-level script equality. Red by design until the residue is closed;
+    # the ceiling stops it growing.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: pip install -e .
+      - run: python tools/floor.py l1 - 116
