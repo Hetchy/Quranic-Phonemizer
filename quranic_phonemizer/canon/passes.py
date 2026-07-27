@@ -31,8 +31,12 @@ def word_of(reading: Reading, draft) -> int:
     return reading.clusters[draft.cluster].word if draft.cluster >= 0 else -1
 
 #: A pass over the drafted slots of a whole verse, after every per-cluster
-#: derivation has run. `(reading, drafts, lexicon) -> None`.
-LexemePass: TypeAlias = Callable[[Reading, list, object], None]
+#: derivation has run. `(reading, drafts, lexicon, scribe) -> None`.
+#:
+#: The scribe is in the signature because a pass may *create* slots -- spelling
+#: `الٓمٓصٓ` turns three into seven -- and a slot no grapheme reaches fails I7.
+#: A pass that only mutates ignores it.
+LexemePass: TypeAlias = Callable[[Reading, list, object, object], None]
 
 
 def apply_ledger(reading: Reading, drafts, ledger: Ledger, track) -> None:
@@ -94,14 +98,14 @@ def _check_skeleton(reading: Reading, drafts, ordinal: int, supply) -> None:
         )
 
 
-def _apply_allah_lexeme(reading: Reading, drafts, lexicon=None) -> None:
+def _apply_allah_lexeme(reading: Reading, drafts, lexicon=None, scribe=None) -> None:
     """Word by word, not verse by verse.
 
     The lexeme is a property of one word. Run over the whole verse, a word
     ending in lām or hamza lends its last slot to the next word's opening lām
     and `لَّهُم` acquires the divine name's long ā.
     """
-    del lexicon
+    del lexicon, scribe
     for word_index in range(len(reading.words)):
         span = [d for d in drafts if word_of(reading, d) == word_index]
         letters = [d.letter for d in span]
@@ -110,7 +114,9 @@ def _apply_allah_lexeme(reading: Reading, drafts, lexicon=None) -> None:
             span[index].nucleus = lexeme.relengthened(span[index].nucleus)
 
 
-def _apply_pausal_lexemes(reading: Reading, drafts, lexicon: Lexicon) -> None:
+def _apply_pausal_lexemes(
+    reading: Reading, drafts, lexicon: Lexicon, scribe=None
+) -> None:
     """The seven alifs. Uthmani marks them `۠` at 66 sites; IndoPak writes a
     plain final ālif, indistinguishable by any IndoPak grapheme from an
     ordinary length carrier — so the fact is lexical, not orthographic."""

@@ -8,7 +8,13 @@ from quranic_phonemizer.engine.boundary_plan import all_join
 from quranic_phonemizer.engine.classifier import RuleSet
 from quranic_phonemizer.engine.run import perform
 from quranic_phonemizer.model.address import Location, Script, VerseRef
-from quranic_phonemizer.riwayat.hafs import corpus, ledger, lexicon, script_adapter
+from quranic_phonemizer.riwayat.hafs import (
+    corpus,
+    ledger,
+    lexeme_passes,
+    lexicon,
+    script_adapter,
+)
 
 
 @pytest.fixture(scope="session")
@@ -18,7 +24,7 @@ def packed():
 
 @pytest.fixture(scope="session")
 def shared():
-    return {"lexicon": lexicon(), "ledger": ledger()}
+    return {"lexicon": lexicon(), "ledger": ledger(), "passes": lexeme_passes()}
 
 
 @pytest.fixture(scope="session")

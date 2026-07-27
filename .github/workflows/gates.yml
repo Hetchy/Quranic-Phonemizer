@@ -36,8 +36,8 @@ jobs:
       - run: pip install -e .
       - name: cross-script parity, both modes
         run: |
-          python tools/floor.py cross word 99.899
-          python tools/floor.py cross verse 99.879
+          python tools/floor.py cross word 99.910
+          python tools/floor.py cross verse 99.889
 
   regression:
     # Not a target — the oracle is the old implementation with its defects
@@ -51,8 +51,8 @@ jobs:
       - run: pip install -e .
       - name: regression oracle, both modes
         run: |
-          python tools/floor.py regression word 99.751
-          python tools/floor.py regression verse 97.046
+          python tools/floor.py regression word 99.787
+          python tools/floor.py regression verse 97.080
 
   l1:
     # Score-level script equality. Red by design until the residue is closed;
@@ -64,4 +64,4 @@ jobs:
         with:
           python-version: "3.13"
       - run: pip install -e .
-      - run: python tools/floor.py l1 - 116
+      - run: python tools/floor.py l1 - 106

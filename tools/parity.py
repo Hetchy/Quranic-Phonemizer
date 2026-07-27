@@ -43,6 +43,7 @@ from quranic_phonemizer.riwayat.hafs import (  # noqa: E402
     HAFS,
     corpus,
     ledger,
+    lexeme_passes,
     lexicon,
     script_adapter,
 )
@@ -76,7 +77,8 @@ def main() -> int:
     args = parser.parse_args()
 
     packed, alphabet = corpus(), load_alphabet(ALPHABET)
-    shared = {"lexicon": lexicon(), "ledger": ledger()}
+    shared = {"lexicon": lexicon(), "ledger": ledger(),
+              "passes": lexeme_passes()}
     adapter = script_adapter(Script.UTHMANI)
 
     matched = total = 0

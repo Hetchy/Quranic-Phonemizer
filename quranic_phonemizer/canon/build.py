@@ -110,7 +110,7 @@ def build(
     drafts = _drafts(reading, lexicon, track, right_context, scribe)
     apply_ledger(reading, drafts, ledger, track)
     for lexeme_pass in (passes if passes is not None else LEXEME_PASSES):
-        lexeme_pass(reading, drafts, lexicon)
+        lexeme_pass(reading, drafts, lexicon, scribe)
     score, ordinals = _assemble(reading, drafts, riwayah, selection)
     return Built(score, scribe.finish(reading, drafts, ordinals))
 

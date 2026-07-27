@@ -34,6 +34,7 @@ from quranic_phonemizer.model.address import (  # noqa: E402
 )
 from quranic_phonemizer.riwayat.hafs import (  # noqa: E402
     ledger,
+    lexeme_passes,
     lexicon,
     script_adapter,
 )
@@ -91,7 +92,8 @@ def main() -> int:
     assert set(uthmani) == set(indopak), "the two corpora disagree on verses"
 
     adapters = {s: script_adapter(s) for s in Script}
-    shared = {"lexicon": lexicon(), "ledger": ledger()}
+    shared = {"lexicon": lexicon(), "ledger": ledger(),
+              "passes": lexeme_passes()}
     tracks = {s: Provenance() for s in Script}
 
     residue: collections.Counter[str] = collections.Counter()

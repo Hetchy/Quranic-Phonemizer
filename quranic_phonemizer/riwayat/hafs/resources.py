@@ -20,6 +20,7 @@ from ...canon.ledger import EMPTY as EMPTY_LEDGER
 from ...canon.ledger import Ledger, load_ledger
 from ...canon.lexicon import EMPTY as EMPTY_LEXICON
 from ...canon.lexicon import Lexicon, load_lexicon
+from ...canon.spell import Names, load_names
 from ...corpus import PackedCorpus, load_corpus
 from ...model.address import Location, Riwayah, Script, VerseRef
 from ...orthography.adapter import Reading
@@ -76,6 +77,24 @@ def ledger() -> Ledger:
 def lexicon() -> Lexicon:
     path = DATA / "lexicon.yaml"
     return load_lexicon(path) if path.exists() else EMPTY_LEXICON
+
+
+def letter_names() -> Names:
+    """Shared across riwayat: what a letter is *called* is a fact about Arabic."""
+    return load_names(DATA.parents[1] / "shared" / "muqattaat.yaml")
+
+
+def lexeme_passes() -> tuple:
+    """Hafs' verse-level passes, in order.
+
+    The riwayah owns this list the way it owns its `RuleSet`. `canon` supplies
+    the shared two; spelling the muqaṭṭaʿāt needs the letter-name table, so it
+    is bound here rather than reached for from inside the builder.
+    """
+    from ...canon.passes import LEXEME_PASSES
+    from ...canon.spell import spell_muqattaat
+
+    return (*LEXEME_PASSES, spell_muqattaat(letter_names()))
 
 
 def corpus() -> PackedCorpus:

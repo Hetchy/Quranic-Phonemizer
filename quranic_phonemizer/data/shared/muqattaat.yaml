@@ -1,0 +1,37 @@
+# The letter names of the muqaṭṭaʿāt, spelled out.
+#
+# Shared rather than per-riwayah: what the letter ا is *called* is a fact about
+# Arabic, and every riwayah spells it the same. What differs between riwāyāt is
+# the madd length, which this model does not store (ADR-006 §5).
+#
+# Written in the vocalised canonical notation `canon/passes.py::_vocalised`
+# already uses -- `ABJAD` letters, a lowercase vowel for a short nucleus, an
+# uppercase one for a long, nothing at all for silent. Canonical letters, so
+# one table serves every script; nothing here is a glyph.
+#
+#   ءaلiف   hamza+a, lam+i, fa+silent          ʔalif
+#   لAم     lam+long a, mim+silent             laam
+#   عaين    ain+a, ya+silent, noon+silent      ʕayn
+#
+# The names are *slots*, not sounds. They then go through the ordinary rules,
+# which is the point: 2:1 `الٓمٓ` reads `ʔalif laam miim` with the lām's final
+# mīm assimilating into the mīm's first, and nothing here knows that. The
+# engine produces it because the slots are ordinary slots.
+schema_version: 1
+
+names:
+  ء: "ءaلiف"
+  ا: "ءaلiف"
+  ح: "حA"
+  ر: "رA"
+  س: "سIن"
+  ص: "صAد"
+  ط: "طA"
+  ع: "عaين"
+  ق: "قAف"
+  ك: "كAف"
+  ل: "لAم"
+  م: "مIم"
+  ن: "نUن"
+  ه: "هA"
+  ي: "يA"

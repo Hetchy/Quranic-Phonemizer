@@ -55,6 +55,7 @@ from quranic_phonemizer.render.recite import phonemes_by_word  # noqa: E402
 from quranic_phonemizer.riwayat.hafs import (  # noqa: E402
     HAFS,
     ledger,
+    lexeme_passes,
     lexicon,
     script_adapter,
 )
@@ -94,7 +95,8 @@ def main() -> int:
     args = parser.parse_args()
 
     alphabet = load_alphabet(ALPHABET)
-    shared = {"lexicon": lexicon(), "ledger": ledger()}
+    shared = {"lexicon": lexicon(), "ledger": ledger(),
+              "passes": lexeme_passes()}
     adapters = {script: script_adapter(script) for script in (LEFT, RIGHT)}
     sources = {script: load_verses(script.value) for script in (LEFT, RIGHT)}
 
