@@ -10,6 +10,7 @@ from __future__ import annotations
 from ...engine.classifier import RuleSet
 from ...model.address import Riwayah
 from ...model.canon import Phase
+from .resources import lexicon
 from ...rules.boundary import (
     TaaMarbutaAtWaqf,
     TanweenAtWaqf,
@@ -30,7 +31,7 @@ HAFS = RuleSet(
         Phase.MERGE: (
             NoonSakinah(),
             MeemSakinah(),
-            ArticleLam(),
+            ArticleLam(is_form_eight_lam=lexicon().is_form_eight_lam),
             GhunnahMushaddadah(),
             Idgham(),
         ),

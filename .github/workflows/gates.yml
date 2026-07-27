@@ -51,8 +51,8 @@ jobs:
       - run: pip install -e .
       - name: regression oracle, both modes
         run: |
-          python tools/floor.py regression word 99.695
-          python tools/floor.py regression verse 96.968
+          python tools/floor.py regression word 99.712
+          python tools/floor.py regression verse 97.034
 
   l1:
     # Score-level script equality. Red by design until the residue is closed;

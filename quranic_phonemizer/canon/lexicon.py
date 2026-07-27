@@ -29,6 +29,7 @@ BUDGETS = {
     "wasl_exempt": 60,
     "silah_exempt": 200,
     "pausal_lexemes": 10,
+    "form_eight_lam": 10,
 }
 
 #: The attached pronouns, in canonical letters. Closed in Arabic, so a lexeme
@@ -60,6 +61,20 @@ class Lexicon:
     """The seven alifs: words whose final ālif is short in waṣl and long at
     pause. IndoPak's inventory has no grapheme that distinguishes them, so it
     gives no evidence and this is not a contradiction (ADR-008 §4.1)."""
+    form_eight_lam: frozenset[str] = frozenset()
+    """Form-VIII verbs whose first radical is lām — `ٱلْتَقَى`, `ٱلْتَمَسَ`.
+
+    After a waṣl hamza these are shaped exactly like the definite article
+    before a sun letter, and the Score cannot tell them apart: the article's
+    gemination is written as a shadda on a slot whose own nucleus is silent,
+    which the adapter reports as an *attestation* rather than as
+    `Onset.GEMINATE`, so it is not a canonical fact any rule can read.
+
+    A closed grammatical class rather than a location table: five roots, and
+    anyone who knows Arabic can enumerate form-VIII verbs with lām as first
+    radical without ever seeing this corpus. That is the test ADR-008 open
+    question 2b sets for any list.
+    """
     source: Path | None = field(default=None, compare=False)
 
     def is_wasl_exempt(self, skeleton: str) -> bool:
@@ -115,6 +130,9 @@ class Lexicon:
 
     def is_silah_exempt(self, skeleton: str) -> bool:
         return skeleton in self.silah_exempt
+
+    def is_form_eight_lam(self, skeleton: str) -> bool:
+        return self._matches(self.form_eight_lam, skeleton)
 
 
 EMPTY = Lexicon()
