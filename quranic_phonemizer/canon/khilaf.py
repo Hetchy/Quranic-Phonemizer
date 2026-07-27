@@ -8,7 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from ..model.address import KhilafId
-from ..model.canon import Quality, Short
+from ..model.canon import Quality
 from ..orthography.adapter import Reading
 from .passes import vocalised, word_of
 
@@ -17,6 +17,7 @@ from .passes import vocalised, word_of
 class VowelSite:
     """One word, and which of its slots the readings disagree about."""
 
+    khilaf: KhilafId
     index: int
     options: dict[str, Quality]
     default: str
@@ -40,7 +41,11 @@ class VowelKhilaf:
     def points(self) -> dict[str, dict[str, object]]:
         """What a caller may choose, without reading the data file."""
         return {
-            name: {"options": sorted(site.options), "default": site.default}
+            name: {
+                "khilaf": site.khilaf.value,
+                "options": sorted(site.options),
+                "default": site.default,
+            }
             for name, site in self.sites.items()
         }
 
@@ -58,9 +63,10 @@ def apply_vowel_khilaf(khilaf: VowelKhilaf):
             if found is None:
                 continue
             name, site = found
-            chosen = selection.chosen(KhilafId.NUCLEUS_VOWEL, site=name)
-            span[site.index].nucleus = Short(
-                site.options[chosen or site.default]
-            )
+            chosen = selection.chosen(site.khilaf, site=name)
+            quality = site.options[chosen or site.default]
+            # The kind is the script's; only the vowel is under dispute.
+            held = span[site.index].nucleus
+            span[site.index].nucleus = type(held)(quality)
 
     return apply

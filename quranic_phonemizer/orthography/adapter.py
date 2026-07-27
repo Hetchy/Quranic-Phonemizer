@@ -51,6 +51,8 @@ class Cluster:
     """This script marks every letter it sounds, so no mark at all is rasm."""
     omitted: bool = False
     """A letter of the reading the rasm leaves out, written small."""
+    rasm_only: bool = False
+    """The glyph never spells a sound of its own."""
 
     def mark(self, role: str) -> Mark | None:
         for mark in self.marks:

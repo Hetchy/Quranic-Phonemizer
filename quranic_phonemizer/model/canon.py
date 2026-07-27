@@ -261,6 +261,7 @@ class Rule(StrEnum):
     MADD_LEEN = "madd_leen"
     IWAD = "iwad"
 
+    IBDAL_HAMZA = "ibdal_hamza"
     WASL_ELISION = "wasl_elision"
     WASL_START = "wasl_start"
     ILTIQA_REPAIR = "iltiqa_repair"
@@ -305,6 +306,7 @@ FAMILY_OF: dict[Rule, RuleFamily] = {
     Rule.MADD_ARID_LIL_SUKUN: RuleFamily.LENGTHENING,
     Rule.MADD_LEEN: RuleFamily.LENGTHENING,
     Rule.IWAD: RuleFamily.LENGTHENING,
+    Rule.IBDAL_HAMZA: RuleFamily.LENGTHENING,
     Rule.WASL_ELISION: RuleFamily.ELISION,
     Rule.WASL_START: RuleFamily.INSERTION,
     Rule.ILTIQA_REPAIR: RuleFamily.INSERTION,

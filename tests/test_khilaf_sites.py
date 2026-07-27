@@ -183,3 +183,35 @@ def test_the_two_scripts_agree_on_the_vowel_khilaf(sources, shared) -> None:
         for script in Script
     }
     assert digests[Script.UTHMANI] == digests[Script.INDOPAK]
+
+
+def test_the_imala_takes_its_documented_default(packed, shared, alphabet) -> None:
+    """11:41 is the only imala in Hafs. Its letter is technically an `e`, so
+    that is the default, and the plain `i` is the other reading."""
+    readings = {
+        name: _read(
+            packed, shared, alphabet, (11, 41, 6), Junction.STOP,
+            VariantSelection(
+                (Option(KhilafId.IMALA_QUALITY, name, site="مجرىها"),)
+            ),
+        )
+        for name in ("e", "i")
+    }
+    assert readings == {"e": "maʒQre:ha:", "i": "maʒQri:ha:"}
+    assert _read(
+        packed, shared, alphabet, (11, 41, 6), Junction.STOP, VariantSelection()
+    ) == readings["e"]
+
+
+def test_both_scripts_reach_the_imala(sources, shared, alphabet) -> None:
+    """IndoPak types no imala mark, so the site is what carries it there."""
+    from quranic_phonemizer.canon.build import build as _build
+
+    for script in Script:
+        score = _build(
+            script_adapter(script).read(
+                VerseRef(11, 41), sources[script][(11, 41)]
+            ),
+            **shared,
+        ).score
+        assert score.words[5].slots[2].nucleus.quality.value == "imala", script

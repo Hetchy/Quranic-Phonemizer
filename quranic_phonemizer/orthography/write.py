@@ -15,8 +15,13 @@ from .inventory import Inventory, InventoryError
 _SHORT_ROLE = {Quality.A: "fatha", Quality.U: "damma", Quality.I: "kasra"}
 
 #: Imala and ishmam are colourings a reciter applies to an ordinary vowel,
-#: not vowels of their own, so they spell as their base quality.
+#: not vowels of their own, so they spell as their base quality wherever the
+#: script has no mark that says otherwise.
 _BASE = {Quality.IMALA: Quality.A}
+
+#: Onsets and qualities a script may name outright.
+TASHIL = "tashil"
+IMALA = "imala"
 
 #: The mark that says a carrier lengthens the vowel before it.
 MADD = "madd"
@@ -108,6 +113,8 @@ def _slot(slot, pen: Pen) -> str:
         out = pen.letter(slot.letter)
     if slot.onset is Onset.GEMINATE:
         out += pen.role("shadda")
+    elif slot.onset is Onset.TASHIL and TASHIL in pen.roles:
+        out += pen.role(TASHIL)
     out += _nucleus(slot, pen)
     for annotation in sorted(slot.annotations):
         # An annotation a script writes has a role; one the builder derives
@@ -119,6 +126,8 @@ def _slot(slot, pen: Pen) -> str:
 
 def _nucleus(slot, pen: Pen) -> str:
     nucleus = slot.nucleus
+    if getattr(nucleus, "quality", None) is Quality.IMALA and IMALA in pen.roles:
+        return pen.role(IMALA)
     quality = _BASE.get(getattr(nucleus, "quality", None), None) or getattr(
         nucleus, "quality", None
     )

@@ -39,7 +39,8 @@ letters:
   "ا": ALIF
   "و": WAW
   "ي": {letter: YA, bare_rasm: true}   # IndoPak writes the maqsura plain
-  "ى": {letter: YA, bare_rasm: true}
+  # Drawn only as a hamza's seat or as rasm; a sounded yaa is `ي` above.
+  "ى": {letter: YA, bare_rasm: true, rasm_only: true}
   "ء": HAMZA
   "ٱ": {letter: HAMZA, onset: WASL}
 

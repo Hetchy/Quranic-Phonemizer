@@ -36,6 +36,7 @@ SITES = [
     (75, 27),   # مَنْ ۜ — sakt; 18:1's entry waits on an L1 row
     (7, 1),     # الٓمٓصٓ — muqaṭṭaʿāt, and madd lāzim with them
     (1, 7),     # ٱلضَّآلِّينَ — madd lāzim in an ordinary word
+    (46, 4),    # ٱئْتُونِى — ibdāl, a quiescent hamza after a prosthetic one
 ]
 
 #: Plus a broad sweep for the common families: noon and meem in all their

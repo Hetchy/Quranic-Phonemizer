@@ -10,6 +10,7 @@ from ...model.address import Riwayah
 from ...model.canon import Phase
 from ...rules.annotation import CanonicalColour, Sakt, Silah, Tarqeeq
 from ...rules.boundary import (
+    SoftenedHamza,
     TaaMarbutaAtWaqf,
     TanweenAtWaqf,
     WaqfEnding,
@@ -35,8 +36,8 @@ def _build() -> RuleSet:
     return RuleSet(
         {
             Phase.BOUNDARY: (
-                WaslHamza(), TanweenAtWaqf(), WaqfEnding(), TaaMarbutaAtWaqf(),
-                Sakt(),
+                WaslHamza(), SoftenedHamza(), TanweenAtWaqf(), WaqfEnding(),
+                TaaMarbutaAtWaqf(), Sakt(),
             ),
             Phase.MERGE: (
                 NoonSakinah(followers=tables.followers_of_noon),

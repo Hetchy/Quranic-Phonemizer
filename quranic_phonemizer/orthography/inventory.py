@@ -65,6 +65,9 @@ class LetterEntry:
     with no letter identity of its own (Uthmani `ى`, `و`)."""
     bare_rasm: bool = False
     """Bare, word-finally, the glyph stands for an unwritten alif."""
+    rasm_only: bool = False
+    """The glyph never spells a sound of its own. IndoPak draws the maqsura
+    only as a hamza's seat or as rasm, and writes a sounded yaa as `ي`."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -269,7 +272,7 @@ def _letter(spec: Any, *, where: str) -> LetterEntry:
         spec,
         {"letter"},
         name=where,
-        optional={"onset", "dagger_host", "bare_rasm"},
+        optional={"onset", "dagger_host", "bare_rasm", "rasm_only"},
     )
     onset = spec.get("onset")
     return LetterEntry(
@@ -277,6 +280,7 @@ def _letter(spec: Any, *, where: str) -> LetterEntry:
         onset=_member(Onset, onset, where=where) if onset else None,
         dagger_host=bool(spec.get("dagger_host", False)),
         bare_rasm=bool(spec.get("bare_rasm", False)),
+        rasm_only=bool(spec.get("rasm_only", False)),
     )
 
 

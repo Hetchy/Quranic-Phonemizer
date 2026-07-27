@@ -117,6 +117,44 @@ class WaslHamza:
 
 
 @dataclass(frozen=True, slots=True)
+class SoftenedHamza:
+    """Two hamzas are not said in a row. Started on, the prosthetic hamza's
+    vowel lengthens and carries the quiescent one as its madd letter."""
+
+    rule: Rule = Rule.IBDAL_HAMZA
+    phase: Phase = Phase.BOUNDARY
+    triggers: frozenset = frozenset({Onset.WASL})
+
+    def look(
+        self, near: Neighbourhood, plan: Plan, at: SlotId,
+        boundaries: BoundaryPlan,
+    ) -> Verdict | None:
+        del plan
+        slot, word = near.slot(at), near.word_of(at)
+        if slot is None or word is None or slot.onset is not Onset.WASL:
+            return None
+        if not (boundaries.started_on(word) and _is_first_of_word(near, at, word)):
+            return None   # joined, the prosthetic hamza has no vowel to carry
+        following = near.after(at)
+        if (
+            following is None
+            or following.letter is not CanonLetter.HAMZA
+            or following.nucleus.kind is not NucleusKind.SILENT
+        ):
+            return None
+        return Verdict(
+            Occurrence(
+                mint(Rule.IBDAL_HAMZA, at), Rule.IBDAL_HAMZA,
+                Participants((at, following.id)),
+            ),
+            (
+                Relength(at, Length.LONG),
+                Silence(following.id, Aspect.ONSET),
+            ),
+        )
+
+
+@dataclass(frozen=True, slots=True)
 class TanweenAtWaqf:
     """The tanween noon is silent at a stop; after a fatha it leaves the iwad.
 

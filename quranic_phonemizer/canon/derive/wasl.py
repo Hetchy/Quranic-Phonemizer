@@ -69,7 +69,9 @@ def is_wasl(context: Context) -> bool:
 
     if following.has("shadda"):
         return _geminate_case(context, cluster, following)
-    if following.has(*QUIESCENT_BLOCKERS) or following.has("dagger"):
+    if (following.has(*QUIESCENT_BLOCKERS) or following.has("dagger")) and not (
+        _article_before_a_wasl(context, following)
+    ):
         return False  # nothing to prop up: no waṣl hamza is needed
 
     written = _written_vowel(cluster)
@@ -169,6 +171,21 @@ def _after_proclitics(context: Context) -> bool:
         if cluster.letter not in PROCLITICS or not cluster.has(*VOWEL_ROLES):
             return False
     return True
+
+
+def _article_before_a_wasl(context: Context, following) -> bool:
+    """`ٱلِٱسْمُ`. The article's lam carries a vowel only to break the two
+    quiescent letters after it, so that vowel is no evidence that the
+    prosthetic hamza before it was unneeded."""
+    third = context.ahead(2)
+    return (
+        context.word_initial
+        and _written_vowel(context.cluster) is None
+        and following.letter is CanonLetter.LAM
+        and third is not None
+        and third.letter is CanonLetter.ALIF
+        and not third.has(*VOWEL_ROLES)
+    )
 
 
 def _assimilated_sun_letter(context: Context) -> bool:

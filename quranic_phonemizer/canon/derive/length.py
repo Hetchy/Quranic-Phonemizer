@@ -88,6 +88,10 @@ def carrier(context: Context) -> Outcome:
         return Sets(SlotFact.LETTER, letter) if letter else Absent()
     if letter is None or letter not in CARRIERS or previous is None:
         return Sets(SlotFact.LETTER, letter) if letter else Absent()
+    if cluster.rasm_only and not context.word_final:
+        # `بِاَيِّىكُمُ` draws with a maqsura the doubling its shadda already
+        # spells. Word-finally the same glyph stands for an unwritten alif.
+        return Absent()
     if letter is CanonLetter.ALIF and cluster.has("sukun"):
         # A carrier bears no mark of its own. IndoPak writes `اْ` for a hamza
         # whose seat Uthmani precomposes.

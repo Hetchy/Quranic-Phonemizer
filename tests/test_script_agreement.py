@@ -36,6 +36,10 @@ SITES = [
     ((41, 44, 9), "ʔaʔaʕʒamijj", "the facilitated hamza is voweled"),
     ((18, 16, 7), "faʔwu:", "a prosthetic hamza never carries a sukun"),
     ((49, 11, 29), "biʔs", "a carrier does not lengthen across a word boundary"),
+    ((49, 11, 30), "ʔalism", "the article before a word that itself begins with a wasl"),
+    ((68, 6, 1), "biʔajjikum", "IndoPak's maqsura spells no sound of its own"),
+    ((46, 4, 18), "ʔi:tu:ni:", "a quiescent hamza after a prosthetic one, started on"),
+    ((11, 41, 6), "maʒQre:ha:", "the imala, which only Uthmani marks"),
 ]
 
 

@@ -17,7 +17,11 @@ SCHEMA_VERSION = 1
 SITED = {
     KhilafId.RAA_TAFKHEEM: "raa_tafkheem",
     KhilafId.NUCLEUS_VOWEL: "nucleus_vowel",
+    KhilafId.IMALA_QUALITY: "imala_quality",
 }
+
+#: The points whose sites the Score carries, so the choice is made at build.
+VOWEL_POINTS = (KhilafId.NUCLEUS_VOWEL, KhilafId.IMALA_QUALITY)
 
 JUNCTIONS = {"stop": True, "join": False}
 
@@ -37,7 +41,7 @@ class Khilaf:
         """Every choice a caller may make, keyed by khilaf point."""
         return {
             KhilafId.RAA_TAFKHEEM.value: self.raa.points(),
-            KhilafId.NUCLEUS_VOWEL.value: self.vowel.points(),
+            "vowel": self.vowel.points(),
         }
 
 
@@ -65,17 +69,16 @@ def load_khilaf(path: Path) -> Khilaf:
         ),
         vowel=VowelKhilaf(
             {
-                name: _vowel(name, spec, path)
-                for name, spec in (
-                    data[SITED[KhilafId.NUCLEUS_VOWEL]] or {}
-                ).items()
+                name: _vowel(point, name, spec, path)
+                for point in VOWEL_POINTS
+                for name, spec in (data[SITED[point]] or {}).items()
             }
         ),
     )
 
 
-def _vowel(name: str, spec: dict, path: Path) -> VowelSite:
-    where = f"{path} {SITED[KhilafId.NUCLEUS_VOWEL]}[{name!r}]"
+def _vowel(point: KhilafId, name: str, spec: dict, path: Path) -> VowelSite:
+    where = f"{path} {SITED[point]}[{name!r}]"
     require_keys(spec, {"slot", "default", "options", "forms"}, name=where)
     options = {
         option: _quality(option, raw, where)
@@ -87,6 +90,7 @@ def _vowel(name: str, spec: dict, path: Path) -> VowelSite:
             f"{sorted(options)}"
         )
     return VowelSite(
+        khilaf=point,
         index=int(spec["slot"]),
         options=options,
         default=str(spec["default"]),
