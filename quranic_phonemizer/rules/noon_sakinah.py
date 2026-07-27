@@ -39,8 +39,23 @@ IDGHAM_NO_GHUNNAH = frozenset({L.LAM, L.RA})
 #: One letter, and the only one that turns the nūn into a mīm.
 IQLAB = frozenset({L.BA})
 
+#: Neither can begin a syllable after a nūn sākinah: the ālif is a length
+#: carrier and never a consonant here, and the tāʾ marbūṭa is word-final by
+#: definition. Left in the complement they made `IKHFAA` 17 rather than the
+#: fifteen every primer lists — invisibly, because the partition test asserted
+#: only that the five sets cover the alphabet, which is a tautology when one of
+#: them is defined as the complement.
+NOT_A_FOLLOWER = frozenset({L.ALIF, L.TAA_MARBUTA})
+
 #: Everything else — the fifteen.
-IKHFAA = frozenset(set(L) - IZHAR - IDGHAM_GHUNNAH - IDGHAM_NO_GHUNNAH - IQLAB)
+IKHFAA = frozenset(
+    set(L)
+    - IZHAR
+    - IDGHAM_GHUNNAH
+    - IDGHAM_NO_GHUNNAH
+    - IQLAB
+    - NOT_A_FOLLOWER
+)
 
 
 @dataclass(frozen=True, slots=True)

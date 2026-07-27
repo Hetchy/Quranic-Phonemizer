@@ -27,7 +27,6 @@ SCHEMA_VERSION = 1
 BUDGETS = {
     "wasl_particles": 10,
     "wasl_exempt": 60,
-    "silah_exempt": 200,
     "pausal_lexemes": 10,
     "form_eight_lam": 10,
 }
@@ -56,7 +55,6 @@ class Lexicon:
     wasl_nouns: frozenset[str] = frozenset()
     """The ten nouns, whose helping vowel is kasra regardless of the third
     letter — `اسم` would otherwise derive damma."""
-    silah_exempt: frozenset[str] = frozenset()
     pausal_lexemes: frozenset[str] = frozenset()
     """The seven alifs: words whose final ālif is short in waṣl and long at
     pause. IndoPak's inventory has no grapheme that distinguishes them, so it
@@ -127,9 +125,6 @@ class Lexicon:
 
     def is_wasl_noun(self, skeleton: str) -> bool:
         return self._matches(self.wasl_nouns, skeleton)
-
-    def is_silah_exempt(self, skeleton: str) -> bool:
-        return skeleton in self.silah_exempt
 
     def is_form_eight_lam(self, skeleton: str) -> bool:
         return self._matches(self.form_eight_lam, skeleton)

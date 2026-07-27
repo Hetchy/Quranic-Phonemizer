@@ -13,7 +13,7 @@ what keeps "how thin the adapters are" a measurement rather than a promise.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Protocol, TypeAlias
+from typing import TypeAlias
 
 from ..model.address import Location, Script, VerseRef
 from ..model.canon import CanonLetter, Onset, RuleFamily
@@ -134,17 +134,8 @@ class Reading:
         return lo, hi + 1
 
 
-SpellStyle: TypeAlias = str
-
-
-class ScriptAdapter(Protocol):
-    script: Script
-
-    def read(self, texts: tuple[str, ...], at: VerseRef) -> Reading:
-        """Verse-scoped, because a script may carry evidence about a
-        neighbouring word — IndoPak's `ࣙ` does, at 54 sites, and 20 of those
-        cross a verse boundary (ADR-001 §5)."""
-        ...
-
-    def write(self, score_words: tuple, style: SpellStyle) -> tuple[str, ...]:
-        ...
+# `ScriptAdapter` and `SpellStyle` were deleted here. The Protocol had no
+# implementations and its `read` signature did not match the concrete
+# `riwayat.hafs.Adapter`, so it documented a contract that was not the one in
+# force -- worse than no Protocol, because a second script would have been
+# written against it. `write` belongs to phase 2 and comes back with it.

@@ -30,6 +30,7 @@ from quranic_phonemizer.rules.noon_sakinah import (
     IKHFAA,
     IQLAB,
     IZHAR,
+    NOT_A_FOLLOWER,
     NoonSakinah,
 )
 
@@ -45,7 +46,23 @@ def test_the_five_outcomes_partition_the_alphabet() -> None:
     for one in sets:
         assert not (union & one), f"overlap at {union & one}"
         union |= one
-    assert union == set(CanonLetter)
+    assert union == set(CanonLetter) - NOT_A_FOLLOWER
+
+
+def test_the_outcome_sets_have_the_counts_the_domain_gives_them() -> None:
+    """The coverage half of the previous test was a tautology: `IKHFAA` is
+    *defined* as the complement, so the union always equalled the alphabet
+    however wrong the members were. It was, and nobody could see it — the
+    complement swept in the ālif and the tāʾ marbūṭa and made the fifteen
+    seventeen.
+
+    Counts are what a primer states, so counts are what this asserts.
+    """
+    assert len(IZHAR) == 6, "the six throat letters"
+    assert len(IQLAB) == 1, "only the bāʾ"
+    assert len(IDGHAM_GHUNNAH) == 4, "يرملون minus the two without ghunnah"
+    assert len(IDGHAM_NO_GHUNNAH) == 2, "lām and rāʾ"
+    assert len(IKHFAA) == 15, "the fifteen"
 
 
 @pytest.mark.parametrize("script", list(Script))

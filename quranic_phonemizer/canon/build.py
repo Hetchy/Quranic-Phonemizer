@@ -40,6 +40,8 @@ from .lexicon import EMPTY as EMPTY_LEXICON
 from .lexicon import Lexicon
 from .ledger import EMPTY as EMPTY_LEDGER
 from .ledger import Ledger, VerseSlot, WordSlot
+from .draft import _Draft, set_fact
+from .passes import LEXEME_PASSES, LexemePass, apply_ledger, word_of
 from .scribe import Scribe
 
 #: The two derivations the builder names itself. Both are properties of the
@@ -89,24 +91,6 @@ class Provenance:
         self.derivation_uses[name] = self.derivation_uses.get(name, 0) + 1
 
 
-@dataclass(slots=True)
-class _Draft:
-    """One slot under construction, plus who decided each of its facts."""
-
-    letter: CanonLetter
-    onset: Onset = Onset.PLAIN
-    nucleus: Nucleus = field(default_factory=Silent)
-    origin: SlotOrigin = SlotOrigin.WRITTEN
-    cluster: int = -1
-    onset_declared: bool = False
-    nucleus_declared: bool = False
-    sakt_after: bool = False
-    """A word-level fact carried on the slot that ends the word; `_assemble`
-    lifts it onto the `ScoreWord`. Before this, `SlotFact.SAKT` reached `_set`
-    and fell through a `match` with no case for it, so 18:1 -- one of Hafs'
-    four canonical sakt sites -- never reached the Score."""
-
-
 def build(
     reading: Reading,
     *,
@@ -116,6 +100,7 @@ def build(
     selection: VariantSelection = VariantSelection(),
     provenance: Provenance | None = None,
     right_context: Reading | None = None,
+    passes: tuple[LexemePass, ...] | None = None,
 ) -> Built:
     """`right_context` is the next verse's reading, and it is not optional
     machinery: 20 of IndoPak's 54 cross-word tanwīn sites put the nūn on a word
@@ -123,9 +108,9 @@ def build(
     track = provenance if provenance is not None else Provenance()
     scribe = Scribe(reading.verse)
     drafts = _drafts(reading, lexicon, track, right_context, scribe)
-    _apply_ledger(reading, drafts, ledger, track)
-    _apply_allah_lexeme(reading, drafts)
-    _apply_pausal_lexemes(reading, drafts, lexicon)
+    apply_ledger(reading, drafts, ledger, track)
+    for lexeme_pass in (passes if passes is not None else LEXEME_PASSES):
+        lexeme_pass(reading, drafts, lexicon)
     score, ordinals = _assemble(reading, drafts, riwayah, selection)
     return Built(score, scribe.finish(reading, drafts, ordinals))
 
@@ -174,12 +159,12 @@ def _drafts(
             track.decorated += 1
             continue
 
-        rasm = _rasm_outcome(context, cluster, rows)
+        rasm = _rasm_outcome(context, cluster, rows, track)
         if rasm is not None:
             # A carrier still has a fact to contribute: it lengthens the slot
             # before it. Skipping the cluster must not skip its evidence.
             if isinstance(rasm, Sets):
-                _set(None, drafts, rasm.fact, rasm.value, Target.PREVIOUS,
+                set_fact(None, drafts, rasm.fact, rasm.value, Target.PREVIOUS,
                      scribe, cluster.offset)
                 track.from_derivation += 1
             else:
@@ -217,7 +202,7 @@ def _apply_rows(rows, draft, drafts, context, track, scribe, base_offset,
             continue
         offset = row.offset if row.offset >= 0 else base_offset
         if row.value is not None:
-            _set(draft, drafts, row.fact, row.value, force or Target.HERE,
+            set_fact(draft, drafts, row.fact, row.value, force or Target.HERE,
                  scribe, offset)
             track.from_evidence += 1
             continue
@@ -226,9 +211,9 @@ def _apply_rows(rows, draft, drafts, context, track, scribe, base_offset,
         track.used(row.derivation)
         match outcome:
             case Sets(fact=fact, value=value, target=target):
-                _set(draft, drafts, fact, value, force or target, scribe, offset)
+                set_fact(draft, drafts, fact, value, force or target, scribe, offset)
             case AddsSlot() as adds:
-                _set(draft, drafts, adds.fact, adds.value, Target.HERE,
+                set_fact(draft, drafts, adds.fact, adds.value, Target.HERE,
                      scribe, offset)
                 extra = _Draft(
                     letter=adds.letter,
@@ -252,48 +237,45 @@ def _apply_rows(rows, draft, drafts, context, track, scribe, base_offset,
     return extra
 
 
-def _set(draft, drafts, fact: SlotFact, value, target: Target,
-         scribe: Scribe | None = None, offset: int = -1) -> None:
-    subject = draft if target is Target.HERE else (drafts[-1] if drafts else None)
-    if subject is None:
-        return
-    if scribe is not None:
-        scribe.evidence(offset, subject, fact)
-    match fact:
-        case SlotFact.LETTER:
-            subject.letter = value
-        case SlotFact.ONSET:
-            subject.onset, subject.onset_declared = value, True
-        case SlotFact.NUCLEUS:
-            subject.nucleus, subject.nucleus_declared = value, True
-        case SlotFact.SAKT:
-            subject.sakt_after = bool(value)
+#: The two derivations `_apply_wasl` resolves by name. Named here rather than
+#: called directly, because calling the function and then recording that a
+#: derivation ran are two statements that can disagree -- and did: the report
+#: claimed `hamzat_wasl` twice where `derive.resolve` had never been asked for
+#: it at all, and `wasl_helping_vowel` 1,258 times for the same reason. A
+#: fabricated provenance entry is worse than a missing one, because §3.1 exists
+#: to tell a real derivation from a relocated fact.
+WASL_ONSET = "hamzat_wasl"
+WASL_VOWEL = "wasl_helping_vowel"
 
 
 def _apply_wasl(context, cluster: Cluster, draft: _Draft, track) -> None:
+    def helping_vowel() -> None:
+        outcome = derive.resolve(WASL_VOWEL, context)
+        draft.nucleus = outcome.value
+        track.from_derivation += 1
+        track.used(WASL_VOWEL)
+
     if draft.onset_declared and draft.onset is Onset.WASL:
         draft.letter = CanonLetter.HAMZA
         if not draft.nucleus_declared:
-            draft.nucleus = wasl.wasl_helping_vowel(context).value
-            track.from_derivation += 1
-            track.used("wasl_helping_vowel")
+            helping_vowel()
         return
     if cluster.letter is not CanonLetter.ALIF or draft.onset_declared:
         if cluster.letter is CanonLetter.ALIF and not draft.nucleus_declared:
             draft.letter = CanonLetter.HAMZA
         return
     if wasl.is_wasl(context):
-        draft.letter, draft.onset = CanonLetter.HAMZA, Onset.WASL
+        draft.letter = CanonLetter.HAMZA
+        draft.onset = derive.resolve(WASL_ONSET, context).value
         track.from_derivation += 1
-        track.used("hamzat_wasl")
+        track.used(WASL_ONSET)
         if not draft.nucleus_declared:
-            draft.nucleus = wasl.wasl_helping_vowel(context).value
-            track.used("wasl_helping_vowel")
+            helping_vowel()
     else:
         draft.letter = CanonLetter.HAMZA  # a non-carrier ālif is a hamza seat
 
 
-def _rasm_outcome(context, cluster: Cluster, rows):
+def _rasm_outcome(context, cluster: Cluster, rows, track):
     """Is this cluster written-but-not-a-slot, and if so what does it still say?
 
     Returns `None` when the cluster is a slot; otherwise the outcome, which may
@@ -321,6 +303,7 @@ def _rasm_outcome(context, cluster: Cluster, rows):
     if cluster.letter not in _length.CARRIERS:
         return None
     outcome = derive.resolve(CARRIER, context)
+    track.used(CARRIER)
     if isinstance(outcome, Absent):
         return outcome
     if isinstance(outcome, Sets) and outcome.target is Target.PREVIOUS:
@@ -406,7 +389,7 @@ def _apply_cross_word_noon(reading, drafts, right_context, scribe) -> None:
         donor = word_index - 1
         if donor < 0:
             continue
-        span = [d for d in drafts if _word_of(reading, d) == donor]
+        span = [d for d in drafts if word_of(reading, d) == donor]
         if not span:
             continue
         last = span[-1]
@@ -432,116 +415,6 @@ def _apply_cross_word_noon(reading, drafts, right_context, scribe) -> None:
 
 
 # ------------------------------------------------------------------ finishing
-def _apply_ledger(reading: Reading, drafts, ledger: Ledger, track) -> None:
-    """An entry for *this* verse that does not resolve is an error.
-
-    It used to be a bare `continue`, which put the skeleton check -- the thing
-    documented as catching ordinal drift -- behind the failure it exists to
-    catch. Four of ten shipped entries silently did nothing, and one of them
-    named a word whose skeleton would have rejected it outright. A Ledger with
-    entries that never fire is worse than no Ledger: it reads as coverage.
-    """
-    for supply in ledger.supplies:
-        if not _addresses(supply.ref, reading.verse):
-            continue
-        ordinal = _ordinal(reading, drafts, supply.ref)
-        if ordinal is None or ordinal >= len(drafts):
-            raise BuildError(
-                f"{reading.verse}: ledger entry {supply.ref} does not resolve "
-                f"to a slot -- the verse has {len(drafts)} slots. The index is "
-                f"zero-based within its word; check the word number too."
-            )
-        _check_skeleton(reading, drafts, ordinal, supply)
-        _set(drafts[ordinal], drafts, supply.fact, supply.value, Target.HERE)
-        track.from_ledger += 1
-
-
-def _addresses(ref, verse: VerseRef) -> bool:
-    """Is this entry about this verse at all? Separating the two meanings of
-    an unresolved address is what lets the second one be loud."""
-    if isinstance(ref, VerseSlot):
-        return ref.verse == verse
-    return isinstance(ref, WordSlot) and ref.location.verse == verse
-
-
-def _ordinal(reading: Reading, drafts, ref) -> int | None:
-    """A verse-scoped ordinal is robust and unreadable, so entries may be
-    written word-relative and are resolved here (ADR-001 §5.1)."""
-    if isinstance(ref, VerseSlot):
-        return ref.ordinal if ref.verse == reading.verse else None
-    if not isinstance(ref, WordSlot) or ref.location.verse != reading.verse:
-        return None
-    word = ref.location.word - 1
-    span = [i for i, d in enumerate(drafts) if _word_of(reading, d) == word]
-    return span[ref.index] if 0 <= ref.index < len(span) else None
-
-
-def _check_skeleton(reading: Reading, drafts, ordinal: int, supply) -> None:
-    """The mandatory `skeleton` is what catches ordinal drift. Without it a
-    Ledger entry silently starts describing a different slot."""
-    word = _word_of(reading, drafts[ordinal])
-    actual = "".join(
-        ABJAD[d.letter.value] for d in drafts if _word_of(reading, d) == word
-    )
-    if actual != supply.skeleton:
-        raise BuildError(
-            f"{reading.verse} slot {ordinal}: ledger entry claims skeleton "
-            f"{supply.skeleton!r} but the word is {actual!r}. The ordinal has "
-            f"drifted, or the entry names the wrong word."
-        )
-
-
-def _apply_allah_lexeme(reading: Reading, drafts) -> None:
-    """Word by word, not verse by verse.
-
-    The lexeme is a property of one word. Run over the whole verse, a word
-    ending in lām or hamza lends its last slot to the next word's opening lām
-    and `لَّهُم` acquires the divine name's long ā.
-    """
-    for word_index in range(len(reading.words)):
-        span = [d for d in drafts if _word_of(reading, d) == word_index]
-        letters = [d.letter for d in span]
-        nuclei = [d.nucleus for d in span]
-        for index in lexeme.allah_long_a(letters, nuclei):
-            span[index].nucleus = lexeme.relengthened(span[index].nucleus)
-
-
-def _apply_pausal_lexemes(reading: Reading, drafts, lexicon: Lexicon) -> None:
-    """The seven alifs. Uthmani marks them `۠` at 66 sites; IndoPak writes a
-    plain final ālif, indistinguishable by any IndoPak grapheme from an
-    ordinary length carrier — so the fact is lexical, not orthographic."""
-    if not lexicon.pausal_lexemes:
-        return
-    for word_index in range(len(reading.words)):
-        span = [d for d in drafts if _word_of(reading, d) == word_index]
-        if not span:
-            continue
-        if lexicon.is_pausal(_vocalised(span)):
-            span[-1].nucleus = PausalLong(Quality.A)
-
-
-def _vocalised(span) -> str:
-    """A skeleton that also spells its vowels.
-
-    Plain letters are not enough here: `أَنَا` and `إِنَّا` share the letters
-    ء-ن, and only the vowels tell them apart. Still one string, still keyed by
-    canonical facts, still readable in the YAML.
-    """
-    out = []
-    for draft in span:
-        quality = getattr(draft.nucleus, "quality", None)
-        out.append(
-            ABJAD[draft.letter.value]
-            + ("~" if draft.onset is Onset.GEMINATE else "")
-            + (quality.value if quality else "")
-        )
-    return "".join(out)
-
-
-def _word_of(reading: Reading, draft) -> int:
-    return reading.clusters[draft.cluster].word if draft.cluster >= 0 else -1
-
-
 def _assemble(
     reading: Reading, drafts, riwayah, selection,
 ) -> tuple[Score, dict[int, int]]:
