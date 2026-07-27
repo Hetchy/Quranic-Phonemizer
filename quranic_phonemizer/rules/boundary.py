@@ -200,7 +200,12 @@ class TaaMarbutaAtWaqf:
         # tāʾ marbūṭa is still the word's last slot, so "final" here means the
         # last slot that is not nunation.
         return Verdict(
-            Occurrence(mint(Rule.WAQF_ENDING, at), Rule.WAQF_ENDING,
+            # `variant=1` because `WaqfEnding` declares the same rule and both
+            # fire on this slot -- on different aspects, so E1 is right not to
+            # complain and both are correct. Sharing an id made 405 pairs of
+            # occurrences indistinguishable to any projection asking which
+            # classifier produced an attribution.
+            Occurrence(mint(Rule.WAQF_ENDING, at, variant=1), Rule.WAQF_ENDING,
                        Participants((at,))),
             (Realize(at, Aspect.ONSET, (Consonant(CanonLetter.HEH),)),),
         )

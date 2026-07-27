@@ -49,6 +49,17 @@ def _every_sound_is_hosted_once(performance: Performance) -> None:
 
 def _every_attribution_resolves(performance: Performance) -> None:
     known = {occurrence.id for occurrence in performance.occurrences}
+    if len(known) != len(performance.occurrences):
+        seen: dict[object, int] = {}
+        for occurrence in performance.occurrences:
+            seen[occurrence.id] = seen.get(occurrence.id, 0) + 1
+        clash = next(i for i, n in seen.items() if n > 1)
+        raise LawError(
+            f"P2: occurrence id {clash} was minted twice. Two classifiers "
+            f"sharing a Rule must pass different `variant`s to `mint`, or "
+            f"every attribution citing the id is ambiguous about which one "
+            f"produced it."
+        )
     for attribution in performance.attributions:
         if attribution.by not in known:
             raise LawError(

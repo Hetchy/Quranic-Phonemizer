@@ -10,7 +10,6 @@ from dataclasses import dataclass
 
 from ..model.address import (
     BoundaryPlan,
-    OccurrenceId,
     Riwayah,
     SlotId,
     SoundId,
@@ -46,6 +45,7 @@ from .plan import (
     SoundFeature,
     Verdict,
 )
+from .plan import mint as plan_mint
 
 class MaterialisationError(AssertionError):
     """A Plan that cannot become a Performance. Names both addresses."""
@@ -67,15 +67,10 @@ class _Mint:
 
     verse: object
     sounds: int = 0
-    occurrences: int = 0
 
     def sound(self) -> SoundId:
         self.sounds += 1
         return SoundId(self.verse, self.sounds)
-
-    def occurrence(self) -> OccurrenceId:
-        self.occurrences += 1
-        return OccurrenceId(self.verse, self.occurrences)
 
 
 def perform(
@@ -158,7 +153,17 @@ def _materialise(
     selection: VariantSelection,
 ) -> Performance:
     mint = _Mint(score.words[0].location.verse if score.words else None)
-    plain = Occurrence(mint.occurrence(), Rule.PLAIN, Participants())
+    # Minted the same way every other occurrence is. It used to come from a
+    # sequential counter sharing one number space with `plan.mint`'s computed
+    # ordinals, so the plain occurrence took id `verse!1` and collided with
+    # whatever rule sits at index 0 firing on slot 1 -- 20:55 `مِنْهَا`, where
+    # izhar halqi does. Two minting schemes in one space is the defect; the
+    # 405 waqf duplicates were the other half of it.
+    plain = Occurrence(
+        plan_mint(Rule.PLAIN, SlotId(score.words[0].location.verse, 0)),
+        Rule.PLAIN,
+        Participants(),
+    )
     sounds: list[tuple[SoundId, Sound]] = []
     attributions: list[Attribution] = []
     occurrences: list[Occurrence] = []

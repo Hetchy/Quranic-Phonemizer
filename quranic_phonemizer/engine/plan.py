@@ -101,9 +101,27 @@ def conflict_key(effect: Effect) -> tuple:
 #: are request-local, so any injection is fine as long as it is a function.
 _RULE_SLOT_STRIDE = 1_000_000
 
+#: Two *classifiers* may legitimately declare the same `Rule` -- `WaqfEnding`
+#: and `TaaMarbutaAtWaqf` both produce `WAQF_ENDING`, on different aspects of
+#: one slot, so E1 does not fire and both are correct. Keyed on rule and slot
+#: alone they minted one id for two occurrences: 405 collisions over the
+#: corpus, every attribution citing one of them ambiguous about which
+#: classifier produced it. That defeats the whole reason occurrences exist.
+_VARIANT_STRIDE = 100_000_000
 
-def mint(rule: Rule, at: SlotId) -> OccurrenceId:
-    ordinal = list(Rule).index(rule) * _RULE_SLOT_STRIDE + at.ordinal
+
+def mint(rule: Rule, at: SlotId, variant: int = 0) -> OccurrenceId:
+    """`variant` separates two classifiers that share a `Rule`.
+
+    A small integer rather than the classifier's identity, because the id has
+    to be stable across runs and a class name is not an address. A classifier
+    that needs one declares it next to its rule.
+    """
+    ordinal = (
+        variant * _VARIANT_STRIDE
+        + list(Rule).index(rule) * _RULE_SLOT_STRIDE
+        + at.ordinal
+    )
     return OccurrenceId(at.verse, ordinal)
 
 
