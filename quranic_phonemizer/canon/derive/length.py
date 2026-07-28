@@ -6,6 +6,8 @@ at its own position, decided by the preceding nucleus, not the glyph.
 from __future__ import annotations
 
 from ...model.canon import (
+    CARRIER_OF,
+    CARRIERS,
     CanonLetter,
     Long,
     NucleusKind,
@@ -16,13 +18,6 @@ from ...model.canon import (
 from ...model.inscription import SlotFact
 from .vocabulary import Absent, Context, Outcome, Sets, Shows, Target, register
 from .silah import carries_silah
-
-CARRIER_OF: dict[Quality, CanonLetter] = {
-    Quality.A: CanonLetter.ALIF,
-    Quality.U: CanonLetter.WAW,
-    Quality.I: CanonLetter.YA,
-}
-CARRIERS = frozenset(CARRIER_OF.values())
 
 #: Roles that give a cluster a vowel of its own, so it cannot be a carrier.
 VOWEL_ROLES = frozenset(

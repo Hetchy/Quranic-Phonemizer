@@ -51,7 +51,7 @@ class GhunnahMushaddadah:
                 Realize(
                     at,
                     Aspect.ONSET,
-                    (Consonant(slot.letter, geminate=True, nasal=True),),
+                    Consonant(slot.letter, geminate=True, nasal=True),
                 ),
             ),
         )
@@ -86,10 +86,10 @@ class MeemSakinah:
                         Realize(
                             at,
                             Aspect.ONSET,
-                            (Nasal(nasal_place(
+                            Nasal(nasal_place(
                                 near.score.selection,
                                 KhilafId.IKHFAA_SHAFAWI_NASAL,
-                            )),),
+                            )),
                         ),
                     ),
                 )
@@ -100,7 +100,7 @@ class MeemSakinah:
                         Realize(
                             following.id,
                             Aspect.ONSET,
-                            (Consonant(L.MEEM, geminate=True, nasal=True),),
+                            Consonant(L.MEEM, geminate=True, nasal=True),
                         ),
                         MergeInto(at, Aspect.ONSET, following.id, Aspect.ONSET),
                     ),

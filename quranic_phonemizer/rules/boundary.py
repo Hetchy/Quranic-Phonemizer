@@ -77,7 +77,7 @@ class WaqfEnding:
             effects.append(Silence(at, Aspect.NUCLEUS))
         elif slot.nucleus.kind is NucleusKind.PAUSAL_LONG:
             effects.append(
-                Realize(at, Aspect.NUCLEUS, (Vowel(slot.nucleus.quality, True),))
+                Realize(at, Aspect.NUCLEUS, Vowel(slot.nucleus.quality, True))
             )
         if slot.onset is Onset.SILAH and not self._kept(near, word):
             # The pronoun yaa's onset must go too, or a stray glide remains,
@@ -242,7 +242,7 @@ class TaaMarbutaAtWaqf:
             # fires on this slot, on a different aspect.
             Occurrence(mint(Rule.WAQF_ENDING, at, variant=1), Rule.WAQF_ENDING,
                        Participants((at,))),
-            (Realize(at, Aspect.ONSET, (Consonant(CanonLetter.HEH),)),),
+            (Realize(at, Aspect.ONSET, Consonant(CanonLetter.HEH)),),
         )
 
 
