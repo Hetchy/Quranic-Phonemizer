@@ -6,6 +6,27 @@ from dataclasses import dataclass
 
 from ..model.canon import CanonLetter, Rule
 
+#: What a quiescent noon's table may name. The remainder is IKHFAA_HAQIQI, and
+#: IZHAR_MUTLAQ is derived within a word rather than selected by a letter.
+NOON_OUTCOMES = frozenset({
+    Rule.IZHAR_HALQI,
+    Rule.IDGHAM_BI_GHUNNAH,
+    Rule.IDGHAM_BILA_GHUNNAH,
+    Rule.IQLAB,
+})
+
+#: What a quiescent meem's table may name. The remainder is IZHAR_SHAFAWI.
+MEEM_OUTCOMES = frozenset({Rule.IKHFAA_SHAFAWI, Rule.IDGHAM_SHAFAWI})
+
+#: What the pair table may name. IDGHAM_MUTAMATHILAYN is absent: like into
+#: like fires on any repeated letter, so no pair needs listing.
+PAIR_OUTCOMES = frozenset({
+    Rule.IDGHAM_MUTAJANISAYN_KAMIL,
+    Rule.IDGHAM_MUTAJANISAYN_NAQIS,
+    Rule.IDGHAM_MUTAQARIBAYN,
+})
+
+
 @dataclass(frozen=True, slots=True)
 class Followers:
     """Which outcome each following letter selects. Disjoint by construction;

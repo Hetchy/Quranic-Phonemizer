@@ -60,11 +60,11 @@ supplies:
   - {slot: "27:36:8#3", skeleton: "ءتني", fact: ONSET, value: SILAH,
      citation: "Hafs; ithbat and hadhf of the yaa"}
 
-  # The four sakt sites. Both scripts write a mark for them, but Uthmani's
-  # `ۜ` is declared polysemous -- it is also a khilaf site -- so the adapter
-  # defers rather than deciding, which is what polysemous is for. Four
-  # locations, no rule can reach them, and every tajwid source lists exactly
-  # these four: the Ledger's own definition.
+  # The four sakt sites. Both scripts write `ۜ` at them, but what that mark
+  # supplies is LETTER = SEEN; the sakt is a second sense of the same scalar
+  # and no rule over canonical context can separate the two. Four locations,
+  # and every tajwid source lists exactly these four: the Ledger's own
+  # definition.
   # 18:1:11 `عِوَجَاۜ` is deliberately absent. Its skeleton is not the same in
   # the two scripts -- IndoPak builds the tanwin nun and Uthmani does not, which
   # is one of the L1 rows -- so a mandatory skeleton cannot match both. The

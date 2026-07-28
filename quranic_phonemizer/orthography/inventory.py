@@ -36,7 +36,6 @@ _SECTIONS = {
     "decorates",
     "advice",
     "structural",
-    "polysemous",
 }
 
 
@@ -88,7 +87,6 @@ class MarkEntry:
     saying something about the one before it."""
     advice: StopAdvice | None = None
     structural: bool = False
-    polysemous: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -191,7 +189,6 @@ def load_inventory(
     _load_decorates(data, path, marks)
     _load_advice(data, path, marks)
     _load_structural(data, path, marks)
-    _load_polysemous(data, path, marks)
 
     overlap = sorted(set(letters) & set(marks))
     if overlap:
@@ -357,27 +354,3 @@ def _load_structural(data: Any, path: Path, marks: dict[str, MarkEntry]) -> None
         )
 
 
-def _load_polysemous(data: Any, path: Path, marks: dict[str, MarkEntry]) -> None:
-    """Declaring a scalar polysemous forces the adapter to defer to the
-    Ledger instead of guessing which sense applies."""
-    for char, senses in (data.get("polysemous") or {}).items():
-        where = f"{path} polysemous[{char!r}]"
-        if char not in marks:
-            raise InventoryError(
-                f"{where}: a polysemous scalar must also be declared in one of "
-                f"{sorted(_SECTIONS - {'polysemous'})}"
-            )
-        base = marks[char]
-        marks[char] = MarkEntry(
-            role=base.role,
-            cls=base.cls,
-            fact=base.fact,
-            value=base.value,
-            derivation=base.derivation,
-            decorates=base.decorates,
-            silences=base.silences,
-            omitted=base.omitted,
-            advice=base.advice,
-            structural=base.structural,
-            polysemous=tuple(str(s) for s in senses),
-        )

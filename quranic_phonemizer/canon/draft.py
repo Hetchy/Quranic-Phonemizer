@@ -36,6 +36,22 @@ class _Draft:
     annotations: frozenset[Annotation] = frozenset()
 
 
+def fact_of(draft, fact: SlotFact):
+    """What a draft currently says about one fact. The mirror of `set_fact`."""
+    match fact:
+        case SlotFact.LETTER:
+            return draft.letter
+        case SlotFact.ONSET:
+            return draft.onset
+        case SlotFact.NUCLEUS:
+            return draft.nucleus
+        case SlotFact.SAKT:
+            return draft.sakt_after
+        case SlotFact.ANNOTATION:
+            return draft.annotations
+    return None
+
+
 def set_fact(draft, drafts, fact: SlotFact, value, target: Target,
          scribe: Scribe | None = None, offset: int = -1) -> None:
     subject = draft if target is Target.HERE else (drafts[-1] if drafts else None)
