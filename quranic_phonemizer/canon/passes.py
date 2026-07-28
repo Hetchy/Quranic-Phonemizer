@@ -19,15 +19,20 @@ from ..model.canon import (
     Quality,
     Short,
 )
+from ..model.inscription import SlotFact
 from ..orthography.adapter import Reading
 from .derive import Target, lexeme
-from .draft import set_fact
+from .draft import fact_of, set_fact
 from .ledger import Ledger, VerseSlot, WordSlot
 from .lexicon import Lexicon
 
 
 class LedgerAddressError(ValueError):
     """An entry for this verse that does not resolve to a slot."""
+
+
+class LedgerWitnessError(ValueError):
+    """A script asserted to write a fact that it does not write."""
 
 
 def word_of(reading: Reading, draft) -> int:
@@ -51,19 +56,51 @@ def apply_ledger(reading: Reading, drafts, ledger: Ledger, track) -> None:
     An entry that silently matches nothing is worse than no entry: it reads
     as coverage that was never checked.
     """
+    _check_witnesses(reading, drafts, ledger)
     for supply in ledger.supplies:
         if not _addresses(supply.ref, reading.verse):
             continue
-        ordinal = _ordinal(reading, drafts, supply.ref)
-        if ordinal is None or ordinal >= len(drafts):
-            raise LedgerAddressError(
-                f"{reading.verse}: ledger entry {supply.ref} does not resolve "
-                f"to a slot -- the verse has {len(drafts)} slots. The index is "
-                f"zero-based within its word; check the word number too."
-            )
-        _check_skeleton(reading, drafts, ordinal, supply)
+        ordinal = _resolve(reading, drafts, supply.ref)
+        _check_skeleton(reading, drafts, ordinal, supply.skeleton)
         set_fact(drafts[ordinal], drafts, supply.fact, supply.value, Target.HERE)
         track.from_ledger += 1
+
+
+def _check_witnesses(reading: Reading, drafts, ledger: Ledger) -> None:
+    """An assert claims this script writes the fact itself, so it is checked
+    before any supply is applied -- otherwise it agrees with the supply."""
+    for row in ledger.asserts:
+        if row.script is not reading.script:
+            continue
+        if not _addresses(row.ref, reading.verse):
+            continue
+        ordinal = _resolve(reading, drafts, row.ref)
+        _check_skeleton(reading, drafts, ordinal, row.skeleton)
+        written = fact_of(drafts[ordinal], row.fact)
+        # A draft holds the set of its annotations, so agreement is membership.
+        agrees = (
+            row.value in written
+            if row.fact is SlotFact.ANNOTATION
+            else written == row.value
+        )
+        if not agrees:
+            raise LedgerWitnessError(
+                f"{reading.verse} slot {ordinal}: {row.script.value} is said "
+                f"to write {row.fact.value} {row.value!r}, and writes "
+                f"{written!r}. An assert records what a script already says."
+            )
+
+
+def _resolve(reading: Reading, drafts, ref) -> int:
+    """The verse ordinal an entry names. Unresolvable is an error, not a skip."""
+    ordinal = _ordinal(reading, drafts, ref)
+    if ordinal is None or ordinal >= len(drafts):
+        raise LedgerAddressError(
+            f"{reading.verse}: ledger entry {ref} does not resolve to a slot "
+            f"-- the verse has {len(drafts)} slots. The index is zero-based "
+            f"within its word; check the word number too."
+        )
+    return ordinal
 
 
 def _addresses(ref, verse: VerseRef) -> bool:
@@ -86,17 +123,17 @@ def _ordinal(reading: Reading, drafts, ref) -> int | None:
     return span[ref.index] if 0 <= ref.index < len(span) else None
 
 
-def _check_skeleton(reading: Reading, drafts, ordinal: int, supply) -> None:
+def _check_skeleton(reading: Reading, drafts, ordinal: int, claimed: str) -> None:
     """The mandatory `skeleton` is what catches ordinal drift. Without it a
     Ledger entry silently starts describing a different slot."""
     word = word_of(reading, drafts[ordinal])
     actual = "".join(
         ABJAD[d.letter.value] for d in drafts if word_of(reading, d) == word
     )
-    if actual != supply.skeleton:
+    if actual != claimed:
         raise LedgerAddressError(
             f"{reading.verse} slot {ordinal}: ledger entry claims skeleton "
-            f"{supply.skeleton!r} but the word is {actual!r}. The ordinal has "
+            f"{claimed!r} but the word is {actual!r}. The ordinal has "
             f"drifted, or the entry names the wrong word."
         )
 
