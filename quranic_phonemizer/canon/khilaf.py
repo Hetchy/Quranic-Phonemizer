@@ -1,0 +1,78 @@
+"""Khilaf the Score carries: a word two readings vowel differently.
+
+Separate from `rules/khilaf.py`, which chooses between two performances of
+one Score. Here the Scores themselves differ, so the choice is made at build.
+"""
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+
+from ..model.address import KhilafId
+from ..model.canon import Annotation, Quality
+from ..orthography.adapter import Reading
+from .passes import vocalised, word_of
+
+
+@dataclass(frozen=True, slots=True)
+class VowelSite:
+    """One word, and which of its slots the readings disagree about."""
+
+    khilaf: KhilafId
+    index: int
+    options: dict[str, Quality]
+    default: str
+    forms: frozenset[str]
+    """Every vocalised spelling either wajh writes, so the word is recognised
+    whichever one its script chose."""
+    annotation: Annotation | None = None
+    """A fact of the site rather than of the option chosen: an imala site is
+    imala whichever of its two vowels is read for it."""
+
+
+@dataclass(frozen=True, slots=True)
+class VowelKhilaf:
+    """Sites keyed by canonical letters, which is what a caller selects on."""
+
+    sites: dict[str, VowelSite] = field(default_factory=dict)
+
+    def of(self, form: str) -> tuple[str, VowelSite] | None:
+        for name, site in self.sites.items():
+            if form in site.forms:
+                return name, site
+        return None
+
+    def points(self) -> dict[str, dict[str, object]]:
+        """What a caller may choose, without reading the data file."""
+        return {
+            name: {
+                "khilaf": site.khilaf.value,
+                "options": sorted(site.options),
+                "default": site.default,
+                "annotation": site.annotation.value if site.annotation else None,
+            }
+            for name, site in self.sites.items()
+        }
+
+
+def apply_vowel_khilaf(khilaf: VowelKhilaf):
+    """Build the pass. Bound by the riwayah like the other lexeme passes."""
+
+    def apply(reading: Reading, drafts, lexicon, scribe, selection) -> None:
+        del lexicon, scribe
+        if not khilaf.sites:
+            return
+        for word in range(len(reading.words)):
+            span = [d for d in drafts if word_of(reading, d) == word]
+            found = khilaf.of(vocalised(span)) if span else None
+            if found is None:
+                continue
+            name, site = found
+            chosen = selection.chosen(site.khilaf, site=name)
+            quality = site.options[chosen or site.default]
+            # The kind is the script's; only the vowel is under dispute.
+            held = span[site.index].nucleus
+            span[site.index].nucleus = type(held)(quality)
+            if site.annotation is not None:
+                span[site.index].annotations |= {site.annotation}
+
+    return apply

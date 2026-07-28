@@ -1,33 +1,48 @@
+# The letter names of the muqaṭṭaʿāt, spelled out.
+#
+# Shared rather than per-riwayah: what the letter ا is *called* is a fact about
+# Arabic, and every riwayah spells it the same. What differs between riwāyāt is
+# the madd length, which this model does not store.
+#
+# Written in the vocalised canonical notation `canon/passes.py::_vocalised`
+# already uses -- `ABJAD` letters, a lowercase vowel for a short nucleus, an
+# uppercase one for a long, nothing at all for silent. Canonical letters, so
+# one table serves every script; nothing here is a glyph.
+#
+#   ءaلiف   hamza+a, lam+i, fa+silent          ʔalif
+#   لAم     lam+long a, mim+silent             laam
+#   عaين    ain+a, ya+silent, noon+silent      ʕayn
+#
+# The names are *slots*, not sounds. They then go through the ordinary rules,
+# which is the point: 2:1 `الٓمٓ` reads `ʔalif laam miim` with the lām's final
+# mīm assimilating into the mīm's first, and nothing here knows that. The
+# engine produces it because the slots are ordinary slots.
 schema_version: 1
 
-forms:
-  - حم
-  - الم
-  - الر
-  - المص
-  - المر
-  - كهيعص
-  - طسم
-  - طس
-  - طه
-  - يس
-  - عسق
-  - ص
-  - ق
-  - ن
+# The twenty-nine openings, as the fourteen distinct letter skeletons they are
+# written with. A closed class of the Quran, so it is named rather than derived:
+# no orthographic test separates `الٓمٓ` from `أَلَمْ`, which shares its letters.
+#
+# An opening is written with none of its letters voweled, with two exceptions
+# that are not vowels of the reading. IndoPak draws a shadda on the mim of
+# `الم` for the idgham the names `laam` and `miim` make between them, and 3:1
+# carries a fatha on that mim, which is the vowel the wasl hamza of the
+# `ٱللَّهُ` opening 3:2 gives it.
+openings: [الم, المص, المر, الر, كهيعص, طه, طسم, طس, يس, ص, حم, عسق, ق, ن]
 
 names:
-  ا: أَلِفْ
-  ح: حَا
-  ي: يَا
-  ط: طَا
-  ه: هَا
-  ر: رَا
-  ل: لَامْ
-  م: مِيمْ
-  س: سِينْ
-  ك: كَافْ
-  ص: صَادْ
-  ق: قَافْ
-  ن: نُونْ
-  ع: عَيْنْ
+  ء: "ءaلiف"
+  ا: "ءaلiف"
+  ح: "حA"
+  ر: "رA"
+  س: "سIن"
+  ص: "صAد"
+  ط: "طA"
+  ع: "عaين"
+  ق: "قAف"
+  ك: "كAف"
+  ل: "لAم"
+  م: "مIم"
+  ن: "نUن"
+  ه: "هA"
+  ي: "يA"

@@ -1,46 +1,7 @@
-from .orthography import (
-    GraphemeRole,
-    Harakah,
-    Letter,
-    LetterForm,
-    LetterUnit,
-    Location,
-    OrthographicHint,
-    SHADDAH,
-    SmallVowel,
-    SourceGrapheme,
-    SourceMark,
-    SourceWord,
-    StopSign,
-    Tanween,
-    VowelQuality,
-)
-from .recitation import BoundaryMode, Recitation, Riwayah, WordRealization
-from .segments import Consonant, Nasal, Release, Segment, Vowel
+from .canon import CanonLetter, Nucleus, Onset, Quality, Rule, Score, ScoreWord, Slot
+from .address import Location, Riwayah, Script, SlotId, VerseRef
 
 __all__ = [
-    "Consonant",
-    "BoundaryMode",
-    "Harakah",
-    "GraphemeRole",
-    "Letter",
-    "LetterForm",
-    "LetterUnit",
-    "Location",
-    "Nasal",
-    "OrthographicHint",
-    "Recitation",
-    "Release",
-    "Riwayah",
-    "SHADDAH",
-    "Segment",
-    "SmallVowel",
-    "SourceGrapheme",
-    "SourceMark",
-    "SourceWord",
-    "StopSign",
-    "Tanween",
-    "Vowel",
-    "VowelQuality",
-    "WordRealization",
+    "CanonLetter", "Location", "Nucleus", "Onset", "Quality", "Riwayah",
+    "Rule", "Score", "ScoreWord", "Script", "Slot", "SlotId", "VerseRef",
 ]

@@ -1,0 +1,104 @@
+# Closed classes of Arabic, not of this corpus. Every key is canonical
+# letters, so one entry serves every script of the riwayah.
+#
+# These replace a 575-skeleton table learned from Uthmani's own U+0671
+# positions. The three morphological rules in canon/derive/wasl.py do the
+# work; what remains is a handful of lexemes a grammarian names without
+# seeing this corpus. Entries are stems: the loader also matches a stem plus
+# any clitic pronoun, so `إيمان` covers `إيمانكم` and `إيمانهم` too.
+#
+# A rise past the declared budget means a rule is
+# missing, not that the corpus is irregular.
+schema_version: 1
+
+# Hamza-initial particles that look prosthetic and are not.
+wasl_particles: ["ءن", "ءذ", "ءذن"]
+
+# Proper nouns, form-IV verbal nouns, and the ʾū- lexemes.
+wasl_exempt:
+  - "ءسرءل"      # إسرائيل
+  - "ءسمعل"      # إسماعيل
+  - "ءبرهم"      # إبراهيم
+  - "ءبلس"       # إبليس
+  - "ءسحق"       # إسحاق
+  - "ءمن"        # إيمان
+  - "ءحسن"       # إحسان
+  - "ءخون"       # إخوان
+  - "ءلون"       # ألوان
+  - "ءلسنت"      # ألسنة
+  - "ءلق"        # ألقى
+  - "ءحد"        # إحدى
+  - "ءخرج"       # إخراج
+  - "ءلت"        # سألت
+  - "ءت"         # أوتوا
+  - "ءل"         # أولو
+  - "ءثم"        # إثم
+  - "ءلحق"      # ألحق
+  - "ءتء"       # إيتاء
+  - "ءطعم"      # إطعام
+  - "ءليس"      # إلياس
+  # hamza + lām roots. These collide with the article and only a dictionary
+  # separates them, so they are listed. `is_wasl` consults the article first,
+  # which is what keeps a three-letter entry from swallowing the definite
+  # class — see the ordering note there.
+  - "ءلف"       # ألّف، ألف، ألفينا
+  - "ءلزم"      # ألزم
+  - "ءله"       # ألهم، ألهاكم
+  - "ءلوح"      # ألواح
+  - "ءلسن"      # ألسنة
+  - "ءلحف"      # إلحاف
+  - "ءلحد"      # إلحاد
+  - "ءلد"       # ألدّ
+  # nouns and form-IV verbs
+  - "ءخو"       # إخوة
+  - "ءخت"       # أخت
+  - "ءدرس"      # إدريس
+  - "ءفك"       # إفك
+  - "ءصر"       # إصر
+  - "ءعط"       # أعطى
+  - "ءد"        # إدّ
+  - "ءنتم"      # أنتم
+
+# Hamza + doubled lam, where the hamza is not prosthetic. Its own list: the
+# ambiguity here is `ألَّف` and `إلَّم` against `الَّذى` and `اللَّه`, which is
+# not the ambiguity `wasl_exempt` resolves, and the two collide on `ءلت`.
+wasl_exempt_doubled:
+  - "ءلف"       # ألّف
+  - "ءلم"       # إلّم
+  - "ءلن"       # ألّن
+
+# Kasra although the third letter carries damma, because that damma is not
+# the stem's. Two closed classes, one behaviour: the ten nouns, where the
+# damma is an inflectional ending, and the defective verbs of `يَمْشِى`,
+# `يَقْضِى`, `يَبْنِى` and `يَأْتِى`, where it belongs to the plural waw that
+# replaced their dropped final radical. `ٱدْعُوا۟` keeps its damma: `يَدْعُو`
+# has one of its own, and nothing in the rasm shows the difference.
+wasl_kasra: ["ءسم", "ءبن", "ءبنة", "ءمرء", "ءمرءة", "ءثنن", "ءثنتن", "ءست",
+             "ءمش", "ءقض", "ءءت", "ءءتن"]
+
+# The seven alifs: short in wasl, long at pause.
+# `لَٰكِنَّ` and `لَّـٰكِنَّا۠` share a key even with the vowels and the
+# gemination spelled, so the second is a Ledger entry rather than a
+# lexeme: one site, and no rule can reach it. `قَوَارِيرَا۠` is the same:
+# only the first of its three sites is pausal.
+pausal_lexemes: ["ءaنa", "سaلسaبiلa"]
+
+# Form VIII with lam as the first radical. After a wasl hamza these are shaped
+# exactly like the article before a sun letter -- ءلت... either way -- and the
+# article's gemination is an attestation rather than a canonical Onset, so no
+# rule can separate them from the Score. A closed grammatical class: three
+# roots, enumerable from a grammar by someone who has never seen this corpus.
+#
+# Matched whole, not as prefixes: التقوى extends التقى and is the article
+# before a sun letter, so each agreement suffix is its own entry.
+#
+#   لقي  التقى، التقتا، التقيتم، التقطه، التقمه
+#   لمس  التمسوا
+#   لفف  التفت
+form_eight_lam: ["ءلتق", "ءلتقت", "ءلتقيتم", "ءلتقط", "ءلتقم", "ءلتمس",
+                 "ءلتفت"]
+
+# What the name spells from its doubled lam onward, vocative included. The
+# heavy lam and the unwritten alif belong to this lexeme and to no other
+# word that opens ال + لـه: ٱللَّهْو and ٱللَّهَب carry a third radical.
+divine_name: ["له", "لهم"]

@@ -1,0 +1,64 @@
+# Points of legitimate disagreement inside Hafs. A riwayah's khilaf is its
+# own: nothing here is shared, and another riwayah inherits none of it.
+#
+# Sites are keyed in the vocalised canonical notation `canon/passes.py`
+# already uses -- `ABJAD` letters, `~` for a geminate, a vowel letter for the
+# nucleus -- so one entry serves every script. Letters alone are not enough:
+# `فِرْقٍ` and `فَرِيقًا` spell the same five. Read from the Score, so a
+# vowel a stop removes is still in the key.
+#
+# `disputed_at` names the junction the dispute lives in. In the other one the
+# reading is settled and rules/tafkheem.py gives it.
+schema_version: 1
+
+# Five words whose quiescent raa is read both ways. Every other raa in the
+# Quran is settled by rule; these are the residue no rule reaches.
+#
+#   فِرْقٍ      the following qaaf is istilaa but carries a kasra of its own
+#   ٱلْقِطْرِ    the sakin taah before it is istilaa, the kasra before that is not
+#   مِصْرَ       the sakin saad before it is istilaa, the kasra before that is not
+#   نُذُرِ       a damma governs it once its own kasra is dropped
+#   يَسْرِ       a sakin seen before it, and a fatha before that
+raa_tafkheem:
+  فiرقiن:       {disputed_at: join, default: heavy}
+  ءaلقiطرi:     {disputed_at: stop, default: light}
+  مiصرa:        {disputed_at: stop, default: heavy}
+  بiمiصرa:      {disputed_at: stop, default: heavy}
+  وaنuذuرi:     {disputed_at: stop, default: heavy}
+  بiءaلنuذuرi:  {disputed_at: stop, default: heavy}
+  يaسرi:        {disputed_at: stop, default: light}
+  ءaسرi:        {disputed_at: stop, default: light}
+  فaءaسرi:      {disputed_at: stop, default: light}
+
+# Words the two readings vowel differently, so the Score itself differs and
+# the choice is made at build. `forms` lists every vocalised spelling either
+# wajh writes -- Uthmani prints one and IndoPak the other -- and `slot` is
+# which of the word's slots carries the vowel under dispute.
+#
+#   ضَعْف   30:54, three times. Both are narrated from Hafs.
+nucleus_vowel:
+  ضعف:
+    slot: 0
+    default: fatha
+    options: {fatha: a, damma: u}
+    forms: [ضaعفiن, ضuعفiن, ضaعفaن, ضuعفaن]
+
+# The one imala in the Quran. The letter is articulated between the two, an
+# `e` that occurs nowhere else in Hafs; the plain `i` is the default so that
+# a single site does not enlarge the vowel inventory. The rule is tagged
+# either way.
+imala_quality:
+  مجرىها:
+    slot: 2
+    default: i
+    annotate: imala
+    options: {e: e, i: i}
+    forms: [مaجرeهa, مaجرiهa]
+
+# The one word whose final yaa a reader may keep or drop at a pause. Both
+# scripts write it small where 19:30 writes the same word's yaa full, which
+# is the mark saying the letter is optional. Joined, it is always said.
+#
+#   ءَاتَىٰنَِۧ  27:36. hadhf gives aataan, ithbat aataanii.
+yaa_ithbat:
+  ءaتaنiيa: {disputed_at: stop, default: hadhf}

@@ -1,3 +1,4 @@
+"""The packed corpus: one binary per riwayah, addressed by location."""
 from __future__ import annotations
 
 import array
@@ -5,11 +6,10 @@ import json
 import struct
 from collections.abc import Mapping
 from dataclasses import dataclass
-from functools import cache
 from pathlib import Path
 from types import MappingProxyType
 
-from .model import Location
+from .model.address import Location
 
 
 @dataclass(frozen=True, slots=True)
@@ -37,7 +37,7 @@ class PackedCorpus:
             raise ValueError(f"Reference starts after it ends: {reference}")
 
         result: list[Location] = []
-        for surah in range(max(low[0], 1), min(high[0], 114) + 1):
+        for surah in range(max(low[0], 1), high[0] + 1):
             verses = self.surah_info.get(str(surah))
             if verses is None:
                 continue
@@ -91,13 +91,13 @@ def _canonical_endpoint(
     )
 
 
-@cache
 def load_corpus(db_path: Path, info_path: Path) -> PackedCorpus:
     raw_info = json.loads(info_path.read_text(encoding="utf-8"))
-    surah_info = {str(surah): tuple(raw_info[str(surah)]) for surah in range(1, 115)}
+    surah_info = {key: tuple(value) for key, value in raw_info.items()}
+    surahs = sorted(int(key) for key in surah_info)
     verse_starts: dict[tuple[int, int], int] = {}
     total_words = 0
-    for surah in range(1, 115):
+    for surah in surahs:
         for ayah, count in enumerate(surah_info[str(surah)], start=1):
             verse_starts[(surah, ayah)] = total_words
             total_words += count

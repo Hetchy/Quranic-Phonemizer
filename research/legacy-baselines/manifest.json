@@ -1,0 +1,125 @@
+{
+  "schema": 1,
+  "legacy_revision": "b3bc53a",
+  "reference": "1-114",
+  "word_count": 77433,
+  "purpose": "information-coverage reference for the new internal model",
+  "caveat": "legacy output has known defects; this is not a correctness oracle",
+  "encoding": "gzip JSON Lines, one line per source word",
+  "modes": {
+    "continuous": {
+      "phonemes": {
+        "file": "continuous.phonemes.jsonl.gz",
+        "rows": 77433,
+        "bytes": 2285752,
+        "sha256": "eab3ce9ce055061badd35ebe682f82ab9b53f03b787e0daaf985a166ae7d5250"
+      },
+      "tajweed_mappings": {
+        "file": "continuous.tajweed_mappings.jsonl.gz",
+        "rows": 77481,
+        "bytes": 13814996,
+        "sha256": "902c9ed409dee4af462b0ccd55dc56e021bae06103aa738e9281ba712a192248"
+      },
+      "letter_phoneme_mappings": {
+        "file": "continuous.letter_phoneme_mappings.jsonl.gz",
+        "rows": 304640,
+        "bytes": 5027775,
+        "sha256": "80a312936fc6a1e0c650e75e222e49ecd9c5794149deb9de6bbd5a7fcad708c3"
+      },
+      "character_phoneme_mappings": {
+        "file": "continuous.character_phoneme_mappings.jsonl.gz",
+        "rows": 77433,
+        "bytes": 135147272,
+        "sha256": "9b4737d6fdbbe1b4a05c6b7ab61c5d75dc8e77a88f6a5c165dbeebdc1ad44b87"
+      },
+      "silent_flags": {
+        "file": "continuous.silent_flags.jsonl.gz",
+        "rows": 338138,
+        "bytes": 5398516,
+        "sha256": "4ff6e08aae334a780730523f587651808d1ab1db4ccebb861577d10cd9d4818c"
+      },
+      "phonetic_text": {
+        "file": "continuous.phonetic_text.jsonl.gz",
+        "rows": 6236,
+        "bytes": 1389319,
+        "sha256": "665ed098b062250f78d8332238b7e612f7e54a9b311e524f8fc4286d50666e0e"
+      }
+    },
+    "verse": {
+      "phonemes": {
+        "file": "verse.phonemes.jsonl.gz",
+        "rows": 77433,
+        "bytes": 2264215,
+        "sha256": "116ca78deceef264bc87dc655bd6f8af8847c9eb9310ed480919400d226e35f7"
+      },
+      "tajweed_mappings": {
+        "file": "verse.tajweed_mappings.jsonl.gz",
+        "rows": 77481,
+        "bytes": 13763823,
+        "sha256": "f981927ad6ade3a43cc0059b1b82cc902c68fabeaef70e82af72d86adaf2f43e"
+      },
+      "letter_phoneme_mappings": {
+        "file": "verse.letter_phoneme_mappings.jsonl.gz",
+        "rows": 305774,
+        "bytes": 5014227,
+        "sha256": "28dfd70089475b4e228ff9cf593cee3a75c4b5132ddd10ccab8f8741c2eb9d8b"
+      },
+      "character_phoneme_mappings": {
+        "file": "verse.character_phoneme_mappings.jsonl.gz",
+        "rows": 77433,
+        "bytes": 135148509,
+        "sha256": "246d0b021e702fa73d3da648e8d8b996971d4519fd1c213f376ec05abe05ff98"
+      },
+      "silent_flags": {
+        "file": "verse.silent_flags.jsonl.gz",
+        "rows": 338138,
+        "bytes": 5399651,
+        "sha256": "bfdab5462b30ab36847c4b3e01228758703c2e6e6623ad963a6a4c1a70e7a363"
+      },
+      "phonetic_text": {
+        "file": "verse.phonetic_text.jsonl.gz",
+        "rows": 6236,
+        "bytes": 1389361,
+        "sha256": "d6e9ea0c5715013d406b7cb61318e7870de734ac4e1e9410a99a915e2de603e1"
+      }
+    },
+    "word": {
+      "phonemes": {
+        "file": "word.phonemes.jsonl.gz",
+        "rows": 77433,
+        "bytes": 2208316,
+        "sha256": "824bcba17ecc25fd1c61d25294968c77a7c3128dbd2b73653100844e12b36c54"
+      },
+      "tajweed_mappings": {
+        "file": "word.tajweed_mappings.jsonl.gz",
+        "rows": 77481,
+        "bytes": 13193304,
+        "sha256": "959daced2b3ed3d49ca801300d670d9f4c8f208a4a6347f93196be86f81de097"
+      },
+      "letter_phoneme_mappings": {
+        "file": "word.letter_phoneme_mappings.jsonl.gz",
+        "rows": 321499,
+        "bytes": 5068403,
+        "sha256": "46b8a25dc8af41c27f34d9b6d53ac938a1315389d15f52485cba328c7f6b1430"
+      },
+      "character_phoneme_mappings": {
+        "file": "word.character_phoneme_mappings.jsonl.gz",
+        "rows": 77433,
+        "bytes": 137001701,
+        "sha256": "c57643de97e52acda8738f091fd998b535cba4d5269beca1d357abd4b135c073"
+      },
+      "silent_flags": {
+        "file": "word.silent_flags.jsonl.gz",
+        "rows": 338138,
+        "bytes": 5414675,
+        "sha256": "524c73df2925090899bf4353c443cd69fee26326af054bf76f9ef782dca63922"
+      },
+      "phonetic_text": {
+        "file": "word.phonetic_text.jsonl.gz",
+        "rows": 6236,
+        "bytes": 1397395,
+        "sha256": "e236dca6588ceab6ca635f341510f1ca71f66ff7470a6469c6a5b17a37d4594e"
+      }
+    }
+  }
+}

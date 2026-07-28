@@ -1,0 +1,111 @@
+# The indopak scalar inventory. Total over the script's scalars: an
+# unlisted scalar is a parse error, never a silent skip (L3).
+schema_version: 1
+script: indopak
+riwayah: hafs
+
+# Every sounded letter carries a haraka, a sukun or a shadda, so a letter
+# with none at all is rasm. Uthmani leaves its carriers bare instead and
+# marks the rasm with `۟`.
+marks_what_it_sounds: true
+
+letters:
+  "ب": BA
+  "ت": TA
+  "ث": THA
+  "ج": JEEM
+  "ح": HA
+  "خ": KHA
+  "د": DAL
+  "ذ": THAL
+  "ر": RA
+  "ز": ZAY
+  "س": SEEN
+  "ش": SHEEN
+  "ص": SAD
+  "ض": DAD
+  "ط": TAH
+  "ظ": ZAH
+  "ع": AIN
+  "غ": GHAIN
+  "ف": FA
+  "ق": QAF
+  "ك": KAF
+  "ل": LAM
+  "م": MEEM
+  "ن": NOON
+  "ه": HEH
+  "ة": TAA_MARBUTA
+  "ا": ALIF
+  "و": WAW
+  "ي": {letter: YA, bare_rasm: true}   # IndoPak writes the maqsura plain
+  # Drawn only as a hamza's seat or as rasm; a sounded yaa is `ي` above.
+  "ى": {letter: YA, bare_rasm: true, rasm_only: true}
+  "ء": HAMZA
+  "ٱ": {letter: HAMZA, onset: WASL}
+
+seats: ["ـ"]
+combining_hamza: ["ٔ", "ٕ"]
+
+evidences:
+  "َ": {fact: NUCLEUS, cls: haraka, role: fatha,
+       value: {kind: Short, quality: A}}
+  "ُ": {fact: NUCLEUS, cls: haraka, role: damma,
+       value: {kind: Short, quality: U}}
+  "ِ": {fact: NUCLEUS, cls: haraka, role: kasra,
+       value: {kind: Short, quality: I}}
+  "ً": {fact: NUCLEUS, cls: tanween, role: fathatan,
+       derivation: tanween}
+  "ٌ": {fact: NUCLEUS, cls: tanween, role: dammatan,
+       derivation: tanween}
+  "ٍ": {fact: NUCLEUS, cls: tanween, role: kasratan,
+       derivation: tanween}
+  "ْ": {fact: NUCLEUS, cls: haraka, role: sukun,
+       value: {kind: Silent}}
+  "ّ": {fact: ONSET, cls: shadda, role: shadda,
+       derivation: gemination}
+  "ٰ": {fact: NUCLEUS, cls: small_vowel, role: dagger,
+       derivation: length_a}
+  "ٔ": {fact: LETTER, cls: base, role: combining_hamza, value: HAMZA}
+  "ٕ": {fact: LETTER, cls: base, role: combining_hamza, value: HAMZA}
+  "ٗ": {fact: NUCLEUS, cls: small_vowel, role: silah_waw,
+       derivation: silah_waw}
+  "ٖ": {fact: NUCLEUS, cls: small_vowel, role: silah_ya,
+       derivation: silah_ya}
+  # A yaa the rasm leaves out, written small. `ٖ` above is not the same mark:
+  # it spells the kasra and its yaa together, so it stays a nucleus.
+  "ۦ": {fact: LETTER, cls: base, role: small_ya, value: YA, omitted: true}
+  "ࣙ": {fact: LETTER, cls: base, role: cross_word_noon,
+       derivation: cross_word_noon}   # a noon drawn on the NEXT word
+  "ۨ": {fact: LETTER, cls: base, role: mini_noon, value: NOON, omitted: true}
+  "ۜ": {fact: LETTER, cls: annotation, role: seen_over, value: SEEN}
+
+decorates:
+  "ٓ": {slot: long_nucleus, cls: madd_sign, role: madd}
+  "࢜": {slot: long_nucleus, cls: madd_sign, role: madd}   # madda waajib
+  "۟": {slot: host, cls: silence_sign, silences: true}
+  "ۢ": {slot: host, cls: annotation}          # iqlab, upper
+  "ۭ": {slot: host, cls: annotation}          # iqlab, lower
+  "ؔ": {slot: host, cls: annotation}          # takhallus: a generic flag
+
+advice:
+  "ؕ": PERMITTED_STOP
+  "ۖ": PREFERRED_CONTINUE
+  "ۘ": COMPULSORY_STOP
+  "ۚ": OPTIONAL_STOP
+  "ۙ": PROHIBITED_STOP
+  "ۛ": EITHER_STOP
+  "ؗ": PREFERRED_STOP
+  "ࣞ": COMPULSORY_STOP
+  "ࣗ": PREFERRED_STOP
+  "࣢": PERMITTED_STOP
+  "ࣕ": PERMITTED_STOP
+  "ࣟ": PERMITTED_STOP
+  "ࣝ": PERMITTED_STOP
+
+structural: [" ", "‮", "٦", "͏"]
+
+polysemous:
+  "ٖ": [SILAH, LONG_VOWEL]
+  "ۜ": [SAKT, KHILAF_SITE]
+  "ࣕ": [ADVICE, KHILAF_SITE]

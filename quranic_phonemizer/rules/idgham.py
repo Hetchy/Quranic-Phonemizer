@@ -1,38 +1,83 @@
+"""The idgham families that are not the noon's: like into like, near into near.
+
+Only cross-boundary assimilation. A geminate written in the rasm is canonical
+and needs no rule.
+"""
 from __future__ import annotations
 
-from ..model import Consonant
-from ..rule_data import RuleConfig
-from .context import LetterState, RuleContext
+from dataclasses import dataclass, field
+
+from ..engine.neighbourhood import Neighbourhood
+from ..engine.plan import MergeInto, Plan, Realize, Verdict, mint
+from ..model.address import BoundaryPlan, SlotId
+from ..model.canon import CanonLetter as L
+from ..model.canon import CanonLetter, NucleusKind, Phase, Rule
+from ..model.performance import Aspect, Consonant, Occurrence, Participants
+from .lam_shamsiyyah import ArticleShape
+from .tables import Pairs
 
 
-def _is_partial_assimilation(
-    context: RuleContext,
-    state: LetterState,
-    config: RuleConfig,
-) -> bool:
-    following = context.next_letter(state)
-    if following is None:
-        return False
-    return following.form.letter in config.partial_assimilation.get(
-        state.form.letter, ()
-    )
+#: Noon and meem have their own families, which handle their same-letter case.
+OWNED_ELSEWHERE = frozenset({L.NOON, L.MEEM})
 
 
-def pronounce_generic(
-    context: RuleContext,
-    state: LetterState,
-    config: RuleConfig,
-    *,
-    emphatic: bool = False,
-) -> list:
-    if state.harakah is None and state.tanween is None and not state.shaddah:
-        if _is_partial_assimilation(context, state, config):
-            return [Consonant(state.form.letter, emphatic=emphatic)]
-        return []
-    return [
-        Consonant(
-            state.form.letter,
-            geminated=state.shaddah,
-            emphatic=emphatic,
+@dataclass(frozen=True, slots=True)
+class Idgham:
+    """One classifier over the pair table; which family a pair falls in is
+    data, so a per-family `look` would be the same body three times."""
+
+    pairs: Pairs
+    never_follows: frozenset[CanonLetter] = frozenset()
+    article: ArticleShape = field(default_factory=ArticleShape)
+    rule: Rule = Rule.IDGHAM_MUTAMATHILAYN
+    phase: Phase = Phase.MERGE
+    triggers: frozenset = field(default=frozenset())
+
+    def __post_init__(self) -> None:
+        # Like into like fires on any repeated letter, so the trigger set is
+        # the alphabet rather than whatever letters the pair table mentions.
+        object.__setattr__(
+            self,
+            "triggers",
+            frozenset(set(CanonLetter) - OWNED_ELSEWHERE - self.never_follows),
         )
-    ]
+
+    def look(
+        self, near: Neighbourhood, plan: Plan, at: SlotId,
+        boundaries: BoundaryPlan,
+    ) -> Verdict | None:
+        del plan, boundaries
+        here = near.slot(at)
+        if here is None or here.nucleus.kind is not NucleusKind.SILENT:
+            return None
+        if self.article(near, at):
+            return None  # lam shamsiyyah owns this slot
+        following = near.after(at)
+        if following is None:
+            return None
+
+        if here.letter is following.letter:
+            rule = Rule.IDGHAM_MUTAMATHILAYN
+        else:
+            rule = self.pairs.of(here.letter, following.letter)
+            if rule is None:
+                return None
+
+        occurrence = Occurrence(
+            mint(rule, at), rule, Participants((at, following.id))
+        )
+        if rule is Rule.IDGHAM_MUTAJANISAYN_NAQIS:
+            # The first letter survives as a colour on the second, so nothing
+            # merges and the pair is recorded for the projection alone.
+            return Verdict(occurrence, ())
+        return Verdict(
+            occurrence,
+            (
+                Realize(
+                    following.id,
+                    Aspect.ONSET,
+                    (Consonant(following.letter, geminate=True),),
+                ),
+                MergeInto(at, Aspect.ONSET, following.id, Aspect.ONSET),
+            ),
+        )

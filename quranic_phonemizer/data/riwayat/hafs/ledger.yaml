@@ -1,0 +1,84 @@
+# Facts neither script determines on its own, and the witnesses that agree.
+#
+# Every entry is a canonical value — the same closed union the adapters emit
+# — so there is no syntax here for "do something" and the Ledger cannot grow
+# into a rule engine. `skeleton` is mandatory and validated against the built
+# word, which is what catches ordinal drift.
+#
+# The list is deliberately short. Everything a rule can reach is a rule; see
+# canon/derive/. What is left is genuinely per-location.
+schema_version: 1
+riwayah: hafs
+
+supplies:
+  # رَءَا — Uthmani writes the hamza with a following alif, IndoPak writes a
+  # bare alif that carries nothing. The long a is the recitation fact both
+  # are spelling.
+  - {slot: "6:77:2#1", skeleton: "رء", fact: NUCLEUS,
+     value: {kind: Long, quality: A}, citation: "Hafs; ra'aa"}
+  - {slot: "6:78:2#1", skeleton: "رء", fact: NUCLEUS,
+     value: {kind: Long, quality: A}, citation: "Hafs; ra'aa"}
+  - {slot: "16:85:2#1", skeleton: "رء", fact: NUCLEUS,
+     value: {kind: Long, quality: A}, citation: "Hafs; ra'aa"}
+  - {slot: "16:86:2#1", skeleton: "رء", fact: NUCLEUS,
+     value: {kind: Long, quality: A}, citation: "Hafs; ra'aa"}
+  - {slot: "33:22:2#1", skeleton: "رء", fact: NUCLEUS,
+     value: {kind: Long, quality: A}, citation: "Hafs; ra'aa"}
+  - {slot: "18:53:1#2", skeleton: "ورء", fact: NUCLEUS,
+     value: {kind: Long, quality: A}, citation: "Hafs; wa-ra'aa"}
+
+  # 18:38 `لَّـٰكِنَّا۠` — a pausal long that its own vocalised skeleton cannot
+  # distinguish from `لَٰكِنَّ`. One site, so a rule would be inventing a class.
+  #
+  # `#N` is zero-based within the word, and the skeleton is written in the
+  # same notation `canon.build` derives — so a prosthetic hamza is `ء`, not
+  # the `ا` the script draws. All four entries below were wrong on one or
+  # both counts and silently did nothing.
+  - {slot: "18:38:1#2", skeleton: "لكن", fact: NUCLEUS,
+     value: {kind: PausalLong, quality: A},
+     citation: "Hafs; one of the seven alifs"}
+
+  # 33:66-67 — `ٱلرَّسُولَا۠`, `ٱلسَّبِيلَا۠`, `ٱلظُّنُونَا۠`. Each shares a vocalised
+  # skeleton with its ordinary accusative, which occurs far more often, so a
+  # lexeme entry would break 27 words to fix one.
+  - {slot: "33:66:11#4", skeleton: "ءلرسل", fact: NUCLEUS,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "33:67:8#4", skeleton: "ءلسبل", fact: NUCLEUS,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "33:10:16#4", skeleton: "ءلظنن", fact: NUCLEUS,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+
+  # 76:15 `قَوَارِيرَا۠` against 76:16 `قَوَارِيرَا۟` and 27:44 `قَوَارِيرَ`.
+  # Uthmani's two marks separate the first from the second; IndoPak writes
+  # the same string for both, so the site is what carries the fact.
+  - {slot: "76:15:8#3", skeleton: "قورر", fact: NUCLEUS,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+
+  # 27:36 `ءَاتَىٰنَِۧ` — the yaa both scripts write small where 19:30 writes
+  # the same word's full. Small is the mark that the letter is optional, and
+  # `SILAH` is exactly that: said when joined to, absent at a pause.
+  - {slot: "27:36:8#3", skeleton: "ءتني", fact: ONSET, value: SILAH,
+     citation: "Hafs; ithbat and hadhf of the yaa"}
+
+  # The four sakt sites. Both scripts write a mark for them, but Uthmani's
+  # `ۜ` is declared polysemous -- it is also a khilaf site -- so the adapter
+  # defers rather than deciding, which is what polysemous is for. Four
+  # locations, no rule can reach them, and every tajwid source lists exactly
+  # these four: the Ledger's own definition.
+  # 18:1:11 `عِوَجَاۜ` is deliberately absent. Its skeleton is not the same in
+  # the two scripts -- IndoPak builds the tanwin nun and Uthmani does not, which
+  # is one of the L1 rows -- so a mandatory skeleton cannot match both. The
+  # entry belongs here and cannot be written until that row closes; addressing
+  # it slot-wise would mean weakening the check that catches ordinal drift.
+  - {slot: "36:52:6#4", skeleton: "مرقدن", fact: SAKT, value: true,
+     citation: "Hafs; sakt, 2 of 4"}
+  - {slot: "75:27:2#1", skeleton: "من", fact: SAKT, value: true,
+     citation: "Hafs; sakt, 3 of 4"}
+  - {slot: "83:14:2#1", skeleton: "بل", fact: SAKT, value: true,
+     citation: "Hafs; sakt, 4 of 4"}
+
+asserts:
+  - {script: uthmani, slot: "6:77:2#1", skeleton: "رء", fact: NUCLEUS,
+     value: {kind: Long, quality: A}}
+  - {script: uthmani, slot: "6:78:2#1", skeleton: "رء", fact: NUCLEUS,
+     value: {kind: Long, quality: A}}
