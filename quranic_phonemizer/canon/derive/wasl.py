@@ -8,6 +8,10 @@ from ...model.canon import ABJAD, CanonLetter, Onset, Quality, Short
 from ...model.inscription import SlotFact
 from . import Context, Outcome, Sets, lexeme, register
 
+#: The shortest word a prosthetic hamza can begin: itself, the quiescent
+#: letter it props, and one more that the quiescent letter opens.
+_STEM = 3
+
 VOWEL_ROLES = frozenset({"fatha", "damma", "kasra"})
 QUIESCENT_BLOCKERS = frozenset(VOWEL_ROLES | {"fathatan", "dammatan", "kasratan"})
 
@@ -66,6 +70,10 @@ def is_wasl(context: Context) -> bool:
     following = context.ahead()
     if following is None:
         return False
+    if len(_skeleton(context)) < _STEM:
+        # `إِى` - a prop needs both a quiescent letter to carry and a stem
+        # behind it, and two letters cannot be all three.
+        return False
 
     if following.has("shadda"):
         return _geminate_case(context, cluster, following)
@@ -118,6 +126,10 @@ def _geminate_case(context: Context, cluster, following) -> bool:
             for c in context.clusters[context.index + 2 : context.word_bounds[1]]
         )
     if written is Quality.A:
+        return False
+    if context.lexicon.is_wasl_exempt(_skeleton(context)):
+        # `إدّ` doubles a letter the form-VIII taa also assimilates into, so
+        # the shape alone cannot tell the noun from the verb.
         return False
     return following.letter in FORM_EIGHT
 
