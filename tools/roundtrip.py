@@ -17,19 +17,17 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
 from l1_harness import load_verses  # noqa: E402
 
-from quranic_phonemizer.canon.build import build  # noqa: E402
-from quranic_phonemizer.model.address import Location, Script, VerseRef  # noqa: E402
+from quranic_phonemizer.api import recitation  # noqa: E402
+from quranic_phonemizer.model.address import (  # noqa: E402
+    Location,
+    Riwayah,
+    Script,
+    VerseRef,
+)
 from quranic_phonemizer.orthography.write import (  # noqa: E402
     WriteError,
     pen_for,
     write_verse,
-)
-from quranic_phonemizer.riwayat.hafs import (  # noqa: E402
-    ledger,
-    lexeme_passes,
-    lexicon,
-    muqattaat,
-    script_adapter,
 )
 
 
@@ -64,10 +62,8 @@ def main() -> int:
     args = parser.parse_args()
 
     script = Script(args.script)
-    adapter = script_adapter(script)
-    pen = pen_for(adapter.inventory, muqattaat().named_by())
-    shared = {"lexicon": lexicon(), "ledger": ledger(),
-              "passes": lexeme_passes()}
+    hafs = recitation(Riwayah.HAFS)
+    pen = pen_for(hafs.inventory(script), hafs.muqattaat.named_by())
     verses = load_verses(script.value)
 
     closed = total = 0
@@ -80,7 +76,7 @@ def main() -> int:
             break
         ref = VerseRef(*key)
         total += 1
-        before = build(adapter.read(ref, verses[key]), **shared).score
+        before = hafs.build(hafs.read(script, ref, verses[key])).score
         try:
             spelled = write_verse(before, pen)
         except WriteError as error:
@@ -92,7 +88,7 @@ def main() -> int:
             for index, text in enumerate(spelled)
         )
         try:
-            after = build(adapter.read(ref, words), **shared).score
+            after = hafs.build(hafs.read(script, ref, words)).score
         except Exception as error:  # noqa: BLE001 - reported, not swallowed
             shapes[f"unreadable: {type(error).__name__}"] += 1
             if len(examples) < args.show:

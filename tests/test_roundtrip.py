@@ -23,26 +23,25 @@ def pen() -> Pen:
 
 
 @pytest.mark.parametrize(("surah", "ayah"), VERSES)
-def test_every_score_can_be_spelled(packed, shared, pen, surah, ayah):
+def test_every_score_can_be_spelled(packed, hafs, pen, surah, ayah):
     """A `WriteError` means the canonical layer holds a fact no orthography
     can express."""
-    score = built_for(packed, shared, surah, ayah).score
+    score = built_for(packed, hafs, surah, ayah).score
     spelled = write_verse(score, pen)
     assert len(spelled) == len(score.words)
     assert all(text for text in spelled)
 
 
 @pytest.mark.parametrize(("surah", "ayah"), VERSES)
-def test_spelling_reads_back_to_the_same_score(packed, shared, pen, surah, ayah):
-    score = built_for(packed, shared, surah, ayah).score
+def test_spelling_reads_back_to_the_same_score(packed, hafs, pen, surah, ayah):
+    score = built_for(packed, hafs, surah, ayah).score
     spelled = write_verse(score, pen)
     words = tuple(
         (Location(surah, ayah, index + 1), text)
         for index, text in enumerate(spelled)
     )
-    again = build(
-        script_adapter(Script.UTHMANI).read(VerseRef(surah, ayah), words),
-        **shared,
+    again = hafs.build(
+        hafs.read(Script.UTHMANI, VerseRef(surah, ayah), words)
     ).score
     assert again.digest == score.digest
 

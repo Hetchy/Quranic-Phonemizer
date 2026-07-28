@@ -52,21 +52,21 @@ def test_the_outcome_sets_have_the_counts_the_domain_gives_them() -> None:
 
 
 @pytest.mark.parametrize("script", list(Script))
-def test_laws_hold_over_a_sample_of_the_corpus(packed, shared, script) -> None:
+def test_laws_hold_over_a_sample_of_the_corpus(packed, hafs, script) -> None:
     if script is Script.INDOPAK:
         pytest.skip("IndoPak has no packed corpus yet; L1 covers it")
     for surah in (1, 2, 78, 112, 114):
         for ayah in range(1, min(11, len(packed.surah_info[str(surah)]) + 1)):
             score, performance = performance_for(
-                packed, shared, surah, ayah, RULES, script
+                packed, hafs, surah, ayah, RULES, script
             )
             check_performance(performance, score)
 
 
-def test_tanween_and_noon_sakinah_are_one_rule(packed, shared) -> None:
+def test_tanween_and_noon_sakinah_are_one_rule(packed, hafs) -> None:
     """2:5 carries both: `مِّن رَّبِّهِمْ` is a noon sakinah and `هُدًى` a
     tanween, produced by the same classifier and the same trigger."""
-    score, performance = performance_for(packed, shared, 2, 5, RULES)
+    score, performance = performance_for(packed, hafs, 2, 5, RULES)
     fired = {o.rule for o in performance.occurrences}
     assert Rule.IDGHAM_BILA_GHUNNAH in fired  # min + ra
     triggers = {
@@ -84,10 +84,10 @@ def test_tanween_and_noon_sakinah_are_one_rule(packed, shared) -> None:
     assert triggers & named, "no noon slot participated in any occurrence"
 
 
-def test_a_merger_is_a_pair_of_edges(packed, shared) -> None:
+def test_a_merger_is_a_pair_of_edges(packed, hafs) -> None:
     """`MergedInto` and `Hosts` share a sound and an occurrence, with no
     source/target boolean anywhere."""
-    _, performance = performance_for(packed, shared, 2, 5, RULES)
+    _, performance = performance_for(packed, hafs, 2, 5, RULES)
     merges = [a for a in performance.attributions if isinstance(a, MergedInto)]
     assert merges, "2:5 has an idgham"
     hosts = {
@@ -97,10 +97,10 @@ def test_a_merger_is_a_pair_of_edges(packed, shared) -> None:
         assert (merge.sound, merge.by) in hosts
 
 
-def test_izhar_is_classification_only(packed, shared) -> None:
+def test_izhar_is_classification_only(packed, hafs) -> None:
     """It produces no sound of its own and still exists, so a projection can
     find it."""
-    _, performance = performance_for(packed, shared, 2, 6, RULES)
+    _, performance = performance_for(packed, hafs, 2, 6, RULES)
     izhar = [o for o in performance.occurrences if o.rule is Rule.IZHAR_HALQI]
     if not izhar:
         pytest.skip("no izhar in this verse")
@@ -108,13 +108,13 @@ def test_izhar_is_classification_only(packed, shared) -> None:
     assert all(o.id not in owned for o in izhar)
 
 
-def test_no_cross_word_effect_crosses_a_stop(packed, shared) -> None:
+def test_no_cross_word_effect_crosses_a_stop(packed, hafs) -> None:
     """Under an all-stop plan the family may fire inside a word but never
     across one."""
     from quranic_phonemizer.engine.run import perform
     from quranic_phonemizer.model.address import BoundaryPlan, Junction
 
-    score = score_for(packed, shared, 2, 5)
+    score = score_for(packed, hafs, 2, 5)
     stopped = BoundaryPlan((Junction.STOP,) * (len(score.words) - 1) + (Junction.EDGE,))
     performance = perform(score, RULES, stopped)
     check_performance(performance, score)
@@ -153,9 +153,9 @@ def _verdict(rule: Rule, slot: SlotId, sounds):
     )
 
 
-def test_every_sound_has_a_named_occurrence(packed, shared) -> None:
+def test_every_sound_has_a_named_occurrence(packed, hafs) -> None:
     """Every attribution must name an occurrence that actually exists."""
-    _, performance = performance_for(packed, shared, 2, 2, RULES)
+    _, performance = performance_for(packed, hafs, 2, 2, RULES)
     known = {o.id for o in performance.occurrences}
     assert all(a.by in known for a in performance.attributions)
     counts = collections.Counter(

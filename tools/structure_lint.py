@@ -30,7 +30,17 @@ ALLOWED: dict[str, set[str]] = {
     "riwayat": {
         "canon", "corpus", "dataio", "engine", "model", "orthography", "rules",
     },
+    # The composition root. Nothing imports it, so a second riwayah stays
+    # additive: it appears here and nowhere else.
+    "api": {
+        "canon", "corpus", "engine", "model", "orthography", "render",
+        "riwayat",
+    },
 }
+
+#: The output alphabet is data and lives in one place. A phoneme string
+#: anywhere else means a projection decision leaked into a decision layer.
+PHONEME_MARKERS = ("ˤ", "ː", "m̃", "ñ")
 
 #: Narrower than the package edge: `canon` reaches only one orthography module.
 MODULE_ALLOWED: dict[tuple[str, str], set[str]] = {
@@ -249,6 +259,17 @@ def _identifiers_outside(package: Path) -> dict[str, int]:
     return counts
 
 
+_SMOKE = """
+import importlib.util, sys
+spec = importlib.util.spec_from_file_location("_smoke", sys.argv[1])
+module = importlib.util.module_from_spec(spec)
+try:
+    spec.loader.exec_module(module)
+except SystemExit:
+    pass
+"""
+
+
 def tool_import_smoke() -> list[Problem]:
     """A committed tool that cannot be imported is a broken workflow."""
     out: list[Problem] = []
@@ -256,13 +277,30 @@ def tool_import_smoke() -> list[Problem]:
         if path.name == Path(__file__).name:
             continue
         done = subprocess.run(
-            [sys.executable, "-c", f"import ast,sys;ast.parse(open(r'{path}',"
-             f"encoding='utf-8').read());"
-             f"__import__('importlib.util',fromlist=['x'])"],
+            [sys.executable, "-c", _SMOKE, str(path)],
             capture_output=True, text=True, cwd=ROOT,
         )
         if done.returncode:
-            out.append((path, 1, "tool-import-smoke", done.stderr.strip().splitlines()[-1]))
+            out.append(
+                (path, 1, "tool-import-smoke",
+                 done.stderr.strip().splitlines()[-1])
+            )
+    return out
+
+
+def phoneme_strings() -> list[Problem]:
+    """Output notation outside `render/`."""
+    out: list[Problem] = []
+    for path in sorted(PACKAGE.rglob("*.py")):
+        if path.relative_to(PACKAGE).parts[0] == "render":
+            continue
+        for line, text in enumerate(
+            path.read_text(encoding="utf-8").splitlines(), start=1
+        ):
+            for marker in PHONEME_MARKERS:
+                if marker in text:
+                    out.append((path, line, "phoneme-strings",
+                                f"{marker!r} outside render/"))
     return out
 
 
@@ -271,6 +309,7 @@ CHECKS = {
     "unused-imports": unused_imports,
     "module-size": module_size,
     "dead-exports": dead_exports,
+    "phoneme-strings": phoneme_strings,
     "tool-import-smoke": tool_import_smoke,
 }
 

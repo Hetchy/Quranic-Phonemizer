@@ -15,29 +15,20 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
 from l1_harness import load_verses  # noqa: E402
 
-from quranic_phonemizer.canon.build import build  # noqa: E402
+from quranic_phonemizer.api import alphabet as load_alphabet  # noqa: E402
+from quranic_phonemizer.api import recitation  # noqa: E402
 from quranic_phonemizer.engine.laws import (  # noqa: E402
     check_inscription,
     check_performance,
 )
-from quranic_phonemizer.engine.run import perform  # noqa: E402
 from quranic_phonemizer.model.address import (  # noqa: E402
     BoundaryPlan,
     Junction,
+    Riwayah,
     Script,
     VerseRef,
 )
-from quranic_phonemizer.render.alphabet import load_alphabet  # noqa: E402
 from quranic_phonemizer.render.recite import phonemes_by_word  # noqa: E402
-from quranic_phonemizer.riwayat.hafs import (  # noqa: E402
-    HAFS,
-    ledger,
-    lexeme_passes,
-    lexicon,
-    script_adapter,
-)
-
-ALPHABET = ROOT / "quranic_phonemizer" / "data" / "render" / "ipa.yaml"
 
 #: Which script's residue rows are shown, and which side of a pair is "got".
 LEFT, RIGHT = Script.UTHMANI, Script.INDOPAK
@@ -53,11 +44,11 @@ def plan_for(mode: str, words: int) -> BoundaryPlan:
     return BoundaryPlan((Junction.JOIN,) * (words - 1) + (Junction.EDGE,))
 
 
-def render_verse(adapter, ref: VerseRef, words, shared, mode: str, alphabet):
-    built = build(adapter.read(ref, words), **shared)
+def render_verse(hafs, script, ref: VerseRef, words, mode: str, alphabet):
+    built = hafs.build(hafs.read(script, ref, words))
     score = built.score
     check_inscription(built.inscription, score)
-    performance = perform(score, HAFS, plan_for(mode, len(score.words)))
+    performance = hafs.perform(score, plan_for(mode, len(score.words)))
     check_performance(performance, score)
     return [list(word) for word in phonemes_by_word(performance, score, alphabet)]
 
@@ -69,10 +60,8 @@ def main() -> int:
     parser.add_argument("--show", type=int, default=12)
     args = parser.parse_args()
 
-    alphabet = load_alphabet(ALPHABET)
-    shared = {"lexicon": lexicon(), "ledger": ledger(),
-              "passes": lexeme_passes()}
-    adapters = {script: script_adapter(script) for script in (LEFT, RIGHT)}
+    alphabet = load_alphabet()
+    hafs = recitation(Riwayah.HAFS)
     sources = {script: load_verses(script.value) for script in (LEFT, RIGHT)}
 
     matched = total = 0
@@ -87,8 +76,7 @@ def main() -> int:
         ref = VerseRef(*key)
         rendered = {
             script: render_verse(
-                adapters[script], ref, sources[script][key], shared,
-                args.mode, alphabet,
+                hafs, script, ref, sources[script][key], args.mode, alphabet
             )
             for script in (LEFT, RIGHT)
         }

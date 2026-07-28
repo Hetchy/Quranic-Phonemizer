@@ -14,32 +14,22 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from quranic_phonemizer.canon.build import build  # noqa: E402
+from quranic_phonemizer.api import alphabet as load_alphabet  # noqa: E402
+from quranic_phonemizer.api import recitation  # noqa: E402
 from quranic_phonemizer.engine.laws import (  # noqa: E402
     check_inscription,
     check_performance,
 )
-from quranic_phonemizer.engine.run import perform  # noqa: E402
 from quranic_phonemizer.model.address import (  # noqa: E402
     BoundaryPlan,
     Junction,
-    Location,
+    Riwayah,
     Script,
     VerseRef,
 )
-from quranic_phonemizer.render.alphabet import load_alphabet  # noqa: E402
 from quranic_phonemizer.render.recite import phonemes_by_word  # noqa: E402
-from quranic_phonemizer.riwayat.hafs import (  # noqa: E402
-    HAFS,
-    corpus,
-    ledger,
-    lexeme_passes,
-    lexicon,
-    script_adapter,
-)
 
 SNAPSHOTS = ROOT / "tests" / "snapshots" / "phonemes"
-ALPHABET = ROOT / "quranic_phonemizer" / "data" / "render" / "ipa.yaml"
 
 
 #: `continuous` is not offered: it joins across verse boundaries, which a verse-by-verse harness cannot plan for.
@@ -60,10 +50,8 @@ def main() -> int:
     parser.add_argument("--show", type=int, default=12)
     args = parser.parse_args()
 
-    packed, alphabet = corpus(), load_alphabet(ALPHABET)
-    shared = {"lexicon": lexicon(), "ledger": ledger(),
-              "passes": lexeme_passes()}
-    adapter = script_adapter(Script.UTHMANI)
+    hafs, alphabet = recitation(Riwayah.HAFS), load_alphabet()
+    packed = hafs.corpus
 
     matched = total = 0
     bucketed = 0
@@ -74,18 +62,14 @@ def main() -> int:
         expected = (json.loads(line) for line in fh)
         for surah in range(1, 115):
             for ayah in range(1, len(packed.surah_info[str(surah)]) + 1):
-                count = packed.surah_info[str(surah)][ayah - 1]
-                words = tuple(
-                    (Location(surah, ayah, w), packed.word(Location(surah, ayah, w)))
-                    for w in range(1, count + 1)
-                )
-                built = build(
-                    adapter.read(VerseRef(surah, ayah), words), **shared
+                verse = VerseRef(surah, ayah)
+                built = hafs.build(
+                    hafs.read(Script.UTHMANI, verse, hafs.words(verse))
                 )
                 score = built.score
                 check_inscription(built.inscription, score)
-                performance = perform(
-                    score, HAFS, plan_for(args.mode, len(score.words))
+                performance = hafs.perform(
+                    score, plan_for(args.mode, len(score.words))
                 )
                 check_performance(performance, score)
                 produced = phonemes_by_word(performance, score, alphabet)

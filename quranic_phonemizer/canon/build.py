@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field, replace
 
-from ..model.address import Riwayah, VariantSelection
+from ..model.address import VariantSelection
 from ..model.canon import (
     CanonLetter,
     NucleusKind,
@@ -80,7 +80,6 @@ class Provenance:
 def build(
     reading: Reading,
     *,
-    riwayah: Riwayah = Riwayah.HAFS,
     lexicon: Lexicon = EMPTY_LEXICON,
     ledger: Ledger = EMPTY_LEDGER,
     selection: VariantSelection = VariantSelection(),
@@ -97,7 +96,7 @@ def build(
     apply_ledger(reading, drafts, ledger, track)
     for lexeme_pass in (passes if passes is not None else LEXEME_PASSES):
         lexeme_pass(reading, drafts, lexicon, scribe, selection)
-    score, ordinals = assemble(reading, drafts, riwayah, selection)
+    score, ordinals = assemble(reading, drafts, selection)
     return Built(score, scribe.finish(reading, drafts, ordinals))
 
 

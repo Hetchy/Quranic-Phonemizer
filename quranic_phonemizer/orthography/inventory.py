@@ -173,21 +173,14 @@ def _fact_value(fact: SlotFact, raw: Any, *, where: str) -> object:
 def load_inventory(
     path: Path,
     *,
+    riwayah: Riwayah,
+    script: Script,
     derivations: frozenset[str] | None = None,
     roles: dict[str, frozenset[str]] | None = None,
 ) -> Inventory:
-    data = load_yaml(path)
-    require_keys(
-        data,
-        {"schema_version", "script", "riwayah"},
-        name=str(path),
-        optional=_SECTIONS,
-    )
-    if data["schema_version"] != SCHEMA_VERSION:
-        raise InventoryError(
-            f"{path}: schema_version {data['schema_version']!r}, expected "
-            f"{SCHEMA_VERSION}"
-        )
+    """`riwayah` and `script` are what the caller believes it is loading; a
+    file that declares otherwise is rejected rather than silently believed."""
+    data = _header(path, riwayah, script)
 
     letters = {
         char: _letter(spec, where=f"{path} letters[{char!r}]")
@@ -208,8 +201,8 @@ def load_inventory(
         )
     _check_contract(path, letters, marks, derivations, roles)
     return Inventory(
-        script=_member(Script, data["script"], where=str(path)),
-        riwayah=_member(Riwayah, data["riwayah"], where=str(path)),
+        script=script,
+        riwayah=riwayah,
         letters=letters,
         marks=marks,
         seats=frozenset(data.get("seats") or ()),
@@ -217,6 +210,36 @@ def load_inventory(
         marks_what_it_sounds=bool(data.get("marks_what_it_sounds", False)),
         source=path,
     )
+
+
+def _header(path: Path, riwayah: Riwayah, script: Script) -> dict:
+    """The file's own declarations, checked before anything is parsed."""
+    data = load_yaml(path)
+    require_keys(
+        data,
+        {"schema_version", "script", "riwayah"},
+        name=str(path),
+        optional=_SECTIONS,
+    )
+    if data["schema_version"] != SCHEMA_VERSION:
+        raise InventoryError(
+            f"{path}: schema_version {data['schema_version']!r}, expected "
+            f"{SCHEMA_VERSION}"
+        )
+    _check_identity(path, data, riwayah, script)
+    return data
+
+
+def _check_identity(path, data, riwayah: Riwayah, script: Script) -> None:
+    declared = (
+        _member(Riwayah, data["riwayah"], where=str(path)),
+        _member(Script, data["script"], where=str(path)),
+    )
+    if declared != (riwayah, script):
+        raise InventoryError(
+            f"{path}: declares {declared[0].value}/{declared[1].value}, "
+            f"loaded as {riwayah.value}/{script.value}"
+        )
 
 
 def _check_contract(path, letters, marks, derivations, roles) -> None:

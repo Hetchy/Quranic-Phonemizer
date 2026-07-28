@@ -7,13 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from ..model.address import (
-    BoundaryPlan,
-    Riwayah,
-    SlotId,
-    SoundId,
-    VariantSelection,
-)
+from ..model.address import BoundaryPlan, SlotId, SoundId, VariantSelection
 from ..model.canon import NucleusKind, Onset, Phase, Rule, Score, Slot
 from ..model.performance import (
     Aspect,
@@ -76,7 +70,6 @@ def perform(
     rules: RuleSet,
     boundaries: BoundaryPlan,
     *,
-    riwayah: Riwayah = Riwayah.HAFS,
     selection: VariantSelection = VariantSelection(),
 ) -> Performance:
     plan = Plan()
@@ -96,7 +89,7 @@ def perform(
                 if verdict is not None:
                     plan.record(phase, verdict)
 
-    return _materialise(plan, index, score, boundaries, riwayah, selection)
+    return _materialise(plan, index, score, boundaries, selection)
 
 
 def _fill_plain(plan: Plan, score: Score, mint: _Mint) -> list[tuple]:
@@ -144,7 +137,6 @@ def _materialise(
     index: dict[SlotId, Slot],
     score: Score,
     boundaries: BoundaryPlan,
-    riwayah: Riwayah,
     selection: VariantSelection,
 ) -> Performance:
     mint = _Mint(score.words[0].location.verse if score.words else None)
@@ -171,7 +163,7 @@ def _materialise(
 
     del index
     return Performance(
-        riwayah=riwayah,
+        riwayah=score.riwayah,
         sounds=tuple(sounds),
         attributions=tuple(attributions),
         occurrences=tuple(occurrences),

@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any, TypeAlias
 
 from ..dataio import load_yaml, require_keys
-from ..model.address import Location, Script, SlotId, VerseRef
+from ..model.address import Location, Riwayah, Script, SlotId, VerseRef
 from ..model.canon import (
     CanonLetter,
     Long,
@@ -181,10 +181,10 @@ def _nucleus(raw: object, *, where: str) -> Nucleus:
 
 
 # ------------------------------------------------------------------- loading
-def load_ledger(path: Path) -> Ledger:
-    """Rejects, by name: a duplicate `Supply` for one key; a value outside the
-    canonical vocabulary; an `Assert` with no matching `Supply`; a key that is
-    not a `SlotId`; a missing `skeleton`; a value in output vocabulary."""
+def load_ledger(path: Path, *, riwayah: Riwayah) -> Ledger:
+    """Rejects, by name: another riwayah's file; a duplicate `Supply`; a value
+    outside the canonical vocabulary or inside the output one; an orphan
+    `Assert`; a key that is not a `SlotId`; a missing `skeleton`."""
     data = load_yaml(path)
     require_keys(
         data,
@@ -196,6 +196,11 @@ def load_ledger(path: Path) -> Ledger:
         raise LedgerError(
             f"{path}: schema_version {data['schema_version']!r}, expected "
             f"{SCHEMA_VERSION}"
+        )
+    declared = _enum(Riwayah, data["riwayah"], where=str(path), what="Riwayah")
+    if declared is not riwayah:
+        raise LedgerError(
+            f"{path}: authored for {declared.value}, loaded as {riwayah.value}"
         )
 
     supplies = tuple(

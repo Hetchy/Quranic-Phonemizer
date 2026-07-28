@@ -9,7 +9,7 @@ from ..orthography.adapter import Reading
 
 
 def assemble(
-    reading: Reading, drafts, riwayah, selection,
+    reading: Reading, drafts, selection,
 ) -> tuple[Score, dict[int, int]]:
     by_word: dict[int, list[Slot]] = {}
     ordinals: dict[int, int] = {}
@@ -30,7 +30,7 @@ def assemble(
         for index, location in enumerate(reading.words)
     )
     return Score(
-        riwayah=riwayah,
+        riwayah=reading.riwayah,
         words=words,
         selection=selection,
         digest=digest(words),

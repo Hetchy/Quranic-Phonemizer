@@ -239,6 +239,7 @@ class _ReadState:
     def finish(self, locations: tuple[Location, ...]) -> Reading:
         return Reading(
             verse=self.verse,
+            riwayah=self.inventory.riwayah,
             script=self.inventory.script,
             words=locations,
             clusters=tuple(self.clusters),
