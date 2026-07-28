@@ -31,6 +31,7 @@ Read in order. 001–006 are the design; 007 is how it is laid out in code;
 | [006](006-variants-and-exceptions.md) | Khilāf resolution and what may be a Ledger entry |
 | [007](007-package-and-conventions.md) | Package tree, module boundaries, data schemas, naming |
 | [008](008-conformance-and-phases.md) | Invariants, fixtures, the L1 harness, the reversal trigger, phase order |
+| [009](009-the-output-alphabet.md) | The output alphabet as entries plus composition, and what replaced row-count totality |
 
 ## What this is for
 
