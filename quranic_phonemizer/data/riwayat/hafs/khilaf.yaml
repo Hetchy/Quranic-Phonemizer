@@ -54,3 +54,11 @@ imala_quality:
     annotate: imala
     options: {e: imala, i: i}
     forms: [مaجرimalaهa, مaجرiهa]
+
+# The one word whose final yaa a reader may keep or drop at a pause. Both
+# scripts write it small where 19:30 writes the same word's yaa full, which
+# is the mark saying the letter is optional. Joined, it is always said.
+#
+#   ءَاتَىٰنَِۧ  27:36. hadhf gives aataan, ithbat aataanii.
+yaa_ithbat:
+  ءaتaنiيa: {disputed_at: stop, default: hadhf}

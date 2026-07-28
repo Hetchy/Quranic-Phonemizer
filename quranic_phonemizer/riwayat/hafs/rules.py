@@ -36,7 +36,8 @@ def _build() -> RuleSet:
     return RuleSet(
         {
             Phase.BOUNDARY: (
-                WaslHamza(), SoftenedHamza(), TanweenAtWaqf(), WaqfEnding(),
+                WaslHamza(), SoftenedHamza(), TanweenAtWaqf(),
+                WaqfEnding(yaa=khilaf().yaa),
                 TaaMarbutaAtWaqf(), Sakt(),
             ),
             Phase.MERGE: (

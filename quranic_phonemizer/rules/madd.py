@@ -41,12 +41,14 @@ class PausalGlide:
         self, near: Neighbourhood, plan: Plan, at: SlotId,
         boundaries: BoundaryPlan,
     ) -> Verdict | None:
-        del plan
         slot, word = near.slot(at), near.word_of(at)
         if slot is None or word is None or not boundaries.stopped_on(word):
             return None
         slots = near.score.words[word].slots
         if not slots or slots[-1].id != at:
+            return None
+        if plan.merged_away(at, Aspect.ONSET):
+            # A glide the stop removed outright lengthens nothing.
             return None
         if slot.onset is Onset.GEMINATE:
             # A doubled glide is a consonant -- `ٱلْعَلِىُّ` ends `-iyy`, not `-ii`.

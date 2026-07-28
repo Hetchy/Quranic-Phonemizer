@@ -54,6 +54,12 @@ supplies:
   - {slot: "76:15:8#3", skeleton: "قورر", fact: NUCLEUS,
      value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
 
+  # 27:36 `ءَاتَىٰنَِۧ` — the yaa both scripts write small where 19:30 writes
+  # the same word's full. Small is the mark that the letter is optional, and
+  # `SILAH` is exactly that: said when joined to, absent at a pause.
+  - {slot: "27:36:8#3", skeleton: "ءتني", fact: ONSET, value: SILAH,
+     citation: "Hafs; ithbat and hadhf of the yaa"}
+
   # The four sakt sites. Both scripts write a mark for them, but Uthmani's
   # `ۜ` is declared polysemous -- it is also a khilaf site -- so the adapter
   # defers rather than deciding, which is what polysemous is for. Four

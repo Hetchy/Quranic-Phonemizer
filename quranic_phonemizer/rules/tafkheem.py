@@ -21,7 +21,7 @@ from ..model.canon import (
     Rule,
 )
 from ..model.performance import Aspect, Occurrence, Participants
-from .khilaf import RaaKhilaf
+from .khilaf import SitedKhilaf, vocalised_word
 
 #: Raa and the lam of the divine name are heavy only under the conditions
 #: below, so they trigger the rule without belonging to any heavy set.
@@ -37,7 +37,7 @@ class Weight:
     is stated once and the two cannot drift apart."""
 
     always_heavy: frozenset[CanonLetter] = frozenset()
-    raa: RaaKhilaf = field(default_factory=RaaKhilaf)
+    raa: SitedKhilaf = field(default_factory=SitedKhilaf)
 
     def is_heavy(self, near, slot, plan, boundaries) -> bool:
         if slot.letter in self.always_heavy:
@@ -53,8 +53,8 @@ class Weight:
         if own is not None:
             return own in (Quality.A, Quality.U)
         word = near.word_of(slot.id)
-        disputed = None if word is None else self.raa.weight(
-            _vocalised(near.score.words[word]),
+        disputed = None if word is None else self.raa.of(
+            vocalised_word(near.score.words[word]),
             boundaries.stopped_on(word),
             near.score.selection,
         )
@@ -94,20 +94,6 @@ class Emphasis:
                        Participants((at,))),
             tuple(effects),
         )
-
-
-def _vocalised(word) -> str:
-    """The word as a khilaf names its sites: letters and their vowels. Read
-    from the Score, so a vowel a stop removes is still in the key."""
-    out = []
-    for slot in word.slots:
-        quality = _quality(slot)
-        out.append(
-            ABJAD[slot.letter.value]
-            + ("~" if slot.onset is Onset.GEMINATE else "")
-            + (quality.value if quality else "")
-        )
-    return "".join(out)
 
 
 def _raa_is_heavy(near, slot, plan, always_heavy) -> bool:

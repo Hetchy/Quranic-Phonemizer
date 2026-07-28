@@ -9,7 +9,7 @@ from ..canon.khilaf import VowelKhilaf, VowelSite
 from ..dataio import load_yaml, require_keys
 from ..model.address import KhilafId
 from ..model.canon import ABJAD, Annotation, Quality
-from ..rules.khilaf import HEAVY, KhilafError, RaaKhilaf, Site
+from ..rules.khilaf import OPTIONS, KhilafError, Site, SitedKhilaf
 
 SCHEMA_VERSION = 1
 
@@ -18,7 +18,11 @@ SITED = {
     KhilafId.RAA_TAFKHEEM: "raa_tafkheem",
     KhilafId.NUCLEUS_VOWEL: "nucleus_vowel",
     KhilafId.IMALA_QUALITY: "imala_quality",
+    KhilafId.YAA_ITHBAT: "yaa_ithbat",
 }
+
+#: The points a rule settles while performing one Score, word by word.
+SITED_POINTS = (KhilafId.RAA_TAFKHEEM, KhilafId.YAA_ITHBAT)
 
 #: The points whose sites the Score carries, so the choice is made at build.
 VOWEL_POINTS = (KhilafId.NUCLEUS_VOWEL, KhilafId.IMALA_QUALITY)
@@ -34,18 +38,28 @@ KEY_ALPHABET = frozenset(ABJAD.values()) | {"~"} | {q.value for q in Quality}
 class Khilaf:
     """One riwayah's disputes, split by the layer that settles them."""
 
-    raa: RaaKhilaf
+    sited: dict[KhilafId, SitedKhilaf]
     vowel: VowelKhilaf
+
+    @property
+    def raa(self) -> SitedKhilaf:
+        return self.sited[KhilafId.RAA_TAFKHEEM]
+
+    @property
+    def yaa(self) -> SitedKhilaf:
+        return self.sited[KhilafId.YAA_ITHBAT]
 
     def points(self) -> dict[str, dict]:
         """Every choice a caller may make, keyed by khilaf point."""
         return {
-            KhilafId.RAA_TAFKHEEM.value: self.raa.points(),
+            **{point.value: k.points() for point, k in self.sited.items()},
             "vowel": self.vowel.points(),
         }
 
 
-EMPTY = Khilaf(RaaKhilaf({}), VowelKhilaf({}))
+EMPTY = Khilaf(
+    {point: SitedKhilaf(point) for point in SITED_POINTS}, VowelKhilaf({})
+)
 
 
 def load_khilaf(path: Path) -> Khilaf:
@@ -61,12 +75,16 @@ def load_khilaf(path: Path) -> Khilaf:
         )
     require_keys(data, set(SITED.values()), name=str(path))
     return Khilaf(
-        raa=RaaKhilaf(
-            {
-                key: _site(key, spec, path)
-                for key, spec in (data[SITED[KhilafId.RAA_TAFKHEEM]] or {}).items()
-            }
-        ),
+        sited={
+            point: SitedKhilaf(
+                point,
+                {
+                    key: _site(point, key, spec, path)
+                    for key, spec in (data[SITED[point]] or {}).items()
+                },
+            )
+            for point in SITED_POINTS
+        },
         vowel=VowelKhilaf(
             {
                 name: _vowel(point, name, spec, path)
@@ -123,8 +141,8 @@ def _quality(option: str, raw: object, where: str) -> Quality:
         ) from None
 
 
-def _site(skeleton: str, spec: dict, path: Path) -> Site:
-    where = f"{path} {SITED[KhilafId.RAA_TAFKHEEM]}[{skeleton!r}]"
+def _site(point: KhilafId, skeleton: str, spec: dict, path: Path) -> Site:
+    where = f"{path} {SITED[point]}[{skeleton!r}]"
     require_keys(spec, {"disputed_at", "default"}, name=where)
     unknown = sorted(set(skeleton) - KEY_ALPHABET)
     if unknown:
@@ -138,10 +156,10 @@ def _site(skeleton: str, spec: dict, path: Path) -> Site:
             f"{where}: disputed_at {spec['disputed_at']!r}, expected one of "
             f"{sorted(JUNCTIONS)}"
         )
-    weight = HEAVY.get(str(spec["default"]))
-    if weight is None:
+    options = OPTIONS[point]
+    if str(spec["default"]) not in options:
         raise KhilafError(
             f"{where}: default {spec['default']!r}, expected one of "
-            f"{sorted(HEAVY)}"
+            f"{sorted(options)}"
         )
-    return Site(at_stop=at_stop, default_heavy=weight)
+    return Site(at_stop=at_stop, default=options[str(spec["default"])])

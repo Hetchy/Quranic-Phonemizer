@@ -5,7 +5,7 @@ these are the only rules that may ask where the reciter stops.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from ..engine.neighbourhood import Neighbourhood
 from ..engine.plan import (
@@ -17,7 +17,7 @@ from ..engine.plan import (
     Verdict,
     mint,
 )
-from ..model.address import BoundaryPlan, SlotId
+from ..model.address import BoundaryPlan, KhilafId, SlotId
 from ..model.canon import (
     CanonLetter,
     NucleusKind,
@@ -34,6 +34,7 @@ from ..model.performance import (
     Participants,
     Vowel,
 )
+from .khilaf import SitedKhilaf, vocalised_word
 
 
 @dataclass(frozen=True, slots=True)
@@ -44,6 +45,9 @@ class WaqfEnding:
     `Aspect` records the two separately.
     """
 
+    yaa: SitedKhilaf = field(
+        default_factory=lambda: SitedKhilaf(KhilafId.YAA_ITHBAT)
+    )
     rule: Rule = Rule.WAQF_ENDING
     phase: Phase = Phase.BOUNDARY
     triggers: frozenset = frozenset()
@@ -75,14 +79,27 @@ class WaqfEnding:
             effects.append(
                 Realize(at, Aspect.NUCLEUS, (Vowel(slot.nucleus.quality, True),))
             )
-        if slot.onset is Onset.SILAH:
-            # The pronoun yaa's onset must go too, or a stray glide remains.
+        if slot.onset is Onset.SILAH and not self._kept(near, word):
+            # The pronoun yaa's onset must go too, or a stray glide remains,
+            # and the stop then lands on the letter before it.
             effects.append(Silence(at, Aspect.ONSET))
+            effects.extend(_hands_the_stop_back(near, at, word))
         if not effects:
             return None
         return Verdict(
             Occurrence(mint(Rule.WAQF_ENDING, at), Rule.WAQF_ENDING, Participants((at,))),
             tuple(effects),
+        )
+
+    def _kept(self, near: Neighbourhood, word: int) -> bool:
+        """Ithbat: the reader says the optional yaa anyway, so the stop takes
+        its vowel and `PausalGlide` lengthens what is left."""
+        return bool(
+            self.yaa.of(
+                vocalised_word(near.score.words[word]),
+                True,
+                near.score.selection,
+            )
         )
 
 
@@ -261,3 +278,16 @@ def _is_last_of_word(near: Neighbourhood, at: SlotId, word: int) -> bool:
 def _is_first_of_word(near: Neighbourhood, at: SlotId, word: int) -> bool:
     slots = near.score.words[word].slots
     return bool(slots) and slots[0].id == at
+
+
+def _hands_the_stop_back(near: Neighbourhood, at: SlotId, word: int):
+    """A letter absent at the pause is not the one stopped on, so the vowel
+    of the letter before it drops instead."""
+    slots = near.score.words[word].slots
+    index = next((i for i, s in enumerate(slots) if s.id == at), 0)
+    if index == 0:
+        return ()
+    before = slots[index - 1]
+    if before.nucleus.kind is not NucleusKind.SHORT:
+        return ()
+    return (Silence(before.id, Aspect.NUCLEUS),)

@@ -114,9 +114,43 @@ def test_the_undisputed_junction_is_left_to_the_rule(
     ) == "misˤrˤaˤ"
 
 
+def test_the_optional_yaa_is_read_both_ways(packed, shared, alphabet) -> None:
+    """27:36. Both scripts write this yaa small where 19:30 writes the same
+    word's full, and small is what says the letter may be dropped."""
+    readings = {
+        name: _read(
+            packed, shared, alphabet, (27, 36, 8), Junction.STOP,
+            VariantSelection(
+                (Option(KhilafId.YAA_ITHBAT, name, site="ءaتaنiيa"),)
+            ),
+        )
+        for name in ("hadhf", "ithbat")
+    }
+    assert readings == {"hadhf": "ʔa:ta:n", "ithbat": "ʔa:ta:ni:"}
+    assert _read(
+        packed, shared, alphabet, (27, 36, 8), Junction.STOP, VariantSelection()
+    ) == readings["hadhf"]
+    assert _read(
+        packed, shared, alphabet, (19, 30, 5), Junction.STOP, VariantSelection()
+    ) == "ʔa:ta:ni:", "the full yaa of 19:30 is not disputed"
+
+
+def test_the_optional_yaa_is_always_said_when_joined(
+    packed, shared, alphabet
+) -> None:
+    """The dispute lives at the stop only; joined, both wajh say it."""
+    for name in ("hadhf", "ithbat"):
+        assert _read(
+            packed, shared, alphabet, (27, 36, 8), Junction.JOIN,
+            VariantSelection(
+                (Option(KhilafId.YAA_ITHBAT, name, site="ءaتaنiيa"),)
+            ),
+        ) == "ʔa:ta:nija"
+
+
 def test_an_unknown_option_raises_rather_than_falling_back() -> None:
     with pytest.raises(KhilafError, match="not an option"):
-        khilaf().raa.weight(
+        khilaf().raa.of(
             "مiصرa", True, VariantSelection((Option(RAA, "middling"),))
         )
 

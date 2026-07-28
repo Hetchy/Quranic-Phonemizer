@@ -4,6 +4,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from ..model.address import KhilafId, VariantSelection
+from ..model.canon import ABJAD, NucleusKind, Onset
 from ..model.performance import NasalPlace
 
 #: Both readings of the two bilabial hidings are taught and both are correct.
@@ -17,6 +18,15 @@ DEFAULT_NASAL_PLACE = NasalPlace.ASSIMILATED
 
 #: The two readings of a disputed raa, as a reader names them.
 HEAVY = {"heavy": True, "light": False}
+
+#: Whether a word-final yaa is still said once the stop has taken its vowel.
+KEPT = {"ithbat": True, "hadhf": False}
+
+#: The option set each sited point is read with.
+OPTIONS = {
+    KhilafId.RAA_TAFKHEEM: HEAVY,
+    KhilafId.YAA_ITHBAT: KEPT,
+}
 
 
 class KhilafError(ValueError):
@@ -44,41 +54,64 @@ class Site:
     """The junction the dispute lives in; in the other one the reading is
     settled and the ordinary rule gives it."""
 
-    default_heavy: bool
+    default: bool
 
 
 @dataclass(frozen=True, slots=True)
-class RaaKhilaf:
-    """The words whose quiescent raa is read both ways, and which way."""
+class SitedKhilaf:
+    """A point disputed word by word, in one junction, two ways.
 
+    The raa's weight and the pronoun yaa's survival are the same question
+    asked of different things, so they are one structure and not two.
+    """
+
+    khilaf: KhilafId = KhilafId.RAA_TAFKHEEM
     sites: dict[str, Site] = field(default_factory=dict)
 
-    def weight(
+    def of(
         self, skeleton: str, stopped: bool, selection: VariantSelection
     ) -> bool | None:
         """`None` where this is no disputed site in this junction, which
-        leaves the answer to the rule that decides every other raa."""
+        leaves the answer to the rule that decides every other word."""
         site = self.sites.get(skeleton)
         if site is None or site.at_stop is not stopped:
             return None
-        name = selection.chosen(KhilafId.RAA_TAFKHEEM, site=skeleton)
+        name = selection.chosen(self.khilaf, site=skeleton)
         if name is None:
-            return site.default_heavy
-        weight = HEAVY.get(name)
-        if weight is None:
+            return site.default
+        options = OPTIONS[self.khilaf]
+        if name not in options:
             raise KhilafError(
-                f"{KhilafId.RAA_TAFKHEEM.value}: {name!r} is not an option; "
-                f"expected one of {sorted(HEAVY)}"
+                f"{self.khilaf.value}: {name!r} is not an option; expected "
+                f"one of {sorted(options)}"
             )
-        return weight
+        return options[name]
 
     def points(self) -> dict[str, dict[str, object]]:
         """What a caller may choose, without reading the data file."""
+        options = OPTIONS[self.khilaf]
+        named = {value: name for name, value in options.items()}
         return {
             skeleton: {
-                "options": sorted(HEAVY),
-                "default": "heavy" if site.default_heavy else "light",
+                "options": sorted(options),
+                "default": named[site.default],
                 "disputed_at": "stop" if site.at_stop else "join",
             }
             for skeleton, site in self.sites.items()
         }
+
+
+def vocalised_word(word) -> str:
+    """The word as a khilaf names its sites: letters and their vowels. Read
+    from the Score, so a vowel a stop removes is still in the key."""
+    out = []
+    for slot in word.slots:
+        quality = getattr(slot.nucleus, "quality", None)
+        if slot.nucleus.kind is NucleusKind.SILENT:
+            quality = None
+        out.append(
+            ABJAD[slot.letter.value]
+            + ("~" if slot.onset is Onset.GEMINATE else "")
+            + (quality.value if quality else "")
+        )
+    return "".join(out)

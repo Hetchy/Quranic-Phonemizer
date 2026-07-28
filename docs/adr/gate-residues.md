@@ -9,7 +9,7 @@ can be checked rather than a number nobody looks at.
 | cross-script, word | 99.997% | 2 words |
 | cross-script, verse | **100.000%** | none |
 | round-trip, uthmani | **100.000%** | none |
-| regression, word | 99.926% | 57 words |
+| regression, word | 99.928% | 56 words |
 | regression, verse | 97.674% | see below |
 | L1 | 18 rows over 287,057 slots | |
 | attestations | 178 uthmani, 239 indopak | |
@@ -25,17 +25,21 @@ forces separates them.
 | 26:61:2 | `تَرَآءَا` | `تَرَآءَ` | `tarˤaˤ:ʔa lʒamʕa:ni` both |
 | 59:9:2 | `تَبَوَّءُو` | `تَبَوَّءُ` | `tabawwaʔu dda:rˤaˤ` both |
 
-## Regression — 57 words
+## Regression — 56 words
 
 The oracle is the previous implementation with its own defects frozen in, so
-this gate is a change detector and not a target. Every row is one of six
+this gate is a change detector and not a target. Every row is one of five
 classes, and each class is a disagreement whose direction is established
 independently of the oracle.
 
-**19 + 5 — the small yaa and the small waw** (`يُحْىِۦ`, `وَلِىِّۦ`,
-`ءَاتَىٰنَِۧ`, `تَلْوُۥٓا۟`, `فَأْوُۥٓا۟`, `لِتَسْتَوُۥا۟`). Uthmani writes
-the vowel with `ۦ` and `ۥ`; the oracle drops it and ends the word on the
-consonant. `juħj` for `يُحْىِۦ` says no vowel is written where one is.
+**19 + 4 — the small yaa and the small waw** (`يُحْىِۦ`, `وَلِىِّۦ`,
+`تَلْوُۥٓا۟`, `فَأْوُۥٓا۟`, `لِتَسْتَوُۥا۟`). Uthmani writes the vowel with
+`ۦ` and `ۥ`; the oracle drops it and ends the word on the consonant. `juħj`
+for `يُحْىِۦ` says no vowel is written where one is.
+
+`ءَاتَىٰنَِۧ` 27:36 left this class: both scripts write its yaa small where
+19:30 writes the same word's full, so it is a khilaf site and hadhf is the
+default. The oracle agrees.
 
 **11 — the quiescent hamza after a prosthetic one** (`ٱئْتِ`, `ٱئْتُوا۟`,
 `ٱئْذَن`, `ٱؤْتُمِنَ`). Read alone, every one of these is started on, and a
