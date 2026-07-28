@@ -56,8 +56,8 @@ SAMPLE = (
 DEFERRED: set[Rule] = set()
 
 
-def _fired(packed, shared, surah, ayah):
-    score = score_for(packed, shared, surah, ayah)
+def _fired(packed, hafs, surah, ayah):
+    score = score_for(packed, hafs, surah, ayah)
     out = set()
     for junction in (Junction.JOIN, Junction.STOP):
         plan = BoundaryPlan(
@@ -67,12 +67,12 @@ def _fired(packed, shared, surah, ayah):
     return out
 
 
-def test_every_rule_not_declared_deferred_actually_fires(packed, shared):
+def test_every_rule_not_declared_deferred_actually_fires(packed, hafs):
     """Falsifier: a `Rule` member with no classifier. Add one without an
     implementation and this fails."""
     fired: set[Rule] = set()
     for surah, ayah in SAMPLE:
-        fired |= _fired(packed, shared, surah, ayah)
+        fired |= _fired(packed, hafs, surah, ayah)
     expected = set(Rule) - DEFERRED
     missing = sorted(rule.value for rule in expected - fired)
     assert not missing, (
@@ -81,22 +81,22 @@ def test_every_rule_not_declared_deferred_actually_fires(packed, shared):
     )
 
 
-def test_the_deferred_list_does_not_rot(packed, shared):
+def test_the_deferred_list_does_not_rot(packed, hafs):
     """The other direction: a rule that starts firing must leave the list, or
     `DEFERRED` slowly becomes a place where finished work hides."""
     fired: set[Rule] = set()
     for surah, ayah in SAMPLE:
-        fired |= _fired(packed, shared, surah, ayah)
+        fired |= _fired(packed, hafs, surah, ayah)
     stale = sorted(rule.value for rule in DEFERRED & fired)
     assert not stale, f"listed as deferred but firing: {stale}"
 
 
 @pytest.mark.parametrize(("surah", "ayah"), SAMPLE)
-def test_no_two_rules_claim_the_same_slot_and_aspect(packed, shared, surah, ayah):
+def test_no_two_rules_claim_the_same_slot_and_aspect(packed, hafs, surah, ayah):
     """No two rules may claim the same slot and aspect; overlaps must be
     resolved by mutually exclusive conditions, not by ranking.
     """
-    score = score_for(packed, shared, surah, ayah)
+    score = score_for(packed, hafs, surah, ayah)
     try:
         perform(score, HAFS, all_join(len(score.words)))
         perform(

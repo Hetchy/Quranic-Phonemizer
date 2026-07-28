@@ -6,10 +6,12 @@ carries a literal value or names a derivation -- the adapter never computes it.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import Protocol
 
-from ..model.address import Location, Script, VerseRef
+from ..model.address import Location, Riwayah, Script, VerseRef
 from ..model.canon import CanonLetter, Onset, RuleFamily
 from ..model.inscription import Grapheme, SlotFact, StopAdvice
+from .inventory import Inventory
 
 
 @dataclass(frozen=True, slots=True)
@@ -111,6 +113,7 @@ class Reading:
     """One verse, as one script wrote it, with nothing decided."""
 
     verse: VerseRef
+    riwayah: Riwayah
     script: Script
     words: tuple[Location, ...]
     clusters: tuple[Cluster, ...]
@@ -130,3 +133,15 @@ class Reading:
             lo = i if lo < 0 else lo
             hi = i
         return lo, hi + 1
+
+
+class ScriptAdapter(Protocol):
+    """What a riwayah must supply per script. Structural, so an adapter
+    stays under its own riwayah and this package never imports one."""
+
+    script: Script
+    inventory: Inventory
+
+    def read(
+        self, verse: VerseRef, words: tuple[tuple[Location, str], ...]
+    ) -> Reading: ...

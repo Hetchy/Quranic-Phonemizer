@@ -1,4 +1,4 @@
-"""Both readings of the two bilabial hidings, and the shared/riwayah overlay."""
+"""Both readings of the two bilabial hidings, and the hafs/riwayah overlay."""
 from __future__ import annotations
 
 import pytest
@@ -24,9 +24,9 @@ RULE_OF = {
 }
 
 
-def _places(packed, shared, khilaf, option: str | None) -> set[NasalPlace]:
+def _places(packed, hafs, khilaf, option: str | None) -> set[NasalPlace]:
     surah, ayah = SITES[khilaf]
-    score = score_for(packed, shared, surah, ayah)
+    score = score_for(packed, hafs, surah, ayah)
     selection = (
         VariantSelection() if option is None
         else VariantSelection((Option(khilaf, option),))
@@ -48,17 +48,17 @@ def _places(packed, shared, khilaf, option: str | None) -> set[NasalPlace]:
 
 
 @pytest.mark.parametrize("khilaf", list(SITES))
-def test_both_options_are_reachable(packed, shared, khilaf) -> None:
+def test_both_options_are_reachable(packed, hafs, khilaf) -> None:
     """A khilaf nothing reads is a khilaf that does not exist."""
-    assert NasalPlace.BILABIAL in _places(packed, shared, khilaf, "bilabial")
+    assert NasalPlace.BILABIAL in _places(packed, hafs, khilaf, "bilabial")
     assert NasalPlace.ASSIMILATED in _places(
-        packed, shared, khilaf, "assimilated"
+        packed, hafs, khilaf, "assimilated"
     )
 
 
 @pytest.mark.parametrize("khilaf", list(SITES))
-def test_the_default_is_taken_when_nothing_is_chosen(packed, shared, khilaf) -> None:
-    assert NasalPlace.ASSIMILATED in _places(packed, shared, khilaf, None)
+def test_the_default_is_taken_when_nothing_is_chosen(packed, hafs, khilaf) -> None:
+    assert NasalPlace.ASSIMILATED in _places(packed, hafs, khilaf, None)
 
 
 def test_an_unknown_option_raises_rather_than_falling_back() -> None:
