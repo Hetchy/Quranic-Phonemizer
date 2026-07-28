@@ -341,7 +341,7 @@ Accepted direction:
 Required changes:
 
 - replace Arabic-block acceptance with the semantic inventory in
-  `docs/warsh-script-codepoint-audit.md`;
+  `research/warsh/warsh-script-codepoint-audit.md`;
 - replace generic flagged-character deletion with the transform manifest;
 - correct stale/incorrect metadata (`U+0656`, `U+06EC`, `U+06EA`, cleaned
   distinct count, and the small-mīm description);

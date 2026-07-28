@@ -195,7 +195,7 @@ longer define the source scalar's universal meaning or drive rules.
 | `scripts/generate_lpm_baseline.py` | use only as a migration gate after replacing its missing `scripts.prepare_mfa_mappings` import with the new alignment projection; retire the legacy baseline once semantic fixtures cover the retained contract |
 | `.github/workflows/sync-quran-db.yml` | parameterize/iterate corpus manifests and verify each committed binary/address pair |
 | `.github/workflows/publish.yml` | run tests and inspect/install built wheel/sdist before publishing; current workflow only builds and uploads |
-| `docs/hafs/research/`, `dev/tajweed_occurences/` | move phonemizer source prose/assets to `research/phonemizer/`, unrelated study to `research/quranic-studies/`, executable cases to `tests/fixtures/`, and stable conclusions to docs; none is runtime data |
+| `research/hafs/syntheses/`, `dev/tajweed_occurences/` | move phonemizer source prose/assets to `research/phonemizer/`, unrelated study to `research/quranic-studies/`, executable cases to `tests/fixtures/`, and stable conclusions to docs; none is runtime data |
 
 Corpus source must live outside the runtime wheel, but its manifest,
 transformation steps, and binary build must be reproducible per riwāyah. A

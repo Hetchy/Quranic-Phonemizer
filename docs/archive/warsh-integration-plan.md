@@ -26,7 +26,7 @@ Governing documents:
 - ADR-002: invariants and implementation gates;
 - ADR-003: code/runtime-data/build/docs/research ownership;
 - `docs/tajweed-model.md`: concrete models and every implemented Tajwīd family;
-- `docs/warsh-script-codepoint-audit.md`: complete Hafs/Warsh source audit;
+- `research/warsh/warsh-script-codepoint-audit.md`: complete Hafs/Warsh source audit;
 - `docs/current-implementation-mapping.md`: every current module/resource/tool
   mapped to a target owner.
 - `docs/internal-model-worked-examples.md`: complete model walkthrough,
