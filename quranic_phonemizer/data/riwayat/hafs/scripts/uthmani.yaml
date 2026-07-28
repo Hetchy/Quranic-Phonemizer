@@ -95,9 +95,3 @@ advice:
   "ۛ": EITHER_STOP
 
 structural: [" ", "۞", "۩", "‏"]
-
-polysemous:
-  "ۜ": [SAKT, KHILAF_SITE]
-  "ۧ": [SILAH, LONG_VOWEL]
-  "ۦ": [SILAH, LONG_VOWEL]
-  "ۥ": [SILAH, LONG_VOWEL]

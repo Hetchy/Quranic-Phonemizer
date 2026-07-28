@@ -90,3 +90,33 @@ def test_the_riwayah_inherits_what_it_does_not_override() -> None:
     bare = load_rule_tables(shared / "rules.yaml")
     assert bare.qalqala == rule_tables().qalqala
     assert bare.pairs.by_pair == rule_tables().pairs.by_pair
+
+
+@pytest.mark.parametrize(
+    ("block", "name"),
+    [
+        ("followers_of_noon", "madd_lazim"),
+        ("followers_of_meem", "izhar_halqi"),
+        ("pairs", "qalqala_sughra"),
+    ],
+)
+def test_a_table_may_not_name_an_outcome_its_family_cannot_act_on(
+    tmp_path, block: str, name: str
+) -> None:
+    """Falsifier: membership in `Rule` was the whole check, so a madd rule
+    loaded as a follower of noon and then never fired."""
+    from pathlib import Path
+
+    from quranic_phonemizer.riwayat.tables import RuleTableError, load_rule_tables
+
+    source = (
+        Path(__file__).resolve().parent.parent
+        / "quranic_phonemizer" / "data" / "shared" / "rules.yaml"
+    )
+    text = source.read_text(encoding="utf-8").replace(
+        f"{block}:\n", f"{block}:\n  {name}: [ب]\n", 1
+    )
+    path = tmp_path / "rules.yaml"
+    path.write_text(text, encoding="utf-8")
+    with pytest.raises(RuleTableError, match="not one this table selects"):
+        load_rule_tables(path)

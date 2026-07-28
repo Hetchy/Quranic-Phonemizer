@@ -86,6 +86,17 @@ class Quality(StrEnum):
     E = "e"
 
 
+#: The letter each quality lengthens into. A property of the canonical model,
+#: not of any script: every script writes these three and no other.
+CARRIER_OF: dict[Quality, CanonLetter] = {
+    Quality.A: CanonLetter.ALIF,
+    Quality.U: CanonLetter.WAW,
+    Quality.I: CanonLetter.YA,
+}
+
+CARRIERS = frozenset(CARRIER_OF.values())
+
+
 class Annotation(StrEnum):
     """A canonical fact that changes no sound.
 

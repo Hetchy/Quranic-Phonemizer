@@ -180,7 +180,6 @@ def _plain_sound(slot: Slot, aspect: Aspect, colours, lengths=None) -> Sound:
             slot.letter,
             geminate=slot.onset is Onset.GEMINATE,
             emphatic=emphatic,
-            nasal=bool(features.get(SoundFeature.NASAL, False)),
         )
     long = slot.nucleus.kind in (
         NucleusKind.LONG, NucleusKind.SILAH, NucleusKind.PAUSAL_LONG
@@ -207,7 +206,7 @@ def _realize(plan, mint, colours, sounds, attributions, hosted) -> None:
                 )
             elif isinstance(effect, Insert):
                 sound_id = mint.sound()
-                sounds.append((sound_id, effect.sounds[0]))
+                sounds.append((sound_id, effect.sound))
                 attributions.append(
                     Inserted(effect.anchor, effect.aspect, sound_id,
                              verdict.occurrence.id)
@@ -258,35 +257,20 @@ def _colours(plan: Plan) -> dict[tuple[SlotId, Aspect], dict[SoundFeature, bool]
 
 
 def _apply_colours(effect: Realize, colours) -> Sound:
-    """A `SoundSpec` is a `Sound` with its context-dependent features unset;
-    the materialiser fills them from later-phase `Recolour` effects."""
-    sound = effect.sounds[0]
-    features = colours.get((effect.slot, effect.aspect))
-    if not features:
+    """A rule names the sound; a later phase may still colour it."""
+    sound = effect.sound
+    emphatic = (colours.get((effect.slot, effect.aspect)) or {}).get(
+        SoundFeature.EMPHATIC
+    )
+    if emphatic is None:
         return sound
-    fields = {
-        "emphatic": features.get(SoundFeature.EMPHATIC),
-        "nasal": features.get(SoundFeature.NASAL),
-    }
     match sound:
         case Consonant():
-            return Consonant(
-                sound.letter,
-                sound.geminate,
-                fields["emphatic"] if fields["emphatic"] is not None else sound.emphatic,
-                fields["nasal"] if fields["nasal"] is not None else sound.nasal,
-            )
+            return Consonant(sound.letter, sound.geminate, emphatic, sound.nasal)
         case Vowel():
-            return Vowel(
-                sound.quality,
-                sound.long,
-                fields["emphatic"] if fields["emphatic"] is not None else sound.emphatic,
-            )
+            return Vowel(sound.quality, sound.long, emphatic)
         case Nasal():
-            return Nasal(
-                sound.place,
-                fields["emphatic"] if fields["emphatic"] is not None else sound.emphatic,
-            )
+            return Nasal(sound.place, emphatic)
     return sound
 
 

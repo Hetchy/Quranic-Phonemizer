@@ -168,6 +168,24 @@ def test_rejects_an_unknown_schema_version(tmp_path: Path) -> None:
         load_ledger(path, riwayah=Riwayah.HAFS)
 
 
+def test_rejects_an_assert_that_disagrees_with_its_supply(tmp_path: Path) -> None:
+    """Falsifier: only `(slot, fact)` was compared, so a witness could name a
+    different value than the authority it is supposed to agree with."""
+    path = write(
+        tmp_path,
+        """
+        supplies:
+          - {slot: "2:245#17", skeleton: "ويبصط", fact: LETTER,
+             value: SEEN, citation: "Shatibiyyah"}
+        asserts:
+          - {script: uthmani, slot: "2:245#17", skeleton: "ويبصط",
+             fact: LETTER, value: SAD}
+        """,
+    )
+    with pytest.raises(LedgerError, match="contradiction"):
+        load_ledger(path, riwayah=Riwayah.HAFS)
+
+
 def test_rejects_a_ledger_authored_for_another_riwayah(tmp_path: Path) -> None:
     """Falsifier: the key was required present but never read, so a ledger
     for another reading supplied its facts to this one."""
@@ -218,6 +236,31 @@ def test_an_entry_for_this_verse_that_does_not_resolve_is_an_error(
     )
     with pytest.raises(LedgerAddressError, match="does not resolve"):
         build(reading, lexicon=hafs.lexicon, ledger=beyond)
+
+
+def test_an_assert_the_script_does_not_write_is_an_error(hafs) -> None:
+    """Checked against the drafted slot before the supply overwrites it.
+
+    Falsifier: nothing read `Ledger.asserts`, so both rows were discarded.
+    """
+    from dataclasses import replace
+
+    from quranic_phonemizer.canon.build import build
+    from quranic_phonemizer.canon.ledger import Ledger
+    from quranic_phonemizer.canon.passes import LedgerWitnessError
+    from quranic_phonemizer.model.address import Script, VerseRef
+    from quranic_phonemizer.model.canon import Long
+
+    verse = VerseRef(6, 77)
+    reading = hafs.read(Script.UTHMANI, verse, hafs.words(verse))
+    hafs.build(reading)
+
+    wrong = Ledger(
+        hafs.ledger.supplies,
+        tuple(replace(row, value=Long(Quality.I)) for row in hafs.ledger.asserts),
+    )
+    with pytest.raises(LedgerWitnessError, match="uthmani is said to write"):
+        build(reading, lexicon=hafs.lexicon, ledger=wrong, passes=hafs.passes)
 
 
 def test_an_entry_for_another_verse_is_not_an_error(packed, hafs) -> None:

@@ -213,7 +213,7 @@ def load_ledger(path: Path, *, riwayah: Riwayah) -> Ledger:
         _assert(row, where=f"{path} asserts[{i}]")
         for i, row in enumerate(data.get("asserts") or ())
     )
-    _reject_orphan_assert(supplies, asserts, path)
+    _check_asserts(supplies, asserts, path)
     return Ledger(supplies, asserts)
 
 
@@ -266,14 +266,23 @@ def _reject_duplicate_supply(supplies: tuple[Supply, ...], path: Path) -> None:
         seen[key] = supply
 
 
-def _reject_orphan_assert(
+def _check_asserts(
     supplies: tuple[Supply, ...], asserts: tuple[Assert, ...], path: Path
 ) -> None:
-    keys = {(str(s.ref), s.fact) for s in supplies}
+    """An assert must have a supply to agree with, and must agree with it."""
+    by_key = {(str(s.ref), s.fact): s for s in supplies}
     for row in asserts:
-        if (str(row.ref), row.fact) not in keys:
+        supply = by_key.get((str(row.ref), row.fact))
+        if supply is None:
             raise LedgerError(
                 f"{path}: {row.script.value} asserts {row.fact.value} at "
                 f"{row.ref} with no supply to agree with. An assert is a "
                 f"witness, not an authority."
+            )
+        if supply.value != row.value:
+            raise LedgerError(
+                f"{path}: {row.script.value} asserts {row.fact.value} at "
+                f"{row.ref} is {row.value!r}, but the supply says "
+                f"{supply.value!r}. A witness that disagrees is a "
+                f"contradiction, not a witness."
             )

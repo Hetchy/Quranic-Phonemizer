@@ -6,7 +6,13 @@ from pathlib import Path
 
 from ..dataio import load_yaml, require_keys
 from ..model.canon import ABJAD, CanonLetter, Rule
-from ..rules.tables import Followers, Pairs
+from ..rules.tables import (
+    MEEM_OUTCOMES,
+    NOON_OUTCOMES,
+    PAIR_OUTCOMES,
+    Followers,
+    Pairs,
+)
 
 SCHEMA_VERSION = 1
 
@@ -49,17 +55,19 @@ def load_rule_tables(shared: Path, riwayah: Path | None = None) -> RuleTables:
     never = _letters(data["never_follows"], where)
     return RuleTables(
         followers_of_noon=_followers(
-            data["followers_of_noon"], never, where
+            data["followers_of_noon"], never, NOON_OUTCOMES,
+            f"{where} followers_of_noon",
         ),
         followers_of_meem=_followers(
-            data["followers_of_meem"], never, where
+            data["followers_of_meem"], never, MEEM_OUTCOMES,
+            f"{where} followers_of_meem",
         ),
         never_follows=never,
         qalqala=_letters(data["qalqala"], where),
         always_heavy=_letters(data["always_heavy"], where),
         sun_letters=_letters(data["sun_letters"], where),
         proclitics=_letters(data["proclitics"], where),
-        pairs=Pairs(_pairs(data["pairs"], where)),
+        pairs=Pairs(_pairs(data["pairs"], f"{where} pairs")),
     )
 
 
@@ -75,11 +83,19 @@ def _versioned(path: Path, keys: set[str], *, partial: bool = False) -> dict:
     return data
 
 
-def _rule(name: str, where: str) -> Rule:
+def _rule(name: str, outcomes: frozenset[Rule], where: str) -> Rule:
+    """A Rule the family reading this table can act on. Checking membership in
+    `Rule` alone would accept a madd rule as a follower of noon."""
     try:
-        return Rule(name)
+        rule = Rule(name)
     except ValueError:
         raise RuleTableError(f"{where}: {name!r} is not a Rule") from None
+    if rule not in outcomes:
+        raise RuleTableError(
+            f"{where}: {name!r} is a Rule but not one this table selects; it "
+            f"selects among {sorted(r.value for r in outcomes)}"
+        )
+    return rule
 
 
 def _letter(glyph: str, where: str) -> CanonLetter:
@@ -96,10 +112,11 @@ def _letters(names: list[str], where: str) -> frozenset[CanonLetter]:
 def _followers(
     block: dict[str, list[str]],
     never: frozenset[CanonLetter],
+    outcomes: frozenset[Rule],
     where: str,
 ) -> Followers:
     by_rule = {
-        _rule(name, where): _letters(letters, where)
+        _rule(name, outcomes, where): _letters(letters, where)
         for name, letters in block.items()
     }
     _reject_overlap(by_rule, where)
@@ -125,7 +142,7 @@ def _pairs(
 ) -> dict[tuple[CanonLetter, CanonLetter], Rule]:
     out: dict[tuple[CanonLetter, CanonLetter], Rule] = {}
     for name, entries in block.items():
-        rule = _rule(name, where)
+        rule = _rule(name, PAIR_OUTCOMES, where)
         for entry in entries:
             if len(entry) != 2:
                 raise RuleTableError(f"{where}: {name} entry {entry} is not a pair")

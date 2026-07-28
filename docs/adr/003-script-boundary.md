@@ -548,6 +548,13 @@ derivation over canonical context, the Ledger separates them, which is what
 27:36:8 requires: one `Supply(ONSET = SILAH)` at that slot, and the ordinary
 long-ī derivation everywhere else.
 
+The separation is therefore the Ledger and `canon/derive/`, and nothing else.
+An earlier implementation also recorded the ambiguity as a `polysemous` section
+in each inventory, which named the senses and then left the scalar's primary
+declaration in force — a note about the problem rather than the mechanism that
+solves it. It has been removed; a scalar is ambiguous exactly when a `Supply`
+or a derivation says so.
+
 Consequence for **fixture 13**: it must assert both halves — `Onset.SILAH` at
 27:36:8 *and* `Nucleus.Long(I)` at a sample of the 38 — or it tests a scalar
 rather than a fact and passes for the wrong reason.

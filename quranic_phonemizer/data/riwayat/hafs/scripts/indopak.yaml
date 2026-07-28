@@ -104,8 +104,3 @@ advice:
   "ࣝ": PERMITTED_STOP
 
 structural: [" ", "‮", "٦", "͏"]
-
-polysemous:
-  "ٖ": [SILAH, LONG_VOWEL]
-  "ۜ": [SAKT, KHILAF_SITE]
-  "ࣕ": [ADVICE, KHILAF_SITE]

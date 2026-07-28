@@ -73,7 +73,7 @@ class PausalGlide:
                 Realize(
                     before.id,
                     Aspect.NUCLEUS,
-                    (Vowel(before.nucleus.quality, long=True),),
+                    Vowel(before.nucleus.quality, long=True),
                 ),
                 MergeInto(at, Aspect.ONSET, before.id, Aspect.NUCLEUS),
             ),

@@ -58,7 +58,7 @@ class Qalqala:
 
         return Verdict(
             Occurrence(mint(degree, at), degree, Participants((at,))),
-            (Realize(at, Aspect.NUCLEUS, (Release(ReleaseKind.QALQALA),)),),
+            (Realize(at, Aspect.NUCLEUS, Release(ReleaseKind.QALQALA)),),
         )
 
 

@@ -9,6 +9,7 @@ from dataclasses import dataclass, field, replace
 
 from ..model.address import VariantSelection
 from ..model.canon import (
+    CARRIERS,
     CanonLetter,
     NucleusKind,
     Onset,
@@ -290,7 +291,7 @@ def _rasm_outcome(context, cluster: Cluster, rows, track):
         or lexeme.otiose_alif(context)
     ):
         return Absent()
-    if cluster.letter not in _length.CARRIERS:
+    if cluster.letter not in CARRIERS:
         return None
     outcome = derive.resolve(CARRIER, context)
     track.used(CARRIER)

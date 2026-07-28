@@ -47,7 +47,7 @@ quiescent hamza after a started prosthetic one becomes the madd of its
 vowel: `ʔi:ti`, not `ʔiʔti`.
 
 **10 — the disputed raa** (`مِصْرَ` ×4 heavy, `يَسْرِ`/`أَسْرِ`/`فَأَسْرِ` ×6
-light). `docs/hafs/research/tafkheem_tarqeeq.md` §2G tabulates both defaults
+light). `research/hafs/syntheses/tafkheem_tarqeeq.md` §2G tabulates both defaults
 and records that the oracle's mechanical rule diverges from them at 89:4. All
 ten are khilaf sites, so the other wajh is selectable.
 
