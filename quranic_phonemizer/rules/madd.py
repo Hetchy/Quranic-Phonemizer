@@ -25,6 +25,11 @@ from ..model.performance import Aspect, Occurrence, Participants, Vowel
 #: Which glide lengthens which vowel.
 GLIDE_OF = {Quality.U: L.WAW, Quality.I: L.YA}
 
+#: Nuclei a stop leaves standing. Only a final short vowel drops.
+KEPT_AT_A_STOP = frozenset(
+    {NucleusKind.LONG, NucleusKind.SILAH, NucleusKind.PAUSAL_LONG}
+)
+
 
 @dataclass(frozen=True, slots=True)
 class PausalGlide:
@@ -45,6 +50,10 @@ class PausalGlide:
             return None
         if slot.onset is Onset.GEMINATE:
             # A doubled glide is a consonant -- `ٱلْعَلِىُّ` ends `-iyy`, not `-ii`.
+            return None
+        if slot.nucleus.kind in KEPT_AT_A_STOP:
+            # A glide the stop cannot strip still carries its own vowel, so it
+            # is a consonant: `نَسِيَا` ends `-iyaa`, not `-iiaa`.
             return None
         before = _before(near, at)
         if before is None or before.nucleus.kind is not NucleusKind.SHORT:

@@ -5,7 +5,7 @@ so both are derivations, never a `Script` consulted directly.
 """
 from __future__ import annotations
 
-from ...model.canon import CanonLetter, Long, NucleusKind, Onset, Quality
+from ...model.canon import ABJAD, CanonLetter, Long, NucleusKind, Onset, Quality
 from . import Context, register  # noqa: F401  (registry import kept explicit)
 
 #: The name is a lam before a haa, and the lam before it or the wasl hamza.
@@ -13,7 +13,9 @@ ALLAH_TAIL = (CanonLetter.LAM, CanonLetter.HEH)
 ALLAH_HEAD = (CanonLetter.LAM, CanonLetter.HAMZA)
 
 
-def divine_name(letters: list[CanonLetter], nuclei: list, onsets: list) -> list[int]:
+def divine_name(
+    letters: list[CanonLetter], nuclei: list, onsets: list, lexicon
+) -> list[int]:
     """Indices of the lam of the divine name, from the letters alone.
 
     Script-independent by construction: one script writes the alif and the
@@ -35,18 +37,26 @@ def divine_name(letters: list[CanonLetter], nuclei: list, onsets: list) -> list[
         )
         if not doubled:
             continue
+        if not lexicon.is_divine_name(_tail(letters, i)):
+            continue
         out.append(i)
     return out
 
 
-def allah_long_a(letters: list[CanonLetter], nuclei: list, onsets: list) -> list[int]:
+def _tail(letters: list[CanonLetter], start: int) -> str:
+    return "".join(ABJAD[letter.value] for letter in letters[start:])
+
+
+def allah_long_a(
+    letters: list[CanonLetter], nuclei: list, onsets: list, lexicon
+) -> list[int]:
     """Of those, the ones whose nucleus must still become `Long(A)`.
 
     Uthmani writes `ٱللَّهِ` with no alif at all; IndoPak writes the dagger.
     """
     return [
         i
-        for i in divine_name(letters, nuclei, onsets)
+        for i in divine_name(letters, nuclei, onsets, lexicon)
         if nuclei[i].kind is NucleusKind.SHORT
         and nuclei[i].quality is Quality.A
     ]

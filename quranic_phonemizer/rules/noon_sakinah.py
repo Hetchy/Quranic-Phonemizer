@@ -11,7 +11,7 @@ from ..engine.neighbourhood import Neighbourhood
 from ..engine.plan import MergeInto, Plan, Realize, Verdict, mint
 from ..model.address import BoundaryPlan, KhilafId, SlotId
 from ..model.canon import CanonLetter as L
-from ..model.canon import Phase, Rule
+from ..model.canon import Phase, Rule, SlotOrigin
 from ..model.performance import (
     Aspect,
     Consonant,
@@ -54,7 +54,9 @@ class NoonSakinah:
                     nasal_place(near.score.selection, KhilafId.IQLAB_NASAL),
                 )
             case Rule.IDGHAM_BI_GHUNNAH:
-                if not near.crosses_word(at):
+                if not near.crosses_word(at) and not _between_names(
+                    near.slot(at), following
+                ):
                     # Izhar mutlaq: inside one word the noon keeps itself.
                     # دنيا، بنيان، قنوان، صنوان are the only sites.
                     return _classification(Rule.IZHAR_MUTLAQ, at, following.id)
@@ -67,6 +69,17 @@ class NoonSakinah:
         return _nasal(
             Rule.IKHFAA_HAQIQI, at, following.id, DEFAULT_NASAL_PLACE
         )
+
+
+def _between_names(slot, following) -> bool:
+    """Letter names are said one after another, so the seam between two of
+    them is a word boundary the Score writes inside one word. Every name
+    that holds a quiescent noon ends on it, so a spelled pair is that seam."""
+    return (
+        slot is not None
+        and slot.origin is SlotOrigin.SPELLED
+        and following.origin is SlotOrigin.SPELLED
+    )
 
 
 def _classification(rule: Rule, at: SlotId, other: SlotId) -> Verdict:

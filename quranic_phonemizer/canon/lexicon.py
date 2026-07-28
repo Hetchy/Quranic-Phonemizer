@@ -21,6 +21,7 @@ BUDGETS = {
     "wasl_exempt_doubled": 10,
     "pausal_lexemes": 10,
     "form_eight_lam": 10,
+    "divine_name": 5,
 }
 
 #: The attached pronouns, in canonical letters. Closed in Arabic, so a lexeme
@@ -61,7 +62,14 @@ class Lexicon:
     """Form-VIII verbs whose first radical is lam, e.g. `ٱلْتَقَى`. After a
     wasl hamza these look identical to the definite article before a sun
     letter, and canonical facts alone cannot tell them apart."""
+    divine_name: frozenset[str] = frozenset()
+    """What the name of God spells from its doubled lam to the end of the
+    word. `ٱللَّهْوِ` and `ٱللَّهَبِ` open the same way and are not it."""
     source: Path | None = field(default=None, compare=False)
+
+    def is_divine_name(self, tail: str) -> bool:
+        """The whole remainder of the word, so a third radical excludes it."""
+        return tail in self.divine_name
 
     def is_wasl_exempt(self, skeleton: str) -> bool:
         return _inflected(self.wasl_particles, skeleton) or _inflected(

@@ -1,4 +1,4 @@
-"""Verse-level passes: the Ledger, and a riwayah's word-level lexemes.
+"""Verse-level passes: the Ledger, the lexemes, and the juncture repairs.
 
 Runs after every cluster is drafted, over a whole word or verse at once -
 which the per-cluster derivation registry cannot express.
@@ -9,7 +9,16 @@ from collections.abc import Callable
 from typing import TypeAlias
 
 from ..model.address import VerseRef
-from ..model.canon import Annotation, ABJAD, Onset, PausalLong, Quality
+from ..model.canon import (
+    ABJAD,
+    Annotation,
+    CanonLetter,
+    NucleusKind,
+    Onset,
+    PausalLong,
+    Quality,
+    Short,
+)
 from ..model.inscription import SlotFact
 from ..orthography.adapter import Reading
 from .derive import Target, lexeme
@@ -101,16 +110,51 @@ def _apply_allah_lexeme(
     Run over the whole verse instead, a word ending in lam or hamza would
     lend its last slot to the next word's opening lam.
     """
-    del lexicon, scribe
+    del scribe
     for word_index in range(len(reading.words)):
         span = [d for d in drafts if word_of(reading, d) == word_index]
         letters = [d.letter for d in span]
         nuclei = [d.nucleus for d in span]
         onsets = [d.onset for d in span]
-        for index in lexeme.divine_name(letters, nuclei, onsets):
+        for index in lexeme.divine_name(letters, nuclei, onsets, lexicon):
             span[index].annotations |= {Annotation.DIVINE_NAME}
-        for index in lexeme.allah_long_a(letters, nuclei, onsets):
+        for index in lexeme.allah_long_a(letters, nuclei, onsets, lexicon):
             span[index].nucleus = lexeme.relengthened(span[index].nucleus)
+
+
+#: What the plural meem attaches to. `ـكُمْ` and `ـهُمْ`, in either person.
+PLURAL_HOSTS = frozenset({CanonLetter.KAF, CanonLetter.HEH})
+
+
+def connect_plural_meem(
+    reading: Reading, drafts, lexicon=None, scribe=None, selection=None
+) -> None:
+    """The plural pronoun's meem takes a damma before a prosthetic hamza.
+
+    The hamza drops when the words are joined and bares the quiescent letter
+    behind it, so the meem is voweled to keep two of them from meeting.
+    """
+    del lexicon, scribe, selection
+    spans = [
+        [d for d in drafts if word_of(reading, d) == word]
+        for word in range(len(reading.words))
+    ]
+    for index, span in enumerate(spans[:-1]):
+        following = spans[index + 1]
+        if not following or following[0].onset is not Onset.WASL:
+            continue
+        if _plural_meem(span):
+            span[-1].nucleus = Short(Quality.U)
+
+
+def _plural_meem(span) -> bool:
+    """Quiescent, because a script that vowels it has said so already."""
+    return (
+        len(span) >= 2
+        and span[-1].letter is CanonLetter.MEEM
+        and span[-1].nucleus.kind is NucleusKind.SILENT
+        and span[-2].letter in PLURAL_HOSTS
+    )
 
 
 def _apply_pausal_lexemes(
@@ -145,10 +189,11 @@ def vocalised(span) -> str:
         )
     return "".join(out)
 
-#: Hafs' word-level lexeme passes, in order. A list rather than a hardcoded
-#: sequence in `build`, because this is riwayah-specific: a second riwayah
-#: swaps the list instead of editing the builder.
+#: The passes every riwayah runs, in order: two lexemes and one juncture. A
+#: list rather than a hardcoded sequence in `build`, so a riwayah that reads
+#: a lexeme differently swaps the list instead of editing the builder.
 LEXEME_PASSES: tuple[LexemePass, ...] = (
     _apply_allah_lexeme,
     _apply_pausal_lexemes,
+    connect_plural_meem,
 )
