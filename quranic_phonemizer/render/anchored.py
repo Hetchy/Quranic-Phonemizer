@@ -9,7 +9,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 
 from ..model.address import GraphemeId, SlotId, SoundId
-from ..model.canon import Rule, Score
+from ..model.canon import Rule
 from ..model.inscription import (
     Attests,
     Decorates,
@@ -80,11 +80,9 @@ class AnchoredView:
 
 def anchored(
     performance: Performance,
-    score: Score,
     inscription: Inscription,
     alphabet: Alphabet,
 ) -> AnchoredView:
-    del score
     writes = _writers(inscription)
     rule_of = {
         occurrence.id: occurrence.rule for occurrence in performance.occurrences
@@ -94,35 +92,12 @@ def anchored(
     for attribution in performance.attributions:
         if isinstance(attribution, MergedInto):
             merged[attribution.sound].extend(attribution.slots)
+    owners = _owners(performance, rule_of)
 
-    owners: dict[SoundId, tuple[tuple[SlotId, ...], Aspect, Rule]] = {}
-    for attribution in performance.attributions:
-        match attribution:
-            case Hosts(slots=slots, aspect=aspect, sound=sound):
-                owners[sound] = (slots, aspect, rule_of[attribution.by])
-            case Inserted(anchor=(slot, _), aspect=aspect, sound=sound):
-                owners[sound] = ((slot,), aspect, rule_of[attribution.by])
-
-    sounds = []
-    for sound in sounds_in_order(performance):
-        slots, aspect, rule = owners[sound]
-        graphemes = _graphemes_for(writes, slots, aspect)
-        contributors = tuple(merged.get(sound, ()))
-        if contributors:
-            graphemes = _dedupe(
-                graphemes + _graphemes_for(writes, contributors, aspect)
-            )
-        sounds.append(
-            AnchoredSound(
-                sound=sound,
-                token=alphabet.token(by_id[sound]),
-                slots=tuple(slots),
-                graphemes=graphemes,
-                rule=rule,
-                merged_from=contributors,
-            )
-        )
-
+    sounds = tuple(
+        _anchored_sound(sound, owners, merged, writes, by_id, alphabet)
+        for sound in sounds_in_order(performance)
+    )
     silent = tuple(
         SilentLetter(
             slot=slot,
@@ -133,7 +108,37 @@ def anchored(
         if isinstance(attribution, Silent)
         for slot in attribution.slots
     )
-    return AnchoredView(tuple(sounds), silent)
+    return AnchoredView(sounds, silent)
+
+
+def _owners(performance: Performance, rule_of) -> dict:
+    """Which slots each sound is attributed to, and by which rule."""
+    out: dict[SoundId, tuple[tuple[SlotId, ...], Aspect, Rule]] = {}
+    for attribution in performance.attributions:
+        match attribution:
+            case Hosts(slots=slots, aspect=aspect, sound=sound):
+                out[sound] = (slots, aspect, rule_of[attribution.by])
+            case Inserted(anchor=(slot, _), aspect=aspect, sound=sound):
+                out[sound] = ((slot,), aspect, rule_of[attribution.by])
+    return out
+
+
+def _anchored_sound(sound, owners, merged, writes, by_id, alphabet):
+    slots, aspect, rule = owners[sound]
+    graphemes = _graphemes_for(writes, slots, aspect)
+    contributors = tuple(merged.get(sound, ()))
+    if contributors:
+        graphemes = _dedupe(
+            graphemes + _graphemes_for(writes, contributors, aspect)
+        )
+    return AnchoredSound(
+        sound=sound,
+        token=alphabet.token(by_id[sound]),
+        slots=tuple(slots),
+        graphemes=graphemes,
+        rule=rule,
+        merged_from=contributors,
+    )
 
 
 def graphemes_by_id(inscription: Inscription) -> dict[GraphemeId, Grapheme]:

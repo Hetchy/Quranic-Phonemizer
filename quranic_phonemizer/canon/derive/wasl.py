@@ -6,7 +6,8 @@ from __future__ import annotations
 
 from ...model.canon import ABJAD, CanonLetter, Onset, Quality, Short
 from ...model.inscription import SlotFact
-from . import Context, Outcome, Sets, lexeme, register
+from .lexeme import alif_in_leen
+from .vocabulary import Context, Outcome, Sets, register
 
 #: The shortest word a prosthetic hamza can begin: itself, the quiescent
 #: letter it props, and one more that the quiescent letter opens.
@@ -48,6 +49,25 @@ PROCLITICS = frozenset(
 )
 
 
+def _cannot_prop(context: Context, cluster) -> bool:
+    """Written so that nothing here could be a prop, whatever follows."""
+    if cluster.letter not in (CanonLetter.ALIF, CanonLetter.HAMZA):
+        return True
+    if cluster.has("sukun"):
+        return True  # a prosthetic hamza exists to be started on
+    if cluster.has("dagger", "combining_hamza", "shadda", "madd"):
+        # Madd badal, a seated hamza, or the ibdal alif that replaces the
+        # article's hamza after an interrogative one in `ءَآلذَّكَرَيْنِ`.
+        return True
+    if not (context.word_initial or _after_proclitics(context)):
+        return True
+    if alif_in_leen(context):
+        return True  # rasm inside a diphthong, not a prop for a quiescent letter
+    # `إِى` - a prop needs both a quiescent letter to carry and a stem behind
+    # it, and two letters cannot be all three.
+    return len(_skeleton(context)) < _STEM
+
+
 def is_wasl(context: Context) -> bool:
     """The decision procedure. `canon.build` names it for every bare alif.
 
@@ -55,24 +75,10 @@ def is_wasl(context: Context) -> bool:
     lexeme list, and the list outranks the shape alone.
     """
     cluster = context.cluster
-    if cluster.letter not in (CanonLetter.ALIF, CanonLetter.HAMZA):
+    if _cannot_prop(context, cluster):
         return False
-    if cluster.has("sukun"):
-        return False  # a prosthetic hamza exists to be started on
-    if cluster.has("dagger", "combining_hamza", "shadda", "madd"):
-        # Madd badal, a seated hamza, or the ibdal alif that replaces the
-        # article's hamza after an interrogative one in `ءَآلذَّكَرَيْنِ`.
-        return False
-    if not (context.word_initial or _after_proclitics(context)):
-        return False
-    if lexeme.alif_in_leen(context):
-        return False  # rasm inside a diphthong, not a prop for a quiescent letter
     following = context.ahead()
     if following is None:
-        return False
-    if len(_skeleton(context)) < _STEM:
-        # `إِى` - a prop needs both a quiescent letter to carry and a stem
-        # behind it, and two letters cannot be all three.
         return False
 
     if following.has("shadda"):

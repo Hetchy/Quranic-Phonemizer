@@ -30,6 +30,18 @@ jobs:
           python-version: "3.13"
       - run: python tools/comment_lint.py
 
+  structure:
+    # The package shape: the import graph and its acyclicity, dead imports and
+    # exports, file and function size, and whether every committed tool still
+    # imports. Conventions with no checker are conventions that drift.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: python tools/structure_lint.py
+
   cross-script:
     # The claim the design is named for: two scripts, same phonemes.
     runs-on: ubuntu-latest

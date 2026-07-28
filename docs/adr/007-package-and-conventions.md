@@ -132,13 +132,23 @@ Off-runtime trees are unchanged: `tools/`, `tests/`, `docs/`,
 
 | Package | May import | Must not import |
 |---|---|---|
+| `dataio` | stdlib, PyYAML | anything in the package |
 | `model` | stdlib | anything in the package |
-| `orthography` | `model` | `rules`, `engine`, `render`, `canon`, `riwayat` |
-| `canon` | `model`, `orthography.adapter` | `rules`, `engine`, `render`, `riwayat` |
+| `corpus` | `model` | everything else |
+| `orthography` | `dataio`, `model` | `rules`, `engine`, `render`, `canon`, `riwayat` |
+| `canon` | `dataio`, `model`, `orthography.adapter` | `rules`, `engine`, `render`, `riwayat` |
 | `engine` | `model` | `orthography`, `canon`, `render`, `riwayat` |
 | `rules` | `model`, `engine` | `orthography`, `canon`, `render`, `riwayat` |
-| `render` | `model` | `rules`, `canon`, `engine`, `orthography` |
-| `riwayat` | all of the above | — |
+| `render` | `dataio`, `model` | `rules`, `canon`, `engine`, `orthography` |
+| `riwayat` | all of the above except `render` | — |
+
+`dataio` and `corpus` are leaves the earlier table omitted while the code
+imported them. Every package that loads a resource reaches `dataio`; nothing
+reaches `render`, so that permission is not granted until a caller needs it.
+
+The table above is the one `tools/structure_lint.py` enforces, in both
+directions: an edge it does not permit is an error, and so is a permission
+nothing uses. No module may be reachable from itself.
 
 `riwayat` is the only package that may import anything, because it is the
 assembly point: it binds a riwayah's adapters, its `RuleSet` and its resource

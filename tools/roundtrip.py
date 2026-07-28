@@ -28,6 +28,7 @@ from quranic_phonemizer.riwayat.hafs import (  # noqa: E402
     ledger,
     lexeme_passes,
     lexicon,
+    muqattaat,
     script_adapter,
 )
 
@@ -44,6 +45,13 @@ def _shape(before, after) -> str:
             return f"onset {a.onset.value}->{b.onset.value}"
         if a.nucleus != b.nucleus:
             return f"nucleus {a.nucleus.kind.value}->{b.nucleus.kind.value}"
+        if a.origin is not b.origin:
+            return f"origin {a.origin.value}->{b.origin.value}"
+        if a.annotations != b.annotations:
+            return (f"annotations {sorted(x.value for x in a.annotations)}"
+                    f"->{sorted(x.value for x in b.annotations)}")
+    if [w.sakt_after for w in before.words] != [w.sakt_after for w in after.words]:
+        return "sakt_after"
     return "equal digest but unequal"
 
 
@@ -57,7 +65,7 @@ def main() -> int:
 
     script = Script(args.script)
     adapter = script_adapter(script)
-    pen = pen_for(adapter.inventory)
+    pen = pen_for(adapter.inventory, muqattaat().named_by())
     shared = {"lexicon": lexicon(), "ledger": ledger(),
               "passes": lexeme_passes()}
     verses = load_verses(script.value)

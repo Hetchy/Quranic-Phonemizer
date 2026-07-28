@@ -6,7 +6,7 @@ so both are derivations, never a `Script` consulted directly.
 from __future__ import annotations
 
 from ...model.canon import ABJAD, CanonLetter, Long, NucleusKind, Onset, Quality
-from . import Context
+from .vocabulary import Context
 
 #: The name is a lam before a haa, and the lam before it or the wasl hamza.
 ALLAH_TAIL = (CanonLetter.LAM, CanonLetter.HEH)

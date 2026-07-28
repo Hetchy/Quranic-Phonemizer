@@ -11,14 +11,15 @@ from conftest import built_for, words_of
 from quranic_phonemizer.canon.build import build
 from quranic_phonemizer.model.address import Location, Script, VerseRef
 from quranic_phonemizer.orthography.write import Pen, WriteError, pen_for, write_verse
-from quranic_phonemizer.riwayat.hafs import script_adapter
+from quranic_phonemizer.riwayat.hafs import muqattaat, script_adapter
 
 VERSES = [(1, 1), (1, 7), (2, 2), (7, 1), (18, 1), (36, 1), (112, 1), (114, 6)]
 
 
 @pytest.fixture(scope="module")
 def pen() -> Pen:
-    return pen_for(script_adapter(Script.UTHMANI).inventory)
+    return pen_for(script_adapter(Script.UTHMANI).inventory,
+                   muqattaat().named_by())
 
 
 @pytest.mark.parametrize(("surah", "ayah"), VERSES)

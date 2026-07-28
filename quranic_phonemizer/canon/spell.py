@@ -50,6 +50,17 @@ class Muqattaat:
     def spell(self, letter: CanonLetter):
         return self.by_letter.get(letter)
 
+    def named_by(self) -> dict[tuple, CanonLetter]:
+        """The same table read backwards, so a writer can compact a run of
+        spelled slots into the letter whose name they are."""
+        return {
+            tuple(
+                (letter, nucleus.kind, getattr(nucleus, "quality", None))
+                for letter, nucleus in spelt
+            ): named
+            for named, spelt in self.by_letter.items()
+        }
+
 
 def load_muqattaat(path: Path) -> Muqattaat:
     data = load_yaml(path)

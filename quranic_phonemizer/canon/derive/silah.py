@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from ...model.canon import CanonLetter, Long, Quality, Silah
 from ...model.inscription import SlotFact
-from . import Context, Outcome, Sets, register
+from .vocabulary import Context, Outcome, Sets, register
 
 
 @register("silah_waw")

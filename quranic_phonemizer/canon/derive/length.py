@@ -14,7 +14,7 @@ from ...model.canon import (
     Silah,
 )
 from ...model.inscription import SlotFact
-from . import Absent, Context, Outcome, Sets, Shows, Target, register
+from .vocabulary import Absent, Context, Outcome, Sets, Shows, Target, register
 from .silah import carries_silah
 
 CARRIER_OF: dict[Quality, CanonLetter] = {

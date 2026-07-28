@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from ...model.canon import NucleusKind, Onset, RuleFamily
 from ...model.inscription import SlotFact
-from . import Attests, Context, Outcome, Sets, register
+from .vocabulary import Attests, Context, Outcome, Sets, register
 
 
 @register("gemination")

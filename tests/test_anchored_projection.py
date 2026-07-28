@@ -26,7 +26,7 @@ VERSES = [(112, 2), (2, 20), (1, 1), (7, 1), (18, 1), (33, 10)]
 def _view(packed, shared, surah, ayah, alphabet):
     built = built_for(packed, shared, surah, ayah)
     performance = perform(built.score, HAFS, all_join(len(built.score.words)))
-    return built, anchored(performance, built.score, built.inscription, alphabet)
+    return built, anchored(performance, built.inscription, alphabet)
 
 
 @pytest.mark.parametrize(("surah", "ayah"), VERSES)

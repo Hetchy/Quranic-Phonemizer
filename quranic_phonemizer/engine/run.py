@@ -42,7 +42,6 @@ from .plan import (
     Relength,
     Silence,
     SoundFeature,
-    Verdict,
 )
 from .plan import mint as plan_mint
 
@@ -166,53 +165,9 @@ def _materialise(
         occurrences.append(verdict.occurrence)
     occurrences.append(plain)
 
-    # Merges resolve last: a merge target is usually realized by the plain
-    # fill, so merging first would leave it half-hosted.
-    for _, verdict in plan.entries:
-        for effect in verdict.effects:
-            if isinstance(effect, Realize):
-                sound_id = mint.sound()
-                sounds.append(
-                    (sound_id, _apply_colours(effect, colours))
-                )
-                hosted[(effect.slot, effect.aspect)] = sound_id
-                attributions.append(
-                    Hosts((effect.slot,), effect.aspect, sound_id,
-                          verdict.occurrence.id)
-                )
-            elif isinstance(effect, Insert):
-                sound_id = mint.sound()
-                sounds.append((sound_id, effect.sounds[0]))
-                attributions.append(
-                    Inserted(effect.anchor, effect.aspect, sound_id,
-                             verdict.occurrence.id)
-                )
-
-    lengths = {e.slot: e.length for e in plan.effects() if isinstance(e, Relength)}
-    for slot, aspect in _fill_plain(plan, score, mint):
-        sound_id = mint.sound()
-        sounds.append((sound_id, _plain_sound(slot, aspect, colours, lengths)))
-        hosted[(slot.id, aspect)] = sound_id
-        attributions.append(Hosts((slot.id,), aspect, sound_id, plain.id))
-
-    for _, verdict in plan.entries:
-        for effect in verdict.effects:
-            if isinstance(effect, MergeInto):
-                host = hosted.get((effect.host, effect.host_aspect))
-                if host is None:
-                    raise MaterialisationError(
-                        f"{effect.slot} merges into {effect.host} "
-                        f"{effect.host_aspect.value}, which hosts no sound. "
-                        f"A merger is a pair of edges; half of one is a bug."
-                    )
-                attributions.append(
-                    MergedInto((effect.slot,), effect.aspect, host,
-                               verdict.occurrence.id)
-                )
-            elif isinstance(effect, Silence):
-                attributions.append(
-                    Silent((effect.slot,), effect.aspect, verdict.occurrence.id)
-                )
+    _realize(plan, mint, colours, sounds, attributions, hosted)
+    _fill(plan, score, mint, colours, sounds, attributions, hosted, plain)
+    _resolve_merges(plan, hosted, attributions)
 
     del index
     return Performance(
@@ -242,6 +197,62 @@ def _plain_sound(slot: Slot, aspect: Aspect, colours, lengths=None) -> Sound:
     if override is not None:
         long = override is Length.LONG
     return Vowel(slot.nucleus.quality, long=long, emphatic=emphatic)
+
+
+
+def _realize(plan, mint, colours, sounds, attributions, hosted) -> None:
+    """Sounds a rule names outright. Merges wait: a merge target is usually
+    realized by the plain fill, so merging first would leave it half-hosted."""
+    for _, verdict in plan.entries:
+        for effect in verdict.effects:
+            if isinstance(effect, Realize):
+                sound_id = mint.sound()
+                sounds.append((sound_id, _apply_colours(effect, colours)))
+                hosted[(effect.slot, effect.aspect)] = sound_id
+                attributions.append(
+                    Hosts((effect.slot,), effect.aspect, sound_id,
+                          verdict.occurrence.id)
+                )
+            elif isinstance(effect, Insert):
+                sound_id = mint.sound()
+                sounds.append((sound_id, effect.sounds[0]))
+                attributions.append(
+                    Inserted(effect.anchor, effect.aspect, sound_id,
+                             verdict.occurrence.id)
+                )
+
+
+def _fill(plan, score, mint, colours, sounds, attributions, hosted, plain) -> None:
+    """Every aspect no rule spoke for, said as the Score writes it."""
+    lengths = {
+        e.slot: e.length for e in plan.effects() if isinstance(e, Relength)
+    }
+    for slot, aspect in _fill_plain(plan, score, mint):
+        sound_id = mint.sound()
+        sounds.append((sound_id, _plain_sound(slot, aspect, colours, lengths)))
+        hosted[(slot.id, aspect)] = sound_id
+        attributions.append(Hosts((slot.id,), aspect, sound_id, plain.id))
+
+
+def _resolve_merges(plan, hosted, attributions) -> None:
+    for _, verdict in plan.entries:
+        for effect in verdict.effects:
+            if isinstance(effect, MergeInto):
+                host = hosted.get((effect.host, effect.host_aspect))
+                if host is None:
+                    raise MaterialisationError(
+                        f"{effect.slot} merges into {effect.host} "
+                        f"{effect.host_aspect.value}, which hosts no sound. "
+                        f"A merger is a pair of edges; half of one is a bug."
+                    )
+                attributions.append(
+                    MergedInto((effect.slot,), effect.aspect, host,
+                               verdict.occurrence.id)
+                )
+            elif isinstance(effect, Silence):
+                attributions.append(
+                    Silent((effect.slot,), effect.aspect, verdict.occurrence.id)
+                )
 
 
 def _colours(plan: Plan) -> dict[tuple[SlotId, Aspect], dict[SoundFeature, bool]]:

@@ -5,7 +5,7 @@ and reading it back must reproduce it.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from ..model.canon import (
     Annotation,
@@ -14,11 +14,18 @@ from ..model.canon import (
     Onset,
     Quality,
     Score,
+    SlotOrigin,
 )
 from .inventory import Inventory
 
 #: Which role writes each nucleus quality, and which carrier lengthens it.
 _SHORT_ROLE = {Quality.A: "fatha", Quality.U: "damma", Quality.I: "kasra"}
+
+#: The same three vowels doubled, which is how a script writes the noon that
+#: follows them rather than drawing the letter.
+_TANWEEN_ROLE = {
+    Quality.A: "fathatan", Quality.U: "dammatan", Quality.I: "kasratan",
+}
 
 #: Imala and ishmam are colourings a reciter applies to an ordinary vowel,
 #: not vowels of their own, so they spell as their base quality wherever the
@@ -63,6 +70,9 @@ class Pen:
     """The scalar that lengthens a vowel, as opposed to the one that spells
     the same letter as a consonant -- `dagger_host` scalars can do either.
     """
+    names: dict[tuple, CanonLetter] = field(default_factory=dict)
+    """What each letter's spoken name spells, reversed. Injected, because the
+    table it comes from belongs to the reading and not to the script."""
 
     def letter(self, letter: CanonLetter) -> str:
         scalar = self.letters.get(letter)
@@ -80,7 +90,7 @@ class Pen:
         return scalar
 
 
-def pen_for(inventory: Inventory) -> Pen:
+def pen_for(inventory: Inventory, names: dict | None = None) -> Pen:
     """Invert an inventory. Ambiguity resolves to the first scalar declared
     for a given letter or role."""
     letters: dict[CanonLetter, str] = {}
@@ -104,7 +114,7 @@ def pen_for(inventory: Inventory) -> Pen:
         if mark.role and (mark.fact is not None or mark.decorates is not None):
             roles.setdefault(mark.role, scalar)
     return Pen(letters=letters, roles=roles, onsets=onsets,
-               carriers=carriers)
+               carriers=carriers, names=names or {})
 
 
 def write_verse(score: Score, pen: Pen) -> tuple[str, ...]:
@@ -113,10 +123,61 @@ def write_verse(score: Score, pen: Pen) -> tuple[str, ...]:
 
 
 def _word(word, pen: Pen) -> str:
-    return "".join(_slot(slot, pen) for slot in word.slots)
+    slots = list(word.slots)
+    out = []
+    index = 0
+    while index < len(slots):
+        step = _spelled_name(slots, index, pen)
+        if step is not None:
+            text, index = step
+            out.append(text)
+            continue
+        if _nunated(slots, index):
+            doubled = pen.role(_TANWEEN_ROLE[slots[index].nucleus.quality])
+            out.append(_slot(slots[index], pen, nucleus=doubled))
+            index += 2
+            continue
+        out.append(_slot(slots[index], pen))
+        index += 1
+    return "".join(out)
 
 
-def _slot(slot, pen: Pen) -> str:
+def _nunated(slots, index: int) -> bool:
+    """A slot whose noon the script writes by doubling its vowel.
+
+    Spelling the noon as a letter would read back as an ordinary one, and
+    the rules that own the pause tell the two apart.
+    """
+    if index + 1 >= len(slots) or slots[index + 1].origin is not SlotOrigin.NUNATION:
+        return False
+    return (
+        slots[index].nucleus.kind is NucleusKind.SHORT
+        and slots[index].origin is not SlotOrigin.NUNATION
+        and getattr(slots[index].nucleus, "quality", None) in _TANWEEN_ROLE
+    )
+
+
+def _spelled_name(slots, index: int, pen: Pen):
+    """A letter said by its name is written as the letter, not as its name."""
+    if slots[index].origin is not SlotOrigin.SPELLED or not pen.names:
+        return None
+    for length in range(len(slots) - index, 0, -1):
+        run = tuple(slots[index:index + length])
+        if any(slot.origin is not SlotOrigin.SPELLED for slot in run):
+            continue
+        letter = pen.names.get(tuple(_spelt(slot) for slot in run))
+        if letter is not None:
+            return pen.letter(letter), index + length
+    return None
+
+
+def _spelt(slot) -> tuple:
+    return (slot.letter, slot.nucleus.kind, getattr(slot.nucleus, "quality", None))
+
+
+def _slot(slot, pen: Pen, nucleus: str | None = None) -> str:
+    """`nucleus` overrides the vowel text when the script writes the slot
+    after this one into the same mark."""
     if slot.onset is Onset.WASL:
         out = pen.onsets.get(Onset.WASL) or pen.letter(CanonLetter.ALIF)
     else:
@@ -125,7 +186,7 @@ def _slot(slot, pen: Pen) -> str:
         out += pen.role("shadda")
     elif slot.onset is Onset.TASHIL and TASHIL in pen.roles:
         out += pen.role(TASHIL)
-    out += _nucleus(slot, pen)
+    out += _nucleus(slot, pen) if nucleus is None else nucleus
     for annotation in sorted(slot.annotations):
         # An annotation a script writes has a role; one the builder derives
         # has none and is re-derived on the way back in.
