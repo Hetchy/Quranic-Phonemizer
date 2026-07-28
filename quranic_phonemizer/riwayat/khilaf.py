@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from ..canon.khilaf import VowelKhilaf, VowelSite
 from ..dataio import load_yaml, require_keys
 from ..model.address import KhilafId
-from ..model.canon import ABJAD, Quality
+from ..model.canon import ABJAD, Annotation, Quality
 from ..rules.khilaf import HEAVY, KhilafError, RaaKhilaf, Site
 
 SCHEMA_VERSION = 1
@@ -79,7 +79,10 @@ def load_khilaf(path: Path) -> Khilaf:
 
 def _vowel(point: KhilafId, name: str, spec: dict, path: Path) -> VowelSite:
     where = f"{path} {SITED[point]}[{name!r}]"
-    require_keys(spec, {"slot", "default", "options", "forms"}, name=where)
+    require_keys(
+        spec, {"slot", "default", "options", "forms"}, name=where,
+        optional={"annotate"},
+    )
     options = {
         option: _quality(option, raw, where)
         for option, raw in spec["options"].items()
@@ -95,7 +98,20 @@ def _vowel(point: KhilafId, name: str, spec: dict, path: Path) -> VowelSite:
         options=options,
         default=str(spec["default"]),
         forms=frozenset(spec["forms"]),
+        annotation=_annotation(spec.get("annotate"), where),
     )
+
+
+def _annotation(raw: object, where: str) -> Annotation | None:
+    if raw is None:
+        return None
+    try:
+        return Annotation(str(raw))
+    except ValueError:
+        raise KhilafError(
+            f"{where}: annotate {raw!r}, expected one of "
+            f"{sorted(a.value for a in Annotation)}"
+        ) from None
 
 
 def _quality(option: str, raw: object, where: str) -> Quality:

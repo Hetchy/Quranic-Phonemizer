@@ -93,6 +93,7 @@ class Annotation(StrEnum):
 
     ISHMAM = "ishmam"
     DIVINE_NAME = "divine_name"
+    IMALA = "imala"
 
 
 class NucleusKind(StrEnum):

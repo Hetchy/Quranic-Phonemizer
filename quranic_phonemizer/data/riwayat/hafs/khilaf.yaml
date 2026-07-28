@@ -43,11 +43,14 @@ nucleus_vowel:
     options: {fatha: a, damma: u}
     forms: [ضaعفiن, ضuعفiن, ضaعفaن, ضuعفaن]
 
-# The one imala in the Quran. The letter is technically an `e`, a vowel that
-# occurs nowhere else in Hafs, so the plain `i` is offered beside it.
+# The one imala in the Quran. The letter is articulated between the two, an
+# `e` that occurs nowhere else in Hafs; the plain `i` is the default so that
+# a single site does not enlarge the vowel inventory. The rule is tagged
+# either way.
 imala_quality:
   مجرىها:
     slot: 2
-    default: e
+    default: i
+    annotate: imala
     options: {e: imala, i: i}
     forms: [مaجرimalaهa, مaجرiهa]

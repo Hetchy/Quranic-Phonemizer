@@ -38,7 +38,7 @@ class CanonicalColour:
     rule: Rule = Rule.IMALA
     phase: Phase = Phase.COLOUR
     triggers: frozenset = frozenset(
-        {Quality.IMALA, Annotation.ISHMAM, Onset.TASHIL}
+        {Annotation.IMALA, Annotation.ISHMAM, Onset.TASHIL}
     )
 
     def look(
@@ -51,7 +51,7 @@ class CanonicalColour:
             return None
         if slot.onset is Onset.TASHIL:
             return _classification(Rule.TASHIL, at)
-        if getattr(slot.nucleus, "quality", None) is Quality.IMALA:
+        if Annotation.IMALA in slot.annotations:
             return _classification(Rule.IMALA, at)
         if Annotation.ISHMAM in slot.annotations:
             return _classification(Rule.ISHMAM, at)

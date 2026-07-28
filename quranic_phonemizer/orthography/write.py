@@ -7,7 +7,14 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from ..model.canon import CanonLetter, NucleusKind, Onset, Quality, Score
+from ..model.canon import (
+    Annotation,
+    CanonLetter,
+    NucleusKind,
+    Onset,
+    Quality,
+    Score,
+)
 from ..model.inscription import SlotFact
 from .inventory import Inventory, InventoryError
 
@@ -25,6 +32,10 @@ IMALA = "imala"
 
 #: The mark that says a carrier lengthens the vowel before it.
 MADD = "madd"
+
+#: Annotations the nucleus spells on their behalf, so writing them again
+#: would put the same mark down twice.
+_SPELT_AS_A_NUCLEUS = frozenset({Annotation.IMALA})
 
 #: How each script spells the pronoun haa's conditional vowel.
 _SILAH_ROLES = {
@@ -119,6 +130,8 @@ def _slot(slot, pen: Pen) -> str:
     for annotation in sorted(slot.annotations):
         # An annotation a script writes has a role; one the builder derives
         # has none and is re-derived on the way back in.
+        if annotation in _SPELT_AS_A_NUCLEUS:
+            continue
         if annotation.value in pen.roles:
             out += pen.role(annotation.value)
     return out
@@ -126,7 +139,9 @@ def _slot(slot, pen: Pen) -> str:
 
 def _nucleus(slot, pen: Pen) -> str:
     nucleus = slot.nucleus
-    if getattr(nucleus, "quality", None) is Quality.IMALA and IMALA in pen.roles:
+    if Annotation.IMALA in slot.annotations and IMALA in pen.roles:
+        # The mark stands for the whole vowel, carrier and all, whichever
+        # of the two the khilaf selected.
         return pen.role(IMALA)
     quality = _BASE.get(getattr(nucleus, "quality", None), None) or getattr(
         nucleus, "quality", None
