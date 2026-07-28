@@ -48,6 +48,12 @@ supplies:
   - {slot: "33:10:16#4", skeleton: "ءلظنن", fact: NUCLEUS,
      value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
 
+  # 76:15 `قَوَارِيرَا۠` against 76:16 `قَوَارِيرَا۟` and 27:44 `قَوَارِيرَ`.
+  # Uthmani's two marks separate the first from the second; IndoPak writes
+  # the same string for both, so the site is what carries the fact.
+  - {slot: "76:15:8#3", skeleton: "قورر", fact: NUCLEUS,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+
   # The four sakt sites. Both scripts write a mark for them, but Uthmani's
   # `ۜ` is declared polysemous -- it is also a khilaf site -- so the adapter
   # defers rather than deciding, which is what polysemous is for. Four
