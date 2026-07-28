@@ -15,7 +15,7 @@ integration plan.
 Companions:
 
 - `docs/tajweed-model.md` is the concrete type and occurrence contract.
-- `docs/warsh-script-codepoint-audit.md` is the source-encoding evidence.
+- `research/warsh/warsh-script-codepoint-audit.md` is the source-encoding evidence.
 - ADR-002 defines invariants and migration gates.
 - ADR-003 defines code, runtime-data, build, evidence, and research ownership.
 

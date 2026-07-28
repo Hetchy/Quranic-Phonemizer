@@ -73,10 +73,6 @@ class Release:
 
 Sound: TypeAlias = Consonant | Vowel | Nasal | Release
 
-#: A `Sound` whose context-dependent features are not yet decided; the
-#: materialiser fills `emphatic` and `nasal` from later `Recolour` effects.
-SoundSpec: TypeAlias = Sound
-
 
 @dataclass(frozen=True, slots=True)
 class Participants:

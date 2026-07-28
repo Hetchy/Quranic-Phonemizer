@@ -21,6 +21,6 @@ documents being updated.
 (IndoPak) is now the next orthography phase, ahead of Warsh.
 
 Still live and not archived: `docs/domain-facts.md` (riwayah-independent
-domain inventory), `docs/riwayah-agnostic-refactor-pr.md` (accurate record of
-what `e0d9fb9` landed), `docs/warsh-script-codepoint-audit.md` (source
+domain inventory), `docs/archive/riwayah-agnostic-refactor-pr.md` (accurate record of
+what `e0d9fb9` landed), `research/warsh/warsh-script-codepoint-audit.md` (source
 evidence), and `docs/hafs/` (research and mapping references).

@@ -8,6 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from ..model.canon import (
+    CARRIER_OF,
     Annotation,
     CanonLetter,
     NucleusKind,
@@ -48,12 +49,6 @@ _SILAH_ROLES = {
     Quality.U: ("silah_waw", "small_waw"),
     Quality.I: ("silah_ya", "small_ya"),
 }
-_CARRIER = {
-    Quality.A: CanonLetter.ALIF,
-    Quality.U: CanonLetter.WAW,
-    Quality.I: CanonLetter.YA,
-}
-
 
 class WriteError(ValueError):
     """A canonical fact this script has no scalar for. Never a silent gap."""
@@ -217,7 +212,7 @@ def _nucleus(slot, pen: Pen) -> str:
             # sign says the carrier lengthens rather than standing for a
             # letter, which is what keeps a bare alif from reading back as a
             # prosthetic hamza.
-            carrier = _CARRIER[quality]
+            carrier = CARRIER_OF[quality]
             return (
                 pen.role(_short_role(quality))
                 + (pen.carriers.get(carrier) or pen.letter(carrier))
