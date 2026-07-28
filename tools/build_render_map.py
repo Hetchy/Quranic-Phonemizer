@@ -41,7 +41,7 @@ HEAVY_CAPABLE = frozenset(
 #: Emphasis spreads onto a following `a` and onto no other vowel.
 EMPHATIC_VOWEL = frozenset({Quality.A})
 
-VOWEL = {Quality.A: "a", Quality.U: "u", Quality.I: "i", Quality.IMALA: "e"}
+VOWEL = {Quality.A: "a", Quality.U: "u", Quality.I: "i", Quality.E: "e"}
 
 #: Ghunnah has no emphatic form: no rule recolours a nasal.
 NASAL_PLACES = {"bilabial": "m̃", "assimilated": "ŋ"}

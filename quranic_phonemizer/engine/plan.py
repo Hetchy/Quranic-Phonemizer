@@ -154,15 +154,6 @@ class Plan:
             if phase is None or recorded_phase is phase:
                 yield from verdict.effects
 
-    def verdict_for(self, slot: SlotId, aspect: Aspect) -> Verdict | None:
-        for _, verdict in self.entries:
-            for effect in verdict.effects:
-                if getattr(effect, "slot", None) == slot and (
-                    getattr(effect, "aspect", None) is aspect
-                ):
-                    return verdict
-        return None
-
     def assimilated_from(self, slot: SlotId) -> bool:
         """Is this slot the source of an assimilation? Idgham naqis keeps the
         first letter's sound and still holds its closure rather than

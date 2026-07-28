@@ -51,9 +51,6 @@ class Muqattaat:
         return self.by_letter.get(letter)
 
 
-EMPTY = Muqattaat(frozenset(), {})
-
-
 def load_muqattaat(path: Path) -> Muqattaat:
     data = load_yaml(path)
     require_keys(data, {"schema_version", "openings", "names"}, name=str(path))

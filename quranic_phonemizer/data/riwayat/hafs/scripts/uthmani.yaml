@@ -75,7 +75,7 @@ evidences:
   "۠": {fact: NUCLEUS, cls: small_vowel, role: pausal,
        derivation: pausal_length}   # the seven alifs
   "۪": {fact: NUCLEUS, cls: annotation, role: imala,
-       value: {kind: Long, quality: IMALA}}
+       value: {kind: Long, quality: e}}
   "۫": {fact: ANNOTATION, cls: annotation, role: ishmam, value: ISHMAM}
   "۬": {fact: ONSET, cls: annotation, role: tashil, value: TASHIL}
   "ۨ": {fact: LETTER, cls: base, role: mini_noon, value: NOON, omitted: true}

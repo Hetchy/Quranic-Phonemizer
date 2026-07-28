@@ -88,13 +88,6 @@ class Ledger:
     supplies: tuple[Supply, ...]
     asserts: tuple[Assert, ...]
 
-    def supply_for(self, slot: SlotId, fact: SlotFact) -> Supply | None:
-        for supply in self.supplies:
-            if isinstance(supply.ref, VerseSlot) and supply.fact is fact:
-                if SlotId(supply.ref.verse, supply.ref.ordinal) == slot:
-                    return supply
-        return None
-
 
 EMPTY = Ledger((), ())
 

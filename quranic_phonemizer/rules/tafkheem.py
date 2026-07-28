@@ -11,7 +11,6 @@ from ..engine.plan import Plan, Recolour, SoundFeature, Verdict, mint
 from ..model.address import BoundaryPlan, SlotId
 from ..model.canon import CanonLetter as L
 from ..model.canon import (
-    ABJAD,
     Annotation,
     CanonLetter,
     NucleusKind,

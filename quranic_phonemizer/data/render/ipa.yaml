@@ -103,8 +103,8 @@ vowels:
   "u|1|0": "u:"
   "i|0|0": "i"
   "i|1|0": "i:"
-  "imala|0|0": "e"
-  "imala|1|0": "e:"
+  "e|0|0": "e"
+  "e|1|0": "e:"
 
 nasals:
   "bilabial|0": "m̃"

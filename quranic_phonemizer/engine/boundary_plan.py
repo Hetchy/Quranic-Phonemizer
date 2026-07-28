@@ -16,11 +16,6 @@ class UnknownStopError(ValueError):
     """An unknown stop reference raises rather than silently doing nothing."""
 
 
-ALL_JOIN = "all_join"
-"""The traversal used to check attestation: the connected reading, since
-that is what a mushaf writes."""
-
-
 def plan_from_request(
     advice: Sequence[StopAdvice | None],
     stop_at: Sequence[StopAdvice] = (),

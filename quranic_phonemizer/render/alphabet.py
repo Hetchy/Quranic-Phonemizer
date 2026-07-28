@@ -12,7 +12,6 @@ from ..dataio import load_yaml, require_keys
 from ..model.performance import Consonant, Nasal, Release, Sound, Vowel
 
 SCHEMA_VERSION = 1
-DEFAULT = "ipa"
 
 
 class NotationError(KeyError):

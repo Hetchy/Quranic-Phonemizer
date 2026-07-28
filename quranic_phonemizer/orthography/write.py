@@ -15,8 +15,7 @@ from ..model.canon import (
     Quality,
     Score,
 )
-from ..model.inscription import SlotFact
-from .inventory import Inventory, InventoryError
+from .inventory import Inventory
 
 #: Which role writes each nucleus quality, and which carrier lengthens it.
 _SHORT_ROLE = {Quality.A: "fatha", Quality.U: "damma", Quality.I: "kasra"}
@@ -24,7 +23,7 @@ _SHORT_ROLE = {Quality.A: "fatha", Quality.U: "damma", Quality.I: "kasra"}
 #: Imala and ishmam are colourings a reciter applies to an ordinary vowel,
 #: not vowels of their own, so they spell as their base quality wherever the
 #: script has no mark that says otherwise.
-_BASE = {Quality.IMALA: Quality.A}
+_BASE = {Quality.E: Quality.A}
 
 #: Onsets and qualities a script may name outright.
 TASHIL = "tashil"
@@ -180,5 +179,4 @@ def _short_role(quality) -> str:
     return role
 
 
-__all__ = ["Pen", "WriteError", "pen_for", "write_verse", "InventoryError",
-           "SlotFact"]
+__all__ = ["Pen", "WriteError", "pen_for", "write_verse"]

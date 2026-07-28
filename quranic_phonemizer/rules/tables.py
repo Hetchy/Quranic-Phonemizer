@@ -34,6 +34,3 @@ class Pairs:
 
     def of(self, first: CanonLetter, second: CanonLetter) -> Rule | None:
         return self.by_pair.get((first, second))
-
-    def letters(self) -> frozenset[CanonLetter]:
-        return frozenset(letter for pair in self.by_pair for letter in pair)

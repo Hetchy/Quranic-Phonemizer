@@ -78,10 +78,12 @@ class Onset(StrEnum):
 
 
 class Quality(StrEnum):
+    """The vowel letters. One character each, so a vocalised skeleton reads."""
+
     A = "a"
     U = "u"
     I = "i"
-    IMALA = "imala"
+    E = "e"
 
 
 class Annotation(StrEnum):

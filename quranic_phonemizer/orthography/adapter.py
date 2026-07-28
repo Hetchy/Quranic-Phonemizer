@@ -6,7 +6,6 @@ carries a literal value or names a derivation -- the adapter never computes it.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TypeAlias
 
 from ..model.address import Location, Script, VerseRef
 from ..model.canon import CanonLetter, Onset, RuleFamily

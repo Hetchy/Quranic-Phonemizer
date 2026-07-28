@@ -4,8 +4,8 @@ Both adapters run this same code; only their inventory differs.
 """
 from __future__ import annotations
 
-from ..model.address import Location, Script, VerseRef
-from ..model.canon import CanonLetter, Onset
+from ..model.address import Location, VerseRef
+from ..model.canon import CanonLetter
 from ..model.inscription import Grapheme, GraphemeClass, SlotFact, StopAdvice
 from .adapter import Attestation, Cluster, Decoration, Evidence, Reading
 from .inventory import Inventory, InventoryError, LetterEntry, MarkEntry
@@ -263,4 +263,4 @@ def _grapheme_id(verse: VerseRef, offset: int):
     return GraphemeId(verse, offset)
 
 
-__all__ = ["read_verse", "Script", "Onset"]
+__all__ = ["read_verse"]

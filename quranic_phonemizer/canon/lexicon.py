@@ -124,6 +124,17 @@ def _inflected(entries: frozenset[str], skeleton: str) -> bool:
 EMPTY = Lexicon()
 
 
+def _section(entries, name: str, path: Path) -> frozenset[str]:
+    """A repeated entry is rejected: a set would swallow it before the budget
+    counts, so the file would show more rows than the ceiling ever sees."""
+    seen: set[str] = set()
+    for entry in entries:
+        if entry in seen:
+            raise LexiconError(f"{path}: {name} lists {entry!r} twice")
+        seen.add(entry)
+    return frozenset(seen)
+
+
 def load_lexicon(path: Path) -> Lexicon:
     data = load_yaml(path)
     require_keys(
@@ -138,7 +149,7 @@ def load_lexicon(path: Path) -> Lexicon:
             f"{SCHEMA_VERSION}"
         )
     sections = {
-        name: frozenset(data.get(name) or ())
+        name: _section(data.get(name) or (), name, path)
         for name in (*BUDGETS, "wasl_kasra")
     }
     for name, ceiling in BUDGETS.items():

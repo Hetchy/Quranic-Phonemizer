@@ -12,11 +12,9 @@ from ..model.address import BoundaryPlan, SlotId
 from ..model.canon import CanonLetter as L
 from ..model.canon import (
     Annotation,
-    CanonLetter,
     NucleusKind,
     Onset,
     Phase,
-    Quality,
     Rule,
 )
 from ..model.performance import Occurrence, Participants

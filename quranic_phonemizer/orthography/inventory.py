@@ -5,7 +5,7 @@ themselves live in `data/riwayat/<r>/scripts/<script>.yaml`.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -33,7 +33,6 @@ _SECTIONS = {
     "seats",
     "combining_hamza",
     "evidences",
-    "attests",
     "decorates",
     "advice",
     "structural",
@@ -91,10 +90,6 @@ class MarkEntry:
     structural: bool = False
     polysemous: tuple[str, ...] = ()
 
-    @property
-    def is_evidence(self) -> bool:
-        return self.fact is not None
-
 
 @dataclass(frozen=True, slots=True)
 class Inventory:
@@ -126,9 +121,6 @@ class Inventory:
                 f"unlisted scalar is a parse error, not a silent skip."
             )
         return entry
-
-    def advice_scalars(self) -> dict[str, StopAdvice]:
-        return {c: m.advice for c, m in self.marks.items() if m.advice is not None}
 
 
 # ---------------------------------------------------------------- value parsing

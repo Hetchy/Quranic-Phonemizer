@@ -8,14 +8,11 @@ from __future__ import annotations
 import hashlib
 from dataclasses import dataclass, field, replace
 
-from ..model.address import Location, Riwayah, SlotId, VariantSelection, VerseRef
+from ..model.address import Riwayah, SlotId, VariantSelection
 from ..model.canon import (
-    ABJAD,
     CanonLetter,
-    Nucleus,
     NucleusKind,
     Onset,
-    PausalLong,
     Quality,
     Score,
     Short,
@@ -29,11 +26,11 @@ from ..orthography.adapter import Cluster, Reading
 from . import derive
 from .derive import Absent, AddsSlot, Attests, Sets, Shows, Target
 from .derive import length as _length
-from .derive import lexeme, silah, tanween, wasl
+from .derive import lexeme, tanween, wasl
 from .lexicon import EMPTY as EMPTY_LEXICON
 from .lexicon import Lexicon
 from .ledger import EMPTY as EMPTY_LEDGER
-from .ledger import Ledger, VerseSlot, WordSlot
+from .ledger import Ledger
 from .draft import _Draft, set_fact
 from .passes import LEXEME_PASSES, LexemePass, apply_ledger, word_of
 from .scribe import Scribe
@@ -105,11 +102,6 @@ def build(
         lexeme_pass(reading, drafts, lexicon, scribe, selection)
     score, ordinals = _assemble(reading, drafts, riwayah, selection)
     return Built(score, scribe.finish(reading, drafts, ordinals))
-
-
-def score_of(reading: Reading, **kwargs) -> Score:
-    """The Score alone, for callers that genuinely do not want the edges."""
-    return build(reading, **kwargs).score
 
 
 # ------------------------------------------------------------------- drafting

@@ -19,7 +19,6 @@ from ..model.canon import (
     Quality,
     Short,
 )
-from ..model.inscription import SlotFact
 from ..orthography.adapter import Reading
 from .derive import Target, lexeme
 from .draft import set_fact

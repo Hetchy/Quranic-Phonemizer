@@ -287,13 +287,6 @@ def _apply_colours(effect: Realize, colours) -> Sound:
     return sound
 
 
-def lengthened(plan: Plan, slot: SlotId) -> Length | None:
-    for effect in plan.effects():
-        if isinstance(effect, Relength) and effect.slot == slot:
-            return effect.length
-    return None
-
-
 def has_content(slot: Slot, aspect: Aspect) -> bool:
     """`ONSET` always has canonical content; `NUCLEUS` has it unless the
     nucleus is `Silent`. A canonically absent nucleus needs no Silent edge."""

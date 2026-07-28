@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from ...model.canon import CanonLetter, Onset, Quality, Short, Silent
 from ...model.inscription import SlotFact
-from . import Absent, AddsSlot, Context, Outcome, Sets, Target, register
+from . import Absent, AddsSlot, Context, Outcome, Target, register
 
 _QUALITY = {"fathatan": Quality.A, "dammatan": Quality.U, "kasratan": Quality.I}
 
