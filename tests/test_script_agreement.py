@@ -39,7 +39,7 @@ SITES = [
     ((49, 11, 30), "ʔalism", "the article before a word that itself begins with a wasl"),
     ((68, 6, 1), "biʔajjikum", "IndoPak's maqsura spells no sound of its own"),
     ((46, 4, 18), "ʔi:tu:ni:", "a quiescent hamza after a prosthetic one, started on"),
-    ((11, 41, 6), "maʒQre:ha:", "the imala, which only Uthmani marks"),
+    ((11, 41, 6), "maʒQri:ha:", "the imala, which only Uthmani marks"),
 ]
 
 
