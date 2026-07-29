@@ -17,6 +17,8 @@ point in time and stays true whatever the code does next.
 
 ## Current references
 
+- [projection-redesign.md](projection-redesign.md) — legacy audit, model gaps,
+  the two-projection target, and its Uthmani delivery plan.
 - [domain-facts.md](domain-facts.md) — the reading facts the package encodes.
 - [mualem_conversion.md](mualem_conversion.md) — the Mualem notation mapping.
 - [hafs/](hafs/) — the public projections: tajweed, letter-phoneme and

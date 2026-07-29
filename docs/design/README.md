@@ -18,7 +18,7 @@ measured before choosing, and what would make the decision wrong.
 | | Question | Blocks |
 |---|---|---|
 | [01](01-mark-semantics.md) | Does a script inventory hand downstream code a typed fact or a string? | Warsh |
-| [03](03-canonical-vocabulary.md) | Do `Onset`, `SlotOrigin` and `Annotation` split? | projections |
+| [03](03-canonical-vocabulary.md) | Resolved: split onset axes, provenance, and annotation concerns | projections |
 | [04](04-data-schemas.md) | What does a data file have to say about itself before it is trusted? | Warsh |
 | [05](05-build-internals.md) | Who owns slot adjacency, pass order, and slot identity? | nothing yet |
 | [06](06-seen-sad-khilaf.md) | How is the seen/sad khilaf authored and selected? | correctness today |
