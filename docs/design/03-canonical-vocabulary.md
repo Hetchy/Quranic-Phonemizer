@@ -6,7 +6,7 @@ Blocks: [projections/01-design](projections/01-design.md).
 
 ## 1. Why this one had a deadline
 
-A `Slot` is what a projection projects. Once `Reading` is public, `Onset` and
+A `Slot` is what a projection projects. Once `Mappings` is public, `Onset` and
 `SlotOrigin` are in a consumer's `match` statement and changing them is a
 breaking release. The census below was the precondition.
 
@@ -106,7 +106,7 @@ So the fact belongs on the slot. What is wrong is only the *reading* of
 - boundary-conditional: `SILAH` (long joined, absent at pause), `PAUSAL_LONG`
   (short joined, long at pause)
 
-No code change. `Reading` publishes the discriminated nucleus value and an SDK
+No code change. `Mappings` publishes the discriminated nucleus value and an SDK
 may derive `conditional: bool`, so no consumer has to infer it from sounds
 (projections/01-design section 3.2).
 

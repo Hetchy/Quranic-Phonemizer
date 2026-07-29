@@ -5,8 +5,9 @@ Status: accepted
 ## Context
 
 ADR-005 deferred the public projection API. The projection audit established
-that the legacy APIs are four views of one graph. Two proposed replacements
-then exposed a real design choice:
+that four of the five legacy APIs are four views of one graph, and that the
+fifth rebuilt recited Arabic from rule names for want of the same graph. Two
+proposed replacements then exposed a real design choice:
 
 - a normalized graph preserves the model's typed relations, but needs an
   explicit request envelope and a serious migration gate;
@@ -23,7 +24,7 @@ that without recovering `Aspect` from the sound kind, which ADR-002 forbids.
 
 ### 1. The public document is an identified snapshot
 
-`Reading` carries a schema version and the complete identity of the request:
+`Mappings` carries a schema version and the complete identity of the request:
 reference, riwayah, script, notation, canonicalized variant selection, boundary
 plan, and Score digest. Two documents are comparable only when those fields
 match.
@@ -35,7 +36,7 @@ schema edition that give the label its meaning.
 
 ### 2. Nodes do not absorb relations
 
-`Reading` publishes ordered node arrays for words, glyphs, units, sounds, and
+`Mappings` publishes ordered node arrays for words, glyphs, units, sounds, and
 occurrences, plus four relation arrays:
 
 - `spellings` is the exact `Evidences | Attests | Decorates | Structural`
@@ -102,6 +103,22 @@ serializer may derive render glyphs from `write`, contributions, attributions,
 and insertion anchors. A slotless insertion is represented by its before/after
 anchor and its rendered sound; it is not forced into a fake unit or an empty
 source glyph.
+
+### 6. The document is named `Mappings` and is emitted whole
+
+`Reading` is unavailable: `orthography/adapter.py` already defines it for the
+parsed script side and eight modules import it, so a public `Reading` would be
+two types with one name in one package. The word is triple-booked besides,
+since a reading is also what `Riwayah` names. `Mappings` carries the migration
+lineage from the legacy `*_mappings` views instead.
+
+There are no per-array flags selecting what to build or serialize. The flags
+would not be independent -- referential integrity forces a dependency order,
+and the closed subsets collapse to three profiles of which only one saves real
+work, with no consumer for it. Conditional emission would also make every
+completeness law in the gate conditional on what was requested. If a measured
+payload or a named consumer later justifies selection, the answer is closed,
+dependency-complete named profiles rather than free booleans.
 
 ## Consequences
 

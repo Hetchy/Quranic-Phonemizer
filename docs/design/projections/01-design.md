@@ -11,11 +11,12 @@ Two public projections, and no third.
 | | Name | Shape | For |
 |---|---|---|---|
 | **P1** | `phonemes` | ordered notation tokens, with word boundaries | consumers that want only sound |
-| **P2** | `Reading` | identified nodes plus typed relation arrays | every script, alignment, and tajweed consumer |
+| **P2** | `Mappings` | identified nodes plus typed relation arrays | every script, alignment, and tajweed consumer |
 
-`Reading` replaces `character_phoneme_mappings`,
-`letter_phoneme_mappings`, `silent_flags`, and `tajweed_mappings`. The four
-legacy APIs were four traversals of the same join, with different relationship
+`Mappings` replaces `character_phoneme_mappings`,
+`letter_phoneme_mappings`, `silent_flags`, and `tajweed_mappings`, and the
+recited-writing serializer over it replaces `phonetic_text`. The four mapping
+APIs were four traversals of the same join, with different relationship
 losses. Publishing four smaller documents would require every consumer to
 reconstruct that join again.
 
@@ -24,15 +25,75 @@ are independently ignorable, and an SDK may provide lazy indexes or narrower
 views. The contract has one source of truth even when transport layers select
 only part of it.
 
+### 1.1 Why `phonemes` stays separate
+
+Not convenience. `phonemes` is derivable in one line -- node order is reading
+order (02-gate section 4.1), so the token stream is `sounds` mapped through
+`token`. The argument for keeping it is **change rate**.
+
+The token stream is stable across every schema evolution of the graph. Adding
+a relation family, splitting a participant role, versioning the contribution
+edge: none of it changes a token. Fold the two together and every consumer who
+wanted a list of strings inherits the schema version, the request envelope and
+the Score digest, and breaks on graph changes that did not affect them.
+
+This is also what makes two projections different from the five legacy ones.
+Those had to be *joined* -- a cell pointed at a phoneme index, silent flags
+zipped onto shard letters, and keeping them consistent was the consumer's
+problem. `phonemes` and `Mappings` are never joined; a consumer picks one. Two
+projections that are never combined carry no coupling cost.
+
+The same test says where the line falls and nowhere else: no two arrays inside
+`Mappings` have different change rates, because they are one graph and they
+version together. So the split is here, and there is no third projection.
+
+### 1.2 Why the whole graph is always emitted
+
+There are no per-array flags selecting what to build or serialize, and the
+reason is that the flags would not be independent. Referential integrity
+forces a dependency order: `attributions` index into `sounds` and
+`occurrences`, `modifiers` into both, `contributions` into
+attributions/modifiers/occurrences, `spellings` into `units`. Drop `sounds`
+and every `Hosts.sound` dangles. The dependency-closed subsets collapse to
+three profiles, of which only one -- canonical plus script, with no
+`perform()` call -- would save real work, and no audited consumer wants it:
+every script-side consumer needs occurrences, and occurrences come from
+`perform()`. Given a `Performance`, building the arrays is a relabelling.
+
+The cost of flags is immediate. Every law in 02-gate section 4 becomes
+conditional on whether its target array was requested, and a gate that cannot
+state an unconditional invariant is how the five legacy views drifted apart in
+the first place.
+
+Bulk output is an offline build that lands in a shard writer, and the shard
+writer already repacks into its own positional rows. Selecting there is
+correct; selecting here saves nothing downstream.
+
+Reopens on evidence, not on principle: a measured request payload too large
+for a real read path, or a named consumer that needs no `perform()`. The reply
+would then be closed, dependency-complete named profiles -- not free booleans,
+which are one contract per subset.
+
+### 1.3 The name
+
+`Mappings`, not `Reading`. `Reading` is taken: `orthography/adapter.py:115`
+defines it for the parsed script side and eight modules import it, so a public
+`Reading` would be two types with one name in one package -- the failure
+convention 1 bans. The word is triple-booked besides, since a reading is also
+what `Riwayah` names.
+
+`Mappings` carries the migration lineage instead: a consumer looking for
+`letter_phoneme_mappings` or `tajweed_mappings` finds where their view went.
+
 ## 2. Identity and identifiers
 
-A `Reading` is a snapshot of one fully identified request:
+A `Mappings` is a snapshot of one fully identified request:
 
 ```python
 @dataclass(frozen=True)
-class Reading:
+class Mappings:
     schema_version: str
-    request: ReadingRequest
+    request: MappingsRequest
     score_digest: str
 
     words: tuple[Word, ...]
@@ -48,7 +109,7 @@ class Reading:
 
 
 @dataclass(frozen=True)
-class ReadingRequest:
+class MappingsRequest:
     ref: str
     riwayah: Riwayah
     script: Script

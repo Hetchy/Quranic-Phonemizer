@@ -8,7 +8,7 @@ Status: **proposed**. This is the acceptance criterion for
 Replacement needs two independent proofs:
 
 1. **Legacy preservation.** Every legacy field promised during migration is
-   reproduced exactly by a pure adapter over `Reading`.
+   reproduced exactly by a pure adapter over `Mappings`.
 2. **Graph completeness.** Every new typed relation is complete and obeys its
    domain laws, including facts for which legacy has no oracle.
 
@@ -72,7 +72,7 @@ directly. The report says which kind of oracle each fixture used.
 
 `tools/projection_parity.py` is the planned harness. For each manifest mode it:
 
-1. loads `Reading` for the same source request;
+1. loads `Mappings` for the same source request;
 2. applies one pure adapter per legacy view;
 3. compares native rows, field order where positional, values, and row order;
 4. reports residues by adapter, field, rule, boundary mode, and cause;
@@ -166,7 +166,7 @@ the old view is derivable, so its exact grouping must be derivable.
 
 Every legacy field is adapted:
 
-| Cell field | Source in `Reading` |
+| Cell field | Source in `Mappings` |
 |---|---|
 | `chars` | source spelling or derived recited writing |
 | `role` | folded `GraphemeClass` |
@@ -330,7 +330,7 @@ the canonical position, so it is not a fact this contract owns.
 
 1. Implement C1-C3 with their local laws.
 2. Define the versioned JSON schema and negative tests.
-3. Assemble a single-verse `Reading` and pass the domain adequacy matrix.
+3. Assemble a single-verse `Mappings` and pass the domain adequacy matrix.
 4. Implement C4 for ranges, internal boundaries, and selections.
 5. Implement `tools/projection_parity.py`; verify the frozen manifest.
 6. Pass each exact adapter in continuous, verse, and word modes.

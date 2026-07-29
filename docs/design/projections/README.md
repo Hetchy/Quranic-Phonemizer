@@ -18,7 +18,8 @@ The one-paragraph version: four of the five legacy projections were four
 traversals of a join that the old model could not hold, so each recomputed
 relationships from rule names and lost a different set; the fifth,
 `phonetic_text`, rebuilt recited Arabic from rule names for the same reason.
-The layered model is the join. `Reading`
-publishes its five ordered node arrays and its typed spelling, attribution, and
-modifier edges, plus explicit glyph contribution, without duplicate reverse
-links. `phonemes` stays separate for consumers that want only sound.
+The layered model is the join. `Mappings` publishes its five ordered node
+arrays and its typed spelling, attribution, and modifier edges, plus explicit
+glyph contribution, without duplicate reverse links. `phonemes` stays separate
+because the token stream and the graph version at different rates, not because
+it is a convenience.
