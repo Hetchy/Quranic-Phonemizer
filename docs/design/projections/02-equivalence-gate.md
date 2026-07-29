@@ -322,9 +322,9 @@ repair it.
 | slotless repair | side, order, occurrence, sound, contribution-free insertion, and rendered form |
 | source structure | spaces, internal spaces, tatweel, stop signs, and verse markers round-trip exactly |
 
-Madd cause is required through rule and participant semantics. Permitted and
-selected counts remain outside this contract until request identity includes
-the transmission path or realization policy that makes them authoritative.
+Madd cause is required through rule and participant semantics. Counts are not:
+a madd's length in harakat is a property of the tariq a reciter takes, not of
+the canonical position, so it is not a fact this contract owns.
 
 ## 7. Order and CI policy
 

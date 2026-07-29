@@ -372,8 +372,7 @@ occurrence participants and lexical identity state why it applied.
 
 ## 9. Shipping questions
 
-The current graph shape is settled by ADR-013. Three empirical gate items and
-one scoped extension question remain:
+The graph shape is settled by ADR-013. Three empirical gate items remain:
 
 1. Does the Uthmani inventory bind every iqlab small meem through a typed
    spelling edge?
@@ -381,8 +380,5 @@ one scoped extension question remain:
    corpus?
 3. Does every preserved legacy field round-trip exactly in continuous, verse,
    and word boundary modes?
-4. What transmission path or realization policy would make permitted and
-   selected madd counts authoritative? Until the request can identify it,
-   counts remain outside the contract.
 
 [02-equivalence-gate](02-equivalence-gate.md) makes each one executable.

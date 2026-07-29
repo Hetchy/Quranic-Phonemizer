@@ -73,10 +73,8 @@ PausalLong(quality)`.
 
 It is not a nullable quality beside an independently set length. The `Onset`
 enum stays intact because the completed census found no domain state it cannot
-represent. Madd counts and durations are realization or teaching-policy data,
-not canonical facts, and are not added to `Unit`. A future duration contract
-must identify the transmission path or policy that makes permitted and
-selected counts authoritative.
+represent. Madd counts and durations are properties of the tariq a reciter
+takes, not canonical facts, and are not added to `Unit`.
 
 `RuleFamily` and execution phase are derived from `Rule` by total registries.
 They are not repeated on each occurrence. An occurrence retains its ordered,

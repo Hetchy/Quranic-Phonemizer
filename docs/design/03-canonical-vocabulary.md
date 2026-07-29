@@ -136,6 +136,16 @@ The one-member lexical enum is deliberate. It names the stable category and
 can grow without another schema migration. The guarantee consumers need --
 "phonemes are computed from `Performance`" -- remains structural.
 
+**D2 is not complete as stated.** `orthography/write.py` reads
+`Annotation.IMALA` off the slot at lines 45 and 197-200, and `write` takes a
+`Score`, not a `Performance`. Making imala an occurrence and nothing else
+breaks the round-trip at every imala site. `projections/00-audit` section 4.6
+sets out the two ways to close it; the smaller is to keep imala a canonical
+fact under a name that is not `Annotation`, with the occurrence as the
+classification over it -- the same shape `DIVINE_NAME` gets. That choice
+belongs to whoever lands D2, and the round-trip gate refuses the commit
+without it.
+
 **D3 -- `Onset` is not split.** The census found no possible manner-presence
 combination the enum cannot express, and every impossibility has a domain
 reason recorded in §4's table. Splitting buys nothing today and the projection

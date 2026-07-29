@@ -5,7 +5,7 @@ public projection API out of scope. This is that API.
 
 | | Document | Answers |
 |---|---|---|
-| [00](00-audit.md) | Audit | What the four legacy projections published, which consumer read what, where consumers invent facts, and what the layered model still cannot say |
+| [00](00-audit.md) | Audit | What the five legacy projections published, which consumer read what, where consumers invent facts, and what the layered model still cannot say |
 | [01](01-design.md) | Design | Two projections over typed nodes and four lossless relation families |
 | [02](02-equivalence-gate.md) | Gate | Exact legacy adapters plus laws for the richer graph |
 
@@ -14,9 +14,11 @@ Scope: Uthmani, Hafs. IndoPak is deferred and nothing here depends on it.
 Assumes [03-canonical-vocabulary](../03-canonical-vocabulary.md) resolved and
 follows [ADR-013](../../adr/013-public-projection-foundations.md).
 
-The one-paragraph version: the four legacy projections were four traversals of
-a join that the old model could not hold, so each recomputed relationships from
-rule names and lost a different set. The layered model is the join. `Reading`
+The one-paragraph version: four of the five legacy projections were four
+traversals of a join that the old model could not hold, so each recomputed
+relationships from rule names and lost a different set; the fifth,
+`phonetic_text`, rebuilt recited Arabic from rule names for the same reason.
+The layered model is the join. `Reading`
 publishes its five ordered node arrays and its typed spelling, attribution, and
 modifier edges, plus explicit glyph contribution, without duplicate reverse
 links. `phonemes` stays separate for consumers that want only sound.
