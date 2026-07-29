@@ -110,7 +110,7 @@ def spell_muqattaat(names: Muqattaat):
     """Build the pass. Bound by the riwayah like the other lexeme passes."""
 
     def apply(
-        reading: Reading, drafts: list, lexicon, scribe=None, selection=None
+        reading: Reading, drafts: list, lexicon, scribe, selection
     ) -> None:
         del lexicon, selection
         for word in range(len(reading.words)):

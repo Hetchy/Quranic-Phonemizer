@@ -5,10 +5,9 @@ which the per-cluster derivation registry cannot express.
 """
 from __future__ import annotations
 
-from collections.abc import Callable
-from typing import TypeAlias
+from typing import Protocol
 
-from ..model.address import VerseRef
+from ..model.address import VariantSelection, VerseRef
 from ..model.canon import (
     ABJAD,
     Annotation,
@@ -22,9 +21,10 @@ from ..model.canon import (
 from ..model.inscription import SlotFact
 from ..orthography.adapter import Reading
 from .derive import Target, lexeme
-from .draft import fact_of, set_fact
+from .draft import _Draft, fact_of, set_fact
 from .ledger import Ledger, VerseSlot, WordSlot
 from .lexicon import Lexicon
+from .scribe import Scribe
 
 
 class LedgerAddressError(ValueError):
@@ -40,14 +40,23 @@ def word_of(reading: Reading, draft) -> int:
     which imports this module rather than the other way round."""
     return reading.clusters[draft.cluster].word if draft.cluster >= 0 else -1
 
-#: A pass over the drafted slots of a whole verse, after every per-cluster
-#: derivation has run. `(reading, drafts, lexicon, scribe, selection) -> None`.
-#:
-#: The scribe is in the signature because a pass may *create* slots -- spelling
-#: `الٓمٓصٓ` turns three into seven -- and every slot must trace to a grapheme.
-#: The selection is, because a khilaf can put a different vowel in the Score.
-#: A pass that needs neither can ignore them.
-LexemePass: TypeAlias = Callable[[Reading, list, object, object, object], None]
+# The scribe is in the signature because a pass may *create* slots -- spelling
+# `الٓمٓصٓ` turns three into seven -- and every slot must trace to a grapheme.
+# The selection is, because a khilaf can put a different vowel in the Score.
+# A pass needing neither `del`s them, so what it ignores is visible where it
+# is ignored rather than absent from the signature.
+class LexemePass(Protocol):
+    """A pass over the drafted slots of a whole verse, after every per-cluster
+    derivation has run."""
+
+    def __call__(
+        self,
+        reading: Reading,
+        drafts: list[_Draft],
+        lexicon: Lexicon,
+        scribe: Scribe | None,
+        selection: VariantSelection,
+    ) -> None: ...
 
 
 def apply_ledger(reading: Reading, drafts, ledger: Ledger, track) -> None:
@@ -139,14 +148,14 @@ def _check_skeleton(reading: Reading, drafts, ordinal: int, claimed: str) -> Non
 
 
 def _apply_allah_lexeme(
-    reading: Reading, drafts, lexicon=None, scribe=None, selection=None
+    reading: Reading, drafts, lexicon, scribe, selection
 ) -> None:
     """Word by word, not verse by verse: the lexeme is a property of one word.
 
     Run over the whole verse instead, a word ending in lam or hamza would
     lend its last slot to the next word's opening lam.
     """
-    del scribe
+    del scribe, selection
     for word_index in range(len(reading.words)):
         span = [d for d in drafts if word_of(reading, d) == word_index]
         letters = [d.letter for d in span]
@@ -163,7 +172,7 @@ PLURAL_HOSTS = frozenset({CanonLetter.KAF, CanonLetter.HEH})
 
 
 def connect_plural_meem(
-    reading: Reading, drafts, lexicon=None, scribe=None, selection=None
+    reading: Reading, drafts, lexicon, scribe, selection
 ) -> None:
     """The plural pronoun's meem takes a damma before a prosthetic hamza.
 
@@ -194,11 +203,12 @@ def _plural_meem(span) -> bool:
 
 
 def _apply_pausal_lexemes(
-    reading: Reading, drafts, lexicon: Lexicon, scribe=None, selection=None
+    reading: Reading, drafts, lexicon: Lexicon, scribe, selection
 ) -> None:
     """The seven alifs. Uthmani marks them `۠`; IndoPak writes a plain final
     alif, indistinguishable from an ordinary length carrier - so the fact is
     lexical, not orthographic."""
+    del scribe, selection
     if not lexicon.pausal_lexemes:
         return
     for word_index in range(len(reading.words)):
