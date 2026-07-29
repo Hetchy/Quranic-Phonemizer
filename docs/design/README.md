@@ -19,7 +19,7 @@ measured before choosing, and what would make the decision wrong.
 |---|---|---|
 | [01](01-mark-semantics.md) | Does a script inventory hand downstream code a typed fact or a string? | Warsh |
 | [02](02-render-map.md) | Is the output alphabet a table of feature tuples or a set of rules? | a second notation |
-| [03](03-canonical-vocabulary.md) | Do `Onset`, `SlotOrigin` and `Annotation` split? | projections |
+| [03](03-canonical-vocabulary.md) | Do `Onset`, `SlotOrigin` and `Annotation` split? **Resolved** -- census done, `SlotOrigin` splits, the other two do not. | projections |
 | [04](04-data-schemas.md) | What does a data file have to say about itself before it is trusted? | Warsh |
 | [05](05-build-internals.md) | Who owns slot adjacency, pass order, and slot identity? | nothing yet |
 | [06](06-seen-sad-khilaf.md) | How is the seen/sad khilaf authored and selected? | correctness today |
@@ -27,3 +27,10 @@ measured before choosing, and what would make the decision wrong.
 
 Read 06 first if you only read one. It is the only item on this list that is
 wrong today rather than merely awkward.
+
+## Multi-document questions
+
+[projections/](projections/) is the public projection API that ADR-005 put out
+of scope: an audit of the four legacy projections and their consumers, a
+two-projection design over the layered model, and the equivalence gate that
+replacement has to pass. It assumes 03 resolved.
