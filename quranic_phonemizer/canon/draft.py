@@ -5,6 +5,7 @@ Shared by `build.py`'s per-cluster drafting and `passes.py`'s verse-level passes
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from itertools import count
 
 from ..model.canon import (
     Annotation,
@@ -16,6 +17,10 @@ from ..model.canon import (
 )
 from ..model.inscription import SlotFact
 from .derive import Target
+
+#: Never serialised and never compared across builds -- only a key while one
+#: verse is being drafted, so a process-wide counter is enough.
+_uid = count()
 
 
 @dataclass(slots=True)
@@ -34,6 +39,26 @@ class _Draft:
     it onto the `ScoreWord`."""
 
     annotations: frozenset[Annotation] = frozenset()
+
+    uid: int = field(default_factory=lambda: next(_uid))
+    """Identity that survives being moved, split or dropped, which `id()` did
+    not. Also what makes `list.remove` and `list.index` mean this draft."""
+
+
+def fact_of(draft, fact: SlotFact):
+    """What a draft currently says about one fact. The mirror of `set_fact`."""
+    match fact:
+        case SlotFact.LETTER:
+            return draft.letter
+        case SlotFact.ONSET:
+            return draft.onset
+        case SlotFact.NUCLEUS:
+            return draft.nucleus
+        case SlotFact.SAKT:
+            return draft.sakt_after
+        case SlotFact.ANNOTATION:
+            return draft.annotations
+    return None
 
 
 def set_fact(draft, drafts, fact: SlotFact, value, target: Target,

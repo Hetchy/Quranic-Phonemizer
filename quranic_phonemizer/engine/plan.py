@@ -11,7 +11,7 @@ from typing import TypeAlias
 
 from ..model.address import OccurrenceId, SlotId
 from ..model.canon import FAMILY_OF, Phase, Rule, RuleFamily
-from ..model.performance import Aspect, Occurrence, Side, SoundSpec
+from ..model.performance import Aspect, Occurrence, Side, Sound
 
 
 class Length(StrEnum):
@@ -21,14 +21,13 @@ class Length(StrEnum):
 
 class SoundFeature(StrEnum):
     EMPHATIC = "emphatic"
-    NASAL = "nasal"
 
 
 @dataclass(frozen=True, slots=True)
 class Realize:
     slot: SlotId
     aspect: Aspect
-    sounds: tuple[SoundSpec, ...]
+    sound: Sound
 
 
 @dataclass(frozen=True, slots=True)
@@ -52,7 +51,7 @@ class Silence:
 class Insert:
     anchor: tuple[SlotId, Side]
     aspect: Aspect
-    sounds: tuple[SoundSpec, ...]
+    sound: Sound
 
 
 @dataclass(frozen=True, slots=True)

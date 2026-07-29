@@ -15,17 +15,13 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from quranic_phonemizer.canon.build import Provenance, build  # noqa: E402
+from quranic_phonemizer.api import recitation  # noqa: E402
+from quranic_phonemizer.canon.build import Provenance  # noqa: E402
 from quranic_phonemizer.model.address import (  # noqa: E402
     Location,
+    Riwayah,
     Script,
     VerseRef,
-)
-from quranic_phonemizer.riwayat.hafs import (  # noqa: E402
-    ledger,
-    lexeme_passes,
-    lexicon,
-    script_adapter,
 )
 
 SOURCES = ROOT / "corpus_sources" / "riwayat" / "hafs" / "scripts"
@@ -80,10 +76,8 @@ def main() -> int:
     successor = _successors(order)
     assert set(uthmani) == set(indopak), "the two corpora disagree on verses"
 
-    adapters = {s: script_adapter(s) for s in Script}
-    shared = {"lexicon": lexicon(), "ledger": ledger(),
-              "passes": lexeme_passes()}
-    tracks = {s: Provenance() for s in Script}
+    hafs = recitation(Riwayah.HAFS)
+    tracks = {s: Provenance() for s in hafs.scripts}
 
     residue: collections.Counter[str] = collections.Counter()
     examples: dict[str, list] = collections.defaultdict(list)
@@ -95,15 +89,15 @@ def main() -> int:
         verse = VerseRef(*key)
         scores = {}
         for script, source in ((Script.UTHMANI, uthmani), (Script.INDOPAK, indopak)):
-            reading = adapters[script].read(verse, tuple(source[key]))
+            reading = hafs.read(script, verse, tuple(source[key]))
             following = successor.get(key)
             right = (
-                adapters[script].read(VerseRef(*following), tuple(source[following]))
+                hafs.read(script, VerseRef(*following), tuple(source[following]))
                 if following
                 else None
             )
-            scores[script] = build(
-                reading, provenance=tracks[script], right_context=right, **shared
+            scores[script] = hafs.build(
+                reading, provenance=tracks[script], right_context=right
             ).score
         words_seen += len(uthmani[key])
         slots_seen += len(scores[Script.UTHMANI].slots())

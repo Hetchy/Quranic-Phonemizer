@@ -76,7 +76,7 @@ class Idgham:
                 Realize(
                     following.id,
                     Aspect.ONSET,
-                    (Consonant(following.letter, geminate=True),),
+                    Consonant(following.letter, geminate=True),
                 ),
                 MergeInto(at, Aspect.ONSET, following.id, Aspect.ONSET),
             ),

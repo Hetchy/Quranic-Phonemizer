@@ -9,13 +9,13 @@ from ..orthography.adapter import Reading
 
 
 def assemble(
-    reading: Reading, drafts, riwayah, selection,
+    reading: Reading, drafts, selection,
 ) -> tuple[Score, dict[int, int]]:
     by_word: dict[int, list[Slot]] = {}
     ordinals: dict[int, int] = {}
     sakt: set[int] = set()
     for ordinal, draft in enumerate(drafts):
-        ordinals[id(draft)] = ordinal
+        ordinals[draft.uid] = ordinal
         word = reading.clusters[draft.cluster].word if draft.cluster >= 0 else 0
         by_word.setdefault(word, []).append(_slot(reading, draft, ordinal))
         if draft.sakt_after:
@@ -30,7 +30,7 @@ def assemble(
         for index, location in enumerate(reading.words)
     )
     return Score(
-        riwayah=riwayah,
+        riwayah=reading.riwayah,
         words=words,
         selection=selection,
         digest=digest(words),

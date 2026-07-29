@@ -110,7 +110,7 @@ def spell_muqattaat(names: Muqattaat):
     """Build the pass. Bound by the riwayah like the other lexeme passes."""
 
     def apply(
-        reading: Reading, drafts: list, lexicon, scribe=None, selection=None
+        reading: Reading, drafts: list, lexicon, scribe, selection
     ) -> None:
         del lexicon, selection
         for word in range(len(reading.words)):
@@ -127,6 +127,9 @@ def spell_muqattaat(names: Muqattaat):
                 drafts.remove(draft)
             drafts[first:first] = spelled
             if scribe is not None:
+                # The letter names replace the word's drafts, so the edges
+                # drafting recorded into them are withdrawn, not orphaned.
+                scribe.withdraw(span)
                 # The compact grapheme evidences every slot its name expands
                 # to, so `الٓمٓصٓ` gives three graphemes reaching seven slots,
                 # keeping every slot traceable to a grapheme.

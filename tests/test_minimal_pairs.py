@@ -77,35 +77,35 @@ PROSTHETIC = [
 ]
 
 
-def _performed(packed, shared, surah: int, ayah: int):
+def _performed(packed, hafs, surah: int, ayah: int):
     """Stopping after every word, as the regression harness plans it: a
     reading in isolation is the one a minimal pair is about."""
-    score = score_for(packed, shared, surah, ayah)
+    score = score_for(packed, hafs, surah, ayah)
     plan = BoundaryPlan(
         (Junction.STOP,) * (len(score.words) - 1) + (Junction.EDGE,)
     )
     return score, perform(score, HAFS, plan)
 
 
-def _word(packed, shared, alphabet, site) -> str:
+def _word(packed, hafs, alphabet, site) -> str:
     surah, ayah, word = site
-    score, performance = _performed(packed, shared, surah, ayah)
+    score, performance = _performed(packed, hafs, surah, ayah)
     return "".join(phonemes_by_word(performance, score, alphabet)[word - 1])
 
 
 @pytest.mark.parametrize(("left", "right", "difference"), PAIRS)
 def test_the_pair_reads_apart(
-    packed, shared, alphabet, left, right, difference
+    packed, hafs, alphabet, left, right, difference
 ) -> None:
     for site, reading in (left, right):
-        assert _word(packed, shared, alphabet, site) == reading, difference
+        assert _word(packed, hafs, alphabet, site) == reading, difference
 
 
-def test_an_assimilated_closure_has_no_qalqala(packed, shared, alphabet) -> None:
+def test_an_assimilated_closure_has_no_qalqala(packed, hafs, alphabet) -> None:
     """`بَسَطتَ` holds the tah into the taa and keeps its itbaq; a closure
     that is never released has nothing to echo."""
-    assert _word(packed, shared, alphabet, (5, 28, 2)) == "basatˤt"
-    score, performance = _performed(packed, shared, 5, 28)
+    assert _word(packed, hafs, alphabet, (5, 28, 2)) == "basatˤt"
+    score, performance = _performed(packed, hafs, 5, 28)
     held = {slot.id for slot in score.words[1].slots}
     fired = {
         o.rule for o in performance.occurrences if held & set(o.parts.slots)
@@ -118,33 +118,33 @@ def test_an_assimilated_closure_has_no_qalqala(packed, shared, alphabet) -> None
 
 @pytest.mark.parametrize(("site", "prosthetic", "why"), PROSTHETIC)
 def test_only_a_prosthetic_hamza_elides(
-    packed, shared, site, prosthetic, why
+    packed, hafs, site, prosthetic, why
 ) -> None:
     surah, ayah, word = site
-    score = score_for(packed, shared, surah, ayah)
+    score = score_for(packed, hafs, surah, ayah)
     opening = score.words[word - 1].slots[0]
     assert (opening.onset is Onset.WASL) is prosthetic, why
 
 
 def test_the_plural_meem_is_voweled_before_a_prosthetic_hamza(
-    packed, shared, alphabet
+    packed, hafs, alphabet
 ) -> None:
     """Two quiescent letters would meet otherwise, so `ـكُمْ` takes a damma
     that only the following word calls for."""
-    score = score_for(packed, shared, 6, 93)
+    score = score_for(packed, hafs, 6, 93)
     assert score.words[33].slots[-1].nucleus == Short(Quality.U)
-    assert _word(packed, shared, alphabet, (6, 93, 34)) == "ʔaŋfusakum"
+    assert _word(packed, hafs, alphabet, (6, 93, 34)) == "ʔaŋfusakum"
 
 
 def test_a_letter_name_ends_where_the_next_begins(
-    packed, shared, alphabet
+    packed, hafs, alphabet
 ) -> None:
     """`طسٓمٓ` says three names, so the noon of `سين` meets the meem of `ميم`
     across a boundary and assimilates instead of standing clear."""
-    assert _word(packed, shared, alphabet, (26, 1, 1)) == "tˤaˤ:si:m̃i:m"
+    assert _word(packed, hafs, alphabet, (26, 1, 1)) == "tˤaˤ:si:m̃i:m"
 
 
-def test_the_shape_of_the_article_needs_a_lam(packed, shared, alphabet) -> None:
+def test_the_shape_of_the_article_needs_a_lam(packed, hafs, alphabet) -> None:
     """19:33 `وُلِدتُّ` puts a vowelless dal after a voweled lam behind a waw,
     which is the article's shape everywhere but the letter itself."""
-    assert _word(packed, shared, alphabet, (19, 33, 4)) == "wulitt"
+    assert _word(packed, hafs, alphabet, (19, 33, 4)) == "wulitt"

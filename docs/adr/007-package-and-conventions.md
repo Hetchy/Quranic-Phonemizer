@@ -141,6 +141,7 @@ Off-runtime trees are unchanged: `tools/`, `tests/`, `docs/`,
 | `rules` | `model`, `engine` | `orthography`, `canon`, `render`, `riwayat` |
 | `render` | `dataio`, `model` | `rules`, `canon`, `engine`, `orthography` |
 | `riwayat` | all of the above except `render` | — |
+| `api` | all of the above except `dataio` | — |
 
 `dataio` and `corpus` are leaves the earlier table omitted while the code
 imported them. Every package that loads a resource reaches `dataio`; nothing
@@ -150,9 +151,18 @@ The table above is the one `tools/structure_lint.py` enforces, in both
 directions: an edge it does not permit is an error, and so is a permission
 nothing uses. No module may be reachable from itself.
 
-`riwayat` is the only package that may import anything, because it is the
-assembly point: it binds a riwayah's adapters, its `RuleSet` and its resource
-paths. Nothing imports *it*, which is what keeps a second riwayah additive.
+`riwayat` binds one riwayah's adapters, its `RuleSet` and its resource paths.
+`api.py` is the composition root above it: `recitation(riwayah)` returns a
+`Recitation` holding everything that riwayah needs, and `Recitation.read`,
+`.build` and `.perform` are the only calls a consumer makes. Nothing imports
+either, which is what keeps a second riwayah additive -- it is one row in
+`api.PACKAGES` and one package under `riwayat/`.
+
+Riwayah identity travels with the data rather than as an argument. An
+`Inventory` declares its riwayah and script and is rejected if the caller
+believed otherwise; a `Reading` carries the riwayah its inventory declared;
+`Score` takes it from the `Reading` and `Performance` from the `Score`. No
+function on the path accepts a riwayah a caller could get wrong.
 
 Two rules carry design weight and are tested, not merely documented:
 

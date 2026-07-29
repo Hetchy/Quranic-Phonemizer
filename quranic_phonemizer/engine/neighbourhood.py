@@ -44,6 +44,30 @@ class Neighbourhood:
         following = self._flat[position + 1]
         return None if self._blocked(at, following.id) else following
 
+    def before(self, at: SlotId) -> Slot | None:
+        """The previous slot in recitation order, junctions ignored.
+
+        Deliberately not the mirror of `after`: a stop blocks the view
+        forward because recitation ends there, but the slot behind was said.
+        """
+        position = self._at.get(at)
+        if not position:
+            return None
+        return self._flat[position - 1]
+
+    def first_of_word(self, at: SlotId) -> bool:
+        position, word = self._at.get(at), self._word.get(at)
+        if position is None or word is None:
+            return False
+        return position == 0 or self._word[self._flat[position - 1].id] != word
+
+    def last_of_word(self, at: SlotId) -> bool:
+        position, word = self._at.get(at), self._word.get(at)
+        if position is None or word is None:
+            return False
+        end = position + 1 == len(self._flat)
+        return end or self._word[self._flat[position + 1].id] != word
+
     def crosses_word(self, at: SlotId) -> bool:
         following = self.after(at)
         return following is not None and self._word[at] != self._word[following.id]

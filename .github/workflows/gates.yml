@@ -1,5 +1,5 @@
 # Thresholds are floors that may only rise. Every row behind every floor short
-# of 100% is named in docs/adr/gate-residues.md, so requiring zero would mean a
+# of 100% is named in docs/conformance/gate-residues.md, so requiring zero would mean a
 # red build with nothing to do about it, and requiring nothing would let a
 # regression land silently.
 name: gates
@@ -40,6 +40,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.13"
+      # tool-import-smoke executes each tool rather than parsing it, so the
+      # tools that read YAML need their dependencies present.
+      - run: pip install -e .
       - run: python tools/structure_lint.py
 
   cross-script:
@@ -60,7 +63,7 @@ jobs:
     # Not a target. The oracle is the previous implementation with its defects
     # frozen in, so this is a change detector and its floor may fall when the
     # oracle is the one that is wrong. All 56 rows are classified in
-    # docs/adr/gate-residues.md, with the evidence for each direction.
+    # docs/conformance/gate-residues.md, with the evidence for each direction.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

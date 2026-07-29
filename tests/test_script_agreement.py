@@ -45,12 +45,12 @@ SITES = [
 
 @pytest.mark.parametrize(("site", "reading", "difference"), SITES)
 def test_both_scripts_read_the_same_word(
-    sources, shared, alphabet, site, reading, difference
+    sources, hafs, alphabet, site, reading, difference
 ) -> None:
     surah, ayah, word = site
     got = {
         script: "".join(
-            _phonemes(sources, script, surah, ayah, shared, alphabet)[word - 1]
+            _phonemes(sources, script, surah, ayah, hafs, alphabet)[word - 1]
         )
         for script in Script
     }
@@ -58,40 +58,38 @@ def test_both_scripts_read_the_same_word(
     assert got[Script.INDOPAK] == reading, difference
 
 
-def _phonemes(sources, script, surah, ayah, shared, alphabet,
+def _phonemes(sources, script, surah, ayah, hafs, alphabet,
               junction=Junction.STOP):
     words = sources[script][(surah, ayah)]
-    score = build(
-        script_adapter(script).read(VerseRef(surah, ayah), words), **shared
-    ).score
+    score = hafs.build(hafs.read(script, VerseRef(surah, ayah), words)).score
     plan = BoundaryPlan(
         (junction,) * (len(score.words) - 1) + (Junction.EDGE,)
     )
-    performance = perform(score, HAFS, plan)
+    performance = hafs.perform(score, plan)
     return [list(w) for w in phonemes_by_word(performance, score, alphabet)]
 
 
 def test_a_stem_writes_the_same_pair_of_lams_as_the_article(
-    sources, shared, alphabet
+    sources, hafs, alphabet
 ) -> None:
     """`زَلَلْتُمْ` is a voweled lam then a sakin one, the pair the article
     writes in `لِلنَّاسِ`. Only the head of the word tells them apart."""
-    got = _phonemes(sources, Script.UTHMANI, 2, 209, shared, alphabet)
+    got = _phonemes(sources, Script.UTHMANI, 2, 209, hafs, alphabet)
     assert "".join(got[1]) == "zalaltum"
 
 
-def test_the_silah_is_still_conditional(sources, shared, alphabet) -> None:
+def test_the_silah_is_still_conditional(sources, hafs, alphabet) -> None:
     """The pronoun haa's vowel is a `Silah`, not a `Long`: it sounds joined
     and is absent at a stop. The small waw is a letter now, and that must
     not have turned it into an ordinary length."""
     for script in Script:
         joined = _phonemes(
-            sources, script, 2, 26, shared, alphabet, Junction.JOIN
+            sources, script, 2, 26, hafs, alphabet, Junction.JOIN
         )
         assert "".join(joined[29]) == "bihi:", script
     stopped = {
         script: "".join(
-            _phonemes(sources, script, 2, 26, shared, alphabet)[29]
+            _phonemes(sources, script, 2, 26, hafs, alphabet)[29]
         )
         for script in Script
     }

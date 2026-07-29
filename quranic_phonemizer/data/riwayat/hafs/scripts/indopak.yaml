@@ -36,11 +36,11 @@ letters:
   "ن": NOON
   "ه": HEH
   "ة": TAA_MARBUTA
-  "ا": ALIF
-  "و": WAW
-  "ي": {letter: YA, bare_rasm: true}   # IndoPak writes the maqsura plain
+  "ا": {letter: ALIF, seat: true}
+  "و": {letter: WAW, seat: true}
+  "ي": {letter: YA, bare_rasm: true, seat: true}   # IndoPak writes the maqsura plain
   # Drawn only as a hamza's seat or as rasm; a sounded yaa is `ي` above.
-  "ى": {letter: YA, bare_rasm: true, rasm_only: true}
+  "ى": {letter: YA, bare_rasm: true, rasm_only: true, seat: true}
   "ء": HAMZA
   "ٱ": {letter: HAMZA, onset: WASL}
 
@@ -104,8 +104,3 @@ advice:
   "ࣝ": PERMITTED_STOP
 
 structural: [" ", "‮", "٦", "͏"]
-
-polysemous:
-  "ٖ": [SILAH, LONG_VOWEL]
-  "ۜ": [SAKT, KHILAF_SITE]
-  "ࣕ": [ADVICE, KHILAF_SITE]

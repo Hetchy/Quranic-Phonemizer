@@ -63,7 +63,7 @@ class WaqfEnding:
             return None
         if not _is_final_letter(near, at, word):
             return None
-        if _followed_by_tanween_noon(near, at, word) and (
+        if _followed_by_tanween_noon(near, word) and (
             slot.letter is not CanonLetter.TAA_MARBUTA
         ):
             # TanweenAtWaqf owns the ending; taa marbuta drops its vowel here instead.
@@ -77,13 +77,13 @@ class WaqfEnding:
             effects.append(Silence(at, Aspect.NUCLEUS))
         elif slot.nucleus.kind is NucleusKind.PAUSAL_LONG:
             effects.append(
-                Realize(at, Aspect.NUCLEUS, (Vowel(slot.nucleus.quality, True),))
+                Realize(at, Aspect.NUCLEUS, Vowel(slot.nucleus.quality, True))
             )
         if slot.onset is Onset.SILAH and not self._kept(near, word):
             # The pronoun yaa's onset must go too, or a stray glide remains,
             # and the stop then lands on the letter before it.
             effects.append(Silence(at, Aspect.ONSET))
-            effects.extend(_hands_the_stop_back(near, at, word))
+            effects.extend(_hands_the_stop_back(near, at))
         if not effects:
             return None
         return Verdict(
@@ -123,7 +123,7 @@ class WaslHamza:
         slot, word = near.slot(at), near.word_of(at)
         if slot is None or word is None or slot.onset is not Onset.WASL:
             return None
-        if boundaries.started_on(word) and _is_first_of_word(near, at, word):
+        if boundaries.started_on(word) and near.first_of_word(at):
             return Verdict(
                 Occurrence(mint(Rule.WASL_START, at), Rule.WASL_START, Participants((at,))), ()
             )
@@ -150,7 +150,7 @@ class SoftenedHamza:
         slot, word = near.slot(at), near.word_of(at)
         if slot is None or word is None or slot.onset is not Onset.WASL:
             return None
-        if not (boundaries.started_on(word) and _is_first_of_word(near, at, word)):
+        if not (boundaries.started_on(word) and near.first_of_word(at)):
             return None   # joined, the prosthetic hamza has no vowel to carry
         following = near.after(at)
         if (
@@ -191,11 +191,11 @@ class TanweenAtWaqf:
         slot, word = near.slot(at), near.word_of(at)
         if slot is None or word is None or not boundaries.stopped_on(word):
             return None
-        if not _is_last_of_word(near, at, word):
+        if not near.last_of_word(at):
             return None
         if slot.origin is not SlotOrigin.NUNATION:
             return None
-        base = _previous(near, at)
+        base = near.before(at)
         if base is None or base.nucleus.kind is not NucleusKind.SHORT:
             return None
         effects = [Silence(at, Aspect.ONSET)]
@@ -242,7 +242,7 @@ class TaaMarbutaAtWaqf:
             # fires on this slot, on a different aspect.
             Occurrence(mint(Rule.WAQF_ENDING, at, variant=1), Rule.WAQF_ENDING,
                        Participants((at,))),
-            (Realize(at, Aspect.ONSET, (Consonant(CanonLetter.HEH),)),),
+            (Realize(at, Aspect.ONSET, Consonant(CanonLetter.HEH)),),
         )
 
 
@@ -256,38 +256,17 @@ def _is_final_letter(near: Neighbourhood, at: SlotId, word: int) -> bool:
     return bool(slots) and slots[-1].id == at
 
 
-def _followed_by_tanween_noon(near: Neighbourhood, at: SlotId, word: int) -> bool:
-    del at
+def _followed_by_tanween_noon(near: Neighbourhood, word: int) -> bool:
     slots = near.score.words[word].slots
     return bool(slots) and slots[-1].origin is SlotOrigin.NUNATION
 
 
-def _previous(near: Neighbourhood, at: SlotId):
-    flat = near.score.slots()
-    for index, slot in enumerate(flat):
-        if slot.id == at:
-            return flat[index - 1] if index else None
-    return None
-
-
-def _is_last_of_word(near: Neighbourhood, at: SlotId, word: int) -> bool:
-    slots = near.score.words[word].slots
-    return bool(slots) and slots[-1].id == at
-
-
-def _is_first_of_word(near: Neighbourhood, at: SlotId, word: int) -> bool:
-    slots = near.score.words[word].slots
-    return bool(slots) and slots[0].id == at
-
-
-def _hands_the_stop_back(near: Neighbourhood, at: SlotId, word: int):
+def _hands_the_stop_back(near: Neighbourhood, at: SlotId):
     """A letter absent at the pause is not the one stopped on, so the vowel
     of the letter before it drops instead."""
-    slots = near.score.words[word].slots
-    index = next((i for i, s in enumerate(slots) if s.id == at), 0)
-    if index == 0:
+    if near.first_of_word(at):
         return ()
-    before = slots[index - 1]
-    if before.nucleus.kind is not NucleusKind.SHORT:
+    before = near.before(at)
+    if before is None or before.nucleus.kind is not NucleusKind.SHORT:
         return ()
     return (Silence(before.id, Aspect.NUCLEUS),)

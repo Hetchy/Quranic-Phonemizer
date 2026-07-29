@@ -7,13 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from ..model.address import (
-    BoundaryPlan,
-    Riwayah,
-    SlotId,
-    SoundId,
-    VariantSelection,
-)
+from ..model.address import BoundaryPlan, SlotId, SoundId, VariantSelection
 from ..model.canon import NucleusKind, Onset, Phase, Rule, Score, Slot
 from ..model.performance import (
     Aspect,
@@ -76,12 +70,10 @@ def perform(
     rules: RuleSet,
     boundaries: BoundaryPlan,
     *,
-    riwayah: Riwayah = Riwayah.HAFS,
     selection: VariantSelection = VariantSelection(),
 ) -> Performance:
     plan = Plan()
     slots = score.slots()
-    index = {slot.id: slot for slot in slots}
 
     near = Neighbourhood(score, boundaries)
     for phase in PHASE_ORDER:
@@ -96,10 +88,10 @@ def perform(
                 if verdict is not None:
                     plan.record(phase, verdict)
 
-    return _materialise(plan, index, score, boundaries, riwayah, selection)
+    return _materialise(plan, score, boundaries, selection)
 
 
-def _fill_plain(plan: Plan, score: Score, mint: _Mint) -> list[tuple]:
+def _fill_plain(plan: Plan, score: Score) -> list[tuple]:
     """Realize every (slot, aspect) no verdict claimed, tagged `Rule.PLAIN`.
 
     `PLAIN` can't be a classifier: it would conflict with every claiming rule.
@@ -117,7 +109,6 @@ def _fill_plain(plan: Plan, score: Score, mint: _Mint) -> list[tuple]:
             if not has_content(slot, aspect) or (slot.id, aspect) in claimed:
                 continue
             filled.append((slot, aspect))
-    del mint
     return filled
 
 
@@ -141,10 +132,8 @@ def _triggered(classifier, slot: Slot) -> bool:
 
 def _materialise(
     plan: Plan,
-    index: dict[SlotId, Slot],
     score: Score,
     boundaries: BoundaryPlan,
-    riwayah: Riwayah,
     selection: VariantSelection,
 ) -> Performance:
     mint = _Mint(score.words[0].location.verse if score.words else None)
@@ -169,9 +158,8 @@ def _materialise(
     _fill(plan, score, mint, colours, sounds, attributions, hosted, plain)
     _resolve_merges(plan, hosted, attributions)
 
-    del index
     return Performance(
-        riwayah=riwayah,
+        riwayah=score.riwayah,
         sounds=tuple(sounds),
         attributions=tuple(attributions),
         occurrences=tuple(occurrences),
@@ -188,7 +176,6 @@ def _plain_sound(slot: Slot, aspect: Aspect, colours, lengths=None) -> Sound:
             slot.letter,
             geminate=slot.onset is Onset.GEMINATE,
             emphatic=emphatic,
-            nasal=bool(features.get(SoundFeature.NASAL, False)),
         )
     long = slot.nucleus.kind in (
         NucleusKind.LONG, NucleusKind.SILAH, NucleusKind.PAUSAL_LONG
@@ -215,7 +202,7 @@ def _realize(plan, mint, colours, sounds, attributions, hosted) -> None:
                 )
             elif isinstance(effect, Insert):
                 sound_id = mint.sound()
-                sounds.append((sound_id, effect.sounds[0]))
+                sounds.append((sound_id, effect.sound))
                 attributions.append(
                     Inserted(effect.anchor, effect.aspect, sound_id,
                              verdict.occurrence.id)
@@ -227,7 +214,7 @@ def _fill(plan, score, mint, colours, sounds, attributions, hosted, plain) -> No
     lengths = {
         e.slot: e.length for e in plan.effects() if isinstance(e, Relength)
     }
-    for slot, aspect in _fill_plain(plan, score, mint):
+    for slot, aspect in _fill_plain(plan, score):
         sound_id = mint.sound()
         sounds.append((sound_id, _plain_sound(slot, aspect, colours, lengths)))
         hosted[(slot.id, aspect)] = sound_id
@@ -266,35 +253,20 @@ def _colours(plan: Plan) -> dict[tuple[SlotId, Aspect], dict[SoundFeature, bool]
 
 
 def _apply_colours(effect: Realize, colours) -> Sound:
-    """A `SoundSpec` is a `Sound` with its context-dependent features unset;
-    the materialiser fills them from later-phase `Recolour` effects."""
-    sound = effect.sounds[0]
-    features = colours.get((effect.slot, effect.aspect))
-    if not features:
+    """A rule names the sound; a later phase may still colour it."""
+    sound = effect.sound
+    emphatic = (colours.get((effect.slot, effect.aspect)) or {}).get(
+        SoundFeature.EMPHATIC
+    )
+    if emphatic is None:
         return sound
-    fields = {
-        "emphatic": features.get(SoundFeature.EMPHATIC),
-        "nasal": features.get(SoundFeature.NASAL),
-    }
     match sound:
         case Consonant():
-            return Consonant(
-                sound.letter,
-                sound.geminate,
-                fields["emphatic"] if fields["emphatic"] is not None else sound.emphatic,
-                fields["nasal"] if fields["nasal"] is not None else sound.nasal,
-            )
+            return Consonant(sound.letter, sound.geminate, emphatic, sound.nasal)
         case Vowel():
-            return Vowel(
-                sound.quality,
-                sound.long,
-                fields["emphatic"] if fields["emphatic"] is not None else sound.emphatic,
-            )
+            return Vowel(sound.quality, sound.long, emphatic)
         case Nasal():
-            return Nasal(
-                sound.place,
-                fields["emphatic"] if fields["emphatic"] is not None else sound.emphatic,
-            )
+            return Nasal(sound.place, emphatic)
     return sound
 
 

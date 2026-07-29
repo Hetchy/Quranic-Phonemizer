@@ -3,38 +3,28 @@ from __future__ import annotations
 
 import pytest
 
-from quranic_phonemizer.canon.build import build
+from quranic_phonemizer.api import recitation
 from quranic_phonemizer.engine.boundary_plan import all_join
-from quranic_phonemizer.engine.classifier import RuleSet
-from quranic_phonemizer.engine.run import perform
-from quranic_phonemizer.model.address import Location, Script, VerseRef
-from quranic_phonemizer.riwayat.hafs import (
-    corpus,
-    ledger,
-    lexeme_passes,
-    lexicon,
-    script_adapter,
-)
+from quranic_phonemizer.model.address import Location, Riwayah, Script, VerseRef
 
 
 @pytest.fixture(scope="session")
-def packed():
-    return corpus()
+def hafs():
+    """The whole riwayah, assembled once. Anything a test needs to build or
+    perform comes from here rather than from a hand-gathered bundle."""
+    return recitation(Riwayah.HAFS)
 
 
 @pytest.fixture(scope="session")
-def shared():
-    return {"lexicon": lexicon(), "ledger": ledger(), "passes": lexeme_passes()}
+def packed(hafs):
+    return hafs.corpus
 
 
 @pytest.fixture(scope="session")
 def alphabet():
-    from pathlib import Path
+    from quranic_phonemizer.api import alphabet as load
 
-    from quranic_phonemizer.render.alphabet import load_alphabet
-
-    root = Path(__file__).resolve().parent.parent
-    return load_alphabet(root / "quranic_phonemizer" / "data" / "render" / "ipa.yaml")
+    return load()
 
 
 def words_of(packed, surah: int, ayah: int) -> tuple:
@@ -75,18 +65,24 @@ def sources():
     return out
 
 
-def built_for(packed, shared, surah: int, ayah: int, script=Script.UTHMANI):
-    reading = script_adapter(script).read(
-        VerseRef(surah, ayah), words_of(packed, surah, ayah)
+def built_for(packed, hafs, surah: int, ayah: int, script=Script.UTHMANI):
+    reading = hafs.read(
+        script, VerseRef(surah, ayah), words_of(packed, surah, ayah)
     )
-    return build(reading, **shared)
+    return hafs.build(reading)
 
 
-def score_for(packed, shared, surah: int, ayah: int, script=Script.UTHMANI):
-    return built_for(packed, shared, surah, ayah, script).score
+def score_for(packed, hafs, surah: int, ayah: int, script=Script.UTHMANI):
+    return built_for(packed, hafs, surah, ayah, script).score
 
 
-def performance_for(packed, shared, surah: int, ayah: int, rules: RuleSet,
+def performance_for(packed, hafs, surah: int, ayah: int, rules=None,
                     script=Script.UTHMANI):
-    score = score_for(packed, shared, surah, ayah, script)
-    return score, perform(score, rules, all_join(len(score.words)))
+    """`rules` overrides the riwayah's own set, for tests that swap one in."""
+    score = score_for(packed, hafs, surah, ayah, script)
+    plan = all_join(len(score.words))
+    if rules is None:
+        return score, hafs.perform(score, plan)
+    from quranic_phonemizer.engine.run import perform
+
+    return score, perform(score, rules, plan)

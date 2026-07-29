@@ -29,8 +29,8 @@ SITES = {
 }
 
 
-def _first_word(packed, shared, alphabet, surah, ayah):
-    built = built_for(packed, shared, surah, ayah)
+def _first_word(packed, hafs, alphabet, surah, ayah):
+    built = built_for(packed, hafs, surah, ayah)
     score = built.score
     check_inscription(built.inscription, score)
     plan = BoundaryPlan(
@@ -43,32 +43,32 @@ def _first_word(packed, shared, alphabet, surah, ayah):
 
 
 @pytest.mark.parametrize(("site", "expected"), sorted(SITES.items()))
-def test_the_openings_are_spelled_out(packed, shared, alphabet, site, expected):
-    _, _, got = _first_word(packed, shared, alphabet, *site)
+def test_the_openings_are_spelled_out(packed, hafs, alphabet, site, expected):
+    _, _, got = _first_word(packed, hafs, alphabet, *site)
     assert got == expected
 
 
-def test_the_spelled_slots_are_marked_as_such(packed, shared, alphabet):
+def test_the_spelled_slots_are_marked_as_such(packed, hafs, alphabet):
     """A spelled-out muqattaat letter must produce `SlotOrigin.SPELLED`
     slots."""
-    score, _, _ = _first_word(packed, shared, alphabet, 7, 1)
+    score, _, _ = _first_word(packed, hafs, alphabet, 7, 1)
     origins = {slot.origin for slot in score.words[0].slots}
     assert origins == {SlotOrigin.SPELLED}
 
 
-def test_the_ordinary_rules_act_on_the_spelled_letters(packed, shared, alphabet):
+def test_the_ordinary_rules_act_on_the_spelled_letters(packed, hafs, alphabet):
     """2:1's ghunnah and 7:1's qalqala both come from ordinary rules, not
     from `canon/spell.py`."""
-    _, performance, _ = _first_word(packed, shared, alphabet, 7, 1)
+    _, performance, _ = _first_word(packed, hafs, alphabet, 7, 1)
     fired = {o.rule for o in performance.occurrences}
     assert Rule.QALQALA_KUBRA in fired or Rule.QALQALA_SUGHRA in fired
     assert fired & {Rule.IDGHAM_SHAFAWI, Rule.IDGHAM_MUTAMATHILAYN}
 
 
-def test_a_word_with_any_vowel_is_not_spelled(packed, shared, alphabet):
+def test_a_word_with_any_vowel_is_not_spelled(packed, hafs, alphabet):
     """The trigger is "nothing in this word is voweled", asked of the clusters.
     An ordinary verse must be untouched."""
-    score, _, _ = _first_word(packed, shared, alphabet, 1, 1)
+    score, _, _ = _first_word(packed, hafs, alphabet, 1, 1)
     assert all(
         slot.origin is not SlotOrigin.SPELLED
         for word in score.words

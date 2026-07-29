@@ -1,6 +1,11 @@
 # 07 - What must exist before a Warsh inventory can be written
 
-Status: **open**. Audit: "Riwayah". Evidence:
+> **Superseded.** Carried forward whole into
+> [design question 08](../../design/08-what-a-second-riwayah-decides.md),
+> which asks its blocking question once for the three documents that
+> stalled on it. Nothing here landed in code.
+
+Status: **superseded**. Audit: "Riwayah". Evidence:
 `warsh-script-codepoint-audit.md` and PR #37.
 
 ## The claim to test
@@ -15,7 +20,7 @@ false answer if anyone ran it.
 
 - The layering. A Warsh Score is a Score.
 - The Ledger, for facts no rule over canonical context can reach.
-- The khilaf mechanism, once [06](06-seen-sad-khilaf.md) has generalised it
+- The khilaf mechanism, once [06](../../design/06-seen-sad-khilaf.md) has generalised it
   past Hafs-shaped sections.
 - The composition root: a Warsh package is one row in `api.PACKAGES`.
 - Two-scripts-one-Score as a gate, **within** Warsh.

@@ -36,7 +36,6 @@ _SECTIONS = {
     "decorates",
     "advice",
     "structural",
-    "polysemous",
 }
 
 
@@ -67,6 +66,9 @@ class LetterEntry:
     rasm_only: bool = False
     """The glyph never spells a sound of its own. IndoPak draws the maqsura
     only as a hamza's seat or as rasm, and writes a sounded yaa as `ي`."""
+    seat: bool = False
+    """A combining hamza written here rests on the glyph rather than being a
+    letter of its own, so the cluster becomes the hamza: `ٮ` + `ٔ` is `ئ`."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -88,7 +90,6 @@ class MarkEntry:
     saying something about the one before it."""
     advice: StopAdvice | None = None
     structural: bool = False
-    polysemous: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -173,9 +174,46 @@ def _fact_value(fact: SlotFact, raw: Any, *, where: str) -> object:
 def load_inventory(
     path: Path,
     *,
+    riwayah: Riwayah,
+    script: Script,
     derivations: frozenset[str] | None = None,
     roles: dict[str, frozenset[str]] | None = None,
 ) -> Inventory:
+    """`riwayah` and `script` are what the caller believes it is loading; a
+    file that declares otherwise is rejected rather than silently believed."""
+    data = _header(path, riwayah, script)
+
+    letters = {
+        char: _letter(spec, where=f"{path} letters[{char!r}]")
+        for char, spec in (data.get("letters") or {}).items()
+    }
+    marks: dict[str, MarkEntry] = {}
+    _load_evidences(data, path, marks)
+    _load_decorates(data, path, marks)
+    _load_advice(data, path, marks)
+    _load_structural(data, path, marks)
+
+    overlap = sorted(set(letters) & set(marks))
+    if overlap:
+        raise InventoryError(
+            f"{path}: {overlap} are declared both as letters and as marks; a "
+            f"scalar resolves to exactly one classification"
+        )
+    _check_contract(path, marks, derivations, roles)
+    return Inventory(
+        script=script,
+        riwayah=riwayah,
+        letters=letters,
+        marks=marks,
+        seats=frozenset(data.get("seats") or ()),
+        combining_hamza=frozenset(data.get("combining_hamza") or ()),
+        marks_what_it_sounds=bool(data.get("marks_what_it_sounds", False)),
+        source=path,
+    )
+
+
+def _header(path: Path, riwayah: Riwayah, script: Script) -> dict:
+    """The file's own declarations, checked before anything is parsed."""
     data = load_yaml(path)
     require_keys(
         data,
@@ -188,54 +226,30 @@ def load_inventory(
             f"{path}: schema_version {data['schema_version']!r}, expected "
             f"{SCHEMA_VERSION}"
         )
+    _check_identity(path, data, riwayah, script)
+    return data
 
-    letters = {
-        char: _letter(spec, where=f"{path} letters[{char!r}]")
-        for char, spec in (data.get("letters") or {}).items()
-    }
-    marks: dict[str, MarkEntry] = {}
-    _load_evidences(data, path, marks)
-    _load_decorates(data, path, marks)
-    _load_advice(data, path, marks)
-    _load_structural(data, path, marks)
-    _load_polysemous(data, path, marks)
 
-    overlap = sorted(set(letters) & set(marks))
-    if overlap:
-        raise InventoryError(
-            f"{path}: {overlap} are declared both as letters and as marks; a "
-            f"scalar resolves to exactly one classification"
-        )
-    _check_contract(path, letters, marks, derivations, roles)
-    return Inventory(
-        script=_member(Script, data["script"], where=str(path)),
-        riwayah=_member(Riwayah, data["riwayah"], where=str(path)),
-        letters=letters,
-        marks=marks,
-        seats=frozenset(data.get("seats") or ()),
-        combining_hamza=frozenset(data.get("combining_hamza") or ()),
-        marks_what_it_sounds=bool(data.get("marks_what_it_sounds", False)),
-        source=path,
+def _check_identity(path, data, riwayah: Riwayah, script: Script) -> None:
+    declared = (
+        _member(Riwayah, data["riwayah"], where=str(path)),
+        _member(Script, data["script"], where=str(path)),
     )
+    if declared != (riwayah, script):
+        raise InventoryError(
+            f"{path}: declares {declared[0].value}/{declared[1].value}, "
+            f"loaded as {riwayah.value}/{script.value}"
+        )
 
 
-def _check_contract(path, letters, marks, derivations, roles) -> None:
+def _check_contract(path, marks, derivations, roles) -> None:
     """Verify every named derivation and required role actually exists.
 
     `derivations` and `roles` are injected, not imported: `orthography` may
-    not depend on `canon`.
+    not depend on `canon`. Only a mark may name a derivation.
     """
+    named = {entry.derivation for entry in marks.values() if entry.derivation}
     if derivations is not None:
-        named = {
-            entry.derivation
-            for entry in marks.values()
-            if getattr(entry, "derivation", None)
-        }
-        named |= {
-            spec.derivation
-            for spec in letters.values()
-            if getattr(spec, "derivation", None)
-        }
         unknown = sorted(named - derivations)
         if unknown:
             raise InventoryError(
@@ -264,7 +278,7 @@ def _letter(spec: Any, *, where: str) -> LetterEntry:
         spec,
         {"letter"},
         name=where,
-        optional={"onset", "dagger_host", "bare_rasm", "rasm_only"},
+        optional={"onset", "dagger_host", "bare_rasm", "rasm_only", "seat"},
     )
     onset = spec.get("onset")
     return LetterEntry(
@@ -273,6 +287,7 @@ def _letter(spec: Any, *, where: str) -> LetterEntry:
         dagger_host=bool(spec.get("dagger_host", False)),
         bare_rasm=bool(spec.get("bare_rasm", False)),
         rasm_only=bool(spec.get("rasm_only", False)),
+        seat=bool(spec.get("seat", False)),
     )
 
 
@@ -334,27 +349,3 @@ def _load_structural(data: Any, path: Path, marks: dict[str, MarkEntry]) -> None
         )
 
 
-def _load_polysemous(data: Any, path: Path, marks: dict[str, MarkEntry]) -> None:
-    """Declaring a scalar polysemous forces the adapter to defer to the
-    Ledger instead of guessing which sense applies."""
-    for char, senses in (data.get("polysemous") or {}).items():
-        where = f"{path} polysemous[{char!r}]"
-        if char not in marks:
-            raise InventoryError(
-                f"{where}: a polysemous scalar must also be declared in one of "
-                f"{sorted(_SECTIONS - {'polysemous'})}"
-            )
-        base = marks[char]
-        marks[char] = MarkEntry(
-            role=base.role,
-            cls=base.cls,
-            fact=base.fact,
-            value=base.value,
-            derivation=base.derivation,
-            decorates=base.decorates,
-            silences=base.silences,
-            omitted=base.omitted,
-            advice=base.advice,
-            structural=base.structural,
-            polysemous=tuple(str(s) for s in senses),
-        )

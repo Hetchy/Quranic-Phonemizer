@@ -15,38 +15,31 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
 from l1_harness import load_verses  # noqa: E402
 
-from quranic_phonemizer.canon.build import build  # noqa: E402
+from quranic_phonemizer.api import recitation  # noqa: E402
 from quranic_phonemizer.engine.laws import check_attestations  # noqa: E402
-from quranic_phonemizer.engine.run import perform  # noqa: E402
 from quranic_phonemizer.model.address import (  # noqa: E402
     BoundaryPlan,
     Junction,
+    Riwayah,
     Script,
     VerseRef,
 )
 from quranic_phonemizer.model.inscription import Attests  # noqa: E402
-from quranic_phonemizer.riwayat.hafs import (  # noqa: E402
-    HAFS,
-    ledger,
-    lexeme_passes,
-    lexicon,
-    script_adapter,
-)
 
 
-def unmet(adapter, ref: VerseRef, words, shared) -> tuple[list[str], int]:
-    built = build(adapter.read(ref, words), **shared)
+def unmet(hafs, script: Script, ref: VerseRef, words) -> tuple[list[str], int]:
+    built = hafs.build(hafs.read(script, ref, words))
     score = built.score
     plan = BoundaryPlan(
         (Junction.JOIN,) * (len(score.words) - 1) + (Junction.EDGE,)
     )
-    performance = perform(score, HAFS, plan)
+    performance = hafs.perform(score, plan)
     attested = [
         (s.anchor, s.family)
         for s in built.inscription.spellings
         if isinstance(s, Attests)
     ]
-    return check_attestations(attested, performance, plan), len(attested)
+    return check_attestations(attested, performance), len(attested)
 
 
 def main() -> int:
@@ -58,9 +51,7 @@ def main() -> int:
     args = parser.parse_args()
 
     script = Script(args.script)
-    adapter = script_adapter(script)
-    shared = {"lexicon": lexicon(), "ledger": ledger(),
-              "passes": lexeme_passes()}
+    hafs = recitation(Riwayah.HAFS)
     verses = load_verses(script.value)
 
     families: collections.Counter[str] = collections.Counter()
@@ -69,7 +60,7 @@ def main() -> int:
     for index, key in enumerate(sorted(verses)):
         if args.limit and index >= args.limit:
             break
-        problems, attested = unmet(adapter, VerseRef(*key), verses[key], shared)
+        problems, attested = unmet(hafs, script, VerseRef(*key), verses[key])
         total += attested
         for problem in problems:
             families[problem.split("attests ")[1].split(" but")[0]] += 1

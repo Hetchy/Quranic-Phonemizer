@@ -19,8 +19,8 @@ from quranic_phonemizer.riwayat.hafs import HAFS
 MERGERS = [(17, 33), (18, 78), (18, 82), (2, 137)]
 
 
-def _performed(packed, shared, surah: int, ayah: int):
-    built = built_for(packed, shared, surah, ayah)
+def _performed(packed, hafs, surah: int, ayah: int):
+    built = built_for(packed, hafs, surah, ayah)
     score = built.score
     plan = all_join(len(score.words))
     attested = [
@@ -32,14 +32,14 @@ def _performed(packed, shared, surah: int, ayah: int):
 
 
 @pytest.mark.parametrize("surah,ayah", MERGERS)
-def test_a_written_shadda_is_accounted_for(packed, shared, surah, ayah) -> None:
-    attested, performance, plan = _performed(packed, shared, surah, ayah)
-    assert not check_attestations(attested, performance, plan)
+def test_a_written_shadda_is_accounted_for(packed, hafs, surah, ayah) -> None:
+    attested, performance, _ = _performed(packed, hafs, surah, ayah)
+    assert not check_attestations(attested, performance)
 
 
 @pytest.mark.parametrize("surah,ayah", MERGERS)
-def test_like_into_like_fires_at_these_sites(packed, shared, surah, ayah) -> None:
+def test_like_into_like_fires_at_these_sites(packed, hafs, surah, ayah) -> None:
     """Every letter can repeat, so the rule cannot key on a pair table."""
-    _, performance, _ = _performed(packed, shared, surah, ayah)
+    _, performance, _ = _performed(packed, hafs, surah, ayah)
     fired = {o.rule for o in performance.occurrences}
     assert Rule.IDGHAM_MUTAMATHILAYN in fired

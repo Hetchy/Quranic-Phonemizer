@@ -13,7 +13,7 @@ from ...canon import derive
 from ...canon.ledger import EMPTY as EMPTY_LEDGER
 from ...canon.ledger import Ledger, load_ledger
 from ...canon.lexicon import EMPTY as EMPTY_LEXICON
-from ...canon.lexicon import Lexicon, load_lexicon
+from ...canon.lexicon import Lexicon, load_clitic_pronouns, load_lexicon
 from ...canon.spell import Muqattaat, load_muqattaat
 from ...corpus import PackedCorpus, load_corpus
 from ...model.address import Location, Riwayah, Script, VerseRef
@@ -24,6 +24,11 @@ from ...orthography.cluster import read_verse
 from ...orthography.inventory import Inventory, load_inventory
 
 RIWAYAH = Riwayah.HAFS
+
+#: The scripts this riwayah is packaged for. Listed rather than taken from
+#: `Script`, so a script added for another riwayah does not appear here.
+SCRIPTS = (Script.UTHMANI, Script.INDOPAK)
+
 DATA = Path(__file__).resolve().parents[2] / "data" / "riwayat" / "hafs"
 
 
@@ -50,29 +55,38 @@ def _inventory(script: Script) -> Inventory:
     """
     return load_inventory(
         DATA / "scripts" / f"{script.value}.yaml",
+        riwayah=RIWAYAH,
+        script=script,
         derivations=frozenset(derive.registered()),
         roles=derive.required_roles(),
     )
 
 
 def script_adapter(script: Script) -> Adapter:
+    if script not in SCRIPTS:
+        raise ValueError(f"{RIWAYAH.value} is not packaged for {script.value}")
     return Adapter(script=script, inventory=_inventory(script))
 
 
 def adapters_for(riwayah: Riwayah) -> dict[Script, Adapter]:
     if riwayah is not RIWAYAH:
         raise ValueError(f"{__name__} assembles {RIWAYAH.value}, not {riwayah.value}")
-    return {script: script_adapter(script) for script in Script}
+    return {script: script_adapter(script) for script in SCRIPTS}
 
 
 def ledger() -> Ledger:
     path = DATA / "ledger.yaml"
-    return load_ledger(path) if path.exists() else EMPTY_LEDGER
+    return load_ledger(path, riwayah=RIWAYAH) if path.exists() else EMPTY_LEDGER
 
 
 def lexicon() -> Lexicon:
+    """The clitic pronouns are shared: which pronouns attach to a word is a
+    fact about Arabic, not about how this riwayah recites it."""
     path = DATA / "lexicon.yaml"
-    return load_lexicon(path) if path.exists() else EMPTY_LEXICON
+    if not path.exists():
+        return EMPTY_LEXICON
+    clitics = load_clitic_pronouns(DATA.parents[1] / "shared" / "morphology.yaml")
+    return load_lexicon(path, clitics=clitics)
 
 
 def rule_tables() -> RuleTables:
