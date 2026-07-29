@@ -226,12 +226,12 @@ before either is public.
 
 ### 4.5 `write` totality is unproven for the cases that matter
 
-`orthography/write.py::write_verse` spells a `Score`. The projection's answer to
-"what glyph does an unwritten unit show?" is exactly this function. ADR-005 §4
-already names the trigger set: the 3:1 connected meem fatha, hamzat al-wasl
-helping vowels in all three flavours, madd iwad, taa marbuta at waqf, and every
-muqattaat expansion. Until that check passes, `Unit.glyphs` (01-design §3.2) has
-no guarantee.
+`orthography/write.py::write_verse` spells a `Score`. The recited-writing view
+uses it for canonical units and separately renders slotless insertions at their
+anchors. ADR-005 section 4 already names the trigger set: the 3:1 connected
+meem fatha, hamzat al-wasl helping vowels in all three flavours, madd iwad, taa
+marbuta at waqf, and every muqattaat expansion. Until that check passes, the
+derived recited-writing view has no totality guarantee.
 
 Two known asymmetries in `write` today, neither wrong but both visible in
 output: `NucleusKind.LONG` always spells haraka + carrier + madd sign rather
@@ -295,7 +295,7 @@ appear, is an empirical question the gate must answer (02-gate §3).
 | F3 | `Recolour`/`Relength` lose their occurrence at materialisation | `tafkheem` on a sound, `iltiqa` shortening |
 | F4 | `api.recitation` and `plan_from_request` exist; the ref-to-document loop above them does not | shipping anything |
 | F5 | Verse-scoped ids vs multi-verse consumers | wasl chains, ranged refs |
-| F6 | `write` totality unproven over ADR-005 §4's trigger set | `Unit.glyphs` |
+| F6 | `write` totality unproven over ADR-005 section 4's trigger set | recited writing |
 | F7 | Sound ownership for display is computed by the consumer | animation correctness |
 | F8 | `render/recite.py` occupies ADR-005's `recite` name | naming only |
 | F9 | `vowel_silent` residue unquantified | the equivalence gate |

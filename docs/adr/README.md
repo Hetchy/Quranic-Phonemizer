@@ -18,8 +18,9 @@ the reasoning, because the principle generalises: a design rule catching a
 modelling error is the healthy direction, and weakening an invariant to fit the
 model is not.
 
-Read in order. 001–006 are the design; 007 is how it is laid out in code;
-008 is the gate the implementation must pass.
+Read in order. 001-006 are the design; 007 is how it is laid out in code;
+008 is the gate the implementation must pass. ADR-013 completes the public
+projection boundary that ADR-005 deferred.
 
 | ADR | Decision |
 |---|---|
@@ -35,6 +36,7 @@ Read in order. 001–006 are the design; 007 is how it is laid out in code;
 | [010](010-constants-that-restate-data.md) | A constant that restates a data file becomes the data, or a check against it |
 | [011](011-where-a-slot-is.md) | Adjacency on `Neighbourhood`, a required pass list, and a draft identity that survives being dropped |
 | [012](012-what-a-signature-may-leave-unsaid.md) | `del` for a parameter a protocol forces, checked rather than conventional |
+| [013](013-public-projection-foundations.md) | Public snapshots preserve typed domain edges and explicit glyph contribution |
 
 ## What this is for
 

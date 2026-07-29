@@ -106,8 +106,9 @@ So the fact belongs on the slot. What is wrong is only the *reading* of
 - boundary-conditional: `SILAH` (long joined, absent at pause), `PAUSAL_LONG`
   (short joined, long at pause)
 
-No code change. `Reading` publishes `conditional: bool` so no consumer has to
-learn this (projections/01-design §3.2).
+No code change. `Reading` publishes the discriminated nucleus value and an SDK
+may derive `conditional: bool`, so no consumer has to infer it from sounds
+(projections/01-design section 3.2).
 
 ---
 
@@ -125,21 +126,21 @@ be both spelled and nunation *today*, but nothing in the domain says a spelled
 letter name may never end in tanween, and the enum makes that unsayable for no
 gain.
 
-**D2 -- `Annotation` is renamed `SlotTag`, and the sound-neutrality promise is
-dropped.** A `SlotTag` is a tag a slot carries, with no claim about sound.
-`DIVINE_NAME` keeps its membership; §3 shows the promise it violated bought
-nothing. The guarantee consumers actually need -- "phonemes are computed without
-reading tags" -- is delivered by the layering, since the phoneme sequence comes
-from `Performance` and `Performance` has no tag field.
+**D2 -- lexical identity and recitation processes split.** ADR-013 amends the
+earlier `SlotTag` proposal. `DIVINE_NAME` becomes a word-level `LexemeClass`;
+`IMALA` and `ISHMAM` are rule occurrences. A lexical fact is not put in the
+same enum as two recitation processes merely because all three arrived from
+annotations in the source corpus.
 
-Rejected: moving `DIVINE_NAME` out. It would need a `lexeme identity` field that
-exists for one member, which is a worse trade than an honest type name.
+The one-member lexical enum is deliberate. It names the stable category and
+can grow without another schema migration. The guarantee consumers need --
+"phonemes are computed from `Performance`" -- remains structural.
 
 **D3 -- `Onset` is not split.** The census found no possible manner-presence
 combination the enum cannot express, and every impossibility has a domain
 reason recorded in §4's table. Splitting buys nothing today and the projection
-publishes `geminate` and `prosthetic` as independent booleans regardless
-(projections/01-design §3.2), so no consumer inherits the coupling.
+can derive `geminate` and `prosthetic` as independent booleans
+(projections/01-design section 3.2), so no consumer inherits the coupling.
 
 This is a reversal of the acceptance criterion "every `Slot` field answers one
 question", and deliberately: the criterion is a heuristic for finding fields
@@ -150,9 +151,9 @@ Reopens if: a riwayah needs a geminate prosthetic hamza, or `TASHIL` grows a
 second member (Warsh's `naql` is a candidate, and it is a *deletion*, so it
 would sit on the presence axis with `WASL`).
 
-**D4 -- `PausalLong` and `Silah` stay.** §5. Documented as the
-boundary-conditional half of `NucleusKind`, with a docstring that says so, and
-the projection hides the distinction behind one boolean.
+**D4 -- `PausalLong` and `Silah` stay.** Section 5. They are documented as the
+boundary-conditional half of `NucleusKind`; the projection preserves the
+discriminated value and may derive a convenience boolean.
 
 ---
 
@@ -161,21 +162,21 @@ the projection hides the distinction behind one boolean.
 | | Change | Size |
 |---|---|---|
 | D1 | `SlotOrigin` -> `nunation` + `spelled`; 10 branches; digest; fixtures | medium |
-| D2 | `Annotation` -> `SlotTag`; rename only | small |
+| D2 | `DIVINE_NAME` -> word `LexemeClass`; imala and ishmam -> occurrences | medium |
 | D3 | none | -- |
 | D4 | `NucleusKind` docstring names the two axes | trivial |
 
 Two further changes are required by the projection design and are recorded
 there rather than here, because they are about `Performance`, not the canonical
-vocabulary: labelling `Participants` (projections/01-design §4, C1) and keeping
-the modifier edge (C2).
+vocabulary: labelling `Participants` (projections/01-design section 6, C1) and
+keeping the modifier edge (C2).
 
 ## 8. Acceptance, restated
 
 - No enum member means "none of the others". Met by D1; `PLAIN` in `Onset` is
   the articulated default, not an absence.
-- Any type documented as sound-neutral is sound-neutral. Met by D2, which
-  removes the false documentation rather than the true member.
+- Lexical identity is not represented as a recitation process. Met by D2.
 - Every field a *projection* exposes answers one question. Met by
-  projections/01-design §3.2, which is where the criterion belongs -- `Slot` is
-  internal and may carry a compressed enum if the compression is proven lossless.
+  projections/01-design section 3.2, which is where the criterion belongs --
+  `Slot` is internal and may carry a compressed enum if the compression is
+  proven lossless.
