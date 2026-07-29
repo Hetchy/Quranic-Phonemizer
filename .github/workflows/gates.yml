@@ -40,6 +40,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.13"
+      # tool-import-smoke executes each tool rather than parsing it, so the
+      # tools that read YAML need their dependencies present.
+      - run: pip install -e .
       - run: python tools/structure_lint.py
 
   cross-script:
