@@ -20,7 +20,7 @@ measured before choosing, and what would make the decision wrong.
 | | Question | Blocks |
 |---|---|---|
 | [03](03-canonical-vocabulary.md) | Do `Onset`, `SlotOrigin` and `Annotation` split? | projections |
-| [05](05-build-internals.md) | Who owns slot adjacency, pass order, and slot identity? | nothing yet |
+| [05](05-build-internals.md) | Is a pass's visible dependency list worth 27 `del`s? | nothing |
 | [06](06-seen-sad-khilaf.md) | How is the seen/sad khilaf authored and selected? | correctness today |
 | [08](08-what-a-second-riwayah-decides.md) | Does a script fact attach to a scalar or to a match? | Warsh |
 
@@ -35,7 +35,12 @@ wrong today rather than merely awkward.
 | 01 — mark semantics | [ADR-010](../adr/010-constants-that-restate-data.md) in part, then merged into 08 |
 | 04 — data schemas | [ADR-010](../adr/010-constants-that-restate-data.md) in part, then merged into 08 |
 | 07 — Warsh readiness | merged into 08 |
+| 05 — build internals | [ADR-011](../adr/011-where-a-slot-is.md) in part; one question left in place |
 
 01, 04 and 07 each stalled at the same question, which is why 08 asks it once.
 What could be settled without answering it landed as ADR-010; the archived
 originals are in `docs/archive/design/`.
+
+05 is the one document that shrank rather than moved. Three of its four items
+had a single correct answer once measured and are ADR-011; the fourth has no
+measurement that would settle it, so the file stays open holding only that.

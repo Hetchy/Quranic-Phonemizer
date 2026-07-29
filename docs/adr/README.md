@@ -33,6 +33,7 @@ Read in order. 001–006 are the design; 007 is how it is laid out in code;
 | [008](008-conformance-and-phases.md) | Invariants, fixtures, the L1 harness, the reversal trigger, phase order |
 | [009](009-the-output-alphabet.md) | The output alphabet as entries plus composition, and what replaced row-count totality |
 | [010](010-constants-that-restate-data.md) | A constant that restates a data file becomes the data, or a check against it |
+| [011](011-where-a-slot-is.md) | Adjacency on `Neighbourhood`, a required pass list, and a draft identity that survives being dropped |
 
 ## What this is for
 
