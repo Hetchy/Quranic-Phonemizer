@@ -1,6 +1,12 @@
 # 04 - What a data file must say about itself
 
-Status: **open**. Audit: "Data versus code", last three bullets, and
+> **Superseded.** The lexicon sections, the budgets and the clitic pronouns
+> landed as [ADR-010](../../adr/010-constants-that-restate-data.md), which
+> also closes `schema_version` and rehomes the `comment_lint` chore. The
+> `rules.yaml` inheritance question moved to
+> [design question 08](../../design/08-what-a-second-riwayah-decides.md).
+
+Status: **superseded**. Audit: "Data versus code", last three bullets, and
 "Enforcement".
 
 ## The pattern behind all of it

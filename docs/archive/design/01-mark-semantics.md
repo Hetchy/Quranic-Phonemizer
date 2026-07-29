@@ -1,6 +1,12 @@
 # 01 - What a script inventory hands downstream
 
-Status: **open**. Audit: "Data versus code", first four bullets.
+> **Superseded.** Its Warsh-agnostic half -- `SEATABLE`, and checking role
+> names against what declares them -- landed as
+> [ADR-010](../../adr/010-constants-that-restate-data.md). Shapes A and B,
+> `ALWAYS_RUN` and `SCRIPT_OPTIONAL` moved to
+> [design question 08](../../design/08-what-a-second-riwayah-decides.md).
+
+Status: **superseded**. Audit: "Data versus code", first four bullets.
 
 ## The choice
 
