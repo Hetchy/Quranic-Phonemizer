@@ -34,6 +34,7 @@ Read in order. 001–006 are the design; 007 is how it is laid out in code;
 | [009](009-the-output-alphabet.md) | The output alphabet as entries plus composition, and what replaced row-count totality |
 | [010](010-constants-that-restate-data.md) | A constant that restates a data file becomes the data, or a check against it |
 | [011](011-where-a-slot-is.md) | Adjacency on `Neighbourhood`, a required pass list, and a draft identity that survives being dropped |
+| [012](012-what-a-signature-may-leave-unsaid.md) | `del` for a parameter a protocol forces, checked rather than conventional |
 
 ## What this is for
 

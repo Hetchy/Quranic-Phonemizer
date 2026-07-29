@@ -92,6 +92,11 @@ linter suppression would hide it — so this is a signature that grew by
 addition, not a bug, and collapsing it into a context object trades the 27
 lines for invisible dependencies. Genuinely two-sided, and nothing forces it.
 
+> Since closed by [ADR-012](012-what-a-signature-may-leave-unsaid.md).
+> Counting them was the measurement this paragraph assumed did not exist: the
+> 27 were three unrelated signatures plus five dead parameters, and only four
+> were `LexemePass`.
+
 **`cross_word_noon` returning a role name** rather than the slot it created
 is listed under 05 but belongs to design question 08:
 `build._split_tanween_words` greps the role name, so a script fact decides a
