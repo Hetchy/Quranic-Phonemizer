@@ -54,6 +54,9 @@ PUBLIC_API = frozenset({"Option", "VariantSelection", "KhilafId"})
 #: Imports whose only purpose is the side effect of importing them.
 SIDE_EFFECT = frozenset({"annotations"})
 
+#: Roles the inventory loader supplies rather than any file naming them.
+LOADER_ROLES = frozenset({"seat", "structural", "advice"})
+
 MAX_FILE_LINES = 400
 MAX_FUNCTION_LINES = 50
 
@@ -304,9 +307,115 @@ def phoneme_strings() -> list[Problem]:
     return out
 
 
+def _role_sites(tree: ast.Module) -> Iterator[ast.expr]:
+    """Every expression this module hands to a role lookup."""
+    for node in ast.walk(tree):
+        if (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and node.func.attr in ("has", "mark")
+        ):
+            yield from node.args
+        elif isinstance(node, ast.Compare) and _names_role(node.left):
+            yield from node.comparators
+
+
+def _role_holders(trees: list[ast.Module]) -> set[str]:
+    """Names the package uses where a role is expected.
+
+    A constant holding a role is the third shape, after a bare literal and a
+    set splatted into `has`. `DAGGER` and `CROSS_WORD_ROLE` are both this.
+    """
+    out: set[str] = set()
+    for tree in trees:
+        for site in _role_sites(tree):
+            node = site.value if isinstance(site, ast.Starred) else site
+            if isinstance(node, ast.Name):
+                out.add(node.id)
+            elif isinstance(node, ast.Attribute):
+                out.add(node.attr)
+    return out
+
+
+def _role_literals(tree: ast.Module, holders: set[str]) -> Iterator[tuple[int, str]]:
+    """Strings this module uses as an inventory role."""
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Assign) and any(
+            isinstance(t, ast.Name) and t.id in holders for t in node.targets
+        ):
+            yield from _strings(ast.walk(node.value), node.lineno)
+    for site in _role_sites(tree):
+        yield from _strings([site], site.lineno)
+
+
+def _names_role(node: ast.expr) -> bool:
+    return isinstance(node, ast.Attribute) and node.attr == "role"
+
+
+def _strings(nodes, line: int) -> Iterator[tuple[int, str]]:
+    for node in nodes:
+        if isinstance(node, ast.Constant) and isinstance(node.value, str):
+            yield line, node.value
+
+
+def _declared_roles() -> set[str]:
+    """Every role a derivation says it reads or an inventory says it writes."""
+    import yaml
+
+    out: set[str] = set()
+    for _, tree in _modules():
+        for node in ast.walk(tree):
+            if not (isinstance(node, ast.Call) and _is_register(node.func)):
+                continue
+            for keyword in node.keywords:
+                if keyword.arg == "requires":
+                    out |= {
+                        role for _, role in _strings(ast.walk(keyword.value), 0)
+                    }
+    for path in sorted((PACKAGE / "data").rglob("scripts/*.yaml")):
+        data = yaml.safe_load(path.read_text(encoding="utf-8"))
+        for section in ("evidences", "decorates", "advice", "structural"):
+            entries = data.get(section) or {}
+            # An entry that names no role is keyed by the scalar it is
+            # written with, and the loader uses that as the role.
+            out |= set(entries)
+            if isinstance(entries, dict):
+                out |= {
+                    str(spec["role"])
+                    for spec in entries.values()
+                    if isinstance(spec, dict) and "role" in spec
+                }
+    return out
+
+
+def _is_register(func: ast.expr) -> bool:
+    return (isinstance(func, ast.Name) and func.id == "register") or (
+        isinstance(func, ast.Attribute) and func.attr == "register"
+    )
+
+
+def role_vocabulary() -> list[Problem]:
+    """A role name in code that no derivation and no inventory declares.
+
+    `Cluster.has` answers `False` for an unknown role rather than raising, so
+    without this a one-character slip is a silent output change.
+    """
+    declared = _declared_roles() | LOADER_ROLES
+    modules = list(_modules())
+    holders = _role_holders([tree for _, tree in modules])
+    out: list[Problem] = []
+    for path, tree in modules:
+        for line, role in sorted(set(_role_literals(tree, holders))):
+            if role not in declared:
+                out.append((path, line, "role-vocabulary",
+                            f"{role!r} is a role nothing declares"))
+    return out
+
+
 CHECKS = {
     "import-graph": import_graph,
     "unused-imports": unused_imports,
+    "role-vocabulary": role_vocabulary,
     "module-size": module_size,
     "dead-exports": dead_exports,
     "phoneme-strings": phoneme_strings,

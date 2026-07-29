@@ -4,7 +4,12 @@ Superseded on 2026-07-26. Kept as decision history. **Nothing here describes
 the current codebase or the accepted design.** Each file carries a header
 explaining why it was archived.
 
-Two groups:
+Three groups:
+
+**Merged design questions** — `design/01`, `design/04` and `design/07` each
+stalled on the same question and were replaced by `docs/design/08`. What could
+be settled without answering it is ADR-010. Each carries its own header saying
+which half went where.
 
 **Pre-refactor snapshots** — `architecture-today.md` and
 `current-implementation-mapping.md` document the 35-module implementation that

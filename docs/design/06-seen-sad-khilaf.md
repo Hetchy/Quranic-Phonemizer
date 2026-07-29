@@ -81,8 +81,8 @@ with three consequences:
    overrides.
 3. The inventory declarations become a deferral -- the mark names the khilaf
    rather than carrying a value -- which is the mechanism
-   [01](01-mark-semantics.md) is deciding the shape of. These two documents
-   are coupled.
+   [08](08-what-a-second-riwayah-decides.md) is deciding the shape of, under
+   mark semantics. These two documents are coupled.
 
 ## What to audit before deciding
 

@@ -66,6 +66,9 @@ class LetterEntry:
     rasm_only: bool = False
     """The glyph never spells a sound of its own. IndoPak draws the maqsura
     only as a hamza's seat or as rasm, and writes a sounded yaa as `ي`."""
+    seat: bool = False
+    """A combining hamza written here rests on the glyph rather than being a
+    letter of its own, so the cluster becomes the hamza: `ٮ` + `ٔ` is `ئ`."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -196,7 +199,7 @@ def load_inventory(
             f"{path}: {overlap} are declared both as letters and as marks; a "
             f"scalar resolves to exactly one classification"
         )
-    _check_contract(path, letters, marks, derivations, roles)
+    _check_contract(path, marks, derivations, roles)
     return Inventory(
         script=script,
         riwayah=riwayah,
@@ -239,23 +242,14 @@ def _check_identity(path, data, riwayah: Riwayah, script: Script) -> None:
         )
 
 
-def _check_contract(path, letters, marks, derivations, roles) -> None:
+def _check_contract(path, marks, derivations, roles) -> None:
     """Verify every named derivation and required role actually exists.
 
     `derivations` and `roles` are injected, not imported: `orthography` may
-    not depend on `canon`.
+    not depend on `canon`. Only a mark may name a derivation.
     """
+    named = {entry.derivation for entry in marks.values() if entry.derivation}
     if derivations is not None:
-        named = {
-            entry.derivation
-            for entry in marks.values()
-            if getattr(entry, "derivation", None)
-        }
-        named |= {
-            spec.derivation
-            for spec in letters.values()
-            if getattr(spec, "derivation", None)
-        }
         unknown = sorted(named - derivations)
         if unknown:
             raise InventoryError(
@@ -284,7 +278,7 @@ def _letter(spec: Any, *, where: str) -> LetterEntry:
         spec,
         {"letter"},
         name=where,
-        optional={"onset", "dagger_host", "bare_rasm", "rasm_only"},
+        optional={"onset", "dagger_host", "bare_rasm", "rasm_only", "seat"},
     )
     onset = spec.get("onset")
     return LetterEntry(
@@ -293,6 +287,7 @@ def _letter(spec: Any, *, where: str) -> LetterEntry:
         dagger_host=bool(spec.get("dagger_host", False)),
         bare_rasm=bool(spec.get("bare_rasm", False)),
         rasm_only=bool(spec.get("rasm_only", False)),
+        seat=bool(spec.get("seat", False)),
     )
 
 

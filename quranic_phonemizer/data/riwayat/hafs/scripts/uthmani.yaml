@@ -31,10 +31,10 @@ letters:
   "ن": NOON
   "ه": HEH
   "ة": TAA_MARBUTA
-  "ا": ALIF
-  "و": {letter: WAW, dagger_host: true}
-  "ي": YA
-  "ى": {letter: YA, dagger_host: true, bare_rasm: true}   # alif maqsura
+  "ا": {letter: ALIF, seat: true}
+  "و": {letter: WAW, dagger_host: true, seat: true}
+  "ي": {letter: YA, seat: true}
+  "ى": {letter: YA, dagger_host: true, bare_rasm: true, seat: true}   # alif maqsura
   "ء": HAMZA
   "أ": HAMZA
   "إ": HAMZA
