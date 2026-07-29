@@ -63,7 +63,7 @@ class WaqfEnding:
             return None
         if not _is_final_letter(near, at, word):
             return None
-        if _followed_by_tanween_noon(near, at, word) and (
+        if _followed_by_tanween_noon(near, word) and (
             slot.letter is not CanonLetter.TAA_MARBUTA
         ):
             # TanweenAtWaqf owns the ending; taa marbuta drops its vowel here instead.
@@ -256,8 +256,7 @@ def _is_final_letter(near: Neighbourhood, at: SlotId, word: int) -> bool:
     return bool(slots) and slots[-1].id == at
 
 
-def _followed_by_tanween_noon(near: Neighbourhood, at: SlotId, word: int) -> bool:
-    del at
+def _followed_by_tanween_noon(near: Neighbourhood, word: int) -> bool:
     slots = near.score.words[word].slots
     return bool(slots) and slots[-1].origin is SlotOrigin.NUNATION
 

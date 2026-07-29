@@ -155,7 +155,7 @@ def _apply_allah_lexeme(
         for index in lexeme.divine_name(letters, nuclei, onsets, lexicon):
             span[index].annotations |= {Annotation.DIVINE_NAME}
         for index in lexeme.allah_long_a(letters, nuclei, onsets, lexicon):
-            span[index].nucleus = lexeme.relengthened(span[index].nucleus)
+            span[index].nucleus = lexeme.RELENGTHENED_A
 
 
 #: What the plural meem attaches to. `ـكُمْ` and `ـهُمْ`, in either person.

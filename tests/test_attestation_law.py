@@ -33,8 +33,8 @@ def _performed(packed, hafs, surah: int, ayah: int):
 
 @pytest.mark.parametrize("surah,ayah", MERGERS)
 def test_a_written_shadda_is_accounted_for(packed, hafs, surah, ayah) -> None:
-    attested, performance, plan = _performed(packed, hafs, surah, ayah)
-    assert not check_attestations(attested, performance, plan)
+    attested, performance, _ = _performed(packed, hafs, surah, ayah)
+    assert not check_attestations(attested, performance)
 
 
 @pytest.mark.parametrize("surah,ayah", MERGERS)
