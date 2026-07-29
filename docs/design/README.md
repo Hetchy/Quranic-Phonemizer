@@ -30,8 +30,9 @@ wrong today rather than merely awkward.
 
 [projections/](projections/) is the public projection API that ADR-005 put out
 of scope: an audit of the four legacy projections and their consumers, a
-two-projection design over the layered model, and the equivalence gate that
-replacement has to pass. It assumes 03 resolved.
+two-projection design over the layered model, and the equivalence and
+completeness gate that replacement has to pass. ADR-013 settles its
+foundations and reconciles it with 03.
 
 ## Closed
 

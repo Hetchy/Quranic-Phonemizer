@@ -1,7 +1,7 @@
-# 01 - Two projections
+# 01 - Two projections over one lossless graph
 
-Status: **proposed**. Depends on [00-audit](00-audit.md) and on
-[03-canonical-vocabulary](../03-canonical-vocabulary.md) being resolved.
+Status: **proposed**. Depends on [00-audit](00-audit.md) and
+[ADR-013](../../adr/013-public-projection-foundations.md).
 Scope: Uthmani, Hafs.
 
 ## 1. The decision
@@ -10,319 +10,332 @@ Two public projections, and no third.
 
 | | Name | Shape | For |
 |---|---|---|---|
-| **P1** | `phonemes` | `tuple[str, ...]`, plus a per-word split | everyone who wants only sound |
-| **P2** | `Reading` | five parallel node arrays joined by integer index | everyone else |
+| **P1** | `phonemes` | ordered notation tokens, with word boundaries | consumers that want only sound |
+| **P2** | `Reading` | identified nodes plus typed relation arrays | every script, alignment, and tajweed consumer |
 
-`Reading` replaces `character_phoneme_mappings`, `letter_phoneme_mappings`,
-`silent_flags` and `tajweed_mappings` -- all four -- with no loss. It is one
-document because the four were one join computed four times (00-audit §1), and
-because a set of "atomic" projections over a graph is a set of tables a consumer
-must re-join, which is the thing that went wrong.
+`Reading` replaces `character_phoneme_mappings`,
+`letter_phoneme_mappings`, `silent_flags`, and `tajweed_mappings`. The four
+legacy APIs were four traversals of the same join, with different relationship
+losses. Publishing four smaller documents would require every consumer to
+reconstruct that join again.
 
-It does not couple, because the arrays are independently ignorable. A tajweed
-colourer for a mushaf reads `words`, `glyphs`, `units`, `rules` and never
-touches `phonemes`. An ASR labeller reads `phonemes` and `rules`. Ignoring an
-array costs nothing; re-joining two documents costs correctness.
+This does not force every consumer to load every relation. Named JSON fields
+are independently ignorable, and an SDK may provide lazy indexes or narrower
+views. The contract has one source of truth even when transport layers select
+only part of it.
 
-## 2. The key: a unit, not a character
+## 2. Identity and identifiers
 
-This is the load-bearing choice, and it is what the legacy projections got
-wrong.
-
-Legacy keyed rows on **written characters**, so anything recited but not written
-had no row. It grew `chars=""` implicit cells and a five-member `status` enum
-(`present`/`inserted`/`dropped`/`replaced`/`shortened`) to describe the gap, and
-downstream consumers still had to synthesize `madd_iwad`, `allah_dagger_alef`,
-`iltiqaa_kasra` and an iqlab mini-meem for themselves.
-
-`Reading` keys on the **`Slot`** -- published as `Unit`. A `Slot` is
-boundary-free and script-free: it exists whether or not this script wrote it and
-whether or not it sounds at this junction. Every legacy implicit cell is an
-ordinary unit:
-
-| Legacy implicit cell | Unit |
-|---|---|
-| hamza-wasl connecting vowel | a unit with `Onset.WASL` and a short nucleus |
-| iltiqa kasra (3:1) | an `Inserted` sound anchored to a unit |
-| Allah dagger alef | a unit with a `LONG` nucleus and the `divine_name` tag |
-| madd-iwad alef | a unit with a `PAUSAL_LONG` nucleus |
-| muqattaat name letters | units with `spelled = true` |
-
-Nothing is invented, and `status` disappears -- not because consumers stop
-wanting those five treatments, but because each is now *derived* from facts:
-
-```
-inserted  = unit.graphemes == () and unit.glyphs != ""
-dropped   = unit.graphemes != () and unit.sounds == ()
-replaced  = unit.glyphs differs from the text its graphemes spell
-shortened = a rule with `iltiqa_repair` names the unit
-present   = otherwise
-```
-
-The producer ships facts; the renderer keeps its vocabulary.
-
-## 3. `Reading`
-
-One request: a ref, a stop-sign policy (which advice classes are honoured), a
-riwayah, a `VariantSelection`. One document.
+A `Reading` is a snapshot of one fully identified request:
 
 ```python
 @dataclass(frozen=True)
 class Reading:
+    schema_version: str
+    request: ReadingRequest
+    score_digest: str
+
+    words: tuple[Word, ...]
+    glyphs: tuple[Glyph, ...]
+    units: tuple[Unit, ...]
+    sounds: tuple[SoundNode, ...]
+    occurrences: tuple[Occurrence, ...]
+
+    spellings: tuple[SpellingEdge, ...]
+    attributions: tuple[AttributionEdge, ...]
+    modifiers: tuple[ModifierEdge, ...]
+
+
+@dataclass(frozen=True)
+class ReadingRequest:
     ref: str
     riwayah: Riwayah
     script: Script
-    notation: str                      # the Alphabet that produced the tokens
-    selection: VariantSelection
-    words:    tuple[Word, ...]
-    glyphs:   tuple[Glyph, ...]
-    units:    tuple[Unit, ...]
-    phonemes: tuple[Phoneme, ...]
-    rules:    tuple[RuleHit, ...]
+    notation: str
+    selection: CanonicalVariantSelection
+    boundaries: BoundaryPlan
 ```
 
-Every cross-reference is an integer index into one of the five arrays, in both
-directions. Ids stay available as strings for stable external addressing.
+`selection` is serialized in canonical order. `boundaries` records starts,
+stops, sakt, and edges rather than only the stop-sign policy that produced
+them. `score_digest` identifies the canonical data against which indices were
+resolved.
+
+Every reference inside the document is an integer index into one array.
+Indices are local to this document. A bare slot label is not advertised as a
+durable external identifier: riwayah, selection, corpus revision, and schema
+edition all affect what it means. A future durable key must include that
+identity explicitly.
+
+The wire format stores each relationship once. Reverse indexes such as
+`units_by_word`, `glyphs_by_unit`, `sounds_by_unit`, and
+`occurrences_by_sound` are pure SDK helpers and are never serialized as
+parallel facts.
+
+## 3. Nodes
+
+Nodes carry intrinsic values and ordering. Relations live in section 4.
 
 ### 3.1 `Word`
 
 ```python
-location: Location          # 2:20:3
-text: str                   # the script's own word, verbatim
-spelled: str                # write() over this word's units
-starts: bool                # recitation began here
-stops: bool                 # recitation stopped after
-junction: Junction          # join | sakt | stop | edge
-advice: StopAdvice | None   # the mushaf's stop sign on this word
-units: tuple[int, ...]
-glyphs: tuple[int, ...]
+location: Location
+text: str
+starts: bool
+junction_after: Junction       # join | sakt | stop | edge
+advice: StopAdvice | None
+lexeme: LexemeClass | None     # currently divine_name
 ```
 
-`starts` / `stops` are the two facts every consumer re-derived from
-`is_starting` / `is_stopping`; `junction` is the full four-way fact underneath
-them. `advice` is new to a projection and comes free from `Inscription.advice`.
+`junction_after` is the complete boundary fact; `stops` would duplicate it.
+`starts` is independent because a range may begin inside a verse or word
+sequence. `lexeme` is lexical identity, not a tajweed tag. The occurrence that
+applies tafkheem to the relevant lam remains in the performance graph.
 
-### 3.2 `Unit` -- the spine
+Word membership points from a child node to its word. The corresponding word
+lists are derived indexes.
+
+### 3.2 `Unit`
 
 ```python
-id: str                     # "2:20#7"
 word: int
 letter: CanonLetter
-geminate: bool
-prosthetic: bool            # Onset.WASL: present only when started on
-conditional: bool           # this unit's presence or length depends on the junction
-nucleus: Quality | None     # None when silent
-length: NucleusKind         # silent | short | long | silah | pausal_long
-nunation: bool              # the tanween noon
-spelled: bool               # part of a muqattaat letter name
-tags: tuple[SlotTag, ...]   # ishmam | divine_name | imala
-graphemes: tuple[int, ...]  # what wrote it; () when unwritten
-glyphs: str                 # what it looks like -- always non-empty
-sounds: tuple[int, ...]     # what it produced here; () when silent
-silenced_by: int | None     # index into `rules`
-rules: tuple[int, ...]      # every rule naming this unit
+onset: Onset
+nucleus: Nucleus
+nunation: bool
+spelled: bool
 ```
 
-`glyphs` is the answer to "the keys of pure script orthography are the wrong
-choice". It is `write` applied to this one unit under this script's `Pen`, so it
-is always non-empty and always spellable in the script the consumer is
-rendering. When `graphemes` is empty, `glyphs` is the only thing to draw. When
-`graphemes` is non-empty and `glyphs` differs from the text they spell, the
-consumer has learned that the recited form and the written form diverge -- which
-is exactly the `replaced` case, stated as two facts instead of one enum member.
+`Nucleus` is the existing discriminated union:
 
-`conditional` collapses `Onset.SILAH`, `NucleusKind.SILAH` and
-`NucleusKind.PAUSAL_LONG` into the one thing a consumer must know: *do not read
-this unit's length as inherent; the junction decided it*. The precise kind is
-still in `length` for anyone who wants it.
+```python
+Silent | Short(quality) | Long(quality) | Silah(quality) | PausalLong(quality)
+```
+
+This forbids combinations such as `quality=None, length=long`. `Silah` and
+`PausalLong` remain lexical, boundary-conditional kinds; the performed sound
+still depends on the requested boundary plan.
+
+`Onset` remains one enum because the corpus and riwayah census found no valid
+combination it cannot express. SDKs may derive `geminate`, `prosthetic`, and
+`conditional` booleans for display. They are not additional wire facts.
+
+There are deliberately no glyph, sound, rule, silence-reason, or rendered-text
+fields on a unit. Those are relations or derived views. Madd counts and
+durations are also absent: they belong to realization or teaching policy, not
+to the canonical slot.
 
 ### 3.3 `Glyph`
 
 ```python
-id: str                     # "2:20@14"
-word: int
+word: int | None
 char: str
-cls: GraphemeClass          # base | haraka | tanween | shadda | length_carrier
-                            # | small_vowel | madd_sign | silence_sign
-                            # | annotation | advice | structural
-index: int                  # ordinal within the word
-units: tuple[int, ...]      # () for structural
-fact: SlotFact | None       # letter | onset | nucleus | sakt | annotation
-                            # None for Decorates / Attests
-attests: RuleFamily | None  # from Attests
+cls: GraphemeClass
+source_index: int
 ```
 
-`cls` is `GraphemeClass` unchanged and replaces legacy `role` exactly:
-`base`->`base`, `haraka`->`haraka`, `tanween`->`tanween`,
-`madd`->`length_carrier | small_vowel | madd_sign`. It is a fact about the mark,
-not a rendering slot, and it is finer than legacy's four.
+The index is the scalar's ordinal in the requested inscription. A structural
+glyph has `word=None`; it is not forced into a neighbouring word. A glyph does
+not flatten all its spelling edges into `units`, `fact`, and `attests`, because
+one glyph can participate in several differently typed edges.
 
-A compact grapheme reaching many units (the `الٓمٓ` opening: three graphemes,
-seven units) is `units` with length > 1. Legacy needed `source_letter_indices`
-plus a parallel `phoneme_rule_tags` array for the same thing.
-
-### 3.4 `Phoneme`
+### 3.4 `SoundNode`
 
 ```python
-id: int                     # == its index; the flat sequence position
 word: int
-token: str                  # the notation token
-kind: str                   # consonant | vowel | nasal | release
-letter: CanonLetter | None
-quality: Quality | None
-long: bool
-geminate: bool
-emphatic: bool
-nasal: bool
-units: tuple[int, ...]      # Hosts; () when Inserted
-owner: int | None           # THE unit that displays it
-merged_from: tuple[int, ...]# units whose own sound folded into this one
-anchor: tuple[int, str] | None   # (unit, "before" | "after") when Inserted
-rules: tuple[int, ...]      # every rule that produced, modified or classified it
+token: str
+spec: Consonant | Vowel | Nasal | Release
 ```
 
-Three fields earn their place:
+`token` is the selected notation's serialization of `spec`. The discriminated
+sound value already carries letter, quality, length, emphasis, gemination,
+nasality, place, or release kind where those concepts apply. A flat record
+with all of those fields optional would admit impossible sound states.
 
-- **`owner`.** Exactly one unit displays each sound. This is the fact
-  `ts-source.ts::lettersFromCells` reimplements ("the carrier wins over the
-  consonant's haraka") and gets to decide differently from the SDK. The rule is
-  stated once here and tested: for a nucleus-aspect sound the owner is the last
-  unit in `units`; for an onset-aspect sound, the first. `share_group`
-  disappears -- co-highlighting is "every unit in `units`", and a disjoint
-  animation is "the `owner` only".
-- **`merged_from`.** The disappearing side of an idgham. Legacy needed
-  `is_source` plus six rule-name tables to find it.
-- **`rules` is a list.** `secondary_tags` and `phoneme_rule_tags` were two
-  separate escape hatches for the fact that a sound carries more than one rule.
-  Both go.
+A sound has no stored unit, owner, merge source, insertion anchor, or rule
+list. Each is stated exactly by a relation in section 4.
 
-### 3.5 `RuleHit`
+### 3.5 `Occurrence`
 
 ```python
-id: int
 rule: Rule
-family: RuleFamily
-phase: Phase
-effect: str                 # hosts | insert | merge | silence | classify
-at: int                     # the anchor unit
-context: tuple[int, ...]    # the other participants
-units: tuple[int, ...]      # at + context
-phonemes: tuple[int, ...]   # every sound it produced, removed or coloured
+participants: tuple[Participant, ...]
+
+
+@dataclass(frozen=True)
+class Participant:
+    unit: int
+    role: ParticipantRole      # trigger | target | context
 ```
 
-`effect` replaces legacy's `source_rules` / `target_rules` partition, and is
-strictly more informative. On a cross-word idgham, legacy put the rule in
-`source_rules` on the disappearing noon and in `target_rules` on the receiving
-letter -- one bit, recovered from a hand-maintained table. Here the same rule is
-one `RuleHit` with `effect = merge`, `at` = the noon, `context` = the host, and
-`phonemes` = the single shared sound. Both sides fall out.
+Participants explain why a rule matched. Attribution and modifier edges
+explain what it did. This avoids a generic `effect` string that duplicates and
+weakens those relations.
 
-`effect = classify` is the fix for finding F1: madd, tafkheem, izhar and the
-other 15 classification-only rules get a hit with the sounds they name, so
-`Phoneme.rules` is complete rather than "whatever attributed the sound".
+`RuleFamily` and execution `Phase` are total functions of `Rule` in versioned
+registries. They are derived rather than repeated in every occurrence.
+`Rule.PLAIN` produces no occurrence; absence of a rule is plain.
 
-## 4. Model changes this requires
+## 4. Typed relations
 
-Three, all small, all in `model/` and `engine/`. Nothing in `rules/` changes
-behaviour.
+The public graph keeps the distinctions already settled in ADR-002 and
+ADR-003.
 
-**C1 -- label the participants** (fixes F2). `Participants` becomes
+### 4.1 Spelling
 
 ```python
-@dataclass(frozen=True, slots=True)
-class Participants:
-    at: SlotId
-    context: tuple[SlotId, ...] = ()
+Evidences(glyph: int, unit: int, fact: SlotFact)
+Attests(glyph: int, family: RuleFamily, anchor: int)
+Decorates(glyph: int, unit: int)
+Structural(glyph: int)
+
+SpellingEdge = Evidences | Attests | Decorates | Structural
 ```
 
-21 call sites, mechanical. `rules/madd.py:69` is the one that changes meaning:
-its `(before.id, at)` becomes `at=at, context=(before.id,)`, matching every
-other rule. Without this the `at` / `context` split in `RuleHit` is a guess.
+This preserves many-to-many script evidence without conflating its meaning.
+The long-vowel haraka and carrier may both reach one unit through distinct
+edges. A compact muqattaat grapheme may evidence facts on several units.
+`Attests` witnesses a performance family without asserting a canonical fact.
+`Structural` has no unit and no word.
 
-**C2 -- keep the modifier edge** (fixes F3). `engine/run.py` consumes `Recolour`
-and `Relength` and discards which occurrence emitted them. Record them:
+### 4.2 Attribution
 
 ```python
-@dataclass(frozen=True, slots=True)
-class Modifies:
-    sound: SoundId
-    by: OccurrenceId
+Hosts(units: tuple[int, ...], aspect: Aspect, sound: int, by: int)
+Inserted(anchor: tuple[int, Side], aspect: Aspect, sound: int, by: int)
+MergedInto(units: tuple[int, ...], aspect: Aspect, sound: int, by: int)
+Silent(units: tuple[int, ...], aspect: Aspect, by: int)
+
+AttributionEdge = Hosts | Inserted | MergedInto | Silent
 ```
 
-added to the `Attribution` union or carried as a separate
-`Performance.modifiers` tuple. Separate tuple is preferred: `Modifies` does not
-own a sound, and the P1 law ("every sound is hosted exactly once") should not
-have to special-case it.
+`Aspect` is mandatory. A final consonant can host an onset sound while a
+separate nucleus attribution is silent at pause. That fact cannot be recovered
+from sound kind.
 
-**C3 -- the ref-to-document loop** (fixes F4). Not a design question, but it is
-the gate on shipping. `api.recitation(riwayah)` already assembles a riwayah and
-`engine/boundary_plan.py::plan_from_request(advice, stop_at, score=)` already
-turns a stop policy into a `BoundaryPlan`. What is missing sits above both: take
-`(ref, stop policy, selection)`, resolve the ref through
-`PackedCorpus.locations`, run `read` -> `build` -> `perform` per verse, and
-assemble one `Reading` across them.
+`Inserted` preserves both the anchor and before/after side, so the 3:1 iltiqa
+vowel needs neither a fake unit nor an empty glyph. A merger is a `Hosts` edge
+and a `MergedInto` edge sharing sound and occurrence. Joint hosting remains a
+tuple of units; it is not reduced to one preferred owner.
 
-Deliberately **not** changed:
+### 4.3 Modification
 
-- `CLASSIFICATION_ONLY` stays. It is the correct statement that a rule owns no
-  sound; C2 gives it an edge without giving it ownership.
-- `SlotOrigin` decomposition, `Annotation` naming: see
-  [03](../03-canonical-vocabulary.md), which this design assumes resolved.
-- `Onset` splitting: not required. `Reading` publishes `geminate` and
-  `prosthetic` as separate booleans regardless of the internal enum shape,
-  which is the whole point of a projection.
+```python
+Recolours(sound: int, by: int, feature: SoundFeature, value: bool)
+Relengths(sound: int, by: int, length: Length)
+Classifies(sound: int, by: int)
 
-## 5. Rule vocabulary
+ModifierEdge = Recolours | Relengths | Classifies
+```
 
-**Keep the branch `Rule` set unchanged.** Three properties make it better than
-legacy's and all three should survive:
+These edges retain the occurrence after the engine applies an effect.
+`Classifies` connects a classification-only occurrence to a sound without
+claiming ownership. A soundless gesture such as ishmam is still represented by
+its occurrence and target participant; it does not receive a fake sound.
 
-1. **Trigger-independent naming.** One `IKHFAA_HAQIQI`, not `ikhfaa_noon` +
-   `ikhfaa_tanween`. The trigger is `unit.nunation`, which the consumer has. A
-   rule name that encodes its own trigger multiplies with every new trigger.
-2. **`FAMILY_OF` is total.** Every rule declares a `RuleFamily`, so a consumer
-   that does not want 40 colours gets 7 for free and a new rule lands in an
-   existing bucket instead of falling off the legend.
-3. **Degrees are separate members.** `QALQALA_SUGHRA` / `KUBRA` / `AKBAR`,
-   `IDGHAM_MUTAJANISAYN_KAMIL` / `NAQIS`. A projection that cannot say which
-   degree fired is not a tajweed projection.
+## 5. Derived views, not stored facts
 
-One rename to consider and one to reject:
+The following conveniences have named definitions:
 
-- `Rule.PLAIN` is the plain-fill sentinel, not a tajweed rule. In `RuleHit` it
-  should either be omitted (a sound with no `rules` entry is plain) or kept with
-  `family = ELISION`, which is wrong. **Omit it.** A `Phoneme` with empty `rules`
-  is plain; that is one less vocabulary item a consumer must learn to ignore.
-- Do **not** split `TAFKHEEM` by cause (istilaa vs raa vs divine name). The
-  cause is recoverable from `at.letter` and `at.tags`, and splitting re-imports
-  legacy's trigger-in-the-name mistake.
+```text
+units_by_word(w)       = units whose word is w
+glyphs_by_unit(u)      = spelling edges naming u
+sounds_by_unit(u, a)   = attribution edges naming u and aspect a
+rules_by_sound(s)      = occurrences reached by attribution or modifier edges
+family(o)              = FAMILY_OF[occurrences[o].rule]
+phase(o)               = PHASE_OF[occurrences[o].rule]
+```
 
-## 6. What each application gets
+Display ownership is also derived, but it is explicitly a rendering policy,
+not domain ownership:
 
-| Application | Reads | Was |
-|---|---|---|
-| Inspector cells | `glyphs`, `units`, `phonemes`, `rules` | `character_phoneme_mappings` + 2 FE surgeries + 7 synthesized tags |
-| Silent co-highlight | `unit.sounds == ()`; the mark is the neighbouring `silence_sign` glyph | `silent_flags` |
-| Aligner letter timing | `phoneme.owner` for disjoint spans, `phoneme.units` for co-light | `lettersFromCells` heuristic |
-| Cross-word bridge | a `RuleHit` with `effect = merge` and units in two words | `detect_cross_word_mergers` + 2 re-exported rule sets |
-| Flat char-to-phoneme runs | `units` with `graphemes` and `sounds` | `letter_phoneme_mappings` |
-| Tajweed-coloured mushaf | `glyphs` -> `units` -> `rules` | `tajweed_mappings` |
-| Tajweed ASR / error detection | `phonemes` + `phoneme.rules` + `selection`, with `khilaf().points()` for the alternatives | not possible |
-| Custom notation | swap the `Alphabet`; `token` changes, nothing else does | not possible |
+```text
+display_glyph(sound, policy)
+  = choose among glyphs that evidence the attributed unit and aspect
+```
 
-## 7. Open questions
+This can choose a haraka or a length carrier. A stored `owner: Unit` cannot,
+because both glyphs may evidence the same unit.
 
-1. **Multi-verse documents.** Finding F5. Ids are already `VerseRef`-qualified,
-   so a `Reading` over a range is concatenation plus a decision about whether
-   array indices restart. Proposal: they do not -- one `Reading`, one index
-   space, `word.location` carries the verse.
-2. **`Unit.glyphs` guarantee.** Blocked on ADR-005 §4's totality gate (F6). If
-   `write` cannot spell a recited form, `glyphs` needs a nullable escape and the
-   ADR-005 refusal of a fourth layer has failed its own trigger.
-3. **Serialization.** Legacy shipped positional tuples and grew four
-   append-only slots. `Reading` should ship named JSON; the positional shard row
-   is the *consumer's* encoding, not the producer's, and the SDK already
-   projects into a different field order. This wants stating so it does not
-   recur.
-4. **Does the Uthmani inventory read `ۢ`?** Finding F10. If not, `Glyph.units`
-   will not attach the iqlab small meem and the frontend surgery survives.
+Recited writing is a separate serializer over `write`, spelling, attribution,
+and insertion anchors. It may return render glyphs with source-glyph links.
+For a slotless insertion it writes the inserted sound at its anchor side.
+Source glyphs remain unchanged, and no core `Unit.glyphs` field is promised
+non-empty.
+
+Legacy presentation states become pure derivations:
+
+```text
+inserted  = an Inserted attribution
+dropped   = a Silent attribution for the relevant aspect
+merged    = paired Hosts and MergedInto attributions
+replaced  = rendered writing differs from source spelling
+shortened = a Relengths edge to short
+present   = none of the above
+```
+
+## 6. Model work required
+
+The projection exposes three gaps that must be fixed before it ships.
+
+**C1 - semantic participant roles.** Replace the unlabelled
+`Participants.slots` tuple with ordered `Participant(unit, role)` values. This
+is not a mechanical first/other split: each rule family must state trigger,
+target, and context from its domain grammar. Tests assert the roles for
+cross-word assimilation, madd, boundary elision, and classification-only
+rules.
+
+**C2 - retained modifier provenance.** When the engine applies `Recolour` or
+`Relength`, retain the occurrence-to-sound edge and its value. Add
+`Classifies` for a classification-only occurrence that names a sound. This
+closes the current loss between verdict application and `Performance`.
+
+**C3 - ref-to-document orchestration.** Resolve `(ref, boundary policy,
+selection)` through the selected corpus, build the Score and Inscription, run
+the Performance, and assemble one index space across the requested range.
+Internal starts, arbitrary stops, sakt, and cross-verse joins use the same
+path; they are not separate projection modes.
+
+No rule behaviour changes as part of C1-C3. `CLASSIFICATION_ONLY` remains a
+valid statement that an occurrence owns no sound.
+
+## 7. Rule vocabulary
+
+Keep the branch `Rule` set:
+
+1. Names are trigger-independent. Noon and tanween ikhfa share one rule; the
+   trigger is a participant and `unit.nunation`.
+2. `FAMILY_OF` is total, so a coarse legend is derived without serializing a
+   second classification beside every occurrence.
+3. Degrees remain distinct rules, such as the qalqala and idgham degrees.
+
+Omit `Rule.PLAIN` from occurrences. Do not split `TAFKHEEM` by cause: the
+occurrence participants and lexical identity state why it applied.
+
+## 8. What consumers read
+
+| Application | Reads |
+|---|---|
+| Inspector cells | nodes plus spelling, attribution, and modifier indexes |
+| Silent highlighting | `Silent` attributions and related spelling edges |
+| Disjoint timing | a chosen `display_glyph` policy |
+| Co-highlighting | all units on the relevant `Hosts` edge |
+| Cross-word bridge | paired `Hosts` and `MergedInto` edges |
+| Flat letter mappings | a legacy adapter over spelling and attribution |
+| Tajweed-coloured script | spelling edges to occurrence participants and modifiers |
+| Tajweed ASR | sounds, occurrences, modifiers, and request selection |
+| Custom notation | the same graph with a different `token` serializer |
+
+## 9. Shipping questions
+
+The graph shape is settled by ADR-013. Three empirical questions remain gate
+items rather than schema choices:
+
+1. Does the Uthmani inventory bind every iqlab small meem through a typed
+   spelling edge?
+2. Is recited writing total for every unit and slotless insertion in the
+   corpus?
+3. Does every preserved legacy field round-trip exactly in continuous, verse,
+   and word boundary modes?
+
+[02-equivalence-gate](02-equivalence-gate.md) makes each one executable.
