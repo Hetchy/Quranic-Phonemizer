@@ -54,6 +54,9 @@ class Cluster:
     """A letter of the reading the rasm leaves out, written small."""
     rasm_only: bool = False
     """The glyph never spells a sound of its own."""
+    seat: bool = False
+    """A hamza may be written on this base. A bare seat always may; which
+    letters also may is the script's to declare, not this package's."""
 
     def mark(self, role: str) -> Mark | None:
         for mark in self.marks:

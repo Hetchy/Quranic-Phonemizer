@@ -66,6 +66,9 @@ class LetterEntry:
     rasm_only: bool = False
     """The glyph never spells a sound of its own. IndoPak draws the maqsura
     only as a hamza's seat or as rasm, and writes a sounded yaa as `ي`."""
+    seat: bool = False
+    """A combining hamza written here rests on the glyph rather than being a
+    letter of its own, so the cluster becomes the hamza: `ٮ` + `ٔ` is `ئ`."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -284,7 +287,7 @@ def _letter(spec: Any, *, where: str) -> LetterEntry:
         spec,
         {"letter"},
         name=where,
-        optional={"onset", "dagger_host", "bare_rasm", "rasm_only"},
+        optional={"onset", "dagger_host", "bare_rasm", "rasm_only", "seat"},
     )
     onset = spec.get("onset")
     return LetterEntry(
@@ -293,6 +296,7 @@ def _letter(spec: Any, *, where: str) -> LetterEntry:
         dagger_host=bool(spec.get("dagger_host", False)),
         bare_rasm=bool(spec.get("bare_rasm", False)),
         rasm_only=bool(spec.get("rasm_only", False)),
+        seat=bool(spec.get("seat", False)),
     )
 
 

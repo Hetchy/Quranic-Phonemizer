@@ -13,12 +13,6 @@ from .inventory import Inventory, InventoryError, LetterEntry, MarkEntry
 #: The small alif, which is a hamza's rest as readily as a seat is.
 DAGGER = "dagger"
 
-#: What a hamza may be written on. `None` is a bare seat; the three carriers
-#: spell no sound of their own when they hold one.
-SEATABLE = frozenset(
-    {None, CanonLetter.ALIF, CanonLetter.WAW, CanonLetter.YA}
-)
-
 
 def read_verse(
     inventory: Inventory,
@@ -87,6 +81,7 @@ class _ReadState:
             dagger_host=entry.dagger_host,
             bare_rasm=entry.bare_rasm,
             rasm_only=entry.rasm_only,
+            seat=entry.seat,
             marked_script=self.inventory.marks_what_it_sounds,
         )
         self.letter_index += 1
@@ -126,7 +121,7 @@ class _ReadState:
         self.clusters[index].marks.append(_mark_of(char, offset, entry))
 
         if char in self.inventory.combining_hamza:
-            if self.clusters[index].letter in SEATABLE:
+            if self.clusters[index].seat:
                 self._fold_to_hamza(index, offset)
             else:
                 self.clusters[index].marks.pop()
@@ -205,6 +200,7 @@ class _ReadState:
                 word=self.word_index,
                 index=self.letter_index,
                 dagger_host=True,
+                seat=True,
             )
         )
         index = len(self.clusters) - 1
@@ -225,6 +221,7 @@ class _ReadState:
         self.clusters[index].letter = CanonLetter.HAMZA
         self.clusters[index].dagger_host = False
         self.clusters[index].bare_rasm = False
+        self.clusters[index].seat = False
 
     def _grapheme(self, char: str, offset: int, cls: GraphemeClass) -> None:
         self.graphemes.append(
