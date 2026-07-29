@@ -235,7 +235,7 @@ def test_an_entry_for_this_verse_that_does_not_resolve_is_an_error(
         asserts=(),
     )
     with pytest.raises(LedgerAddressError, match="does not resolve"):
-        build(reading, lexicon=hafs.lexicon, ledger=beyond)
+        build(reading, lexicon=hafs.lexicon, ledger=beyond, passes=hafs.passes)
 
 
 def test_an_assert_the_script_does_not_write_is_an_error(hafs) -> None:
@@ -289,4 +289,4 @@ def test_an_entry_for_another_verse_is_not_an_error(packed, hafs) -> None:
         ),
         asserts=(),
     )
-    build(reading, lexicon=hafs.lexicon, ledger=elsewhere)
+    build(reading, lexicon=hafs.lexicon, ledger=elsewhere, passes=hafs.passes)
