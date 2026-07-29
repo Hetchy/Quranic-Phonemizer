@@ -74,7 +74,6 @@ def perform(
 ) -> Performance:
     plan = Plan()
     slots = score.slots()
-    index = {slot.id: slot for slot in slots}
 
     near = Neighbourhood(score, boundaries)
     for phase in PHASE_ORDER:
@@ -89,10 +88,10 @@ def perform(
                 if verdict is not None:
                     plan.record(phase, verdict)
 
-    return _materialise(plan, index, score, boundaries, selection)
+    return _materialise(plan, score, boundaries, selection)
 
 
-def _fill_plain(plan: Plan, score: Score, mint: _Mint) -> list[tuple]:
+def _fill_plain(plan: Plan, score: Score) -> list[tuple]:
     """Realize every (slot, aspect) no verdict claimed, tagged `Rule.PLAIN`.
 
     `PLAIN` can't be a classifier: it would conflict with every claiming rule.
@@ -110,7 +109,6 @@ def _fill_plain(plan: Plan, score: Score, mint: _Mint) -> list[tuple]:
             if not has_content(slot, aspect) or (slot.id, aspect) in claimed:
                 continue
             filled.append((slot, aspect))
-    del mint
     return filled
 
 
@@ -134,7 +132,6 @@ def _triggered(classifier, slot: Slot) -> bool:
 
 def _materialise(
     plan: Plan,
-    index: dict[SlotId, Slot],
     score: Score,
     boundaries: BoundaryPlan,
     selection: VariantSelection,
@@ -161,7 +158,6 @@ def _materialise(
     _fill(plan, score, mint, colours, sounds, attributions, hosted, plain)
     _resolve_merges(plan, hosted, attributions)
 
-    del index
     return Performance(
         riwayah=score.riwayah,
         sounds=tuple(sounds),
@@ -218,7 +214,7 @@ def _fill(plan, score, mint, colours, sounds, attributions, hosted, plain) -> No
     lengths = {
         e.slot: e.length for e in plan.effects() if isinstance(e, Relength)
     }
-    for slot, aspect in _fill_plain(plan, score, mint):
+    for slot, aspect in _fill_plain(plan, score):
         sound_id = mint.sound()
         sounds.append((sound_id, _plain_sound(slot, aspect, colours, lengths)))
         hosted[(slot.id, aspect)] = sound_id

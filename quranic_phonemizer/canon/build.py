@@ -30,7 +30,7 @@ from .ledger import Ledger
 from .assemble import assemble
 from .draft import _Draft, set_fact
 from .juncture import apply_cross_word_noon
-from .passes import LEXEME_PASSES, LexemePass, apply_ledger
+from .passes import LexemePass, apply_ledger
 from .scribe import Scribe
 
 #: The two derivations the builder names itself. Both are properties of the
@@ -86,16 +86,16 @@ def build(
     selection: VariantSelection = VariantSelection(),
     provenance: Provenance | None = None,
     right_context: Reading | None = None,
-    passes: tuple[LexemePass, ...] | None = None,
+    passes: tuple[LexemePass, ...],
 ) -> Built:
-    """`right_context` is the next verse's reading and is not optional: some
-    cross-word tanween sites put the noon on a word in the following verse,
-    so verse scope alone is not sufficient."""
+    """`right_context` is the next verse's reading and is not optional: a
+    cross-word tanween site can put the noon on a word in the next verse.
+    `passes` has no default; a defaulted one would not be the riwayah's own."""
     track = provenance if provenance is not None else Provenance()
     scribe = Scribe(reading.verse)
     drafts = _drafts(reading, lexicon, track, right_context, scribe)
     apply_ledger(reading, drafts, ledger, track)
-    for lexeme_pass in (passes if passes is not None else LEXEME_PASSES):
+    for lexeme_pass in passes:
         lexeme_pass(reading, drafts, lexicon, scribe, selection)
     score, ordinals = assemble(reading, drafts, selection)
     return Built(score, scribe.finish(reading, drafts, ordinals))

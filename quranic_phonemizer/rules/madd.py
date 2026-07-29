@@ -57,7 +57,7 @@ class PausalGlide:
             # A glide the stop cannot strip still carries its own vowel, so it
             # is a consonant: `نَسِيَا` ends `-iyaa`, not `-iiaa`.
             return None
-        before = _before(near, at)
+        before = near.before(at)
         if before is None or before.nucleus.kind is not NucleusKind.SHORT:
             return None
         if GLIDE_OF.get(before.nucleus.quality) is not slot.letter:
@@ -138,14 +138,6 @@ def _opens_on_a_sakin(slot) -> bool:
     )
 
 
-def _before(near: Neighbourhood, at: SlotId):
-    flat = near.score.slots()
-    for index, slot in enumerate(flat):
-        if slot.id == at:
-            return flat[index - 1] if index else None
-    return None
-
-
 @dataclass(frozen=True, slots=True)
 class MaddClass:
     """Which madd this long vowel is -- one classifier, five outcomes.
@@ -223,7 +215,7 @@ class MaddLeen:
             return None
         if slot.onset is Onset.GEMINATE:
             return None
-        before = _before(near, at)
+        before = near.before(at)
         if before is None or before.nucleus.kind is not NucleusKind.SHORT:
             return None
         if before.nucleus.quality is not Quality.A:

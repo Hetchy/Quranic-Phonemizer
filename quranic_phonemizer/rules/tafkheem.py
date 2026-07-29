@@ -97,7 +97,7 @@ class Emphasis:
 
 def _raa_is_heavy(near, slot, plan, always_heavy) -> bool:
     """The quiescent raa, whose vowel is gone or was never there."""
-    before = _before(near, slot)
+    before = near.before(slot.id)
     if (
         before is not None
         and before.letter is L.YA
@@ -145,22 +145,14 @@ def _governing(near: Neighbourhood, slot, plan):
     Skips a canonically silent slot and one a BOUNDARY rule elided: the wasl
     hamza's helping vowel is not spoken mid-word.
     """
-    before = _before(near, slot)
+    before = near.before(slot.id)
     for _ in range(MAX_LOOKBACK):
         if before is None:
             return None
         silent = before.nucleus.kind is NucleusKind.SILENT
         if not (silent or _silenced(plan, before)):
             return before
-        before = _before(near, before)
-    return None
-
-
-def _before(near: Neighbourhood, slot):
-    flat = near.score.slots()
-    for index, other in enumerate(flat):
-        if other.id == slot.id:
-            return flat[index - 1] if index else None
+        before = near.before(before.id)
     return None
 
 

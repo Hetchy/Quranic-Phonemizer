@@ -39,7 +39,7 @@ def unmet(hafs, script: Script, ref: VerseRef, words) -> tuple[list[str], int]:
         for s in built.inscription.spellings
         if isinstance(s, Attests)
     ]
-    return check_attestations(attested, performance, plan), len(attested)
+    return check_attestations(attested, performance), len(attested)
 
 
 def main() -> int:

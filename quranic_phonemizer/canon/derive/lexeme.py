@@ -62,9 +62,9 @@ def allah_long_a(
     ]
 
 
-def relengthened(nucleus) -> Long:
-    del nucleus
-    return Long(Quality.A)
+#: What the divine name's short `a` becomes. A value, not a transform: the
+#: only relengthening there is has one answer, and `Long` is frozen.
+RELENGTHENED_A = Long(Quality.A)
 
 
 def otiose_waw(context: Context) -> bool:

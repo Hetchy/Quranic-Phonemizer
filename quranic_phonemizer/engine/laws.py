@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 
-from ..model.address import BoundaryPlan, SlotId
+from ..model.address import SlotId
 from ..model.canon import CLASSIFICATION_ONLY, FAMILY_OF, RuleFamily, Score
 from ..model.inscription import Attests, Decorates, Evidences, Inscription
 from ..model.performance import (
@@ -145,14 +145,12 @@ def check_inscription(inscription: Inscription, score: Score) -> None:
 def check_attestations(
     attested: Iterable[tuple[SlotId, RuleFamily]],
     performance: Performance,
-    boundaries: BoundaryPlan,
 ) -> list[str]:
     """Every family a script attests must be produced by some occurrence.
 
     One-directional: an occurrence family with no matching attestation is
     not an error. Returns disagreements instead of raising them individually.
     """
-    del boundaries
     produced: dict[SlotId, set[RuleFamily]] = {}
     for occurrence in performance.occurrences:
         family = FAMILY_OF[occurrence.rule]

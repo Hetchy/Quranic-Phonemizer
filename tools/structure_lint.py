@@ -57,6 +57,15 @@ SIDE_EFFECT = frozenset({"annotations"})
 #: Roles the inventory loader supplies rather than any file naming them.
 LOADER_ROLES = frozenset({"seat", "structural", "advice"})
 
+#: The two callback protocols, by parameter names: `Classifier.look` and
+#: `LexemePass`. A protocol is the only thing that hands an implementation a
+#: parameter it may not want, so these are where an unread one is legitimate
+#: -- and where it has to be `del`ed rather than left silent.
+PROTOCOLS = {
+    ("near", "plan", "at", "boundaries"),
+    ("reading", "drafts", "lexicon", "scribe", "selection"),
+}
+
 MAX_FILE_LINES = 400
 MAX_FUNCTION_LINES = 50
 
@@ -412,10 +421,73 @@ def role_vocabulary() -> list[Problem]:
     return out
 
 
+def _parameters(node) -> tuple[str, ...]:
+    """Positional and keyword-only names, less `self`. Keyed on names rather
+    than on the function's own name, so an implementation is recognised by
+    the protocol it satisfies."""
+    args = node.args
+    return tuple(
+        arg.arg
+        for arg in (*args.posonlyargs, *args.args, *args.kwonlyargs)
+        if arg.arg != "self"
+    )
+
+
+def _is_stub(node) -> bool:
+    """A Protocol's own body is a docstring and `...`: it declares the
+    parameters and by construction reads none of them."""
+    return not [
+        statement
+        for statement in node.body
+        if not (
+            isinstance(statement, ast.Expr)
+            and isinstance(statement.value, ast.Constant)
+        )
+    ]
+
+
+def _accounted_for(node) -> set[str]:
+    """Every name the body reads or deletes. A nested closure counts as the
+    enclosing function reading it, which is what a pass built by a factory
+    needs."""
+    out = set()
+    for inner in ast.walk(node):
+        if isinstance(inner, ast.Name) and isinstance(inner.ctx, ast.Load):
+            out.add(inner.id)
+        elif isinstance(inner, ast.Delete):
+            out |= {t.id for t in inner.targets if isinstance(t, ast.Name)}
+    return out
+
+
+def signature_honesty() -> list[Problem]:
+    """A protocol parameter an implementation neither reads nor `del`s.
+
+    Nothing else here looks at signatures, so without this an absent `del`
+    cannot be told from a parameter the author forgot.
+    """
+    out: list[Problem] = []
+    for path, tree in _modules():
+        for node in ast.walk(tree):
+            if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                continue
+            parameters = _parameters(node)
+            if parameters not in PROTOCOLS or _is_stub(node):
+                continue
+            accounted = _accounted_for(node)
+            out.extend(
+                (path, node.lineno, "signature-honesty",
+                 f"{node.name} ignores {name!r} without a `del`")
+                for name in parameters
+                if name not in accounted
+            )
+    return out
+
+
 CHECKS = {
     "import-graph": import_graph,
     "unused-imports": unused_imports,
     "role-vocabulary": role_vocabulary,
+    "signature-honesty": signature_honesty,
     "module-size": module_size,
     "dead-exports": dead_exports,
     "phoneme-strings": phoneme_strings,
