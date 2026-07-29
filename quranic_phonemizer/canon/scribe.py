@@ -20,12 +20,16 @@ from ..model.inscription import (
 )
 
 
+class OrphanedEdgeError(ValueError):
+    """A recorded edge points at a draft no slot came from."""
+
+
 @dataclass(slots=True)
 class Scribe:
     """Collects the edges. One per `build` call, discarded after `finish`.
 
-    Drafts are identified by `id()`, valid only while `build`'s own list
-    keeps them alive.
+    Drafts are identified by `_Draft.uid`, so a pass that drops one has to
+    say what becomes of its edges rather than leaving them to fall out.
     """
 
     verse: VerseRef
@@ -37,30 +41,35 @@ class Scribe:
         """`subject` is the draft the fact landed on, which is not always the
         cluster that carried the mark."""
         if offset >= 0 and subject is not None:
-            self.evidences.append((offset, id(subject), fact))
+            self.evidences.append((offset, subject.uid, fact))
 
     def decoration(self, offset: int, subject) -> None:
         if offset >= 0 and subject is not None:
-            self.decorates.append((offset, id(subject)))
+            self.decorates.append((offset, subject.uid))
 
     def attestation(self, offset: int, family: RuleFamily, anchor) -> None:
         if offset >= 0 and anchor is not None:
-            self.attests.append((offset, family, id(anchor)))
+            self.attests.append((offset, family, anchor.uid))
+
+    def withdraw(self, drafts) -> None:
+        """Every edge into these drafts, dropped. For a pass that replaces a
+        span wholesale: the graphemes are re-evidenced onto what replaces it."""
+        gone = {draft.uid for draft in drafts}
+        self.evidences = [row for row in self.evidences if row[1] not in gone]
+        self.decorates = [row for row in self.decorates if row[1] not in gone]
+        self.attests = [row for row in self.attests if row[2] not in gone]
 
     def finish(self, reading, drafts, ordinals: dict[int, int]) -> Inscription:
         spellings: list[Spelling] = []
         for offset, key, fact in self.evidences:
-            slot = _slot(self.verse, ordinals, key)
-            if slot is not None:
-                spellings.append(Evidences(_grapheme(self.verse, offset), slot, fact))
+            slot = _slot(self.verse, ordinals, key, offset)
+            spellings.append(Evidences(_grapheme(self.verse, offset), slot, fact))
         for offset, key in self.decorates:
-            slot = _slot(self.verse, ordinals, key)
-            if slot is not None:
-                spellings.append(Decorates(_grapheme(self.verse, offset), slot))
+            slot = _slot(self.verse, ordinals, key, offset)
+            spellings.append(Decorates(_grapheme(self.verse, offset), slot))
         for offset, family, key in self.attests:
-            slot = _slot(self.verse, ordinals, key)
-            if slot is not None:
-                spellings.append(Attests(_grapheme(self.verse, offset), family, slot))
+            slot = _slot(self.verse, ordinals, key, offset)
+            spellings.append(Attests(_grapheme(self.verse, offset), family, slot))
         for offset in reading.structural:
             spellings.append(Structural(_grapheme(self.verse, offset)))
         spellings.extend(self._decorations(reading, drafts, ordinals))
@@ -79,9 +88,9 @@ class Scribe:
         not know which clusters become slots. A mark on rasm has no cluster
         of its own, so it falls back to the last slot before it."""
         by_cluster = {
-            draft.cluster: ordinals[id(draft)]
+            draft.cluster: ordinals[draft.uid]
             for draft in drafts
-            if draft.cluster >= 0 and id(draft) in ordinals
+            if draft.cluster >= 0
         }
         ordered = sorted(by_cluster)
         for decoration in reading.decorations:
@@ -99,9 +108,17 @@ class Scribe:
             )
 
 
-def _slot(verse: VerseRef, ordinals: dict[int, int], key: int) -> SlotId | None:
+def _slot(verse: VerseRef, ordinals: dict[int, int], key: int, offset: int) -> SlotId:
+    """A miss is a written character anchored to no sound, which is invisible
+    in output and in every gate. It raises instead."""
     ordinal = ordinals.get(key)
-    return None if ordinal is None else SlotId(verse, ordinal)
+    if ordinal is None:
+        raise OrphanedEdgeError(
+            f"{verse.surah}:{verse.ayah} offset {offset}: edge into draft "
+            f"{key}, which no slot came from. A pass that drops a draft must "
+            f"withdraw its edges."
+        )
+    return SlotId(verse, ordinal)
 
 
 def _grapheme(verse: VerseRef, offset: int) -> GraphemeId:

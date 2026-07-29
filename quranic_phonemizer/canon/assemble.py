@@ -15,7 +15,7 @@ def assemble(
     ordinals: dict[int, int] = {}
     sakt: set[int] = set()
     for ordinal, draft in enumerate(drafts):
-        ordinals[id(draft)] = ordinal
+        ordinals[draft.uid] = ordinal
         word = reading.clusters[draft.cluster].word if draft.cluster >= 0 else 0
         by_word.setdefault(word, []).append(_slot(reading, draft, ordinal))
         if draft.sakt_after:
