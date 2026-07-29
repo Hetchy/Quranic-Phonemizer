@@ -254,11 +254,13 @@ added to the `Attribution` union or carried as a separate
 own a sound, and the P1 law ("every sound is hosted exactly once") should not
 have to special-case it.
 
-**C3 -- a composition root** (fixes F4). Not a design question, but it is the
-gate on shipping. It takes `(ref, stop policy, riwayah, selection)` and returns
-`Reading`; the boundary plan is derived from the policy plus `Inscription.advice`
-plus verse ends, which is what `engine/boundary_plan.py` should grow beyond
-`all_join`.
+**C3 -- the ref-to-document loop** (fixes F4). Not a design question, but it is
+the gate on shipping. `api.recitation(riwayah)` already assembles a riwayah and
+`engine/boundary_plan.py::plan_from_request(advice, stop_at, score=)` already
+turns a stop policy into a `BoundaryPlan`. What is missing sits above both: take
+`(ref, stop policy, selection)`, resolve the ref through
+`PackedCorpus.locations`, run `read` -> `build` -> `perform` per verse, and
+assemble one `Reading` across them.
 
 Deliberately **not** changed:
 

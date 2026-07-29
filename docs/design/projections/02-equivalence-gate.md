@@ -161,7 +161,8 @@ reasoning:
 3. **C2** -- keep the modifier edge. Small, and F1/F3 do not close without it.
 4. Build `Reading` over a single verse with a hand-written composition, and
    check it against `tests/test_anchored_projection.py`'s six verses.
-5. **C3** -- the composition root and a real boundary policy.
+5. **C3** -- the ref-to-document loop over `api.recitation` and
+   `plan_from_request`.
 6. `tools/projection_parity.py`, `silent_flags` adapter first.
 7. The other three adapters, largest last.
 8. Bump `out/phonemized_v{N+1}` and write the `changes.txt` entry.

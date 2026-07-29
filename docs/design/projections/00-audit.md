@@ -193,14 +193,18 @@ but there is no edge from a sound to it, so today the join is guesswork.
   record of which occurrence set them. After materialisation you can see that a
   consonant is emphatic; you cannot see that `TAFKHEEM` made it so.
 
-### 4.2 There is no composition root (blocking)
+### 4.2 The composition root stops one level below a projection
 
-`quranic_phonemizer/__init__.py` exports only `KhilafId`, `Option`,
-`VariantSelection`, and says so. Every test assembles the pipeline by hand
-(`conftest.py`: `build` -> `perform` -> `anchored`). A projection needs an entry
-point that takes a ref, a stop-sign policy and a selection, and returns the
-document. That is the largest piece of implementation work and it is not
-projection design.
+`api.recitation(riwayah)` assembles a riwayah's adapters, data and rules, and
+`engine/boundary_plan.py::plan_from_request` turns per-word `StopAdvice` plus a
+requested stop set into a `BoundaryPlan`. Both of the pieces this document's
+first draft called missing are there.
+
+What is still absent is the level above them: a call that takes a *ref* -- a
+range, not a verse -- resolves it against `PackedCorpus.locations`, loops
+`read` -> `build` -> `perform` per verse, and returns one document. Today a
+caller does that loop by hand, which is what every test does. That is
+assembly, not design, but nothing ships until it exists.
 
 ### 4.3 The projection is verse-scoped; consumers are not
 
@@ -289,7 +293,7 @@ appear, is an empirical question the gate must answer (02-gate §3).
 | F1 | Classification-only rules have no sound edge; `AnchoredSound.rule` is `plain` for every madd | the whole tajweed payload |
 | F2 | `Participants.slots` is unlabelled; `PausalGlide` reverses the convention | any rule-to-unit join |
 | F3 | `Recolour`/`Relength` lose their occurrence at materialisation | `tafkheem` on a sound, `iltiqa` shortening |
-| F4 | No composition root | shipping anything |
+| F4 | `api.recitation` and `plan_from_request` exist; the ref-to-document loop above them does not | shipping anything |
 | F5 | Verse-scoped ids vs multi-verse consumers | wasl chains, ranged refs |
 | F6 | `write` totality unproven over ADR-005 §4's trigger set | `Unit.glyphs` |
 | F7 | Sound ownership for display is computed by the consumer | animation correctness |
