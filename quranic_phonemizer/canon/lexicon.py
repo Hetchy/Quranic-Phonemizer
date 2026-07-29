@@ -1,34 +1,29 @@
 """The canonical-skeleton lexicon: closed classes of Arabic, not of this corpus.
 
 Keyed by canonical letters so one entry serves every script of the riwayah.
-A budget ceiling turns growth past it into a build failure, not a silent list.
+The sections are data; the ways of matching one are a closed set in here.
 """
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from enum import StrEnum
 from pathlib import Path
 
 from ..dataio import load_yaml, require_keys
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
-#: Exceeding a budget fails the build instead of absorbing growth silently.
-#: `wasl_exempt` needs headroom because `ال` is genuinely ambiguous between
-#: the article and a root lam, with no orthographic test to tell them apart.
-BUDGETS = {
-    "wasl_particles": 10,
-    "wasl_exempt": 60,
-    "wasl_exempt_doubled": 10,
-    "pausal_lexemes": 10,
-    "form_eight_lam": 10,
-    "divine_name": 5,
-}
+#: Versioned per file, not per package: this one has never had to move.
+MORPHOLOGY_SCHEMA_VERSION = 1
 
-#: The attached pronouns, in canonical letters. Closed in Arabic, so a lexeme
-#: entry covers its whole inflectional family without enumerating it.
-CLITIC_PRONOUNS: frozenset[str] = frozenset(
-    {"ه", "هم", "هما", "هن", "ك", "كم", "كما", "كن", "نا", "ي", "ني", "همء"}
-)
+
+class MatchMode(StrEnum):
+    """How an entry is compared against the skeleton being tested."""
+
+    EXACT = "exact"
+    CLITIC = "clitic"
+    INFLECTED = "inflected"
+    PROCLITIC = "proclitic"
 
 
 #: Below this length a stem is not specific enough to match a prefix.
@@ -44,120 +39,155 @@ class LexiconError(ValueError):
 
 
 @dataclass(frozen=True, slots=True)
+class Section:
+    """One closed class: how to match it, and how large it may grow."""
+
+    match: MatchMode
+    budget: int
+    """A ceiling the gate enforces. Growth past it means a rule is missing,
+    not that the corpus is irregular, so it is reviewed rather than raised."""
+    entries: frozenset[str] = frozenset()
+
+
+@dataclass(frozen=True, slots=True)
 class Lexicon:
-    wasl_particles: frozenset[str] = frozenset()
-    """`إن`, `إذ`, `إذا` - hamza-initial particles that look prosthetic."""
-    wasl_exempt: frozenset[str] = frozenset()
-    """Proper nouns and form-IV verbal nouns the three rules over-accept."""
-    wasl_exempt_doubled: frozenset[str] = frozenset()
-    """`ألَّف`, `إلَّم` - hamza plus a doubled lam that is not the article."""
-    wasl_kasra: frozenset[str] = frozenset()
-    """Words whose wasl hamza takes kasra although their third letter carries
-    damma, because that damma is not the stem's: `اسم`, `ٱمْشُوا۟`."""
-    pausal_lexemes: frozenset[str] = frozenset()
-    """The seven alifs: words whose final alif is short in wasl and long at
-    pause. IndoPak's script has no grapheme that distinguishes them, so the
-    absence of evidence is not a contradiction."""
-    form_eight_lam: frozenset[str] = frozenset()
-    """Form-VIII verbs whose first radical is lam, e.g. `ٱلْتَقَى`. After a
-    wasl hamza these look identical to the definite article before a sun
-    letter, and canonical facts alone cannot tell them apart."""
-    divine_name: frozenset[str] = frozenset()
-    """What the name of God spells from its doubled lam to the end of the
-    word. `ٱللَّهْوِ` and `ٱللَّهَبِ` open the same way and are not it."""
+    sections: dict[str, Section] = field(default_factory=dict)
+    clitics: frozenset[str] = frozenset()
+    """Arabic's attached pronouns. A closed set, so a stem entry covers its
+    whole inflectional family without enumerating it."""
     source: Path | None = field(default=None, compare=False)
 
     def is_divine_name(self, tail: str) -> bool:
         """The whole remainder of the word, so a third radical excludes it."""
-        return tail in self.divine_name
+        return self._matches("divine_name", tail)
 
     def is_wasl_exempt(self, skeleton: str) -> bool:
-        return _inflected(self.wasl_particles, skeleton) or _inflected(
-            self.wasl_exempt, skeleton
+        return self._matches("wasl_particles", skeleton) or self._matches(
+            "wasl_exempt", skeleton
         )
 
     def is_wasl_exempt_doubled(self, skeleton: str) -> bool:
-        return _inflected(self.wasl_exempt_doubled, skeleton)
+        return self._matches("wasl_exempt_doubled", skeleton)
 
     def is_pausal(self, skeleton: str) -> bool:
         """Matched exactly, or after a single proclitic: `وَأَنَا` is `أنا`."""
-        if skeleton in self.pausal_lexemes:
-            return True
-        return any(
-            len(skeleton) - len(entry) == _PROCLITIC and skeleton.endswith(entry)
-            for entry in self.pausal_lexemes
-        )
+        return self._matches("pausal_lexemes", skeleton)
 
     def takes_wasl_kasra(self, skeleton: str) -> bool:
         """Matched as it stands: `است` heads every form-X verb, whose helping
         vowel its own third letter decides."""
-        return _bare(self.wasl_kasra, skeleton)
+        return self._matches("wasl_kasra", skeleton)
 
     def is_form_eight_lam(self, skeleton: str) -> bool:
         """Matched as it stands: `ٱلتَّقْوَىٰ` and `ٱلتَّمَاثِيل` extend the
         stems of `ٱلْتَقَى` and `ٱلْتَمِسُوا` and are not them."""
-        return _bare(self.form_eight_lam, skeleton)
+        return self._matches("form_eight_lam", skeleton)
+
+    @property
+    def pausal_lexemes(self) -> frozenset[str]:
+        """The pass that applies them skips its whole loop when there are
+        none, so it asks for the entries rather than testing a skeleton."""
+        section = self.sections.get("pausal_lexemes")
+        return section.entries if section else frozenset()
+
+    def _matches(self, name: str, key: str) -> bool:
+        section = self.sections.get(name)
+        if section is None:
+            return False
+        return _MATCHERS[section.match](section.entries, key, self.clitics)
 
 
-def _bare(entries: frozenset[str], skeleton: str) -> bool:
-    """A lexeme, with or without a clitic pronoun.
+def _exact(entries: frozenset[str], key: str, clitics: frozenset[str]) -> bool:
+    return key in entries
 
-    Arabic's clitic pronouns are a closed set, so matching stem plus pronoun
-    avoids enumerating every inflected form of `إيمان` separately.
-    """
-    return skeleton in entries or any(
-        skeleton == stem + clitic
-        for stem in entries
-        for clitic in CLITIC_PRONOUNS
+
+def _clitic(entries: frozenset[str], key: str, clitics: frozenset[str]) -> bool:
+    """A lexeme, with or without a clitic pronoun."""
+    return key in entries or any(
+        key == stem + clitic for stem in entries for clitic in clitics
     )
 
 
-def _inflected(entries: frozenset[str], skeleton: str) -> bool:
+def _inflected(entries: frozenset[str], key: str, clitics: frozenset[str]) -> bool:
     """That, or a stem long enough to be specific as a prefix -- `ألقى`,
     `ألقينا`, `ألقوا` are one entry."""
-    return _bare(entries, skeleton) or any(
-        len(stem) >= _PREFIX_MIN and skeleton.startswith(stem)
-        for stem in entries
+    return _clitic(entries, key, clitics) or any(
+        len(stem) >= _PREFIX_MIN and key.startswith(stem) for stem in entries
     )
 
+
+def _proclitic(entries: frozenset[str], key: str, clitics: frozenset[str]) -> bool:
+    return key in entries or any(
+        len(key) - len(entry) == _PROCLITIC and key.endswith(entry)
+        for entry in entries
+    )
+
+
+_MATCHERS = {
+    MatchMode.EXACT: _exact,
+    MatchMode.CLITIC: _clitic,
+    MatchMode.INFLECTED: _inflected,
+    MatchMode.PROCLITIC: _proclitic,
+}
 
 EMPTY = Lexicon()
 
 
-def _section(entries, name: str, path: Path) -> frozenset[str]:
+def _entries(raw, name: str, path: Path) -> frozenset[str]:
     """A repeated entry is rejected: a set would swallow it before the budget
     counts, so the file would show more rows than the ceiling ever sees."""
     seen: set[str] = set()
-    for entry in entries:
+    for entry in raw or ():
         if entry in seen:
             raise LexiconError(f"{path}: {name} lists {entry!r} twice")
         seen.add(entry)
     return frozenset(seen)
 
 
-def load_lexicon(path: Path) -> Lexicon:
-    data = load_yaml(path)
-    require_keys(
-        data,
-        {"schema_version"},
-        name=str(path),
-        optional=set(BUDGETS) | {"wasl_kasra"},
+def _section(raw, name: str, path: Path) -> Section:
+    where = f"{path} sections[{name}]"
+    require_keys(raw, {"match", "budget", "entries"}, name=where)
+    try:
+        match = MatchMode(raw["match"])
+    except ValueError:
+        raise LexiconError(
+            f"{where}: {raw['match']!r} is not a match mode. The modes are "
+            f"code and closed: {sorted(m.value for m in MatchMode)}"
+        ) from None
+    return Section(
+        match=match,
+        budget=int(raw["budget"]),
+        entries=_entries(raw["entries"], name, path),
     )
+
+
+def load_lexicon(path: Path, *, clitics: frozenset[str] = frozenset()) -> Lexicon:
+    data = load_yaml(path)
+    require_keys(data, {"schema_version", "sections"}, name=str(path))
     if data["schema_version"] != SCHEMA_VERSION:
         raise LexiconError(
             f"{path}: schema_version {data['schema_version']!r}, expected "
             f"{SCHEMA_VERSION}"
         )
-    sections = {
-        name: _section(data.get(name) or (), name, path)
-        for name in (*BUDGETS, "wasl_kasra")
-    }
-    for name, ceiling in BUDGETS.items():
-        size = len(sections[name])
-        if size > ceiling:
-            raise LexiconError(
-                f"{path}: {name} has {size} entries, over its budget of "
-                f"{ceiling}. A location table growing toward 10^4 is a signal "
-                f"that a rule is missing, not that the corpus is irregular."
-            )
-    return Lexicon(source=path, **sections)
+    sections = data["sections"] or {}
+    if not isinstance(sections, dict):
+        raise LexiconError(f"{path}: sections must be a mapping, got {sections!r}")
+    return Lexicon(
+        sections={
+            name: _section(raw, name, path) for name, raw in sections.items()
+        },
+        clitics=clitics,
+        source=path,
+    )
+
+
+def load_clitic_pronouns(path: Path) -> frozenset[str]:
+    """Arabic morphology, invariant across riwayat, so it is shared data."""
+    data = load_yaml(path)
+    require_keys(data, {"schema_version", "clitic_pronouns"}, name=str(path))
+    if data["schema_version"] != MORPHOLOGY_SCHEMA_VERSION:
+        raise LexiconError(
+            f"{path}: schema_version {data['schema_version']!r}, expected "
+            f"{MORPHOLOGY_SCHEMA_VERSION}"
+        )
+    return _entries(data["clitic_pronouns"], "clitic_pronouns", path)

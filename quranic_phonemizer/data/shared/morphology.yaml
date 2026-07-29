@@ -1,0 +1,12 @@
+# Arabic morphology, not one riwayah's reading of it. Shared for the same
+# reason the muqattaat letter names are: which pronouns attach to a word is a
+# fact about the language, and every riwayah recites the same language.
+#
+# Written in canonical letters, like every lexicon key.
+schema_version: 1
+
+# The attached pronouns. A closed class, so a lexicon entry can be a stem and
+# still cover its whole inflectional family: `ءمن` matches `إيمانكم` and
+# `إيمانهم` without either being listed.
+clitic_pronouns: ["ه", "هم", "هما", "هن", "ك", "كم", "كما", "كن", "نا", "ي",
+                  "ني", "همء"]
