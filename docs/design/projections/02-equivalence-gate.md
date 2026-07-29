@@ -105,10 +105,15 @@ suite separately proves the new facts exist.
 For each non-structural source token:
 
 ```text
-units  = units reached by its Evidences and Decorates edges
-silent = every relevant attributed aspect has a Silent outcome
-mark   = the adjacent silence-sign glyph bound to the same unit, or ""
+links  = contribution edges for the token's source glyphs
+silent = the legacy silence policy over Presents targets and OrthographicOnly
+mark   = the silence-sign glyph presenting the same outcome, or ""
 ```
+
+The policy distinguishes `Presents(Hosts)`, `Presents(Silent)`,
+`Presents(MergedInto)`, and `OrthographicOnly`; it never infers glyph
+audibility from whether a related unit has any sound. This is what makes the
+carrier waw silent while the dagger on the same nucleus remains sounded.
 
 The adapter then applies the legacy scalar grouping exactly: dagger alif,
 mini-waw, and mini-yaa remain separate where legacy separated them; other
@@ -119,15 +124,17 @@ combining marks rejoin their base. The following named cases must be exact:
 - taa marbuta at pause;
 - all legacy `vowel_silent` rows.
 
-Every silent outcome must name an occurrence. The residue report groups
-`vowel_silent` by the actual rule and fails if any row has no reason.
+Every `Presents(Silent)` outcome must name an occurrence.
+`OrthographicOnly` instead keeps its script reason in the glyph's spelling
+edges; it does not fabricate a performance occurrence. The residue report
+groups `vowel_silent` by the typed case and fails if any row has neither.
 
 ### 3.3 `tajweed_mappings`
 
-Occurrence participants supply trigger, target, and context; spelling edges
-locate the source glyphs; attribution and modifier edges locate the affected
-sound. A versioned vocabulary table maps the current `Rule` to the legacy
-rule names and trigger splits.
+Occurrence participants supply trigger, source, target, and context anchors;
+contribution edges locate the source glyphs; attribution and modifier edges
+locate the affected sound. A versioned vocabulary table maps the current
+`Rule` to the legacy rule names and trigger splits.
 
 Source and target are reconstructed from semantic roles, not tuple position.
 For assimilation, the disappearing trigger and receiving target are distinct
@@ -163,12 +170,12 @@ Every legacy field is adapted:
 |---|---|
 | `chars` | source spelling or derived recited writing |
 | `role` | folded `GraphemeClass` |
-| `status` | typed attribution plus source/rendered difference |
-| `phonemes` | attributed sound tokens |
+| `status` | typed glyph contribution plus source/rendered difference |
+| `phonemes` | sound targets reached by glyph contribution |
 | `phoneme_indices` | sound indices rebased word-local |
 | `tag` | legacy priority over compatible occurrences |
 | `secondary_tags` | remaining compatible occurrences |
-| `phoneme_rule_tags` | occurrences reached by attribution and modifier edges |
+| `phoneme_rule_tags` | occurrences reached by contribution, attribution, and modifier edges |
 | `share_group` | units on joint or shared sound relations |
 | `source_letter_index` | source glyph index |
 | `source_letter_indices` | spelling edges back to source glyphs |
@@ -198,6 +205,9 @@ These laws run over the entire corpus in all three boundary modes.
 ### 4.2 Spelling
 
 - Every source scalar produces exactly one `Glyph` node.
+- Concatenating `glyph.char` in `source_index` order reproduces the requested
+  source text as the exact Unicode scalar sequence, including internal spaces
+  and structural marks.
 - Every glyph participates in at least one spelling edge.
 - `Structural` glyphs have `word=None` and no unit-bearing spelling edge.
 - Every `Evidences` edge has the correct `SlotFact`.
@@ -223,7 +233,9 @@ These laws run over the entire corpus in all three boundary modes.
 
 ### 4.4 Occurrences, participants, and modifiers
 
-- Every occurrence has valid, ordered, rule-legal participant roles.
+- Every participant names a valid `(unit, Aspect)` anchor.
+- Every occurrence has valid, ordered roles under its rule family's schema,
+  including required and repeatable role cardinalities.
 - Every target participant is reached by an attribution or modifier when the
   rule changes or classifies a sound.
 - Every applied `Recolour` and `Relength` has exactly one retained modifier
@@ -233,11 +245,27 @@ These laws run over the entire corpus in all three boundary modes.
 - `FAMILY_OF` and `PHASE_OF` are total for every public `Rule`.
 - Deriving reverse indexes introduces no duplicate or dangling relation.
 
-### 4.5 Recited writing
+### 4.5 Glyph contribution
+
+- Every non-structural glyph has one or more `Presents` edges or exactly one
+  `OrthographicOnly` edge, never both.
+- Every `Presents` target resolves to an attribution, modifier, or occurrence
+  and is compatible with the glyph's spelling edges.
+- Structural glyphs have no contribution edge.
+- A haraka and ordinary carrier may both present one hosted nucleus sound.
+- A carrier under a dagger is `OrthographicOnly`; the dagger presents the
+  hosted nucleus sound.
+- A maddah may present a performance target even though `Decorates` supplies
+  no canonical fact.
+- A soundless process mark may present its occurrence without a fabricated
+  sound.
+- No adapter or serializer infers glyph audibility from unit audibility.
+
+### 4.6 Recited writing
 
 - `write` is total for every unit that has a recited representation.
-- Every rendered glyph links either to source spelling edges or to one
-  inserted sound and its anchor side.
+- Every rendered glyph links either to source contribution and spelling edges
+  or to one inserted sound and its anchor side.
 - Source glyph order and values never change.
 - An insertion needs neither a fake unit nor `char=""`.
 - Source and rendered strings reproduce every legacy `present`, `inserted`,
@@ -247,7 +275,7 @@ These laws run over the entire corpus in all three boundary modes.
 ## 5. Schema and negative tests
 
 The JSON schema uses tagged unions for nucleus, sound, spelling, attribution,
-and modifier values. Tests reject at least:
+modifier, and glyph-contribution values. Tests reject at least:
 
 - a nullable quality paired with an incompatible nucleus kind;
 - a sound with fields from two sound variants;
@@ -257,6 +285,9 @@ and modifier values. Tests reject at least:
 - `Silent` carrying a sound;
 - an attribution without `Aspect`;
 - a merger without its matching host;
+- a `Presents` edge with an out-of-range or wrong-kind target;
+- a glyph carrying both `Presents` and `OrthographicOnly`;
+- a non-structural glyph with no contribution edge;
 - an out-of-range or wrong-kind index;
 - duplicate canonical relations;
 - an unknown schema version.
@@ -265,31 +296,42 @@ Round-trip tests cover canonical JSON, optional SDK-derived indexes, and schema
 evolution. Adding a union member requires a schema-version change and a
 negative test showing older readers fail clearly rather than misinterpret it.
 
-## 6. Domain fixture spine
+## 6. Domain adequacy matrix
 
-Small fixtures make failures diagnosable before the full-corpus run:
+Each applicable family has joined, stopped, and started fixtures. An
+unmodelled relationship blocks the contract; an adapter or serializer may not
+repair it.
 
-| Case | What it proves |
+| Family | Relationships that must be represented |
 |---|---|
-| final consonant at pause | onset realization and nucleus silence coexist |
-| long vowel | haraka and carrier keep distinct spelling facts on one unit |
-| tanween | one grapheme reaches the base and the derived nunation unit |
-| muqattaat | compact script expands through many-to-many evidence |
-| cross-word idgham | host and contributor share sound and occurrence |
-| 3:1 iltiqa | slotless insertion keeps before/after placement |
-| silah joined and paused | conditional nucleus has two valid performances |
-| madd iwad | boundary-conditional length without a duration fact |
-| iqlab small meem | script witness remains bound without frontend surgery |
-| stop sign and verse marker | structural glyph belongs to no word or unit |
-| divine-name lam | lexical identity and tafkheem occurrence remain separate |
-| imala and ishmam | processes are occurrences; soundless gesture stays soundless |
+| short and long vowels | base, haraka, carrier fan-in, shared sound, and distinct glyph contribution |
+| silent carriers | otiose alif, waw, yaa, and maqsura; silence sign; dagger seat versus sounded dagger |
+| hamza wasl | source glyph, start vowel, joined deletion, repair, and article lam |
+| tanween | one mark to vowel and nunation anchors; continuing carrier silence; waqf iwad |
+| silah | written or virtual extension, joined length, and pausal deletion |
+| divine name | word lexical class, heavy or light lam occurrence, written or virtual dagger, and waqf change |
+| mergers | within-word and cross-word source, host, contributor, shared sound, complete and partial forms |
+| noon and meem | source, trigger, target roles and nasal placement for noon, tanween, and meem |
+| madd | haraka, carrier, mark, subtype, participant-derived cause, and boundary change |
+| qalqala | closure and release, one occurrence, consonant reach, and stop degree |
+| emphasis | consonant and governed vowel reach, including raa and divine-name cases |
+| muqattaat | compact glyph to spelled units, sounds, and rules without a cached mapping |
+| waqf endings | nucleus deletion with onset retained, ta marbuta, iwad, arid, leen, and qalqala |
+| ibtida | start boundary, wasl vowel, gemination, and right context |
+| marks and advice | imala, ishmam, tashil, sakt, seen/sad, iqlab, maddah, and stop advice |
+| slotless repair | side, order, occurrence, sound, contribution-free insertion, and rendered form |
+| source structure | spaces, internal spaces, tatweel, stop signs, and verse markers round-trip exactly |
+
+Madd cause is required through rule and participant semantics. Permitted and
+selected counts remain outside this contract until request identity includes
+the transmission path or realization policy that makes them authoritative.
 
 ## 7. Order and CI policy
 
-1. Implement C1 and C2 with their local laws.
+1. Implement C1-C3 with their local laws.
 2. Define the versioned JSON schema and negative tests.
-3. Assemble a single-verse `Reading` and pass the domain fixture spine.
-4. Implement C3 for ranges, internal boundaries, and selections.
+3. Assemble a single-verse `Reading` and pass the domain adequacy matrix.
+4. Implement C4 for ranges, internal boundaries, and selections.
 5. Implement `tools/projection_parity.py`; verify the frozen manifest.
 6. Pass each exact adapter in continuous, verse, and word modes.
 7. Pass the extended request matrix and full graph-completeness suite.

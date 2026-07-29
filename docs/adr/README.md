@@ -36,7 +36,7 @@ projection boundary that ADR-005 deferred.
 | [010](010-constants-that-restate-data.md) | A constant that restates a data file becomes the data, or a check against it |
 | [011](011-where-a-slot-is.md) | Adjacency on `Neighbourhood`, a required pass list, and a draft identity that survives being dropped |
 | [012](012-what-a-signature-may-leave-unsaid.md) | `del` for a parameter a protocol forces, checked rather than conventional |
-| [013](013-public-projection-foundations.md) | Public snapshots preserve typed spelling, attribution, and modifier edges |
+| [013](013-public-projection-foundations.md) | Public snapshots preserve typed domain edges and explicit glyph contribution |
 
 ## What this is for
 

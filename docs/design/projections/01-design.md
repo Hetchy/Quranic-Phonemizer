@@ -44,6 +44,7 @@ class Reading:
     spellings: tuple[SpellingEdge, ...]
     attributions: tuple[AttributionEdge, ...]
     modifiers: tuple[ModifierEdge, ...]
+    contributions: tuple[GlyphContributionEdge, ...]
 
 
 @dataclass(frozen=True)
@@ -164,13 +165,26 @@ participants: tuple[Participant, ...]
 
 @dataclass(frozen=True)
 class Participant:
+    anchor: AspectRef
+    role: ParticipantRole      # trigger | source | target | context
+
+
+@dataclass(frozen=True)
+class AspectRef:
     unit: int
-    role: ParticipantRole      # trigger | target | context
+    aspect: Aspect
 ```
 
 Participants explain why a rule matched. Attribution and modifier edges
 explain what it did. This avoids a generic `effect` string that duplicates and
 weakens those relations.
+
+Roles are closed and checked against the rule family's participant schema.
+`trigger` is the condition that made the rule applicable; `source` is its
+canonical locus; `target` is the affected anchor; and `context` records a
+required participant with none of those meanings. `host`, `contributor`, and
+`carrier` are not repeated here: attribution edges state host and contributor,
+while spelling and contribution edges state carrier participation.
 
 `RuleFamily` and execution `Phase` are total functions of `Rule` in versioned
 registries. They are derived rather than repeated in every occurrence.
@@ -233,6 +247,27 @@ These edges retain the occurrence after the engine applies an effect.
 claiming ownership. A soundless gesture such as ishmam is still represented by
 its occurrence and target participant; it does not receive a fake sound.
 
+### 4.4 Glyph contribution
+
+```python
+Presents(glyph: int, target: PerformanceRef)
+OrthographicOnly(glyph: int)
+
+PerformanceRef = AttributionRef | ModifierRef | OccurrenceRef
+GlyphContributionEdge = Presents | OrthographicOnly
+```
+
+Each reference variant is a tagged index into the named relation or occurrence
+array. A glyph may have several `Presents` edges. `OrthographicOnly` is
+exclusive and means the glyph has no performance contribution; its spelling
+edge still states its canonical or structural attachment.
+
+This relation cannot be inferred from unit audibility. A haraka and carrier
+can evidence the same nucleus and share its vowel, while a carrier waw under a
+dagger is orthographic-only and the dagger presents the vowel. A maddah can
+present an attribution or modifier despite supplying no canonical fact. A
+soundless ishmam mark can present its occurrence without fabricating a sound.
+
 ## 5. Derived views, not stored facts
 
 The following conveniences have named definitions:
@@ -242,6 +277,7 @@ units_by_word(w)       = units whose word is w
 glyphs_by_unit(u)      = spelling edges naming u
 sounds_by_unit(u, a)   = attribution edges naming u and aspect a
 rules_by_sound(s)      = occurrences reached by attribution or modifier edges
+performance_by_glyph(g)= targets of Presents edges for g
 family(o)              = FAMILY_OF[occurrences[o].rule]
 phase(o)               = PHASE_OF[occurrences[o].rule]
 ```
@@ -251,23 +287,23 @@ not domain ownership:
 
 ```text
 display_glyph(sound, policy)
-  = choose among glyphs that evidence the attributed unit and aspect
+  = choose among glyphs whose Presents targets reach sound
 ```
 
 This can choose a haraka or a length carrier. A stored `owner: Unit` cannot,
 because both glyphs may evidence the same unit.
 
-Recited writing is a separate serializer over `write`, spelling, attribution,
-and insertion anchors. It may return render glyphs with source-glyph links.
-For a slotless insertion it writes the inserted sound at its anchor side.
-Source glyphs remain unchanged, and no core `Unit.glyphs` field is promised
-non-empty.
+Recited writing is a separate serializer over `write`, spelling, contribution,
+attribution, and insertion anchors. It may return render glyphs with
+source-glyph links. For a slotless insertion it writes the inserted sound at
+its anchor side. Source glyphs remain unchanged, and no core `Unit.glyphs`
+field is promised non-empty.
 
 Legacy presentation states become pure derivations:
 
 ```text
 inserted  = an Inserted attribution
-dropped   = a Silent attribution for the relevant aspect
+dropped   = a source glyph Presents a Silent attribution, or is OrthographicOnly
 merged    = paired Hosts and MergedInto attributions
 replaced  = rendered writing differs from source spelling
 shortened = a Relengths edge to short
@@ -276,27 +312,35 @@ present   = none of the above
 
 ## 6. Model work required
 
-The projection exposes three gaps that must be fixed before it ships.
+The projection exposes four gaps that must be fixed before it ships.
 
 **C1 - semantic participant roles.** Replace the unlabelled
-`Participants.slots` tuple with ordered `Participant(unit, role)` values. This
-is not a mechanical first/other split: each rule family must state trigger,
-target, and context from its domain grammar. Tests assert the roles for
-cross-word assimilation, madd, boundary elision, and classification-only
-rules.
+`Participants.slots` tuple with ordered `Participant(AspectRef, role)` values.
+This is not a mechanical first/other split: each rule family must define its
+allowed and required trigger, source, target, and context roles. Tests assert
+the roles for cross-word assimilation, madd, boundary elision, and
+classification-only rules.
 
 **C2 - retained modifier provenance.** When the engine applies `Recolour` or
 `Relength`, retain the occurrence-to-sound edge and its value. Add
 `Classifies` for a classification-only occurrence that names a sound. This
 closes the current loss between verdict application and `Performance`.
 
-**C3 - ref-to-document orchestration.** Resolve `(ref, boundary policy,
+**C3 - total glyph contribution.** Build the cross-layer join that tells which
+performance targets each glyph presents. Every non-structural glyph has one or
+more `Presents` edges or exactly one `OrthographicOnly` edge. The construction
+must distinguish a sounded dagger from its silent carrier, a sounded maddah
+from an otiose seat, and a performance deletion from orthographic zero. If
+the source model cannot determine a link, it must be fixed below the
+projection; serializers may not detect the answer from tokens or rule names.
+
+**C4 - ref-to-document orchestration.** Resolve `(ref, boundary policy,
 selection)` through the selected corpus, build the Score and Inscription, run
 the Performance, and assemble one index space across the requested range.
 Internal starts, arbitrary stops, sakt, and cross-verse joins use the same
 path; they are not separate projection modes.
 
-No rule behaviour changes as part of C1-C3. `CLASSIFICATION_ONLY` remains a
+No rule behaviour changes as part of C1-C4. `CLASSIFICATION_ONLY` remains a
 valid statement that an occurrence owns no sound.
 
 ## 7. Rule vocabulary
@@ -316,20 +360,20 @@ occurrence participants and lexical identity state why it applied.
 
 | Application | Reads |
 |---|---|
-| Inspector cells | nodes plus spelling, attribution, and modifier indexes |
-| Silent highlighting | `Silent` attributions and related spelling edges |
+| Inspector cells | nodes plus spelling, contribution, attribution, and modifier indexes |
+| Silent highlighting | `Presents(Silent)` and `OrthographicOnly` contribution edges |
 | Disjoint timing | a chosen `display_glyph` policy |
 | Co-highlighting | all units on the relevant `Hosts` edge |
 | Cross-word bridge | paired `Hosts` and `MergedInto` edges |
 | Flat letter mappings | a legacy adapter over spelling and attribution |
-| Tajweed-coloured script | spelling edges to occurrence participants and modifiers |
+| Tajweed-coloured script | contribution edges to occurrences, attributions, and modifiers |
 | Tajweed ASR | sounds, occurrences, modifiers, and request selection |
 | Custom notation | the same graph with a different `token` serializer |
 
 ## 9. Shipping questions
 
-The graph shape is settled by ADR-013. Three empirical questions remain gate
-items rather than schema choices:
+The current graph shape is settled by ADR-013. Three empirical gate items and
+one scoped extension question remain:
 
 1. Does the Uthmani inventory bind every iqlab small meem through a typed
    spelling edge?
@@ -337,5 +381,8 @@ items rather than schema choices:
    corpus?
 3. Does every preserved legacy field round-trip exactly in continuous, verse,
    and word boundary modes?
+4. What transmission path or realization policy would make permitted and
+   selected madd counts authoritative? Until the request can identify it,
+   counts remain outside the contract.
 
 [02-equivalence-gate](02-equivalence-gate.md) makes each one executable.

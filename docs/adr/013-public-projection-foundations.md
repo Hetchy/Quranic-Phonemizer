@@ -36,7 +36,7 @@ schema edition that give the label its meaning.
 ### 2. Nodes do not absorb relations
 
 `Reading` publishes ordered node arrays for words, glyphs, units, sounds, and
-occurrences, plus three relation arrays:
+occurrences, plus four relation arrays:
 
 - `spellings` is the exact `Evidences | Attests | Decorates | Structural`
   union from ADR-003;
@@ -44,7 +44,15 @@ occurrences, plus three relation arrays:
   `Hosts | Inserted | MergedInto | Silent` union from ADR-002, including
   `Aspect`, insertion side, sound, and occurrence;
 - `modifiers` links an occurrence to each sound it recolours, relengthens, or
-  classifies without owning.
+  classifies without owning;
+- `contributions` links each non-structural glyph to the exact performance
+  edge or occurrence it presents, or marks it as orthographic-only.
+
+The contribution relation is necessary even though spelling and attribution
+are already present. A haraka, a length carrier, and a dagger can reach the
+same nucleus while presenting different performance outcomes. In particular,
+a carrier under a dagger can be orthographic-only while the dagger presents
+the long vowel. Unit audibility cannot decide glyph audibility.
 
 The serialized graph stores one direction for every relationship. Reverse
 indexes such as glyphs for a unit, sounds for a unit, rules for a sound, and
@@ -52,9 +60,9 @@ units for a word are named derived helpers. They are not duplicate facts in
 the wire format.
 
 No semantic `owner` is stored on a sound. Display ownership is a rendering
-policy over attribution aspect and spelling edges. This matters when the
-haraka and its carrier both evidence the same unit: choosing a unit cannot
-choose the glyph that should be painted.
+policy over attribution and contribution edges. This matters when the haraka
+and its carrier both evidence the same unit: choosing a unit cannot choose the
+glyph that should be painted.
 
 ### 3. Public values exclude invalid combinations
 
@@ -66,7 +74,9 @@ PausalLong(quality)`.
 It is not a nullable quality beside an independently set length. The `Onset`
 enum stays intact because the completed census found no domain state it cannot
 represent. Madd counts and durations are realization or teaching-policy data,
-not canonical facts, and are not added to `Unit`.
+not canonical facts, and are not added to `Unit`. A future duration contract
+must identify the transmission path or policy that makes permitted and
+selected counts authoritative.
 
 `RuleFamily` and execution phase are derived from `Rule` by total registries.
 They are not repeated on each occurrence. An occurrence retains its ordered,
@@ -90,10 +100,10 @@ class is currently consumed.
 ### 5. Recited writing is a derived view
 
 The core graph preserves source glyphs and domain relations. A recited-writing
-serializer may derive render glyphs from `write`, attributions, and insertion
-anchors. A slotless insertion is represented by its before/after anchor and
-its rendered sound; it is not forced into a fake unit or an empty source
-glyph.
+serializer may derive render glyphs from `write`, contributions, attributions,
+and insertion anchors. A slotless insertion is represented by its before/after
+anchor and its rendered sound; it is not forced into a fake unit or an empty
+source glyph.
 
 ## Consequences
 

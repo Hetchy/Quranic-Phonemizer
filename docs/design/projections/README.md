@@ -6,7 +6,7 @@ public projection API out of scope. This is that API.
 | | Document | Answers |
 |---|---|---|
 | [00](00-audit.md) | Audit | What the four legacy projections published, which consumer read what, where consumers invent facts, and what the layered model still cannot say |
-| [01](01-design.md) | Design | Two projections over typed nodes, spelling, attribution, and modifier edges |
+| [01](01-design.md) | Design | Two projections over typed nodes and four lossless relation families |
 | [02](02-equivalence-gate.md) | Gate | Exact legacy adapters plus laws for the richer graph |
 
 Scope: Uthmani, Hafs. IndoPak is deferred and nothing here depends on it.
@@ -18,5 +18,5 @@ The one-paragraph version: the four legacy projections were four traversals of
 a join that the old model could not hold, so each recomputed relationships from
 rule names and lost a different set. The layered model is the join. `Reading`
 publishes its five ordered node arrays and its typed spelling, attribution, and
-modifier edges without duplicate reverse links. `phonemes` stays separate for
-consumers that want only sound.
+modifier edges, plus explicit glyph contribution, without duplicate reverse
+links. `phonemes` stays separate for consumers that want only sound.
