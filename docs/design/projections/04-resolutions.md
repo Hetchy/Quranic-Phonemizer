@@ -13,8 +13,8 @@ edited: `00-audit §4.1`, `01-design §6`, `02-gate §3.1`, `03-vocabulary D2`,
 
 ## 0. Summary
 
-Four owner decisions, three new blockers the review did not find, two gate
-legs it did not ask for, and four claims corrected.
+Four owner decisions, five new blockers the review did not find, two gate legs
+it did not ask for, and four claims corrected.
 
 | | Decision |
 |---|---|
@@ -23,9 +23,8 @@ legs it did not ask for, and four claims corrected.
 | **[owner]** rule vocabulary | `Rule` plus the 7-member `RuleFamily`, no third grouping axis. 39 members: `PLAIN` and `SILAH` both leave |
 | **[owner]** plain attribution | `by` becomes optional. `Rule.PLAIN` leaves the public enum; absence of `by` *is* plain |
 
-Three new blockers. Two are the same shape - a live type or name with no
-producer, hidden inside the verse-mode parity floor - and the third is a glyph
-attributed to the wrong slot, which no phoneme gate can see:
+Five new blockers. They share one shape: a fact the contract promises that no
+code produces, sitting behind a law that runs the other way or no law at all.
 
 - **B5**, `Rule.MADD_TABII` has no producer for ordinary madd tabii, which is
   the most frequent tag in the entire legacy corpus.
@@ -33,9 +32,13 @@ attributed to the wrong slot, which no phoneme gate can see:
   a helping kasra are each missing a phoneme.
 - **B7**, the iwad's alif is attributed to the noon that goes silent instead
   of the base whose vowel lengthens.
+- **B8**, 6,379 glyphs reach no unit at all - one percent of the script, and
+  the biggest group is the dagger alef.
+- **B9**, an ikhfaa before an istilaa letter is heavy, and nothing in the
+  package can produce, write or read that.
 
-All three would have been caught by the totality laws in §6.1, which the gate
-does not have because every law it does have runs one way only.
+B5, B6 and B7 would all have been caught by the totality laws in §6.1. B8 is
+caught by a law the gate already states and has never run.
 
 New design question, raised by the owner and answered with a measurement in
 §5: consumer overload is an **API** gap, not a projection gap. `Mappings`
@@ -411,6 +414,66 @@ rule-to-glyph (capability 3) correctly returns nothing and the consumer knows
 the madd is unwritten. Those are two different relations giving two different
 answers about one sound, which is why ADR-013 §2 keeps `spellings` and
 `contributions` apart.
+
+### B8. 6,379 glyphs reach no unit at all
+
+**New.** 02-gate §4.2 requires that every glyph participate in at least one
+spelling edge. Measured over the whole corpus:
+
+```
+glyphs with no spelling edge:  6,379 of 638,425
+
+  3,066  'ا'  base            the otiose and iwad alifs
+  2,427  'ٰ'  small_vowel     dagger alef
+    772  'ٔ'  base            hamza above
+     66  '۠'  small_vowel     the seven-alif mark
+     38  'ۧ'  base            mini yaa
+      7  'ۜ'  annotation      the sakt sign
+      2  'ۥ' 'ۨ'              mini waw, mini noon
+```
+
+One percent of the script is unreachable from any unit, and the largest group
+is the **dagger alef** - which in many words *is* the vowel. A consumer cannot
+say what the dagger at 2:3 belongs to, cannot grey it, and cannot link it to a
+phoneme, so this breaks capabilities 3, 4 and 6 for exactly these glyphs.
+
+This is not a new design problem - C3 is already "total glyph contribution" -
+but it is C3's measured scope, and it means the gate law exists while the
+producer has never satisfied it. Note the shape: another law that was never
+run. Add the count to the ratchet so it can only fall.
+
+**Lands in:** 00-audit §4.5; 01-design §6 (C3's scope); 02-gate §4.2 with a
+starting ceiling of 6,379.
+
+### B9. Nothing can produce an emphatic ghunnah
+
+**New.** An ikhfaa before an istilaa letter is heavy - `domain-facts.md` §5.5:
+"Ghunnah is likewise coloured by the *following* letter (heavy before
+isti'laa)". Three things have to be true for the contract to say that, and
+none of them is:
+
+- `Emphasis` only recolours a slot it finds heavy by its own letter
+  (`always_heavy`, raa, divine lam). A noon is none of those, and no rule
+  looks at the letter *after* a nasal, so nothing sets the flag.
+- `render/alphabet.py` **raises** on an emphatic nasal: "no rule recolours a
+  nasal".
+- `data/render/ipa.yaml` gives the nasals bare token strings with no
+  `emphatic` slot, unlike the consonants.
+
+Legacy modelled it and then retired it in the notation: `rule_phonemes.yaml`
+declares `light_phoneme: "ŋ"` and `heavy_phoneme: "ŋ"` - the same string. So
+the distinction is absent from both implementations, and nothing downstream
+has ever seen it.
+
+`Ghunnah.emphatic` therefore **stays in the public shape** - the domain fact
+is real - and closing it is three changes: a rule that colours a ghunnah from
+the following letter, an `emphatic` entry in the nasals table, and dropping
+the raise. Whether the heavy token differs from `ŋ` is a notation decision, not
+a model one; making them equal (as `kha` and `sad` already are) is a valid
+answer that still lets the flag be read.
+
+**Lands in:** 01-design §6 (as C13); `data/render/ipa.yaml`;
+`render/alphabet.py`; `rules/tafkheem.py`.
 
 ---
 
@@ -954,7 +1017,9 @@ floor; `docs/conformance/gate-residues.md` for its residue classes.
 | **C9** | `iwad_carrier` shows the base slot, not the noon | **new, B7**. Glyph attribution only; no sound changes |
 | **C10** | named grouping and owner policies in the read API | **new**, 05 §2.2. Two groupings, faithful and font, so those renderings are one contract instead of two downstream inventions |
 | **C11** | `Junction` and `boundaries` leave the public document | **new**, 05 §4.2. Three per-word booleans carry every boundary fact anything reads, which also settles the review's "one fact three ways" minor |
-| **C12** | vocabulary deletions: `Rule.SILAH`, `lexeme`, `participants`, `OrthographicOnly`, `Ghunnah.emphatic` | **new**, 05 §6. Each was a second way of saying something the contract already says |
+| **C12** | vocabulary deletions: `Rule.SILAH`, `lexeme`, `participants`, `OrthographicOnly` | **new**, 05 §6. Each was a second way of saying something the contract already says |
+| **C13** | an emphatic ghunnah can be produced, written, and read | **new, B9**. A rule, a notation entry, and one dropped raise |
+| **C14** | `waqf_ending` splits into `pausal_sukun`, `tanween_drop`, `taa_marbuta_pausal`, `silah_elision` | **new**, 05 §5. It named a cause where every other rule names an effect, and carried six unrelated outcomes |
 | D1 | `SlotOrigin` -> two booleans | lands first, before C1 |
 | D2 | `DIVINE_NAME` -> `LexemeClass`; imala **and ishmam** stay canonical facts with occurrences over them | amended by B2 |
 

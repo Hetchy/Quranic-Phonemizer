@@ -413,7 +413,7 @@ had to be guessed back out of the spelling.
 | `kind` + variant fields **RENAME** | `consonant \| vowel \| ghunnah \| release`, flattened onto the node rather than nested under a field called `spec` |
 
 `consonant{letter, geminate, emphatic, ghunnah}` · `vowel{quality, long,
-emphatic}` · `ghunnah{place}` · `release{kind}`.
+emphatic}` · `ghunnah{place, emphatic}` · `release{kind}`.
 
 **`nasal` becomes `ghunnah` everywhere.** **[owner]** On a noon or a meem
 "nasal" reads as tautological, which is why it looked like it added nothing.
@@ -423,11 +423,16 @@ for that and it is the one to use (N1). The standalone `ghunnah` kind is the
 hum of ikhfaa and iqlab, which belongs to no letter at all: `place` is
 `bilabial` for iqlab, `assimilated` for ikhfaa.
 
-`Ghunnah.emphatic` is **dropped**: `render/alphabet.py` raises on it ("no rule
-recolours a nasal") and no rule sets it, so it is a field that cannot be true.
-And when `ghunnah` is set the alphabet ignores `geminate`, because a held
-nasal is already the sound of a doubled letter - a model redundancy worth
-recording rather than publishing.
+`Ghunnah.emphatic` **stays**. **[owner]** An ikhfaa before an istilaa letter
+is heavy - `domain-facts.md` §5.5 says the ghunnah is coloured by the letter
+after it - and legacy had a `heavy_phoneme` for exactly this. What legacy then
+did was set it to `ŋ`, the same string as `light_phoneme`, which retired the
+distinction in the notation while keeping it in the model. The field is right;
+see **04 B9** for what has to change so anything can set it.
+
+When `ghunnah` is set the alphabet ignores `geminate`, because a held nasal is
+already the sound of a doubled letter - a model redundancy worth recording
+rather than publishing.
 
 **Geminate is a feature, not a kind.** A doubled consonant is still a
 consonant, and it can also be emphatic or nasal; making `geminate` a fifth
@@ -556,6 +561,36 @@ and 14 additions legacy could not name - every izhar, `tarqeeq`, `iwad`,
 `qalqala_akbar`, `ibdal_hamza`, `imala`, `tashil`, `ishmam`, `sakt`,
 `waqf_ending`.
 
+**`waqf_ending` is deleted, and split into what it does.** **[owner]** It names
+a *cause* - the reciter stopped - where every other rule names an effect, and
+it is currently carrying six unrelated outcomes. The effects are already
+enumerated in `domain-facts.md` §7:
+
+| One of today's `waqf_ending` instances | What actually happens | Becomes |
+|---|---|---|
+| a final short nucleus is silenced | the vowel is not pronounced | `pausal_sukun` |
+| a `LongWhenJoined` nucleus is silenced | the silah vowel is absent | `pausal_sukun` - the same effect, a silenced final nucleus |
+| a `LongWhenStopped` nucleus is realized long | the seven alifs sound | `madd_tabii` - it is a natural madd, and the nucleus kind already says it happens only at a pause |
+| dammatan or kasratan | the tanween is not pronounced | `tanween_drop` |
+| taa marbuta realized as heh | `ة` sounds as `h` | `taa_marbuta_pausal` |
+| a `silah` onset is silenced | the optional pronoun yaa is absent at pause | `silah_elision` - the exact mirror of `wasl_elision`, which is the prosthetic hamza absent when joined |
+| fathatan lengthens the base | the substitute alif | `iwad`, unchanged |
+
+39 becomes 42, and that is the right direction: a name that says what happened
+beats one name covering six things because they share a cause.
+
+**No `waqf` rule family is added.** The cause is already in the document -
+`word.is_stopped_on` - so "everything the stop did to this word" is a filter,
+not a taxonomy. It correctly also catches `madd_arid_lil_sukun`,
+`qalqala_kubra` and `qalqala_akbar`, which are effects of stopping too and
+would have to be duplicated into any waqf family.
+
+**The two iwads are one iwad, and that is correct.** Verified at 2:22:11
+`مَآءً` stopped: `m a: ʔ a:`, with one `iwad` instance whose participants are
+the tanween noon and the hamza - structurally identical to `هُدًى` at 2:5:3,
+where the base is a dal. The hamza is simply what the base happens to be. Both
+are one fact: fathatan on a base at waqf lengthens the base's vowel.
+
 **`Rule.SILAH` is deleted.** **[owner]** A silah *is* a madd on the pronoun
 haa, and the two facts it was carrying are both already stated elsewhere: the
 nucleus kind `LongWhenJoined` says it is long joined and absent at pause, and
@@ -620,7 +655,6 @@ the contract already says another way:
 | `Rule.SILAH` | the nucleus kind plus the madd rule already say it |
 | `participants`, `Participant`, `ParticipantRole` | nothing has three participants; two fields carry it |
 | `OrthographicOnly` | an empty `presents` list says it with no second edge kind |
-| `Ghunnah.emphatic` | the alphabet raises on it and no rule sets it |
 
 ## 7. Open, for the owner
 
