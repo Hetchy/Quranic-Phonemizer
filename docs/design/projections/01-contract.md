@@ -190,12 +190,12 @@ is written by no glyph of its own.
 |---|---|
 | `word` | index into `words` |
 | `letter` | which of the thirty: the twenty-eight plus hamza and taa marbuta |
-| `onset` | the consonant's state: `plain \| geminate \| hamza_wasl \| silah \| tashil` |
-| `nucleus` | the vowel state |
+| `consonant` | the letter's state: `plain \| geminate \| hamza_wasl \| silah \| tashil` |
+| `vowel` | the vowel state that follows it |
 | `is_tanween` | this unit is the noon of a tanween |
 | `is_letter_name` | part of a letter's spoken name |
 
-`Nucleus` is a discriminated union, so an impossible combination cannot be
+`vowel` is a discriminated union, so an impossible combination cannot be
 spelled:
 
 | Variant | Means |
@@ -212,7 +212,14 @@ too: a madd's length in harakat is a property of the tariq a reciter takes,
 not of the canonical position. Imala, ishmam and tashil reach the consumer as
 rules, because that is what they are.
 
-`Part` is `onset | nucleus`, the two halves a rule addresses separately.
+`Part` is `consonant | vowel`, the two halves a rule addresses separately. A
+unit is not a syllable, so the syllable's onset and nucleus are the wrong loan:
+a letter with no vowel is a coda in syllable terms and is simply a consonant
+with a silent vowel here.
+
+Silence is not a third part. It is what happened to one of the two, and it
+happens to both: a joined hamza wasl loses its consonant, a stopped word's
+last letter loses its vowel and keeps its consonant.
 
 ### 4.3 `Glyph`
 
@@ -324,15 +331,14 @@ states something with no unit at all.
 | `presents` | the glyph | one row per non-structural glyph and per rendered glyph, listing the outcomes it is the mark for |
 
 A merger **is** the `Hosts` and `MergedInto` pair sharing a sound and a rule
-instance. `Part` is mandatory on every attribution: a final consonant can host
-an onset while a separate nucleus attribution is silent at pause, and that
+instance. `Part` is mandatory on every attribution: a final letter can host
+its consonant while a separate vowel attribution is silent at pause, and that
 cannot be recovered from sound kind.
 
-**A release is hosted on the onset it releases.** The qalqala echo belongs to
-the consonant that makes it - one of the five - and not to a vowel the stop
-has just taken away. Anchoring it to the nucleus would put one unit's part in
-two states at once, silenced by the stop and hosting the echo the stop caused,
-at every qalqala kubra and akbar.
+**A release is hosted on the consonant that makes it**, one of the five, and
+not on a vowel the stop has just taken away. Anchoring it to the vowel would
+put one unit's part in two states at once, silenced by the stop and hosting
+the echo the stop caused, at every qalqala kubra and akbar.
 
 `contributions` has one row per glyph, whose `presents` list may be empty. An
 empty list means the glyph contributes to nothing heard; a glyph *missing*
@@ -416,7 +422,7 @@ the choice is the consumer's.
 A rule name says what happened. It does not say what triggered it, because the
 trigger is data on a node: noon and tanween ikhfaa are one rule and
 `unit.is_tanween` says which, and the hamza wasl's three helping vowels are
-one rule and the nucleus quality says which. Degrees stay distinct rules,
+one rule and the vowel quality says which. Degrees stay distinct rules,
 because a different degree is a different outcome.
 
 The set, grouped only for reading:
@@ -453,8 +459,8 @@ Three different things, and only one of them is a sukun.
 
 | | |
 |---|---|
-| a sound goes | `pausal_sukun`: the final short nucleus, the tanween that goes with it, the absent silah vowel, the dropped pronoun yaa. One instance may carry several silences, because losing a tanween is one event across two units |
-| a vowel lengthens | a madd rule. A length is not a silence and does not belong to `pausal_sukun`. The seven alifs carry a `LongWhenStopped` nucleus; the fathatan base must too, and today does not - see section 8 |
+| a sound goes | `pausal_sukun`: the final short vowel, the tanween that goes with it, the absent silah vowel, the dropped pronoun yaa. One instance may carry several silences, because losing a tanween is one event across two units |
+| a vowel lengthens | a madd rule. A length is not a silence and does not belong to `pausal_sukun`. The seven alifs carry a `LongWhenStopped` vowel; the fathatan base must too, and today does not - see section 8 |
 | a letter is realized differently | `taa_marbuta_pausal` |
 
 They are mutually exclusive per unit and per part, so no trigger has to
@@ -470,7 +476,7 @@ of minting a name that means the same as one already emitted.
 |---|---|---|
 | madd iwad | `pausal_sukun` on the tanween noon, and a madd rule on the base | a madd whose unit's tanween noon is silenced at a stop |
 | madd badal | `hamza_wasl_start` naming both units, and a madd rule on the lengthened vowel | a madd whose rule instance also silenced a following quiescent hamza |
-| silah, and silah kubra | a madd rule on the `LongWhenJoined` nucleus | the nucleus kind, and which madd rule fired |
+| silah, and silah kubra | a madd rule on the `LongWhenJoined` vowel | the vowel kind, and which madd rule fired |
 
 The badal's silence is carried by `hamza_wasl_start`, whose `source` is the
 prosthetic hamza and whose `target` is the quiescent one. One instance, two
@@ -520,7 +526,7 @@ not one of these. It is a producer defect, and section 8 lists them.
    is fixed below the projection; a serializer may not detect the answer from
    tokens or rule names.
 4. **The dagger and its carrier.** Where a dagger sits over a written carrier,
-   the carrier currently takes the nucleus edge and the dagger takes none,
+   the carrier currently takes the vowel edge and the dagger takes none,
    which is the reverse of what the contract states. This is canonical-layer
    work, not a cross-layer join.
 5. **Sub-verse requests.** The canonical build resolves ledger entries against
@@ -543,7 +549,7 @@ not one of these. It is a producer defect, and section 8 lists them.
    depend on this.
 8. **Madd rules for their ordinary cases.** `madd_tabii` is minted only on the
    pausal glide, so an ordinary long vowel produces no rule instance. A
-   `LongWhenJoined` nucleus produces none either, which is what deleting a
+   `LongWhenJoined` vowel produces none either, which is what deleting a
    separate silah rule depends on.
 9. **Continuous assembly.** Cross-word lookahead reaches past a one-slot word,
    so a chunked continuous build must overlap by two words, or the reach must
@@ -563,10 +569,10 @@ not one of these. It is a producer defect, and section 8 lists them.
     combining mark twice, so the glyph array is longer than the source and the
     concatenation law fails there. The same pass emits a duplicate spelling
     edge for every alef wasla, and another for every tatweel.
-13. **The fathatan base's nucleus.** A base that lengthens at a stop is
+13. **The fathatan base's vowel.** A base that lengthens at a stop is
     canonically short, and the length arrives as a modifier. It is the same
     fact as the seven alifs - short joined, long stopped - so it must carry
-    the same nucleus kind, or nothing in the contract requires the lengthening
+    the same vowel kind, or nothing in the contract requires the lengthening
     that madd iwad consists of.
 14. **The orthographic rule.** `orthographic_silence` has no producer. The
     seats are already identified in the canonical layer, which is what decides
@@ -577,9 +583,12 @@ not one of these. It is a producer defect, and section 8 lists them.
     structural while some of them supply a canonical fact, and stop signs are
     classed as advice while carrying the structural edge. The edge is the
     authority, and the class must be brought into line with it.
-16. **Release attribution.** The producer hosts a release on the nucleus,
-    which is the part a stop silences. It moves to the onset.
+16. **Release attribution.** The producer hosts a release on the vowel, which
+    is the part a stop silences. It moves to the consonant.
 17. **Delete the rule family.** `RuleFamily` and its lookup leave the model as
     well as the wire. Nothing reads them once the public surface stops
     publishing them, and a grouping kept only for a document is a table that
     drifts from the document.
+18. **Rename the two parts.** `Aspect` becomes `Part`, and `onset` and
+    `nucleus` become `consonant` and `vowel` on the unit and on every
+    attribution. The old names describe a syllable, and a unit is not one.

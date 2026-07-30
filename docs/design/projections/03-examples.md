@@ -53,7 +53,7 @@ assimilation without asserting it: stop on word one and the meem sounds plain.
 | h | ه | |
 | i | ِ | |
 
-No dagger alif anywhere in this word, so the fatha alone supplies the nucleus
+No dagger alif anywhere in this word, so the fatha alone supplies the vowel
 and there is no length carrier. The long vowel is written, by one glyph rather
 than the usual two. The lam is light here, following a kasra, so no `tafkheem`
 fires.
@@ -101,7 +101,7 @@ Two separate questions, and conflating them is easy.
 
 **Sounds no source glyph presents.** These take a gap row under
 `text="source"`. There are two, and neither is an insertion in the model: the
-hamza wasl's helping vowel is hosted on the wasl unit's own nucleus, and only
+hamza wasl's helping vowel is hosted on the hamza wasl unit's own vowel, and only
 the iltiqa kasra is attributed as an insertion.
 
 | Sound | Rendered as |
@@ -121,7 +121,7 @@ glyph; what changes is what recitation writes for it.
 | the hamza wasl started on | adds the helping haraka, and under the explicit policy respells the seat |
 
 The divine name's long vowel belongs to neither list. Its fatha supplies the
-nucleus, so it is written; it simply has no length carrier, and the writer
+vowel, so it is written; it simply has no length carrier, and the writer
 does not abbreviate it to a dagger.
 
 The qalqala echo is in neither list either. It is a release sound rather than

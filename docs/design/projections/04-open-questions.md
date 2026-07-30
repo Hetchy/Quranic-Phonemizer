@@ -47,7 +47,7 @@ workaround.
 
 The gate's converse triggers read canonical facts and the boundary plan only,
 because a predicate that reads the performance cannot check it. One trigger
-cannot be written that way: a qalqala letter with a silent nucleus needs a
+cannot be written that way: a qalqala letter with a silent vowel needs a
 qalqala rule *unless a merger consumed the closure*, and whether it did is
 something the producer worked out.
 

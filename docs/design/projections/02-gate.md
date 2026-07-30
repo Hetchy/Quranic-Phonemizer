@@ -87,7 +87,7 @@ for its glyphs and applies the legacy silence policy over their `presents`
 targets. It distinguishes `Hosts`, `Silent` and `MergedInto` targets from an
 empty `presents` list, and never infers glyph audibility from whether a
 related unit has any sound. That is what makes a carrier waw silent while the
-dagger on the same nucleus remains sounded.
+dagger on the same vowel remains sounded.
 
 It then applies the legacy scalar grouping exactly: dagger alif, mini-waw and
 mini-yaa stay separate; other combining marks rejoin their base. Named cases
@@ -164,7 +164,7 @@ These run over the whole corpus in all three boundary modes.
   `Decorates` edge the unit it marks.
 - Many-to-many edges for long-vowel carriers, tanween and muqattaat are
   present rather than collapsed.
-- A dagger over a written carrier supplies the nucleus; the carrier does not.
+- A dagger over a written carrier supplies the vowel; the carrier does not.
 
 ### 4.3 Attribution
 
@@ -176,9 +176,9 @@ These run over the whole corpus in all three boundary modes.
   instance, with distinct host and contributor units.
 - Every insertion has a valid anchor, side, part, sound and rule instance.
 - Every silence names a rule instance and carries no sound.
-- Every release sound is hosted on an onset, never on a nucleus.
+- Every release sound is hosted on a consonant, never on a vowel.
 - Joint hosts preserve every participating unit.
-- An onset can host while the same unit's nucleus is silent.
+- A consonant can host while the same unit's vowel is silent.
 
 ### 4.4 Rules and modifiers
 
@@ -204,8 +204,8 @@ These run over the whole corpus in all three boundary modes.
 - Every `presents` target resolves to an attribution, modifier or rule
   instance, and is compatible with the glyph's spelling edges.
 - Structural glyphs have no contribution row.
-- A haraka and an ordinary carrier may both present one hosted nucleus sound.
-- A carrier under a dagger presents nothing; the dagger presents the nucleus.
+- A haraka and an ordinary carrier may both present one hosted vowel sound.
+- A carrier under a dagger presents nothing; the dagger presents the vowel.
 - A maddah may present a target although it supplies no canonical fact.
 - A soundless process mark may present its rule instance without a fabricated
   sound.
@@ -252,22 +252,22 @@ guaranteed failure.
 
 | Trigger, read from the Score and the plan | Requires |
 |---|---|
-| a nucleus canonically long | a madd rule instance |
-| a `LongWhenStopped` nucleus on a stopped word | a madd rule instance |
-| a `LongWhenJoined` nucleus on a joined word | a madd rule instance |
+| a vowel canonically long | a madd rule instance |
+| a `LongWhenStopped` vowel on a stopped word | a madd rule instance |
+| a `LongWhenJoined` vowel on a joined word | a madd rule instance |
 | a silent waw or yaa after a short a, whose following letter the stop silences | `madd_leen` |
 | a sakin noon or a tanween, joined to a following consonant | one of the noon rules |
 | a sakin meem, joined to a following consonant | one of the meem rules |
 | a geminate noon or meem | `ghunnah_mushaddadah` |
 | two identical, close or homorganic consonants, the first sakin and joined to the second | an idgham or an izhar rule |
 | a definite article lam before a letter | `lam_shamsiyyah` or `lam_qamariyyah` |
-| a hamza wasl onset, word-initial and started on | `hamza_wasl_start` |
-| a hamza wasl onset, not started on | `hamza_wasl_elision` |
+| a hamza wasl consonant, word-initial and started on | `hamza_wasl_start` |
+| a hamza wasl consonant, not started on | `hamza_wasl_elision` |
 | two sakins meeting across a word boundary and joined | `iltiqa_shortening` or `iltiqa_kasra` |
-| a qalqala letter with a silent nucleus, not merged away | a qalqala rule at the right degree |
+| a qalqala letter with a silent vowel, not merged away | a qalqala rule at the right degree |
 | an istilaa letter, or a raa in a colouring context | `tafkheem` or `tarqeeq` |
 | a taa marbuta at a stop | `taa_marbuta_pausal` |
-| a final short nucleus at a stop, or a tanween at a stop, or a silah nucleus at a stop | `pausal_sukun` |
+| a final short vowel at a stop, or a tanween at a stop, or a silah vowel at a stop | `pausal_sukun` |
 | an imala, ishmam or tashil mark | that rule |
 | a sakt site named by the riwayah | `sakt` |
 | an ikhfaa before an istilaa letter | a heavy ghunnah |
@@ -286,9 +286,9 @@ madd rule and the silence that make it up.
 
 ## 5. Schema and negative tests
 
-The JSON schema uses tagged unions for nucleus, sound, spelling, attribution
+The JSON schema uses tagged unions for vowel, sound, spelling, attribution
 and modifier values. Tests reject at least: a nullable quality on an
-incompatible nucleus kind; a sound carrying fields from two kinds;
+incompatible vowel kind; a sound carrying fields from two kinds;
 `Structural` with a unit or word; `Supplies` without a fact; `Insertion`
 without a side; `Silent` carrying a sound; an attribution without a part; a
 merger without its host; a contribution target out of range or of the wrong
@@ -319,7 +319,7 @@ relationship blocks the contract; an adapter may not repair it.
 | qalqala | closure and release, one instance, consonant reach, stop degree |
 | emphasis | consonant and governed vowel reach, including raa and the divine name |
 | muqattaat | compact glyph to spelled units, sounds and rules |
-| waqf endings | nucleus deletion with onset retained, taa marbuta, iwad, arid, leen, qalqala |
+| waqf endings | vowel deletion with the consonant retained, taa marbuta, iwad, arid, leen, qalqala |
 | ibtidaa | start boundary, wasl vowel, gemination, right context |
 | marks and advice | imala, ishmam, tashil, sakt, seen and sad, iqlab, maddah, stop advice |
 | slotless repair | side, order, rule instance, sound, gap row, rendered form |
