@@ -137,6 +137,89 @@ it is not re-run here.
 
 ---
 
+### 2.1 What this shape lets you build
+
+The seven capabilities the contract is being bought for, each traced to the
+edges that answer it and the model work it still needs. "Needs" means the
+graph shape is right and the producer is not finished, not that the design is
+in doubt.
+
+| | Capability | Reads | Needs |
+|---|---|---|---|
+| 1 | rule -> phoneme | `attributions.by` and `modifiers.by` on the sound | **C2** (modifier edges are discarded today), **C5**, B1's law |
+| 2 | rule -> recited letter, waqf and wasl applied | recited-writing serializer over `write` + contributions | **C3**, **C4**; gated on `write` totality (F6) |
+| 3 | rule -> source glyph | participants -> units -> `spellings` | **C3** |
+| 4 | recited text, silent glyphs greyed | source glyph order + `Presents(Silent)` vs `WrittenOnly` | **C3** |
+| 5 | recited text, silent glyphs omitted | **not** 4 minus rows - see below | **C3**, **C4**, F6 |
+| 6 | glyph <-> phoneme, N to M | `contributions` | **C3** |
+| 7 | everything else | below | |
+
+**On 3, "some rules have nowhere to point".** Fewer than expected, and the set
+is *queryable* rather than guessed: a unit with no `supplies(fact=nucleus)`
+edge has an unwritten vowel, and a sound with no `Presents` edge has no glyph
+at all. Both named worries turn out to point somewhere:
+
+- **The divine name's long `aa`.** In `ٱللَّهِ` (1:1:2) there is a dagger alef
+  and it supplies the nucleus. In `لِلَّهِ` (1:2:2) there is **no dagger in the
+  rasm at all** - and the fatha supplies the nucleus by itself, because the
+  length is a lexical fact the build derives. Two spellings, both with a
+  glyph to point at, and neither is the one a reader would guess.
+- **Madd iwad.** At 2:5:3 stopped, the `iwad` occurrence lengthens the dal's
+  vowel, and that vowel is supplied by the **tanween mark** `ً`. The alef
+  maqsura seat `ى` only `decorates` - it is the otiose companion, not the
+  source of the length.
+
+What genuinely has no glyph is an **inserted** sound, and there is exactly one
+kind: the helping kasra of iltiqa al-sakinayn. It is placed by
+`Insertion(anchor, side)` between two glyphs rather than on one. See **04 B6** -
+today the package emits none at all.
+
+**On 5, the trap.** "Recited text with silent letters omitted" is *not*
+"recited text with silent letters greyed, minus those rows", because **a glyph
+is not atomically silent**. The single tanween mark `ً` at 2:5:3 supplies
+three facts across two units: the dal's vowel, the noon's letter, and the
+noon's silence. At waqf the noon half goes silent and the vowel half
+lengthens into the iwad. Delete the glyph and you lose the vowel; keep it and
+you keep a noon that is not said.
+
+This is exactly where legacy needed split-extension rows and
+`EXTENSION_FALLBACK_CHARS`. The contract handles it because `Presents` is
+per-glyph-per-target - one glyph may present both a `hosts` and a `silent` -
+but the honest answer to capability 5 is that it is **capability 2**, the
+recited-writing serializer, not a filtered capability 4. Capability 4 is a
+rendering of the *source* glyph sequence; capabilities 2 and 5 render a
+*different* glyph sequence.
+
+**On 6, one thing deliberately withheld.** The contract gives you every
+glyph-sound link, including the many-to-many ones - a haraka and its carrier
+both presenting one vowel, one muqattaat glyph presenting nine sounds, two
+words' glyphs presenting one merged consonant. It does **not** tell you which
+single glyph *owns* a sound for animation. That is `display_glyph(sound,
+policy)`, a rendering policy, because when a haraka and its carrier supply the
+same nucleus no stored owner can name which one to paint (ADR-013 §2).
+
+**7. What else falls out, with no further work**
+
+- **Teaching "why".** Every occurrence carries its participants, so "why is
+  this raa heavy?" is answered by the `tafkheem` occurrence's `trigger`,
+  rather than by re-running the rule in the UI.
+- **Boundary rehearsal.** Two `Mappings` for one ref under different
+  `boundaries`, diffed: exactly what changes if you stop here.
+- **Khilaf diffing.** Same, varying `khilaf` instead - which is the only way
+  to show a reader the two wajhs of a disputed raa side by side.
+- **Cross-script proof.** Uthmani and IndoPak `Mappings` for one ref must
+  agree on `units`, `sounds` and `occurrences` and differ only in `glyphs`
+  and `spellings`. That is the claim the whole riwayah-agnostic design is
+  named for, expressible as a document comparison.
+- **Corpus search.** Every site of a rule, or of a rule on a given letter, or
+  of a rule that crosses a word boundary.
+- **Alignment targets.** Sounds with their word allocation and rule labels -
+  what a tajweed-aware ASR or a forced aligner consumes, without the SDK
+  re-slicing words or maintaining an "indexable unit" coordinate space to
+  exclude render-only markers.
+- **Custom notation.** The same graph with a different `token` serializer;
+  nothing else in the document is notation-dependent.
+
 ## 3. The naming rules this document applies
 
 So that the next name is decidable rather than argued.

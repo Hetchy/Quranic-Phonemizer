@@ -23,8 +23,13 @@ review's own claims corrected.
 | **[owner]** rule vocabulary | the 40-member `Rule` plus the 7-member `RuleFamily`. No third grouping axis |
 | **[owner]** plain attribution | `by` becomes optional. `Rule.PLAIN` leaves the public enum; absence of `by` *is* plain |
 
-New blocker: **B5**, `Rule.MADD_TABII` has no producer for ordinary madd tabii,
-which is the most frequent tag in the entire legacy corpus.
+Two new blockers, both the same shape - a live type or name with no producer,
+hidden inside the verse-mode parity floor:
+
+- **B5**, `Rule.MADD_TABII` has no producer for ordinary madd tabii, which is
+  the most frequent tag in the entire legacy corpus.
+- **B6**, nothing in the package emits an insertion, so the 46 sites needing
+  a helping kasra are each missing a phoneme.
 
 New design question, raised by the owner and answered with a measurement in
 §5: consumer overload is an **API** gap, not a projection gap. `Mappings`
@@ -82,7 +87,7 @@ one member has an occurrence shape that does.
 | `idgham_mutajanisayn_naqis` | `Idgham` | none | `Classifies` | the source's onset consonant, which survives |
 | `tafkheem` | `Emphasis` | `Recolour` x1 or x2 | `Recolours` x1 or x2 | the consonant, and its fatha where emphasis spreads |
 | `tarqeeq` | `Tarqeeq` | **none** | `Classifies` | the raa's onset consonant |
-| `iltiqa_repair` | `IltiqaRepair` | `Relength(SHORT)` | `Relengths` | the long vowel it shortens |
+| `iltiqa_repair` | `IltiqaRepair` | `Relength(SHORT)` | `Relengths`, or `Hosts` via `Insertion` after C8 | the long vowel it shortens; or the helping kasra it inserts (**B6**) |
 | `imala` | `CanonicalColour` | none | `Classifies` | the nucleus vowel, quality `e` |
 | `tashil` | `CanonicalColour` | none | `Classifies` | the hamza's onset consonant |
 | `ishmam` | `CanonicalColour` | none | **none** | soundless: see below |
@@ -272,6 +277,64 @@ Scope and risk:
 
 **Lands in:** 00-audit §4.1 and F1; 01-design §6 (as C5); 02-gate §6 (madd
 row, and a tabii fixture); `rules/madd.py`.
+
+### B6. Nothing inserts, so 46 words are missing a phoneme
+
+**New. Not in the review.** `Inserted` is a live attribution type with a
+docstring naming its case - "the 3:1 iltiqa fatha is the only genuinely
+slot-less sound in the design" (`model/performance.py:102-104`) - and
+**zero producers**. `Insert` is constructed nowhere in the package; the only
+mention outside `engine/plan.py`'s own definition is the `conflict_key` match
+arm.
+
+Measured over the whole corpus in verse mode:
+
+```
+Inserted attributions, whole corpus:            0
+tanween meeting a wasl hamza inside a verse:   46
+of those 46, agreeing with legacy:              0
+```
+
+Every one is the same shape - the helping kasra that `domain-facts.md` §5.7
+requires when a tanween meets a sakin, simply absent:
+
+```
+2:61:30    خَيْرٌ ۚ ٱهْبِطُوا۟     got  x aˤ j rˤ u n      want x aˤ j rˤ u n i
+2:180:9    خَيْرًا ٱلْوَصِيَّةُ      got  x aˤ j rˤ aˤ n     want x aˤ j rˤ aˤ n i
+4:171:31   ثَلَـٰثَةٌ ۚ ٱنتَهُوا۟    got  θ a l a: θ a t u n  want θ a l a: θ a t u n i
+```
+
+46 is exactly legacy's `iltiqaa_sakinayn_tanween` count in the frozen
+baseline. `ILTIQA_REPAIR` exists, and its family is already
+`RuleFamily.INSERTION` (`model/canon.py:326`) - but its only effect is
+`Relength(SHORT)`, the *shortening* branch of iltiqa. The *insertion* branch
+was never written, and the family name has been advertising the gap.
+
+Like M1, this hides inside the verse-mode parity floor: word mode stops after
+every word, so no cross-word iltiqa fires and none of the 46 appears among
+`gate-residues.md`'s 56 classified rows. Verse mode is at 97.674% and its
+residue is described only as "the same classes, plus propagation".
+
+Consequences for the contract, beyond the missing sound:
+
+- 02-gate §4.3's four insertion laws are **vacuous**. A build emitting no
+  insertions passes all of them.
+- 02-gate §6's `slotless repair` family row has no live case to fixture.
+- `Insertion` is a dead type in the public schema, so no consumer has ever
+  had to handle it and nothing proves the anchor-and-side encoding works.
+
+**Fix - C8.** `IltiqaRepair` grows its second branch: where the sakin the madd
+meets is reached across a tanween rather than a long vowel, emit
+`Insert(anchor=(noon, AFTER), NUCLEUS, Vowel(I))` instead of `Relength`. One
+classifier, two branches, because it is one domain rule with two repairs.
+
+The other insertion the docstring names - the fatha on `الٓمٓ`'s final meem
+before `ٱللَّهُ` at 3:1-2 - is cross-verse and this scan does not reach it. It
+needs the continuous path (M10) to test, and it is a second fixture rather
+than a second rule.
+
+**Lands in:** 00-audit §4 (as a new gap); 01-design §6 (as C8); 02-gate §4.3
+and §6; `rules/madd.py`.
 
 ---
 
@@ -691,6 +754,7 @@ promise); 05-vocabulary §1; and `README.md` with C4.
 | **C5** | `MaddClass` emits `madd_tabii` as its fifth outcome | **new, B5** |
 | **C6** | `Rule.PLAIN` leaves the public enum; `by` becomes optional | **new, B4** |
 | **C7** | the read API on `Mappings`, and the README rewritten around it | **new, §5.3**. Ships with C4, because it is what makes C4's entry point usable |
+| **C8** | `IltiqaRepair` grows its insertion branch | **new, B6**. The one change here that alters sounds, so it moves the parity floor |
 | D1 | `SlotOrigin` -> two booleans | lands first, before C1 |
 | D2 | `DIVINE_NAME` -> `LexemeClass`; imala **and ishmam** stay canonical facts with occurrences over them | amended by B2 |
 
@@ -698,6 +762,11 @@ Named follow-ups, outside this design:
 
 - the `PAUSAL_LONG` joined-length defect (M1), with the 69-word measurement as
   its regression test and a new `gate-residues.md` class until it is fixed.
+
+C5, C8 and the M1 follow-up are the three that touch rule behaviour. C8 and M1
+move the verse-mode parity floor - upward, since both currently disagree with
+legacy and legacy is right in both. They are sequenced before the gate's step
+1, or the floors are seeded against known-wrong output.
 
 ## 7. What still needs agreement before implementation
 
