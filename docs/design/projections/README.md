@@ -12,6 +12,7 @@ public projection API out of scope. This is that API.
 | [04](04-resolutions.md) | Resolutions | The review answered item by item: four owner decisions, a fifth blocker it missed, two of its own claims corrected, and every open question closed |
 | [05](05-vocabulary.md) | Vocabulary | The contract explained for a consumer who has not read `model/`, plus a name-by-name audit with the alternatives rejected |
 | [06](06-examples.md) | Examples | One generated contract example per linguistic case and per rule case |
+| [07](07-review-prompt.md) | Review brief | The defect classes this design has already produced, and the hit list for the next adversarial pass |
 
 Scope: Uthmani, Hafs. IndoPak is deferred and nothing here depends on it.
 
