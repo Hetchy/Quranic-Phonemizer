@@ -187,7 +187,20 @@ iwad sites with no seat (all `ءً`):           78     legacy: status "inserted"
 
 In the first the seat is already written, silent in wasl, and un-silenced at
 the pause. In the second there is no seat, and the recited form has a glyph
-the rasm does not. **The contract distinguishes them with no rule-name
+the rasm does not.
+
+**`chars: ''` is legacy's defect, not the target.** **[owner]** An empty string
+tells a consumer that something was inserted and refuses to say what, so every
+renderer has to know on its own that an iwad inserts an alif. The contract
+emits the **rendered glyph**: a render glyph carrying `ا`, linked to the sound
+it spells and to the anchor it sits after, with no source glyph behind it.
+ADR-005 §5 already requires this - "a slotless insertion is represented by its
+before/after anchor and its rendered sound; it is not forced into a fake unit
+or an empty source glyph" - and `write.py::_nucleus` already knows the
+spelling, since a `Long(a)` nucleus spells as haraka plus carrier plus madd
+sign. What does not exist is the serializer that applies performance results
+to `write`, which is 00-audit §4.4's unbuilt ADR-005 mechanism and F6's gate.
+Until it lands, capability 5 has no output for these 78 words. **The contract distinguishes them with no rule-name
 difference**: the `a:` is presented by *two* glyphs in the first case - the
 fathatan and the seat, once B7 puts the seat on the right unit - and by *one*
 in the second. `status` is then derived, exactly as 01-design §5 defines it:
@@ -602,11 +615,13 @@ enumerated in `domain-facts.md` §7:
 | a `LongWhenJoined` nucleus is silenced | the silah vowel is absent | `pausal_sukun` |
 | a `LongWhenStopped` nucleus is realized long | the seven alifs sound | `madd_tabii` |
 | taa marbuta realized as heh | `ة` sounds as `h` | `taa_marbuta_pausal` |
-| the yaa ithbat's onset is silenced | the optional first-person yaa of `ءَاتَىٰنِۦَ` 27:36 is dropped at a pause - **hadhf**, the default; `Onset.SILAH` is set from that one ledger row and nowhere else | `yaa_hadhf` |
+| the yaa ithbat's onset is silenced | at the pause this unit is not pronounced | `pausal_sukun`. **[owner]** One site, `ءَاتَىٰنِۦَ` 27:36, and it is already a khilaf point - `variant` carries `YAA_ITHBAT`, which says which wajh was taken. A rule of its own would name what the selection already names |
 | fathatan lengthens the base | the substitute alif | `iwad`, unchanged |
 
-39 becomes 41, and that is the right direction: a name that says what happened
-beats one name covering six things because they share a cause.
+39 becomes 40, and that is the right direction: a name that says what happened
+beats one name covering six things because they share a cause. Two of the six
+turn out to be `pausal_sukun` as well, so the split adds two names and removes
+one.
 
 **Where "long when paused" lives, since `madd_tabii` does not say it.** In the
 nucleus kind. `LongWhenStopped` says *when* - short joined, long at pause -

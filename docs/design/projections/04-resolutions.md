@@ -445,6 +445,11 @@ run. Add the count to the ratchet so it can only fall.
 **Lands in:** 00-audit §4.5; 01-design §6 (C3's scope); 02-gate §4.2 with a
 starting ceiling of 6,379.
 
+A related law, since an inserted sound is the mirror image: **no rendered
+glyph is empty.** Legacy's `chars: ''` for the 78 seatless iwad sites tells a
+consumer something was inserted and refuses to say what. A render glyph
+carries the character it spells or it is not a render glyph.
+
 ### B9. Nothing can produce an emphatic ghunnah
 
 **New.** An ikhfaa before an istilaa letter is heavy - `domain-facts.md` §5.5:
@@ -1019,7 +1024,7 @@ floor; `docs/conformance/gate-residues.md` for its residue classes.
 | **C11** | `Junction` and `boundaries` leave the public document | **new**, 05 §4.2. Three per-word booleans carry every boundary fact anything reads, which also settles the review's "one fact three ways" minor |
 | **C12** | vocabulary deletions: `Rule.SILAH`, `lexeme`, `participants`, `OrthographicOnly` | **new**, 05 §6. Each was a second way of saying something the contract already says |
 | **C13** | an emphatic ghunnah can be produced, written, and read | **new, B9**. A rule, a notation entry, and one dropped raise |
-| **C14** | `waqf_ending` splits into `pausal_sukun`, `taa_marbuta_pausal`, `yaa_hadhf`; the seven alifs move to `madd_tabii` in the LENGTH phase | **new**, 05 §5. It named a cause where every other rule names an effect. The phase move is tied to M1 |
+| **C14** | `waqf_ending` splits into `pausal_sukun` and `taa_marbuta_pausal`; the seven alifs move to `madd_tabii` in the LENGTH phase | **new**, 05 §5. It named a cause where every other rule names an effect. The phase move is tied to M1 |
 | D1 | `SlotOrigin` -> two booleans | lands first, before C1 |
 | D2 | `DIVINE_NAME` -> `LexemeClass`; imala **and ishmam** stay canonical facts with occurrences over them | amended by B2 |
 
