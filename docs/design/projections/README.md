@@ -10,6 +10,8 @@ public projection API out of scope. This is that API.
 | [02](02-equivalence-gate.md) | Gate | Exact legacy adapters plus laws for the richer graph |
 | [03](03-review.md) | Review | What the three documents still get wrong, verified against source; four blockers before implementation |
 | [04](04-resolutions.md) | Resolutions | The review answered item by item: four owner decisions, a fifth blocker it missed, two of its own claims corrected, and every open question closed |
+| [05](05-vocabulary.md) | Vocabulary | The contract explained for a consumer who has not read `model/`, plus a name-by-name audit with the alternatives rejected |
+| [06](06-examples.md) | Examples | One generated contract example per linguistic case and per rule case |
 
 Scope: Uthmani, Hafs. IndoPak is deferred and nothing here depends on it.
 
