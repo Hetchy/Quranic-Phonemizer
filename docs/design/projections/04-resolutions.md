@@ -20,7 +20,7 @@ legs it did not ask for, and four claims corrected.
 |---|---|
 | **[owner]** cross-word merged sound | the **host word** owns it. Legacy's allocation is reproduced inside the legacy adapter, never in the native projection |
 | **[owner]** public type names | one namespaced module; domain names kept unchanged; nothing re-exported bare at package root |
-| **[owner]** rule vocabulary | the 40-member `Rule` plus the 7-member `RuleFamily`. No third grouping axis |
+| **[owner]** rule vocabulary | `Rule` plus the 7-member `RuleFamily`, no third grouping axis. 39 members: `PLAIN` and `SILAH` both leave |
 | **[owner]** plain attribution | `by` becomes optional. `Rule.PLAIN` leaves the public enum; absence of `by` *is* plain |
 
 Three new blockers. Two are the same shape - a live type or name with no
@@ -55,8 +55,8 @@ corpus.
 ### B1. The classification law, made unconditional and per-occurrence
 
 **Upheld, with both of the review's corrections and one of its own.** The set
-has 20 members (`model/canon.py:334-368`), not 18, and membership is per-rule
-while the fact is per-occurrence: `PausalGlide` mints a `Rule.MADD_TABII`
+has 20 members (`model/canon.py:334-368`), not 18 - 19 once `Rule.SILAH` is
+deleted (05 §5) - and membership is per-rule while the fact is per-occurrence: `PausalGlide` mints a `Rule.MADD_TABII`
 occurrence whose effects are `Realize` plus `MergeInto`
 (`rules/madd.py:65-80`), so that occurrence owns a `Hosts` edge today.
 
@@ -84,7 +84,9 @@ a `Classifies` edge") was satisfied verbatim by emitting nothing.
 checked over, but its docstring stops claiming that its members own no sound:
 one member has an occurrence shape that does.
 
-**The 20 members, and the edge each occurrence must reach.**
+**The members, and the edge each occurrence must reach.** `silah` is absent:
+the rule is deleted, because the `LongWhenJoined` nucleus kind and the madd
+rule already carry both of its facts.
 
 | Rule | Minted by | Effects today | Edge after C2 | The sound it reaches |
 |---|---|---|---|---|
@@ -99,7 +101,6 @@ one member has an occurrence shape that does.
 | `imala` | `CanonicalColour` | none | `Classifies` | the nucleus vowel, quality `e` |
 | `tashil` | `CanonicalColour` | none | `Classifies` | the hamza's onset consonant |
 | `ishmam` | `CanonicalColour` | none | **none** | soundless: see below |
-| `silah` | `Silah` | none | `Classifies` | the nucleus long vowel |
 | `sakt` | `Sakt` | none | **none** | soundless: see below |
 | `wasl_start` | `WaslHamza` | none | `Classifies` x2 | the prosthetic hamza's onset consonant and its helping vowel |
 | `madd_tabii` | `PausalGlide` only | `Realize` + `MergeInto` | **`Hosts` + `MergedInto`** | it owns its sound. See **B5** for the ordinary case |
@@ -953,6 +954,7 @@ floor; `docs/conformance/gate-residues.md` for its residue classes.
 | **C9** | `iwad_carrier` shows the base slot, not the noon | **new, B7**. Glyph attribution only; no sound changes |
 | **C10** | named grouping and owner policies in the read API | **new**, 05 §2.2. Two groupings, faithful and font, so those renderings are one contract instead of two downstream inventions |
 | **C11** | `Junction` and `boundaries` leave the public document | **new**, 05 §4.2. Three per-word booleans carry every boundary fact anything reads, which also settles the review's "one fact three ways" minor |
+| **C12** | vocabulary deletions: `Rule.SILAH`, `lexeme`, `participants`, `OrthographicOnly`, `Ghunnah.emphatic` | **new**, 05 §6. Each was a second way of saying something the contract already says |
 | D1 | `SlotOrigin` -> two booleans | lands first, before C1 |
 | D2 | `DIVINE_NAME` -> `LexemeClass`; imala **and ishmam** stay canonical facts with occurrences over them | amended by B2 |
 

@@ -33,7 +33,7 @@ for r in m.rules:
 ```
 
 `m.rules` is the array itself, not a method: every rule that fired, in reading
-order. `r.rule` is one of 40 names, `r.source` and `r.target` are the units
+order. `r.rule` is one of 39 names, `r.source` and `r.target` are the units
 involved, `r.sounds` is what it sounds like and `r.glyphs` is what to point at.
 
 ### "Colour the letters of the script by rule"
@@ -257,9 +257,10 @@ calque. Nobody reading a mushaf says "nunation".
 term for "the row that says which position produced this sound". `hosts`,
 `sound`, `word`, `glyph` are structure, not doctrine.
 
-**N3. A structure is never named after a rule.** `Silah` is currently both a
-rule and a nucleus kind, so `unit.nucleus.kind == "silah"` and
-`rule == "silah"` are different claims spelled identically.
+**N3. A structure is never named after a rule.** `Silah` was both a rule and a
+nucleus kind, so `unit.nucleus.kind == "silah"` and `rule == "silah"` were
+different claims spelled identically. Resolved by deleting the rule (§5), not
+by renaming around it.
 
 **N4. A field says what it holds, not how it was derived.** `spelled` holds
 "is part of a spoken letter name" and reads as "is written".
@@ -323,8 +324,7 @@ cross-word rules. Three booleans cover all three.
 | `is_started_on` | recitation begins here (ibtidaa) |
 | `is_stopped_on` | recitation pauses after this word (waqf). The last word of a request is stopped on |
 | `sakt_after` | a breathless pause after this word: not a stop, but cross-word rules are blocked |
-| `stop_sign` **RENAME** | the mushaf's sign, if any: `preferred_stop`, `compulsory_stop`, ... | 
-| `lexeme` | see below |
+| `stop_sign` **RENAME** | the mushaf's sign, if any: `preferred_stop`, `compulsory_stop`, ... |
 
 The invariant, which a consumer can check: **`is_started_on` for word N+1 is
 true exactly when word N `is_stopped_on`** - with one exception, and it is the
@@ -334,16 +334,9 @@ started on, because a sakt is mid-wasl.
 `advice` becomes `stop_sign` because that is what it is on the page. The
 values already carry the advisory meaning; the field name does not need to.
 
-**`lexeme`, honestly.** One member, `divine_name`. The case for publishing it:
-tafkheem on a lam is conditioned on the word being the divine name, and the
-participants alone do not say that - so without this field "why is this lam
-heavy?" has no answer in the document. It is also what legacy's frontend was
-reaching for when it synthesized `allah_dagger_alef`. The case against: it is
-one field for one word, and a consumer could match the text. The alternative
-is every consumer re-implementing a closed skeleton list
-(`ٱللَّه`, `لِلَّه`, `بِٱللَّه`, `ٱللَّهُمَّ`, ...), which is the invention pattern
-this design exists to stop. **Recommended: keep. Cheap to drop later,
-expensive to add.**
+**`lexeme` is dropped.** **[owner]** One field for one word. The only lam that
+is ever heavy is the divine name's, so a `tafkheem` instance on a lam is
+already unambiguous, and a consumer that wants to name the word can read it.
 
 ### 4.3 `Unit`
 
@@ -374,7 +367,7 @@ the public document.
 | `Silent` | no vowel here |
 | `Short(quality)` | fatha, damma, kasra |
 | `Long(quality)` | a madd letter's vowel |
-| `LongWhenJoined(quality)` **RENAME** | the pronoun haa's silah: long in wasl, absent at pause. `Silah` is currently this *and* a rule name (N3), and the new name states the condition |
+| `LongWhenJoined(quality)` **RENAME** | the pronoun haa's silah: long in wasl, absent at pause. States the condition, and `Rule.SILAH` is deleted (below) so nothing is spelled two ways |
 | `LongWhenStopped(quality)` **RENAME** | the seven alifs: short in wasl, long at pause. `PausalLong` does not say which way round it goes - which is exactly the confusion 04 M1 found live in the engine |
 
 ### 4.5 `Glyph`
@@ -417,10 +410,24 @@ had to be guessed back out of the spelling.
 |---|---|
 | `word` | which word it is credited to - for a merged sound, the **host**'s word (04 B3) |
 | `token` | the selected notation's spelling, e.g. `"m̃m̃"` |
-| `kind` + variant fields **RENAME** | `consonant \| vowel \| nasal \| release`, flattened onto the node rather than nested under a field called `spec` |
+| `kind` + variant fields **RENAME** | `consonant \| vowel \| ghunnah \| release`, flattened onto the node rather than nested under a field called `spec` |
 
-`consonant{letter, geminate, emphatic, nasal}` · `vowel{quality, long,
-emphatic}` · `nasal{place, emphatic}` · `release{kind}`.
+`consonant{letter, geminate, emphatic, ghunnah}` · `vowel{quality, long,
+emphatic}` · `ghunnah{place}` · `release{kind}`.
+
+**`nasal` becomes `ghunnah` everywhere.** **[owner]** On a noon or a meem
+"nasal" reads as tautological, which is why it looked like it added nothing.
+It is not saying the letter is a nasal - it is saying the letter is **held
+with ghunnah**, which for a noon changes `nn` to `ñ`. The domain has a word
+for that and it is the one to use (N1). The standalone `ghunnah` kind is the
+hum of ikhfaa and iqlab, which belongs to no letter at all: `place` is
+`bilabial` for iqlab, `assimilated` for ikhfaa.
+
+`Ghunnah.emphatic` is **dropped**: `render/alphabet.py` raises on it ("no rule
+recolours a nasal") and no rule sets it, so it is a field that cannot be true.
+And when `ghunnah` is set the alphabet ignores `geminate`, because a held
+nasal is already the sound of a doubled letter - a model redundancy worth
+recording rather than publishing.
 
 **Geminate is a feature, not a kind.** A doubled consonant is still a
 consonant, and it can also be emphatic or nasal; making `geminate` a fifth
@@ -430,52 +437,43 @@ which is why this is a union at all.
 
 ### 4.7 `RuleInstance`
 
-**RENAME, [owner].** `Occurrence` does not say occurrence *of what*.
-`RuleInstance` does, and the array is `rules` - so `m.rules` is literally the
-answer to "which rules apply here", and `m.rules[0].rule` is its name.
+**RENAME, [owner].** `Occurrence` does not say occurrence *of what*. The array
+is `rules`, so `m.rules` answers "which rules apply here" and
+`m.rules[0].rule` is its name.
 
 | Name | Means |
 |---|---|
-| `rule` | one of the 40 |
-| `participants` | who was involved, and how |
+| `rule` | one of the 39 |
+| `source` | the unit the rule is about |
+| `target` | the other unit it names; absent when the rule names only one |
 
-**Two roles, not four - and the evidence says so.** The 4-role vocabulary
-(`trigger`, `source`, `target`, `context`) was proposed without a census.
-Taken now, over the whole corpus in both boundary modes:
+**There is no `participants` array, no `Participant` type and no role enum.**
+**[owner]** The census over the whole corpus in both boundary modes:
 
 ```
 participants per rule instance:   1 -> 155,039     2 -> 95,389     3 -> 0
 ```
 
-**No rule instance anywhere has a third participant**, so `context` - "a
-required participant with none of the other meanings" - has zero producers.
-That is the same defect class as `Inserted` in 04 B6: a member of a public
-vocabulary that nothing has ever produced.
+Nothing anywhere has a third, so a variable-length list of role-labelled
+references was three layers of structure over a pair. Two fields carry it, and
+`source`/`target` are legacy's own two words, so that part of the adapter is
+an identity map. In `min rabbihim`: `source` is the sakin noon, `target` the
+following raa.
 
-And `target` as a *role* is redundant with the graph. Where the effect lands
-is already stated by the attribution or modifier edge - on the following
-letter for an idgham, on the vowel itself for a madd. A role that duplicates
-an edge is a second copy that can disagree.
+The earlier four-role proposal is withdrawn entirely. `context` had zero
+producers - the same defect class as B6 - and `target` as a *role* restated
+where the attribution edge already lands, which is a second copy that can
+disagree.
 
-So: **`source` and `target`, the same two words legacy used**, making that
-part of the adapter an identity map.
+This still fixes what C1 was for: `PausalGlide` passes its pair reversed
+(00-audit F2), and two named fields correct that as well as four roles would.
 
-| Role | Means | In `min rabbihim` |
-|---|---|---|
-| `source` | the unit the rule is about | the sakin noon |
-| `target` | the other unit the rule names | the following raa |
-
-This still fixes what C1 was for. `PausalGlide` passes `(before.id, at)` where
-every other call site passes `(at, other)` (00-audit F2) - two labels correct
-that as well as four would, and C1 shrinks accordingly.
-
-One wrinkle for the per-rule schema: `waqf_ending` has **1 participant 43,548
-times and 2 participants 6,756 times**, because `TanweenAtWaqf` also mints it.
-Arity is per rule instance, not per rule.
+One wrinkle: arity is per instance, not per rule. `waqf_ending` has one
+participant 43,548 times and two 6,756 times, because `TanweenAtWaqf` also
+mints it - so `target` is optional per row, not per rule.
 
 `RuleFamily` and `Phase` are not fields here. They are total functions of
-`rule`, published as versioned tables, so nothing carries a second
-classification that can drift from the first.
+`rule`, published as versioned tables.
 
 ### 4.8 The four edge families
 
@@ -535,8 +533,8 @@ vocabulary, because absence is the honest encoding of absence.
 
 ## 5. The legacy vocabulary, and why it is not the public one
 
-Legacy had 33 rule names; the branch has 40. Six legacy names are the same
-rule with the trigger baked in:
+Legacy had 33 rule names; the public set has **39**. Six legacy names are the
+same rule with the trigger baked in:
 
 | Legacy pair | Public | The trigger is read from |
 |---|---|---|
@@ -554,9 +552,19 @@ questions a participant already answers.
 
 The rest is renames (`madd_arid_lissukun` -> `madd_arid_lil_sukun`,
 `lam_shamsiyah` -> `lam_shamsiyyah`, `hamza_wasl_silent` -> `wasl_elision`)
-and 15 additions legacy could not name - every izhar, `tarqeeq`, `iwad`,
-`qalqala_akbar`, `ibdal_hamza`, `imala`, `tashil`, `ishmam`, `silah`, `sakt`,
+and 14 additions legacy could not name - every izhar, `tarqeeq`, `iwad`,
+`qalqala_akbar`, `ibdal_hamza`, `imala`, `tashil`, `ishmam`, `sakt`,
 `waqf_ending`.
+
+**`Rule.SILAH` is deleted.** **[owner]** A silah *is* a madd on the pronoun
+haa, and the two facts it was carrying are both already stated elsewhere: the
+nucleus kind `LongWhenJoined` says it is long joined and absent at pause, and
+`MaddClass` already picks the right madd for it - `madd_tabii` normally,
+`madd_jaiz_munfasil` when a hamza follows, which is the silah kubra. A rule
+whose entire content is "this is the nucleus kind you can already read" is a
+second spelling of one fact. 40 becomes 39, and the `Silah`/`silah`
+structure-versus-rule collision (N3) goes with it rather than being renamed
+around.
 
 Two legacy names are retired: **`vowel_silent`**, the catch-all for 4,568 rows
 where legacy had no better reason, now replaced by a real rule name or the
@@ -593,22 +601,31 @@ and the namespaced public module differs, which 04 M11 makes legal.
 | R14 | `source_index` | split into `word_index` + `source_index` | public only | one added field; fixes 04 M8 |
 | R15 | `length_carrier` | `vowel_letter` | public only | one enum value |
 | R16 | `annotation` glyph kind | `tajweed_mark` | public only | one enum value |
+| R17 | `nasal` on a consonant, `Nasal` kind, `NasalPlace` | `ghunnah`, `Ghunnah`, `GhunnahPlace` | model + public | three names; no values change |
 
 **Withdrawn:** the earlier R12 (`selection` -> `khilaf`) is rejected by the
 owner; `variant` stays. The earlier R15 (`Junction` values to `wasl`/`waqf`)
 is moot - the enum leaves the public surface entirely.
 
-**Deletions, which are not renames:** `m.tokens()` and `m.tokens_by_word()`
-(the `phonemes` projection owns that, N9); `m.timeline()` (folded into
-`cells`); `boundaries` on the request; `Junction`; the `letter` grouping
-policy; `OrthographicOnly`; the `trigger` and `context` participant roles.
+**Deletions, which are not renames.** Each removes a way of saying something
+the contract already says another way:
+
+| Deleted | Because |
+|---|---|
+| `m.tokens()`, `m.tokens_by_word()` | the `phonemes` projection owns the token stream and its splitting |
+| `m.timeline()` | the partition law already makes every grouping resolve ownership |
+| the `letter` grouping | it is `font` plus legacy's silent-merge policy; it belongs in the legacy adapter |
+| `boundaries` on the request, and `Junction` | three per-word booleans carry everything anything reads |
+| `lexeme` | one field for one word, and a heavy lam is already unambiguous |
+| `Rule.SILAH` | the nucleus kind plus the madd rule already say it |
+| `participants`, `Participant`, `ParticipantRole` | nothing has three participants; two fields carry it |
+| `OrthographicOnly` | an empty `presents` list says it with no second edge kind |
+| `Ghunnah.emphatic` | the alphabet raises on it and no rule sets it |
 
 ## 7. Open, for the owner
 
 1. **`Unit`.** Still content-free. `Letter` is what a consumer reaches for and
    is wrong for the tanween noon and for `Unit.letter`. Nothing considered is
    better.
-2. **`lexeme`.** Kept on the argument in §4.2, but it is one field for one
-   word and the counter-argument is real.
-3. **`Mappings`.** Settled, re-raised only because a plural noun for one
+2. **`Mappings`.** Settled, re-raised only because a plural noun for one
    document reads like a bag. `Reading` and `Recitation` are both taken.
