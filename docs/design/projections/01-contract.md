@@ -433,7 +433,7 @@ The set, grouped only for reading:
 **Boundary.** `hamza_wasl_start` · `hamza_wasl_elision` · `iltiqa_kasra` ·
 `pausal_sukun` · `taa_marbuta_pausal` · `sakt`
 
-**Orthographic.** `otiose_alif` · `otiose_waw`
+**Orthographic.** `otiose_alif` · `otiose_waw` · `otiose_yaa`
 
 There is no rule family on the wire. The grouping above is a static reading
 aid, not a versioned table every instance is checked against, and a colouring
@@ -448,7 +448,7 @@ Three different things, and only one of them is a sukun.
 | | |
 |---|---|
 | a sound goes | `pausal_sukun`: the final short nucleus, the tanween that goes with it, the absent silah vowel, the dropped pronoun yaa. One instance may carry several silences, because losing a tanween is one event across two units |
-| a vowel lengthens | a madd rule. The seven alifs and the fathatan base both have a `LongWhenStopped` nucleus, which is a length, not a silence, and does not belong to `pausal_sukun` |
+| a vowel lengthens | a madd rule. A length is not a silence and does not belong to `pausal_sukun`. The seven alifs carry a `LongWhenStopped` nucleus; the fathatan base must too, and today does not - see section 8 |
 | a letter is realized differently | `taa_marbuta_pausal` |
 
 They are mutually exclusive per unit and per part, so no trigger has to
@@ -463,8 +463,13 @@ of minting a name that means the same as one already emitted.
 | Named in teaching | What the contract emits | Derived from |
 |---|---|---|
 | madd iwad | `pausal_sukun` on the tanween noon, and a madd rule on the base | a madd whose unit's tanween noon is silenced at a stop |
-| madd badal | a madd rule on the lengthened vowel, and a silence on the quiescent hamza | a madd whose length came from a following quiescent hamza |
+| madd badal | `hamza_wasl_start` naming both units, and a madd rule on the lengthened vowel | a madd whose rule instance also silenced a following quiescent hamza |
 | silah, and silah kubra | a madd rule on the `LongWhenJoined` nucleus | the nucleus kind, and which madd rule fired |
+
+The badal's silence is carried by `hamza_wasl_start`, whose `source` is the
+prosthetic hamza and whose `target` is the quiescent one. One instance, two
+units, two effects - the same shape as a `pausal_sukun` that takes both halves
+of a tanween.
 
 Each of these produced a rule name whose entire content was "this madd has
 that story". The story is in the edges, so a consumer that wants the teaching
@@ -475,9 +480,14 @@ label builds it and a consumer that does not is not handed a second name for
 
 A letter the rasm carries and recitation never sounds is not a tajweed event,
 but a consumer asking "why is this silent?" deserves better than the literal
-`orthographic`. Two names cover the seats: `otiose_alif` for the alif of the
-plural waw and the alif no vowel can carry, and `otiose_waw` for the waw that
-never sounds.
+`orthographic`. Three names cover the seats: `otiose_alif` for the alif of the
+plural waw and the alif no vowel can carry, `otiose_waw` for the waw that
+never sounds, and `otiose_yaa` for the yaa and the alif maqsura.
+
+The trigger is the letter's canonical position, not the mark: the script marks
+only some of these seats with a silence sign, and the rest are just as silent.
+A rule that fired only where a mark happened to be written would leave most of
+the population unexplained.
 
 A mark that supplies a fact to the wrong glyph, or supplies none at all, is
 not one of these. It is a producer defect, and section 8 lists them.
@@ -515,11 +525,12 @@ not one of these. It is a producer defect, and section 8 lists them.
    or started-on form at all; it also normalizes deliberately, and most of the
    corpus does not survive it unchanged. `rendered` needs a different writer,
    producing glyph records that carry `from_glyph` and their own `presents`
-   edges. Its trigger set is every case where the recited spelling differs
-   from the source: the hamza wasl started on, madd iwad with and without a
-   seat, taa marbuta at a stop, and the badal, where a quiescent hamza becomes
-   the madd letter of the vowel before it and so changes kind as well as
-   shape. Both recited quadrants of section 6 depend on this.
+   edges. Its totality obligation is every sound the performance produced and
+   every glyph the source wrote, so the cases it must get right are the whole
+   of section 7 and not a list: the commonest by far is the stopped word,
+   whose final haraka is written and not said, followed by the elided hamza
+   wasl and every merged-away letter. Both recited quadrants of section 6
+   depend on this.
 8. **Madd rules for their ordinary cases.** `madd_tabii` is minted only on the
    pausal glide, so an ordinary long vowel produces no rule instance. A
    `LongWhenJoined` nucleus produces none either, which is what deleting a
@@ -541,4 +552,18 @@ not one of these. It is a producer defect, and section 8 lists them.
 12. **One scalar, one glyph.** A verse exists where the reader emits a
     combining mark twice, so the glyph array is longer than the source and the
     concatenation law fails there. The same pass emits a duplicate spelling
-    edge for every alef wasla.
+    edge for every alef wasla, and another for every tatweel.
+13. **The fathatan base's nucleus.** A base that lengthens at a stop is
+    canonically short, and the length arrives as a modifier. It is the same
+    fact as the seven alifs - short joined, long stopped - so it must carry
+    the same nucleus kind, or nothing in the contract requires the lengthening
+    that madd iwad consists of.
+14. **The orthographic rules.** `otiose_alif`, `otiose_waw` and `otiose_yaa`
+    have no producer. The seats are already identified in the canonical layer,
+    which is what decides they never sound; what is missing is a rule instance
+    and the `Silent` attribution naming it.
+15. **One notion of structural.** A glyph class and a spelling edge both use
+    the name and disagree about thousands of glyphs: tatweels are classed
+    structural while some of them supply a canonical fact, and stop signs are
+    classed as advice while carrying the structural edge. The edge is the
+    authority, and the class must be brought into line with it.

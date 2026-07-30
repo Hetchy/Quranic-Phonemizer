@@ -159,7 +159,7 @@ These run over the whole corpus in all three boundary modes.
 - Concatenating `char` in `source_index` order reproduces the requested source
   text exactly, including internal spaces and structural marks.
 - Every glyph participates in at least one spelling edge.
-- `Structural` glyphs have no word and no unit-bearing edge.
+- A glyph carrying the `Structural` edge has no word and no other spelling edge, and no glyph supplying a canonical fact carries it.
 - Every `Supplies` edge names the correct fact; every `Witnesses` and
   `Decorates` edge the unit it marks.
 - Many-to-many edges for long-vowel carriers, tanween and muqattaat are
@@ -194,11 +194,12 @@ These run over the whole corpus in all three boundary modes.
 
 - Every non-structural glyph and every rendered glyph has exactly one
   contribution row.
-- **Every sound the recited text writes is presented by at least one rendered
-  glyph.** This is the converse of the glyph-side law and is the one that
-  catches a sound nothing points at. Over the source text the converse does
-  not hold and must not be asserted: a sound the source does not write is
-  exactly what a gap row is for.
+- **Under `text="recited"`, no sound takes a gap row.** Every sound the
+  performance produced is presented by some rendered glyph, because the
+  recited text is by definition what recitation writes. This is the converse
+  of the glyph-side law and the one that catches a sound nothing points at.
+  Over the source text it does not hold and must not be asserted: a sound the
+  source does not write is exactly what a gap row is for.
 - Every `presents` target resolves to an attribution, modifier or rule
   instance, and is compatible with the glyph's spelling edges.
 - Structural glyphs have no contribution row.
@@ -214,7 +215,8 @@ These run over the whole corpus in all three boundary modes.
 For every combination of `text` and `grouping`:
 
 - **The rows partition their glyph array.** Every glyph of the selected text
-  appears in exactly one row, except structural glyphs, which have no row.
+  appears in exactly one row, except those carrying the `Structural` spelling
+  edge, which have no row. The edge decides this, never the glyph's `kind`.
 - **The rows and their gap rows cover every sound exactly once in `sounds`.**
   A sound may appear in any number of `shares` lists.
 - A gap row has no glyphs, exactly one owned sound, and an `after` that names
@@ -252,7 +254,7 @@ guaranteed failure.
 | a nucleus canonically long | a madd rule instance |
 | a `LongWhenStopped` nucleus on a stopped word | a madd rule instance |
 | a `LongWhenJoined` nucleus on a joined word | a madd rule instance |
-| a leen nucleus on a stopped word | `madd_leen` |
+| a silent waw or yaa after a short a, whose following letter the stop silences | `madd_leen` |
 | a sakin noon or a tanween, joined to a following consonant | one of the noon rules |
 | a sakin meem, joined to a following consonant | one of the meem rules |
 | a geminate noon or meem | `ghunnah_mushaddadah` |
@@ -260,7 +262,7 @@ guaranteed failure.
 | a definite article lam before a letter | `lam_shamsiyyah` or `lam_qamariyyah` |
 | a hamza wasl onset, word-initial and started on | `hamza_wasl_start` |
 | a hamza wasl onset, not started on | `hamza_wasl_elision` |
-| two sakins meeting and joined | `iltiqa_shortening` or `iltiqa_kasra` |
+| two sakins meeting across a word boundary and joined | `iltiqa_shortening` or `iltiqa_kasra` |
 | a qalqala letter with a silent nucleus, not merged away | a qalqala rule at the right degree |
 | an istilaa letter, or a raa in a colouring context | `tafkheem` or `tarqeeq` |
 | a taa marbuta at a stop | `taa_marbuta_pausal` |
@@ -268,7 +270,7 @@ guaranteed failure.
 | an imala, ishmam or tashil mark | that rule |
 | a sakt site named by the riwayah | `sakt` |
 | an ikhfaa before an istilaa letter | a heavy ghunnah |
-| an alif or waw the script marks as never sounding | `otiose_alif` or `otiose_waw` |
+| a seat the canonical layer resolves to no sound | `otiose_alif`, `otiose_waw` or `otiose_yaa` |
 
 Two rows carry a caveat the table cannot hide. **The qalqala row's "not merged
 away" is a derived fact**, not a canonical one, so it is the one trigger that
