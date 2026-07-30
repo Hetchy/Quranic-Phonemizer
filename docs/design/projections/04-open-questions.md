@@ -43,20 +43,34 @@ contract probably should not add a key - but it should be explicit that it
 never will, because the one consumer that needed otherwise already built the
 workaround.
 
-## 5. Which family do the pausal rules belong to?
+## 5. May a converse trigger read a derived fact?
 
-`pausal_sukun` and `taa_marbuta_pausal` are new, and the family and phase
-tables must be total. `elision` fits the first. The second changes a letter's
-realization rather than removing it, and no existing family names that.
+The gate's converse triggers read canonical facts and the boundary plan only,
+because a predicate that reads the performance cannot check it. One trigger
+cannot be written that way: a qalqala letter with a silent nucleus needs a
+qalqala rule *unless a merger consumed the closure*, and whether it did is
+something the producer worked out.
 
-## 6. What is the authoritative source for every sakt site?
+Either the trigger set admits derived canonical facts, in which case say which
+and why the derivation is not the answer in disguise; or the qalqala row is
+dropped and the case goes uncovered.
+
+## 6. Should bilabial iqlab ship as a variant?
+
+`NasalPlace.BILABIAL` and a khilaf identifier for it both exist, but the
+shipped Hafs data defines no options for it, so nothing can select it and
+iqlab emits the same sound as ikhfaa. Either the variant point gets data, or
+the place and its identifier are deleted. Until one or the other, the gate
+cannot demonstrate ghunnah placement and no fixture can reach the variant.
+
+## 7. What is the authoritative source for every sakt site?
 
 The riwayah's sakt data is short of what Hafs requires, and the missing site
 is absent because its cross-script skeleton is unresolved rather than because
 it does not exist. The gate's converse law for sakt cannot be total until the
 source fact is chosen.
 
-## 7. Two names
+## 8. Two names
 
 **`Unit`** is content-free, and every alternative is worse: `Letter` is what a
 consumer reaches for and is wrong for the tanween noon.

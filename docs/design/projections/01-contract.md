@@ -190,7 +190,7 @@ is written by no glyph of its own.
 |---|---|
 | `word` | index into `words` |
 | `letter` | which of the thirty: the twenty-eight plus hamza and taa marbuta |
-| `onset` | the consonant's state: `plain \| geminate \| wasl \| silah \| tashil` |
+| `onset` | the consonant's state: `plain \| geminate \| hamza_wasl \| silah \| tashil` |
 | `nucleus` | the vowel state |
 | `is_tanween` | this unit is the noon of a tanween |
 | `is_letter_name` | part of a letter's spoken name |
@@ -291,9 +291,11 @@ every rule without exception. For `min rabbihim`, `source` is the sakin noon
 and `target` the following raa. A producer that assembles its pair in the
 other order is corrected at the producer.
 
-`RuleFamily` and `Phase` are total functions of `rule`, published as versioned
-tables rather than repeated on every instance. Every public rule has an entry
-in both.
+There is no rule family and no phase on the public surface. A coarse grouping
+of the rule names is a static thing a reader wants once, so it lives in
+section 7 as prose rather than as a versioned table every instance is checked
+against. A consumer wanting the textbook grouping, or a colouring scheme,
+builds it from `rule`.
 
 ---
 
@@ -306,13 +308,13 @@ states something with no unit at all.
 |---|---|---|
 | **spellings** | | |
 | `Supplies(glyph, unit, fact)` | the glyph | supplies a canonical fact: this fatha *is* the unit's vowel |
-| `Witnesses(glyph, family, unit)` | the glyph | witnesses that a rule of this family happens here without supplying a canonical fact: a word-initial shadda witnesses an assimilation from the previous word |
+| `Witnesses(glyph, unit)` | the glyph | witnesses that something happened here without supplying a canonical fact: a word-initial shadda witnesses an assimilation from the previous word |
 | `Decorates(glyph, unit)` | the glyph | supplies and asserts nothing, but is bound to the unit it marks: the maddah |
 | `Structural(glyph)` | the glyph | belongs to no word: space, verse marker, tatweel |
 | **attributions** | | |
 | `Hosts(units, part, sound, by?)` | the units | these units produce this sound. Several units is joint ownership, not a preferred owner |
 | `MergedInto(units, part, sound, by?)` | the units | this unit disappeared into that sound |
-| `Silent(units, part, by?)` | the units | this unit lost its sound, and `by` says which rule took it |
+| `Silent(units, part, by)` | the units | this unit lost its sound, and `by` says which rule took it. Never absent: a sound does not go silent by default |
 | `Insertion(anchor, side, part, sound, by?)` | nobody | a sound no unit owns, placed before or after an anchor |
 | **modifiers** | | |
 | `Recolours(sound, by, feature, value)` | the rule | tafkheem made this consonant heavy |
@@ -378,7 +380,7 @@ ordering is total and is a definition rather than a parameter:
 
 1. the glyph that supplies the sound's **length**, if one is written;
 2. otherwise the glyph that supplies its **quality**;
-3. for a merged sound, the **host** unit's glyph;
+3. for a merged sound, the first presenting glyph of the **host** unit;
 4. otherwise the first presenting glyph in source order.
 
 So in `قَالَ` the alif owns the long vowel and the qaf owns its own consonant,
@@ -387,10 +389,12 @@ merged-away cell shares it.
 
 ### 6.2 Gap rows
 
-An inserted sound has no glyph in the source text. Under `text="source"` it
-takes a **gap row**: `glyphs` empty, `after` naming the row it follows.
-Under `text="recited"` it is an ordinary row, because a rendered glyph exists
-for it.
+A **gap row** is what a sound takes when no glyph of the selected text
+presents it: `glyphs` empty, `after` naming the row it follows, or absent when
+it precedes every row. The criterion is what the selected text writes, not how
+the sound was attributed - the hamza wasl's helping vowel is hosted rather
+than inserted and still has no glyph, and any sound the recited spelling adds
+has an ordinary row there while needing a gap row in the source.
 
 ### 6.3 Word-by-word
 
@@ -403,40 +407,80 @@ the choice is the consumer's.
 
 ## 7. Rules
 
-The public set:
+A rule name says what happened. It does not say what triggered it, because the
+trigger is data on a node: noon and tanween ikhfaa are one rule and
+`unit.is_tanween` says which, and the hamza wasl's three helping vowels are
+one rule and the nucleus quality says which. Degrees stay distinct rules,
+because a different degree is a different outcome.
 
-`ikhfaa_haqiqi` · `iqlab` · `idgham_bi_ghunnah` · `idgham_bila_ghunnah` ·
-`izhar_halqi` · `izhar_mutlaq` · `ghunnah_mushaddadah` · `izhar_shafawi` ·
-`ikhfaa_shafawi` · `idgham_shafawi` · `idgham_mutamathilayn` ·
-`idgham_mutaqaribayn` · `idgham_mutajanisayn_kamil` ·
-`idgham_mutajanisayn_naqis` · `lam_shamsiyyah` · `lam_qamariyyah` ·
-`madd_tabii` · `madd_wajib_muttasil` · `madd_jaiz_munfasil` · `madd_lazim` ·
-`madd_arid_lil_sukun` · `madd_leen` · `iwad` · `ibdal_hamza` ·
-`qalqala_sughra` · `qalqala_kubra` · `qalqala_akbar` · `tafkheem` ·
-`tarqeeq` · `imala` · `tashil` · `ishmam` · `sakt` · `wasl_start` ·
-`wasl_elision` · `iltiqa_repair` · `pausal_sukun` · `taa_marbuta_pausal`
+The set, grouped only for reading:
 
-Names are trigger-independent: noon and tanween ikhfaa are one rule, and the
-trigger is read from `unit.is_tanween`. Degrees stay distinct rules.
+**The nasal letters.** `ikhfaa_haqiqi` · `iqlab` · `idgham_bi_ghunnah` ·
+`idgham_bila_ghunnah` · `izhar_halqi` · `izhar_mutlaq` ·
+`ghunnah_mushaddadah` · `izhar_shafawi` · `ikhfaa_shafawi` · `idgham_shafawi`
 
-`RuleFamily` is an effect class - `assimilation`, `nasalization`, `insertion`,
-`lengthening`, `emphasis`, `release`, `elision` - not a teaching taxonomy. A
-consumer wanting the textbook grouping builds it from `rule`.
+**Adjacent consonants.** `idgham_mutamathilayn` · `idgham_mutaqaribayn` ·
+`idgham_mutajanisayn_kamil` · `idgham_mutajanisayn_naqis` · `lam_shamsiyyah` ·
+`lam_qamariyyah`
 
-There is no `waqf` family. `word.is_stopped_on` is already in the document, so
-"everything the stop did to this word" is a filter. It correctly also catches
-`madd_arid_lil_sukun` and the pausal qalqalas, which a waqf family would have
-to duplicate.
+**Length.** `madd_tabii` · `madd_wajib_muttasil` · `madd_jaiz_munfasil` ·
+`madd_lazim` · `madd_arid_lil_sukun` · `madd_leen` · `iltiqa_shortening`
 
-`pausal_sukun` names what a stop silences: the final short nucleus, the
-tanween that goes with it, the absent silah vowel, and the dropped pronoun
-yaa. One instance may carry several silences, because losing a tanween is one
-event across two units. `is_tanween` and the nucleus kind already say which
-case it was, so the name does not repeat them.
+**Release.** `qalqala_sughra` · `qalqala_kubra` · `qalqala_akbar`
 
-The two things a stop does other than silence keep their own names: `iwad`,
-where the base's vowel lengthens instead, and `taa_marbuta_pausal`, where the
-letter's sound changes.
+**Colour and manner.** `tafkheem` · `tarqeeq` · `imala` · `tashil` · `ishmam`
+
+**Boundary.** `hamza_wasl_start` · `hamza_wasl_elision` · `iltiqa_kasra` ·
+`pausal_sukun` · `taa_marbuta_pausal` · `sakt`
+
+**Orthographic.** `otiose_alif` · `otiose_waw`
+
+There is no rule family on the wire. The grouping above is a static reading
+aid, not a versioned table every instance is checked against, and a colouring
+scheme is a convention a consumer picks rather than a fact this contract owns.
+There is likewise no `waqf` grouping: `word.is_stopped_on` is already in the
+document, so "everything the stop did to this word" is a filter.
+
+### 7.1 What a stop does
+
+Three different things, and only one of them is a sukun.
+
+| | |
+|---|---|
+| a sound goes | `pausal_sukun`: the final short nucleus, the tanween that goes with it, the absent silah vowel, the dropped pronoun yaa. One instance may carry several silences, because losing a tanween is one event across two units |
+| a vowel lengthens | a madd rule. The seven alifs and the fathatan base both have a `LongWhenStopped` nucleus, which is a length, not a silence, and does not belong to `pausal_sukun` |
+| a letter is realized differently | `taa_marbuta_pausal` |
+
+They are mutually exclusive per unit and per part, so no trigger has to
+except one against another.
+
+### 7.2 Names that are not rules
+
+Some things the domain names are true descriptions of a configuration rather
+than separate outcomes, and the contract lets a consumer derive them instead
+of minting a name that means the same as one already emitted.
+
+| Named in teaching | What the contract emits | Derived from |
+|---|---|---|
+| madd iwad | `pausal_sukun` on the tanween noon, and a madd rule on the base | a madd whose unit's tanween noon is silenced at a stop |
+| madd badal | a madd rule on the lengthened vowel, and a silence on the quiescent hamza | a madd whose length came from a following quiescent hamza |
+| silah, and silah kubra | a madd rule on the `LongWhenJoined` nucleus | the nucleus kind, and which madd rule fired |
+
+Each of these produced a rule name whose entire content was "this madd has
+that story". The story is in the edges, so a consumer that wants the teaching
+label builds it and a consumer that does not is not handed a second name for
+`madd_tabii`.
+
+### 7.3 Silence the script writes
+
+A letter the rasm carries and recitation never sounds is not a tajweed event,
+but a consumer asking "why is this silent?" deserves better than the literal
+`orthographic`. Two names cover the seats: `otiose_alif` for the alif of the
+plural waw and the alif no vowel can carry, and `otiose_waw` for the waw that
+never sounds.
+
+A mark that supplies a fact to the wrong glyph, or supplies none at all, is
+not one of these. It is a producer defect, and section 8 lists them.
 
 ---
 
@@ -464,13 +508,22 @@ letter's sound changes.
    rather than building. Ledger application must ask whether an entry is
    inside the request, not only inside the verse. Until it does, no ranged
    request over those verses builds at all.
-6. **Insertions.** The helping vowel of iltiqa al-sakinayn is specified and
-   constructed nowhere, so the sites that need one emit nothing.
-7. **Recited glyphs.** The writer returns strings. `rendered` needs glyph
-   records carrying `from_glyph` and their own `presents` edges. Both recited
-   quadrants of section 6 depend on this and on nothing else.
-8. **Madd tabii for its ordinary case.** The rule is minted only on the pausal
-   glide, so an ordinary madd tabii produces no rule instance.
+6. **The iltiqa helping vowel.** It is specified and constructed nowhere, so
+   the sites that need one emit nothing.
+7. **A writer for the recited text.** The one that exists takes a Score, so it
+   has no boundary plan and no performance and cannot spell a pausal, merged
+   or started-on form at all; it also normalizes deliberately, and most of the
+   corpus does not survive it unchanged. `rendered` needs a different writer,
+   producing glyph records that carry `from_glyph` and their own `presents`
+   edges. Its trigger set is every case where the recited spelling differs
+   from the source: the hamza wasl started on, madd iwad with and without a
+   seat, taa marbuta at a stop, and the badal, where a quiescent hamza becomes
+   the madd letter of the vowel before it and so changes kind as well as
+   shape. Both recited quadrants of section 6 depend on this.
+8. **Madd rules for their ordinary cases.** `madd_tabii` is minted only on the
+   pausal glide, so an ordinary long vowel produces no rule instance. A
+   `LongWhenJoined` nucleus produces none either, which is what deleting a
+   separate silah rule depends on.
 9. **Continuous assembly.** Cross-word lookahead reaches past a one-slot word,
    so a chunked continuous build must overlap by two words, or the reach must
    be bounded to one. Chunking that overlaps by one invents occurrences on
@@ -480,3 +533,12 @@ letter's sound changes.
     through the corpus, build the Score and Inscription, run the Performance,
     and assemble one index space across the requested range. Internal starts,
     arbitrary stops, sakt and cross-verse joins use the same path.
+11. **Marks that reach no unit.** A large minority of them are seats the
+    contract now names, but the rest are facts the producer drops: the
+    superscript alif over a written carrier, the sakt mark although a sakt
+    fact exists in the model, the combining hamza above, and the silence sign
+    on the plural waw's alif. Each must reach a unit or be structural.
+12. **One scalar, one glyph.** A verse exists where the reader emits a
+    combining mark twice, so the glyph array is longer than the source and the
+    concatenation law fails there. The same pass emits a duplicate spelling
+    edge for every alef wasla.

@@ -31,10 +31,10 @@ No indices. What is on a row belongs together.
 | u | ُ | |
 | d | د | |
 | a | ً | |
+| - | ى | `otiose_alif` |
 | held meem | ً + مّ | `idgham_bi_ghunnah`: the tanween's noon merges into word two's meem |
 | i | ِ | |
 | n | ن | |
-| - | ى | otiose seat |
 
 One mark, three facts: `ً` is the dal's vowel, the noon's letter, and the
 noon's silence. One sound, two words. The word-initial shadda witnesses the
@@ -53,9 +53,10 @@ assimilation without asserting it: stop on word one and the meem sounds plain.
 | h | ه | |
 | i | ِ | |
 
-No dagger alif anywhere in this word, so the fatha alone writes a long vowel.
-Rule to glyph for the madd returns nothing; glyph to sound still links the
-fatha. The lam is light here, following a kasra, so no `tafkheem` fires.
+No dagger alif anywhere in this word, so the fatha alone supplies the nucleus
+and there is no length carrier. The long vowel is written, by one glyph rather
+than the usual two. The lam is light here, following a kasra, so no `tafkheem`
+fires.
 
 ### E3. Stopping on a word, 2:2:1
 
@@ -87,32 +88,44 @@ a case that reads the same in all four proves nothing.
 | lam shamsiyyah | a silent glyph sharing the geminate: the same row shape as idgham, a different rule |
 | madd iwad with a written seat | the seat un-silences at the pause; a rendered glyph replaces a source glyph |
 | madd iwad with no seat | the recited text has a glyph the source does not; only the recited quadrants show it |
-| the wasl hamza's helping vowel | a sound with no source glyph: a gap row in source, an ordinary row in recited |
+| the hamza wasl started on | a sound no source glyph presents: a gap row in source, an ordinary row in recited |
 | iltiqa al-sakinayn | a gap row between two rows that neither owns |
-| the divine name's long vowel | unwritten in every quadrant: the negative case |
+| the badal | a source glyph changes kind as well as shape: a hamza becomes the madd letter of the vowel before it, so one recited cluster covers two source glyphs |
+| the divine name's long vowel | one presenting glyph where a long vowel usually has two, and no length carrier to own it |
 | taa marbuta at a stop | the glyph does not change and the sound does |
 | a muqattaat opening | one glyph spelling several units, under both groupings |
 
-## 4. Sounds with no source glyph
+## 4. Where the two texts differ
 
-Every insertion names the character to draw.
+Two separate questions, and conflating them is easy.
+
+**Sounds no source glyph presents.** These take a gap row under
+`text="source"`. There are two, and neither is an insertion in the model: the
+hamza wasl's helping vowel is hosted on the wasl unit's own nucleus, and only
+the iltiqa kasra is attributed as an insertion.
 
 | Sound | Rendered as |
 |---|---|
-| the wasl hamza's helping vowel, when started on | the haraka its grammar chooses |
-| the divine name's long vowel | a dagger alif |
-| madd iwad where no seat is written | an alif |
+| the hamza wasl's helping vowel, when started on | the haraka its grammar chooses |
 | the iltiqa helping kasra | a kasra |
 
-Iwad sites that already have a seat need no insertion: the seat stops being
-silent, which is a replacement rather than an insertion.
+**Recited spellings that differ from the source.** Here the sound has a source
+glyph; what changes is what recitation writes for it.
 
-The qalqala echo is not here. It is a release sound rather than a letter, and
-the recited text does not write it.
+| Case | The recited text |
+|---|---|
+| madd iwad, no seat written | adds an alif the rasm does not have |
+| madd iwad, seat written | keeps the seat, which stops being silent |
+| taa marbuta at a stop | keeps the glyph, changes the sound |
+| the badal | writes the quiescent hamza as a madd letter, changing its kind |
+| the hamza wasl started on | adds the helping haraka, and under the explicit policy respells the seat |
 
-The counts for each of these are boundary-mode dependent, so they belong to a
-measurement rather than to this document. A fixture set derived from performed
-output covers what a count would only assert.
+The divine name's long vowel belongs to neither list. Its fatha supplies the
+nucleus, so it is written; it simply has no length carrier, and the writer
+does not abbreviate it to a dagger.
+
+The qalqala echo is in neither list either. It is a release sound rather than
+a letter, and the recited text does not write it.
 
 ## 5. The inventory still to produce
 
@@ -130,7 +143,7 @@ with no seat and an alif rendered; dammatan and kasratan at waqf; on taa
 marbuta at waqf; meeting a sakin, the inserted kasra.
 
 **C. Boundary.** Waqf on a final short vowel (E3); taa marbuta to a heh;
-ibtidaa with the wasl hamza sounding, all three vowels, both spelling
+ibtidaa with the hamza wasl sounding, all three vowels, both spelling
 policies; wasl with the hamza silent; iltiqa shortening a long vowel; sakt;
 silah joined and at waqf; the seven alifs joined and stopped; madd leen at
 waqf; the stop that hands itself back at 27:36.
@@ -147,7 +160,7 @@ lam qamariyyah.
 
 **G. Madd.** Tabii; wajib muttasil; jaiz munfasil and its reversion at waqf;
 lazim; arid lil sukun; leen, whose edge lands on a consonant; iwad; the pausal
-glide; ibdal hamza.
+glide; the badal.
 
 **H. Colour.** Tafkheem spreading to a fatha; raa heavy; raa light; the divine
 lam heavy and light; imala; tashil; ishmam, the soundless instance; ikhfaa

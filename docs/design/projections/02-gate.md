@@ -111,7 +111,7 @@ target rule list, and row order.
 This adapter owns the legacy presentation grouping. It starts from source
 glyph order, typed spelling edges and part-bearing attributions, then applies
 the versioned legacy merge policy. Row-for-row equality, including silent
-units merged left or right, lam shamsiyyah and wasl elision, idgham source and
+units merged left or right, lam shamsiyyah and hamza wasl elision, idgham source and
 host grouping, iltiqa shortening, waqf tanween and the otiose alif, and
 muqattaat expansions.
 
@@ -160,8 +160,8 @@ These run over the whole corpus in all three boundary modes.
   text exactly, including internal spaces and structural marks.
 - Every glyph participates in at least one spelling edge.
 - `Structural` glyphs have no word and no unit-bearing edge.
-- Every `Supplies` edge names the correct fact; every `Witnesses` edge a valid
-  family and anchor; every `Decorates` edge the unit it marks.
+- Every `Supplies` edge names the correct fact; every `Witnesses` and
+  `Decorates` edge the unit it marks.
 - Many-to-many edges for long-vowel carriers, tanween and muqattaat are
   present rather than collapsed.
 - A dagger over a written carrier supplies the nucleus; the carrier does not.
@@ -189,15 +189,16 @@ These run over the whole corpus in all three boundary modes.
   and the sound it names exists.
 - Every rule instance owns at least one attribution or one modifier edge. The
   only exemptions are the rules that produce no sound at all: ishmam and sakt.
-- `RuleFamily` and `Phase` are total over the public rule set.
 
 ### 4.5 Contribution
 
 - Every non-structural glyph and every rendered glyph has exactly one
   contribution row.
-- **Every sound is presented by at least one glyph, or is an insertion whose
-  rendered glyph presents it.** This is the converse of the glyph-side law and
-  is the one that catches a sound nothing points at.
+- **Every sound the recited text writes is presented by at least one rendered
+  glyph.** This is the converse of the glyph-side law and is the one that
+  catches a sound nothing points at. Over the source text the converse does
+  not hold and must not be asserted: a sound the source does not write is
+  exactly what a gap row is for.
 - Every `presents` target resolves to an attribution, modifier or rule
   instance, and is compatible with the glyph's spelling edges.
 - Structural glyphs have no contribution row.
@@ -213,11 +214,13 @@ These run over the whole corpus in all three boundary modes.
 For every combination of `text` and `grouping`:
 
 - **The rows partition their glyph array.** Every glyph of the selected text
-  appears in exactly one row.
+  appears in exactly one row, except structural glyphs, which have no row.
 - **The rows and their gap rows cover every sound exactly once in `sounds`.**
   A sound may appear in any number of `shares` lists.
 - A gap row has no glyphs, exactly one owned sound, and an `after` that names
-  an existing row.
+  an existing row or is absent when the sound precedes every row.
+- A sound takes a gap row exactly when no glyph of the selected text presents
+  it. How it was attributed does not enter into it.
 - `shares` on a row names only sounds owned by another row.
 - `silent` names only glyphs of that row whose contribution presents a
   `Silent` attribution.
@@ -240,29 +243,43 @@ the text contains and require the producer to have explained it. Each trigger
 reads only canonical facts and the boundary plan; none reads a performance
 result, because a predicate that reads the answer cannot check it.
 
+"Joined" below means the plan does not stop or sakt between the two units; a
+cross-word trigger that omits it fires at every stop and is not a law but a
+guaranteed failure.
+
 | Trigger, read from the Score and the plan | Requires |
 |---|---|
-| a nucleus canonically long, and not shortened by a repair the plan permits | a madd rule instance |
+| a nucleus canonically long | a madd rule instance |
 | a `LongWhenStopped` nucleus on a stopped word | a madd rule instance |
 | a `LongWhenJoined` nucleus on a joined word | a madd rule instance |
-| a sakin noon or a tanween before a consonant | one of the noon rules |
-| a sakin meem before a consonant | one of the meem rules |
-| two adjacent identical, close or homorganic consonants | an idgham or an izhar rule |
+| a leen nucleus on a stopped word | `madd_leen` |
+| a sakin noon or a tanween, joined to a following consonant | one of the noon rules |
+| a sakin meem, joined to a following consonant | one of the meem rules |
+| a geminate noon or meem | `ghunnah_mushaddadah` |
+| two identical, close or homorganic consonants, the first sakin and joined to the second | an idgham or an izhar rule |
 | a definite article lam before a letter | `lam_shamsiyyah` or `lam_qamariyyah` |
-| a wasl onset, word-initial and started on | `wasl_start` and an insertion |
-| a wasl onset, not started on | `wasl_elision` |
-| two sakins meeting across a boundary | `iltiqa_repair` and, where the repair inserts, an insertion |
-| a qalqala letter with a silent nucleus | a qalqala rule at the right degree |
+| a hamza wasl onset, word-initial and started on | `hamza_wasl_start` |
+| a hamza wasl onset, not started on | `hamza_wasl_elision` |
+| two sakins meeting and joined | `iltiqa_shortening` or `iltiqa_kasra` |
+| a qalqala letter with a silent nucleus, not merged away | a qalqala rule at the right degree |
 | an istilaa letter, or a raa in a colouring context | `tafkheem` or `tarqeeq` |
-| a fathatan on a base at a stop | `iwad` |
 | a taa marbuta at a stop | `taa_marbuta_pausal` |
-| a final short nucleus at a stop | `pausal_sukun` |
+| a final short nucleus at a stop, or a tanween at a stop, or a silah nucleus at a stop | `pausal_sukun` |
 | an imala, ishmam or tashil mark | that rule |
 | a sakt site named by the riwayah | `sakt` |
 | an ikhfaa before an istilaa letter | a heavy ghunnah |
+| an alif or waw the script marks as never sounding | `otiose_alif` or `otiose_waw` |
 
-The sakt row requires the riwayah's sakt sites to be complete in its own data
-before the gate can claim to be total.
+Two rows carry a caveat the table cannot hide. **The qalqala row's "not merged
+away" is a derived fact**, not a canonical one, so it is the one trigger that
+reads something the producer computed; see
+[04-open-questions](04-open-questions.md). **The sakt row** requires the
+riwayah's sakt sites to be complete in its own data before the gate can claim
+to be total, and they are not.
+
+There is no row for madd iwad, madd badal or silah. Each is a description of a
+configuration rather than an outcome, so the rows above already require the
+madd rule and the silence that make it up.
 
 ## 5. Schema and negative tests
 
@@ -282,10 +299,10 @@ fail clearly rather than misinterpret it.
 
 ## 6. Domain adequacy
 
-Each family has joined, stopped and started fixtures. An unmodelled
+Each area has joined, stopped and started fixtures. An unmodelled
 relationship blocks the contract; an adapter may not repair it.
 
-| Family | Must be represented |
+| Area | Must be represented |
 |---|---|
 | short and long vowels | base, haraka, carrier fan-in, shared sound, distinct contribution |
 | silent carriers | otiose alif, waw, yaa and maqsura; silence sign; dagger seat against sounded dagger |
