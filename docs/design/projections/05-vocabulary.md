@@ -200,7 +200,14 @@ or an empty source glyph" - and `write.py::_nucleus` already knows the
 spelling, since a `Long(a)` nucleus spells as haraka plus carrier plus madd
 sign. What does not exist is the serializer that applies performance results
 to `write`, which is 00-audit §4.4's unbuilt ADR-005 mechanism and F6's gate.
-Until it lands, capability 5 has no output for these 78 words. **The contract distinguishes them with no rule-name
+Until it lands, capability 5 has no output for these 78 words.
+
+The same holds for every other unwritten sound, and
+[06 §3](06-examples.md) counts them: 13,483 wasl-hamza helping vowels, 2,704
+divine-name long `aa`s, 78 seatless iwad alifs, 46 iltiqa kasras. Each names
+the character to draw. Recited writing also takes a `spelling` policy, the
+same shape as `cells`: `faithful` keeps `ٱ` and adds the haraka, `explicit`
+renders it `أ` or `إ` so the seat shows which vowel it takes. **The contract distinguishes them with no rule-name
 difference**: the `a:` is presented by *two* glyphs in the first case - the
 fathatan and the seat, once B7 puts the seat on the right unit - and by *one*
 in the second. `status` is then derived, exactly as 01-design §5 defines it:
