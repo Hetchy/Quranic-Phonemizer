@@ -8,6 +8,7 @@ public projection API out of scope. This is that API.
 | [00](00-audit.md) | Audit | What the five legacy projections published, which consumer read what, where consumers invent facts, and what the layered model still cannot say |
 | [01](01-design.md) | Design | Two projections over typed nodes and four lossless relation families |
 | [02](02-equivalence-gate.md) | Gate | Exact legacy adapters plus laws for the richer graph |
+| [03](03-review.md) | Review | What the three documents still get wrong, verified against source; four blockers before implementation |
 
 Scope: Uthmani, Hafs. IndoPak is deferred and nothing here depends on it.
 
