@@ -20,7 +20,7 @@ it did not ask for, and four claims corrected.
 |---|---|
 | **[owner]** cross-word merged sound | the **host word** owns it. Legacy's allocation is reproduced inside the legacy adapter, never in the native projection |
 | **[owner]** public type names | one namespaced module; domain names kept unchanged; nothing re-exported bare at package root |
-| **[owner]** rule vocabulary | `Rule` plus the 7-member `RuleFamily`, no third grouping axis. 39 members: `PLAIN` and `SILAH` both leave |
+| **[owner]** rule vocabulary | `Rule` plus the 7-member `RuleFamily`, no third grouping axis. 38 public members: see N5 |
 | **[owner]** plain attribution | `by` becomes optional. `Rule.PLAIN` leaves the public enum; absence of `by` *is* plain |
 
 Five new blockers. They share one shape: a fact the contract promises that no
@@ -49,7 +49,14 @@ Review claims corrected: **N1** (`TARQEEQ` emits no `Recolour`), **N2** (`Word`
 does not collide, and the package already carries two internal name
 collisions), **N3** (madd leen classifies a consonant). And **N4** corrects
 this document's own draft: the divine name has no dagger alif anywhere in the
-corpus.
+corpus. **N5** corrects 00-audit's rule census.
+
+**N5 - the branch `Rule` enum has 39 members, not 40.** `00-audit §5` says 40
+and this document repeated it. Counted at this head: `len(list(Rule)) == 39`,
+and `FAMILY_OF` is total over all 39. The public set is **38**: `plain`,
+`silah` and `waqf_ending` leave, `pausal_sukun` and `taa_marbuta_pausal`
+arrive. Same class of defect as the 18-against-20 the review found in the
+`CLASSIFICATION_ONLY` census, in the same document, one section apart.
 
 ---
 

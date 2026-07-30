@@ -33,7 +33,7 @@ for r in m.rules:
 ```
 
 `m.rules` is the array itself, not a method: every rule that fired, in reading
-order. `r.rule` is one of 39 names, `r.source` and `r.target` are the units
+order. `r.rule` is one of 38 names, `r.source` and `r.target` are the units
 involved, `r.sounds` is what it sounds like and `r.glyphs` is what to point at.
 
 ### "Colour the letters of the script by rule"
@@ -497,7 +497,7 @@ is `rules`, so `m.rules` answers "which rules apply here" and
 
 | Name | Means |
 |---|---|
-| `rule` | one of the 39 |
+| `rule` | one of the 38 |
 | `source` | the unit the rule is about |
 | `target` | the other unit it names; absent when the rule names only one |
 
@@ -587,7 +587,10 @@ vocabulary, because absence is the honest encoding of absence.
 
 ## 5. The legacy vocabulary, and why it is not the public one
 
-Legacy had 33 rule names; the public set has **39**. Six legacy names are the
+Legacy had 33 rule names; the public set has **38**. The branch `Rule` enum
+has 39 members, not the 40 `00-audit §5` claims - counted at this head - and
+`plain`, `silah` and `waqf_ending` all leave while `pausal_sukun` and
+`taa_marbuta_pausal` arrive. Six legacy names are the
 same rule with the trigger baked in:
 
 | Legacy pair | Public | The trigger is read from |
@@ -606,9 +609,10 @@ questions a participant already answers.
 
 The rest is renames (`madd_arid_lissukun` -> `madd_arid_lil_sukun`,
 `lam_shamsiyah` -> `lam_shamsiyyah`, `hamza_wasl_silent` -> `wasl_elision`)
-and 14 additions legacy could not name - every izhar, `tarqeeq`, `iwad`,
-`qalqala_akbar`, `ibdal_hamza`, `imala`, `tashil`, `ishmam`, `sakt`,
-`waqf_ending`.
+and 14 additions legacy could not name - `izhar_halqi`, `izhar_mutlaq`,
+`izhar_shafawi`, `lam_qamariyyah`, `qalqala_akbar`, `tarqeeq`, `imala`,
+`tashil`, `ishmam`, `iwad`, `ibdal_hamza`, `sakt`, `pausal_sukun`,
+`taa_marbuta_pausal`.
 
 **`waqf_ending` is deleted, and split into what it does.** **[owner]** It names
 a *cause* - the reciter stopped - where every other rule names an effect, and
@@ -625,7 +629,7 @@ enumerated in `domain-facts.md` §7:
 | the yaa ithbat's onset is silenced | at the pause this unit is not pronounced | `pausal_sukun`. **[owner]** One site, `ءَاتَىٰنِۦَ` 27:36, and it is already a khilaf point - `variant` carries `YAA_ITHBAT`, which says which wajh was taken. A rule of its own would name what the selection already names |
 | fathatan lengthens the base | the substitute alif | `iwad`, unchanged |
 
-39 becomes 40, and that is the right direction: a name that says what happened
+37 becomes 38, and that is the right direction: a name that says what happened
 beats one name covering six things because they share a cause. Two of the six
 turn out to be `pausal_sukun` as well, so the split adds two names and removes
 one.
