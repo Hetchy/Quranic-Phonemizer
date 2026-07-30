@@ -31,7 +31,7 @@ No indices. What is on a row belongs together.
 | u | ُ | |
 | d | د | |
 | a | ً | |
-| - | ى | `otiose_alif` |
+| - | ى | `orthographic_silence` |
 | held meem | ً + مّ | `idgham_bi_ghunnah`: the tanween's noon merges into word two's meem |
 | i | ِ | |
 | n | ن | |

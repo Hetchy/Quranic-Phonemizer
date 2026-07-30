@@ -176,6 +176,7 @@ These run over the whole corpus in all three boundary modes.
   instance, with distinct host and contributor units.
 - Every insertion has a valid anchor, side, part, sound and rule instance.
 - Every silence names a rule instance and carries no sound.
+- Every release sound is hosted on an onset, never on a nucleus.
 - Joint hosts preserve every participating unit.
 - An onset can host while the same unit's nucleus is silent.
 
@@ -270,7 +271,7 @@ guaranteed failure.
 | an imala, ishmam or tashil mark | that rule |
 | a sakt site named by the riwayah | `sakt` |
 | an ikhfaa before an istilaa letter | a heavy ghunnah |
-| a seat the canonical layer resolves to no sound | `otiose_alif`, `otiose_waw` or `otiose_yaa` |
+| a seat the canonical layer resolves to no sound | `orthographic_silence` |
 
 Two rows carry a caveat the table cannot hide. **The qalqala row's "not merged
 away" is a derived fact**, not a canonical one, so it is the one trigger that

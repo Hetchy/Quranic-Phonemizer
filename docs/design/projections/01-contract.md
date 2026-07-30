@@ -328,6 +328,12 @@ instance. `Part` is mandatory on every attribution: a final consonant can host
 an onset while a separate nucleus attribution is silent at pause, and that
 cannot be recovered from sound kind.
 
+**A release is hosted on the onset it releases.** The qalqala echo belongs to
+the consonant that makes it - one of the five - and not to a vowel the stop
+has just taken away. Anchoring it to the nucleus would put one unit's part in
+two states at once, silenced by the stop and hosting the echo the stop caused,
+at every qalqala kubra and akbar.
+
 `contributions` has one row per glyph, whose `presents` list may be empty. An
 empty list means the glyph contributes to nothing heard; a glyph *missing*
 from the array is a bug. The read API reports one `reason` that is either a
@@ -433,7 +439,7 @@ The set, grouped only for reading:
 **Boundary.** `hamza_wasl_start` · `hamza_wasl_elision` · `iltiqa_kasra` ·
 `pausal_sukun` · `taa_marbuta_pausal` · `sakt`
 
-**Orthographic.** `otiose_alif` · `otiose_waw` · `otiose_yaa`
+**Orthographic.** `orthographic_silence`
 
 There is no rule family on the wire. The grouping above is a static reading
 aid, not a versioned table every instance is checked against, and a colouring
@@ -480,14 +486,18 @@ label builds it and a consumer that does not is not handed a second name for
 
 A letter the rasm carries and recitation never sounds is not a tajweed event,
 but a consumer asking "why is this silent?" deserves better than the literal
-`orthographic`. Three names cover the seats: `otiose_alif` for the alif of the
-plural waw and the alif no vowel can carry, `otiose_waw` for the waw that
-never sounds, and `otiose_yaa` for the yaa and the alif maqsura.
+`orthographic`. `orthographic_silence` is that answer: the script wrote this
+letter and recitation does not say it.
 
-The trigger is the letter's canonical position, not the mark: the script marks
-only some of these seats with a silence sign, and the rest are just as silent.
-A rule that fired only where a mark happened to be written would leave most of
-the population unexplained.
+One rule, not one per letter. The alif of the plural waw, the alif no vowel
+can carry, the waw that never sounds, the yaa and the alif maqsura are the
+same event on different letters, and `unit.letter` already says which - the
+same reason noon and tanween ikhfaa are one rule.
+
+The trigger is the letter's canonical position, not the mark. The script marks
+only some of these seats with a silence sign and the rest are just as silent,
+so a rule that fired only where a mark was written would leave most of the
+population unexplained.
 
 A mark that supplies a fact to the wrong glyph, or supplies none at all, is
 not one of these. It is a producer defect, and section 8 lists them.
@@ -558,12 +568,18 @@ not one of these. It is a producer defect, and section 8 lists them.
     fact as the seven alifs - short joined, long stopped - so it must carry
     the same nucleus kind, or nothing in the contract requires the lengthening
     that madd iwad consists of.
-14. **The orthographic rules.** `otiose_alif`, `otiose_waw` and `otiose_yaa`
-    have no producer. The seats are already identified in the canonical layer,
-    which is what decides they never sound; what is missing is a rule instance
-    and the `Silent` attribution naming it.
+14. **The orthographic rule.** `orthographic_silence` has no producer. The
+    seats are already identified in the canonical layer, which is what decides
+    they never sound; what is missing is a rule instance and the `Silent`
+    attribution naming it.
 15. **One notion of structural.** A glyph class and a spelling edge both use
     the name and disagree about thousands of glyphs: tatweels are classed
     structural while some of them supply a canonical fact, and stop signs are
     classed as advice while carrying the structural edge. The edge is the
     authority, and the class must be brought into line with it.
+16. **Release attribution.** The producer hosts a release on the nucleus,
+    which is the part a stop silences. It moves to the onset.
+17. **Delete the rule family.** `RuleFamily` and its lookup leave the model as
+    well as the wire. Nothing reads them once the public surface stops
+    publishing them, and a grouping kept only for a document is a table that
+    drifts from the document.
