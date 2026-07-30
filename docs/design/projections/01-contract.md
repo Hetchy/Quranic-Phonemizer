@@ -336,9 +336,14 @@ its consonant while a separate vowel attribution is silent at pause, and that
 cannot be recovered from sound kind.
 
 **A release is hosted on the consonant that makes it**, one of the five, and
-not on a vowel the stop has just taken away. Anchoring it to the vowel would
-put one unit's part in two states at once, silenced by the stop and hosting
-the echo the stop caused, at every qalqala kubra and akbar.
+not on a vowel the stop has just taken away.
+
+A release is an **addition**, not the part's realization. The consonant still
+states exactly one of hosted, merged or silent, and the echo sits beside that
+without replacing it - a part may carry one realization and one release. Sound
+kind already distinguishes them, so this costs no new edge. Filing the echo on
+the vowel instead would make it collide with the silence the stop puts there,
+which is a genuine contradiction rather than a second sound.
 
 `contributions` has one row per glyph, whose `presents` list may be empty. An
 empty list means the glyph contributes to nothing heard; a glyph *missing*
@@ -442,7 +447,7 @@ The set, grouped only for reading:
 
 **Colour and manner.** `tafkheem` · `tarqeeq` · `imala` · `tashil` · `ishmam`
 
-**Boundary.** `hamza_wasl_start` · `hamza_wasl_elision` · `iltiqa_kasra` ·
+**Boundary.** `hamza_wasl_start` · `hamza_wasl_elision` · `iltiqa_vowel` ·
 `pausal_sukun` · `taa_marbuta_pausal` · `sakt`
 
 **Orthographic.** `orthographic_silence`
@@ -475,13 +480,14 @@ of minting a name that means the same as one already emitted.
 | Named in teaching | What the contract emits | Derived from |
 |---|---|---|
 | madd iwad | `pausal_sukun` on the tanween noon, and a madd rule on the base | a madd whose unit's tanween noon is silenced at a stop |
-| madd badal | `hamza_wasl_start` naming both units, and a madd rule on the lengthened vowel | a madd whose rule instance also silenced a following quiescent hamza |
+| madd badal | a madd rule on the lengthened vowel | a madd on a unit whose letter is hamza |
 | silah, and silah kubra | a madd rule on the `LongWhenJoined` vowel | the vowel kind, and which madd rule fired |
 
-The badal's silence is carried by `hamza_wasl_start`, whose `source` is the
-prosthetic hamza and whose `target` is the quiescent one. One instance, two
-units, two effects - the same shape as a `pausal_sukun` that takes both halves
-of a tanween.
+A separate case shares the old name and is not madd badal: starting on a word
+whose prosthetic hamza is followed by a quiescent one, where the first
+lengthens over the second. That is `hamza_wasl_start`, whose `source` is the
+prosthetic hamza and whose `target` is the quiescent one, carrying the
+lengthening and the silence together.
 
 Each of these produced a rule name whose entire content was "this madd has
 that story". The story is in the edges, so a consumer that wants the teaching
@@ -560,11 +566,13 @@ not one of these. It is a producer defect, and section 8 lists them.
     through the corpus, build the Score and Inscription, run the Performance,
     and assemble one index space across the requested range. Internal starts,
     arbitrary stops, sakt and cross-verse joins use the same path.
-11. **Marks that reach no unit.** A large minority of them are seats the
-    contract now names, but the rest are facts the producer drops: the
-    superscript alif over a written carrier, the sakt mark although a sakt
-    fact exists in the model, the combining hamza above, and the silence sign
-    on the plural waw's alif. Each must reach a unit or be structural.
+11. **Marks that reach no unit.** The largest group by far is the alif that
+    seats a fathatan, which the build skips entirely although the seat sounds
+    at a pause and every iwad case depends on it. The rest are facts the
+    producer drops: the superscript alif over a written carrier, the sakt mark
+    although a sakt fact exists in the model, the combining hamza above, and
+    the rectangular zero on the seven alifs. Each must reach a unit or be
+    structural.
 12. **One scalar, one glyph.** A verse exists where the reader emits a
     combining mark twice, so the glyph array is longer than the source and the
     concatenation law fails there. The same pass emits a duplicate spelling
@@ -592,3 +600,13 @@ not one of these. It is a producer defect, and section 8 lists them.
 18. **Rename the two parts.** `Aspect` becomes `Part`, and `onset` and
     `nucleus` become `consonant` and `vowel` on the unit and on every
     attribution. The old names describe a syllable, and a unit is not one.
+19. **Which glyph supplies length, and which quality.** Section 6.1's
+    ownership order asks for that distinction and the emitted spelling facts
+    do not carry it: a haraka and its length carrier state the identical fact
+    about the identical unit, so no rule can tell them apart. Either the fact
+    vocabulary gains the distinction or the order is not total.
+20. **Split the producer's boundary rules to match the names.** One code rule
+    covers what the contract calls `pausal_sukun` and `taa_marbuta_pausal`;
+    another mints an iwad name the contract does not have and carries silences
+    the contract assigns to `pausal_sukun`. Two rule instances minted at one
+    unit need distinct identities.

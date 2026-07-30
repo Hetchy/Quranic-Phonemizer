@@ -168,15 +168,17 @@ These run over the whole corpus in all three boundary modes.
 
 ### 4.3 Attribution
 
-- For each unit and each applicable part, exactly one outcome is stated:
-  hosted, merged, or silent.
+- For each unit and each applicable part, exactly one realization is stated:
+  hosted, merged, or silent. A release sound is an addition rather than a
+  realization, so a part may carry one of each and no more.
 - Every sound has exactly one primary origin, one `Hosts` or one `Insertion`.
   `MergedInto` never becomes a second owner.
 - Every merger is a `Hosts` and `MergedInto` pair sharing sound and rule
   instance, with distinct host and contributor units.
 - Every insertion has a valid anchor, side, part, sound and rule instance.
 - Every silence names a rule instance and carries no sound.
-- Every release sound is hosted on a consonant, never on a vowel.
+- Every release sound is hosted on a consonant, never on a vowel, and no part
+  carries two of them.
 - Joint hosts preserve every participating unit.
 - A consonant can host while the same unit's vowel is silent.
 
@@ -262,8 +264,8 @@ guaranteed failure.
 | two identical, close or homorganic consonants, the first sakin and joined to the second | an idgham or an izhar rule |
 | a definite article lam before a letter | `lam_shamsiyyah` or `lam_qamariyyah` |
 | a hamza wasl consonant, word-initial and started on | `hamza_wasl_start` |
-| a hamza wasl consonant, not started on | `hamza_wasl_elision` |
-| two sakins meeting across a word boundary and joined | `iltiqa_shortening` or `iltiqa_kasra` |
+| a hamza wasl consonant, not started on, or not word-initial | `hamza_wasl_elision` |
+| two sakins meeting across a word boundary and joined | `iltiqa_shortening` or `iltiqa_vowel` |
 | a qalqala letter with a silent vowel, not merged away | a qalqala rule at the right degree |
 | an istilaa letter, or a raa in a colouring context | `tafkheem` or `tarqeeq` |
 | a taa marbuta at a stop | `taa_marbuta_pausal` |

@@ -100,14 +100,14 @@ a case that reads the same in all four proves nothing.
 Two separate questions, and conflating them is easy.
 
 **Sounds no source glyph presents.** These take a gap row under
-`text="source"`. There are two, and neither is an insertion in the model: the
-hamza wasl's helping vowel is hosted on the hamza wasl unit's own vowel, and only
-the iltiqa kasra is attributed as an insertion.
+`text="source"`. There are two. The hamza wasl's helping vowel is hosted on
+that unit's own vowel; only the iltiqa vowel is attributed as an insertion,
+and nothing constructs one yet.
 
 | Sound | Rendered as |
 |---|---|
 | the hamza wasl's helping vowel, when started on | the haraka its grammar chooses |
-| the iltiqa helping kasra | a kasra |
+| the iltiqa helping vowel | the haraka its position calls for, a kasra or a fatha |
 
 **Recited spellings that differ from the source.** Here the sound has a source
 glyph; what changes is what recitation writes for it.
@@ -140,7 +140,7 @@ concatenation law.
 
 **B. Tanween.** Joined izhar; fathatan at waqf with a seat; fathatan at waqf
 with no seat and an alif rendered; dammatan and kasratan at waqf; on taa
-marbuta at waqf; meeting a sakin, the inserted kasra.
+marbuta at waqf; meeting a sakin, the inserted vowel.
 
 **C. Boundary.** Waqf on a final short vowel (E3); taa marbuta to a heh;
 ibtidaa with the hamza wasl sounding, all three vowels, both spelling
