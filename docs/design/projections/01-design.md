@@ -423,7 +423,7 @@ occurrence participants and lexical identity state why it applied.
 |---|---|
 | Inspector cells | nodes plus spelling, contribution, attribution, and modifier indexes |
 | Silent highlighting | `Presents(Silent)` and `OrthographicOnly` contribution edges |
-| Disjoint timing | a chosen `display_glyph` policy |
+| Disjoint timing | a chosen grouping and owner policy |
 | Co-highlighting | all units on the relevant `Hosts` edge |
 | Cross-word bridge | paired `Hosts` and `MergedInto` edges |
 | Flat letter mappings | a legacy adapter over spelling and attribution |

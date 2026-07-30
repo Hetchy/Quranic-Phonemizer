@@ -13,8 +13,8 @@ edited: `00-audit §4.1`, `01-design §6`, `02-gate §3.1`, `03-vocabulary D2`,
 
 ## 0. Summary
 
-Four owner decisions, one new blocker the review did not find, two of the
-review's own claims corrected.
+Four owner decisions, three new blockers the review did not find, two gate
+legs it did not ask for, and four claims corrected.
 
 | | Decision |
 |---|---|
@@ -23,13 +23,19 @@ review's own claims corrected.
 | **[owner]** rule vocabulary | the 40-member `Rule` plus the 7-member `RuleFamily`. No third grouping axis |
 | **[owner]** plain attribution | `by` becomes optional. `Rule.PLAIN` leaves the public enum; absence of `by` *is* plain |
 
-Two new blockers, both the same shape - a live type or name with no producer,
-hidden inside the verse-mode parity floor:
+Three new blockers. Two are the same shape - a live type or name with no
+producer, hidden inside the verse-mode parity floor - and the third is a glyph
+attributed to the wrong slot, which no phoneme gate can see:
 
 - **B5**, `Rule.MADD_TABII` has no producer for ordinary madd tabii, which is
   the most frequent tag in the entire legacy corpus.
 - **B6**, nothing in the package emits an insertion, so the 46 sites needing
   a helping kasra are each missing a phoneme.
+- **B7**, the iwad's alif is attributed to the noon that goes silent instead
+  of the base whose vowel lengthens.
+
+All three would have been caught by the totality laws in §6.1, which the gate
+does not have because every law it does have runs one way only.
 
 New design question, raised by the owner and answered with a measurement in
 §5: consumer overload is an **API** gap, not a projection gap. `Mappings`
@@ -38,7 +44,9 @@ the payload evidence ADR-013 asked for now exists and does not justify them.
 
 Review claims corrected: **N1** (`TARQEEQ` emits no `Recolour`), **N2** (`Word`
 does not collide, and the package already carries two internal name
-collisions).
+collisions), **N3** (madd leen classifies a consonant). And **N4** corrects
+this document's own draft: the divine name has no dagger alif anywhere in the
+corpus.
 
 ---
 
@@ -335,6 +343,73 @@ than a second rule.
 
 **Lands in:** 00-audit §4 (as a new gap); 01-design §6 (as C8); 02-gate §4.3
 and §6; `rules/madd.py`.
+
+### B7. The iwad carrier is attributed to the slot that goes silent
+
+**New.** `canon/derive/tanween.py::iwad_carrier` returns
+`Absent(shows=Target.PREVIOUS)` for the alif written after a fathatan, and its
+own docstring says what the alif is: "at waqf it is the iwad, lengthening the
+base while silencing the noon slot." `Target.PREVIOUS` from that cluster is
+the **noon** slot - the one being silenced - not the base whose vowel
+lengthens.
+
+Measured at 2:5:3 `هُدًى`, stopped:
+
+```
+spelling  Decorates  ى  ->  u2 (the tanween noon, silent at waqf)
+sound     a:   Hosts u1 nucleus       <- the base, lengthened by `iwad`
+legacy    {'chars': 'ى', 'role': 'madd', 'status': 'replaced',
+           'phonemes': ['a:'], 'tag': 'madd_iwad'}
+```
+
+Legacy attributes the `a:` to `ى`; the branch attributes `ى` to a silent noon
+and puts the `a:` on a unit the alif does not point at. The sound is right and
+the **glyph attribution is off by one slot**, which is exactly the class of
+error the projection exists to eliminate - and it is invisible to the phoneme
+parity gate, because the token stream is identical.
+
+This is the general invariant behind it, stated by the owner: **a madd must be
+linked to a vowel grapheme or a vowel phoneme.** The iwad is currently linked
+to neither: its glyph shows a noon and its length lands elsewhere. §6.1 makes
+it a law.
+
+**Fix.** `iwad_carrier` shows the base slot, not the noon. Whether that is a
+`Target` change or a new target kind depends on whether "two slots back" is
+expressible; `Target.PREVIOUS` from the alif cluster reaches the noon because
+the tanween derivation inserted it. Land it with the C3 contribution work,
+because C3 is what makes the mis-target observable.
+
+**Lands in:** 00-audit §4 (new gap); 02-gate §4.5 and §6 (tanween row);
+`canon/derive/tanween.py`.
+
+### N4. The divine name has no dagger alif, and legacy's two views disagree
+
+**A correction to this document's own earlier draft**, and to 05's first
+version of the capability matrix. I claimed `ٱللَّهِ` at 1:1:2 writes a dagger
+that supplies its long vowel. It does not. The corpus scalars are:
+
+```
+1:1:2   ٱللَّهِ    U+0671 U+0644 U+0644 U+0651 U+064E U+0647 U+0650
+2:255:1 ٱللَّهُ    U+0671 U+0644 U+0644 U+0651 U+064E U+0647 U+064F
+```
+
+No `U+0670` anywhere. The divine name's long `aa` is **unwritten in every
+occurrence**, exactly as the owner said. What misled the draft is that
+legacy's `tajweed_mappings` emits a `ٰ` character for this word that the
+source does not contain - while legacy's `character_phoneme_mappings` emits
+`{'chars': '', 'role': 'madd', 'status': 'inserted', 'tag':
+'allah_dagger_alef'}` for the same fact. **Two legacy views of one sound, one
+inventing a glyph and the other admitting there is none.** It is the
+four-traversals problem in a single word, and it is worth keeping as the
+audit's clearest example.
+
+The contract's answer, and the owner's requirement that a consumer be able to
+tell: the fatha `supplies` the unit's nucleus, so glyph-to-phoneme (capability
+6) still links `َ` to `a:`; but **no glyph `presents` the madd occurrence**, so
+rule-to-glyph (capability 3) correctly returns nothing and the consumer knows
+the madd is unwritten. Those are two different relations giving two different
+answers about one sound, which is why ADR-013 §2 keeps `spellings` and
+`contributions` apart.
 
 ---
 
@@ -712,8 +787,13 @@ m.tokens()                 the flat token stream
 m.tokens_by_word()         grouped, host-owns allocation
 m.letters()                the legacy letter-to-phoneme grouping
 m.recited_text()           recited writing, ADR-005's serializer
-m.display_glyph(sound, policy)   which glyph to paint for a sound
+m.cells(grouping=...)      glyph rows at a chosen granularity
+m.timeline(grouping=, owner=)    one row per sound, naming what to paint
 ```
+
+`cells` and `timeline` take the named grouping and owner policies of
+[05 §2.2](05-vocabulary.md) - faithful, font and aligner renderings as one
+contract rather than three downstream inventions, which is C10.
 
 Each returns a small frozen record, not a slice of the graph. Each is
 documented with a four-line example. None of them is a wire format, so adding
@@ -741,7 +821,97 @@ have, and it is rewritten in the same commit.
 **Lands in:** 01-design §1 and §5; ADR-013 §6 (the measurement replaces the
 promise); 05-vocabulary §1; and `README.md` with C4.
 
-## 6. Model work, restated
+## 6. Two gate legs the review did not ask for
+
+Both requested by the owner, and both aimed at the same weakness: **every law
+in 02-gate §4 runs in one direction only.** They all start from something the
+producer emitted and check that it is well formed. None starts from something
+the *text* contains and checks that the producer explained it.
+
+That is why B5 and B6 survived three review rounds. A build that emits no
+`madd_tabii` occurrence and no insertion at all satisfies every existing law
+perfectly, because the laws only ever ask "is what you emitted valid", never
+"is what you emitted complete".
+
+### 6.1 Totality laws: every trigger is explained
+
+For each configuration the domain says must be accounted for, assert that an
+occurrence accounts for it. The predicate is per *configuration*, not per
+letter - "every lam carries a rule" is false, since an ordinary lam carries
+none; "every **article** lam carries exactly one of two" is true and testable.
+
+| Trigger | Must carry | Not when |
+|---|---|---|
+| a quiescent noon, including a tanween noon, with a sounding unit after it | exactly one of `izhar_halqi`, `izhar_mutlaq`, `ikhfaa_haqiqi`, `iqlab`, `idgham_bi_ghunnah`, `idgham_bila_ghunnah` | the word is stopped on, so `waqf_ending` or `iwad` owns the noon; or a sakt sits at the junction |
+| a quiescent meem with a unit after it | exactly one of `izhar_shafawi`, `ikhfaa_shafawi`, `idgham_shafawi` | as above |
+| a geminate noon or meem | `ghunnah_mushaddadah` | - |
+| the article's lam | exactly one of `lam_shamsiyyah`, `lam_qamariyyah` | - |
+| a raa that sounds | exactly one of `tafkheem`, `tarqeeq` | the raa merged away |
+| an istilaa letter that sounds | `tafkheem` | - |
+| **a nucleus realized long** | **exactly one lengthening occurrence** | - **catches B5** |
+| a qalqala letter with a real closure | exactly one qalqala degree | the closure is held by an assimilation and never released |
+| a `wasl` onset | exactly one of `wasl_start`, `wasl_elision` | - |
+| a stopped-on word whose final unit has a short nucleus | `waqf_ending` or `iwad` | - |
+| **a tanween meeting a sakin across a join** | **`iltiqa_repair`** | - **catches B6** |
+
+Two properties make this affordable. Every predicate reads only the `Score`
+and the `BoundaryPlan`, so none of them needs the answer it is checking. And
+every one is already written down in `domain-facts.md` §5 and §8.2 - "exactly
+one rule of a family fires per trigger" is the invariant this table
+operationalizes, and the engine's `ConflictError` already enforces the *at
+most one* half. These laws are the *at least one* half, which nothing enforces
+today.
+
+**L-madd**, stated separately because it is the one that also constrains
+glyphs: every occurrence in `RuleFamily.LENGTHENING` reaches a `Vowel` sound -
+with `madd_leen` the single stated exception, which reaches the leen consonant
+(N3) - and where the script writes a length carrier for that vowel, the
+carrier is among the glyphs presenting it. The second clause is what fails on
+the iwad today (**B7**).
+
+### 6.2 Cell-shard parity against Quranic Universal Audio
+
+The legacy adapter gate proves the old *API* is derivable. It does not prove
+the contract is sufficient for a real product surface - and the surface that
+matters is the timestamps viewer, which 00-audit §2.1 shows synthesizing seven
+tags and performing two cell surgeries because the legacy API could not carry
+them. **Those inventions are the redesign's thesis, and this is the test of
+it.**
+
+- **Oracle.** The published cell shards for one full reciter from
+  `Wider-Community/quranic-universal-audio`, pinned by commit. Step 0 is
+  pinning the shard schema revision, which lives in that repository and
+  versions independently of this one.
+- **Input mapping.** A shard carries the ref span, the reciter's actual stop
+  and start points, and their repetitions. That is a sequence of
+  `MappingsRequest`s: one per contiguous recited span with its own
+  `BoundaryPlan`, and a repetition is the same ref performed again, possibly
+  with a different plan at the seam. If the reciter's boundary points are not
+  recoverable from the shard, that is the first thing this gate discovers and
+  it is worth discovering.
+- **Derivation.** From each `Mappings`, produce the facts the viewer displays,
+  through the read API and nothing else: rules on phonemes, rules on letters,
+  and the transformation, added and silent markers.
+- **Comparison.** Parity over the **canonically serialized fact set**, not
+  over the viewer's rendered output - timings and DOM order are not contract
+  facts and would make the gate fragile for no gain. Every divergence takes a
+  disposition, and the only one that passes is a named legacy defect with its
+  evidence, recorded the same way as `gate-residues.md`'s classes.
+- **The bar this sets.** Every one of the seven synthesized tags -
+  `izhar_halqi`, `izhar_shafawi`, `iqlab_silent_noon`, `iltiqaa`,
+  `iltiqaa_kasra`, `madd_iwad`, `allah_dagger_alef` - must come out of the
+  contract with no downstream invention, and both cell surgeries must become
+  unnecessary. B6 is `iltiqaa_kasra`. N4 is `allah_dagger_alef`. B7 is
+  `madd_iwad`. Three of the seven are already open findings, which is a good
+  sign this gate is aimed correctly.
+- **Scope.** One reciter first. Expand to all 35 on the results, since the
+  interesting variance across reciters is boundary choices and repetitions,
+  and one reciter exercises the mechanism while 35 exercise its coverage.
+
+**Lands in:** 02-gate, as a fifth section and a second CI job with its own
+floor; `docs/conformance/gate-residues.md` for its residue classes.
+
+## 7. Model work, restated
 
 01-design §6's C1-C4, plus what this document adds.
 
@@ -755,6 +925,8 @@ promise); 05-vocabulary §1; and `README.md` with C4.
 | **C6** | `Rule.PLAIN` leaves the public enum; `by` becomes optional | **new, B4** |
 | **C7** | the read API on `Mappings`, and the README rewritten around it | **new, §5.3**. Ships with C4, because it is what makes C4's entry point usable |
 | **C8** | `IltiqaRepair` grows its insertion branch | **new, B6**. The one change here that alters sounds, so it moves the parity floor |
+| **C9** | `iwad_carrier` shows the base slot, not the noon | **new, B7**. Glyph attribution only; no sound changes |
+| **C10** | named grouping and ownership policies in the read API | **new**, 05 §2.1. What makes font, faithful and aligner renderings one contract instead of three inventions |
 | D1 | `SlotOrigin` -> two booleans | lands first, before C1 |
 | D2 | `DIVINE_NAME` -> `LexemeClass`; imala **and ishmam** stay canonical facts with occurrences over them | amended by B2 |
 
@@ -768,7 +940,7 @@ move the verse-mode parity floor - upward, since both currently disagree with
 legacy and legacy is right in both. They are sequenced before the gate's step
 1, or the floors are seeded against known-wrong output.
 
-## 7. What still needs agreement before implementation
+## 8. What still needs agreement before implementation
 
 Two documents, in this order, and neither is written yet:
 

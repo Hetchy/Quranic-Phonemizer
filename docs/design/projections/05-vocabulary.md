@@ -76,9 +76,9 @@ does not change when the graph does.
 
 ```text
 m.rules_at(word=3)               the same hits, filtered
-m.letters()                      the legacy letter-to-phoneme grouping
+m.cells(grouping=...)            glyph rows at a chosen granularity (2.2)
+m.timeline(grouping=, owner=)    one row per sound, naming what to paint
 m.recited_text()                 the words respelled as recited
-m.display_glyph(sound, policy)   which glyph to paint for one sound
 ```
 
 Everything past this section is for the fifth consumer: an aligner, a
@@ -152,25 +152,37 @@ in doubt.
 | 4 | recited text, silent glyphs greyed | source glyph order + `Presents(Silent)` vs `WrittenOnly` | **C3** |
 | 5 | recited text, silent glyphs omitted | **not** 4 minus rows - see below | **C3**, **C4**, F6 |
 | 6 | glyph <-> phoneme, N to M | `contributions` | **C3** |
-| 7 | everything else | below | |
+| 7 | everything else | §2.1 below | |
 
-**On 3, "some rules have nowhere to point".** Fewer than expected, and the set
-is *queryable* rather than guessed: a unit with no `supplies(fact=nucleus)`
-edge has an unwritten vowel, and a sound with no `Presents` edge has no glyph
-at all. Both named worries turn out to point somewhere:
+Capability 6 is the primitive the others are built on, and §2.2 states the
+grouping and ownership policies that sit over it - faithful, font, and
+aligner renderings as one contract rather than three downstream inventions.
 
-- **The divine name's long `aa`.** In `ٱللَّهِ` (1:1:2) there is a dagger alef
-  and it supplies the nucleus. In `لِلَّهِ` (1:2:2) there is **no dagger in the
-  rasm at all** - and the fatha supplies the nucleus by itself, because the
-  length is a lexical fact the build derives. Two spellings, both with a
-  glyph to point at, and neither is the one a reader would guess.
-- **Madd iwad.** At 2:5:3 stopped, the `iwad` occurrence lengthens the dal's
-  vowel, and that vowel is supplied by the **tanween mark** `ً`. The alef
-  maqsura seat `ى` only `decorates` - it is the otiose companion, not the
-  source of the length.
+**On 3, "some rules have nowhere to point".** The set is *queryable* rather
+than maintained by hand: a unit with no `supplies(fact=nucleus)` edge has an
+unwritten vowel, and a rule occurrence with no `Presents` edge has no glyph at
+all. Both named cases resolve, and neither the way an earlier draft of this
+document claimed:
 
-What genuinely has no glyph is an **inserted** sound, and there is exactly one
-kind: the helping kasra of iltiqa al-sakinayn. It is placed by
+- **The divine name's long `aa` is unwritten everywhere.** There is no dagger
+  alif in `ٱللَّهِ`, `ٱللَّهُ` or `لِلَّهِ` - the corpus scalars are
+  `U+0671 U+0644 U+0644 U+0651 U+064E U+0647 U+0650` and no `U+0670`. The
+  length is lexical, derived from the word's identity. So the fatha
+  `supplies` the unit's nucleus, and **no glyph `presents` the madd
+  occurrence**: rule-to-glyph correctly returns nothing, and the consumer can
+  tell the madd is unwritten rather than being handed a plausible wrong glyph.
+  That is the owner's requirement, and it is why `spellings` and
+  `contributions` are two relations rather than one.
+- **Madd iwad currently points at the wrong glyph, and that is a defect.** The
+  domain invariant is that a madd links to a vowel grapheme or a vowel
+  phoneme. At 2:5:3 stopped, the alif seat `ى` is the grapheme that carries
+  the iwad - legacy says so too, tagging `{'chars': 'ى', 'role': 'madd',
+  'phonemes': ['a:'], 'tag': 'madd_iwad'}`. The branch instead has `ى`
+  *decorating the tanween noon*, the one unit that goes silent, while the
+  length lands on the base. See **04 B7**; the fix is C9.
+
+What genuinely has no glyph and never will is an **inserted** sound, and there
+is exactly one kind: the helping kasra of iltiqa al-sakinayn. It is placed by
 `Insertion(anchor, side)` between two glyphs rather than on one. See **04 B6** -
 today the package emits none at all.
 
@@ -190,13 +202,67 @@ recited-writing serializer, not a filtered capability 4. Capability 4 is a
 rendering of the *source* glyph sequence; capabilities 2 and 5 render a
 *different* glyph sequence.
 
-**On 6, one thing deliberately withheld.** The contract gives you every
-glyph-sound link, including the many-to-many ones - a haraka and its carrier
-both presenting one vowel, one muqattaat glyph presenting nine sounds, two
-words' glyphs presenting one merged consonant. It does **not** tell you which
-single glyph *owns* a sound for animation. That is `display_glyph(sound,
-policy)`, a rendering policy, because when a haraka and its carrier supply the
-same nucleus no stored owner can name which one to paint (ADR-013 §2).
+### 2.2 Granularity: one faithful relation, named folds over it
+
+Capability 6 is the primitive, and an earlier draft of this document
+underspecified what sits on top of it by calling display ownership
+"deliberately withheld". That was wrong in an important way. What ADR-013 §2
+forbids is a **stored** `owner` on a sound - because when a haraka and its
+carrier both supply one nucleus, no single stored value can serve both a
+faithful renderer and a font renderer. It does not forbid *shipping* the
+policies, and shipping them is exactly what stops each consumer inventing one.
+
+That has already happened once: 00-audit §2.1 records
+`ts-source.ts::lettersFromCells` and `qua-sdk/cells.py` each reimplementing
+ownership, with the frontend's tiebreak ("the carrier wins over the
+consonant's haraka") written down in a comment rather than in a contract. Two
+implementations of one unpublished rule is how they drift.
+
+**The wire carries `faithful` only** - every glyph, every `Presents` edge,
+including `بَ` as two glyphs presenting two sounds. Everything else is a named
+fold in the read API:
+
+```text
+m.cells(grouping="faithful")   one row per glyph:  ب -> b   َ -> a
+m.cells(grouping="rasm")       one row per base plus its combining marks,
+                               which is what a font shapes as one unit:
+                               بَ -> b a  ·  the dagger stays its own row
+                               because it is a separate shaped mark
+m.cells(grouping="letter")     legacy `letter_phoneme_mappings` grouping -
+                               base plus marks plus extensions, silent units
+                               merged left or right by the legacy policy.
+                               This is what the QUA cells and MFA use
+```
+
+Every grouping is a **partition of the glyph array covering every sound
+exactly once**. That is a law, not a convention, so a fold that drops or
+duplicates a sound fails the gate rather than producing a plausible
+misalignment.
+
+Animation needs one more thing - a single owner per sound - and it is a second
+named parameter over a grouping, not a property of the graph:
+
+```text
+m.timeline(grouping="letter", owner="carrier")
+```
+
+| `owner` | Picks | For |
+|---|---|---|
+| `carrier` | the length carrier over the consonant's haraka | what QUA and the legacy frontend do today; the tiebreak that keeps a consonant's highlight from smearing across the whole vowel |
+| `first` | the first presenting glyph in source order | faithful letter-by-letter animation |
+| `haraka` | the vowel mark over its carrier | animating harakat |
+
+So the answer to "is faithful sufficient, or do we need a font mode, or should
+the consumer combine": **faithful is the wire, and all three folds ship.** A
+consumer may still write its own - the edges are all there - but it should not
+have to, and when the QUA gate (04 §6.2) pins which policy the viewer uses,
+the policy has a name to be pinned by.
+
+Silent-glyph co-highlighting composes from the same two pieces: `silences()`
+gives per-glyph silence with its reason, the grouping gives the cluster the
+glyph sits in, so "grey the silent glyph inside its group" and "skip it
+entirely" are both derivable. Both are named options rather than a third
+invention.
 
 **7. What else falls out, with no further work**
 
