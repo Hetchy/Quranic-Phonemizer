@@ -171,6 +171,35 @@ is exactly one kind: the helping kasra of iltiqa al-sakinayn, placed by
 `Insertion(anchor, side)` between two glyphs rather than on one. See
 **04 B6** - today the package emits none at all.
 
+**On 2 and 5, the orthographic transformations QUA cells need.** The
+seat-versus-no-seat difference is real, is not a rule difference, and is what
+legacy's `status` field was carrying. Counted over the corpus:
+
+```
+iwad sites with a written seat (ا or ى):  3,156     legacy: status "replaced"
+iwad sites with no seat (all `ءً`):           78     legacy: status "inserted"
+```
+
+```
+2:5:3   هُدًى   {'chars': 'ى', 'status': 'replaced', 'tag': 'madd_iwad'}
+2:22:11 مَآءً   {'chars': '',  'status': 'inserted', 'tag': 'madd_iwad'}
+```
+
+In the first the seat is already written, silent in wasl, and un-silenced at
+the pause. In the second there is no seat, and the recited form has a glyph
+the rasm does not. **The contract distinguishes them with no rule-name
+difference**: the `a:` is presented by *two* glyphs in the first case - the
+fathatan and the seat, once B7 puts the seat on the right unit - and by *one*
+in the second. `status` is then derived, exactly as 01-design §5 defines it:
+`inserted` when the recited writing has a glyph the source does not,
+`replaced` when a source glyph's rendering changes.
+
+Taa marbuta is the same shape from the other direction: the glyph does not
+change but its sound does, so `ة` at waqf is `replaced` with one presenting
+glyph throughout. These, madd iwad, and the wasl-hamza helping vowels are the
+cases the recited-writing serializer has to get right, and they are ADR-005
+§4's totality trigger set (F6) for exactly this reason.
+
 **On 5, the trap.** "Silent letters omitted" is *not* "silent letters greyed,
 minus those rows", because **a glyph is not atomically silent**. The single
 tanween mark `ً` at 2:5:3 supplies three facts across two units: the dal's
@@ -568,16 +597,27 @@ enumerated in `domain-facts.md` §7:
 
 | One of today's `waqf_ending` instances | What actually happens | Becomes |
 |---|---|---|
-| a final short nucleus is silenced | the vowel is not pronounced | `pausal_sukun` |
-| a `LongWhenJoined` nucleus is silenced | the silah vowel is absent | `pausal_sukun` - the same effect, a silenced final nucleus |
-| a `LongWhenStopped` nucleus is realized long | the seven alifs sound | `madd_tabii` - it is a natural madd, and the nucleus kind already says it happens only at a pause |
-| dammatan or kasratan | the tanween is not pronounced | `tanween_drop` |
+| a final short nucleus is silenced | the diacritic is not pronounced | `pausal_sukun` |
+| dammatan or kasratan | the same thing - a final diacritic not pronounced. `unit.is_tanween` already says which it was | `pausal_sukun` |
+| a `LongWhenJoined` nucleus is silenced | the silah vowel is absent | `pausal_sukun` |
+| a `LongWhenStopped` nucleus is realized long | the seven alifs sound | `madd_tabii` |
 | taa marbuta realized as heh | `ة` sounds as `h` | `taa_marbuta_pausal` |
-| a `silah` onset is silenced | the optional pronoun yaa is absent at pause | `silah_elision` - the exact mirror of `wasl_elision`, which is the prosthetic hamza absent when joined |
+| the yaa ithbat's onset is silenced | the optional first-person yaa of `ءَاتَىٰنِۦَ` 27:36 is dropped at a pause - **hadhf**, the default; `Onset.SILAH` is set from that one ledger row and nowhere else | `yaa_hadhf` |
 | fathatan lengthens the base | the substitute alif | `iwad`, unchanged |
 
-39 becomes 42, and that is the right direction: a name that says what happened
+39 becomes 41, and that is the right direction: a name that says what happened
 beats one name covering six things because they share a cause.
+
+**Where "long when paused" lives, since `madd_tabii` does not say it.** In the
+nucleus kind. `LongWhenStopped` says *when* - short joined, long at pause -
+and `madd_tabii` says *what kind of madd* it is once long, and owns the
+`Hosts` edge. Two facts, two places, neither repeated. What has to move is the
+realization: today `WaqfEnding` emits it in the BOUNDARY phase, and it belongs
+in the madd classifier, which is in the LENGTH phase and already reads the
+boundary plan. That move is tied to **04 M1** - once the plain path stops
+making `LongWhenStopped` long unconditionally, something boundary-aware has to,
+and the madd classifier is the only place that both reads boundaries and owns
+madd.
 
 **No `waqf` rule family is added.** The cause is already in the document -
 `word.is_stopped_on` - so "everything the stop did to this word" is a filter,

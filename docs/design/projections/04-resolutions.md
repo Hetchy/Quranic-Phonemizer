@@ -1019,7 +1019,7 @@ floor; `docs/conformance/gate-residues.md` for its residue classes.
 | **C11** | `Junction` and `boundaries` leave the public document | **new**, 05 §4.2. Three per-word booleans carry every boundary fact anything reads, which also settles the review's "one fact three ways" minor |
 | **C12** | vocabulary deletions: `Rule.SILAH`, `lexeme`, `participants`, `OrthographicOnly` | **new**, 05 §6. Each was a second way of saying something the contract already says |
 | **C13** | an emphatic ghunnah can be produced, written, and read | **new, B9**. A rule, a notation entry, and one dropped raise |
-| **C14** | `waqf_ending` splits into `pausal_sukun`, `tanween_drop`, `taa_marbuta_pausal`, `silah_elision` | **new**, 05 §5. It named a cause where every other rule names an effect, and carried six unrelated outcomes |
+| **C14** | `waqf_ending` splits into `pausal_sukun`, `taa_marbuta_pausal`, `yaa_hadhf`; the seven alifs move to `madd_tabii` in the LENGTH phase | **new**, 05 §5. It named a cause where every other rule names an effect. The phase move is tied to M1 |
 | D1 | `SlotOrigin` -> two booleans | lands first, before C1 |
 | D2 | `DIVINE_NAME` -> `LexemeClass`; imala **and ishmam** stay canonical facts with occurrences over them | amended by B2 |
 
