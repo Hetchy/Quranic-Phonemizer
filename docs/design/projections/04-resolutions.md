@@ -115,7 +115,7 @@ one member has an occurrence shape that does.
   the vowel it gestures at is merged away, so there is no sound to classify.
   The occurrence carries its target participant and nothing else.
 - `sakt` is a pause, not a sound, and the fact it records is already published
-  as `Word.junction_after = sakt`. The occurrence names the word-final unit as
+  as `Word.sakt_after`. The occurrence names the word-final unit as
   its participant.
 
 Both are closed by name. Adding a third requires editing this list, which is
@@ -516,23 +516,50 @@ legacy compatibility for `character_phoneme_mappings` needs a presentation
 adapter that synthesizes the mini-meem cell where legacy promised it, which is
 02-gate §3.5's job and not a graph fact.
 
-### M6. Participant roles
+### M6. Participant roles: two, not four
 
-**Upheld.** Under 01-design §3.5's definitions the sakin noon of an idgham is
-the `source` and the following letter the `trigger`; 02-gate §3.3 says "the
-disappearing trigger", which is the opposite assignment. No document contains a
-worked role assignment for any family.
+**Upheld, and the fix is smaller than proposed.** 01-design §3.5 and 02-gate
+§3.3 do contradict each other on the idgham case - one makes the sakin noon
+the `source`, the other calls the following letter "the disappearing trigger" -
+and no document contains a worked role assignment for any family.
 
-Also upheld: C1 touches behaviour. `engine/plan.py:156-164`
-(`assimilated_from`) reads `parts.slots[:1]`, and `engine/laws.py:154-164`
-(`check_attestations`) derives attested families from *all* participant slots.
-01-design §6's "no rule behaviour changes as part of C1-C4" weakens to "no
-verdict changes, and the two participant-order readers are converted with a
-pinning test".
+But the four-role vocabulary (`trigger`, `source`, `target`, `context`) was
+proposed without a census. Taken now, over the whole corpus in both boundary
+modes:
 
-A role table with one worked example per family lands in 01-design §3.5. The
-worked examples themselves live in the examples document (§5 below), and the
-role assignment for every family is settled there before C1 is implemented.
+```
+participants per rule instance:   1 -> 155,039     2 -> 95,389     3 -> 0
+```
+
+**No rule instance anywhere has a third participant.** `context` - "a required
+participant with none of those meanings" - has zero producers, which is the
+same defect class as B6: a member of a public vocabulary that nothing has ever
+produced.
+
+And `target` as a *role* duplicates the graph. Where an effect lands is
+already stated by the attribution or modifier edge: on the following letter
+for an idgham, on the vowel itself for a madd. A role that restates an edge is
+a second copy that can disagree with the first.
+
+**Resolution: two roles, `source` and `target` - legacy's own two words**, so
+that part of the adapter is an identity map. `source` is the unit the rule is
+about; `target` is the other unit it names.
+
+This still does what C1 was for. `PausalGlide` passes `(before.id, at)` where
+every other call site passes `(at, other)` (00-audit F2); two labels correct
+that as well as four would. **C1 shrinks from "each rule family defines its
+allowed and required trigger, source, target and context roles" to "label the
+existing pair".**
+
+One wrinkle a per-rule schema must handle: arity is per *instance*, not per
+rule. `waqf_ending` has one participant 43,548 times and two 6,756 times,
+because `TanweenAtWaqf` also mints it.
+
+Also upheld, unchanged: C1 touches behaviour. `engine/plan.py:156-164`
+(`assimilated_from`) reads `parts.slots[:1]` and `engine/laws.py:154-164`
+(`check_attestations`) reads *all* participant slots, so 01-design §6's "no
+rule behaviour changes" weakens to "no verdict changes, and the two
+participant-order readers are converted with a pinning test".
 
 ### M7. `Evidences.fact` publishes members the public `Unit` cannot answer
 
@@ -783,17 +810,15 @@ m.rules()                  every occurrence, with role-labelled units,
 m.rules_at(word=3)         the same, filtered
 m.rules_on(glyph=12)       what to colour this glyph with
 m.silences()               every unheard glyph, with the rule that took it
-m.tokens()                 the flat token stream
-m.tokens_by_word()         grouped, host-owns allocation
-m.letters()                the legacy letter-to-phoneme grouping
+m.cells(grouping=, owner=) glyph rows at a chosen granularity
 m.recited_text()           recited writing, ADR-005's serializer
-m.cells(grouping=...)      glyph rows at a chosen granularity
-m.timeline(grouping=, owner=)    one row per sound, naming what to paint
 ```
 
-`cells` and `timeline` take the named grouping and owner policies of
-[05 §2.2](05-vocabulary.md) - faithful, font and aligner renderings as one
-contract rather than three downstream inventions, which is C10.
+`cells` takes the named grouping and owner policies of
+[05 §2.2](05-vocabulary.md) - faithful and font renderings as one contract
+rather than two downstream inventions, which is C10. There is no token method:
+the `phonemes` projection owns the token stream and its splitting, and two
+ways to get one fact is how the five legacy views drifted.
 
 Each returns a small frozen record, not a slice of the graph. Each is
 documented with a four-line example. None of them is a wire format, so adding
@@ -917,7 +942,7 @@ floor; `docs/conformance/gate-residues.md` for its residue classes.
 
 | | Change | New? |
 |---|---|---|
-| C1 | semantic participant roles, with a per-family schema | roles settled by the examples document before implementation |
+| C1 | label the participant pair `source`/`target` | **shrunk by M6**: two roles, not four. `context` had zero producers and `target`-as-effect-location is already an edge |
 | C2 | retained modifier provenance: `Recolours`, `Relengths`, `Classifies` | `SoundFeature` and `Length` move into `model/` |
 | C3 | total glyph contribution: `Presents` / `OrthographicOnly` | the iqlab meem drops out of scope with M5 |
 | C4 | ref-to-document orchestration | also renames `render/recite.py` (F8) and defines the range digest |
@@ -926,7 +951,8 @@ floor; `docs/conformance/gate-residues.md` for its residue classes.
 | **C7** | the read API on `Mappings`, and the README rewritten around it | **new, §5.3**. Ships with C4, because it is what makes C4's entry point usable |
 | **C8** | `IltiqaRepair` grows its insertion branch | **new, B6**. The one change here that alters sounds, so it moves the parity floor |
 | **C9** | `iwad_carrier` shows the base slot, not the noon | **new, B7**. Glyph attribution only; no sound changes |
-| **C10** | named grouping and ownership policies in the read API | **new**, 05 §2.1. What makes font, faithful and aligner renderings one contract instead of three inventions |
+| **C10** | named grouping and owner policies in the read API | **new**, 05 §2.2. Two groupings, faithful and font, so those renderings are one contract instead of two downstream inventions |
+| **C11** | `Junction` and `boundaries` leave the public document | **new**, 05 §4.2. Three per-word booleans carry every boundary fact anything reads, which also settles the review's "one fact three ways" minor |
 | D1 | `SlotOrigin` -> two booleans | lands first, before C1 |
 | D2 | `DIVINE_NAME` -> `LexemeClass`; imala **and ishmam** stay canonical facts with occurrences over them | amended by B2 |
 

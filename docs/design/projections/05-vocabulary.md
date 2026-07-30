@@ -9,7 +9,7 @@ alternatives that were rejected, so the naming can be reviewed rather than
 inherited.
 
 Everything marked **RENAME** is a proposal, not a decision. Each carries its
-cost. Reject them individually.
+cost. Reject them individually. Items marked **[owner]** are settled.
 
 ---
 
@@ -25,16 +25,16 @@ when no method fits - not where you start.
 ```python
 m = mappings("2:255")
 
-for hit in m.rules():
-    print(hit.rule, hit.source.letter, hit.trigger.letter)
+for r in m.rules:
+    print(r.rule, r.source.letter, r.target.letter)
     # ikhfaa_haqiqi  noon  jeem
     # madd_lazim     ya    meem
     # tafkheem       sad   -
 ```
 
-`hit.rule` is one of 40 names. `hit.source`, `hit.trigger`, `hit.target` are
-the units involved, already resolved. `hit.tokens` is what it sounds like and
-`hit.glyphs` is what to point at.
+`m.rules` is the array itself, not a method: every rule that fired, in reading
+order. `r.rule` is one of 40 names, `r.source` and `r.target` are the units
+involved, `r.sounds` is what it sounds like and `r.glyphs` is what to point at.
 
 ### "Colour the letters of the script by rule"
 
@@ -52,33 +52,28 @@ spelling four units.
 
 ```python
 for s in m.silences():
-    print(s.glyph.char, s.rule)
+    print(s.glyph.char, s.reason)
     # ٱ  wasl_elision
     # ل  lam_shamsiyyah
-    # ا  -            (written-only: the otiose alif, no rule took it)
+    # ا  orthographic     (the otiose alif: never fed a sound, no rule took it)
 ```
 
-`s.rule` is `None` for a glyph that never fed a sound in the first place -
-the otiose alif, the carrier under a dagger - as opposed to one a rule
-silenced. Legacy could not tell those apart.
+`reason` is a rule name, or the literal `orthographic` for a glyph that never
+fed a sound in the first place. One field, two kinds of answer, no null to
+handle. Legacy could not tell the two apart at all and needed `vowel_silent`
+as a catch-all for 4,568 rows.
 
 ### "Just the phonemes"
 
-```python
-m.tokens()            # ('ʔ', 'a', 'l', 'lˤ', 'a:', 'h', 'u', ...)
-m.tokens_by_word()    # (('ʔ','a','l','lˤ','a:','h','u'), ...)
-```
-
-Or use the `phonemes` projection, which is these tokens and nothing else, and
-does not change when the graph does.
+Use the `phonemes` projection, which takes its own split argument. It is not
+duplicated here: two ways to get one fact is how the five legacy views drifted.
 
 ### The rest of the surface
 
 ```text
-m.rules_at(word=3)               the same hits, filtered
-m.cells(grouping=...)            glyph rows at a chosen granularity (2.2)
-m.timeline(grouping=, owner=)    one row per sound, naming what to paint
-m.recited_text()                 the words respelled as recited
+m.rules_at(word=3)                  the same rule rows, filtered
+m.cells(grouping=..., owner=...)    glyph rows at a chosen granularity (2.2)
+m.recited_text()                    the words respelled as recited
 ```
 
 Everything past this section is for the fifth consumer: an aligner, a
@@ -106,7 +101,7 @@ Five kinds of node, four kinds of edge between them. Nothing else.
     wrote                             position                             |
       |                                    ^                               |
       |                                    |                               |
-      +--------- contributions ---> [ Occurrence ] <---- modifiers --------+
+      +--------- contributions --->  [ RuleInstance ] <---- modifiers -----+
                                      which rule fired,
                                      and on which units
 ```
@@ -135,12 +130,9 @@ each lost a different set, and every consumer rebuilt the join by matching on
 rule names. The full argument is [ADR-013](../../adr/013-public-projection-foundations.md);
 it is not re-run here.
 
----
-
 ### 2.1 What this shape lets you build
 
-The seven capabilities the contract is being bought for, each traced to the
-edges that answer it and the model work it still needs. "Needs" means the
+The seven capabilities the contract is being bought for. "Needs" means the
 graph shape is right and the producer is not finished, not that the design is
 in doubt.
 
@@ -149,142 +141,108 @@ in doubt.
 | 1 | rule -> phoneme | `attributions.by` and `modifiers.by` on the sound | **C2** (modifier edges are discarded today), **C5**, B1's law |
 | 2 | rule -> recited letter, waqf and wasl applied | recited-writing serializer over `write` + contributions | **C3**, **C4**; gated on `write` totality (F6) |
 | 3 | rule -> source glyph | participants -> units -> `spellings` | **C3** |
-| 4 | recited text, silent glyphs greyed | source glyph order + `Presents(Silent)` vs `WrittenOnly` | **C3** |
+| 4 | recited text, silent glyphs greyed | source glyph order + `silences()` | **C3** |
 | 5 | recited text, silent glyphs omitted | **not** 4 minus rows - see below | **C3**, **C4**, F6 |
 | 6 | glyph <-> phoneme, N to M | `contributions` | **C3** |
-| 7 | everything else | §2.1 below | |
-
-Capability 6 is the primitive the others are built on, and §2.2 states the
-grouping and ownership policies that sit over it - faithful, font, and
-aligner renderings as one contract rather than three downstream inventions.
+| 7 | everything else | end of this section | |
 
 **On 3, "some rules have nowhere to point".** The set is *queryable* rather
 than maintained by hand: a unit with no `supplies(fact=nucleus)` edge has an
-unwritten vowel, and a rule occurrence with no `Presents` edge has no glyph at
-all. Both named cases resolve, and neither the way an earlier draft of this
-document claimed:
+unwritten vowel, and a rule instance with no `presents` edge has no glyph at
+all. Both named cases resolve, and neither the way an earlier draft claimed:
 
 - **The divine name's long `aa` is unwritten everywhere.** There is no dagger
   alif in `ٱللَّهِ`, `ٱللَّهُ` or `لِلَّهِ` - the corpus scalars are
   `U+0671 U+0644 U+0644 U+0651 U+064E U+0647 U+0650` and no `U+0670`. The
-  length is lexical, derived from the word's identity. So the fatha
-  `supplies` the unit's nucleus, and **no glyph `presents` the madd
-  occurrence**: rule-to-glyph correctly returns nothing, and the consumer can
-  tell the madd is unwritten rather than being handed a plausible wrong glyph.
-  That is the owner's requirement, and it is why `spellings` and
-  `contributions` are two relations rather than one.
-- **Madd iwad currently points at the wrong glyph, and that is a defect.** The
-  domain invariant is that a madd links to a vowel grapheme or a vowel
-  phoneme. At 2:5:3 stopped, the alif seat `ى` is the grapheme that carries
-  the iwad - legacy says so too, tagging `{'chars': 'ى', 'role': 'madd',
-  'phonemes': ['a:'], 'tag': 'madd_iwad'}`. The branch instead has `ى`
-  *decorating the tanween noon*, the one unit that goes silent, while the
-  length lands on the base. See **04 B7**; the fix is C9.
+  length is lexical. So the fatha `supplies` the unit's nucleus, and **no
+  glyph `presents` the madd**: rule-to-glyph correctly returns nothing, and
+  the consumer can tell the madd is unwritten rather than being handed a
+  plausible wrong glyph. That is why `spellings` and `contributions` are two
+  relations rather than one.
+- **Madd iwad currently points at the wrong glyph, and that is a defect.** A
+  madd must link to a vowel grapheme or a vowel phoneme. At 2:5:3 stopped, the
+  alif seat `ى` is the grapheme that carries the iwad - legacy tags it
+  `{'chars': 'ى', 'role': 'madd', 'phonemes': ['a:'], 'tag': 'madd_iwad'}` -
+  but the branch has `ى` decorating the tanween noon, the one unit that goes
+  silent. See **04 B7**; the fix is C9 and the law is L-madd.
 
 What genuinely has no glyph and never will is an **inserted** sound, and there
-is exactly one kind: the helping kasra of iltiqa al-sakinayn. It is placed by
-`Insertion(anchor, side)` between two glyphs rather than on one. See **04 B6** -
-today the package emits none at all.
+is exactly one kind: the helping kasra of iltiqa al-sakinayn, placed by
+`Insertion(anchor, side)` between two glyphs rather than on one. See
+**04 B6** - today the package emits none at all.
 
-**On 5, the trap.** "Recited text with silent letters omitted" is *not*
-"recited text with silent letters greyed, minus those rows", because **a glyph
-is not atomically silent**. The single tanween mark `ً` at 2:5:3 supplies
-three facts across two units: the dal's vowel, the noon's letter, and the
-noon's silence. At waqf the noon half goes silent and the vowel half
-lengthens into the iwad. Delete the glyph and you lose the vowel; keep it and
-you keep a noon that is not said.
-
-This is exactly where legacy needed split-extension rows and
-`EXTENSION_FALLBACK_CHARS`. The contract handles it because `Presents` is
-per-glyph-per-target - one glyph may present both a `hosts` and a `silent` -
-but the honest answer to capability 5 is that it is **capability 2**, the
-recited-writing serializer, not a filtered capability 4. Capability 4 is a
-rendering of the *source* glyph sequence; capabilities 2 and 5 render a
-*different* glyph sequence.
-
-### 2.2 Granularity: one faithful relation, named folds over it
-
-Capability 6 is the primitive, and an earlier draft of this document
-underspecified what sits on top of it by calling display ownership
-"deliberately withheld". That was wrong in an important way. What ADR-013 §2
-forbids is a **stored** `owner` on a sound - because when a haraka and its
-carrier both supply one nucleus, no single stored value can serve both a
-faithful renderer and a font renderer. It does not forbid *shipping* the
-policies, and shipping them is exactly what stops each consumer inventing one.
-
-That has already happened once: 00-audit §2.1 records
-`ts-source.ts::lettersFromCells` and `qua-sdk/cells.py` each reimplementing
-ownership, with the frontend's tiebreak ("the carrier wins over the
-consonant's haraka") written down in a comment rather than in a contract. Two
-implementations of one unpublished rule is how they drift.
-
-**The wire carries `faithful` only** - every glyph, every `Presents` edge,
-including `بَ` as two glyphs presenting two sounds. Everything else is a named
-fold in the read API:
-
-```text
-m.cells(grouping="faithful")   one row per glyph:  ب -> b   َ -> a
-m.cells(grouping="rasm")       one row per base plus its combining marks,
-                               which is what a font shapes as one unit:
-                               بَ -> b a  ·  the dagger stays its own row
-                               because it is a separate shaped mark
-m.cells(grouping="letter")     legacy `letter_phoneme_mappings` grouping -
-                               base plus marks plus extensions, silent units
-                               merged left or right by the legacy policy.
-                               This is what the QUA cells and MFA use
-```
-
-Every grouping is a **partition of the glyph array covering every sound
-exactly once**. That is a law, not a convention, so a fold that drops or
-duplicates a sound fails the gate rather than producing a plausible
-misalignment.
-
-Animation needs one more thing - a single owner per sound - and it is a second
-named parameter over a grouping, not a property of the graph:
-
-```text
-m.timeline(grouping="letter", owner="carrier")
-```
-
-| `owner` | Picks | For |
-|---|---|---|
-| `carrier` | the length carrier over the consonant's haraka | what QUA and the legacy frontend do today; the tiebreak that keeps a consonant's highlight from smearing across the whole vowel |
-| `first` | the first presenting glyph in source order | faithful letter-by-letter animation |
-| `haraka` | the vowel mark over its carrier | animating harakat |
-
-So the answer to "is faithful sufficient, or do we need a font mode, or should
-the consumer combine": **faithful is the wire, and all three folds ship.** A
-consumer may still write its own - the edges are all there - but it should not
-have to, and when the QUA gate (04 §6.2) pins which policy the viewer uses,
-the policy has a name to be pinned by.
-
-Silent-glyph co-highlighting composes from the same two pieces: `silences()`
-gives per-glyph silence with its reason, the grouping gives the cluster the
-glyph sits in, so "grey the silent glyph inside its group" and "skip it
-entirely" are both derivable. Both are named options rather than a third
-invention.
+**On 5, the trap.** "Silent letters omitted" is *not* "silent letters greyed,
+minus those rows", because **a glyph is not atomically silent**. The single
+tanween mark `ً` at 2:5:3 supplies three facts across two units: the dal's
+vowel, the noon's letter, and the noon's silence. At waqf the noon half goes
+silent and the vowel half lengthens into the iwad. Delete the glyph and you
+lose the vowel; keep it and you keep a noon that is not said. So capability 5
+**is capability 2** - the recited-writing serializer - not a filtered
+capability 4. Capability 4 renders the *source* glyph sequence; 2 and 5 render
+a different one.
 
 **7. What else falls out, with no further work**
 
-- **Teaching "why".** Every occurrence carries its participants, so "why is
-  this raa heavy?" is answered by the `tafkheem` occurrence's `trigger`,
-  rather than by re-running the rule in the UI.
-- **Boundary rehearsal.** Two `Mappings` for one ref under different
-  `boundaries`, diffed: exactly what changes if you stop here.
-- **Khilaf diffing.** Same, varying `khilaf` instead - which is the only way
-  to show a reader the two wajhs of a disputed raa side by side.
+- **Teaching "why".** Every rule instance carries its participants, so "why is
+  this raa heavy?" is answered by the `tafkheem` row rather than by re-running
+  the rule in the UI.
+- **Boundary rehearsal.** Two `Mappings` for one ref stopped at different
+  words, diffed: exactly what changes if you stop here.
+- **Variant diffing.** The same, varying `variant` - the only way to show a
+  reader both wajhs of a disputed raa side by side.
 - **Cross-script proof.** Uthmani and IndoPak `Mappings` for one ref must
-  agree on `units`, `sounds` and `occurrences` and differ only in `glyphs`
-  and `spellings`. That is the claim the whole riwayah-agnostic design is
-  named for, expressible as a document comparison.
+  agree on `units`, `sounds` and `rules` and differ only in `glyphs` and
+  `spellings`. That is the claim the riwayah-agnostic design is named for,
+  expressible as a document comparison.
 - **Corpus search.** Every site of a rule, or of a rule on a given letter, or
   of a rule that crosses a word boundary.
-- **Alignment targets.** Sounds with their word allocation and rule labels -
-  what a tajweed-aware ASR or a forced aligner consumes, without the SDK
-  re-slicing words or maintaining an "indexable unit" coordinate space to
-  exclude render-only markers.
-- **Custom notation.** The same graph with a different `token` serializer;
-  nothing else in the document is notation-dependent.
+- **Alignment targets.** Sounds with their word allocation and rule labels,
+  without the SDK re-slicing words or maintaining an "indexable unit"
+  coordinate space to exclude render-only markers.
+
+### 2.2 Granularity: one faithful relation, one fold over it
+
+An earlier draft called display ownership "deliberately withheld". That was
+wrong. What ADR-013 §2 forbids is a **stored** owner on a sound - when a
+haraka and its carrier both supply one nucleus, no single stored value serves
+both a faithful renderer and a font renderer. It does not forbid *shipping*
+the policies, and shipping them is what stops each consumer inventing one.
+That has already happened twice: `ts-source.ts::lettersFromCells` and
+`qua-sdk/cells.py` each wrote their own, with the tiebreak living in a comment.
+
+**The wire carries `faithful` only.** Every glyph, every `presents` edge,
+including `بَ` as two glyphs presenting two sounds. Two groupings ship:
+
+| `grouping` | One row per | For |
+|---|---|---|
+| `faithful` | glyph | the primitive; MFA allocation, letter-to-sound animation |
+| `font` | base letter plus the combining marks a font shapes with it | font-based animation and highlighting |
+
+`font` is not always 1:1 or even 2:1. A tanween cell is three glyphs' worth of
+fact in one mark; an iltiqa site puts a sound between two cells that no cell
+owns. The rows carry whatever `presents` says, and the partition law below is
+what keeps that honest.
+
+Legacy's `letter_phoneme_mappings` grouping is **not** a third policy. It is
+`font` plus legacy's silent-merge policy, and it lives in the legacy adapter
+(02-gate §3.4) where the rest of the legacy presentation already lives.
+
+**Ownership is a parameter of `cells`, not a second method.** Every grouping
+must **partition the glyph array and cover every sound exactly once** - that
+is a gate law, so a fold that drops or duplicates a sound fails rather than
+producing a plausible misalignment. Satisfying it *is* resolving ownership, so
+there is nothing left for a separate timeline call to do:
+
+| `owner` | Picks | For |
+|---|---|---|
+| `carrier` | the length carrier over the consonant's haraka | what QUA and the legacy frontend do today; keeps a consonant's highlight from smearing across the whole vowel |
+| `first` | the first presenting glyph in source order | faithful letter-by-letter animation |
+
+Silent-glyph co-highlighting composes from the same two pieces: `silences()`
+gives per-glyph silence with its reason and the grouping gives the cell it
+sits in, so "grey it inside its cell" and "skip it" are both derivable.
+
+---
 
 ## 3. The naming rules this document applies
 
@@ -292,290 +250,365 @@ So that the next name is decidable rather than argued.
 
 **N1. The domain's own word wins, written in plain ASCII.** If Hafs teaching
 has a term - `tanween`, `madd`, `idgham`, `qalqala`, `sakt`, `silah`, `waqf`,
-`wasl`, `khilaf`, `riwayah`, `haraka`, `shadda` - use it. Not the English
-linguistics calque for the same thing. Nobody reading a mushaf says
-"nunation".
+`wasl`, `riwayah`, `haraka`, `shadda` - use it, not the English linguistics
+calque. Nobody reading a mushaf says "nunation".
 
 **N2. Plain English wins where the domain has no word.** There is no Arabic
-term for "the row in the array that says which position produced this sound".
-`hosts`, `sound`, `word`, `glyph`, `occurrence` are structure, not doctrine.
+term for "the row that says which position produced this sound". `hosts`,
+`sound`, `word`, `glyph` are structure, not doctrine.
 
 **N3. A structure is never named after a rule.** `Silah` is currently both a
-rule and a nucleus kind, which means `unit.nucleus.kind == "silah"` and
-`occurrence.rule == "silah"` are different claims spelled identically.
+rule and a nucleus kind, so `unit.nucleus.kind == "silah"` and
+`rule == "silah"` are different claims spelled identically.
 
 **N4. A field says what it holds, not how it was derived.** `spelled` holds
 "is part of a spoken letter name" and reads as "is written".
 
-**N5. Two names that are near-synonyms in English may not carry a load-bearing
-distinction.** `Evidences` against `Attests` is the current example: both mean
-"provides evidence for", and the contract needs them to mean two very
-different things.
+**N5. Two near-synonyms may not carry a load-bearing distinction.**
+`Evidences` against `Attests`: both mean "provides evidence for", and the
+contract needs them to mean two very different things.
 
 **N6. No abbreviations on the wire.** `cls` is Python; JSON has room for
 `kind`.
+
+**N7. Booleans take `is_`.** **[owner]** `is_tanween`, `is_letter_name`,
+`is_started_on`, `is_stopped_on`. A noun-shaped boolean reads as a field
+holding that noun.
+
+**N8. Infrastructure does not sit beside domain facts.** A field only the
+producer and the cache care about goes under `provenance`, so the document's
+top level is words, glyphs, units, sounds, rules and their edges - and nothing
+a reader has to skip past.
+
+**N9. One concept, one representation.** If the same fact is reachable two
+ways, one of them is deleted. This retires `m.tokens()` in favour of the
+`phonemes` projection, and `Junction` in favour of the two booleans that were
+already the only thing anyone read.
 
 ---
 
 ## 4. The register
 
-Columns: the name, what it holds in domain terms, why that word, and what was
-considered and rejected. **RENAME** marks a proposal against the current
-drafts.
+### 4.1 The envelope
 
-### 4.1 The request envelope
+Split in two, by N8. What a reader needs is at the top; what a cache needs is
+under `provenance`.
 
-| Name | Means | Why | Rejected |
+| Name | Where | Means | Notes |
 |---|---|---|---|
-| `Mappings` | the whole document for one request | carries the migration lineage: a consumer looking for `letter_phoneme_mappings` finds where their view went | `Reading` - `orthography/adapter.py` defines it and eight modules import it. `Recitation` - `api.py` defines it. Noted tension: a plural noun for one document reads like a bag, and this is the one name settled before the others |
-| `ref` | the passage: `"2:255"`, `"2:255:3-2:256:1"` | legacy's word, short, and already what a caller types | `passage`, `range` - longer, no gain |
-| `riwayah` | which transmission | N1 | `reading` - triple-booked |
-| `script` | `uthmani` or `indopak` | plain and correct | `mushaf`, `orthography` |
-| `notation` | which phoneme alphabet, e.g. `"ipa"` | it names the *choice*; `render/alphabet.py::Alphabet` is the table that choice selects | `alphabet` - that is the internal table, and publishing the same word for both is the collision this contract is trying to avoid |
-| `khilaf` **RENAME** | the variant readings selected | N1. The model already has `KhilafId`; the wrapper being called `VariantSelection` is the only place the English is used | keep `selection: VariantSelection`. Cost of the rename: one field name and one type alias, no behaviour |
-| `boundaries` | where the reciter starts, stops, joins, and takes a sakt | covers all four states; `waqf_plan` would name only one of them | `waqf`, `stops` |
-| `canon_digest` **RENAME** | identifies the canonical data the indices were resolved against | `score_digest` exposes `Score`, an internal layer name with a musical metaphor a consumer has no way to decode | keep `score_digest`. Cost: one field name |
+| `ref` | top | the passage: `"2:255"`, `"2:255:3-2:256:1"` | addresses words, not only verses (04 open question 4) |
+| `variant` | top | the variant readings selected | **[owner]** `variant: VariantSelection`. R12's `khilaf` is rejected |
+| `words` ... `contributions` | top | the nine arrays | |
+| `riwayah`, `script` | `provenance` | which transmission, which mushaf | |
+| `notation` | `provenance` | which phoneme alphabet, e.g. `"ipa"` | **kept, and this is the justification**: `Sound.token` is a string whose meaning depends on it, so a document without this field cannot say what its own tokens mean. Not kept on the theory that someone will pick another |
+| `schema_version` | `provenance` | | |
+| `canon_digest` **RENAME** | `provenance` | identifies the canonical data the indices were resolved against | pure cache correctness: two documents are comparable only if it matches. `score_digest` exposes `Score`, an internal layer name a consumer cannot decode |
+
+**Dropped: `boundaries` / `BoundaryPlan`.** It was a third copy of a fact the
+words already carry. See 4.2.
 
 ### 4.2 `Word`
 
-| Name | Means | Why | Rejected |
-|---|---|---|---|
-| `location` | `surah:ayah:word` | the join key every downstream system already uses | |
-| `text` | the source word as written | | |
-| `started_on` **RENAME** | recitation begins at this word (ibtidaa) | `starts` reads as "this word starts something"; `started_on` says it is the reciter who started, and matches `BoundaryPlan.started_on` | keep `starts`; legacy's `is_starting` |
-| `junction_after` | what happens after this word | it is the complete boundary fact, so a separate `stops` would be a second copy | `boundary_after`, `stop` |
-| `Junction` values **RENAME** | `wasl \| sakt \| waqf \| edge` | N1. The domain's three states are literally wasl, waqf and ibtidaa (`domain-facts.md` §2); `join`/`stop` are the English calques of two of them, while `sakt` is already the domain word - so the current enum is half-translated | keep `join \| sakt \| stop \| edge`. Cost: this is a **model** enum, so its values are hashed into digests and every fixture regenerates. Land it with D1, which regenerates them anyway |
-| `advice` | the mushaf's stop sign, if any | the sign advises; it does not decide | `stop_sign` - names the glyph, not the class |
-| `lexeme` | lexical identity: currently only `divine_name` | D2: a lexical fact is not a recitation process | `divine_name: bool` - cannot grow; `word_class` - collides with grammatical class |
+**[owner] `Junction` leaves the public surface.** A word is started on,
+stopped on, both, or neither - that is the whole boundary fact, and it is what
+the domain calls ibtidaa, waqf and wasl. Checked against the source: the only
+readers of the four-member enum are `stopped_on`, `started_on`, and one
+lookahead block in `neighbourhood.py` that treats a sakt like a stop for
+cross-word rules. Three booleans cover all three.
 
-### 4.3 `Unit` - the one word to get right
+| Name | Means |
+|---|---|
+| `location` | `surah:ayah:word` - the join key every downstream system already uses |
+| `text` | the source word as written |
+| `is_started_on` | recitation begins here (ibtidaa) |
+| `is_stopped_on` | recitation pauses after this word (waqf). The last word of a request is stopped on |
+| `sakt_after` | a breathless pause after this word: not a stop, but cross-word rules are blocked |
+| `stop_sign` **RENAME** | the mushaf's sign, if any: `preferred_stop`, `compulsory_stop`, ... | 
+| `lexeme` | see below |
 
-A **unit** is one letter together with the vowel state that follows it. It is
-the thing a rule fires on.
+The invariant, which a consumer can check: **`is_started_on` for word N+1 is
+true exactly when word N `is_stopped_on`** - with one exception, and it is the
+reason `sakt_after` is its own field: after a sakt the next word is *not*
+started on, because a sakt is mid-wasl.
 
-It is not the same as a written letter cluster. Some units are written by
-several glyphs (a long vowel: haraka plus carrier). Some glyphs write several
-units (a muqattaat letter: `ص` spells four). Some units are written by no
-glyph of their own (the noon inside a tanween).
+`advice` becomes `stop_sign` because that is what it is on the page. The
+values already carry the advisory meaning; the field name does not need to.
 
-| Name | Means | Why | Rejected |
-|---|---|---|---|
-| `Unit` | one canonical position | deliberately content-free, because the thing it names is not any one of the words a reader would guess | `Letter` - readable, but a unit is letter *plus* vowel state, and `Letter.letter` is absurd. `Slot` - the internal name, equally content-free with no lineage. `Syllable` - wrong; a geminate spans two units. `Cluster` - `domain-facts.md` §1.1 already uses it for the *written* thing |
-| `letter` | which of the 30 | `CanonLetter`: the 28 plus hamza and taa marbuta. Phonological identity, not glyphic - no alef maqsura, no alef wasla | |
-| `onset` / `Onset` | the state of the consonant: `plain \| geminate \| wasl \| silah \| tashil` | phonologically exact, and the census (`03-vocabulary §4`) proved every impossible combination has a domain reason | `consonant: ConsonantState` - readable, but then `Sound`'s `Consonant` variant means something else and the two would be confused |
-| `nucleus` / `Nucleus` | the vowel state | same | `vowel` - a `Silent` nucleus is not a vowel, and `Release` (qalqala) attaches here too |
-| `Part` **RENAME** | `onset \| nucleus`, the two halves a rule can address separately | `Aspect` is the worst name in the surface: in linguistics "aspect" means something else entirely, and nothing about the word suggests "which half of a unit". `Part` needs no gloss | keep `Aspect`. Cost: a model enum name, no values change, no digest moves |
-| `tanween` **RENAME** | this unit is the noon of a tanween | N1, and the reviewer's own example. `nunation` is the English linguistics calque; the corpus, the docs, and every teaching source say tanween | keep `nunation`. Cost: one public field plus `SlotOrigin.NUNATION` under D1, which is already being decomposed |
-| `letter_name` **RENAME** | this unit is part of a letter's spoken name (`ص` -> `s`,`aa`,`d`) | N4. `spelled` reads as "is written", which is the opposite of useful next to `Glyph` and `spellings` | keep `spelled`; `muqattaat` - the mechanism is more general than the openings; `part_of_letter_name` - unambiguous but long, and offered as the fallback if `letter_name` reads as a string field |
+**`lexeme`, honestly.** One member, `divine_name`. The case for publishing it:
+tafkheem on a lam is conditioned on the word being the divine name, and the
+participants alone do not say that - so without this field "why is this lam
+heavy?" has no answer in the document. It is also what legacy's frontend was
+reaching for when it synthesized `allah_dagger_alef`. The case against: it is
+one field for one word, and a consumer could match the text. The alternative
+is every consumer re-implementing a closed skeleton list
+(`ٱللَّه`, `لِلَّه`, `بِٱللَّه`, `ٱللَّهُمَّ`, ...), which is the invention pattern
+this design exists to stop. **Recommended: keep. Cheap to drop later,
+expensive to add.**
+
+### 4.3 `Unit`
+
+A **unit** is one letter together with the vowel state that follows it: the
+thing a rule fires on. Not the same as a written cluster - some units are
+written by several glyphs, some glyphs write several units, and the noon
+inside a tanween is written by no glyph of its own.
+
+| Name | Means | Notes |
+|---|---|---|
+| `letter` | which of the 30 | the 28 plus hamza and taa marbuta; phonological, so no alef maqsura and no alef wasla |
+| `onset` | the consonant's state: `plain \| geminate \| wasl \| silah \| tashil` | |
+| `nucleus` | the vowel state | |
+| `is_tanween` **RENAME** | this unit is the noon of a tanween | R1 + N7. `nunation` is the English calque; every teaching source says tanween |
+| `is_letter_name` **RENAME** | part of a letter's spoken name (`ص` -> `s`,`aa`,`d`) | R2 + N7. `spelled` reads as "is written" |
+| `Part` **RENAME** | `onset \| nucleus`, the two halves a rule addresses separately | `Aspect` means something else in linguistics and suggests nothing about halves of a unit |
+
+**No annotation field.** **[owner]** Imala, ishmam and tashil reach the
+consumer as *rules*, because that is what they are. The canonical fact stays
+internal, where `write` needs it for the round-trip (04 B2), and the mark that
+writes it is a `tajweed_mark` glyph. Nothing called "annotation" appears in
+the public document.
 
 ### 4.4 `Nucleus` variants
 
-| Name | Means | Why | Rejected |
-|---|---|---|---|
-| `Silent` | no vowel here | | `Sukun` - the sukun is a *mark*; a bare letter with no mark is equally silent |
-| `Short(quality)` | fatha, damma, kasra | | |
-| `Long(quality)` | a madd letter's vowel | | |
-| `LongWhenJoined(quality)` **RENAME** | the pronoun haa's silah: long in wasl, absent at pause | N3 - `Silah` is currently both this and `Rule.SILAH`, so `kind == "silah"` and `rule == "silah"` are different claims spelled the same. The new name also *says* the condition instead of requiring the reader to know it | keep `Silah`. Cost: a model type name |
-| `LongWhenStopped(quality)` **RENAME** | the seven alifs: short in wasl, long at pause | pairs with the above and states the condition. `PausalLong` is half-English half-jargon and does not say which way round it goes - which is exactly the confusion **04 M1** found live in the engine | keep `PausalLong` |
-
-The pair is the point: these two are the *boundary-conditional* half of the
-nucleus, and everything else is inherent. Naming them for their condition
-makes `03-vocabulary §5`'s two axes visible in the values themselves rather
-than in a docstring.
+| Name | Means |
+|---|---|
+| `Silent` | no vowel here |
+| `Short(quality)` | fatha, damma, kasra |
+| `Long(quality)` | a madd letter's vowel |
+| `LongWhenJoined(quality)` **RENAME** | the pronoun haa's silah: long in wasl, absent at pause. `Silah` is currently this *and* a rule name (N3), and the new name states the condition |
+| `LongWhenStopped(quality)` **RENAME** | the seven alifs: short in wasl, long at pause. `PausalLong` does not say which way round it goes - which is exactly the confusion 04 M1 found live in the engine |
 
 ### 4.5 `Glyph`
 
-| Name | Means | Why | Rejected |
-|---|---|---|---|
-| `Glyph` | one Unicode scalar the script wrote | | `Character` - friendliest, and legacy's `chars`, but ambiguous between scalar and cluster. `Grapheme` - the model's name and the least accurate of the three: in Unicode a grapheme is a *cluster*, and this is one scalar. `Scalar` - accurate, meaningless to a reader |
-| `char` | the scalar itself | | |
-| `kind` **RENAME** | `base \| haraka \| tanween \| shadda \| length_carrier \| small_vowel \| madd_sign \| silence_sign \| annotation \| advice \| structural` | N6: `cls` is a Python abbreviation, and JSON has room. The *values* are already domain words and stay | keep `cls`. Cost: one wire field name |
-| `word_index` **RENAME/split** | the scalar's ordinal within its word | this is what `model/inscription.py:39` actually holds and what legacy's `source_letter_index` joins on. **04 M8**: the drafts currently call one field `source_index` and define it two incompatible ways | |
-| `source_index` | the scalar's ordinal in the whole requested passage | what the concatenation law walks | |
+| Name | Means | Notes |
+|---|---|---|
+| `Glyph` | one Unicode scalar the script wrote | `Grapheme`, the model's word, is the least accurate: in Unicode a grapheme is a *cluster* |
+| `char` | the scalar | |
+| `kind` **RENAME** | what the mark is | `cls` is a Python abbreviation (N6) |
+| `word_index` | ordinal within its word - the legacy join key | 04 M8 |
+| `source_index` | ordinal in the whole requested passage | what the concatenation law walks |
+
+`kind` values, with two renamed:
+
+`base` · `haraka` · `tanween` · `shadda` · **`vowel_letter`** *(was
+`length_carrier`)* · `small_vowel` · `madd_sign` · `silence_sign` ·
+**`tajweed_mark`** *(was `annotation`)* · `stop_sign` *(was `advice`)* ·
+`structural`
+
+- **`vowel_letter`**, because the set was inconsistent: `small_vowel` names a
+  mark by its size, `length_carrier` named its neighbour by its function. The
+  domain (`domain-facts.md` §1.1) calls them vowel letters and small vowels,
+  so both are now named for what they are.
+- **`tajweed_mark`**, because `annotation` was the vague member of an
+  otherwise specific set - `madd_sign` and `silence_sign` say what they mark
+  and this one did not. It covers the imala, ishmam and tashil marks: marks
+  that name a manner of recitation.
 
 ### 4.6 `Sound`
 
-| Name | Means | Why | Rejected |
-|---|---|---|---|
-| `Sound` | one segment that is heard | | `Phoneme` - these are not phonemes of a language, they are realized segments. `Phone` - accurate, jargon |
-| `word` | which word it is credited to | for a merged sound this is the **host**'s word (04 B3 leg 1) | |
-| `token` | the selected notation's spelling of it, e.g. `"m̃m̃"` | | `phoneme`, `ipa` - `ipa` is one notation among possible several |
-| `kind` + variant fields **RENAME** | `consonant \| vowel \| nasal \| release`, flattened onto the node | the drafts nest the union under a field called `spec`, which says nothing. A tagged union inline is one fewer hop and is how the other four unions are already serialized | keep `spec: Consonant \| Vowel \| Nasal \| Release` |
+`Sound` is the node; `token` is one field of it. **They are not the same
+thing, and the reason is measurable.** Legacy shipped only tokens, so every
+consumer answered questions about sounds with *string tests over the token*:
+`is_madd(ph)` was `":" in ph`, `is_geminate(ph)` split the string in half and
+compared, `is_nasalised(ph)` matched against a set loaded from YAML
+(`b3bc53a:phonemes.py`). Those exist because the structure was thrown away and
+had to be guessed back out of the spelling.
 
-The variants and their fields, unchanged: `consonant{letter, geminate,
-emphatic, nasal}`, `vowel{quality, long, emphatic}`, `nasal{place, emphatic}`,
-`release{kind}`. A flat record with every field optional would admit
-impossible sounds, which is why this is a union at all.
+| Name | Means |
+|---|---|
+| `word` | which word it is credited to - for a merged sound, the **host**'s word (04 B3) |
+| `token` | the selected notation's spelling, e.g. `"m̃m̃"` |
+| `kind` + variant fields **RENAME** | `consonant \| vowel \| nasal \| release`, flattened onto the node rather than nested under a field called `spec` |
 
-### 4.7 `Occurrence`
+`consonant{letter, geminate, emphatic, nasal}` · `vowel{quality, long,
+emphatic}` · `nasal{place, emphatic}` · `release{kind}`.
 
-| Name | Means | Why | Rejected |
-|---|---|---|---|
-| `Occurrence` | one firing of one rule at one place | not "rule": the same rule fires many times | `RuleInstance`, `Application`, `Tag` - legacy's word, and it is the flattening this design exists to undo |
-| `rule` | one of the 40 | trigger-independent: one `ikhfaa_haqiqi` for noon and tanween alike. The trigger is read off the participant's `unit.tanween` | the legacy trigger-split names; see §5 |
-| `participants` | who was involved, and how | | |
-| `Participant{unit, part, role}` **RENAME** | flattened | the drafts nest `anchor: AspectRef{unit, aspect}`; nothing else references the inner type, so the nesting buys nothing | keep `anchor: AspectRef` |
-| `role` | `trigger \| source \| target \| context` | see the table below | |
+**Geminate is a feature, not a kind.** A doubled consonant is still a
+consonant, and it can also be emphatic or nasal; making `geminate` a fifth
+kind would make those combinations unsayable. Same reasoning as `long` on a
+vowel. A flat record with every field optional would admit impossible sounds,
+which is why this is a union at all.
 
-**Roles, stated once**, because 02-gate §3.3 and 01-design §3.5 currently
-contradict each other on the idgham case (04 M6):
+### 4.7 `RuleInstance`
 
-| Role | Means | In `min rabbihim` (idgham bila ghunnah) |
+**RENAME, [owner].** `Occurrence` does not say occurrence *of what*.
+`RuleInstance` does, and the array is `rules` - so `m.rules` is literally the
+answer to "which rules apply here", and `m.rules[0].rule` is its name.
+
+| Name | Means |
+|---|---|
+| `rule` | one of the 40 |
+| `participants` | who was involved, and how |
+
+**Two roles, not four - and the evidence says so.** The 4-role vocabulary
+(`trigger`, `source`, `target`, `context`) was proposed without a census.
+Taken now, over the whole corpus in both boundary modes:
+
+```
+participants per rule instance:   1 -> 155,039     2 -> 95,389     3 -> 0
+```
+
+**No rule instance anywhere has a third participant**, so `context` - "a
+required participant with none of the other meanings" - has zero producers.
+That is the same defect class as `Inserted` in 04 B6: a member of a public
+vocabulary that nothing has ever produced.
+
+And `target` as a *role* is redundant with the graph. Where the effect lands
+is already stated by the attribution or modifier edge - on the following
+letter for an idgham, on the vowel itself for a madd. A role that duplicates
+an edge is a second copy that can disagree.
+
+So: **`source` and `target`, the same two words legacy used**, making that
+part of the adapter an identity map.
+
+| Role | Means | In `min rabbihim` |
 |---|---|---|
-| `source` | the rule's canonical locus - the unit the rule is *about* | the sakin noon |
-| `trigger` | the condition that made it applicable | the following raa |
-| `target` | the affected anchor, where the outcome lands | the raa's onset, which is now doubled |
-| `context` | a required participant with none of the above meanings | - |
+| `source` | the unit the rule is about | the sakin noon |
+| `target` | the other unit the rule names | the following raa |
 
-`trigger` and `target` are the same unit here and are still two roles: one
-says why the rule matched, the other says where it landed. The full
-per-family assignment is settled in [06](06-examples.md), not here.
+This still fixes what C1 was for. `PausalGlide` passes `(before.id, at)` where
+every other call site passes `(at, other)` (00-audit F2) - two labels correct
+that as well as four would, and C1 shrinks accordingly.
 
-`RuleFamily` and `Phase` are **not** fields on an occurrence. They are total
-functions of `rule`, published as versioned tables, so an occurrence never
-carries a second classification that can drift from the first.
+One wrinkle for the per-rule schema: `waqf_ending` has **1 participant 43,548
+times and 2 participants 6,756 times**, because `TanweenAtWaqf` also mints it.
+Arity is per rule instance, not per rule.
+
+`RuleFamily` and `Phase` are not fields here. They are total functions of
+`rule`, published as versioned tables, so nothing carries a second
+classification that can drift from the first.
 
 ### 4.8 The four edge families
 
-Subject matters. Three of the attribution edges state something a *unit*
-does; one states something with no unit at all. That is the only irregularity
-and it is worth knowing before reading them.
+Subject matters. Three attribution edges state something a *unit* does; one
+states something with no unit at all.
 
 | Edge | Subject | Means |
 |---|---|---|
 | **spellings** | | |
-| `Supplies(glyph, unit, fact)` **RENAME** | the glyph | supplies a canonical fact of the unit: this fatha *is* the unit's vowel |
-| `Witnesses(glyph, family, unit)` **RENAME** | the glyph | witnesses that a rule of this family happens here, without supplying any canonical fact: a word-initial shadda witnesses an assimilation from the previous word |
-| `Decorates(glyph, unit)` | the glyph | supplies nothing and asserts nothing, but is bound to the unit it marks: the maddah |
-| `Structural(glyph)` | the glyph | belongs to no word at all: space, verse marker, tatweel, stop-sign scalar |
+| `Supplies(glyph, unit, fact)` **RENAME** | the glyph | supplies a canonical fact: this fatha *is* the unit's vowel |
+| `Witnesses(glyph, family, unit)` **RENAME** | the glyph | witnesses that a rule of this family happens here without supplying any canonical fact: a word-initial shadda witnesses an assimilation from the previous word |
+| `Decorates(glyph, unit)` | the glyph | supplies and asserts nothing, but is bound to the unit it marks: the maddah |
+| `Structural(glyph)` | the glyph | belongs to no word: space, verse marker, tatweel |
 | **attributions** | | |
-| `Hosts(units, part, sound, by?)` | the units | these units produce this sound. Several units means joint ownership, not a preferred owner |
-| `MergedInto(units, part, sound, by?)` | the units | this unit disappeared into that sound. A merger **is** the `Hosts`/`MergedInto` pair sharing one sound and one occurrence; there is no `assimilated` flag |
+| `Hosts(units, part, sound, by?)` | the units | these units produce this sound. Several units is joint ownership, not a preferred owner |
+| `MergedInto(units, part, sound, by?)` | the units | this unit disappeared into that sound. A merger **is** the `Hosts`/`MergedInto` pair sharing a sound and a rule instance |
 | `Silent(units, part, by?)` | the units | this unit lost its sound, and `by` says which rule took it |
-| `Insertion(anchor, side, part, sound, by?)` **RENAME** | nobody | a sound no unit owns, placed before or after an anchor unit: the 3:1 iltiqa kasra. Renamed from `Inserted` because it is the one edge whose subject is not a unit, and a noun says so |
+| `Insertion(anchor, side, part, sound, by?)` **RENAME** | nobody | a sound no unit owns, placed before or after an anchor. Renamed from `Inserted` because it is the one edge whose subject is not a unit |
 | **modifiers** | | |
-| `Recolours(sound, by, feature, value)` | the occurrence | tafkheem made this consonant heavy. The domain's own word (`domain-facts.md` §4) |
-| `SetsLength(sound, by, length)` **RENAME** | the occurrence | iltiqa shortened this madd; ibdal lengthened that one. `Relengths` is a coined verb that exists nowhere else | keep `Relengths` |
-| `Classifies(sound, by)` | the occurrence | this rule names this sound without changing it. Every madd, every izhar, tarqeeq, tashil |
+| `Recolours(sound, by, feature, value)` | the rule | tafkheem made this consonant heavy. The domain's own word |
+| `SetsLength(sound, by, length)` **RENAME** | the rule | iltiqa shortened this madd. `Relengths` is a coined verb |
+| `Classifies(sound, by)` | the rule | names this sound without changing it: every madd, every izhar, tarqeeq, tashil |
 | **contributions** | | |
-| `Presents(glyph, target)` | the glyph | this is the mark you point at for that outcome. `target` is a tagged index: `{"to": "attribution", "index": 4}` |
-| `WrittenOnly(glyph)` **RENAME** | the glyph | written, and contributes to nothing heard. Distinct from `Silent`: `Silent` is a *unit* whose sound a rule removed; this is a *glyph* that never fed one - the carrier waw under a dagger alef | keep `OrthographicOnly` |
+| `presents` | the glyph | one row per non-structural glyph, listing the outcomes it is the mark for. **An empty list means the glyph contributes to nothing heard** |
 
-**`Supplies` / `Witnesses` is the rename with the strongest case.** `Evidences`
-and `Attests` are near-synonyms in English carrying the contract's sharpest
-distinction: one is a claim about the *canonical text*, made by the script
-adapter; the other is a claim about the *performance*, made with no knowledge
-of which rule actually fired. A consumer cannot guess which is which from the
-words, and 04's open question 5 existed precisely because the drafts' own
-authors could not either. Cost: these are model type names with a lint gate
-(`tools/attest.py`, `engine/laws.py::check_attestations`) built around the
-second one, so the model may keep `Attests` while the public says `Witnesses`
-- the namespaced module makes that legal.
+**`WrittenOnly` / `OrthographicOnly` is dropped.** **[owner]** Two edge kinds
+for one question was over-built. `contributions` becomes one row per
+non-structural glyph with a possibly-empty `presents` list, which keeps the
+totality the gate needs - a glyph *missing* from the array is a bug, a glyph
+present with an empty list is a deliberate statement - without a second type.
+The read API then reports one `reason` field that is either a rule name or the
+literal `orthographic`.
+
+**`Supplies` / `Witnesses` is the rename with the strongest case.**
+`Evidences` and `Attests` are near-synonyms carrying the contract's sharpest
+distinction: one is a claim about the *canonical text* made by the script
+adapter, the other a claim about the *performance* made with no knowledge of
+which rule fired. 04's open question 5 existed because the drafts' own authors
+could not tell them apart. The model may keep `Attests` for
+`tools/attest.py`; the namespaced module makes that legal.
 
 ### 4.9 `by`, and what its absence means
 
-`by` is the index of the occurrence responsible. It is **optional**
-(04 B4). No `by` means no rule claimed this outcome: it is what the script
-writes, realized by default.
+`by` is the index of the rule instance responsible, and it is **optional**
+(04 B4). No `by` means no rule claimed this: what the script writes, realized
+by default.
 
 ```json
 {"kind": "hosts", "units": [0], "part": "onset", "sound": 0}
 {"kind": "hosts", "units": [5], "part": "onset", "sound": 5, "by": 2}
 ```
 
-The first is the `k` of `kitaab`. Nothing made it; it is just there. There is
-no `plain` rule in the public vocabulary, because absence is the honest
-encoding of absence, and because a `rules_by_sound()` that answers `["plain"]`
-for most of the corpus is the exact complaint this redesign exists to fix.
+The first is the `k` of `kitaab`. There is no `plain` rule in the public
+vocabulary, because absence is the honest encoding of absence.
 
 ---
 
 ## 5. The legacy vocabulary, and why it is not the public one
 
 Legacy had 33 rule names; the branch has 40. Six legacy names are the same
-rule with the trigger baked into the name:
+rule with the trigger baked in:
 
 | Legacy pair | Public | The trigger is read from |
 |---|---|---|
-| `ikhfaa_noon` / `ikhfaa_tanween` | `ikhfaa_haqiqi` | `unit.tanween` |
-| `iqlab_noon` / `iqlab_tanween` | `iqlab` | `unit.tanween` |
-| `idgham_ghunnah_noon` / `_tanween` | `idgham_bi_ghunnah` | `unit.tanween` |
-| `idgham_bila_ghunnah_noon` / `_tanween` | `idgham_bila_ghunnah` | `unit.tanween` |
+| `ikhfaa_noon` / `ikhfaa_tanween` | `ikhfaa_haqiqi` | `unit.is_tanween` |
+| `iqlab_noon` / `iqlab_tanween` | `iqlab` | `unit.is_tanween` |
+| `idgham_ghunnah_noon` / `_tanween` | `idgham_bi_ghunnah` | `unit.is_tanween` |
+| `idgham_bila_ghunnah_noon` / `_tanween` | `idgham_bila_ghunnah` | `unit.is_tanween` |
 | `noon_ghunnah` / `meem_ghunnah` | `ghunnah_mushaddadah` | `unit.letter` |
 | `hamza_wasl_fatha` / `_kasra` / `_damma` | `wasl_start` | `unit.nucleus.quality` |
 
 A rule is a rule; what triggered it is data on a node. Baking the trigger into
-the name means every new trigger is a new enum member and a breaking release,
-and it is why legacy needed six hand-maintained classification tables to
-answer questions the participant already answers.
+the name makes every new trigger a new enum member and a breaking release, and
+it is why legacy needed six hand-maintained classification tables to answer
+questions a participant already answers.
 
-The rest of the mapping is renames (`madd_arid_lissukun` ->
-`madd_arid_lil_sukun`, `lam_shamsiyah` -> `lam_shamsiyyah`,
-`hamza_wasl_silent` -> `wasl_elision`) and 15 additions the branch names that
-legacy could not - every izhar, `tarqeeq`, `iwad`, `qalqala_akbar`,
-`ibdal_hamza`, `imala`, `tashil`, `ishmam`, `silah`, `sakt`, `waqf_ending`.
+The rest is renames (`madd_arid_lissukun` -> `madd_arid_lil_sukun`,
+`lam_shamsiyah` -> `lam_shamsiyyah`, `hamza_wasl_silent` -> `wasl_elision`)
+and 15 additions legacy could not name - every izhar, `tarqeeq`, `iwad`,
+`qalqala_akbar`, `ibdal_hamza`, `imala`, `tashil`, `ishmam`, `silah`, `sakt`,
+`waqf_ending`.
 
-Two legacy names have no successor and are retired by name:
+Two legacy names are retired: **`vowel_silent`**, the catch-all for 4,568 rows
+where legacy had no better reason, now replaced by a real rule name or the
+literal `orthographic`; and **`mode="simple"`**, retired by owner decision.
 
-- **`vowel_silent`** - the catch-all for "this letter produced nothing and we
-  have no better reason". 4,568 attributions in the frozen baseline. In the
-  new contract every `Silent` edge cites an occurrence with a real rule, so
-  the catch-all has nothing to mean. Which real rules those 4,568 rows turn
-  out to be is a measurement the gate reports (00-audit F9), not a name.
-- **`mode="simple"`** - retired by owner decision in 03-review.
-
-**One grouping axis, not two.** `RuleFamily` is published - `assimilation`,
+**One grouping axis. [owner]** `RuleFamily` is published - `assimilation`,
 `nasalization`, `insertion`, `lengthening`, `emphasis`, `release`, `elision` -
-and it is an *effect* class: what a script adapter can see. It is deliberately
-not a teaching taxonomy. `idgham_bi_ghunnah` is `assimilation` here even
-though a tajweed textbook files it under "noon sakinah and tanween". A
-consumer that wants the textbook grouping builds it from `rule`, which is a
-closed 40-member enum; the contract does not ship a second classification it
-would then have to version.
+as an *effect* class, what a script adapter can see. It is deliberately not a
+teaching taxonomy; a consumer wanting the textbook grouping builds it from the
+closed 40-member `rule`.
 
 ---
 
 ## 6. Every rename, collected
 
-Accept or reject individually. "Public only" means the model keeps its current
-name and the namespaced public module differs, which the 04 M11 decision makes
-legal.
+Accept or reject individually. "Public only" means the model keeps its name
+and the namespaced public module differs, which 04 M11 makes legal.
 
 | # | From | To | Reach | Cost |
 |---|---|---|---|---|
-| R1 | `nunation` | `tanween` | public + `SlotOrigin` under D1 | none beyond D1, which already rewrites this field |
-| R2 | `spelled` | `letter_name` | public + `Slot.spelled` under D1 | same |
-| R3 | `Aspect` | `Part` | model + public | a type name; no values change, no digest moves |
+| R1 | `nunation` | `is_tanween` | public + `SlotOrigin` under D1 | none beyond D1 |
+| R2 | `spelled` | `is_letter_name` | public + `Slot.spelled` under D1 | same |
+| R3 | `Aspect` | `Part` | model + public | a type name; no values change |
 | R4 | `cls` | `kind` | public only | one wire field |
-| R5 | `spec` flattened into `Sound` | `kind` + variant fields | public only | wire shape only |
+| R5 | `spec` nested | `kind` + variant fields inline | public only | wire shape |
 | R6 | `Inserted` | `Insertion` | public only | a type name |
 | R7 | `Relengths` | `SetsLength` | public only | a type name |
-| R8 | `OrthographicOnly` | `WrittenOnly` | public only | a type name |
-| R9 | `Evidences` / `Attests` | `Supplies` / `Witnesses` | public only | two type names; the model keeps `Attests` for `tools/attest.py` |
-| R10 | `Silah` / `PausalLong` nucleus kinds | `LongWhenJoined` / `LongWhenStopped` | model + public | two type names and two `NucleusKind` values, so digests move - land with D1 |
-| R11 | `score_digest` | `canon_digest` | public only | one field |
-| R12 | `selection: VariantSelection` | `khilaf: KhilafSelection` | public only | one field, one alias |
-| R13 | `starts` | `started_on` | public only | one field |
+| R8 | `Occurrence` | `RuleInstance`, array `rules` | public only | a type name |
+| R9 | `Evidences` / `Attests` | `Supplies` / `Witnesses` | public only | two type names |
+| R10 | `Silah` / `PausalLong` kinds | `LongWhenJoined` / `LongWhenStopped` | model + public | two `NucleusKind` values, so digests move - land with D1 |
+| R11 | `score_digest` | `canon_digest`, under `provenance` | public only | one field |
+| R12 | `advice` | `stop_sign` | public only | one field |
+| R13 | `starts` | `is_started_on`, and `Junction` dropped | public only | removes two fields, adds one |
 | R14 | `source_index` | split into `word_index` + `source_index` | public only | one added field; fixes 04 M8 |
-| R15 | `Junction` values `join`/`stop` | `wasl`/`waqf` | model + public | **the expensive one**: enum values are hashed into digests, so every ledger fixture regenerates. Only worth it if bundled with D1 |
+| R15 | `length_carrier` | `vowel_letter` | public only | one enum value |
+| R16 | `annotation` glyph kind | `tajweed_mark` | public only | one enum value |
 
-R1, R2, R4, R14 fix things that are actively misleading. R3, R9, R10 fix
-things that mislead more subtly and cost more. R15 is the only one that is
-arguably not worth its price.
+**Withdrawn:** the earlier R12 (`selection` -> `khilaf`) is rejected by the
+owner; `variant` stays. The earlier R15 (`Junction` values to `wasl`/`waqf`)
+is moot - the enum leaves the public surface entirely.
 
----
+**Deletions, which are not renames:** `m.tokens()` and `m.tokens_by_word()`
+(the `phonemes` projection owns that, N9); `m.timeline()` (folded into
+`cells`); `boundaries` on the request; `Junction`; the `letter` grouping
+policy; `OrthographicOnly`; the `trigger` and `context` participant roles.
 
 ## 7. Open, for the owner
 
-1. **`Unit`.** Is there a better word? `Letter` is what a consumer would
-   reach for and is wrong for the tanween noon and for `Unit.letter`. Nothing
-   else considered is better than content-free.
-2. **Booleans.** `tanween`, `letter_name`, `started_on` are all
-   noun-shaped booleans. The repo avoids `is_` prefixes (`Word.starts`, not
-   `is_starting`), but `letter_name: bool` genuinely reads like a string
-   field. Adopt `is_` for booleans whose name is a noun, or accept the
-   ambiguity?
-3. **R15.** Half-translated `Junction` values, or pay for the digest churn?
-4. **`Mappings`.** Settled, and re-raised only because §4.1 names the
-   tension: a plural noun for one document. `Reading` and `Recitation` are
-   both taken, but nothing has been tried beyond those two.
+1. **`Unit`.** Still content-free. `Letter` is what a consumer reaches for and
+   is wrong for the tanween noon and for `Unit.letter`. Nothing considered is
+   better.
+2. **`lexeme`.** Kept on the argument in §4.2, but it is one field for one
+   word and the counter-argument is real.
+3. **`Mappings`.** Settled, re-raised only because a plural noun for one
+   document reads like a bag. `Reading` and `Recitation` are both taken.
