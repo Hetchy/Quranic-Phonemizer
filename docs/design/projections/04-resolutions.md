@@ -26,6 +26,11 @@ review's own claims corrected.
 New blocker: **B5**, `Rule.MADD_TABII` has no producer for ordinary madd tabii,
 which is the most frequent tag in the entire legacy corpus.
 
+New design question, raised by the owner and answered with a measurement in
+§5: consumer overload is an **API** gap, not a projection gap. `Mappings`
+grows a read API; it does not split, and named profiles stay closed because
+the payload evidence ADR-013 asked for now exists and does not justify them.
+
 Review claims corrected: **N1** (`TARQEEQ` emits no `Recolour`), **N2** (`Word`
 does not collide, and the package already carries two internal name
 collisions).
@@ -552,7 +557,128 @@ Each is accepted as written unless noted.
 
 ---
 
-## 5. Model work, restated
+## 5. One document, or several? A read API, not more projections
+
+Raised by the owner: if a consumer only wants to know which tajweed rules
+apply to a verse, is handing them `Mappings` an overload? Should there be
+several smaller projections instead of one large one?
+
+Three different questions wear one coat here, and they have different answers.
+
+| | Question | Answer |
+|---|---|---|
+| 1 | What does the producer **compute and serialize**? | One document. 01-design §1.2 stands, and §5.1 below is the evidence it invited |
+| 2 | What does a caller **receive over a wire**? | A transport concern. Field selection at the transport layer needs no second contract |
+| 3 | What does a consumer **call**? | **A read API on the document.** This is the real gap, and it is new work |
+
+The overload is real. It is an API gap, not a projection gap, and the two have
+very different costs: a method is a pure function of a document a consumer
+already holds, with no schema version, no digest, no gate law and no way to
+disagree with the graph. A second projection is a second contract.
+
+### 5.1 The size argument, measured
+
+ADR-013 §6 said named profiles reopen "on evidence, not on principle: a
+measured request payload too large for a real read path". The measurement was
+never taken. It has been now - node and edge counts from the branch at this
+head, sized against a representative serialized row per array.
+
+| Verse | Words | Total | `glyphs` | `sounds` | `spellings` | `units` | `attributions` | `occurrences` | `words` |
+|---|---|---|---|---|---|---|---|---|---|
+| 1:1 | 4 | 14 KB | 19% | 17% | 19% | 16% | 15% | 10% | 4% |
+| 2:5 | 8 | 26 KB | 22% | 22% | 19% | 15% | 14% | 5% | 4% |
+| 2:255 | 50 | 141 KB | 20% | 23% | 18% | 15% | 14% | 6% | 5% |
+| 2:282 | 128 | 408 KB | 20% | 23% | 17% | 15% | 14% | 5% | 4% |
+
+Two things fall out, and both cut against splitting.
+
+**No array dominates.** The distribution is flat and stable across verse
+lengths. A tajweed-only profile - `occurrences` plus `units` plus `words`,
+because resolving a noon from a tanween needs the unit - is **25%** of the
+document. Dropping five of seven arrays buys 4x. It does not buy an order of
+magnitude, because there is no single array to drop.
+
+**Compression already buys 31x.** The frozen
+`continuous.character_phoneme_mappings` baseline is 135,147,272 bytes of JSONL
+and 4,291,471 bytes on disk as `.gz`. This shape of document - repeated keys,
+small integer values, a closed string vocabulary - compresses at 31.5:1. At
+that ratio 2:255 is roughly **4.5 KB** on the wire and 2:282 roughly 13 KB.
+
+A 4x saving on a 4.5 KB payload is not a reason to ship a second contract, and
+it is certainly not a reason to make every completeness law in 02-gate §4
+conditional on which arrays were requested. **The evidence ADR-013 asked for
+has arrived, and it says no.** The size driver is the requested *range*, which
+is the caller's choice and already under their control.
+
+### 5.2 The change-rate test, applied
+
+01-design §1.1 splits `phonemes` from `Mappings` on change rate, not
+convenience: the token stream is stable across every schema evolution of the
+graph, so folding them together would make a consumer who wanted a list of
+strings inherit breakage from graph changes that did not affect them.
+
+Apply the same test to a hypothetical `tajweed` projection. It changes when
+the rule vocabulary changes, when participant roles change, when a family is
+split - which is exactly when `Mappings` changes, because it is the same
+graph. Same change rate, so no split.
+
+And the second half of the test is worse for it. Two projections that must be
+**joined by the consumer** carry coupling cost, which is what made the five
+legacy views drift. "Colour the script by rule" needs rules *and* spellings;
+"which letters are silent" needs attributions *and* contributions. A `tajweed`
+projection and a `script` projection would be re-joined by every consumer that
+does anything visual - which is most of them.
+
+### 5.3 The decision: a read API on `Mappings`
+
+`Mappings` grows methods that answer the audited consumer questions directly,
+each a pure function over the arrays. 01-design §5 already names seven derived
+indexes and calls them SDK helpers in an aside. They stop being an aside and
+become the documented entry point: the graph is what you reach for when a
+method does not exist, not what you start from.
+
+The surface, from 00-audit §2's census of what consumers actually invent:
+
+```text
+m.rules()                  every occurrence, with role-labelled units,
+                           the sounds it reaches, and the glyphs to point at
+m.rules_at(word=3)         the same, filtered
+m.rules_on(glyph=12)       what to colour this glyph with
+m.silences()               every unheard glyph, with the rule that took it
+m.tokens()                 the flat token stream
+m.tokens_by_word()         grouped, host-owns allocation
+m.letters()                the legacy letter-to-phoneme grouping
+m.recited_text()           recited writing, ADR-005's serializer
+m.display_glyph(sound, policy)   which glyph to paint for a sound
+```
+
+Each returns a small frozen record, not a slice of the graph. Each is
+documented with a four-line example. None of them is a wire format, so adding
+`m.rules_by_family()` in a later release breaks nothing and needs no schema
+version.
+
+[05-vocabulary §1](05-vocabulary.md) is written as the reader-facing form of
+this list and becomes the README's usage section when C4 lands - the root
+`README.md` currently documents a `Phonemizer` class this branch does not
+have, and it is rewritten in the same commit.
+
+### 5.4 What is deliberately not added
+
+- **No per-array flags.** Unchanged from 01-design §1.2: they are not
+  independent, referential integrity forces a dependency order, and every
+  gate law would become conditional on what was asked for.
+- **No named profiles.** ADR-013 §6's condition for reopening was a
+  measurement; §5.1 is that measurement and it does not justify them. The
+  paragraph is amended to record the number rather than the promise, so this
+  is not re-litigated without new evidence - a *bulk* build over a whole
+  surah or the whole corpus would be new evidence, and that path already
+  lands in a shard writer that repacks into its own rows.
+- **No third projection.** §5.2.
+
+**Lands in:** 01-design §1 and §5; ADR-013 §6 (the measurement replaces the
+promise); 05-vocabulary §1; and `README.md` with C4.
+
+## 6. Model work, restated
 
 01-design §6's C1-C4, plus what this document adds.
 
@@ -564,6 +690,7 @@ Each is accepted as written unless noted.
 | C4 | ref-to-document orchestration | also renames `render/recite.py` (F8) and defines the range digest |
 | **C5** | `MaddClass` emits `madd_tabii` as its fifth outcome | **new, B5** |
 | **C6** | `Rule.PLAIN` leaves the public enum; `by` becomes optional | **new, B4** |
+| **C7** | the read API on `Mappings`, and the README rewritten around it | **new, §5.3**. Ships with C4, because it is what makes C4's entry point usable |
 | D1 | `SlotOrigin` -> two booleans | lands first, before C1 |
 | D2 | `DIVINE_NAME` -> `LexemeClass`; imala **and ishmam** stay canonical facts with occurrences over them | amended by B2 |
 
@@ -572,7 +699,7 @@ Named follow-ups, outside this design:
 - the `PAUSAL_LONG` joined-length defect (M1), with the 69-word measurement as
   its regression test and a new `gate-residues.md` class until it is fixed.
 
-## 6. What still needs agreement before implementation
+## 7. What still needs agreement before implementation
 
 Two documents, in this order, and neither is written yet:
 

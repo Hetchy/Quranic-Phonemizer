@@ -15,54 +15,84 @@ cost. Reject them individually.
 
 ## 1. Read this much and stop
 
-Three consumers, three answers. None of them needs the whole document.
+`Mappings` is one document, and you almost never walk it yourself. It has
+methods for the things consumers actually ask for, each returning a small
+record with the joins already done. The graph underneath is what you reach for
+when no method fits - not where you start.
 
 ### "Which tajweed rules apply to this verse?"
 
 ```python
 m = mappings("2:255")
 
-for o in m.occurrences:
-    print(o.rule)               # "ikhfaa_haqiqi", "madd_lazim", "tafkheem", ...
+for hit in m.rules():
+    print(hit.rule, hit.source.letter, hit.trigger.letter)
+    # ikhfaa_haqiqi  noon  jeem
+    # madd_lazim     ya    meem
+    # tafkheem       sad   -
 ```
 
-That is the whole answer. `occurrences` is the list of rules that fired, in
-reading order. If you also want to know *where*:
-
-```python
-for o in m.occurrences:
-    for p in o.participants:
-        unit = m.units[p.unit]
-        print(o.rule, p.role, unit.letter)   # ikhfaa_haqiqi source noon
-```
-
-You do not need `Hosts`, `Presents`, `Aspect` or `Glyph` for this.
+`hit.rule` is one of 40 names. `hit.source`, `hit.trigger`, `hit.target` are
+the units involved, already resolved. `hit.tokens` is what it sounds like and
+`hit.glyphs` is what to point at.
 
 ### "Colour the letters of the script by rule"
 
-You need one more hop, because a rule fires on a *unit* and the script writes
-*glyphs*, and the two are not one-to-one: a long vowel is one unit written by
-two glyphs, and a muqattaat letter is one glyph spelling four units.
-
 ```python
-for e in m.spellings:                        # glyph -> unit
-    if e.kind == "supplies" and e.unit in units_of(occurrence):
-        highlight(m.glyphs[e.glyph])
+for glyph, rules in m.rules_on_glyphs():
+    paint(glyph.char, colour_for(rules))
 ```
+
+One call, because the hard part - a rule fires on a *unit* while the script
+writes *glyphs*, and the two are not one-to-one - is done for you. A long
+vowel is one unit written by two glyphs; a muqattaat letter is one glyph
+spelling four units.
 
 ### "Which letters are silent, and why?"
 
 ```python
-for e in m.attributions:
-    if e.kind == "silent":
-        why = m.occurrences[e.by].rule       # "wasl_elision", "lam_shamsiyyah"
-        for u in e.units:
-            mark_silent(u, why)
+for s in m.silences():
+    print(s.glyph.char, s.rule)
+    # ٱ  wasl_elision
+    # ل  lam_shamsiyyah
+    # ا  -            (written-only: the otiose alif, no rule took it)
 ```
 
-Everything past here is for the fourth consumer: an aligner, a
-recited-writing renderer, or anything that needs to know which *glyph* to
-paint for which *sound*.
+`s.rule` is `None` for a glyph that never fed a sound in the first place -
+the otiose alif, the carrier under a dagger - as opposed to one a rule
+silenced. Legacy could not tell those apart.
+
+### "Just the phonemes"
+
+```python
+m.tokens()            # ('ʔ', 'a', 'l', 'lˤ', 'a:', 'h', 'u', ...)
+m.tokens_by_word()    # (('ʔ','a','l','lˤ','a:','h','u'), ...)
+```
+
+Or use the `phonemes` projection, which is these tokens and nothing else, and
+does not change when the graph does.
+
+### The rest of the surface
+
+```text
+m.rules_at(word=3)               the same hits, filtered
+m.letters()                      the legacy letter-to-phoneme grouping
+m.recited_text()                 the words respelled as recited
+m.display_glyph(sound, policy)   which glyph to paint for one sound
+```
+
+Everything past this section is for the fifth consumer: an aligner, a
+recited-writing renderer, or anything that needs a join no method offers. That
+consumer reads §2 onward. Nobody else has to.
+
+**Why methods and not five smaller documents.** Measured in
+[04 §5](04-resolutions.md): no array dominates the payload, a tajweed-only
+subset is 25% of it, and this shape of JSON compresses 31:1 - so a whole
+`Mappings` for 2:255 is about 4.5 KB on the wire. Splitting would buy 4x on
+4.5 KB while giving every visual consumer two documents to re-join, which is
+exactly how the five legacy views drifted apart. A method costs nothing, has
+no schema version, and cannot disagree with the graph because it *is* the
+graph.
 
 ---
 
