@@ -1,6 +1,10 @@
 # ADR-013: Public projections preserve the domain edges
 
-Status: accepted
+Status: superseded by [docs/design/projections/](../design/projections/)
+
+The decisions below were taken before the contract was written against the
+layered model. Where this record and that document set disagree, the document
+set is authoritative.
 
 ## Context
 

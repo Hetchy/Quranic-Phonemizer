@@ -2,7 +2,7 @@
 
 Status: **resolved**, pending the code changes in §7. The audit this document
 asked for has been done; the census is §2-§5 and the decisions are §6.
-Blocks: [projections/01-design](projections/01-design.md).
+Blocks: [projections/01-contract](projections/01-contract.md).
 
 ## 1. Why this one had a deadline
 
@@ -108,7 +108,7 @@ So the fact belongs on the slot. What is wrong is only the *reading* of
 
 No code change. `Mappings` publishes the discriminated nucleus value and an SDK
 may derive `conditional: bool`, so no consumer has to infer it from sounds
-(projections/01-design section 3.2).
+(projections/01-contract section 4.2).
 
 ---
 
@@ -139,8 +139,7 @@ can grow without another schema migration. The guarantee consumers need --
 **D2 is not complete as stated.** `orthography/write.py` reads
 `Annotation.IMALA` off the slot at lines 45 and 197-200, and `write` takes a
 `Score`, not a `Performance`. Making imala an occurrence and nothing else
-breaks the round-trip at every imala site. `projections/00-audit` section 4.6
-sets out the two ways to close it; the smaller is to keep imala a canonical
+breaks the round-trip at every imala site. The smaller of the two ways to close it is to keep imala a canonical
 fact under a name that is not `Annotation`, with the occurrence as the
 classification over it -- the same shape `DIVINE_NAME` gets. That choice
 belongs to whoever lands D2, and the round-trip gate refuses the commit
@@ -150,7 +149,7 @@ without it.
 combination the enum cannot express, and every impossibility has a domain
 reason recorded in §4's table. Splitting buys nothing today and the projection
 can derive `geminate` and `prosthetic` as independent booleans
-(projections/01-design section 3.2), so no consumer inherits the coupling.
+(projections/01-contract section 4.2), so no consumer inherits the coupling.
 
 This is a reversal of the acceptance criterion "every `Slot` field answers one
 question", and deliberately: the criterion is a heuristic for finding fields
@@ -178,8 +177,7 @@ discriminated value and may derive a convenience boolean.
 
 Two further changes are required by the projection design and are recorded
 there rather than here, because they are about `Performance`, not the canonical
-vocabulary: labelling `Participants` (projections/01-design section 6, C1) and
-keeping the modifier edge (C2).
+vocabulary: labelling `Participants` (projections/01-contract section 8) and keeping the modifier edge.
 
 ## 8. Acceptance, restated
 
@@ -187,6 +185,6 @@ keeping the modifier edge (C2).
   the articulated default, not an absence.
 - Lexical identity is not represented as a recitation process. Met by D2.
 - Every field a *projection* exposes answers one question. Met by
-  projections/01-design section 3.2, which is where the criterion belongs --
+  projections/01-contract section 4.2, which is where the criterion belongs --
   `Slot` is internal and may carry a compressed enum if the compression is
   proven lossless.

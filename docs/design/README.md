@@ -29,10 +29,9 @@ wrong today rather than merely awkward.
 ## Multi-document questions
 
 [projections/](projections/) is the public projection API that ADR-005 put out
-of scope: an audit of the five legacy projections and their consumers, a
-two-projection design over the layered model (`phonemes` and `Mappings`), and
-the equivalence and completeness gate that replacement has to pass. ADR-013
-settles its foundations and reconciles it with 03.
+of scope: two projections over the layered model (`phonemes` and `Mappings`),
+the equivalence and completeness gate that replacement has to pass, and the
+worked examples. It supersedes ADR-013.
 
 ## Closed
 
