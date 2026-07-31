@@ -451,6 +451,8 @@ The set, grouped only for reading:
 **Boundary.** `hamza_wasl_start` · `hamza_wasl_elision` · `iltiqa_kasra` ·
 `pausal_sukun` · `taa_marbuta_pausal` · `sakt`
 
+**Substitution.** `ibdal_hamza`
+
 **Orthographic.** `orthographic_silence`
 
 There is no rule family on the wire. The grouping above is a static reading
@@ -482,13 +484,12 @@ of minting a name that means the same as one already emitted.
 |---|---|---|
 | madd iwad | `pausal_sukun` on the tanween noon, and a madd rule on the base | a madd whose unit's tanween noon is silenced at a stop |
 | madd badal | a madd rule on the lengthened vowel | a madd on a unit whose letter is hamza |
-| silah, and silah kubra | a madd rule on the `LongWhenJoined` vowel | the vowel kind, and which madd rule fired |
 
-A separate case shares the old name and is not madd badal: starting on a word
-whose prosthetic hamza is followed by a quiescent one, where the first
-lengthens over the second. That is `hamza_wasl_start`, whose `source` is the
-prosthetic hamza and whose `target` is the quiescent one, carrying the
-lengthening and the silence together.
+`ibdal_hamza` is not on this list. Substituting a hamza for a vowel is an
+outcome - a letter realized as a different letter, the same class as
+`taa_marbuta_pausal` - and madd badal is the length that results. Cause and
+effect, and the contract names both because both happen.
+| silah, and silah kubra | a madd rule on the `LongWhenJoined` vowel | the vowel kind, and which madd rule fired |
 
 Each of these produced a rule name whose entire content was "this madd has
 that story". The story is in the edges, so a consumer that wants the teaching

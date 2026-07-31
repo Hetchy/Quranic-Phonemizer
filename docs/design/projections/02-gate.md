@@ -270,6 +270,7 @@ guaranteed failure.
 | a qalqala letter with a silent vowel, not merged away | a qalqala rule at the right degree |
 | an istilaa letter, or a raa in a colouring context | `tafkheem` or `tarqeeq` |
 | a taa marbuta at a stop | `taa_marbuta_pausal` |
+| a quiescent hamza the reading substitutes for a vowel | `ibdal_hamza` |
 | a final short vowel at a stop, or a tanween at a stop, or a silah vowel at a stop | `pausal_sukun` |
 | an imala, ishmam or tashil mark | that rule |
 | a sakt site named by the riwayah | `sakt` |
