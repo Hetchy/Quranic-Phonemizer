@@ -34,9 +34,9 @@ granularity for a consumer animating within the name. Splitting it would mean
 a cluster that is not a font cluster, which is the thing the grouping is named
 for.
 
-## 4. Do alignment rows need a durable identity?
+## 4. Do pairings need a durable identity?
 
-Rows are request-local, and the document says so. A shipped consumer persists
+Pairings are request-local, and the document says so. A shipped consumer persists
 records against cell position and defends against drift with a content
 snapshot. That is the right shape for content that genuinely changes, so the
 contract probably should not add a key - but it should be explicit that it

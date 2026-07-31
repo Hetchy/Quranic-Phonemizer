@@ -150,7 +150,7 @@ These run over the whole corpus in all three boundary modes.
 - Canonical serialization of the same request is byte-stable.
 - Every index is in range and points to the declared node kind.
 - Node order is reading order, and one index space spans the request.
-- Changing riwayah, variant, boundary plan, notation or canonical data changes
+- Changing riwayah, script, variant, boundary plan or canonical data changes
   the corresponding identity field.
 
 ### 4.2 Spelling
@@ -198,12 +198,12 @@ These run over the whole corpus in all three boundary modes.
 
 - Every non-structural glyph and every rendered glyph has exactly one
   contribution row.
-- **Under `text="recited"`, no sound takes a gap row.** Every sound the
+- **Under `text="recited"`, no sound takes a gap pairing.** Every sound the
   performance produced is presented by some rendered glyph, because the
   recited text is by definition what recitation writes. This is the converse
   of the glyph-side law and the one that catches a sound nothing points at.
   Over the source text it does not hold and must not be asserted: a sound the
-  source does not write is exactly what a gap row is for.
+  source does not write is exactly what a gap pairing is for.
 - Every `presents` target resolves to an attribution, modifier or rule
   instance, and is compatible with the glyph's spelling edges.
 - Structural glyphs have no contribution row.
@@ -218,21 +218,24 @@ These run over the whole corpus in all three boundary modes.
 
 For every combination of `text` and `grouping`:
 
-- **The rows partition their glyph array.** Every glyph of the selected text
-  appears in exactly one row, except those carrying the `Structural` spelling
-  edge, which have no row. The edge decides this, never the glyph's `kind`.
-- **The rows and their gap rows cover every sound exactly once in `sounds`.**
-  A sound may appear in any number of `shares` lists.
-- A gap row has no glyphs, exactly one owned sound, and an `after` that names
-  an existing row or is absent when the sound precedes every row.
-- A sound takes a gap row exactly when no glyph of the selected text presents
-  it. How it was attributed does not enter into it.
-- `shares` on a row names only sounds owned by another row.
-- `silent` names glyphs of that row that are written and not said: those
-  presenting a `Silent` attribution, and those whose `presents` list is empty
-  because the script wrote them and recitation never says them.
-- Ownership follows the published order, and the order is total: no row set
-  requires a tiebreak the order does not decide.
+- **The pairings partition the selected text's glyph array.** Every glyph
+  appears in exactly one pairing, except those carrying the `Structural`
+  spelling edge, which have none. The edge decides this, never `kind`.
+- **The pairings and their gap pairings cover every sound exactly once in
+  `sounds`.** A sound may appear in any number of `shares` lists.
+- A gap pairing has no glyphs of the selected text, exactly one owned sound,
+  and an `after` naming an existing pairing or absent when the sound precedes
+  every one.
+- A sound takes a gap pairing exactly when no glyph of the selected text
+  presents it. How it was attributed does not enter into it.
+- `shares` names only sounds owned by another pairing.
+- `silent` names glyphs that are written and not said: those presenting a
+  `Silent` attribution, and those whose `presents` list is empty because the
+  script wrote them and recitation never says them.
+- Both `glyphs` and `rendered` are populated whichever text is selected, so
+  the script-recited pairing is readable from either.
+- Ownership follows the published order, and the order is total: no pairing
+  set requires a tiebreak the order does not decide.
 
 ### 4.7 Recited writing
 
@@ -257,16 +260,16 @@ guaranteed failure.
 | Trigger, read from the Score and the plan | Requires |
 |---|---|
 | a vowel canonically long | a madd rule instance |
-| a `LongWhenStopped` vowel on a stopped word | a madd rule instance |
-| a `LongWhenJoined` vowel on a joined word | a madd rule instance |
+| a vowel long in its stopped form, on a stopped word | a madd rule instance |
+| a vowel long in its joined form, on a joined word | a madd rule instance |
 | a silent waw or yaa after a short a, whose following letter the stop silences | `madd_leen` |
 | a sakin noon or a tanween, joined to a following consonant | one of the noon rules |
 | a sakin meem, joined to a following consonant | one of the meem rules |
 | a geminate noon or meem | `ghunnah_mushaddadah` |
 | two identical, close or homorganic consonants, the first sakin and joined to the second | an idgham rule |
 | a definite article lam before a letter | `lam_shamsiyyah` or `lam_qamariyyah` |
-| a hamza wasl consonant, word-initial and started on | `hamza_wasl_start` |
-| a hamza wasl consonant, not started on, or not word-initial | `hamza_wasl_elision` |
+| a consonant that sounds only when started on, word-initial and started on | `hamza_wasl_start` |
+| a consonant that sounds only when started on, not started on or not word-initial | `hamza_wasl_elision` |
 | two sakins meeting across a word boundary and joined | `iltiqa_shortening` or `iltiqa_kasra` |
 | a qalqala letter with a silent vowel, not merged away | a qalqala rule at the right degree |
 | an istilaa letter, or a raa in a colouring context | `tafkheem` or `tarqeeq` |
@@ -278,7 +281,7 @@ guaranteed failure.
 | an ikhfaa before an istilaa letter | a heavy ghunnah |
 | a written letter the canonical layer returns its no-sound verdict for | `orthographic_silence` |
 
-Three rows carry a caveat the table cannot hide. **The qalqala row's "not
+Three triggers carry a caveat the table cannot hide. **The qalqala row's "not
 merged away" is a derived fact**, not a canonical one, so it is the one
 trigger that reads something the producer computed; see
 [04-open-questions](04-open-questions.md). **The sakt row** requires the
