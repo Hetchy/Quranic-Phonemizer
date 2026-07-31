@@ -43,7 +43,22 @@ contract probably should not add a key - but it should be explicit that it
 never will, because the one consumer that needed otherwise already built the
 workaround.
 
-## 5. May a converse trigger read a derived fact?
+## 5. Is orthographic silence a canonical fact or a script one?
+
+`orthographic_silence` is said to fire on the canonical layer's verdict
+whether or not the script wrote a silence sign. Nearly its whole population
+reaches that verdict *because* the script wrote one: the Uthmani mapping
+marks the sign as silencing, and the build reads that before any derivation
+runs. Only a handful of seats are derived without it.
+
+Under a Uthmani-only scope the rule is total either way and nothing breaks.
+But the claim of sign-independence is false as written, and a script that
+marks nothing would leave the rule with almost no population. Either the
+sentence narrows to what is true, or the canonical layer learns to derive
+these seats from position - which is the larger change and the one that makes
+the rule mean what it says.
+
+## 6. May a converse trigger read a derived fact?
 
 The gate's converse triggers read canonical facts and the boundary plan only,
 because a predicate that reads the performance cannot check it. One trigger
@@ -55,7 +70,7 @@ Either the trigger set admits derived canonical facts, in which case say which
 and why the derivation is not the answer in disguise; or the qalqala row is
 dropped and the case goes uncovered.
 
-## 6. Should bilabial iqlab ship as a variant?
+## 7. Should bilabial iqlab ship as a variant?
 
 `NasalPlace.BILABIAL` and a khilaf identifier for it both exist, but the
 shipped Hafs data defines no options for it, so nothing can select it and
@@ -63,14 +78,14 @@ iqlab emits the same sound as ikhfaa. Either the variant point gets data, or
 the place and its identifier are deleted. Until one or the other, the gate
 cannot demonstrate ghunnah placement and no fixture can reach the variant.
 
-## 7. What is the authoritative source for every sakt site?
+## 8. What is the authoritative source for every sakt site?
 
 The riwayah's sakt data is short of what Hafs requires, and the missing site
 is absent because its cross-script skeleton is unresolved rather than because
 it does not exist. The gate's converse law for sakt cannot be total until the
 source fact is chosen.
 
-## 8. Two names
+## 9. Two names
 
 **`Unit`** is content-free, and every alternative is worse: `Letter` is what a
 consumer reaches for and is wrong for the tanween noon.

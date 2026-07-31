@@ -228,8 +228,9 @@ For every combination of `text` and `grouping`:
 - A sound takes a gap row exactly when no glyph of the selected text presents
   it. How it was attributed does not enter into it.
 - `shares` on a row names only sounds owned by another row.
-- `silent` names only glyphs of that row whose contribution presents a
-  `Silent` attribution.
+- `silent` names glyphs of that row that are written and not said: those
+  presenting a `Silent` attribution, and those whose `presents` list is empty
+  because the script wrote them and recitation never says them.
 - Ownership follows the published order, and the order is total: no row set
   requires a tiebreak the order does not decide.
 
@@ -262,7 +263,7 @@ guaranteed failure.
 | a sakin noon or a tanween, joined to a following consonant | one of the noon rules |
 | a sakin meem, joined to a following consonant | one of the meem rules |
 | a geminate noon or meem | `ghunnah_mushaddadah` |
-| two identical, close or homorganic consonants, the first sakin and joined to the second | an idgham or an izhar rule |
+| two identical, close or homorganic consonants, the first sakin and joined to the second | an idgham rule |
 | a definite article lam before a letter | `lam_shamsiyyah` or `lam_qamariyyah` |
 | a hamza wasl consonant, word-initial and started on | `hamza_wasl_start` |
 | a hamza wasl consonant, not started on, or not word-initial | `hamza_wasl_elision` |
@@ -275,14 +276,15 @@ guaranteed failure.
 | an imala, ishmam or tashil mark | that rule |
 | a sakt site named by the riwayah | `sakt` |
 | an ikhfaa before an istilaa letter | a heavy ghunnah |
-| a written letter the canonical layer produces no unit for | `orthographic_silence` |
+| a written letter the canonical layer returns its no-sound verdict for | `orthographic_silence` |
 
-Two rows carry a caveat the table cannot hide. **The qalqala row's "not merged
-away" is a derived fact**, not a canonical one, so it is the one trigger that
-reads something the producer computed; see
+Three rows carry a caveat the table cannot hide. **The qalqala row's "not
+merged away" is a derived fact**, not a canonical one, so it is the one
+trigger that reads something the producer computed; see
 [04-open-questions](04-open-questions.md). **The sakt row** requires the
 riwayah's sakt sites to be complete in its own data before the gate can claim
-to be total, and they are not.
+to be total, and they are not. **The heavy ghunnah row** demands a colour
+nothing can currently produce, and whether it ever can is open.
 
 There is no row for madd iwad, madd badal or silah. Each is a description of a
 configuration rather than an outcome, so the rows above already require the

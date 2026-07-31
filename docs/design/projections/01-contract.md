@@ -147,6 +147,7 @@ class Mappings:
 | `variant` | top | the variant readings selected |
 | `riwayah`, `script` | `provenance` | which transmission, which mushaf |
 | `notation` | `provenance` | which phoneme alphabet. `Sound.token` is a string whose meaning depends on it |
+| `spelling` | `provenance` | which recited-spelling policy, `faithful` or `explicit`. `rendered` differs between them, so a document without it cannot say what its own glyphs are |
 | `schema_version` | `provenance` | |
 | `canon_digest` | `provenance` | identifies the canonical data the indices were resolved against |
 
@@ -205,7 +206,7 @@ spelled:
 | `Short(quality)` | fatha, damma, kasra |
 | `Long(quality)` | a madd letter's vowel |
 | `LongWhenJoined(quality)` | the pronoun haa's silah: long in wasl, absent at pause |
-| `LongWhenStopped(quality)` | the seven alifs: short in wasl, long at pause |
+| `LongWhenStopped(quality)` | short in wasl, long at pause: the seven alifs, and the base a fathatan lengthens |
 
 There are deliberately no glyph, sound, rule, silence-reason or rendered-text
 fields on a unit; those are relations. Madd counts and durations are absent
@@ -346,10 +347,10 @@ kind already distinguishes them, so this costs no new edge. Filing the echo on
 the vowel instead would make it collide with the silence the stop puts there,
 which is a genuine contradiction rather than a second sound.
 
-`contributions` has one row per glyph, whose `presents` list may be empty. An
+`contributions` has one row per non-structural glyph, whose `presents` list
+may be empty. An
 empty list means the glyph contributes to nothing heard; a glyph *missing*
-from the array is a bug. The read API reports one `reason` that is either a
-rule name or the literal `orthographic`.
+from the array is a bug. The read API reports one `reason`, and it is always a rule name.
 
 `by` is optional. Its absence means no rule claimed this: what the script
 writes, realized by default. There is no `plain` rule, because absence is the
@@ -378,7 +379,7 @@ class AlignmentRow:
     glyphs: tuple[int, ...]   # into glyphs, or into rendered
     sounds: tuple[int, ...]   # the sounds this row owns
     shares: tuple[int, ...]   # sounds it presents that another row owns
-    silent: tuple[int, ...]   # its glyphs presenting a Silent attribution
+    silent: tuple[int, ...]   # its glyphs that are written and not said
     rules:  tuple[int, ...]
     after:  int | None        # set only on a gap row
 ```
@@ -484,12 +485,12 @@ of minting a name that means the same as one already emitted.
 |---|---|---|
 | madd iwad | `pausal_sukun` on the tanween noon, and a madd rule on the base | a madd whose unit's tanween noon is silenced at a stop |
 | madd badal | a madd rule on the lengthened vowel | a madd on a unit whose letter is hamza |
+| silah, and silah kubra | a madd rule on the `LongWhenJoined` vowel | the vowel kind, and which madd rule fired |
 
 `ibdal_hamza` is not on this list. Substituting a hamza for a vowel is an
 outcome - a letter realized as a different letter, the same class as
 `taa_marbuta_pausal` - and madd badal is the length that results. Cause and
 effect, and the contract names both because both happen.
-| silah, and silah kubra | a madd rule on the `LongWhenJoined` vowel | the vowel kind, and which madd rule fired |
 
 Each of these produced a rule name whose entire content was "this madd has
 that story". The story is in the edges, so a consumer that wants the teaching
@@ -519,6 +520,11 @@ be a position that never sounds in any reading, which is not what a unit is.
 So this joins ishmam and sakt as a rule that produces nothing, and the answer
 reaches the consumer the way it should - the seat's `presents` list is empty
 and its `reason` names this rule instead of a bare literal.
+
+An empty `presents` is therefore two different statements, and a consumer must
+not conflate them: a seat the script writes and recitation never says, which
+this rule names, and a mark that decorates without spelling anything, which no
+rule names. The reason field is what tells them apart.
 
 A mark that supplies a fact to the wrong glyph, or supplies none at all, is
 not one of these. It is a producer defect, and section 8 lists them.
@@ -563,9 +569,10 @@ not one of these. It is a producer defect, and section 8 lists them.
    wasl and every merged-away letter. Both recited quadrants of section 6
    depend on this.
 8. **Madd rules for their ordinary cases.** `madd_tabii` is minted only on the
-   pausal glide, so an ordinary long vowel produces no rule instance. A
-   `LongWhenJoined` vowel produces none either, which is what deleting a
-   separate silah rule depends on.
+   pausal glide, so an ordinary long vowel produces no rule instance. Neither
+   a `LongWhenJoined` vowel nor a `LongWhenStopped` one on a stopped word
+   produces one, and the first is what deleting a separate silah rule depends
+   on.
 9. **Continuous assembly.** Cross-word lookahead reaches past a one-slot word,
    so a chunked continuous build must overlap by two words, or the reach must
    be bounded to one. Chunking that overlaps by one invents occurrences on
@@ -591,21 +598,32 @@ not one of these. It is a producer defect, and section 8 lists them.
     fact as the seven alifs - short joined, long stopped - so it must carry
     the same vowel kind, or nothing in the contract requires the lengthening
     that madd iwad consists of.
-14. **The orthographic rule.** `orthographic_silence` has no producer. The
-    canonical layer already identifies these seats and already names the unit
-    each is shown against; what is missing is the rule instance anchored
-    there, and the empty contribution row that carries its name.
+14. **The orthographic rule.** `orthographic_silence` has no producer, and
+    the anchor it would need is inert: the field meant to name the unit a
+    seat is shown against is written and never read, so the seat in practice
+    attaches to whatever draft was appended last, which is not word-scoped.
+    A seat class the contract names first - the alif no vowel can carry -
+    reaches no spelling edge at all, because the iwad-carrier skip consumes
+    the cluster first. The rule instance, the anchor, and that skip are three
+    pieces of work, not one.
 15. **One notion of structural.** A glyph class and a spelling edge both use
     the name and disagree about thousands of glyphs: tatweels are classed
     structural while some of them supply a canonical fact, and stop signs are
     classed as advice while carrying the structural edge. The edge is the
     authority, and the class must be brought into line with it.
 16. **Release attribution.** The producer hosts a release on the vowel, which
-    is the part a stop silences. It moves to the consonant.
+    is the part a stop silences. It moves to the consonant - and moving only
+    the effect deletes the consonant's own sound, because the fill step reads
+    any realization as claiming the part and the hosted map is single-valued
+    per part. The addition has to be expressible before the move is made.
 17. **Delete the rule family.** `RuleFamily` and its lookup leave the model as
-    well as the wire. Nothing reads them once the public surface stops
-    publishing them, and a grouping kept only for a document is a table that
-    drifts from the document.
+    well as the wire. Three readers must be replaced first, and one of them
+    changes recitation: the plan asks the family whether a slot was
+    assimilated from, which qalqala consults before suppressing its echo, so
+    deleting the lookup without a replacement predicate moves qalqala counts.
+    The other two are the attestation law and its tool, and the family
+    carried on the spelling edge the contract calls `Witnesses` - which the
+    contract has already dropped, so that field goes with it.
 18. **Rename the two parts.** `Aspect` becomes `Part`, and `onset` and
     `nucleus` become `consonant` and `vowel` on the unit and on every
     attribution. The old names describe a syllable, and a unit is not one.
@@ -614,7 +632,15 @@ not one of these. It is a producer defect, and section 8 lists them.
     do not carry it: a haraka and its length carrier state the identical fact
     about the identical unit, so no rule can tell them apart. Either the fact
     vocabulary gains the distinction or the order is not total.
-20. **Split the producer's boundary rules to match the names.** One code rule
+20. **Delete the plain rule and make `by` optional.** The engine mints one
+    plain occurrence per request and cites it from every default
+    realization. It names no unit, so it fails the law that every rule
+    instance names one, and it cannot be published because absence is what
+    the contract uses for it.
+21. **Spaces are glyphs.** The reader emits none, so the concatenation law
+    cannot pass on any verse and the first example of a structural glyph does
+    not exist.
+22. **Split the producer's boundary rules to match the names.** One code rule
     covers what the contract calls `pausal_sukun` and `taa_marbuta_pausal`;
     another mints an iwad name the contract does not have and carries silences
     the contract assigns to `pausal_sukun`. Two rule instances minted at one
