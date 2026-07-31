@@ -8,8 +8,7 @@ because it was consistent with the code, consistent with itself, and wrong.
 **Read:** `01-contract`, `02-gate`, `03-examples`, `04-open-questions`, plus
 `../03-canonical-vocabulary.md` and `../../domain-facts.md`.
 
-**Against:** the source at this branch head, and Hafs as a teacher of tajweed
-would describe it.
+**Against:** the sources in section 2, in the order of authority given there.
 
 ---
 
@@ -29,20 +28,64 @@ things to say about recitation".
 
 ---
 
-## 2. Rules of evidence
+## 2. What to check against, and how far to trust it
+
+Four sources, and they do not carry equal weight. When they disagree, the one
+higher on this list wins.
+
+| | Source | Trust |
+|---|---|---|
+| 1 | `corpus_sources/riwayat/hafs/scripts/uthmani/quran.json` | the script text. Ground truth for what is written, full stop |
+| 2 | today's phoneme output, from the code at this head | **correct**. If a change would alter a token, the change is wrong |
+| 3 | the legacy rules and mappings on `main`, and the frozen baselines under `research/legacy-baselines/` | **almost always right**. A disagreement is usually the model's fault, occasionally legacy's |
+| 4 | `../../domain-facts.md` | authoritative guidance, not a constitution |
+
+**On 2.** The token stream is the one thing this project has got right, and it
+is the hardest constraint in this review. Any proposed model change - splitting
+a type, moving an attribution, deleting a value - must leave every phoneme in
+the corpus identical unless you can show the current token is wrong. Run it
+both ways and diff. A finding that silently changes output is not a
+simplification, it is a regression wearing one's clothes.
+
+This is also what makes shape defects findable. If the tokens are right and
+the shape is wrong, the wrongness is entirely in how the facts are arranged -
+which is what the defect classes below are for.
+
+**On 3.** Legacy is a coverage reference: it knows about cases the new model
+may have dropped, and its rule and mapping vocabulary encodes distinctions
+somebody needed. It is not an oracle, and its own manifest says so. Use it to
+find what is missing, not to settle what is right.
+
+**On 4.** `domain-facts.md` is the project's record of Hafs and is the first
+place to check a domain claim. It is also incomplete, and underspecified in
+places: it does not define izhar mutlaq, and its silence on a case is not
+evidence the case does not exist. Where it is silent or thin, say so and reach
+for a teaching source rather than inferring from the code - the code is where
+the questionable shapes live.
+
+**When 2 and 4 disagree**, that is a real finding either way: either the model
+is producing a correct token for the wrong reason, or the domain record is
+wrong. Say which you think it is and what would settle it.
+
+---
+
+## 3. Rules of evidence
 
 1. Census before arguing. Every enum, every union, every optional field: how
    many members, how many sites each, over the whole corpus in both boundary
    modes. A value with one site is a finding until proven otherwise.
 2. No claim without a `file.py:line` or a number you produced.
 3. State a confidence and a falsifier per finding.
+3a. For any finding that proposes a model change, say what it does to the
+   token stream. "No change" is the expected answer and must be shown, not
+   asserted.
 4. Say what you could not verify, and why.
 5. A finding that **removes** a concept outranks one that adds. If you propose
    an addition, name the consumer and what it lets them do today.
 
 ---
 
-## 3. The defect classes
+## 4. The defect classes
 
 Each was found in this design after it had passed a review that checked every
 claim. Assume each has more instances.
@@ -119,10 +162,13 @@ what its English calque suggests.
 
 ---
 
-## 4. Method
+## 5. Method
 
 Do these before forming an opinion.
 
+0. **Baseline the tokens.** Dump every phoneme in the corpus, both boundary
+   modes, before you touch anything. That file is what every proposed change
+   is diffed against.
 1. **Census.** Every enum member, union variant and optional field, over the
    whole corpus, in joined and stopped modes. Report the distribution.
 2. **Grid every union.** Two axes if you can find them. Mark each cell
@@ -137,7 +183,7 @@ Do these before forming an opinion.
 
 ---
 
-## 5. What is settled
+## 6. What is settled
 
 Owner decisions. Challenge only with evidence unavailable when they were
 made - a measurement, a code path, a named consumer.
@@ -158,7 +204,7 @@ finding is genuinely a question for the owner, mark it **FOR OWNER**.
 
 ---
 
-## 6. Output
+## 7. Output
 
 1. **Verdict** - one line.
 2. **Findings**, ordered by how much they simplify. Each with its evidence,
