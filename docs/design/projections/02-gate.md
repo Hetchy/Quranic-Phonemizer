@@ -93,7 +93,7 @@ It then applies the legacy scalar grouping exactly: dagger alif, mini-waw and
 mini-yaa stay separate; other combining marks rejoin their base. Named cases
 that must be exact: a silent carrier waw under a dagger alif; mini-waw and
 mini-yaa silah at pause; taa marbuta at pause; every legacy catch-all silence
-row, each of which must resolve to a rule name or to `orthographic`.
+row, each of which must resolve to a rule name.
 
 ### 3.2 `tajweed_mappings`
 
@@ -191,7 +191,8 @@ These run over the whole corpus in all three boundary modes.
 - Every classification-only rule that names a sound has a `Classifies` edge,
   and the sound it names exists.
 - Every rule instance owns at least one attribution or one modifier edge. The
-  only exemptions are the rules that produce no sound at all: ishmam and sakt.
+  only exemptions are the rules that produce no sound at all: ishmam, sakt and
+  `orthographic_silence`.
 
 ### 4.5 Contribution
 
@@ -265,7 +266,7 @@ guaranteed failure.
 | a definite article lam before a letter | `lam_shamsiyyah` or `lam_qamariyyah` |
 | a hamza wasl consonant, word-initial and started on | `hamza_wasl_start` |
 | a hamza wasl consonant, not started on, or not word-initial | `hamza_wasl_elision` |
-| two sakins meeting across a word boundary and joined | `iltiqa_shortening` or `iltiqa_vowel` |
+| two sakins meeting across a word boundary and joined | `iltiqa_shortening` or `iltiqa_kasra` |
 | a qalqala letter with a silent vowel, not merged away | a qalqala rule at the right degree |
 | an istilaa letter, or a raa in a colouring context | `tafkheem` or `tarqeeq` |
 | a taa marbuta at a stop | `taa_marbuta_pausal` |
@@ -273,7 +274,7 @@ guaranteed failure.
 | an imala, ishmam or tashil mark | that rule |
 | a sakt site named by the riwayah | `sakt` |
 | an ikhfaa before an istilaa letter | a heavy ghunnah |
-| a seat the canonical layer resolves to no sound | `orthographic_silence` |
+| a written letter the canonical layer produces no unit for | `orthographic_silence` |
 
 Two rows carry a caveat the table cannot hide. **The qalqala row's "not merged
 away" is a derived fact**, not a canonical one, so it is the one trigger that

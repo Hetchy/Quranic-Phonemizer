@@ -51,8 +51,9 @@ for s in m.silences():
     print(s.glyph.char, s.reason)
 ```
 
-`reason` is a rule name, or the literal `orthographic` for a glyph that never
-fed a sound. One field, two kinds of answer, no null to handle.
+`reason` is the rule that took the sound. A letter the script writes and
+recitation never says has one too - see section 7.3 - so there is one kind of
+answer and no null to handle.
 
 ### "Just the phonemes"
 
@@ -447,7 +448,7 @@ The set, grouped only for reading:
 
 **Colour and manner.** `tafkheem` · `tarqeeq` · `imala` · `tashil` · `ishmam`
 
-**Boundary.** `hamza_wasl_start` · `hamza_wasl_elision` · `iltiqa_vowel` ·
+**Boundary.** `hamza_wasl_start` · `hamza_wasl_elision` · `iltiqa_kasra` ·
 `pausal_sukun` · `taa_marbuta_pausal` · `sakt`
 
 **Orthographic.** `orthographic_silence`
@@ -506,10 +507,17 @@ can carry, the waw that never sounds, the yaa and the alif maqsura are the
 same event on different letters, and `unit.letter` already says which - the
 same reason noon and tanween ikhfaa are one rule.
 
-The trigger is the letter's canonical position, not the mark. The script marks
-only some of these seats with a silence sign and the rest are just as silent,
-so a rule that fired only where a mark was written would leave most of the
-population unexplained.
+The trigger is the canonical layer's own verdict. A seat like this produces no
+unit at all - the layer says so explicitly and names the unit a projection
+should attribute it to - so the rule fires wherever that verdict is reached,
+whether or not the script happened to write a silence sign.
+
+**The instance owns no attribution.** There is no unit to silence: the one the
+seat is shown against is busy hosting its own sound, and a second unit would
+be a position that never sounds in any reading, which is not what a unit is.
+So this joins ishmam and sakt as a rule that produces nothing, and the answer
+reaches the consumer the way it should - the seat's `presents` list is empty
+and its `reason` names this rule instead of a bare literal.
 
 A mark that supplies a fact to the wrong glyph, or supplies none at all, is
 not one of these. It is a producer defect, and section 8 lists them.
@@ -583,9 +591,9 @@ not one of these. It is a producer defect, and section 8 lists them.
     the same vowel kind, or nothing in the contract requires the lengthening
     that madd iwad consists of.
 14. **The orthographic rule.** `orthographic_silence` has no producer. The
-    seats are already identified in the canonical layer, which is what decides
-    they never sound; what is missing is a rule instance and the `Silent`
-    attribution naming it.
+    canonical layer already identifies these seats and already names the unit
+    each is shown against; what is missing is the rule instance anchored
+    there, and the empty contribution row that carries its name.
 15. **One notion of structural.** A glyph class and a spelling edge both use
     the name and disagree about thousands of glyphs: tatweels are classed
     structural while some of them supply a canonical fact, and stop signs are
