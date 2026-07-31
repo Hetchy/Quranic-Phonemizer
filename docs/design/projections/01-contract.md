@@ -259,8 +259,9 @@ A sound has no `word` field: its word is the word of its primary origin.
 | `source` | the unit the rule is about |
 | `target` | the unit it reaches, or absent |
 
-`source` means the same for every rule. Nothing in the corpus has a third
-participant. There is no family and no phase: the grouping in section 7 is for
+`source` means the same for every rule, and a rule is read against its
+`source`: a lam shamsiyyah belongs to the lam that disappears, not to the
+letter that doubles. Nothing in the corpus has a third participant. There is no family and no phase: the grouping in section 7 is for
 reading, and a colouring scheme is a convention a consumer picks.
 
 ---
