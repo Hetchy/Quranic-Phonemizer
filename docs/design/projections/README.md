@@ -9,6 +9,7 @@ public projection API out of scope. This is that API.
 | [02](02-gate.md) | Gate | The legacy adapters, the completeness and converse laws, and the order of work |
 | [03](03-examples.md) | Examples | One generated example per linguistic case, per rule, and per alignment quadrant |
 | [04](04-open-questions.md) | Open questions | What still needs an owner decision |
+| [05](05-modelling-review.md) | Review brief | How to review this as a model rather than as a set of claims |
 
 Scope: Uthmani, Hafs. IndoPak is deferred and nothing here depends on it.
 
