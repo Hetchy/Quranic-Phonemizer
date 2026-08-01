@@ -31,7 +31,7 @@ m.alignment(text="source", grouping="cluster")   # writing lined up with sound
 What is not said is on the row that does not say it. `pairing.silent` names the
 glyphs, and each one names its rule twice over: a unit the reading silenced has
 a `Silent` edge, and a letter the rasm carries and recitation never says has no
-unit to silence, so its contribution names the rule instead.
+unit to silence, so its pairing names the rule instead.
 
 Section 6 is the whole of `alignment`. Everything past section 4 is for a
 consumer that needs a join no method offers.
@@ -84,10 +84,9 @@ class Mappings:
     sounds:   tuple[Sound, ...]
     rules:    tuple[RuleInstance, ...]
 
-    spellings:     tuple[SpellingEdge, ...]
-    attributions:  tuple[AttributionEdge, ...]
-    modifiers:     tuple[ModifierEdge, ...]
-    contributions: tuple[Contribution, ...]
+    spellings:    tuple[SpellingEdge, ...]
+    attributions: tuple[AttributionEdge, ...]
+    modifiers:    tuple[ModifierEdge, ...]
 ```
 
 | Field | Means |
@@ -240,26 +239,23 @@ source has none. It is a tuple because the mapping is many-to-many in both
 directions, which is what section 2's last row is about, and a recited row
 needs no second list of source glyphs: it reads them through here.
 
-| `kind` | Is | In `rendered` |
-|---|---|---|
-| `base` | a letter of the rasm | may change letter: a quiescent hamza becomes a vowel letter |
-| `haraka` | fatha, damma, kasra | added at a started-on hamza wasl, dropped at a stop |
-| `tanween` | the doubled haraka | dropped at a stop, and may leave an alif |
-| `shadda` | doubling | unchanged |
-| `vowel_letter` | alif, waw or yaa carrying length | added where the rasm omits one; occurs in `rendered` only |
-| `small_vowel` | the dagger alif, the mini waw and yaa | written full |
-| `madd_sign` | the maddah | unchanged |
-| `silence_sign` | the round and rectangular zeros | dropped: recitation does not write what it does not say |
-| `tajweed_mark` | the imala, ishmam and tashil marks | unchanged |
-| `stop_sign` | the mushaf's advice | dropped: advice is not recitation |
-| `structural` | space, verse marker, tatweel | spaces kept, the rest dropped |
+| `kind` | Is |
+|---|---|
+| `base` | a letter of the rasm |
+| `haraka` | fatha, damma, kasra |
+| `tanween` | the doubled haraka |
+| `shadda` | doubling |
+| `vowel_letter` | alif, waw or yaa carrying length; occurs in `rendered` only |
+| `small_vowel` | the dagger alif, the mini waw and yaa |
+| `madd_sign` | the maddah |
+| `silence_sign` | the round and rectangular zeros |
+| `tajweed_mark` | the imala, ishmam and tashil marks, and the iqlab meem |
+| `stop_sign` | the mushaf's advice |
+| `structural` | space, verse marker, tatweel |
 
-The recited spelling takes one policy, and it changes exactly one thing:
-
-| `spelling` | A hamza wasl started on | Everything else |
-|---|---|---|
-| `faithful` | `ٱ` plus the helping haraka | identical |
-| `explicit` | `أ` or `إ` per the vowel | identical |
+What each becomes in `rendered` is not a property of its kind, and there is no
+spelling policy to choose: the recited text is what recitation writes, once.
+[06-two-texts](06-two-texts.md) is the whole of that relationship.
 
 ### 4.4 `Sound`
 
@@ -295,12 +291,15 @@ A sound has no `word` field: its word is the word of its primary origin.
 | Name | Means |
 |---|---|
 | `rule` | section 7 |
-| `source` | the unit the rule is about |
+| `source` | the unit the rule is about, or absent |
 | `target` | the unit it reaches, or absent |
-| `labels` | teaching names for this instance, section 7.3 |
+| `labels` | teaching names for this instance, [07-rules](07-rules.md) |
 
-`source` means the same for every rule, and a rule is read against its
-`source`: a lam shamsiyyah belongs to the lam that disappears, not to the
+`source` is absent for the two rules that have no subject unit: an
+`orthographic_silence`, which is about a letter no unit answers to, and an
+`iltiqa_kasra`, whose sound is an insertion between two units and belongs to
+neither. Everywhere else `source` means the same thing, and a rule is read
+against it: a lam shamsiyyah belongs to the lam that disappears, not to the
 letter that doubles. Nothing in the corpus has a third participant. There is no family and no phase: the grouping in section 7 is for
 reading, and a colouring scheme is a convention a consumer picks.
 
@@ -324,12 +323,10 @@ reading, and a colouring scheme is a convention a consumer picks.
 | `Recolours(sound, by)` | the rule | tafkheem made this consonant heavy |
 | `SetsLength(sound, by, length)` | the rule | iltiqa shortened this madd |
 | `Classifies(sound, by)` | the rule | names this sound without changing it |
-| **contributions** | | |
-| `Contribution(glyph, text, sounds, rules)` | the glyph | what this glyph puts on the page |
 
 One unit per attribution. Two units never own one sound jointly: a merger is
 already a pair of edges over one sound, which is what carries the sharing, and
-a long vowel is shared by *graphemes*, which the spelling and contribution
+a long vowel is shared by *graphemes*, which the spelling edges and the glyph
 edges carry.
 
 An insertion has no side. The one sound in the design that no unit owns is the
@@ -347,24 +344,11 @@ haraka and its carrier make the identical claim about the identical unit and
 section 6.1 cannot be evaluated. Sakt is not a unit-level fact: it is stated
 on the word.
 
-### 5.1 `Contribution`
-
-Ownership in section 6.1 says which pairing *owns* a sound. This says which
-glyphs *show* it, which is the join a colouring consumer needs and the only
-place a glyph that shows nothing is distinguished from one nothing looked at.
-
-```python
-@dataclass(frozen=True)
-class Contribution:
-    glyph:  int                # index into glyphs, or into rendered
-    text:   str                # "source" or "recited": which array glyph indexes
-    sounds: tuple[int, ...]    # the sounds this glyph puts on the page
-    rules:  tuple[int, ...]    # rule instances it shows that no sound carries
-```
-
-`sounds` is empty for a glyph the reading does not say, and `rules` then names
-why: an `orthographic_silence`, a `pausal_sukun`, a merger. A glyph with both
-lists empty is a defect, not a state.
+**Which glyphs show a sound is not an edge.** It is
+`alignment(grouping="glyph")`, whose rows are one glyph each and already carry
+what a colouring consumer needs: the sounds the glyph owns, the ones it only
+presents, the ones it is written for and does not say, and its rules. A second
+array over the same join would say less and have to be kept consistent with it.
 
 `Part` is `consonant | vowel`. Silence is not a third value: it is what
 happened to one of the two, and it happens to both.
@@ -469,29 +453,10 @@ on a node. Noon and tanween ikhfaa are one rule, and `origin` says which.
 
 **Orthographic.** `orthographic_silence`
 
-### 7.1 Every merger
-
-A merger is the only place two units share one sound, so which unit hosts is
-stated per rule rather than reasoned about.
-
-| Rule | Source | Host | Crosses a word |
-|---|---|---|---|
-| `idgham_mutamathilayn` | the first of two identical consonants | the second | may |
-| `idgham_mutaqaribayn` | the first of two close consonants | the second | may |
-| `idgham_mutajanisayn_kamil` | the first of two homorganic consonants | the second | may |
-| `idgham_bi_ghunnah` | a sakin noon or a tanween | the following letter | always |
-| `idgham_bila_ghunnah` | a sakin noon or a tanween | the following lam or raa | always |
-| `idgham_shafawi` | a sakin meem | the following meem | may |
-| `lam_shamsiyyah` | the article's lam | the following letter | never |
-
-The host owns the sound; the source has a `MergedInto` edge to it. Across a
-boundary the host's word owns it, so a merged sound is never credited to the
-word that lost it.
-
-Two rules that look like mergers and are not. `idgham_mutajanisayn_naqis`
-keeps the letter's own sound and changes only its manner.
-`iqlab` turns a noon into a meem, which is one unit substituting, and leaves
-the following baa untouched.
+That is the vocabulary. What each rule reaches, which unit hosts a merged
+sound, the teaching labels, the silence the script writes, and where a rule
+means one thing to a letter and another to a sound are all in
+[07-rules](07-rules.md).
 
 ### 7.2 What a stop does
 
@@ -502,44 +467,6 @@ the following baa untouched.
 | a letter is realized differently | `taa_marbuta_pausal` |
 
 Mutually exclusive per unit and per part.
-
-### 7.3 Teaching labels
-
-Each is a true description of a configuration the graph already states. They
-are not rules and never mint an instance of their own: each names the trigger
-rather than the outcome, and a second instance over one lengthening would
-leave `by` with two answers. They are a field on the instance that did happen.
-
-`labels` is a subset of:
-
-| Label | Holds when |
-|---|---|
-| `madd_iwad` | a madd on a unit whose tanween noon is silenced at a stop |
-| `madd_badal` | a madd on a unit whose letter is hamza |
-| `silah` | a madd on a unit whose vowel is long joined and absent stopped |
-| `silah_kubra` | the same, where the rule is `madd_jaiz_munfasil` |
-
-The length is always the rule's. A silah kubra is `madd_jaiz_munfasil` on a
-silah vowel and takes that rule's length; a badal in this reading is the
-length of a `madd_tabii`, which is why it is a name and not a rule.
-
-`ibdal_hamza` is a rule and not on this list, because substituting a hamza for
-a vowel is an outcome. Madd badal is the length that follows it.
-
-### 7.4 Silence the script writes
-
-`orthographic_silence` names a letter the rasm carries and recitation never
-says: the alif of the plural waw, the alif no vowel can carry, the otiose waw,
-the yaa and the alif maqsura. One rule, because `letter` says which.
-
-The verdict is a canonical fact. Which evidence a script offered for it - a
-written silence sign in Uthmani, position alone elsewhere - is the script
-adapter's business, and a script that marks nothing owes its adapter the
-derivation. Uthmani's is correct today.
-
-The instance owns no attribution - there is no unit to silence - so it joins
-`ishmam` and `sakt` as a rule that produces nothing. The seat's contribution
-shows no sound and its `rules` names this one.
 
 ---
 
@@ -555,7 +482,6 @@ shows no sound and its `rules` names this one.
 | Every silence names a rule |
 | Concatenating `glyphs` in `source_index` order reproduces the source text |
 | Under `text="recited"`, no sound takes a gap pairing |
-| Every non-structural glyph, of either text, has exactly one contribution |
 
 A part is applicable unless the unit's vowel is absent in both forms, which is
 a unit the reading never vowels: it has nothing for a rule to take and states
@@ -637,32 +563,44 @@ changes.
 18. **Madd rules for their ordinary cases.** `madd_tabii` is minted only on
     the pausal glide; an ordinary long vowel, a silah vowel and a stopped
     seven-alif produce none.
-19. **`orthographic_silence`.** The seats are identified, but the field naming
-    the unit each shows against is written and never read, and one seat class
-    reaches no spelling edge at all.
-20. **The iltiqa helping vowel** is constructed nowhere. It is one insertion,
+19. **`orthographic_silence` is two rules.** A letter never said and a letter
+    said only at a pause are not one outcome, and `letter` does not tell them
+    apart: the same alif is one in one word and the other in another. What
+    separates them is the sign the script wrote. Separately, the seats are
+    identified but the field naming the unit each shows against is written and
+    never read, and one seat class reaches no spelling edge at all.
+20. **The vocabulary is short two rules**, both mandatory and both corpus-wide:
+    dropping a word-initial shadda when a word is started on, and the role a
+    word-final yaa, waw or alif maqsura takes at a pause. Neither has a name,
+    neither has a converse trigger, and [06-two-texts](06-two-texts.md) is
+    where the transformation each performs is written down.
+21. **The iltiqa helping vowel** is constructed nowhere. It is one insertion,
     at a handful of sites, and it is the only sound in the design no unit owns.
-21. **Split the boundary rules to match the names.** One code rule covers
+22. **Split the boundary rules to match the names.** One code rule covers
     `pausal_sukun` and `taa_marbuta_pausal`; another mints an iwad name the
     contract does not have.
-22. **Release attribution moves to the consonant** - and the fill step reads
+23. **A colour is not minted for a part a complete merger consumed.** The
+    letter has no sound of its own to be heavy, which is the whole difference
+    between a complete idgham and a partial one. The producer already declines
+    this for the vowel and must decline it for the consonant too.
+24. **Release attribution moves to the consonant** - and the fill step reads
     any realization as claiming the part, so moving only the effect deletes
     the consonant's own sound. Every release in the corpus sits on the vowel
     today, so this is not a repair at the margin.
 
 **Machinery**
 
-23. **A writer for the recited text.** The one that exists takes a Score, so
+25. **A writer for the recited text.** The one that exists takes a Score, so
     it has no boundary plan and no performance and cannot spell a pausal,
     merged or started-on form. `rendered` needs glyph records carrying
-    `from_glyph` and their own contribution rows.
-24. **Total glyph contribution.** The join saying which outcomes each glyph
+    `from_glyphs` and their own pairings.
+26. **Total glyph pairing.** The join saying which outcomes each glyph
     presents, distinguishing a sounded dagger from its silent carrier and a
     performance deletion from orthographic zero.
-25. **Sub-verse requests.** A request clipping a ledger-addressed word raises
+27. **Sub-verse requests.** A request clipping a ledger-addressed word raises
     rather than building.
-26. **Continuous assembly** overlaps by two words, because cross-word
+28. **Continuous assembly** overlaps by two words, because cross-word
     lookahead reaches past a one-slot word.
-27. **Request orchestration.** Resolve `(ref, boundaries, variant)`, build,
+29. **Request orchestration.** Resolve `(ref, boundaries, variant)`, build,
     perform, and assemble one index space. Internal starts, arbitrary stops,
     sakt and cross-verse joins use the same path.

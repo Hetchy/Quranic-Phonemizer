@@ -82,7 +82,7 @@ explicitly retired with consumer approval.
 
 ### 3.1 `silent_flags`
 
-For each non-structural source token, the adapter reads the contribution rows
+For each non-structural source token, the adapter reads the glyph pairings
 for its glyphs and applies the legacy silence policy over the sounds they
 show. It distinguishes a glyph showing a hosted sound from one showing a
 merged one and from one showing none at all, and never infers glyph
@@ -98,7 +98,7 @@ row, each of which must resolve to a rule name.
 
 ### 3.2 `tajweed_mappings`
 
-Rule instances supply `source` and `target`; contribution edges locate the
+Rule instances supply `source` and `target`; the glyph pairings locate the
 glyphs; attribution and modifier edges locate the affected sound. A versioned
 table maps each public rule to the legacy names and trigger splits. Rules
 legacy could not name are filtered from the compatibility view and checked by
@@ -123,11 +123,11 @@ muqattaat expansions.
 | `chars` | source spelling, or the rendered glyph |
 | `role` | folded glyph kind |
 | `status` | `from_glyph` presence and difference |
-| `phonemes` | sound targets reached by contribution |
+| `phonemes` | the sounds the glyph's pairing owns and shares |
 | `phoneme_indices` | sound indices rebased word-local |
 | `tag` | legacy priority over compatible rule instances |
 | `secondary_tags` | the remaining compatible instances |
-| `phoneme_rule_tags` | instances reached by contribution, attribution and modifier edges |
+| `phoneme_rule_tags` | the pairing's rules, and those on its sounds' attribution and modifier edges |
 | `share_group` | units on joint or shared sound relations |
 | `source_letter_index` | source glyph index |
 | `source_letter_indices` | spelling edges back to source glyphs |
@@ -196,19 +196,19 @@ These run over the whole corpus in all three boundary modes.
   only exemptions are the rules that produce no sound at all: ishmam, sakt and
   `orthographic_silence`.
 
-### 4.5 Contribution
+### 4.5 What a glyph shows
 
-- Every non-structural glyph and every rendered glyph has exactly one
-  contribution row.
+Every law here is over `alignment(text=t, grouping="glyph")`, whose rows are
+one glyph each.
 - **Under `text="recited"`, no sound takes a gap pairing.** Every sound the
   performance produced is presented by some rendered glyph, because the
   recited text is by definition what recitation writes. This is the converse
   of the glyph-side law and the one that catches a sound nothing points at.
   Over the source text it does not hold and must not be asserted: a sound the
   source does not write is exactly what a gap pairing is for.
-- Every sound and every rule instance a contribution names resolves, and is
-  compatible with the glyph's spelling edges.
-- Structural glyphs have no contribution row.
+- Every sound and every rule instance a pairing names resolves, and is
+  compatible with its glyph's spelling edges.
+- Structural glyphs take no pairing.
 - A haraka and an ordinary carrier may both present one hosted vowel sound.
 - A carrier under a dagger presents nothing; the dagger presents the vowel.
 - A maddah may present a target although it supplies no canonical fact.
@@ -298,7 +298,7 @@ written as one. A gate that asks the producer whether it merged something is
 checking the producer against itself. The condition is canonical: a closure is
 consumed when the next consonant is identical, close or homorganic to it and
 the two are joined, which is the merger table of
-[01-contract](01-contract.md) section 7.1 over letters and the boundary plan.
+[07-rules](07-rules.md) over letters and the boundary plan.
 Restating it here is what makes this a converse law rather than a mirror.
 
 There is no row for madd iwad, madd badal or silah. Each is a description of a
@@ -312,8 +312,8 @@ and modifier values. Tests reject at least: a nullable quality on an
 incompatible vowel kind; a sound carrying fields from two kinds;
 `Structural` with a unit or word; `Supplies` without a fact; an attribution
 naming two units; `Silent` carrying a sound; an attribution without a part; a
-merger without its host; a contribution target out of range or of the wrong
-kind; a glyph with no contribution row; a rendered glyph with an empty
+merger without its host; a pairing target out of range or of the wrong
+kind; a non-structural glyph in no pairing; a rendered glyph with an empty
 character; a gap row with glyphs; duplicate canonical relations; an unknown
 schema version.
 
@@ -328,7 +328,7 @@ relationship blocks the contract; an adapter may not repair it.
 
 | Area | Must be represented |
 |---|---|
-| short and long vowels | base, haraka, carrier fan-in, shared sound, distinct contribution |
+| short and long vowels | base, haraka, carrier fan-in, shared sound, distinct pairing |
 | silent carriers | otiose alif, waw, yaa and maqsura; silence sign; dagger seat against sounded dagger |
 | hamza wasl | source glyph, start vowel, joined deletion, repair, article lam |
 | tanween | one mark reaching vowel and noon; carrier silence when joined; waqf iwad |
@@ -375,7 +375,7 @@ exists to remove, so using them as the oracle would be circular.
 
 ## 8. Order and CI policy
 
-1. Build the model work in [01-contract](01-contract.md) section 8, each with
+1. Build the model work in [01-contract](01-contract.md) section 9, each with
    its local laws.
 2. Define the versioned schema and its negative tests.
 3. Assemble a single-verse `Mappings` and pass the domain adequacy matrix.

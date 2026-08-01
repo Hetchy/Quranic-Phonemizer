@@ -5,7 +5,7 @@ Status: **format seed**. Scope: Uthmani, Hafs.
 These are the specification, not a recording. Nothing here can be generated
 today: the contract names rules no code mints, a recited text no writer
 produces, and pairings no method returns. Each table says what the
-output must look like when the work in [01-contract](01-contract.md) section 8
+output must look like when the work in [01-contract](01-contract.md) section 9
 is done, which is what makes them the acceptance fixtures.
 
 Source words are taken from the corpus, because hand-typing Arabic is how a
@@ -116,7 +116,7 @@ The helping vowel has no glyph in the source, which is the one case that takes
 a gap pairing. The echo sits beside the consonant rather than replacing it, and
 the vowel that is gone is a separate row.
 
-Recited `أَلْحَمْدْ` under the explicit policy, `ٱَلْحَمْدْ` under the faithful one.
+Recited `أَلْحَمْدْ`.
 
 ### E5. Lam shamsiyyah - 1:3:1, stopped
 
@@ -178,7 +178,7 @@ Recited `أَلْكِتَابُ` - the dagger becomes a written alif.
 | ا | `orthographic_silence` | - | |
 
 The alif is written and never said. Its rule instance owns no attribution, so
-the glyph's contribution shows no sound and names the rule in its `rules`.
+the glyph's pairing shows no sound and names the rule in its `rules`.
 
 Recited `كَفَرُو`.
 
@@ -318,40 +318,13 @@ a case that reads the same in all four proves nothing.
 | iltiqa al-sakinayn | a gap pairing between two pairings that neither owns |
 | the badal | a source glyph changes kind as well as shape: a hamza becomes the madd letter of the vowel before it, so one recited cluster covers two source glyphs |
 | the divine name's long vowel | one presenting glyph where a long vowel usually has two, and no length carrier to own it |
-| taa marbuta at a stop (E10) | the glyph does not change and the sound does |
+| taa marbuta at a stop (E10) | the sound changes and so does the recited glyph, while the source glyph stands |
 | a muqattaat opening (E12) | one glyph spelling several units, under both groupings |
 
 ## 4. Where the two texts differ
 
-Two separate questions, and conflating them is easy.
-
-**Sounds no source glyph presents.** These take a gap pairing under
-`text="source"`. There are two. The hamza wasl's helping vowel is hosted on
-that unit's own vowel; only the iltiqa kasra is attributed as an insertion,
-and nothing constructs one yet.
-
-| Sound | Rendered as |
-|---|---|
-| the hamza wasl's helping vowel, when started on | the haraka its grammar chooses |
-| the iltiqa helping kasra | a kasra |
-
-**Recited spellings that differ from the source.** Here the sound has a source
-glyph; what changes is what recitation writes for it.
-
-| Case | The recited text |
-|---|---|
-| madd iwad, no seat written | adds an alif the rasm does not have |
-| madd iwad, seat written | keeps the seat, which stops being silent |
-| taa marbuta at a stop | keeps the glyph, changes the sound |
-| the badal | writes the quiescent hamza as a madd letter, changing its kind |
-| the hamza wasl started on | adds the helping haraka, and under the explicit policy respells the seat |
-
-The divine name's long vowel belongs to neither list. Its fatha supplies the
-vowel, so it is written; it simply has no length carrier, and the writer
-does not abbreviate it to a dagger.
-
-The qalqala echo is in neither list either. It is a release sound rather than
-a letter, and the recited text does not write it.
+[06-two-texts](06-two-texts.md) is the whole of it, and every case below
+appears there with its trigger and its owning rule.
 
 ## 5. The inventory still to produce
 
