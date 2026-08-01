@@ -148,8 +148,8 @@ without it.
 **D3 -- `Onset` is not split.** The census found no possible manner-presence
 combination the enum cannot express, and every impossibility has a domain
 reason recorded in §4's table. Splitting buys nothing today and the projection
-can derive `geminate` and `prosthetic` as independent booleans
-(projections/01-contract section 4.2), so no consumer inherits the coupling.
+derives `geminate` and `sounds` from it (projections/01-contract section
+4.2.1), so no consumer inherits the coupling.
 
 This is a reversal of the acceptance criterion "every `Slot` field answers one
 question", and deliberately: the criterion is a heuristic for finding fields
@@ -177,7 +177,8 @@ discriminated value and may derive a convenience boolean.
 
 Two further changes are required by the projection design and are recorded
 there rather than here, because they are about `Performance`, not the canonical
-vocabulary: labelling `Participants` (projections/01-contract section 8) and keeping the modifier edge.
+vocabulary: labelling `Participants` and keeping the modifier edge, which are
+items 10 and 2 of projections/01-contract section 9.
 
 ## 8. Acceptance, restated
 

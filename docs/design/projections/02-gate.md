@@ -83,9 +83,10 @@ explicitly retired with consumer approval.
 ### 3.1 `silent_flags`
 
 For each non-structural source token, the adapter reads the contribution rows
-for its glyphs and applies the legacy silence policy over their `presents`
-targets. It distinguishes `Hosts`, `Silent` and `MergedInto` targets from an
-empty `presents` list, and never infers glyph audibility from whether a
+for its glyphs and applies the legacy silence policy over the sounds they
+show. It distinguishes a glyph showing a hosted sound from one showing a
+merged one and from one showing none at all, and never infers glyph
+audibility from whether a
 related unit has any sound. That is what makes a carrier waw silent while the
 dagger on the same vowel remains sounded.
 
@@ -175,11 +176,12 @@ These run over the whole corpus in all three boundary modes.
   `MergedInto` never becomes a second owner.
 - Every merger is a `Hosts` and `MergedInto` pair sharing sound and rule
   instance, with distinct host and contributor units.
-- Every insertion has a valid anchor, side, part, sound and rule instance.
+- Every insertion has a valid anchor, part, sound and rule instance, and lands
+  after its anchor.
 - Every silence names a rule instance and carries no sound.
 - Every release sound is hosted on a consonant, never on a vowel, and no part
   carries two of them.
-- Joint hosts preserve every participating unit.
+- Every attribution names exactly one unit.
 - A consonant can host while the same unit's vowel is silent.
 
 ### 4.4 Rules and modifiers
@@ -220,7 +222,9 @@ For every combination of `text` and `grouping`:
 
 - **The pairings partition the selected text's glyph array.** Every glyph
   appears in exactly one pairing, except those carrying the `Structural`
-  spelling edge, which have none. The edge decides this, never `kind`.
+  spelling edge, which have none. The edge decides this, never `kind`, and
+  `01-contract` item 14 is what makes the two agree: a tatweel and a stop sign
+  both carry the edge and both take no pairing.
 - **The pairings and their gap pairings cover every sound exactly once in
   `sounds`.** A sound may appear in any number of `shares` lists.
 - A gap pairing has no glyphs of the selected text, exactly one owned sound,
@@ -229,9 +233,9 @@ For every combination of `text` and `grouping`:
 - A sound takes a gap pairing exactly when no glyph of the selected text
   presents it. How it was attributed does not enter into it.
 - `shares` names only sounds owned by another pairing.
-- `silent` names glyphs that are written and not said: those presenting a
-  `Silent` attribution, and those whose `presents` list is empty because the
-  script wrote them and recitation never says them.
+- `silent` names glyphs that are written and not said: those showing a
+  `Silent` attribution, and those showing no sound at all because the script
+  wrote them and recitation never says them.
 - Both `glyphs` and `rendered` are populated whichever text is selected, so
   the script-recited pairing is readable from either.
 - Ownership follows the published order, and the order is total: no pairing
@@ -298,8 +302,8 @@ madd rule and the silence that make it up.
 The JSON schema uses tagged unions for vowel, sound, spelling, attribution
 and modifier values. Tests reject at least: a nullable quality on an
 incompatible vowel kind; a sound carrying fields from two kinds;
-`Structural` with a unit or word; `Supplies` without a fact; `Insertion`
-without a side; `Silent` carrying a sound; an attribution without a part; a
+`Structural` with a unit or word; `Supplies` without a fact; an attribution
+naming two units; `Silent` carrying a sound; an attribution without a part; a
 merger without its host; a contribution target out of range or of the wrong
 kind; a glyph with no contribution row; a rendered glyph with an empty
 character; a gap row with glyphs; duplicate canonical relations; an unknown
@@ -323,7 +327,7 @@ relationship blocks the contract; an adapter may not repair it.
 | silah | written or virtual extension, joined length, pausal deletion |
 | divine name | heavy or light lam, written or virtual dagger, waqf change |
 | mergers | within-word and cross-word source, host, contributor, shared sound, complete and partial forms |
-| noon and meem | source and target, and ghunnah placement, for noon, tanween and meem |
+| noon and meem | source and target, for noon, tanween and meem |
 | madd | haraka, carrier, mark, subtype, cause, boundary change |
 | qalqala | closure and release, one instance, consonant reach, stop degree |
 | emphasis | consonant and governed vowel reach, including raa and the divine name |
@@ -331,7 +335,7 @@ relationship blocks the contract; an adapter may not repair it.
 | waqf endings | vowel deletion with the consonant retained, taa marbuta, iwad, arid, leen, qalqala |
 | ibtidaa | start boundary, wasl vowel, gemination, right context |
 | marks and advice | imala, ishmam, tashil, sakt, seen and sad, iqlab, maddah, stop advice |
-| slotless repair | side, order, rule instance, sound, gap row, rendered form |
+| slotless repair | order, rule instance, sound, gap row, rendered form |
 | source structure | spaces, tatweel, stop signs and verse markers round-trip exactly |
 
 ## 7. The consumer gate

@@ -70,22 +70,14 @@ Either the trigger set admits derived canonical facts, in which case say which
 and why the derivation is not the answer in disguise; or the qalqala row is
 dropped and the case goes uncovered.
 
-## 7. Should bilabial iqlab ship as a variant?
-
-`NasalPlace.BILABIAL` and a khilaf identifier for it both exist, but the
-shipped Hafs data defines no options for it, so nothing can select it and
-iqlab emits the same sound as ikhfaa. Either the variant point gets data, or
-the place and its identifier are deleted. Until one or the other, the gate
-cannot demonstrate ghunnah placement and no fixture can reach the variant.
-
-## 8. What is the authoritative source for every sakt site?
+## 7. What is the authoritative source for every sakt site?
 
 The riwayah's sakt data is short of what Hafs requires, and the missing site
 is absent because its cross-script skeleton is unresolved rather than because
 it does not exist. The gate's converse law for sakt cannot be total until the
 source fact is chosen.
 
-## 9. Two names
+## 8. Two names
 
 **`Unit`** is content-free, and every alternative is worse: `Letter` is what a
 consumer reaches for and is wrong for the tanween noon.

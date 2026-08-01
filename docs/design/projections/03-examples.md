@@ -178,7 +178,7 @@ Recited `أَلْكِتَابُ` - the dagger becomes a written alif.
 | ا | `orthographic_silence` | - | |
 
 The alif is written and never said. Its rule instance owns no attribution, so
-the glyph carries an empty `presents` list and names the rule as its reason.
+the glyph's contribution shows no sound and names the rule in its `rules`.
 
 Recited `كَفَرُو`.
 
@@ -274,9 +274,10 @@ addition and not the part's realization.
 | | | i: | `madd_lazim` |
 | م | | m | |
 
-Three glyphs spell eleven units, every one with `origin = letter_name`: `ا`
-alone spells the four of `alif`. The two meems at the seam are one held nasal,
-not two, and the meem that disappears is the rule's `source`.
+Three glyphs spell seven units, every one with `origin = letter_name`: `ا`
+alone spells the three of `alif`. The rows are parts, which is why there are
+eleven of them. The two meems at the seam are one held nasal, not two, and the
+meem that disappears is the rule's `source`.
 
 Recited `أَلِفْ لَآمّٓ مِيمْ`.
 
