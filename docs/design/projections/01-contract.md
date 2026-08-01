@@ -28,8 +28,10 @@ m.rules                                          # every rule, in reading order
 m.alignment(text="source", grouping="cluster")   # writing lined up with sound
 ```
 
-What is not said is on the row that does not say it: `pairing.silent` names
-the glyphs, and the `Silent` edge behind each names the rule.
+What is not said is on the row that does not say it. `pairing.silent` names the
+glyphs, and each one names its rule twice over: a unit the reading silenced has
+a `Silent` edge, and a letter the rasm carries and recitation never says has no
+unit to silence, so its contribution names the rule instead.
 
 Section 6 is the whole of `alignment`. Everything past section 4 is for a
 consumer that needs a join no method offers.
@@ -147,10 +149,11 @@ Indices are local to one document, and pairings are request-local.
 `compulsory_stop` · `prohibited_stop` · `either_stop` · `permitted_stop`
 
 **The divine name is not published.** It is a lexeme, not a recitation
-process, and everything it does is already on the sounds: the lam is heavy or
-light, and a `Recolours` edge says which and why. A word field naming it would
-let a consumer colour by lexical identity, which is not what this document is
-for.
+process, and a word field naming it would let a consumer colour by lexical
+identity, which is not what this document is for. Its heavy lam is on the
+sounds, carrying a `tafkheem` and its modifier edge. Its light lam is not:
+that case leaves no trace, because a light lam is the ordinary lam and no rule
+fires to say so.
 
 ### 4.2 `Unit`
 
@@ -187,10 +190,14 @@ Two independent facts, because they combine.
 exact mirror. Manner is not here: an eased hamza is something a reciter does,
 so it is a rule.
 
-**Cardinality.** Six combinations, three of them laws rather than gaps. A
-consonant that sounds only when started on is word-initial and elidable, and
-a consonant that sounds only when joined is a pronoun's haa; neither is ever
-doubled. So `geminate` is true only where `sounds` is `always`.
+**Cardinality.** Six cells, four populated and two closed by a law: a
+consonant that sounds only when started on is a word-initial elidable hamza,
+and one that sounds only when joined is the yaa of 27:36, which a reader may
+keep or drop at a pause. Neither is ever doubled, so `geminate` is true only
+where `sounds` is `always`. `when_joined` has a single site in the corpus.
+
+The vowel long only when joined is the pronoun haa's, and it is section
+4.2.2's business. Nothing here is that.
 
 The model keeps these two facts in one enum and the projection derives them.
 That is `03-canonical-vocabulary` D3, and it holds: the enum can express every
@@ -228,8 +235,10 @@ the default reading no vowel in the corpus takes it.
 | `word_index` | ordinal within its word |
 | `source_index` | ordinal in the whole passage |
 
-`RenderGlyph` adds `from_glyph`: the source glyph it renders, absent when the
-source has none.
+`RenderGlyph` adds `from_glyphs`: the source glyphs it renders, empty when the
+source has none. It is a tuple because the mapping is many-to-many in both
+directions, which is what section 2's last row is about, and a recited row
+needs no second list of source glyphs: it reads them through here.
 
 | `kind` | Is | In `rendered` |
 |---|---|---|
@@ -288,6 +297,7 @@ A sound has no `word` field: its word is the word of its primary origin.
 | `rule` | section 7 |
 | `source` | the unit the rule is about |
 | `target` | the unit it reaches, or absent |
+| `labels` | teaching names for this instance, section 7.3 |
 
 `source` means the same for every rule, and a rule is read against its
 `source`: a lam shamsiyyah belongs to the lam that disappears, not to the
@@ -311,7 +321,7 @@ reading, and a colouring scheme is a convention a consumer picks.
 | `Silent(unit, part, by)` | the unit | this unit lost its sound |
 | `Insertion(anchor, part, sound, by?)` | nobody | a sound no unit owns |
 | **modifiers** | | |
-| `Recolours(sound, by, heavy)` | the rule | tafkheem made this consonant heavy |
+| `Recolours(sound, by)` | the rule | tafkheem made this consonant heavy |
 | `SetsLength(sound, by, length)` | the rule | iltiqa shortened this madd |
 | `Classifies(sound, by)` | the rule | names this sound without changing it |
 | **contributions** | | |
@@ -325,9 +335,11 @@ edges carry.
 An insertion has no side. The one sound in the design that no unit owns is the
 helping vowel of an iltiqa, and it lands after its anchor.
 
-`heavy` is a boolean and emphasis is the only feature a rule sets, so
-`Recolours` carries the value and not the name of a field. `length` is `short`
-or `long`.
+`Recolours` carries no value. Emphasis is the only feature a rule sets, only
+one rule sets it, and the resulting state is `emphatic` on the sound; the edge
+exists to say which rule put it there. A light letter is the ordinary letter
+and no rule fires, so there is nothing for a second value to mean. `length` is
+`short` or `long`.
 
 `Supplies.fact`: `letter` · `consonant` · `vowel_quality` · `vowel_length` ·
 `tajweed_mark`. Quality and length are separate facts, because otherwise a
@@ -411,7 +423,18 @@ A sound no glyph of the selected text presents takes a **gap pairing**:
 `glyphs` empty, `after` naming the pairing it follows. The criterion is what
 the text writes, not how the sound was attributed.
 
-### 6.3 Word-by-word
+### 6.3 What a cluster is, and what a pairing is not
+
+A muqattaat glyph is one cluster row owning the sounds of a whole letter name.
+That is the granularity a font shapes and the granularity this grouping is
+named for; a consumer animating inside the name reads the units, which are
+already there and already ordered.
+
+Pairings are request-local and will never take a durable key. A consumer
+persisting records against them keys on position and defends against drift
+with a content snapshot, which is the right shape for content that changes.
+
+### 6.4 Word-by-word
 
 Not a grouping. Every node carries its word and a merged sound's word is its
 host's, so a consumer animating whole words reads which words a sound touches
@@ -480,17 +503,25 @@ the following baa untouched.
 
 Mutually exclusive per unit and per part.
 
-### 7.3 Teaching labels the contract does not mint
+### 7.3 Teaching labels
 
-Each is a true description of a configuration the graph already states,
-published as a predicate so a consumer does not rebuild it from prose.
+Each is a true description of a configuration the graph already states. They
+are not rules and never mint an instance of their own: each names the trigger
+rather than the outcome, and a second instance over one lengthening would
+leave `by` with two answers. They are a field on the instance that did happen.
+
+`labels` is a subset of:
 
 | Label | Holds when |
 |---|---|
-| madd iwad | a madd on a unit whose tanween noon is silenced at a stop |
-| madd badal | a madd on a unit whose letter is hamza |
-| silah | a madd on a unit whose vowel is long joined and absent stopped |
-| silah kubra | the same, where the rule is `madd_jaiz_munfasil` |
+| `madd_iwad` | a madd on a unit whose tanween noon is silenced at a stop |
+| `madd_badal` | a madd on a unit whose letter is hamza |
+| `silah` | a madd on a unit whose vowel is long joined and absent stopped |
+| `silah_kubra` | the same, where the rule is `madd_jaiz_munfasil` |
+
+The length is always the rule's. A silah kubra is `madd_jaiz_munfasil` on a
+silah vowel and takes that rule's length; a badal in this reading is the
+length of a `madd_tabii`, which is why it is a name and not a rule.
 
 `ibdal_hamza` is a rule and not on this list, because substituting a hamza for
 a vowel is an outcome. Madd badal is the length that follows it.
@@ -500,6 +531,11 @@ a vowel is an outcome. Madd badal is the length that follows it.
 `orthographic_silence` names a letter the rasm carries and recitation never
 says: the alif of the plural waw, the alif no vowel can carry, the otiose waw,
 the yaa and the alif maqsura. One rule, because `letter` says which.
+
+The verdict is a canonical fact. Which evidence a script offered for it - a
+written silence sign in Uthmani, position alone elsewhere - is the script
+adapter's business, and a script that marks nothing owes its adapter the
+derivation. Uthmani's is correct today.
 
 The instance owns no attribution - there is no unit to silence - so it joins
 `ishmam` and `sakt` as a rule that produces nothing. The seat's contribution
@@ -522,8 +558,10 @@ shows no sound and its `rules` names this one.
 | Every non-structural glyph, of either text, has exactly one contribution |
 
 A part is applicable unless the unit's vowel is absent in both forms, which is
-a unit written with a sukun: it has nothing for a rule to take and states no
-vowel realization. The consonant part is always applicable.
+a unit the reading never vowels: it has nothing for a rule to take and states
+no vowel realization. That covers the sukun, the bare consonant, the tanween's
+noon and a letter of a spelled name alike. The consonant part is always
+applicable.
 
 ---
 
@@ -542,14 +580,21 @@ changes.
    change are engine effects today, applied to the sound and then dropped, so
    the rule that made them owns nothing. `tafkheem` is the largest instance
    class in the corpus and every one of its instances is currently empty.
+   `Classifies` is the third modifier and it has never existed at all: it is
+   the edge every classification-only rule needs, and those are the majority
+   of the instances that own nothing, `tarqeeq` and `madd_arid_lil_sukun` and
+   `lam_qamariyyah` among them.
 3. **`silah` names two unrelated things** - a consonant present only when
    joined, and a vowel long only when joined - on two types.
 4. **The vowel becomes a joined form and a stopped form.** Five named variants
    collapse to two fields over one small value set, and the base a fathatan
    lengthens becomes a data change rather than a new variant.
-   The seven alifs must be sited **by word**, not by vocalised skeleton: the
-   tail of `جَآءَنَا` spells what `أَنَا۠` spells, and its final alif is an
-   ordinary pronoun that is long when joined. Today the boundary-conditional
+   The seven alifs must be sited **by word location**, not by vocalised
+   skeleton: the tail of `جَآءَنَا` spells what `أَنَا۠` spells and its final
+   alif is an ordinary pronoun, and 76:15 `قَوَارِيرَا۠` and 76:16
+   `قَوَارِيرَا۟` are the same letters and harakat with opposite behaviour,
+   told apart by a silence sign no skeleton keeps. Today the
+   boundary-conditional
    vowel has no effect on any token, so this item is the first to change one:
    it corrects every `أَنَا۠` in the corpus, which is long when joined today
    and should be short, and `02-gate` section 1 requires those refs be

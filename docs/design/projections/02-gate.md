@@ -206,8 +206,8 @@ These run over the whole corpus in all three boundary modes.
   of the glyph-side law and the one that catches a sound nothing points at.
   Over the source text it does not hold and must not be asserted: a sound the
   source does not write is exactly what a gap pairing is for.
-- Every `presents` target resolves to an attribution, modifier or rule
-  instance, and is compatible with the glyph's spelling edges.
+- Every sound and every rule instance a contribution names resolves, and is
+  compatible with the glyph's spelling edges.
 - Structural glyphs have no contribution row.
 - A haraka and an ordinary carrier may both present one hosted vowel sound.
 - A carrier under a dagger presents nothing; the dagger presents the vowel.
@@ -285,13 +285,21 @@ guaranteed failure.
 | an ikhfaa before an istilaa letter | a heavy ghunnah |
 | a written letter the canonical layer returns its no-sound verdict for | `orthographic_silence` |
 
-Three triggers carry a caveat the table cannot hide. **The qalqala row's "not
-merged away" is a derived fact**, not a canonical one, so it is the one
-trigger that reads something the producer computed; see
-[04-open-questions](04-open-questions.md). **The sakt row** requires the
-riwayah's sakt sites to be complete in its own data before the gate can claim
-to be total, and they are not. **The heavy ghunnah row** demands a colour
-nothing can currently produce, and whether it ever can is open.
+Two triggers carry a caveat the table cannot hide. **The sakt row** requires
+the riwayah's sakt sites to be complete in its own data, and they are not: the
+missing site is the one whose skeleton the two scripts spell differently. The
+sites are canonical and the set is the union of what both scripts evidence, so
+a site one script cannot address is still a site. **The heavy ghunnah row**
+demands a colour nothing can currently produce, and whether it ever can is
+open.
+
+The qalqala row's "not merged away" is not a derived fact and must not be
+written as one. A gate that asks the producer whether it merged something is
+checking the producer against itself. The condition is canonical: a closure is
+consumed when the next consonant is identical, close or homorganic to it and
+the two are joined, which is the merger table of
+[01-contract](01-contract.md) section 7.1 over letters and the boundary plan.
+Restating it here is what makes this a converse law rather than a mirror.
 
 There is no row for madd iwad, madd badal or silah. Each is a description of a
 configuration rather than an outcome, so the rows above already require the
