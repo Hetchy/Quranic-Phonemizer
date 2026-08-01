@@ -309,9 +309,20 @@ general case.
 
 ## 6. The control surface
 
-**No request field switches a transformation on or off.** The recited text is a
-total function of `(ref, riwayah, script, variant, boundary plan)`, and one of
-it exists per request.
+**One request field changes what the recited text writes, and it is a spelling
+choice rather than a switch over a transformation.** Otherwise the recited text
+is a total function of `(ref, riwayah, script, variant, boundary plan)`.
+
+`tanween` says how a nunated unit is spelled out:
+
+| `tanween` | Writes |
+|---|---|
+| `explicit` | the haraka, then a noon with a sukun |
+| `bare` | the haraka, then a bare noon |
+
+Both spell the same two units and neither adds or removes a sound, which is
+what keeps the completeness laws true. Where the noon merges there is nothing
+to write and the field does not apply: that is the idgham, not a third value.
 
 Each candidate switch, and why it is not one:
 

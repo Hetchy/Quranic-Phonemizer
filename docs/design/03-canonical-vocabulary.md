@@ -178,7 +178,7 @@ discriminated value and may derive a convenience boolean.
 Two further changes are required by the projection design and are recorded
 there rather than here, because they are about `Performance`, not the canonical
 vocabulary: labelling `Participants` and keeping the modifier edge, which are
-items 10 and 2 of projections/01-contract section 9.
+items 14 and 2 of projections/01-contract section 9.
 
 ## 8. Acceptance, restated
 

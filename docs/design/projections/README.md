@@ -8,10 +8,9 @@ public projection API out of scope. This is that API.
 | [01](01-contract.md) | Contract | The two projections, the nodes and edges, the read API, and what the producer must still build |
 | [02](02-gate.md) | Gate | The legacy adapters, the completeness and converse laws, and the order of work |
 | [03](03-examples.md) | Examples | One generated example per linguistic case, per rule, and per alignment quadrant |
-| [04](04-open-questions.md) | Open questions | What still needs an owner decision |
 | [05](05-modelling-review.md) | Review brief | How to review this as a model rather than as a set of claims |
 | [06](06-two-texts.md) | The two texts | What the mushaf writes against what recitation writes, and every transformation between them |
-| [07](07-rules.md) | Rules | Every rule with its source and target, the teaching labels, and where a letter and a sound relate to a rule differently |
+| [07](07-rules.md) | Rules | Every rule with its source, trigger and host, the teaching labels, and where a letter and a sound relate to a rule differently |
 
 Scope: Uthmani, Hafs. IndoPak is deferred and nothing here depends on it.
 

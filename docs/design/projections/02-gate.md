@@ -72,7 +72,7 @@ exact equality after the documented adapter.
 | `phonemes` | exact tokens and word grouping |
 | `phonetic_text` | exact lines and order |
 | `silent_flags` | exact tuple rows after legacy tokenization |
-| `tajweed_mappings` | exact legacy rule vocabulary and source and target rows after the vocabulary adapter |
+| `tajweed_mappings` | exact legacy rule vocabulary and source and target rows after the vocabulary adapter, the target reconstructed from the trigger the rule read |
 | `letter_phoneme_mappings` | exact characters, tokens, grouping, row order and merge direction |
 | `character_phoneme_mappings` | exact cells and every legacy field after the presentation adapter |
 
@@ -98,7 +98,7 @@ row, each of which must resolve to a rule name.
 
 ### 3.2 `tajweed_mappings`
 
-Rule instances supply `source` and `target`; the glyph pairings locate the
+Rule instances supply `source` and `host`; the glyph pairings locate the
 glyphs; attribution and modifier edges locate the affected sound. A versioned
 table maps each public rule to the legacy names and trigger splits. Rules
 legacy could not name are filtered from the compatibility view and checked by
@@ -186,14 +186,14 @@ These run over the whole corpus in all three boundary modes.
 
 ### 4.4 Rules and modifiers
 
-- Every `source` and `target` names a valid unit, and `source` is the unit the
-  rule is about for every rule alike.
+- Every `source` and `host` names a valid unit, `source` is the unit the rule
+  is about for every rule alike, and only a merger carries a host.
 - Every applied recolour and length change has exactly one retained modifier
   edge carrying its value.
 - Every classification-only rule that names a sound has a `Classifies` edge,
   and the sound it names exists.
 - Every rule instance owns at least one attribution or one modifier edge. The
-  only exemptions are the rules that produce no sound at all: ishmam, sakt and
+  only exemptions are the rules that produce no sound at all: ishmam and
   `orthographic_silence`.
 
 ### 4.5 What a glyph shows
@@ -223,7 +223,7 @@ For every combination of `text` and `grouping`:
 - **The pairings partition the selected text's glyph array.** Every glyph
   appears in exactly one pairing, except those carrying the `Structural`
   spelling edge, which have none. The edge decides this, never `kind`, and
-  `01-contract` item 14 is what makes the two agree: a tatweel and a stop sign
+  `01-contract` item 18 is what makes the two agree: a tatweel and a stop sign
   both carry the edge and both take no pairing.
 - **The pairings and their gap pairings cover every sound exactly once in
   `sounds`.** A sound may appear in any number of `shares` lists.
@@ -281,17 +281,17 @@ guaranteed failure.
 | a quiescent hamza the reading substitutes for a vowel | `ibdal_hamza` |
 | a final short vowel at a stop, or a tanween at a stop, or a silah vowel at a stop | `pausal_sukun` |
 | an imala, ishmam or tashil mark | that rule |
-| a sakt site named by the riwayah | `sakt` |
 | an ikhfaa before an istilaa letter | a heavy ghunnah |
 | a written letter the canonical layer returns its no-sound verdict for | `orthographic_silence` |
 
-Two triggers carry a caveat the table cannot hide. **The sakt row** requires
-the riwayah's sakt sites to be complete in its own data, and they are not: the
-missing site is the one whose skeleton the two scripts spell differently. The
+The heavy ghunnah row is the ikhfaa's own: the rule already reads the letter
+that follows in order to fire, so it is the rule that sets the colour, and the
+row needs no second rule.
+
+Sakt has no row, because it is not a rule. It is a fact of the word and its
+converse belongs with the boundary plan, which is where its data is short: the
 sites are canonical and the set is the union of what both scripts evidence, so
-a site one script cannot address is still a site. **The heavy ghunnah row**
-demands a colour nothing can currently produce, and whether it ever can is
-open.
+the site one script cannot address is still a site.
 
 The qalqala row's "not merged away" is not a derived fact and must not be
 written as one. A gate that asks the producer whether it merged something is
@@ -335,7 +335,7 @@ relationship blocks the contract; an adapter may not repair it.
 | silah | written or virtual extension, joined length, pausal deletion |
 | divine name | heavy or light lam, written or virtual dagger, waqf change |
 | mergers | within-word and cross-word source, host, contributor, shared sound, complete and partial forms |
-| noon and meem | source and target, for noon, tanween and meem |
+| noon and meem | source and host, for noon, tanween and meem |
 | madd | haraka, carrier, mark, subtype, cause, boundary change |
 | qalqala | closure and release, one instance, consonant reach, stop degree |
 | emphasis | consonant and governed vowel reach, including raa and the divine name |

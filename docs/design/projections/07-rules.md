@@ -15,13 +15,16 @@ relate. Recited spellings are named by their row in
 | Column | Holds |
 |---|---|
 | **source** | the unit the rule is about, and the unit it is read against |
-| **target** | the unit it reaches, or `-` |
+| **trigger** | what the rule read in order to fire, or `-` |
 | **crosses** | `never` · `may` · `always` |
 | **on the sound** | what the rule does to the sounds the units produce |
 | **recited** | what the recited text writes, by its catalogue row |
 
-A rule with a target does not act on it. The target is the reason the rule
-fired, and a consumer highlighting a rule lights both.
+**The trigger is not a field.** It is stated here because a reader wants to
+know what fired a rule, and it is not on the instance because it is not the
+same kind of thing twice: sometimes a unit after, sometimes one before,
+sometimes the unit's own vowel, sometimes the boundary plan. The one second
+participant an instance carries is `host`, and only a merger has one.
 
 `on the sound` is stated in domain words, and each maps onto one edge family
 that [01-contract](01-contract.md) section 5 defines: silencing and merging and
@@ -34,14 +37,13 @@ modifiers, and producing nothing is a rule that owns neither.
 
 ### 2.1 The nasal letters
 
-| Rule | Source | Target | Crosses | On the sound | Recited |
+| Rule | Source | Trigger | Crosses | On the sound | Recited |
 |---|---|---|---|---|---|
 | `ikhfaa_haqiqi` | a sakin noon, or a tanween's noon | the ikhfaa letter | always for a tanween, may otherwise | the noon's consonant is a hum | unchanged |
 | `iqlab` | a sakin noon, or a tanween's noon | the following baa | always for a tanween, may otherwise | the noon's consonant is a hum made at the lips | unchanged joined; row 4 stopped |
 | `idgham_bi_ghunnah` | a sakin noon, or a tanween's noon | the following letter | always | the noon merges into the host, which is held | rows 9 and 20 |
 | `idgham_bila_ghunnah` | a sakin noon, or a tanween's noon | the following lam or raa | always | the noon merges into the host | rows 9 and 20 |
-| `izhar_halqi` | a sakin noon, or a tanween's noon | the throat letter | may | names the noon's own sound | unchanged |
-| `izhar_mutlaq` | a sakin noon | the yaa or waw after it in the same word | never | names the noon's own sound | unchanged |
+| `izhar` | a sakin noon, or a tanween's noon | a throat letter, or the waw or yaa of its own word | may | names the noon's own sound | unchanged |
 | `ghunnah_mushaddadah` | a geminate noon or meem | - | never | names its own held sound | unchanged |
 | `izhar_shafawi` | a sakin meem | the following letter | may | names the meem's own sound | unchanged |
 | `ikhfaa_shafawi` | a sakin meem | the following baa | always | the meem is held | unchanged |
@@ -58,7 +60,7 @@ with a shadda and is `ghunnah_mushaddadah`.
 
 ### 2.2 Adjacent consonants
 
-| Rule | Source | Target | Crosses | On the sound | Recited |
+| Rule | Source | Trigger | Crosses | On the sound | Recited |
 |---|---|---|---|---|---|
 | `idgham_mutamathilayn` | the first of two identical consonants | the second | may | merges into the host | rows 9 and 20 |
 | `idgham_mutaqaribayn` | the first of two close consonants | the second | may | merges into the host | rows 9 and 20 |
@@ -73,10 +75,10 @@ row 10 deletes and adds nothing, where row 20 has a shadda to add.
 
 ### 2.3 Length
 
-The source is the unit whose vowel the rule lengthens. The target is the unit
-whose presence caused it, where one did.
+The source is the unit whose vowel the rule lengthens. The trigger is what
+caused it, and for two of them it is the boundary plan rather than a unit.
 
-| Rule | Source | Target | Crosses | On the sound | Recited |
+| Rule | Source | Trigger | Crosses | On the sound | Recited |
 |---|---|---|---|---|---|
 | `madd_tabii` | the unit whose vowel is long | - | never | sets the length | rows 18, 19, 29, 30 |
 | `madd_wajib_muttasil` | the unit whose vowel is long | the hamza in the same word | never | sets the length | as above |
@@ -91,7 +93,7 @@ its waw or yaa is silent and the vowel before it stays short.
 
 ### 2.4 Release
 
-| Rule | Source | Target | Crosses | On the sound | Recited |
+| Rule | Source | Trigger | Crosses | On the sound | Recited |
 |---|---|---|---|---|---|
 | `qalqala_sughra` | a qalqala letter whose vowel is absent | - | never | adds a release beside the consonant | unchanged |
 | `qalqala_kubra` | the same, word-final at a stop | - | never | adds a release | unchanged |
@@ -103,7 +105,7 @@ still states its own realization beside it.
 
 ### 2.5 Colour and manner
 
-| Rule | Source | Target | Crosses | On the sound | Recited |
+| Rule | Source | Trigger | Crosses | On the sound | Recited |
 |---|---|---|---|---|---|
 | `tafkheem` | the unit whose sound is heavy | - | never | makes the sound heavy, and the vowel of the same unit with it | unchanged |
 | `tarqeeq` | the unit whose raa is light | - | never | names the sound | unchanged |
@@ -113,19 +115,18 @@ still states its own realization beside it.
 
 `tafkheem` is the only rule that names more than one sound of its own unit: the
 consonant is heavy and the vowel it governs is heavy with it, and both are
-sounds of the source. It has no target, because nothing outside the unit is
-part of why it fired.
+sounds of the source. Its trigger is inside the unit, which is why the column
+is empty.
 
 ### 2.6 Boundary
 
-| Rule | Source | Target | Crosses | On the sound | Recited |
+| Rule | Source | Trigger | Crosses | On the sound | Recited |
 |---|---|---|---|---|---|
 | `hamza_wasl_start` | the word-initial unit whose consonant sounds only when started on | - | never | hosts the consonant and its vowel | rows 15 and 26 |
 | `hamza_wasl_elision` | the same unit, not started on or not word-initial | - | never | silences both parts | row 8 |
 | `iltiqa_kasra` | the unit the inserted vowel is anchored on | - | always | inserts a vowel no unit owns | row 16 |
 | `pausal_sukun` | the unit whose part the stop takes | - | never | silences the part | rows 1, 2, 14, 21, 22, 23 |
 | `taa_marbuta_pausal` | the taa marbuta unit | - | never | realizes the letter as a haa | row 24 |
-| `sakt` | the last unit of the word `sakt_after` names | - | never | produces nothing | unchanged |
 
 `pausal_sukun` reaches the most catalogue rows of any rule, and the reason is
 that it is one event with several spellings: the haraka it takes may be a
@@ -139,7 +140,7 @@ section 6.
 
 ### 2.7 Substitution and orthography
 
-| Rule | Source | Target | Crosses | On the sound | Recited |
+| Rule | Source | Trigger | Crosses | On the sound | Recited |
 |---|---|---|---|---|---|
 | `ibdal_hamza` | the unit whose quiescent hamza the reading substitutes | - | never | the letter is realized as the vowel letter of the vowel before it | row 25 |
 | `orthographic_silence` | see section 5 | - | never | produces nothing | rows 5 and 6 |
@@ -208,7 +209,7 @@ adapter's business, and a script that marks nothing owes its adapter the
 derivation. Uthmani's is correct today.
 
 The instance owns no attribution, because there is no unit to silence, so it
-joins `ishmam` and `sakt` as a rule that produces nothing. The seat is in its
+joins `ishmam` as a rule that produces nothing. The seat is in its
 pairing's `silent` and the pairing's `rules` names this instance. That pairing
 is the only place the instance is reachable from, which makes it the one rule
 whose entire relation to the document is at the letter level.
@@ -223,7 +224,7 @@ over them.
 ## 6. The letter level and the phoneme level
 
 A rule can be read two ways. At the **phoneme level** it is `source` and
-`target`, and the attribution and modifier edges that reach the sounds those
+`host`, and the attribution and modifier edges that reach the sounds those
 units produce. At the **letter level** it is a member of some pairing's
 `rules`, reached from the glyphs.
 

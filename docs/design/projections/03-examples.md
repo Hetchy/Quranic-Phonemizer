@@ -26,7 +26,7 @@ One row per part of a unit, in reading order.
 | sound | the token, or `-` for a part that is written and not said |
 | on the sound | the rule that coloured, lengthened or named the sound |
 
-**A rule appears on the row of its `source`, never its `target`.** So a lam
+**A rule appears on the row of its `source`, never its host.** So a lam
 shamsiyyah is written against the lam that disappears, not against the letter
 that doubles.
 

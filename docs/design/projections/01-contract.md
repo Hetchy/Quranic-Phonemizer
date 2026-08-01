@@ -36,6 +36,38 @@ unit to silence, so its pairing names the rule instead.
 Section 6 is the whole of `alignment`. Everything past section 4 is for a
 consumer that needs a join no method offers.
 
+### 1.1 The call
+
+```python
+mappings(
+    ref,                      # "2:255", "2:255:3-2:256:1"
+    riwayah="hafs",
+    script="uthmani",
+    stops=(),                 # where recitation pauses
+    starts=(),                # where it begins, when not at the start of ref
+    variant=VariantSelection(),
+    tanween="explicit",       # 06-two-texts section 6
+) -> Mappings
+```
+
+`stops` and `starts` are word locations. A request always stops after its last
+word and starts at its first, so a passage read alone is complete without
+naming either. Everything else about the reading follows from them: which madd
+reverts, which noon merges, which vowel the pause takes.
+
+The two things that raise rather than guess: a `ref` outside the corpus, and a
+`ref` that clips a word the riwayah's data addresses as a whole. A stop asked
+for where the mushaf forbids one is not an error, because the reader is
+allowed to be wrong and the document should say what that reading sounds like.
+
+### 1.2 Names a person reads
+
+Every rule has a display name and a one-line description, in English and in
+Arabic, and they are part of this contract rather than a consumer's table.
+`ikhfaa_haqiqi` is the identifier; "Ikhfaa Haqiqi" and "the noon is hidden and
+hummed into the letter that follows" is what a legend prints. A consumer that
+writes its own is free to; a consumer that does not should not have to.
+
 ---
 
 ## 2. The four things a consumer wants, and their six pairings
@@ -262,29 +294,31 @@ spelling policy to choose: the recited text is what recitation writes, once.
 | Name | Means |
 |---|---|
 | `token` | how this sound is written in the chosen notation |
-| `kind` | `consonant` · `vowel` · `ghunnah` · `qalqala` |
+| `kind` | `consonant` · `vowel` · `qalqala` |
 
 | `kind` | Fields |
 |---|---|
 | `consonant` | `letter`, `geminate`, `emphatic`, `ghunnah` |
 | `vowel` | `quality`, `long`, `emphatic` |
-| `ghunnah` | `emphatic` |
 | `qalqala` | `degree` |
 
-A ghunnah is the hum an ikhfaa or an iqlab leaves where the noon was. It
-belongs to no letter, which is why it is its own kind; `ghunnah` on a
-consonant means the letter is held instead. It has no place of articulation:
-one value would be a place and the other would be "wherever the next letter
-is", and which of the two a reciter produces is a khilaf the shipped data does
-not yet site. There is one kind of release and it is the qalqala, so the
-kind is named for it; `degree` is `sughra`, `kubra` or `akbar`, and the rule
-of the same name is where the degree was decided.
+**A ghunnah is not a kind.** It is a consonant said through the nose, and the
+consonant is always a real letter: an ikhfaa hums the noon it fires on, so the
+sound is that noon, and an idgham holds the letter its noon merged into, so
+the sound is that letter. One field, one referent, and no sound that belongs
+to no letter.
 
-**The consonant's cardinality.** `ghunnah` is true only where `geminate` is,
-because a held consonant is one a merger doubled, and it occurs on four
-letters: noon, meem, waw, yaa. Every other combination of the three booleans
-is attested, except `ghunnah` with `emphatic`, which is the heavy ghunnah of
-[04-open-questions](04-open-questions.md) section 1.
+`geminate` tells the two apart. A hummed noon is not doubled and an idgham's
+host is, which is also why the hum needs no place of articulation: it is the
+noon, and where a reciter puts it is a khilaf the shipped data does not site.
+
+`ghunnah` occurs on four letters, noon, meem, waw and yaa. With `emphatic` it
+is the heavy ghunnah of an ikhfaa before an istilaa letter, which the ikhfaa
+sets, because the ikhfaa is already the rule that read the following letter.
+
+There is one kind of release and it is the qalqala, so the kind is named for
+it; `degree` is `sughra`, `kubra` or `akbar`, and the rule of the same name is
+where the degree was decided.
 
 A sound has no `word` field: its word is the word of its primary origin.
 
@@ -294,16 +328,27 @@ A sound has no `word` field: its word is the word of its primary origin.
 |---|---|
 | `rule` | section 7 |
 | `source` | the unit the rule is about, or absent |
-| `target` | the unit it reaches, or absent |
+| `host` | the unit that keeps the sound, where one is shared |
 | `labels` | teaching names for this instance, [07-rules](07-rules.md) |
 
-`source` is absent for the two rules that have no subject unit: an
-`orthographic_silence`, which is about a letter no unit answers to, and an
-`iltiqa_kasra`, whose sound is an insertion between two units and belongs to
-neither. Everywhere else `source` means the same thing, and a rule is read
-against it: a lam shamsiyyah belongs to the lam that disappears, not to the
-letter that doubles. Nothing in the corpus has a third participant. There is no family and no phase: the grouping in section 7 is for
-reading, and a colouring scheme is a convention a consumer picks.
+A rule is read against its `source`: a lam shamsiyyah belongs to the lam that
+disappears, not to the letter that doubles. `source` is absent for the two
+rules with no subject unit: an `orthographic_silence`, which is about a letter
+no unit answers to, and an `iltiqa_kasra`, whose sound is inserted between two
+units and belongs to neither.
+
+**A trigger is not a participant.** What a rule read in order to fire is data
+on a node, and where that data sits is not the same from rule to rule: the
+letter after, for an ikhfaa; the letter before, for a raa's colour; the unit's
+own vowel, for a qalqala; the boundary plan, for a madd arid or a hamza wasl.
+A field naming it would have to mean a different thing in each family, which
+is what `target` was doing.
+
+So `host` is the only second participant, it is present only where two units
+share one sound, and that is the mergers. Nothing has a third.
+
+There is no family and no phase: the grouping in section 7 is for reading, and
+a colouring scheme is a convention a consumer picks.
 
 ---
 
@@ -434,8 +479,13 @@ A rule name says what happened, never what triggered it: the trigger is data
 on a node. Noon and tanween ikhfaa are one rule, and `origin` says which.
 
 **The nasal letters.** `ikhfaa_haqiqi` · `iqlab` · `idgham_bi_ghunnah` ·
-`idgham_bila_ghunnah` · `izhar_halqi` · `izhar_mutlaq` ·
-`ghunnah_mushaddadah` · `izhar_shafawi` · `ikhfaa_shafawi` · `idgham_shafawi`
+`idgham_bila_ghunnah` · `izhar` · `ghunnah_mushaddadah` · `izhar_shafawi` ·
+`ikhfaa_shafawi` · `idgham_shafawi`
+
+`izhar` is one rule. Saying the noon plainly before a throat letter and saying
+it plainly before the waw or yaa of a word it shares is one outcome with two
+triggers, and a name may not carry a trigger. The meem's three keep their own
+names because the meem's outcomes are its own.
 
 **Adjacent consonants.** `idgham_mutamathilayn` · `idgham_mutaqaribayn` ·
 `idgham_mutajanisayn_kamil` · `idgham_mutajanisayn_naqis` · `lam_shamsiyyah` ·
@@ -449,7 +499,11 @@ on a node. Noon and tanween ikhfaa are one rule, and `origin` says which.
 **Colour and manner.** `tafkheem` · `tarqeeq` · `imala` · `tashil` · `ishmam`
 
 **Boundary.** `hamza_wasl_start` · `hamza_wasl_elision` · `iltiqa_kasra` ·
-`pausal_sukun` · `taa_marbuta_pausal` · `sakt`
+`pausal_sukun` · `taa_marbuta_pausal`
+
+Sakt is not here. It is a silence the reciter holds between two words, it
+produces no sound and reaches no unit, and `Word.sakt_after` already says
+where it falls. A rule for it would name a boundary twice.
 
 **Substitution.** `ibdal_hamza`
 
@@ -535,74 +589,85 @@ changes.
    a slot was assimilated from.
 8. **Delete the plain rule and make `by` optional.**
 9. **Rename the parts** to `consonant` and `vowel` throughout.
-10. **`Participants` are labelled.** A rule's units are a source and a target,
+10. **The ghunnah stops being a sound of its own.** A hummed noon is a
+    consonant with `ghunnah`, so the standalone nasal type goes and the
+   notation gains one key: a noon with `ghunnah` and no gemination is the hum
+   it already writes, and the same noon geminate is the held letter it
+    already writes. Every token stays as it is.
+11. **`izhar` replaces `izhar_halqi` and `izhar_mutlaq`.** One outcome, two
+    triggers, and a name may not carry a trigger.
+12. **Sakt stops being a rule.** `Word.sakt_after` is where it lives.
+13. **An ikhfaa sets its ghunnah's weight.** The rule reads the following
+    letter already; before an istilaa letter the hum is heavy, and the
+    `Recolours` edge is the rule's own.
+14. **`Participants` are labelled.** A rule's units are a source and a host,
     and today the pair is positional.
 
 **Facts the model drops**
 
-11. **Marks that reach no unit.** The largest group is the alif seating a
+15. **Marks that reach no unit.** The largest group is the alif seating a
     fathatan, skipped although it sounds at a pause and every iwad case needs
     it. Then the superscript alif over a written carrier, the sakt mark, the
     combining hamza above, and the rectangular zero.
-12. **The separator between words is a glyph.** A space inside a word's own
+16. **The separator between words is a glyph.** A space inside a word's own
     text is emitted; the one between two words is not, so the concatenation
     law passes only on a single-word verse.
-13. **One scalar, one glyph.** One verse emits a combining mark twice, and
+17. **One scalar, one glyph.** One verse emits a combining mark twice, and
     duplicate spelling edges exist for every alef wasla and every tatweel.
-14. **One notion of structural, and it is the `Structural` edge.** The class
+18. **One notion of structural, and it is the `Structural` edge.** The class
     and the edge disagree in both directions: a tatweel is classed structural
     and carries no edge, a stop sign carries the edge and is classed as
     advice. Both move to the edge, and section 4.3 follows: `stop_sign` keeps
     its own `kind` and takes no pairing, and a tatweel takes none either.
-15. **The dagger and its carrier are reversed.**
-16. **`length_carrier` is a class nothing assigns.** No scalar classifies as
+19. **The dagger and its carrier are reversed.**
+20. **`length_carrier` is a class nothing assigns.** No scalar classifies as
     one, and the recited spelling is where a length carrier is added.
-17. **Sakt is a word fact and is evidenced by nothing.** The unit-level fact
+21. **Sakt is a word fact and is evidenced by nothing.** The unit-level fact
     exists in the model and no glyph supplies it.
 
 **Rules with no producer**
 
-18. **Madd rules for their ordinary cases.** `madd_tabii` is minted only on
+22. **Madd rules for their ordinary cases.** `madd_tabii` is minted only on
     the pausal glide; an ordinary long vowel, a silah vowel and a stopped
     seven-alif produce none.
-19. **`orthographic_silence` is two rules.** A letter never said and a letter
+23. **`orthographic_silence` is two rules.** A letter never said and a letter
     said only at a pause are not one outcome, and `letter` does not tell them
     apart: the same alif is one in one word and the other in another. What
     separates them is the sign the script wrote. Separately, the seats are
     identified but the field naming the unit each shows against is written and
     never read, and one seat class reaches no spelling edge at all.
-20. **The vocabulary is short two rules**, both mandatory and both corpus-wide:
+24. **The vocabulary is short two rules**, both mandatory and both corpus-wide:
     dropping a word-initial shadda when a word is started on, and the role a
     word-final yaa, waw or alif maqsura takes at a pause. Neither has a name,
     neither has a converse trigger, and [06-two-texts](06-two-texts.md) is
     where the transformation each performs is written down.
-21. **The iltiqa helping vowel** is constructed nowhere. It is one insertion,
+25. **The iltiqa helping vowel** is constructed nowhere. It is one insertion,
     at a handful of sites, and it is the only sound in the design no unit owns.
-22. **Split the boundary rules to match the names.** One code rule covers
+26. **Split the boundary rules to match the names.** One code rule covers
     `pausal_sukun` and `taa_marbuta_pausal`; another mints an iwad name the
     contract does not have.
-23. **A colour is not minted for a part a complete merger consumed.** The
+27. **A colour is not minted for a part a complete merger consumed.** The
     letter has no sound of its own to be heavy, which is the whole difference
     between a complete idgham and a partial one. The producer already declines
     this for the vowel and must decline it for the consonant too.
-24. **Release attribution moves to the consonant** - and the fill step reads
+28. **Release attribution moves to the consonant** - and the fill step reads
     any realization as claiming the part, so moving only the effect deletes
     the consonant's own sound. Every release in the corpus sits on the vowel
     today, so this is not a repair at the margin.
 
 **Machinery**
 
-25. **A writer for the recited text.** The one that exists takes a Score, so
+29. **A writer for the recited text.** The one that exists takes a Score, so
     it has no boundary plan and no performance and cannot spell a pausal,
     merged or started-on form. `rendered` needs glyph records carrying
     `from_glyphs` and their own pairings.
-26. **Total glyph pairing.** The join saying which outcomes each glyph
+30. **Total glyph pairing.** The join saying which outcomes each glyph
     presents, distinguishing a sounded dagger from its silent carrier and a
     performance deletion from orthographic zero.
-27. **Sub-verse requests.** A request clipping a ledger-addressed word raises
+31. **Sub-verse requests.** A request clipping a ledger-addressed word raises
     rather than building.
-28. **Continuous assembly** overlaps by two words, because cross-word
+32. **Continuous assembly** overlaps by two words, because cross-word
     lookahead reaches past a one-slot word.
-29. **Request orchestration.** Resolve `(ref, boundaries, variant)`, build,
+33. **Request orchestration.** Resolve `(ref, boundaries, variant)`, build,
     perform, and assemble one index space. Internal starts, arbitrary stops,
     sakt and cross-verse joins use the same path.
