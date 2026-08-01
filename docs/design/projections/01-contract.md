@@ -69,7 +69,10 @@ writes its own is free to; a consumer that does not should not have to.
 
 ---
 
-## 2. The four things a consumer wants, and their six pairings
+## 2. Two calls, and why they cover everything
+
+A consumer wants four things and every question is a relationship between two
+of them.
 
 | | |
 |---|---|
@@ -78,7 +81,9 @@ writes its own is free to; a consumer that does not should not have to.
 | **sound** | what is heard |
 | **rules** | what happened, and why |
 
-Every question is a relationship between two of them.
+Four things make six pairings. This table is a coverage proof and not a menu:
+five of the six are columns of one row of one table, and the sixth is the rule
+list.
 
 | Pairing | Answered by |
 |---|---|
@@ -86,13 +91,25 @@ Every question is a relationship between two of them.
 | script - rules | `alignment(text="source")`, `pairing.rules` |
 | recited - sound | `alignment(text="recited")`, `pairing.sounds` |
 | recited - rules | `alignment(text="recited")`, `pairing.rules` |
+| script - recited | `pairing.rendered` beside `pairing.glyphs`, on one row |
 | sound - rules | `m.rules`, and `by` on every attribution and modifier |
-| **script - recited** | `pairing.rendered` beside `pairing.glyphs`, on one row |
 
-The last is what a diff view or a two-line teleprompter needs, and the only
-one many-to-many in both directions: a recited cluster can cover two source
-glyphs, and one source glyph can render as two. It is a column on the same
-row, not a fifth call.
+**So there are two calls and not six**, and the reason is not economy. A
+pairing given its own call is a second traversal of one join, and a consumer
+that wants two of them has to rejoin the results by index - which is the join
+this document exists to have done already. Co-highlighting is the plain case:
+it reads `sounds` and `shares` off one row, and no arrangement in which those
+arrive from two calls can do it without the consumer rebuilding the row.
+
+The script-recited pairing is the one that settles it. It is many-to-many in
+both directions, because a recited cluster can cover two source glyphs and one
+source glyph can render as two, so there is no key a separate call could
+return it against. It is a column beside `glyphs`, which is what a diff view
+or a two-line teleprompter reads.
+
+`text` and `grouping` are the two axes and not two more calls: both arrays are
+always populated, and `text` says only which of them the rows partition.
+Partitioning both at once is what the many-to-many forbids.
 
 ---
 
