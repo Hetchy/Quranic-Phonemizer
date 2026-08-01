@@ -443,9 +443,15 @@ class Pairing:
     sounds:   tuple[int, ...]   # the sounds this pairing owns
     shares:   tuple[int, ...]   # sounds it presents that another owns
     silent:   tuple[int, ...]   # its glyphs that are written and not said
-    rules:    tuple[int, ...]
+    rules:    tuple[int, ...]   # every rule this pairing shows
     after:    int | None        # set only on a gap pairing
 ```
+
+`rules` is total. Every rule a consumer would colour on these glyphs is in
+it, whether the rule silenced the position or coloured the sound it made,
+because a colouring consumer asks what happened here and not through which
+edge family it happened. Which part or sound each one reached is on the
+edges.
 
 `text` selects which array is partitioned; both are always populated, which is
 what makes the script-recited pairing a column rather than a call.
@@ -646,12 +652,11 @@ changes.
 22. **Madd rules for their ordinary cases.** `madd_tabii` is minted only on
     the pausal glide; an ordinary long vowel, a silah vowel and a stopped
     seven-alif produce none.
-23. **`orthographic_silence` is two rules.** A letter never said and a letter
-    said only at a pause are not one outcome, and `letter` does not tell them
-    apart: the same alif is one in one word and the other in another. What
-    separates them is the sign the script wrote. Separately, the seats are
-    identified but the field naming the unit each shows against is written and
-    never read, and one seat class reaches no spelling edge at all.
+23. **`orthographic_silence`.** The seats are identified, but the field
+    naming the unit each shows against is written and never read, and one
+    seat class reaches no spelling edge at all. It stays one rule: a letter
+    never said and a seat silent only when joined are the same outcome, and
+    the boundary tells them apart without a second name.
 24. **The vocabulary is short two rules**, both mandatory and both corpus-wide:
     dropping a word-initial shadda when a word is started on, and the role a
     word-final yaa, waw or alif maqsura takes at a pause. Neither has a name,
