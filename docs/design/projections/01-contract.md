@@ -166,7 +166,7 @@ writes, and one muqattaat glyph makes several.
 | `letter` | the twenty-eight, plus `hamza` and `taa_marbuta` |
 | `consonant` | 4.2.1 |
 | `vowel` | 4.2.2 |
-| `origin` | `written` · `letter_name` · `tanween` |
+| `origin` | `written` · `muqattaat` · `tanween` |
 
 `letter` is phonological, so there is no alif maqsura and no alef wasla -
 those are spellings. `origin` is one field with three values rather than two
@@ -249,7 +249,7 @@ needs no second list of source glyphs: it reads them through here.
 | `small_vowel` | the dagger alif, the mini waw and yaa |
 | `madd_sign` | the maddah |
 | `silence_sign` | the round and rectangular zeros |
-| `tajweed_mark` | the imala, ishmam and tashil marks, and the iqlab meem |
+| `tajweed_mark` | the imala, ishmam and tashil marks |
 | `stop_sign` | the mushaf's advice |
 | `structural` | space, verse marker, tatweel |
 
@@ -262,21 +262,23 @@ spelling policy to choose: the recited text is what recitation writes, once.
 | Name | Means |
 |---|---|
 | `token` | how this sound is written in the chosen notation |
-| `kind` | `consonant` · `vowel` · `ghunnah` · `release` |
+| `kind` | `consonant` · `vowel` · `ghunnah` · `qalqala` |
 
 | `kind` | Fields |
 |---|---|
 | `consonant` | `letter`, `geminate`, `emphatic`, `ghunnah` |
 | `vowel` | `quality`, `long`, `emphatic` |
 | `ghunnah` | `emphatic` |
-| `release` | `kind` |
+| `qalqala` | `degree` |
 
 A ghunnah is the hum an ikhfaa or an iqlab leaves where the noon was. It
 belongs to no letter, which is why it is its own kind; `ghunnah` on a
 consonant means the letter is held instead. It has no place of articulation:
 one value would be a place and the other would be "wherever the next letter
 is", and which of the two a reciter produces is a khilaf the shipped data does
-not yet site. `release.kind` is `qalqala`.
+not yet site. There is one kind of release and it is the qalqala, so the
+kind is named for it; `degree` is `sughra`, `kubra` or `akbar`, and the rule
+of the same name is where the degree was decided.
 
 **The consonant's cardinality.** `ghunnah` is true only where `geminate` is,
 because a held consonant is one a merger doubled, and it occurs on four

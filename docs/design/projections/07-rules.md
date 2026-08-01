@@ -44,13 +44,17 @@ modifiers, and producing nothing is a rule that owns neither.
 | `izhar_mutlaq` | a sakin noon | the yaa or waw after it in the same word | never | names the noon's own sound | unchanged |
 | `ghunnah_mushaddadah` | a geminate noon or meem | - | never | names its own held sound | unchanged |
 | `izhar_shafawi` | a sakin meem | the following letter | may | names the meem's own sound | unchanged |
-| `ikhfaa_shafawi` | a sakin meem | the following baa | may | the meem is held | unchanged |
-| `idgham_shafawi` | a sakin meem | the following meem | may | the meem merges into the host, which is held | rows 9 and 20 |
+| `ikhfaa_shafawi` | a sakin meem | the following baa | always | the meem is held | unchanged |
+| `idgham_shafawi` | a sakin meem | the following meem | always | the meem merges into the host, which is held | rows 9 and 20 |
 
 `iqlab` substitutes a unit and does not merge one: the baa is untouched and no
-sound is shared. The recited text writes the rasm unchanged, because what is
-said is a hum and the noon with its small meem is already the spelling for a
-hummed noon; writing a plain meem would assert a consonant nobody says.
+sound is shared. The recited text writes the rasm unchanged. The Uthmani rasm
+has no iqlab mark, so nothing in the written word says the hum is coming, and
+writing a plain meem would assert a consonant nobody says.
+
+The meem's three rules never fire inside a word: a quiescent meem meets a baa
+or a meem only across a boundary, and a meem doubled inside a word is written
+with a shadda and is `ghunnah_mushaddadah`.
 
 ### 2.2 Adjacent consonants
 
@@ -154,7 +158,7 @@ stated per rule rather than reasoned about.
 | `idgham_mutajanisayn_kamil` | the second of the two | may |
 | `idgham_bi_ghunnah` | the following letter | always |
 | `idgham_bila_ghunnah` | the following lam or raa | always |
-| `idgham_shafawi` | the following meem | may |
+| `idgham_shafawi` | the following meem | always |
 | `lam_shamsiyyah` | the following letter | never |
 
 The host owns the sound and the source has a `MergedInto` edge to it. Across a
@@ -233,28 +237,26 @@ is a defect to be repaired.
 
 | | The divergence | Phoneme level | Letter level |
 |---|---|---|---|
-| 1 | **many units, one glyph** - a muqattaat opening | the rule's source is a unit whose `origin` is `letter_name`, and a spelled name has several | the name is one cluster row, so its `rules` names every instance of every unit of the name at once. There is no finer relation, and a unit carries no offset into the compact glyph |
+| 1 | **many units, one glyph** - a muqattaat opening | the rule's source is a unit whose `origin` is `muqattaat`, and a spelled name has several | one glyph spells one whole name, and the sounds under it are ordered, so a rule reaches the sounds it made and not a range of characters |
 | 2 | **one unit, no glyph** - the tanween's noon | the noon is the `source` of every noon rule when `origin` is `tanween` | the instance is reached through the tanween mark, which also supplies the previous unit's vowel. One scalar shows two units' facts, so colouring the noon and colouring the vowel colour the same character |
 | 3 | **one sound, two words** - a cross-word merger | `source` and host are units in different words, and the host's word owns the sound | the instance appears in two pairings: the source glyph's, where the glyph is `silent`, and the host's, where the sound is owned. `shares` is what joins them |
 | 4 | **a sound with no letter** - a release | the release is a separate sound hosted on the consonant part, beside that part's own realization | it has no glyph, so the base letter's pairing owns two sounds for one part, and the recited text writes nothing for it |
 | 5 | **a sound with no unit** - `iltiqa_kasra` | an insertion with an anchor, and the only one in the design | there is no source glyph, so the sound takes a gap pairing under `text="source"` and an ordinary one under `text="recited"`. The only rule whose letter-level relation differs between the two texts |
 | 6 | **a glyph with no unit** - `orthographic_silence` | nothing to reach: no unit, no sound, no attribution | the seat's pairing carries the instance and the glyph. The exact inverse of case 5, and the relation exists only on the source side |
 
-Case 1 is the sharpest, and it is what a consumer pays for. Colouring a rule on
-the page means painting a range of characters. For every ordinary rule the
-range is the glyphs of a pairing. For a muqattaat opening the range would have
-to be a part of one compact glyph, and no fact in the document says which part:
-a unit has an ordinal and no offset, and the cluster row is the whole name. A
-consumer that wants to colour the madd inside `لَام` without colouring the
-letter before it has to write the offsets down by hand, once per opening, and
-keep them in step with the script. This document does not fix that. It states
-it, so that a consumer meets it as a property of the domain rather than as a
-missing feature.
+Case 1 is where a consumer expects to be stuck and is not. One compact glyph
+spells one letter name, so the pairing is per glyph and the sounds under it are
+ordered: `alif` is five sounds under the first glyph of a three-glyph opening,
+and the `madd_lazim` of `laam` reaches that name's vowel and nothing else. A
+consumer colouring by sound has the relation already. Only one that insists on
+painting a sub-range of the compact glyph has to invent offsets, and the
+recited text is where that consumer should be reading, because there the name
+is spelled out and every sound has a glyph of its own.
 
-Case 3 is the one that surprises. A consumer reading the phoneme level sees a
-sound in the second word. A consumer reading the letter level sees a coloured
-letter in the first. Both are right, and a highlight that follows only one of
-them will light half the rule.
+Case 3 is the one that surprises. The sound is in the second word and it is
+owned there. The letter level sees the rule twice: once on the first word's
+glyph, which is `silent`, and once on the second word's, which owns the sound.
+A highlight that follows only one of them lights half the rule.
 
 Cases 5 and 6 together are why the recited text has its own pairings rather
 than a list of edits over the source text: one rule is invisible to the source

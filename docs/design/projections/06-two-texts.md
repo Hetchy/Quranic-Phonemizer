@@ -120,7 +120,6 @@ whose trigger is the next word goes as soon as the plan stops. Both are
 | 1 | the tanween on a taa marbuta goes, and leaves no alif | a stopped word ending in a nunated taa marbuta | performance | stopped | `pausal_sukun` |
 | 2 | the silah mark goes, and any maddah on it | a stopped word whose vowel is long joined and absent stopped | performance | stopped | `pausal_sukun` |
 | 3 | the maddah over a madd the stop reverts goes | a stopped word whose final vowel carried a maddah for `madd_jaiz_munfasil` | performance | stopped | **-** |
-| 4 | the iqlab mark goes | a stopped word carrying a nunated iqlab | performance | stopped | **-** |
 | 5 | a letter the rasm carries and recitation never says goes | the canonical no-sound verdict | orthographic | none | `orthographic_silence` |
 | 6 | the same letter goes when the plan joins, and stays when it stops | the verdict, on a unit whose vowel is short joined and long stopped | orthographic | joined | `orthographic_silence` |
 | 7 | the silence sign goes | a round or a rectangular zero | orthographic | none | **-** |
@@ -176,7 +175,6 @@ than under `spell out` because there is nothing in the rasm to spell out from.
 | 24 | a taa marbuta becomes a haa | a stopped word ending in taa marbuta | performance | stopped | `taa_marbuta_pausal` |
 | 25 | a quiescent hamza becomes a vowel letter | the reading substitutes it | orthographic | none | `ibdal_hamza` |
 | 26 | the hamza wasl seat becomes the hamza its vowel calls for | started on | performance | started | `hamza_wasl_start` |
-| 27 | the imala mark stands for the vowel and its carrier | an imala mark | orthographic | none | `imala` |
 
 Row 24 changes the glyph. The pausal realization of a taa marbuta is a haa, and
 the recited text writes what is said, so it writes a haa. The taa marbuta in
@@ -286,9 +284,9 @@ place in this catalogue, and a reader comparing the two should know which.
 | Its transformation | The Uthmani position |
 |---|---|
 | an alif maqsura is respelled as a yaa where the letter sounds as a yaa | **no analogue.** Uthmani writes `ى` throughout, and the role is a fact of the unit. Row 32 is the general case |
-| a dagger alif is inserted into the divine name | **no analogue.** Uthmani writes the dagger. Row 18 is the general fact, and it is an insertion because no carrier follows, not because the script omitted one |
+| a dagger alif is inserted into the divine name | the same fact. The Uthmani rasm writes no dagger on this word either, so row 18 is an insertion in both scripts |
 | an iqlab is written as a plain vowel plus a small meem | the same fact with a different encoding: Uthmani writes the tanween and the small meem |
-| a tatweel seats a dagger alif | cosmetic; Uthmani seats it on the letter |
+| a tatweel seats a dagger alif | cosmetic; Uthmani seats its daggers on the letter |
 | precomposed hamza seats are decomposed | encoding only |
 | a stop sign attaches with no preceding space | cosmetic |
 | a deletion is written as an invisible combining mark rather than removing the character | **not a domain fact at all.** It exists so that string length stays stable and colour offsets keep pointing at the right characters |
