@@ -120,18 +120,18 @@ whose trigger is the next word goes as soon as the plan stops. Both are
 | 1 | the tanween on a taa marbuta goes, and leaves no alif | a stopped word ending in a nunated taa marbuta | performance | stopped | `pausal_sukun` |
 | 2 | the silah mark goes, and any maddah on it | a stopped word whose vowel is long joined and absent stopped | performance | stopped | `pausal_sukun` |
 | 3 | the maddah over a madd the stop reverts goes | a stopped word whose final vowel carried a maddah for `madd_jaiz_munfasil` | performance | stopped | **-** |
-| 5 | a letter the rasm carries and recitation never says goes | the canonical no-sound verdict | orthographic | none | `orthographic_silence` |
-| 6 | the same letter goes when the plan joins, and stays when it stops | the verdict, on a unit whose vowel is short joined and long stopped | orthographic | joined | `orthographic_silence` |
-| 7 | the silence sign goes | a round or a rectangular zero | orthographic | none | **-** |
-| 8 | the hamza wasl seat goes | not started on, or not word-initial | performance | joined | `hamza_wasl_elision` |
-| 9 | the merged-away consonant goes, with its sukun | joined, an idgham fires | performance | joined | the idgham rule |
-| 10 | the article lam goes, with its sukun | the article before a sun letter | performance | none | `lam_shamsiyyah` |
-| 11 | the word-initial shadda goes | started on a word whose first shadda is the previous word's idgham trace | performance | started | **-** |
-| 12 | the carrier of a shortened long vowel goes | joined, two sakins meet | performance | joined | `iltiqa_shortening` |
-| 13 | the verse marker and the tatweel go | a structural glyph | orthographic | none | **-** |
+| 4 | a letter the rasm carries and recitation never says goes | the canonical no-sound verdict | orthographic | none | `orthographic_silence` |
+| 5 | the same letter goes when the plan joins, and stays when it stops | the verdict, on a unit whose vowel is short joined and long stopped | orthographic | joined | `orthographic_silence` |
+| 6 | the silence sign goes | a round or a rectangular zero | orthographic | none | **-** |
+| 7 | the hamza wasl seat goes | not started on, or not word-initial | performance | joined | `hamza_wasl_elision` |
+| 8 | the merged-away consonant goes, with its sukun | joined, an idgham fires | performance | joined | the idgham rule |
+| 9 | the article lam goes, with its sukun | the article before a sun letter | performance | none | `lam_shamsiyyah` |
+| 10 | the word-initial shadda goes | started on a word whose first shadda is the previous word's idgham trace | performance | started | **-** |
+| 11 | the carrier of a shortened long vowel goes | joined, two sakins meet | performance | joined | `iltiqa_shortening` |
+| 12 | the verse marker and the tatweel go | a structural glyph | orthographic | none | **-** |
 
 Rows 5 and 6 are one rule and two behaviours, and `letter` does not tell them
-apart: the same alif is row 5 in one word and row 6 in another. What separates
+apart: the same alif is row 4 in one word and row 5 in another. What separates
 them is the sign the rasm wrote over it, which
 [07-rules](07-rules.md) section 5 places with the script adapter rather than
 with the rule.
@@ -159,13 +159,13 @@ already uses on a written noon.
 
 | | Transformation | Trigger | Kind | Boundary | Owner |
 |---|---|---|---|---|---|
-| 14 | a sukun is written on a letter the rasm left bare | a stopped word whose final consonant the rasm wrote bare | performance | stopped | `pausal_sukun` |
-| 15 | the helping haraka is written | started on, a consonant that sounds only when started on | performance | started | `hamza_wasl_start` |
-| 16 | the helping kasra is written, and the noon it follows | joined, two sakins meet after a tanween | performance | joined | `iltiqa_kasra` |
-| 17 | an alif is written where the rasm has no seat for the fathatan to lengthen | a stopped word ending in a nunated hamza | performance | stopped | a madd rule |
-| 18 | the long a of the divine name is written | that lam, which no carrier follows | orthographic | none | a madd rule |
-| 19 | a carrier is written for a word-final long a the rasm writes bare | a stopped word ending in a bare alif maqsura that sounds as a long a | performance | stopped | a madd rule |
-| 20 | a shadda is written on an idgham host the rasm does not double | joined, a cross-word idgham | performance | joined | the idgham rule |
+| 13 | a sukun is written on a letter the rasm left bare | a stopped word whose final consonant the rasm wrote bare | performance | stopped | **-** |
+| 14 | the helping haraka is written | started on, a consonant that sounds only when started on | performance | started | `hamza_wasl_start` |
+| 15 | the helping kasra is written, and the noon it follows | joined, two sakins meet after a tanween | performance | joined | `iltiqa_kasra` |
+| 16 | an alif is written where the rasm has no seat for the fathatan to lengthen | a stopped word ending in a nunated hamza | performance | stopped | a madd rule |
+| 17 | the long a of the divine name is written | that lam, which no carrier follows | orthographic | none | a madd rule |
+| 18 | a carrier is written for a word-final long a the rasm writes bare | a stopped word ending in a bare alif maqsura that sounds as a long a | performance | stopped | a madd rule |
+| 19 | a shadda is written on an idgham host the rasm does not double | joined, a cross-word idgham | performance | joined | the idgham rule |
 
 Row 14 is the largest population in the catalogue and the one a per-kind
 account cannot reach. Where the rasm wrote a haraka, the stop replaces it (row
@@ -188,12 +188,12 @@ than under `spell out` because there is nothing in the rasm to spell out from.
 
 | | Transformation | Trigger | Kind | Boundary | Owner |
 |---|---|---|---|---|---|
-| 21 | a final short haraka becomes a sukun | a stopped word whose vowel is short in its joined form | performance | stopped | `pausal_sukun` |
-| 22 | a final dammatan or kasratan becomes a sukun | a stopped word, nunated | performance | stopped | `pausal_sukun` |
-| 23 | a fathatan becomes a fatha | a stopped word whose fathatan precedes a written seat | performance | stopped | `pausal_sukun` |
-| 24 | a taa marbuta becomes a haa | a stopped word ending in taa marbuta | performance | stopped | `taa_marbuta_pausal` |
-| 25 | a quiescent hamza becomes a vowel letter | the reading substitutes it | orthographic | none | `ibdal_hamza` |
-| 26 | the hamza wasl seat becomes the hamza its vowel calls for | started on | performance | started | `hamza_wasl_start` |
+| 20 | a final short haraka becomes a sukun | a stopped word whose vowel is short in its joined form | performance | stopped | `pausal_sukun` |
+| 21 | a final dammatan or kasratan becomes a sukun | a stopped word, nunated | performance | stopped | `pausal_sukun` |
+| 22 | a fathatan becomes a fatha | a stopped word whose fathatan precedes a written seat | performance | stopped | `pausal_sukun` |
+| 23 | a taa marbuta becomes a haa | a stopped word ending in taa marbuta | performance | stopped | `taa_marbuta_pausal` |
+| 24 | a quiescent hamza becomes a vowel letter | the reading substitutes it | orthographic | none | `ibdal_hamza` |
+| 25 | the hamza wasl seat becomes the hamza its vowel calls for | started on | performance | started | `hamza_wasl_start` |
 
 Row 24 changes the glyph. The pausal realization of a taa marbuta is a haa, and
 the recited text writes what is said, so it writes a haa. The taa marbuta in
@@ -207,14 +207,14 @@ source glyph and the hamza's.
 
 | | Transformation | Trigger | Kind | Boundary | Owner |
 |---|---|---|---|---|---|
-| 28 | a muqattaat glyph becomes its spelled letter names | a disjoined-letter opening | orthographic | none | **-** |
-| 29 | a dagger alif becomes a haraka and a full carrier | any dagger alif | orthographic | none | **-** |
-| 30 | a silah mark becomes a haraka and a full carrier | joined, a vowel long in its joined form | orthographic | joined | a madd rule |
+| 26 | a muqattaat glyph becomes its spelled letter names | a disjoined-letter opening | orthographic | none | **-** |
+| 27 | a dagger alif becomes a haraka and a full carrier | any dagger alif | orthographic | none | **-** |
+| 28 | a silah mark becomes a haraka and a full carrier | joined, a vowel long in its joined form | orthographic | joined | a madd rule |
 
 Rows 29 and 30 are two instances of one policy: **a long vowel is written as
 its haraka, then its carrier, then the madd sign, whatever the rasm abbreviated
 it to.** The policy has no row of its own because it fires wherever a long
-vowel does, and rows 18 and 19 are the two places it has to invent a carrier
+vowel does, and rows 17 and 18 are the two places it has to invent a carrier
 rather than expand one.
 
 Row 28 owns nothing and cannot. The expansion is not the outcome of a rule; the
@@ -227,8 +227,8 @@ phoneme-level relation to a rule diverge furthest, which
 
 | | Transformation | Trigger | Kind | Boundary | Owner |
 |---|---|---|---|---|---|
-| 31 | the seat of a fathatan stops being silent | a stopped word whose written seat follows a fathatan | performance | stopped | a madd rule |
-| 32 | a word-final yaa, waw or alif maqsura changes between consonant and vowel | a stopped word ending in one of them, voweled | performance | stopped | **-** |
+| 29 | the seat of a fathatan stops being silent | a stopped word whose written seat follows a fathatan | performance | stopped | a madd rule |
+| 30 | a word-final yaa, waw or alif maqsura changes between consonant and vowel | a stopped word ending in one of them, voweled | performance | stopped | **-** |
 
 Row 31 is why the catalogue cannot be a diff. Both arrays hold the same seat at
 the same place with the same character, and the fact that changed is that the
@@ -238,8 +238,8 @@ seat now shows a sound. A consumer comparing characters sees nothing.
 
 | | Transformation | Trigger | Kind | Boundary | Owner |
 |---|---|---|---|---|---|
-| 33 | the stop sign is kept, and takes no pairing | any stop sign | advice | none | **-** |
-| 34 | the space between words is kept | a space | orthographic | none | **-** |
+| 31 | the stop sign is kept, and takes no pairing | any stop sign | advice | none | **-** |
+| 32 | the space between words is kept | a space | orthographic | none | **-** |
 
 A stop sign is advice and not recitation, and dropping it from `rendered` on
 that ground costs a consumer the one place it wants it: a recited line that
@@ -262,35 +262,38 @@ kind marked unchanged is not evidence that every case under it was examined.
 | every ikhfaa and every izhar | the hum belongs to no letter and nothing writes it |
 | `tafkheem` and `tarqeeq` | a colour on a sound; no glyph carries it |
 | the tashil and the ishmam mark | the mark is what the reciter reads, so the source spelling is the recited spelling |
-| the sakt mark | it instructs the reciter rather than advising him, so it survives where row 33's sign would not have |
+| the sakt mark | it instructs the reciter rather than advising him, so it survives where row 31's sign would not have |
 | the qalqala echo | a release rather than a letter, and the recited text does not write it |
 
 ### 4.8 What the table adds up to
 
 | | |
 |---|---|
-| deleted | 13 |
+| deleted | 12 |
 | inserted | 7 |
-| substituted | 7 |
+| substituted | 6 |
 | spelled out | 3 |
 | reclassed | 2 |
 | kept against expectation | 2 |
-| **transformations** | **34** |
+| **transformations** | **32** |
 | cases examined and unchanged | 9 |
 | transformations reachable through no rule instance | 10 |
-| orthographic | 11 |
-| performance | 22 |
+| orthographic | 10 |
+| performance | 21 |
 | advice | 1 |
-| boundary-dependent | 23 |
+| boundary-dependent | 22 |
 
-The ten with no owner are rows 3, 4, 7, 11, 13, 28, 29, 32, 33 and 34. Two of
+The ten with no owner are rows 3, 6, 10, 12, 13, 26, 27, 30, 31 and 32. Two of
 them are missing rules rather than transformations no rule should own: dropping
-the word-initial shadda at ibtidaa (row 11) and the word-final role flip at a
-pause (row 32) are both mandatory and neither has a name in
+the word-initial shadda at ibtidaa (row 10) and the word-final role flip at a
+pause (row 30) are both mandatory and neither has a name in
 [01-contract](01-contract.md) section 7 or a converse trigger in
-[02-gate](02-gate.md) section 4.8. Row 6 has an owner and shares it with row 5,
-which is the other half of the same problem: one rule, two behaviours, and
-nothing in the instance says which.
+[02-gate](02-gate.md) section 4.8. Row 13 has no owner for a different reason:
+a consonant the rasm leaves bare has a vowel that is absent joined and stopped
+alike, so section 8 of the contract makes that part inapplicable and no
+`pausal_sukun` instance exists to claim the sukun the recited text writes.
+Row 5 shares row 4's owner, which is the other half of one problem: one rule,
+two behaviours, and nothing in the instance says which.
 
 ---
 
@@ -303,7 +306,7 @@ place in this catalogue, and a reader comparing the two should know which.
 | Its transformation | The Uthmani position |
 |---|---|
 | an alif maqsura is respelled as a yaa where the letter sounds as a yaa | **no analogue.** Uthmani writes `ى` throughout, and the role is a fact of the unit. Row 32 is the general case |
-| a dagger alif is inserted into the divine name | the same fact. The Uthmani rasm writes no dagger on this word either, so row 18 is an insertion in both scripts |
+| a dagger alif is inserted into the divine name | the same fact. The Uthmani rasm writes no dagger on this word either, so row 17 is an insertion in both scripts |
 | an iqlab is written as a plain vowel plus a small meem | the same fact with a different encoding: Uthmani writes the tanween and the small meem |
 | a tatweel seats a dagger alif | cosmetic; Uthmani seats its daggers on the letter |
 | precomposed hamza seats are decomposed | encoding only |
@@ -321,7 +324,7 @@ did not have them.
 
 Everything else that consumer does appears in section 4. In particular, writing
 a sukun onto a bare final noon or meem is **not** a Digital Khatt artefact: the
-Uthmani rasm leaves those letters bare for the same reason, and row 14 is the
+Uthmani rasm leaves those letters bare for the same reason, and row 13 is the
 general case.
 
 ---
@@ -336,7 +339,7 @@ Each candidate switch, and why it is not one:
 
 | Candidate | Why not |
 |---|---|
-| keep or drop the stop advice | the consumer wants it kept and wants it outside the rule relation, which is row 33 and needs no setting |
+| keep or drop the stop advice | the consumer wants it kept and wants it outside the rule relation, which is row 31 and needs no setting |
 | compact or expanded muqattaat | the consumer wants both at once, and `glyphs` beside `rendered` is both at once |
 | show or hide the silences | the silences are on the source text, where they are always shown. Section 1 |
 | show or hide the insertions | hiding them produces a text no reciter reads |
