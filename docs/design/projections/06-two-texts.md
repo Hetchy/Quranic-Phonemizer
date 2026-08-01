@@ -136,6 +136,25 @@ them is the sign the rasm wrote over it, which
 [07-rules](07-rules.md) section 5 places with the script adapter rather than
 with the rule.
 
+### 4.1a How a tanween is spelled out
+
+The tanween is one mark over two units, so the recited text has to write them
+apart. What it writes is not a choice: the noon is a unit like any other and
+the rule that fired on it says how it is said, so the spelling follows the
+rule.
+
+| The noon's rule | The recited text writes |
+|---|---|
+| `izhar` | the haraka, then a noon with a sukun |
+| `ikhfaa_haqiqi`, `iqlab` | the haraka, then a bare noon |
+| an idgham | the haraka alone; the host carries the shadda |
+| `iltiqa_kasra` | the haraka, then a noon with a kasra |
+
+The bare noon is not an omission. A consonant the rasm leaves bare is
+orthographically distinct from one bearing a sukun, and bareness is what
+signals the assimilation coming, which is the same convention the source text
+already uses on a written noon.
+
 ### 4.2 Inserted: recitation says it, the script does not write it
 
 | | Transformation | Trigger | Kind | Boundary | Owner |
@@ -309,20 +328,9 @@ general case.
 
 ## 6. The control surface
 
-**One request field changes what the recited text writes, and it is a spelling
-choice rather than a switch over a transformation.** Otherwise the recited text
-is a total function of `(ref, riwayah, script, variant, boundary plan)`.
-
-`tanween` says how a nunated unit is spelled out:
-
-| `tanween` | Writes |
-|---|---|
-| `explicit` | the haraka, then a noon with a sukun |
-| `bare` | the haraka, then a bare noon |
-
-Both spell the same two units and neither adds or removes a sound, which is
-what keeps the completeness laws true. Where the noon merges there is nothing
-to write and the field does not apply: that is the idgham, not a third value.
+**No request field switches a transformation on or off.** The recited text is a
+total function of `(ref, riwayah, script, variant, boundary plan)`, and one of
+it exists per request.
 
 Each candidate switch, and why it is not one:
 

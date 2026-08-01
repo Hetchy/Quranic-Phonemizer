@@ -50,9 +50,11 @@ modifiers, and producing nothing is a rule that owns neither.
 | `idgham_shafawi` | a sakin meem | the following meem | always | the meem merges into the host, which is held | rows 9 and 20 |
 
 `iqlab` substitutes a unit and does not merge one: the baa is untouched and no
-sound is shared. The recited text writes the rasm unchanged. The Uthmani rasm
-has no iqlab mark, so nothing in the written word says the hum is coming, and
-writing a plain meem would assert a consonant nobody says.
+sound is shared. The recited text writes the rasm unchanged where the noon is
+written, because the Uthmani rasm has no iqlab mark and a plain meem would
+assert a consonant nobody says. Where the noon is a tanween's, the recited
+text spells the two units apart and the noon is bare, which is
+[06-two-texts](06-two-texts.md) section 4.1a for every noon rule at once.
 
 The meem's three rules never fire inside a word: a quiescent meem meets a baa
 or a meem only across a boundary, and a meem doubled inside a word is written

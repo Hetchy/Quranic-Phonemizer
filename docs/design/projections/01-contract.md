@@ -46,7 +46,6 @@ mappings(
     stops=(),                 # where recitation pauses
     starts=(),                # where it begins, when not at the start of ref
     variant=VariantSelection(),
-    tanween="explicit",       # 06-two-texts section 6
 ) -> Mappings
 ```
 
