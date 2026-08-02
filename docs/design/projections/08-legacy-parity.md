@@ -6,8 +6,8 @@ There is a consumer already in production drawing per-character cells against
 recitation timings, and it is the reason `character_phoneme_mappings` exists.
 This document reads its shipped data against
 [01-contract](01-contract.md) and answers one question: can that view be drawn
-from `Mappings`. Nothing here proposes a field; the answer is a derivation per
-column.
+from a `PhonemizeResult`. Nothing here proposes a field; the answer is a
+derivation per column.
 
 ---
 

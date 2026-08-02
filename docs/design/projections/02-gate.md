@@ -7,7 +7,7 @@ Status: **proposed**. The acceptance criterion for [01-contract](01-contract.md)
 Two independent proofs:
 
 1. **Legacy preservation.** Every legacy field promised during migration is
-   reproduced exactly by a pure adapter over `Mappings`.
+   reproduced exactly by a pure adapter over `PhonemizeResult`.
 2. **Graph completeness.** Every typed relation is complete and obeys its
    domain laws, including facts for which legacy has no oracle.
 
@@ -59,8 +59,9 @@ instances while leaving every token identical.
 ## 3. Exact legacy adapters
 
 `tools/projection_parity.py` is the harness, with a CI job and a residue path
-under `docs/conformance/`. For each manifest mode it loads `Mappings` for the
-same request, applies one pure adapter per legacy view, compares native rows
+under `docs/conformance/`. For each manifest mode it loads a
+`PhonemizeResult` for the same request, applies one pure adapter per legacy
+view, compares native rows
 including field and row order, reports residues by adapter, field, rule, mode
 and cause, and exits non-zero for any residue without an approved disposition.
 
@@ -236,7 +237,7 @@ For every combination of `text` and `grouping`:
 - **The pairings partition the selected text's glyph array.** Every glyph
   appears in exactly one pairing, except those carrying the `Structural`
   spelling edge, which have none. The edge decides this, never `kind`, and
-  `01-contract` item 18 is what makes the two agree: a tatweel and a stop sign
+  `01-contract` item 19 is what makes the two agree: a tatweel and a stop sign
   both carry the edge and both take no pairing.
 - **The pairings and their gap pairings cover every sound exactly once in
   `sounds`.** A sound may appear in any number of `shares` lists.
@@ -365,7 +366,7 @@ relationship blocks the contract; an adapter may not repair it.
 Legacy parity proves the old views survive. It does not prove the contract is
 sufficient for a product surface, because legacy is what the frontend had to
 work around. The second gate takes a real cell shard consumer and requires
-every fact its frontend synthesizes to fall out of `Mappings` with no
+every fact its frontend synthesizes to fall out of `PhonemizeResult` with no
 downstream invention.
 
 Pinning is in three parts, because they move independently: the **schema
@@ -392,7 +393,8 @@ exists to remove, so using them as the oracle would be circular.
 1. Build the model work in [01-contract](01-contract.md) section 9, each with
    its local laws.
 2. Define the versioned schema and its negative tests.
-3. Assemble a single-verse `Mappings` and pass the domain adequacy matrix.
+3. Assemble a single-verse `PhonemizeResult` and pass the domain adequacy
+   matrix.
 4. Implement request orchestration for ranges, internal boundaries and
    variants.
 5. Implement `tools/projection_parity.py`; verify the frozen manifest.

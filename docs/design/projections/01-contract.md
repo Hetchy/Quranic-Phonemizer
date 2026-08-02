@@ -12,21 +12,23 @@ Two projections, and no third.
 | Name | Shape | For |
 |---|---|---|
 | `phonemes` | ordered tokens, with word boundaries | consumers that want only sound |
-| `Mappings` | identified nodes plus typed relation arrays | every script, alignment, and tajweed consumer |
+| the graph | identified nodes plus typed relation arrays | every script, alignment, and tajweed consumer |
 
-They are never joined; a consumer picks one. `phonemes` stays separate because
-the token stream is stable across every schema evolution of the graph.
+One call answers both, and a consumer reads whichever it came for. `phonemes`
+is a method rather than an array because the token stream is stable across
+every schema evolution of the graph.
 
 ---
 
 ## 1. Read this much and stop
 
 ```python
-m = mappings("2:255")
+r = Phonemizer().phonemize("2:255")
 
-m.rules                                       # every rule, in reading order
-m.alignment(text="source", grouping="cell")   # writing lined up with sound
-m.respelling(grouping="cell")                 # the two texts against each other
+r.phonemes()                                  # every token, in reading order
+r.rules                                       # every rule, in reading order
+r.alignment(text="source", grouping="cell")   # writing lined up with sound
+r.respelling(grouping="cell")                 # the two texts against each other
 ```
 
 What is not said is on the row that does not say it. `pairing.silent` names the
@@ -39,21 +41,47 @@ section 4 is for a consumer that needs a join no method offers.
 
 ### 1.1 The call
 
+Configuration selects which data is loaded, so it is stated once, on the
+instance. What varies per call is the passage and where the reader pauses.
+
 ```python
-mappings(
-    ref,                      # "2:255", "2:255:3-2:256:1"
+pm = Phonemizer(
     riwayah="hafs",
-    script="uthmani",
-    stops=(),                 # where recitation pauses
-    starts=(),                # where it begins, when not at the start of ref
-    variant=VariantSelection(),
-) -> Mappings
+    script=None,              # defaults per riwayah; hafs is uthmani
+    variants=None,            # section 3.1
+    extra_phonemes=(),        # section 3.2
+)
+
+pm.phonemize(
+    ref,                      # below
+    stop_signs=(),            # stop at every word carrying one of these signs
+    stop_refs=(),             # stop after these words
+) -> PhonemizeResult
 ```
 
-`stops` and `starts` are word locations. A request always stops after its last
-word and starts at its first, so a passage read alone is complete without
-naming either. Everything else about the reading follows from them: which madd
-reverts, which noon merges, which vowel the pause takes.
+`Phonemizer()` bare is hafs uthmani under the default reading. No caller
+constructs a model object: every argument is a string, a dict or a tuple of
+them.
+
+**The ref.** An endpoint is `surah[:ayah[:word]]`, and a ref is one endpoint or
+two joined by a hyphen, both at the same depth.
+
+```
+"2"    "2:255"    "2:255-2:257"    "2:255:3"    "2:255:3-2:256:1"
+```
+
+There is no list of refs: two disjoint spans have no junction between them, so
+a discontinuous request has no reading to describe.
+
+**The boundaries.** A request always stops after its last word, so a passage
+read alone is complete without naming any. Everything else about the reading
+follows from where it pauses: which madd reverts, which noon merges, which
+vowel the pause takes.
+
+There is no `starts`. Where recitation begins is where it last stopped, so
+`Word.is_started_on` is derived rather than asked for, and a passage started on
+mid-ref is a stop before it. Sakt is not asked for either: the mark is in the
+rasm and `Word.sakt_after` reads it.
 
 The two things that raise rather than guess: a `ref` outside the corpus, and a
 `ref` that clips a word the riwayah's data addresses as a whole. A stop asked
@@ -62,11 +90,22 @@ allowed to be wrong and the document should say what that reading sounds like.
 
 ### 1.2 Names a person reads
 
-Every rule has a display name and a one-line description, in English and in
-Arabic, and they are part of this contract rather than a consumer's table.
-`ikhfaa_haqiqi` is the identifier; "Ikhfaa Haqiqi" and "the noon is hidden and
-hummed into the letter that follows" is what a legend prints. A consumer that
-writes its own is free to; a consumer that does not should not have to.
+Every rule has a display name in English and in Arabic, and they are part of
+this contract rather than a consumer's table. `ikhfaa_haqiqi` is the
+identifier and "Ikhfaa Haqiqi" with إخفاء حقيقي is what a legend prints.
+
+```python
+supported_riwayat()          -> ("hafs",)
+available_variants("hafs")   -> section 3.1
+tajweed_rules("hafs")        -> ((identifier, english, arabic), ...)
+```
+
+Three module functions and no more. `available_variants` has to answer before
+an instance exists, because it is read to decide what to pass as `variants`.
+Everything else a consumer might enumerate - which scripts a riwayah has, the
+phoneme inventory, the glyphs of a script, a sentence explaining each rule - is
+documentation, and a table in a document does not go stale the way a shipped
+one does.
 
 ---
 
@@ -77,7 +116,7 @@ of them.
 
 | | |
 |---|---|
-| **script** | what the mushaf wrote |
+| **source** | what the mushaf wrote |
 | **recited** | what recitation spells |
 | **sound** | what is heard |
 | **rules** | what happened, and why |
@@ -88,12 +127,12 @@ call each.
 
 | Pairing | Answered by |
 |---|---|
-| script - sound | `alignment(text="source")`, `pairing.sounds` |
-| script - rules | `alignment(text="source")`, `pairing.rules` |
+| source - sound | `alignment(text="source")`, `pairing.sounds` |
+| source - rules | `alignment(text="source")`, `pairing.rules` |
 | recited - sound | `alignment(text="recited")`, `pairing.sounds` |
 | recited - rules | `alignment(text="recited")`, `pairing.rules` |
-| script - recited | `m.respelling()` |
-| sound - rules | `m.rules`, and `by` on every attribution and modifier |
+| source - recited | `r.respelling()` |
+| sound - rules | `r.rules`, and `by` on every attribution and modifier |
 
 **So there are three calls and not six**, and the reason is not economy. Four
 of the pairings are columns of one row, because a pairing given its own call is
@@ -102,7 +141,7 @@ rejoin by index. Co-highlighting is the plain case: it reads `sounds` and
 `shares` off one row, and no arrangement in which those arrive from two calls
 can do it without the consumer rebuilding the row.
 
-Script against recited is the one that cannot be a column. It is many-to-many
+Source against recited is the one that cannot be a column. It is many-to-many
 in both directions - a recited cell can cover two source glyphs and one
 source glyph can render as two - and a column on a row that partitions one text
 cannot hold a group that spans several rows of the other. `respelling` returns
@@ -119,13 +158,17 @@ alone.
 
 ```python
 @dataclass(frozen=True)
-class Mappings:
+class PhonemizeResult:
     ref: str
-    riwayah: Riwayah
-    script: Script
-    variant: VariantSelection
+    riwayah: str
+    script: str
+    variant: dict
+    extra_phonemes: frozenset[str]
     schema_version: str
     canon_digest: str
+
+    def phonemes(self, by=None): ...   # by="word" nests one tuple per word
+    def text(self, which="source"): ...
 
     words:    tuple[Word, ...]
     glyphs:   tuple[Glyph, ...]
@@ -143,28 +186,37 @@ class Mappings:
 |---|---|
 | `ref` | the passage: `"2:255"`, `"2:255:3-2:256:1"`. Addresses words, not only verses |
 | `riwayah`, `script` | which transmission, which mushaf |
-| `variant` | which reading was taken at each disputed point |
+| `variant` | which reading was taken at every disputed point, resolved |
+| `extra_phonemes` | which optional tokens this notation spent, section 3.2 |
 | `schema_version` | the shape of this document |
 | `canon_digest` | identifies the canonical data the indices were resolved against |
 
-Six fields, all flat. No envelope groups them: a reader who must decide
+Seven fields, all flat. No envelope groups them: a reader who must decide
 whether a field is domain or infrastructure before reading it has been handed
 a puzzle rather than a document.
+
+The result restates the configuration the instance holds because the result is
+what gets cached, serialized and compared. A document that says which reading
+it is, at every site, resolved against which canon, is a complete record; one
+that says only `"2:255"` is not.
 
 **There is no notation field.** One notation ships, and a consumer supplying
 its own tokens knows which it supplied.
 
 ### 3.1 Variants
 
-A `VariantSelection` is a list of choices, because a reading can differ at
-several points and a reciter may take one wajh throughout and another in a
-single word.
+A reading can differ at several points, and a reciter may take one wajh
+throughout and another in a single word. So a selection is per point, and per
+site within a point.
 
 ```python
-VariantSelection(options=(Option(khilaf, site, name), ...))
+variants={"raa_tafkheem": "heavy"}                  # every site of that point
+variants={"raa_tafkheem": {"<site>": "heavy"}}      # one site
 ```
 
-A choice naming a site outranks one naming the whole point.
+A string value broadcasts over the point's sites; a dict value names them. The
+nesting is what `available_variants` returns, so a caller hands a site key back
+rather than composing one.
 
 | `khilaf` | Disputes |
 |---|---|
@@ -176,6 +228,37 @@ A choice naming a site outranks one naming the whole point.
 
 `seen_sad` is published and has no sites in the shipped Hafs data, so nothing
 selects it yet. The two nasal placement points are not here: see section 4.4.
+
+**Every point in the shipped Hafs data is a set of sites, and defaults differ
+between the sites of one point.** So a whole-point choice is a broadcast that
+moves some sites off their default, not a name for a reading. `r.variant`
+publishes the resolved selection, every site with the value actually read, so a
+caller who passed nothing can still see what was taken where.
+
+**Rule identifiers are stable and site keys are not.** A site key is an opaque
+token read from `available_variants` and handed back; a planned refactor names
+a case per lexeme or pattern and rewrites them. A consumer that stores one
+stores a version with it.
+
+### 3.2 Optional phonemes
+
+Three distinctions the model always carries and the notation does not always
+spend a token on. All default off.
+
+| Name | Off | On |
+|---|---|---|
+| `tashil` | the hamza token | a token of its own |
+| `heavy_ikhfaa` | one ghunnah token | the emphatic form |
+| `qalqala_degree` | one release token | sughra apart from kubra and akbar |
+
+`qalqala_degree` is a two-way split: kubra and akbar share a token and akbar
+takes no third.
+
+**Switching one on changes no node and no edge.** `Sound.emphatic` on a ghunnah
+is true whether or not the token shows it, and a qalqala's degree is on the
+sound either way, so nothing is lost by leaving a toggle off and a consumer can
+always read the distinction from the graph. That is what separates this from
+`variants`, which changes what is read.
 
 Indices are local to one document, and pairings are request-local.
 
@@ -429,7 +512,7 @@ part still states one realization and carries the echo beside it.
 ## 6. Alignment and respelling
 
 ```python
-m.alignment(text="source"|"recited", grouping="glyph"|"cell")
+r.alignment(text="source"|"recited", grouping="glyph"|"cell")
 ```
 
 | | `text="source"` | `text="recited"` |
@@ -488,7 +571,7 @@ the text writes, not how the sound was attributed.
 ### 6.3 Respelling
 
 ```python
-m.respelling(grouping="glyph"|"cell")
+r.respelling(grouping="glyph"|"cell")
 ```
 
 ```python
@@ -694,66 +777,72 @@ changes.
 12. **Sakt stops being a rule.** `Word.sakt_after` is where it lives.
 13. **An ikhfaa sets its ghunnah's weight.** The rule reads the following
     letter already; before an istilaa letter the hum is heavy, and the
-    `Recolours` edge is the rule's own.
+    `Recolours` edge is the rule's own. The notation has no emphatic form
+    for a nasal and refuses one outright, so the token is a second half of
+    this item and not a consequence of it.
 14. **`Participants` are labelled.** A rule's units are a source and a host,
     and today the pair is positional.
+15. **A qalqala's degree is on the sound.** Section 4.4 publishes `degree`;
+    `Release` carries only `kind`, whose single value is the qalqala itself,
+    and the degree lives in the rule names alone. A consumer reading a release
+    has to walk to the rule to learn how hard it bounces.
 
 **Facts the model drops**
 
-15. **Marks that reach no unit.** The largest group is the alif seating a
+16. **Marks that reach no unit.** The largest group is the alif seating a
     fathatan, skipped although it sounds at a pause and every iwad case needs
     it. Then the superscript alif over a written carrier, the sakt mark, the
     combining hamza above, and the rectangular zero.
-16. **The separator between words is a glyph.** A space inside a word's own
+17. **The separator between words is a glyph.** A space inside a word's own
     text is emitted; the one between two words is not, so the concatenation
     law passes only on a single-word verse.
-17. **One scalar, one glyph.** One verse emits a combining mark twice, and
+18. **One scalar, one glyph.** One verse emits a combining mark twice, and
     duplicate spelling edges exist for every alef wasla and every tatweel.
-18. **One notion of structural, and it is the `Structural` edge.** The class
+19. **One notion of structural, and it is the `Structural` edge.** The class
     and the edge disagree in both directions: a tatweel is classed structural
     and carries no edge, a stop sign carries the edge and is classed as
     advice. Both move to the edge, and section 4.3 follows: `stop_sign` keeps
     its own `kind` and takes no pairing, and a tatweel takes none either.
-19. **The dagger and its carrier are reversed.**
-20. **`length_carrier` is a class nothing assigns.** No scalar classifies as
+20. **The dagger and its carrier are reversed.**
+21. **`length_carrier` is a class nothing assigns.** No scalar classifies as
     one, and the recited spelling is where a length carrier is added.
-21. **Sakt is a word fact and is evidenced by nothing.** The unit-level fact
+22. **Sakt is a word fact and is evidenced by nothing.** The unit-level fact
     exists in the model and no glyph supplies it.
 
 **Rules with no producer**
 
-22. **Madd rules for their ordinary cases.** `madd_tabii` is minted only on
+23. **Madd rules for their ordinary cases.** `madd_tabii` is minted only on
     the pausal glide; an ordinary long vowel, a silah vowel and a stopped
     seven-alif produce none.
-23. **`orthographic_silence`.** The seats are identified, but the field
+24. **`orthographic_silence`.** The seats are identified, but the field
     naming the unit each shows against is written and never read, and one
     seat class reaches no spelling edge at all. It stays one rule: a letter
     never said and a seat silent only when joined are the same outcome, and
     the boundary tells them apart without a second name.
-24. **The vocabulary is short two rules**, both mandatory and both corpus-wide:
+25. **The vocabulary is short two rules**, both mandatory and both corpus-wide:
     dropping a word-initial shadda when a word is started on, and the role a
     word-final yaa, waw or alif maqsura takes at a pause. Neither has a name,
     neither has a converse trigger, and [06-two-texts](06-two-texts.md) is
     where the transformation each performs is written down.
-25. **The iltiqa helping vowel** is constructed nowhere. It is the vowel of
+26. **The iltiqa helping vowel** is constructed nowhere. It is the vowel of
     the unit the reading vowels - a tanween's noon, or the meem of a spelled
     name - hosted on a vowel part the canon leaves absent.
-26. **Split the boundary rules to match the names.** One code rule covers
+27. **Split the boundary rules to match the names.** One code rule covers
     `pausal_sukun` and `taa_marbuta_pausal`. The iwad is already its own rule
     and keeps its name.
-27. **A colour is not minted for a part a complete merger consumed.** The
+28. **A colour is not minted for a part a complete merger consumed.** The
     letter has no sound of its own to be heavy, which is the whole difference
     between a complete idgham and a partial one. The producer already declines
     this for the vowel and must decline it for the consonant too.
-28. **Release attribution moves to the consonant** - and the fill step reads
+29. **Release attribution moves to the consonant** - and the fill step reads
     any realization as claiming the part, so moving only the effect deletes
     the consonant's own sound. Every release in the corpus sits on the vowel
     today, so this is not a repair at the margin.
-29. **A merger host keeps its ghunnah.** The pair-table family builds its host
+30. **A merger host keeps its ghunnah.** The pair-table family builds its host
     consonant with no nasal fact, and the corpus has one merger of that family
     whose host is a nasal letter: the baa of `ٱرْكَب` into the meem of
     `مَّعَنَا`, which is held today without a hum.
-30. **A spelled name is closed.** The noon that ends a disjoined-letter
+31. **A spelled name is closed.** The noon that ends a disjoined-letter
     opening takes the nasal rules of the word after it, so `طسٓ` hums into
     `تِلْكَ` and `نٓ` merges into `وَٱلْقَلَمِ` and loses its own consonant.
     A unit whose `origin` is `muqattaat` neither takes a rule from another
@@ -762,17 +851,27 @@ changes.
 
 **Machinery**
 
-31. **A writer for the recited text.** The one that exists takes a Score, so
+32. **A writer for the recited text.** The one that exists takes a Score, so
     it has no boundary plan and no performance and cannot spell a pausal,
     merged or started-on form. `rendered` needs glyph records carrying
     `from_glyphs`, their own pairings, and the blocks `respelling` returns.
-32. **Total glyph pairing.** The join saying which outcomes each glyph
+33. **Total glyph pairing.** The join saying which outcomes each glyph
     presents, distinguishing a sounded dagger from its silent carrier and a
     performance deletion from orthographic zero.
-33. **Sub-verse requests.** A request clipping a ledger-addressed word raises
+34. **Sub-verse requests.** A request clipping a ledger-addressed word raises
     rather than building.
-34. **Continuous assembly** overlaps by two words, because cross-word
+35. **Continuous assembly** overlaps by two words, because cross-word
     lookahead reaches past a one-slot word.
-35. **Request orchestration.** Resolve `(ref, boundaries, variant)`, build,
-    perform, and assemble one index space. Internal starts, arbitrary stops,
-    sakt and cross-verse joins use the same path.
+36. **Request orchestration.** Resolve `(ref, boundaries, variant)`, build,
+    perform, and assemble one index space. Arbitrary stops, sakt and
+    cross-verse joins use the same path, and a started-on word is the word
+    after a stop rather than a second input.
+37. **The ref grammar.** An endpoint is `surah[:ayah[:word]]` and a ref is one
+    or two of them at the same depth. Five forms, and a whole surah is the
+    common one.
+38. **The three module functions.** `supported_riwayat`, `available_variants`
+    and `tajweed_rules`, answering without an instance, and
+    `available_variants` returning the nesting `variants` accepts.
+39. **The optional phonemes are gated at the notation.** Section 3.2's three
+    names select tokens and reach no node and no edge, so the gate belongs
+    beside the alphabet and nowhere in the producer.

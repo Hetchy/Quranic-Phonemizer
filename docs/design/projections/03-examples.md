@@ -53,7 +53,7 @@ another quadrant.
 | rules | every rule a consumer would colour on these glyphs |
 
 There is no recited column. The two texts are related by
-`m.respelling(grouping=...)`, which returns blocks, and the recited spelling of
+`r.respelling(grouping=...)`, which returns blocks, and the recited spelling of
 each word is in the header row. Where an example turns on that relation it adds
 a **respelling block** table: one row per block, naming the source pairings and
 the recited pairings that correspond as a unit, either side empty where the
@@ -87,14 +87,17 @@ every relationship is one call and one field read, the example says so in a
 line and moves on. A row named `identity` is not one of the six: it records
 something a consumer needs about the request that no relationship reaches.
 
+Every request is `pm = Phonemizer()`, the default hafs uthmani reading, so
+the example gives the call alone.
+
 ---
 
 ## 2. The examples
 
 ### E1. The ordinary word
 
-`mappings("2:2")`, joined throughout, stopping after the last word. The tables
-are word 2.
+`pm.phonemize("2:2")`, joined throughout, stopping after the last word. The
+tables are word 2.
 
 | word | source | recited | phonemes |
 |---|---|---|---|
@@ -142,7 +145,8 @@ shared, no gap, and every rule reachable from the glyphs it is drawn on.
 
 ### E2. A dagger over a written carrier, and a seat that stops being silent
 
-Plan A: `mappings("2:28:4-2:28:8")`, joined throughout, stopping after word 8.
+Plan A: `pm.phonemize("2:28:4-2:28:8")`, joined throughout, stopping after
+word 8.
 
 | word | source | recited | phonemes |
 |---|---|---|---|
@@ -152,7 +156,7 @@ Plan A: `mappings("2:28:4-2:28:8")`, joined throughout, stopping after word 8.
 | 7 | ثُمَّ | ثُمَّ | `θ u m̃ a` |
 | 8 | يُمِيتُكُمْ | يُمِيتُكُمْ | `j u m i: t u k u m` |
 
-Plan B: `mappings("2:28:4-2:28:5")`, joined, stopping after word 5.
+Plan B: `pm.phonemize("2:28:4-2:28:5")`, joined, stopping after word 5.
 
 | word | source | recited | phonemes |
 |---|---|---|---|
@@ -279,10 +283,10 @@ pairing, and the recited text drops the first (row 11) and keeps the other two
 
 | relationship | what a consumer must do | cost |
 |---|---|---|
-| script - sound | colour the fathatan for the hum under plan A | one field read, and it over-reaches: one scalar owns two units' sounds, so a consumer that wants the hum alone has no sub-glyph answer on this text |
-| script - rules | reach the tanween noon's silence under plan B through the fathatan's `rules` | one field read, and the same glyph is audible, so a consumer colouring silence paints a sounded character |
+| source - sound | colour the fathatan for the hum under plan A | one field read, and it over-reaches: one scalar owns two units' sounds, so a consumer that wants the hum alone has no sub-glyph answer on this text |
+| source - rules | reach the tanween noon's silence under plan B through the fathatan's `rules` | one field read, and the same glyph is audible, so a consumer colouring silence paints a sounded character |
 | recited - sound | read the row | one call and one field read, and the only side that separates the two units: the fathatan is two rendered glyphs under plan A |
-| script - recited | diff the two plans | pairing indices are request-local, so a consumer keys on `source_index` and never on a pairing |
+| source - recited | diff the two plans | pairing indices are request-local, so a consumer keys on `source_index` and never on a pairing |
 | the other two | | one call and one field read |
 
 The word settles what an alignment quadrant is for: the same ten scalars, one
@@ -291,7 +295,7 @@ silent, with no character changed anywhere.
 
 ### E3. Letters the rasm writes and recitation never says
 
-`mappings("2:5:1-2:5:3")`, joined, stopping after word 3.
+`pm.phonemize("2:5:1-2:5:3")`, joined, stopping after word 3.
 
 | word | source | recited | phonemes |
 |---|---|---|---|
@@ -361,7 +365,7 @@ supplies, so the two are one cell and the letter they follow is bare.
 
 | relationship | what a consumer must do | cost |
 |---|---|---|
-| script - rules | start at `m.rules` and ask where each silence falls | the instance is reachable from the glyphs and the glyphs are not reachable from the instance, so the consumer scans every pairing's `rules`. Nothing else in the document needs that scan |
+| source - rules | start at `r.rules` and ask where each silence falls | the instance is reachable from the glyphs and the glyphs are not reachable from the instance, so the consumer scans every pairing's `rules`. Nothing else in the document needs that scan |
 | sound - rules | walk sounds to rules | no answer, and correctly none: the instance owns no attribution and no modifier, so the walk never meets it. This is the exemption the completeness law already names |
 | recited - sound, recited - rules | | the silenced glyphs are absent from the recited text, so the rule has no relation there at all |
 | the other two | | one call and one field read |
@@ -371,7 +375,7 @@ unit takes a pairing and names its rule, and a structural glyph takes neither.
 
 ### E4. Started on, and the release at a pause
 
-`mappings("1:2:1-1:2:3")`, started on ٱلْحَمْدُ, which is where the request
+`pm.phonemize("1:2:1-1:2:3")`, started on ٱلْحَمْدُ, which is where the request
 begins, joined, stopping after word 3.
 
 | word | source | recited | phonemes |
@@ -444,8 +448,8 @@ part while the kasra it renders as a sukun is `silent`.
 
 | relationship | what a consumer must do | cost |
 |---|---|---|
-| script - sound | draw the source text in order | a gap pairing has no source index, so the consumer cannot sort the rows on one key: it walks the glyph rows and splices each gap row in at the pairing its `after` names |
-| script - recited | read the blocks | one call. A rendered glyph naming no source glyph is a block with an empty source, and its position in the block order is what says where it falls, so a two-line teleprompter drawing block by block loses no character. What the block order does not settle is which block a source gap pairing joins: the only stated link between the two sides is `from_glyphs`, and neither the gap pairing nor the helping fatha it answers to has one |
+| source - sound | draw the source text in order | a gap pairing has no source index, so the consumer cannot sort the rows on one key: it walks the glyph rows and splices each gap row in at the pairing its `after` names |
+| source - recited | read the blocks | one call. A rendered glyph naming no source glyph is a block with an empty source, and its position in the block order is what says where it falls, so a two-line teleprompter drawing block by block loses no character. What the block order does not settle is which block a source gap pairing joins: the only stated link between the two sides is `from_glyphs`, and neither the gap pairing nor the helping fatha it answers to has one |
 | recited - sound | read the row | one call and one field read. The release has no rendered glyph and takes no gap pairing there, because it rides on the pairing of the consonant that makes it |
 | the other three | | one call and one field read |
 
@@ -455,7 +459,7 @@ vowel is shown by nothing, because the rasm writes no haraka over the seat.
 
 ### E5. The cross-word merger
 
-`mappings("2:5:3-2:5:4")`, joined, stopping after word 4.
+`pm.phonemize("2:5:3-2:5:4")`, joined, stopping after word 4.
 
 | word | source | recited | phonemes |
 |---|---|---|---|
@@ -501,9 +505,9 @@ same seat carries a long a and is not silent at all.
 
 | relationship | what a consumer must do | cost |
 |---|---|---|
-| script - sound | ask what دً makes audible | two field reads and one lookup: it owns two sounds and shares a third, and the shared one is owned in another word, so the consumer follows the owning pairing to learn which word times it |
-| script - rules | highlight `idgham_bi_ghunnah` | the instance sits in two pairings in two words, and a highlight driven off either one lights half the rule. The consumer unions every pairing naming the instance |
-| script - recited | ask why ى is unwritten | the block holding it has an empty recited side, which says only that something is unrepresented; the cause is on the source side, in `silent` and `rules` |
+| source - sound | ask what دً makes audible | two field reads and one lookup: it owns two sounds and shares a third, and the shared one is owned in another word, so the consumer follows the owning pairing to learn which word times it |
+| source - rules | highlight `idgham_bi_ghunnah` | the instance sits in two pairings in two words, and a highlight driven off either one lights half the rule. The consumer unions every pairing naming the instance |
+| source - recited | ask why ى is unwritten | the block holding it has an empty recited side, which says only that something is unrepresented; the cause is on the source side, in `silent` and `rules` |
 | recited - rules | attribute the sukun of نْ | **FINDING.** No rule instance owns it. The noon's vowel is absent in its joined form and its stopped form alike, so the pause takes nothing from it and mints nothing, and a consumer colouring the recited text has a glyph it cannot attribute. Row 12 is the transformation and it owns nothing |
 | the other two | | one call and one field read |
 
@@ -512,7 +516,7 @@ is silent, and `shares` is the only thing joining them.
 
 ### E6. Every outcome the noon and the meem have
 
-`mappings("106:4")`, joined throughout, stopping after word 7.
+`pm.phonemize("106:4")`, joined throughout, stopping after word 7.
 
 | word | source | recited | phonemes |
 |---|---|---|---|
@@ -629,8 +633,8 @@ token, although `tafkheem` names both sounds of that unit.
 
 | relationship | what a consumer must do | cost |
 |---|---|---|
-| script - sound | walk the source text forward | three sounds are owned in a later word than the glyph that helped make them, and the helping vowel of word 1 is owned by no source glyph at all, so it takes a gap pairing whose only link is `after`, pointing backwards. A consumer walking forward keeps its own index of gaps by anchor |
-| script - rules | colour the noon of جُوعٍ | one field read that cannot be narrowed: the kasratan supplies the ain's vowel and the tanween's noon, so colouring the rule and colouring the vowel colour the same character. Under an ikhfaa the recited spelling would separate them by writing a bare noon beside the haraka; under this idgham it does not |
+| source - sound | walk the source text forward | three sounds are owned in a later word than the glyph that helped make them, and the helping vowel of word 1 is owned by no source glyph at all, so it takes a gap pairing whose only link is `after`, pointing backwards. A consumer walking forward keeps its own index of gaps by anchor |
+| source - rules | colour the noon of جُوعٍ | one field read that cannot be narrowed: the kasratan supplies the ain's vowel and the tanween's noon, so colouring the rule and colouring the vowel colour the same character. Under an ikhfaa the recited spelling would separate them by writing a bare noon beside the haraka; under this idgham it does not |
 | recited - rules | highlight the merger on the recited line | the recited text writes the haraka alone, so the merged noon has no rendered glyph. The instance shows twice over the source glyphs and once over the recited ones, and the consumer loses the contributor |
 | the other three | | one call and one field read |
 
@@ -639,7 +643,7 @@ outcomes, so `origin` is visibly the only thing telling them apart.
 
 ### E7. Close consonants, and the shadda a start drops
 
-Plan A: `mappings("77:20")`, joined throughout, stopping after word 5.
+Plan A: `pm.phonemize("77:20")`, joined throughout, stopping after word 5.
 
 | word | source | recited | phonemes |
 |---|---|---|---|
@@ -649,8 +653,8 @@ Plan A: `mappings("77:20")`, joined throughout, stopping after word 5.
 | 4 | مَّآءٍ | مَّآءِ | `m̃ a: ʔ i` |
 | 5 | مَّهِينٍ | مَّهِينْ | `m̃ a h i: n` |
 
-Plan B: `mappings("77:20:3-77:20:5")`, started on مِّن, joined, stopping after
-word 5.
+Plan B: `pm.phonemize("77:20:3-77:20:5")`, started on مِّن, joined, stopping
+after word 5.
 
 | word | source | recited | phonemes |
 |---|---|---|---|
@@ -752,9 +756,9 @@ accounts for.
 
 | relationship | what a consumer must do | cost |
 |---|---|---|
-| script - sound | ask what a cell sounds like | four cells present a sound another row owns, three of them a row in the next word, and ق owns nothing at all, so the pairing that answers is never the row the consumer is on |
-| script - rules | colour نَخْلُقكُّم | three rules over six cells, two glyphs dropped under two different rules, and the pairing says which rule without saying where the sound went. That is on the instance's `host` |
-| script - recited | account for مِّ becoming مِ under plan B | **FINDING.** No rule instance owns the difference. An absent rendered index says only that the shadda is unrepresented, and the source side cannot name it either: a glyph in `silent` names its rule, and this one has none. Row 9 has no owner and no name in the vocabulary |
+| source - sound | ask what a cell sounds like | four cells present a sound another row owns, three of them a row in the next word, and ق owns nothing at all, so the pairing that answers is never the row the consumer is on |
+| source - rules | colour نَخْلُقكُّم | three rules over six cells, two glyphs dropped under two different rules, and the pairing says which rule without saying where the sound went. That is on the instance's `host` |
+| source - recited | account for مِّ becoming مِ under plan B | **FINDING.** No rule instance owns the difference. An absent rendered index says only that the shadda is unrepresented, and the source side cannot name it either: a glyph in `silent` names its rule, and this one has none. Row 9 has no owner and no name in the vocabulary |
 | recited - rules | colour the recited word مِّ under plan A | it shows one rule, minted for the meem of the word before it. The noon this word loses into the word after writes nothing on the recited line and colours nothing there, so one of the word's two mergers is invisible on the text a consumer is drawing |
 | the other two | | one call and one field read |
 
@@ -763,7 +767,7 @@ which is the shape E8 meets again on a different letter.
 
 ### E8. The taa marbuta at a pause
 
-Plan A: `mappings("2:26:7-2:26:9")`, joined, stopping after word 9.
+Plan A: `pm.phonemize("2:26:7-2:26:9")`, joined, stopping after word 9.
 
 | word | source | recited | phonemes |
 |---|---|---|---|
@@ -771,7 +775,7 @@ Plan A: `mappings("2:26:7-2:26:9")`, joined, stopping after word 9.
 | 8 | مَّا | مَّا | `m̃ a:` |
 | 9 | بَعُوضَةً | بَعُوضَهْ | `b a ʕ u: dˤ aˤ h` |
 
-Plan B: `mappings("2:26:8-2:26:9")`, started on مَّا, joined, stopping after
+Plan B: `pm.phonemize("2:26:8-2:26:9")`, started on مَّا, joined, stopping after
 word 9.
 
 | word | source | recited | phonemes |
@@ -858,10 +862,10 @@ under it.
 
 | relationship | what a consumer must do | cost |
 |---|---|---|
-| script - recited | compare ةً with هْ under plan A | one block, and both its rendered glyphs are substitutions: the haa names the taa marbuta and the sukun names the fathatan. A consumer comparing characters sees a changed letter and a changed mark, and has to read `silent` and `rules` to learn which unit each one belongs to |
-| script - recited | account for مَّ becoming مَ under plan B | **FINDING.** No instance owns the missing shadda. This is the unowned deletion E7 shows under the same row, and the same dead end on both sides of it |
-| script - rules | say which rule reached which part of ةً | two rules sit on one cell and the letter level cannot separate them |
-| script - sound | follow the one `shares` | لً shares a sound owned in the next word, and under this grouping that is the only kind of `shares` left: the long vowels of مَّا and عُو are each one cell and share nothing |
+| source - recited | compare ةً with هْ under plan A | one block, and both its rendered glyphs are substitutions: the haa names the taa marbuta and the sukun names the fathatan. A consumer comparing characters sees a changed letter and a changed mark, and has to read `silent` and `rules` to learn which unit each one belongs to |
+| source - recited | account for مَّ becoming مَ under plan B | **FINDING.** No instance owns the missing shadda. This is the unowned deletion E7 shows under the same row, and the same dead end on both sides of it |
+| source - rules | say which rule reached which part of ةً | two rules sit on one cell and the letter level cannot separate them |
+| source - sound | follow the one `shares` | لً shares a sound owned in the next word, and under this grouping that is the only kind of `shares` left: the long vowels of مَّا and عُو are each one cell and share nothing |
 | the other three | | one call and one field read |
 
 A rendered glyph carries a different character from the single source glyph it
@@ -869,7 +873,7 @@ names, and the source array stands unchanged beside it.
 
 ### E9. A tanween said plainly, and the pronoun haa joined
 
-`mappings("112:4")`, joined throughout, stopping after word 5.
+`pm.phonemize("112:4")`, joined throughout, stopping after word 5.
 
 | word | source | recited | phonemes |
 |---|---|---|---|
@@ -954,8 +958,8 @@ one.
 
 | relationship | what a consumer must do | cost |
 |---|---|---|
-| script - rules | colour a tanween mark | one field read, and the consumer chooses which of two units a highlight means: the fathatan of كُفُوًا shows the waw's vowel and the noon's `izhar`, and the dammatan of أَحَدٌ shows two units the stop takes together |
-| script - recited | read the two irregular blocks | one source cell corresponds to two recited cells and one to none, and each is one block. One call, and the block is the only place the correspondence is stated |
+| source - rules | colour a tanween mark | one field read, and the consumer chooses which of two units a highlight means: the fathatan of كُفُوًا shows the waw's vowel and the noon's `izhar`, and the dammatan of أَحَدٌ shows two units the stop takes together |
+| source - recited | read the two irregular blocks | one source cell corresponds to two recited cells and one to none, and each is one block. One call, and the block is the only place the correspondence is stated |
 | the other four | | one call and one field read |
 
 One mark is spelled two ways here: the fathatan becomes a fatha, a noon and a
@@ -966,7 +970,7 @@ dal; the table carries the degree the converse law requires.
 
 ### E10. Two identical consonants, and the mark that instructs
 
-`mappings("18:1:8-18:1:11")`, joined, stopping after word 11.
+`pm.phonemize("18:1:8-18:1:11")`, joined, stopping after word 11.
 
 | word | source | recited | phonemes |
 |---|---|---|---|
@@ -1032,8 +1036,8 @@ unchanged case, and so is the release.
 
 | relationship | what a consumer must do | cost |
 |---|---|---|
-| script - rules | account for the sakt mark | **FINDING.** It belongs to its word, so it is not structural and takes a pairing, and no spelling edge fits it: it supplies no fact, witnesses no unit and decorates none. Answering to no unit, it joins no other glyph's cell either, so it is a cell of its own naming nothing at all. Sakt is not a rule, and calling the mark silent instead would owe a rule it cannot name. `Word.sakt_after` is where the fact belongs |
-| script - recited | read the merger's spelling | the merger costs one deletion and buys no insertion, so the block over the merged lam has an empty recited side and the host's block runs one to one. One call |
+| source - rules | account for the sakt mark | **FINDING.** It belongs to its word, so it is not structural and takes a pairing, and no spelling edge fits it: it supplies no fact, witnesses no unit and decorates none. Answering to no unit, it joins no other glyph's cell either, so it is a cell of its own naming nothing at all. Sakt is not a rule, and calling the mark silent instead would owe a rule it cannot name. `Word.sakt_after` is where the fact belongs |
+| source - recited | read the merger's spelling | the merger costs one deletion and buys no insertion, so the block over the merged lam has an empty recited side and the host's block runs one to one. One call |
 | the other four | | one call and one field read |
 
 A merger's whole spelling is a deletion here, because the mushaf already wrote
@@ -1043,7 +1047,7 @@ table says anything about.
 
 ### E11. The homorganic pair that does not merge
 
-Plan A: `mappings("27:22:5-27:22:10")`, joined, stopping after word 10.
+Plan A: `pm.phonemize("27:22:5-27:22:10")`, joined, stopping after word 10.
 
 | word | source | recited | phonemes |
 |---|---|---|---|
@@ -1054,7 +1058,7 @@ Plan A: `mappings("27:22:5-27:22:10")`, joined, stopping after word 10.
 | 9 | بِهِۦ | بِهِي | `b i h i:` |
 | 10 | وَجِئْتُكَ | وَجِئْتُكْ | `w a ʒ i ʔ t u k` |
 
-Plan B: `mappings("27:22:5-27:22:9")`, joined, stopping after word 9.
+Plan B: `pm.phonemize("27:22:5-27:22:9")`, joined, stopping after word 9.
 
 | word | source | recited | phonemes |
 |---|---|---|---|
@@ -1154,8 +1158,8 @@ cell opens after the haa and the kasra never leaves it.
 | relationship | what a consumer must do | cost |
 |---|---|---|
 | sound - rules | reach what the naqis did | one field read. The instance owns a `Classifies` on the tah's consonant and changes nothing about the sound, which is the whole of what a partial merger is: the letter keeps its own sound, and a notation that wants to write it differently has the instance sitting on it |
-| script - sound | ask which glyph of هِۦ owns the vowel | at `grouping="cell"` the mark and its carrier are one row under plan A and the question does not arise; at `grouping="glyph"` the ownership order gives `i:` to the small yeh, which supplies its length, and the kasra takes it in `shares`. One field read |
-| script - recited | read هِۦ under each plan | one source cell corresponds to هِي under A and to هْ under B, one block each way. One call, two documents |
+| source - sound | ask which glyph of هِۦ owns the vowel | at `grouping="cell"` the mark and its carrier are one row under plan A and the question does not arise; at `grouping="glyph"` the ownership order gives `i:` to the small yeh, which supplies its length, and the kasra takes it in `shares`. One field read |
+| source - recited | read هِۦ under each plan | one source cell corresponds to هِي under A and to هْ under B, one block each way. One call, two documents |
 | the other three | | one call and one field read |
 
 An idgham with nothing shared and no host, beside a mark that owns a long vowel
@@ -1165,7 +1169,7 @@ naqis rule's trigger in the tuple position a merger uses for its host.
 
 ### E12. A vowel the canon leaves absent, and a release a merger consumes
 
-`mappings("11:42:7-11:42:15")`, joined, stopping after word 15.
+`pm.phonemize("11:42:7-11:42:15")`, joined, stopping after word 15.
 
 | word | source | recited | phonemes |
 |---|---|---|---|
@@ -1315,10 +1319,10 @@ that do not run one to one.
 
 | relationship | what a consumer must do | cost |
 |---|---|---|
-| script - sound | place the helping vowel | one sound, two row identities: under `text="source"` no glyph writes it, so it takes a gap pairing and the consumer reads `after` to place it, and under `text="recited"` it is an ordinary row on the kasra. `respelling` is what pairs the two, and no field of either row does |
+| source - sound | place the helping vowel | one sound, two row identities: under `text="source"` no glyph writes it, so it takes a gap pairing and the consumer reads `after` to place it, and under `text="recited"` it is an ordinary row on the kasra. `respelling` is what pairs the two, and no field of either row does |
 | sound - rules | ask what the baa does | one letter and one rule twice over: the baa of ٱبْنَهُۥ carries a release and the baa of ٱرْكَب carries a merger that consumed the closure, so `rules` gives different answers for the same letter in one request |
-| script - rules | colour the merger of مَعْزِلٍ | the kasratan shows the lam's vowel and the noon's merger on one scalar, so the merger colours a mark the merged letter does not have. One field read, two units |
-| script - recited | say why ٱرْكَب lost two glyphs | each is a block with an empty `recited`, which says a glyph went and not which rule took it; only `silent` read against `shares` separates the elision from the merger |
+| source - rules | colour the merger of مَعْزِلٍ | the kasratan shows the lam's vowel and the noon's merger on one scalar, so the merger colours a mark the merged letter does not have. One field read, two units |
+| source - recited | say why ٱرْكَب lost two glyphs | each is a block with an empty `recited`, which says a glyph went and not which rule took it; only `silent` read against `shares` separates the elision from the merger |
 | the other two | | one call and one field read |
 
 The one vowel the canon leaves absent and the one release a merger eats sit in
@@ -1332,7 +1336,8 @@ nasal host that family has is this meem.
 
 ### E13. The hum at the lips, the heavy hum, and the heavy lam
 
-Plan A: `mappings("2:27:2-2:27:8")`, joined throughout, stopping after word 8.
+Plan A: `pm.phonemize("2:27:2-2:27:8")`, joined throughout, stopping after
+word 8.
 
 | word | source | recited | phonemes |
 |---|---|---|---|
@@ -1344,7 +1349,8 @@ Plan A: `mappings("2:27:2-2:27:8")`, joined throughout, stopping after word 8.
 | 7 | مِيثَـٰقِهِۦ | مِيثَاقِهِي | `m i: θ a: q i h i:` |
 | 8 | وَيَقْطَعُونَ | وَيَقْطَعُونْ | `w a j a q Q tˤ aˤ ʕ u: n` |
 
-Plan B: `mappings("2:27:2-2:27:7")`, joined throughout, stopping after word 7.
+Plan B: `pm.phonemize("2:27:2-2:27:7")`, joined throughout, stopping after
+word 7.
 
 | word | source | recited | phonemes |
 |---|---|---|---|
@@ -1484,11 +1490,11 @@ holding the alif no rasm writes beside the cell whose length it carries.
 
 | relationship | what a consumer must do | cost |
 |---|---|---|
-| script - recited | list every glyph the recited text drops | **FINDING.** Both ٱ and ل are in a block with an empty `recited`, and only ٱ is in `silent`: a merged lam shows the geminate through `shares`, so no rule names its silence. No one list holds every dropped glyph, and the catalogue's "dropped" row says otherwise |
-| script - recited | draw the recited word لَّاهِ | the alif written for a length the rasm has no carrier for names no source glyph, and it owns the sound the source cell owns, so the block holds the two together. One call |
-| script - recited | draw مِيثَاقِهْ under plan B | row 1 removes ۦ and row 19 writes the sukun the kasra becomes, which covers a silah vowel and a short one alike. One call |
+| source - recited | list every glyph the recited text drops | **FINDING.** Both ٱ and ل are in a block with an empty `recited`, and only ٱ is in `silent`: a merged lam shows the geminate through `shares`, so no rule names its silence. No one list holds every dropped glyph, and the catalogue's "dropped" row says otherwise |
+| source - recited | draw the recited word لَّاهِ | the alif written for a length the rasm has no carrier for names no source glyph, and it owns the sound the source cell owns, so the block holds the two together. One call |
+| source - recited | draw مِيثَاقِهْ under plan B | row 1 removes ۦ and row 19 writes the sukun the kasra becomes, which covers a silah vowel and a short one alike. One call |
 | sound - rules | highlight the geminate | one call and two rows: `lˤlˤ` is owned in the second lam and the instance names the first as its `source`, so the highlight reads one row through `sounds` and one through `shares` |
-| script - sound, script - rules | read any other row | one call and one field read, except that ٱ and ل both own nothing, and only `silent` read against `shares` separates an elision from a merger |
+| source - sound, source - rules | read any other row | one call and one field read, except that ٱ and ل both own nothing, and only `silent` read against `shares` separates an elision from a merger |
 | the other two | | one call and one field read |
 
 Two hums, one token. The tables carry the heavy ghunnah the converse law asks
@@ -1500,8 +1506,8 @@ the shape of the recited word.
 
 ### E14. A length the stop reverts, and a length the join shortens
 
-Plan A: `mappings("2:27:12-2:27:17")`, joined throughout, stopping after word
-17.
+Plan A: `pm.phonemize("2:27:12-2:27:17")`, joined throughout, stopping after
+word 17.
 
 | word | source | recited | phonemes |
 |---|---|---|---|
@@ -1512,7 +1518,7 @@ Plan A: `mappings("2:27:12-2:27:17")`, joined throughout, stopping after word
 | 16 | فِى | فِ | `f i` |
 | 17 | ٱلْأَرْضِ ۚ | لْأَرْضْ ۚ | `l ʔ a rˤ dˤ` |
 
-Plan B: `mappings("2:27:12")`, one word, stopped.
+Plan B: `pm.phonemize("2:27:12")`, one word, stopped.
 
 | word | source | recited | phonemes |
 |---|---|---|---|
@@ -1631,9 +1637,9 @@ under plan B.
 | relationship | what a consumer must do | cost |
 |---|---|---|
 | sound - rules | ask فِى for its madd rule | **FINDING.** The converse law asks a canonically long vowel for a madd rule instance, and the only Length rule naming this one is `iltiqa_shortening`, which took the length away |
-| script - sound | ask why the fa's vowel is short | the cell holds a glyph claiming a length and owns a short vowel, and it is in no `silent` list, so the row states the outcome and not the conflict; that the vowel is canonically long is on the length edge of the sound and nowhere on either glyph, so the question takes a row read and an edge read |
-| script - recited | say why فِى loses its ى | the block's recited side is the kasra alone and the pairing's `rules` names `iltiqa_shortening`. It is the shape E13 marks: the drop is read from the block and not from `silent` |
-| script - recited | draw بِهِۦٓ stopped | row 1 removes the mark and its maddah together, and the maddah is a glyph that presented a sound it supplied no fact for. One field read |
+| source - sound | ask why the fa's vowel is short | the cell holds a glyph claiming a length and owns a short vowel, and it is in no `silent` list, so the row states the outcome and not the conflict; that the vowel is canonically long is on the length edge of the sound and nowhere on either glyph, so the question takes a row read and an edge read |
+| source - recited | say why فِى loses its ى | the block's recited side is the kasra alone and the pairing's `rules` names `iltiqa_shortening`. It is the shape E13 marks: the drop is read from the block and not from `silent` |
+| source - recited | draw بِهِۦٓ stopped | row 1 removes the mark and its maddah together, and the maddah is a glyph that presented a sound it supplied no fact for. One field read |
 | the other three | | one call and one field read |
 
 The maddah goes with the plan and the carrier goes with the join, and neither
@@ -1645,7 +1651,7 @@ tables.
 
 ### E15. An alif the rasm does not have
 
-`mappings("2:22:10-2:22:11")`, started on ٱلسَّمَآءِ, which is where the
+`pm.phonemize("2:22:10-2:22:11")`, started on ٱلسَّمَآءِ, which is where the
 request begins, joined, stopping after word 11.
 
 | word | source | recited | phonemes |
@@ -1729,8 +1735,8 @@ fathatan whose length it carries.
 
 | relationship | what a consumer must do | cost |
 |---|---|---|
-| script - sound | ask what the merged lam sounds like | not answerable from this quadrant. The lam is written and not recited, so it has no rendered glyph and no row here; the source quadrants are where it is |
-| script - recited | read the fathatan's two blocks | the fatha it becomes and the alif that was never written. Row 21 names a written seat this word does not have and row 15 is the one that supplies the alif, so the substitution is stated by neither alone |
+| source - sound | ask what the merged lam sounds like | not answerable from this quadrant. The lam is written and not recited, so it has no rendered glyph and no row here; the source quadrants are where it is |
+| source - recited | read the fathatan's two blocks | the fatha it becomes and the alif that was never written. Row 21 names a written seat this word does not have and row 15 is the one that supplies the alif, so the substitution is stated by neither alone |
 | the other four | | one call and one field read on every row. No sound takes a gap pairing here, and the two insertions are ordinary rows that their blocks place against the source side |
 
 The quadrant settles which array a colouring consumer should be reading: on the
@@ -1739,7 +1745,7 @@ that the letter a rule removed has nothing left to colour.
 
 ### E16. The letter said only at a pause
 
-Plan A: `mappings("76:15:8-76:16:1")`, joined across the verse boundary,
+Plan A: `pm.phonemize("76:15:8-76:16:1")`, joined across the verse boundary,
 stopping after the second word.
 
 | word | source | recited | phonemes |
@@ -1747,7 +1753,7 @@ stopping after the second word.
 | 76:15:8 | قَوَارِيرَا۠ | قَوَارِيرَ | `q aˤ w a: r i: rˤ aˤ` |
 | 76:16:1 | قَوَارِيرَا۟ | قَوَارِيرْ | `q aˤ w a: r i: r` |
 
-Plan B: the same request with `stops=("76:15:8",)`, so the second word is
+Plan B: the same request with `stop_refs=("76:15:8",)`, so the second word is
 started on.
 
 | word | source | recited | phonemes |
@@ -1837,9 +1843,9 @@ not the plain one the same five letters carry in the verse before.
 
 | relationship | what a consumer must do | cost |
 |---|---|---|
-| script - rules | attribute the silence signs | **FINDING.** Both are written and not said under every plan, and row 5 drops them with no owner. Where the seat beside the sign is silent too, the pairing names `orthographic_silence` and both scalars are `silent` under it; on the stopped 76:15:8 the alif sounds and no rule names the sign's silence, so it is in no list and the pairing's rules name only a madd |
+| source - rules | attribute the silence signs | **FINDING.** Both are written and not said under every plan, and row 5 drops them with no owner. Where the seat beside the sign is silent too, the pairing names `orthographic_silence` and both scalars are `silent` under it; on the stopped 76:15:8 the alif sounds and no rule names the sign's silence, so it is in no list and the pairing's rules name only a madd |
 | identity | tell the two requests apart | **FINDING.** They differ only in the junction after 76:15:8. One phoneme separates them under the reading the tables state, and none under what the package emits, and either way section 3 publishes no boundary field, so the identity is the same document twice. E17's version of this finding is the general one |
-| script - sound | ask an alif what it sounds like | one call and one field read, and the answer is what the character cannot give: two alifs with the same neighbours and the same harakat, one owning a long vowel at a pause and one owning nothing under any plan |
+| source - sound | ask an alif what it sounds like | one call and one field read, and the answer is what the character cannot give: two alifs with the same neighbours and the same harakat, one owning a long vowel at a pause and one owning nothing under any plan |
 | sound - rules | reach `orthographic_silence` | one call and one field read. It owns no attribution in either word, so it is reached only through the seat's pairing |
 | the other three | | one call and one field read |
 
@@ -1850,7 +1856,7 @@ space.
 
 ### E17. A glyph that spells a whole name
 
-Plan A: `mappings("27:1")`, joined throughout, stopping after word 6.
+Plan A: `pm.phonemize("27:1")`, joined throughout, stopping after word 6.
 
 | word | source | recited | phonemes |
 |---|---|---|---|
@@ -1861,8 +1867,8 @@ Plan A: `mappings("27:1")`, joined throughout, stopping after word 6.
 | 5 | وَكِتَابٍ | وَكِتَابِ | `w a k i t a: b i` |
 | 6 | مُّبِينٍ | مُّبِينْ | `m̃ u b i: n` |
 
-Plan B: `mappings("27:1", stops=("27:1:3",))`, the same with a stop after word
-3, so word 4 is started on.
+Plan B: `pm.phonemize("27:1", stop_refs=("27:1:3",))`, the same with a stop
+after word 3, so word 4 is started on.
 
 | word | source | recited | phonemes |
 |---|---|---|---|
@@ -1977,9 +1983,9 @@ its damma `silent` and `pausal_sukun` in its rules.
 
 | relationship | what a consumer must do | cost |
 |---|---|---|
-| script - sound | ask the pairing of سٓ | it receives the sounds of a whole letter name at once. The glyph has no sub-range, so a consumer painting one letter of the name reads the recited text instead, where each name is spelled out |
-| script - rules | light the izhar's trigger | one field read, and there is nothing outside the pairing to light: the taa that begins word 2 fired nothing, because a spelled name is closed and its last unit is said plainly whatever follows |
-| script - recited | expand one source glyph | one call: the block holds one source pairing and the whole spelled name on the recited side |
+| source - sound | ask the pairing of سٓ | it receives the sounds of a whole letter name at once. The glyph has no sub-range, so a consumer painting one letter of the name reads the recited text instead, where each name is spelled out |
+| source - rules | light the izhar's trigger | one field read, and there is nothing outside the pairing to light: the taa that begins word 2 fired nothing, because a spelled name is closed and its last unit is said plainly whatever follows |
+| source - recited | expand one source glyph | one call: the block holds one source pairing and the whole spelled name on the recited side |
 | identity | tell the two plans apart | **FINDING.** They are two documents whose `ref`, `riwayah`, `script`, `variant` and `canon_digest` are identical. Section 3 publishes no boundary field, so nothing in the identity separates them, and a consumer keyed on identity serves plan A's document for a plan B request |
 | the other three | | one call and one field read |
 
@@ -1993,8 +1999,8 @@ one law this example is for.
 
 ### E18. A hamza written as the vowel before it
 
-Plan A: `mappings("2:283:12-2:283:17")`, joined throughout, stopping after word
-17.
+Plan A: `pm.phonemize("2:283:12-2:283:17")`, joined throughout, stopping after
+word 17.
 
 | word | source | recited | phonemes |
 |---|---|---|---|
@@ -2005,7 +2011,8 @@ Plan A: `mappings("2:283:12-2:283:17")`, joined throughout, stopping after word
 | 16 | ٱؤْتُمِنَ | ؤْتُمِنَ | `ʔ t u m i n a` |
 | 17 | أَمَـٰنَتَهُۥ | أَمَانَتَهْ | `ʔ a m a: n a t a h` |
 
-Plan B: the same request with `stops=("2:283:15",)`, so word 16 is started on.
+Plan B: the same request with `stop_refs=("2:283:15",)`, so word 16 is started
+on.
 
 | word | source | recited | phonemes |
 |---|---|---|---|
@@ -2133,9 +2140,9 @@ substituted hamza owns the vowel that sounds.
 
 | relationship | what a consumer must do | cost |
 |---|---|---|
-| script - recited | read `from_glyphs` on the rendered waw at the ibdal | **FINDING.** Row 23 is the case that makes `from_glyphs` a tuple, covering the vowel's source glyph and the hamza's; here the vowel is itself written by no source glyph, so the tuple has one member |
+| source - recited | read `from_glyphs` on the rendered waw at the ibdal | **FINDING.** Row 23 is the case that makes `from_glyphs` a tuple, covering the vowel's source glyph and the hamza's; here the vowel is itself written by no source glyph, so the tuple has one member |
 | sound - rules | order the thal's lengthening against its shortening | no order between them is published. The sound's own `long` field is the answer; the two modifier edges are the account, and a consumer reading only the first is wrong |
-| script - rules | account for word 15's yaa | one field read, and a consumer that reached for the reclass finds a deletion: the yaa is written in one plan and not in the other, and the rule that removes it is `iltiqa_shortening` rather than row 29's reclass |
+| source - rules | account for word 15's yaa | one field read, and a consumer that reached for the reclass finds a deletion: the yaa is written in one plan and not in the other, and the rule that removes it is `iltiqa_shortening` rather than row 29's reclass |
 | identity | tell the two plans apart | **FINDING**, the one E17 records, and here it separates two readings of the same six words |
 | the other three | | one call and one field read |
 
@@ -2148,7 +2155,7 @@ in this request carries the `silah` label.
 
 ### E19. Colour, and the vowel that tilts
 
-`mappings("11:41:6-11:41:11")`, joined throughout, stopping after word 11.
+`pm.phonemize("11:41:6-11:41:11")`, joined throughout, stopping after word 11.
 
 | word | source | recited | phonemes |
 |---|---|---|---|
@@ -2253,8 +2260,8 @@ the shadda.
 | relationship | what a consumer must do | cost |
 |---|---|---|
 | sound - rules | tell a colour from a classification | one field read each, and the sound's `emphatic` field alone gives the state of every raa here and the name of none: `tafkheem` recolours and `tarqeeq` only names |
-| script - rules | colour the imala | the mark and the vowel it tilts fall in two cells and both name the instance, so a consumer colouring the mark alone lights half of it. One field read |
-| script - sound | derive a sound from a spelling | the source writes ىٰ, which spells a long a everywhere else in this request; the pairing answers and the glyph does not, so a consumer deriving sound from spelling is wrong at exactly this cell |
+| source - rules | colour the imala | the mark and the vowel it tilts fall in two cells and both name the instance, so a consumer colouring the mark alone lights half of it. One field read |
+| source - sound | derive a sound from a spelling | the source writes ىٰ, which spells a long a everywhere else in this request; the pairing answers and the glyph does not, so a consumer deriving sound from spelling is wrong at exactly this cell |
 | the other three | | one call and one field read |
 
 The imala vowel prints as a long i under the shipped reading, so the quality
@@ -2264,7 +2271,7 @@ single `emphatic` field cannot show.
 
 ### E20. A rule that produces nothing
 
-`mappings("12:11:5-12:11:8")`, joined throughout, stopping after word 8.
+`pm.phonemize("12:11:5-12:11:8")`, joined throughout, stopping after word 8.
 
 | word | source | recited | phonemes |
 |---|---|---|---|
@@ -2327,9 +2334,9 @@ spelling is the recited spelling. Word 7 is row 26 and word 8 is row 19.
 
 | relationship | what a consumer must do | cost |
 |---|---|---|
-| sound - rules | reach the ishmam from a sound | the instance names no sound, so no attribution and no modifier reaches it. It is in `m.rules` and in one pairing's `rules`, and a consumer animating by sound never meets it |
-| script - rules | say what the instance on that row reached | under `grouping="cell"` the mark folds into the meem's cell, so the instance sits on a row that owns two real sounds and nothing on the row says the rule reaches neither. `grouping="glyph"` separates the mark and the row it gets owns nothing at all |
-| script - sound | tell a soundless cell from a soundless rule | **FINDING.** They are the same shape. `silent` distinguishes them, but only because it names glyphs recitation never says, and this mark is one the reciter performs |
+| sound - rules | reach the ishmam from a sound | the instance names no sound, so no attribution and no modifier reaches it. It is in `r.rules` and in one pairing's `rules`, and a consumer animating by sound never meets it |
+| source - rules | say what the instance on that row reached | under `grouping="cell"` the mark folds into the meem's cell, so the instance sits on a row that owns two real sounds and nothing on the row says the rule reaches neither. `grouping="glyph"` separates the mark and the row it gets owns nothing at all |
+| source - sound | tell a soundless cell from a soundless rule | **FINDING.** They are the same shape. `silent` distinguishes them, but only because it names glyphs recitation never says, and this mark is one the reciter performs |
 | the other three | | one call and one field read |
 
 **FINDING.** Learning that an instance produces nothing takes a scan of both
@@ -2341,7 +2348,7 @@ else in the four words is ordinary, which is what makes the cost visible.
 
 ### E21. A hamza the reciter eases
 
-`mappings("41:44:8-41:44:10")`, joined throughout, stopping after word 10.
+`pm.phonemize("41:44:8-41:44:10")`, joined throughout, stopping after word 10.
 
 | word | source | recited | phonemes |
 |---|---|---|---|
@@ -2421,14 +2428,14 @@ and word 10 takes the shadda row 18 adds; word 10 is row 20.
 | relationship | what a consumer must do | cost |
 |---|---|---|
 | sound - rules | tell the eased hamza from the plain one | one field read to reach the rule and none at all to reach the manner: the two are the same token, the ease is a `Classifies` edge and no field of the sound, which is what the contract intends and what a consumer reading tokens alone cannot recover |
-| script - sound | ask an alif what it owns | one field read, and a consumer keyed on the base letter reads an alif twice and hears two different things: the ا۬ of word 9 owns a hamza and the vowel after it, where the plain ا of word 8 owns the long a of the letter before it |
-| script - recited | expand the silah mark | one call: the block holds the mark's cell on one side and the haraka and its carrier on the other |
+| source - sound | ask an alif what it owns | one field read, and a consumer keyed on the base letter reads an alif twice and hears two different things: the ا۬ of word 9 owns a hamza and the vowel after it, where the plain ا of word 8 owns the long a of the letter before it |
+| source - recited | expand the silah mark | one call: the block holds the mark's cell on one side and the haraka and its carrier on the other |
 | the other three | | one call and one field read |
 
 Manner is a rule here and nothing else, so two hamzas a reciter says
 differently are separated by their rule lists alone. The label on the
 lengthening names a configuration the graph already states and mints no
-instance, so the length it reports is the madd rule's, and `m.rules` carries no
+instance, so the length it reports is the madd rule's, and `r.rules` carries no
 entry called `silah_kubra`: a consumer looking that teaching name up scans
 every instance's `labels`.
 

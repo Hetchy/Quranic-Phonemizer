@@ -21,7 +21,7 @@ The one-paragraph version: four of the five legacy projections were four
 traversals of a join the old model could not hold, so each recomputed
 relationships from rule names and lost a different set; the fifth rebuilt
 recited Arabic from rule names for the same reason. The layered model is the
-join. `Mappings` publishes its ordered node arrays and its typed spelling,
-attribution and modifier edges, over the written text and the
-recited one alike. `phonemes` stays separate because the token stream and the
+join. `PhonemizeResult` publishes its ordered node arrays and its typed
+spelling, attribution and modifier edges, over the written text and the
+recited one alike. `phonemes` stays a method because the token stream and the
 graph version at different rates.

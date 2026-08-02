@@ -100,7 +100,7 @@ request.
 
 `owner = -` says a real difference between the two texts is reachable through
 no rule instance. Those rows are why the catalogue exists: a consumer cannot
-find them through `m.rules` and has nowhere else to look.
+find them through `r.rules` and has nowhere else to look.
 
 A glyph kind is not the unit of this decision. Eleven kinds do not decide
 thirty-four transformations, and a kind that behaves one way under a rule and

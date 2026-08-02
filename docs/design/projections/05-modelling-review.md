@@ -189,7 +189,7 @@ Do these before forming an opinion.
 Owner decisions. Challenge only with evidence unavailable when they were
 made - a measurement, a code path, a named consumer.
 
-- Two projections, `phonemes` and `Mappings`; one document, no profiles.
+- Two projections, `phonemes` and the graph; one document, no profiles.
 - `alignment(text=, grouping=)`, its two axes and four values; pairings carry
   both texts; co-highlighting is a field, not a policy.
 - No rule family anywhere.
