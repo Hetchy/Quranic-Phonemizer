@@ -76,6 +76,11 @@ class Neighbourhood:
         left, right = self._word.get(here), self._word.get(following)
         if left is None or right is None or left == right:
             return False
+        if self.score.words[left].sakt_after:
+            # A sakt is a silence, so nothing carries across it. It is a Score
+            # fact rather than a requested stop, and holds under any plan --
+            # a caller that asks to join everything still cannot join `مَنْ ۜ رَاقٍ`.
+            return True
         return self.boundaries.junctions[left] in (
             Junction.STOP,
             Junction.SAKT,
