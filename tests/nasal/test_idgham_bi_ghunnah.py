@@ -52,3 +52,10 @@ def test_a_tanween_merges_with_a_hum_into_each_letter(ref, words, expected):
 def test_the_noon_of_a_letter_name_merges_into_the_next_name(r):
     # طسٓمٓ
     assert r.phonemes(1) == "tˤaˤ:si:m̃i:m"
+
+
+@for_each_riwayah(AZEEMUN, ibtidaa=12, wasl=12)
+def test_a_tanween_at_a_verse_end_merges_into_the_next_verse(r):
+    # عَظِيمٌ وَمِنَ
+    assert r.phonemes(12) == "ʕaðˤi:mu"
+    assert r.phonemes(13) == "w̃amina"
