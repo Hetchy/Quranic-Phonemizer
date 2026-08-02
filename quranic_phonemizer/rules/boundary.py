@@ -172,6 +172,41 @@ class SoftenedHamza:
 
 
 @dataclass(frozen=True, slots=True)
+class PausalAlif:
+    """The seven alifs: long at a pause, short when the word is joined to.
+
+    The mirror of `Onset.SILAH`, which `WaqfEnding` removes at a stop.
+    """
+    # Emits `Relength`, not a realization: the vowel is still plainly
+    # produced, and only its length changes.
+
+    rule: Rule = Rule.PAUSAL_ALIF
+    phase: Phase = Phase.BOUNDARY
+    triggers: frozenset = frozenset({NucleusKind.PAUSAL_LONG})
+
+    def look(
+        self, near: Neighbourhood, plan: Plan, at: SlotId,
+        boundaries: BoundaryPlan,
+    ) -> Verdict | None:
+        del plan
+        slot, word = near.slot(at), near.word_of(at)
+        if slot is None or word is None:
+            return None
+        if slot.nucleus.kind is not NucleusKind.PAUSAL_LONG:
+            return None
+        if boundaries.stopped_on(word):
+            # Stopped on, the alif is said and `WaqfEnding` owns the slot.
+            return None
+        return Verdict(
+            Occurrence(
+                mint(Rule.PAUSAL_ALIF, at), Rule.PAUSAL_ALIF,
+                Participants((at,)),
+            ),
+            (Relength(at, Length.SHORT),),
+        )
+
+
+@dataclass(frozen=True, slots=True)
 class TanweenAtWaqf:
     """The tanween noon is silent at a stop; after a fatha it leaves the iwad.
 
