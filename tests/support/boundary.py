@@ -41,11 +41,8 @@ def plan_for(
 
     for word in _requested(wasl):
         if word == words:
-            raise UnreachableWasl(
-                f"word {word} is the last of its verse, so it is always "
-                f"stopped on. Name a site with a word after it."
-            )
-        if junctions[word - 1] is not Junction.JOIN:
+            junctions[-1] = Junction.JOIN   # joins into the verse after it
+        elif junctions[word - 1] is not Junction.JOIN:
             raise UnreachableWasl(
                 f"word {word} is asked to join forward and to stop"
             )

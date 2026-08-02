@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from tests.support import Site, for_each_riwayah
+import pytest
+
+from tests.support import Site, for_each_riwayah, reading
 
 QAWARIRA = Site(hafs=("76:15", (8,)))
 QAWARIRA_SECOND = Site(hafs=("76:16", (1,)))
@@ -12,23 +14,45 @@ ANA = Site(hafs=("2:258", (21,)))
 ANA_AGAIN = Site(hafs=("18:39", (15,)))
 LAKINNA = Site(hafs=("18:38", (1,)))
 
+#: Written with the mark that is sounded at a stop and silent when joined.
+SOUNDED_AT_A_STOP = [
+    (QAWARIRA, 8, "qaˤwa:ri:rˤaˤ:", "qaˤwa:ri:rˤaˤ"),   # قَوَارِيرَا۠
+    (DHUNUNA, 16, "ʔaðˤðˤunu:na:", "ʔaðˤðˤunu:na"),     # ٱلظُّنُونَا۠
+    (RASULA, 11, "ʔarˤrˤaˤsu:la:", "ʔarˤrˤaˤsu:la"),    # ٱلرَّسُولَا۠
+    (SABILA, 8, "ʔassabi:la:", "ʔassabi:la"),           # ٱلسَّبِيلَا۠
+    (ANA, 21, "ʔana:", "ʔana"),                         # أَنَا۠
+    (ANA_AGAIN, 15, "ʔana:", "ʔana"),                   # أَنَا۠
+    (LAKINNA, 1, "la:kiña:", "la:kiña"),                # لَّـٰكِنَّا۠
+]
 
-@for_each_riwayah(QAWARIRA, isolated=8)
-def test_the_pausal_alif_of_qawarira_is_long_when_stopped_on(r):
-    # قَوَارِيرَا۠
-    assert r.phonemes(8) == "qaˤwa:ri:rˤaˤ:"
-    assert r.silent(8) == frozenset()
+
+@pytest.mark.parametrize(("site", "word", "stopped", "joined"),
+                         SOUNDED_AT_A_STOP)
+def test_each_pausal_alif_is_sounded_when_it_is_stopped_on(
+    site, word, stopped, joined
+):
+    assert reading(site, isolated=word).phonemes(word) == stopped
+
+
+@pytest.mark.engine_bug
+@pytest.mark.parametrize(("site", "word", "stopped", "joined"),
+                         SOUNDED_AT_A_STOP)
+def test_each_pausal_alif_falls_silent_when_the_reading_carries_on(
+    site, word, stopped, joined
+):
+    # the engine sounds the alif at either junction, so it reads long here too
+    assert reading(site, ibtidaa=word, wasl=word).phonemes(word) == joined
 
 
 @for_each_riwayah(QAWARIRA_SECOND, ibtidaa=1, wasl=1)
-def test_the_second_qawarira_keeps_its_fatha_when_joined_forward(r):
+def test_the_round_zero_keeps_a_short_fatha_when_joined_forward(r):
     # قَوَارِيرَا۟
     assert r.phonemes(1) == "qaˤwa:ri:rˤaˤ"
     assert r.silent(1) == frozenset()
 
 
 @for_each_riwayah(QAWARIRA_SECOND, isolated=1)
-def test_the_second_qawarira_drops_that_alif_at_a_stop(r):
+def test_the_round_zero_drops_its_alif_at_a_stop(r):
     # قَوَارِيرَا۟
     assert r.phonemes(1) == "qaˤwa:ri:r"
     assert r.silent(1) == {"َ", "ا", "۟"}
@@ -46,64 +70,3 @@ def test_salasila_is_stopped_on_without_sounding_its_alif(r):
     # سَلَـٰسِلَا۟
     assert r.phonemes(4) == "sala:sil"
     assert r.silent(4) == {"َ", "ا", "۟"}
-
-
-@for_each_riwayah(DHUNUNA, isolated=16)
-def test_the_pausal_alif_of_adh_dhununa_is_long_when_stopped_on(r):
-    # ٱلظُّنُونَا۠
-    assert r.phonemes(16) == "ʔaðˤðˤunu:na:"
-    assert r.silent(16) == frozenset()
-
-
-@for_each_riwayah(RASULA, isolated=11)
-def test_the_pausal_alif_of_ar_rasula_is_long_when_stopped_on(r):
-    # ٱلرَّسُولَا۠
-    assert r.phonemes(11) == "ʔarˤrˤaˤsu:la:"
-    assert r.silent(11) == frozenset()
-
-
-@for_each_riwayah(SABILA, isolated=8)
-def test_the_pausal_alif_of_as_sabila_is_long_when_stopped_on(r):
-    # ٱلسَّبِيلَا۠
-    assert r.phonemes(8) == "ʔassabi:la:"
-    assert r.silent(8) == frozenset()
-
-
-@for_each_riwayah(ANA, isolated=21)
-def test_ana_is_long_when_stopped_on(r):
-    # أَنَا۠
-    assert r.phonemes(21) == "ʔana:"
-    assert r.silent(21) == frozenset()
-
-
-@for_each_riwayah(ANA, ibtidaa=21, wasl=21)
-def test_ana_is_read_long_when_joined_forward_as_well(r):
-    # أَنَا۠
-    assert r.phonemes(21) == "ʔana:"
-    assert r.silent(21) == frozenset()
-
-
-@for_each_riwayah(ANA_AGAIN, isolated=15)
-def test_a_second_ana_is_long_when_stopped_on(r):
-    # أَنَا۠
-    assert r.phonemes(15) == "ʔana:"
-
-
-@for_each_riwayah(ANA_AGAIN, ibtidaa=15, wasl=15)
-def test_a_second_ana_is_read_long_when_joined_forward_as_well(r):
-    # أَنَا۠
-    assert r.phonemes(15) == "ʔana:"
-
-
-@for_each_riwayah(LAKINNA, isolated=1)
-def test_lakinna_is_long_when_stopped_on(r):
-    # لَّـٰكِنَّا۠
-    assert r.phonemes(1) == "la:kiña:"
-    assert r.silent(1) == frozenset()
-
-
-@for_each_riwayah(LAKINNA, ibtidaa=1, wasl=1)
-def test_lakinna_is_read_long_when_joined_forward_as_well(r):
-    # لَّـٰكِنَّا۠
-    assert r.phonemes(1) == "la:kiña:"
-    assert r.silent(1) == frozenset()

@@ -8,15 +8,17 @@ from pathlib import Path
 from quranic_phonemizer.api import alphabet as load_alphabet
 from quranic_phonemizer.api import recitation
 from quranic_phonemizer.model.address import (
+    Junction,
     Location,
     Riwayah,
     Script,
     VariantSelection,
+    VerseRef,
 )
 from quranic_phonemizer.render.anchored import anchored, graphemes_by_id
 from quranic_phonemizer.render.recite import phonemes_by_word
 
-from .boundary import plan_for
+from .boundary import UnreachableWasl, plan_for
 from .site import Site
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -58,6 +60,29 @@ def _words(recitation_, riwayah: Riwayah, script: Script, verse):
     if script is Script.UTHMANI:
         return recitation_.words(verse)
     return _editable(riwayah, script)[(verse.surah, verse.ayah)]
+
+
+def _after(recitation_, verse: VerseRef) -> VerseRef | None:
+    """The verse a continuing reading runs into, across a surah if it must."""
+    surahs = recitation_.corpus.surah_info
+    if verse.ayah < len(surahs[str(verse.surah)]):
+        return VerseRef(verse.surah, verse.ayah + 1)
+    if str(verse.surah + 1) in surahs:
+        return VerseRef(verse.surah + 1, 1)
+    return None
+
+
+def _right_context(recitation_, riwayah, script, verse):
+    """The next verse, read but not performed, so a tanween can reach it."""
+    following = _after(recitation_, verse)
+    if following is None:
+        raise UnreachableWasl(
+            f"{verse.surah}:{verse.ayah} is the last verse of the corpus, "
+            f"so it has nothing to join into"
+        )
+    return recitation_.read(
+        script, following, _words(recitation_, riwayah, script, following)
+    )
 
 
 class Reading:
@@ -126,10 +151,16 @@ def reading(
     recitation_ = _recitation(name)
     address = site.address(riwayah)
     words = _words(recitation_, name, script, address.verse)
+    plan = plan_for(len(words), **boundary)
+    carries_on = plan.junctions[-1] is Junction.JOIN
     built = recitation_.build(
-        recitation_.read(script, address.verse, words), selection=selection
+        recitation_.read(script, address.verse, words),
+        selection=selection,
+        right_context=(
+            _right_context(recitation_, name, script, address.verse)
+            if carries_on else None
+        ),
     )
-    plan = plan_for(len(built.score.words), **boundary)
     return Reading(
         riwayah, script, built,
         recitation_.perform(built.score, plan, selection=selection), words,

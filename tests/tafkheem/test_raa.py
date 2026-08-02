@@ -160,10 +160,13 @@ def test_the_same_word_started_on_keeps_its_heavy_raa(r):
     assert r.phonemes(5) == "ʔirˤta:bu:"
 
 
+@pytest.mark.engine_bug
 @for_each_riwayah(AMI_IRTABU, ibtidaa=4, waqf=5)
-def test_joining_ami_onto_it_reports_the_raa_as_light(r):
+def test_an_incidental_kasra_before_it_leaves_the_raa_heavy(r):
     # أَمِ ٱرْتَابُوٓا۟
-    assert r.phonemes(5) == "rta:bu:"
+    # the engine reads the kasra of ami as a real one and gives rta:bu:
+    assert r.phonemes(4) == "ʔami"
+    assert r.phonemes(5) == "rˤta:bu:"
 
 
 @for_each_riwayah(KHAYRUN, isolated=17)
