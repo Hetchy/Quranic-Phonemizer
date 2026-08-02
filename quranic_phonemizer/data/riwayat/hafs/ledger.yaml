@@ -77,6 +77,13 @@ supplies:
   - {slot: "83:14:2#1", skeleton: "بل", fact: SAKT, value: true,
      citation: "Hafs; sakt, 4 of 4"}
 
+  # 69:28-29 `مَالِيَهْ ۜ هَلَكَ` is the fifth site, and the one the sources argue
+  # over: the two haas would otherwise merge, and Hafs by the Shatibiyyah
+  # keeps the first clear. Listed here rather than among the four above
+  # because it is a decision this package makes, not one every source shares.
+  - {slot: "69:28:4#3", skeleton: "مليه", fact: SAKT, value: true,
+     citation: "Hafs; sakt on مَالِيَهْ, izhar of the two haas"}
+
 asserts:
   - {script: uthmani, slot: "6:77:2#1", skeleton: "رء", fact: NUCLEUS,
      value: {kind: Long, quality: A}}
