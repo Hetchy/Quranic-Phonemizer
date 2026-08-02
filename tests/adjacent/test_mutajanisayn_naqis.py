@@ -1,18 +1,20 @@
 from __future__ import annotations
 
-from tests.support import Site, for_each_riwayah
+import pytest
 
-BASATTA = Site(hafs=("5:28", (2,)))
-AHATTU = Site(hafs=("27:22", (5,)))
+from tests.support import Site, reading
+
+A_TAH_BEFORE_A_TAA = [
+    ("5:28", 2, "basatˤt"),              # بَسَطتَ
+    ("27:22", 5, "ʔaħatˤt"),             # أَحَطتُ
+    ("12:80", 21, "farˤrˤaˤtˤtum"),      # فَرَّطتُمْ
+    ("39:56", 7, "farˤrˤaˤtˤt"),         # فَرَّطتُ
+]
 
 
-@for_each_riwayah(BASATTA, waqf=2)
-def test_a_taa_keeps_the_heaviness_of_the_taa_before_it(r):
-    # بَسَطتَ
-    assert r.phonemes(2) == "basatˤt"
-
-
-@for_each_riwayah(AHATTU, waqf=5)
-def test_the_same_partial_merger_before_a_damma(r):
-    # أَحَطتُ
-    assert r.phonemes(5) == "ʔaħatˤt"
+@pytest.mark.parametrize(("ref", "word", "expected"), A_TAH_BEFORE_A_TAA)
+def test_a_taa_takes_the_place_of_the_tah_but_not_its_heaviness(
+    ref, word, expected
+):
+    r = reading(Site(hafs=(ref, (word,))), ibtidaa=word, waqf=word)
+    assert r.phonemes(word) == expected

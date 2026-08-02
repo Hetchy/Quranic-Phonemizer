@@ -1,20 +1,49 @@
 from __future__ import annotations
 
-from tests.support import Site, for_each_riwayah
+import pytest
 
-QAD_TABAYYANA = Site(hafs=("2:256", (5, 6)))
-IRKAB_MAANA = Site(hafs=("11:42", (14, 15)))
+from tests.support import Site, for_each_riwayah, reading
+
+ATHQALAT_DAAWA = Site(hafs=("7:189", (20, 21)))
+
+ACROSS_A_BOUNDARY = [
+    ("2:256", (5, 6), ("qaˤ", "ttabajjan")),        # قَد تَّبَيَّنَ
+    ("6:94", (22, 23), ("laqaˤ", "ttaqaˤtˤtˤaˤʕ")),  # لَقَد تَّقَطَّعَ
+    ("3:69", (1, 2), ("wadda", "tˤtˤaˤ:ʔifah")),    # وَدَّت طَّآئِفَةٌ
+    ("3:122", (2, 3),
+     ("ham̃a", "tˤtˤaˤ:ʔifata:n")),                 # هَمَّت طَّآئِفَتَانِ
+    ("4:64", (11, 12), ("ʔi", "ðˤðˤaˤlamu:")),      # إِذ ظَّلَمُوٓا۟
+    ("11:42", (14, 15), ("ʔirˤka", "mmaʕana:")),    # ٱرْكَب مَّعَنَا
+    ("7:176", (20, 21), ("jalha", "ðða:lik")),      # يَلْهَث ذَّٰلِكَ
+]
+
+INSIDE_ONE_WORD = [
+    ("2:233", 45, "ʔarˤaˤttum"),                    # أَرَدتُّمْ
+    ("12:32", 7, "rˤaˤ:wattuh"),                    # رَٰوَدتُّهُۥ
+    ("5:110", 13, "ʔajjattuk"),                     # أَيَّدتُّكَ
+    ("12:51", 5, "rˤaˤ:wattuñ"),                    # رَٰوَدتُّنَّ
+]
 
 
-@for_each_riwayah(QAD_TABAYYANA, wasl=5, waqf=6)
-def test_a_daal_merges_wholly_into_a_following_taa(r):
-    # قَد تَّبَيَّنَ
-    assert r.phonemes(5) == "qaˤ"
-    assert r.phonemes(6) == "ttabajjan"
+@pytest.mark.parametrize(("ref", "words", "expected"), ACROSS_A_BOUNDARY)
+def test_a_letter_merges_wholly_into_its_neighbour_of_the_same_family(
+    ref, words, expected
+):
+    first, last = words
+    r = reading(Site(hafs=(ref, words)), ibtidaa=first, waqf=last)
+    assert (r.phonemes(first), r.phonemes(last)) == expected
 
 
-@for_each_riwayah(IRKAB_MAANA, wasl=14, waqf=15)
-def test_a_baa_merges_wholly_into_a_following_meem(r):
-    # ٱرْكَب مَّعَنَا
-    assert r.phonemes(14) == "rˤka"
-    assert r.phonemes(15) == "mmaʕana:"
+@pytest.mark.parametrize(("ref", "word", "expected"), INSIDE_ONE_WORD)
+def test_a_daal_merges_wholly_into_a_taa_inside_one_word(ref, word, expected):
+    r = reading(Site(hafs=(ref, (word,))), ibtidaa=word, waqf=word)
+    assert r.phonemes(word) == expected
+
+
+@pytest.mark.engine_bug
+@for_each_riwayah(ATHQALAT_DAAWA, ibtidaa=20, waqf=21)
+def test_a_quiescent_taa_merges_wholly_into_a_following_daal(r):
+    # أَثْقَلَت دَّعَوَا
+    # the engine sounds the taa and leaves the daal single
+    assert r.phonemes(20) == "ʔaθqaˤla"
+    assert r.phonemes(21) == "ddaʕawa:"

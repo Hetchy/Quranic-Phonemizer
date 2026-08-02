@@ -1,12 +1,37 @@
 from __future__ import annotations
 
-from tests.support import Site, for_each_riwayah
+import pytest
 
-RABIHAT_TIJARATUHUM = Site(hafs=("2:16", (7, 8)))
+from tests.support import Site, for_each_riwayah, reading
+
+YUDRIKKUM = Site(hafs=("4:78", (3,)))
+
+THE_SAME_LETTER_TWICE = [
+    ("2:16", (7, 8),
+     ("rˤaˤbiħa", "ttiʒa:rˤaˤtuhum")),           # رَبِحَت تِّجَـٰرَتُهُمْ
+    ("2:33", (10, 11), ("ʔaqu", "llakum")),      # أَقُل لَّكُمْ
+    ("3:154", (23, 24), ("ha", "llana:")),       # هَل لَّنَا
+    ("2:60", (6, 7), ("ʔidˤri", "bbiʕasˤaˤ:k")),  # ٱضْرِب بِّعَصَاكَ
+    ("2:61", (57, 58), ("ʕasˤaˤ", "wwaka:nu:")),  # عَصَوا۟ وَّكَانُوا۟
+    ("83:3", (3, 4), ("ʔa", "wwazanu:hum")),     # أَو وَّزَنُوهُمْ
+    ("3:41", (15, 16), ("waðku", "rˤrˤaˤbbak")),  # وَٱذْكُر رَّبَّكَ
+    ("5:61", (5, 6), ("waqaˤ", "ddaxaˤlu:")),    # وَقَد دَّخَلُوا۟
+    ("21:87", (3, 4), ("ʔi", "ððahabQ")),        # إِذ ذَّهَبَ
+    ("18:78", (10, 11), ("tastatˤi", "ʕʕalajh")),  # تَسْتَطِع عَّلَيْهِ
+    ("17:33", (17, 18), ("jusri", "ffi:")),      # يُسْرِف فِّى
+]
 
 
-@for_each_riwayah(RABIHAT_TIJARATUHUM, wasl=7, waqf=8)
-def test_a_letter_merges_into_the_same_letter_across_a_boundary(r):
-    # رَبِحَت تِّجَـٰرَتُهُمْ
-    assert r.phonemes(7) == "rˤaˤbiħa"
-    assert r.phonemes(8) == "ttiʒa:rˤaˤtuhum"
+@pytest.mark.parametrize(("ref", "words", "expected"), THE_SAME_LETTER_TWICE)
+def test_a_letter_merges_into_the_same_letter_across_a_boundary(
+    ref, words, expected
+):
+    first, last = words
+    r = reading(Site(hafs=(ref, words)), ibtidaa=first, waqf=last)
+    assert (r.phonemes(first), r.phonemes(last)) == expected
+
+
+@for_each_riwayah(YUDRIKKUM, ibtidaa=3, waqf=3)
+def test_the_same_merger_inside_one_word(r):
+    # يُدْرِككُّمُ
+    assert r.phonemes(3) == "judQrikkum"
