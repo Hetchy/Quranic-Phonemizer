@@ -241,9 +241,9 @@ one glyph each.
 
 For every combination of `text` and `grouping`:
 
-- **Under `grouping="cell"` no pairing splits a glyph**, every glyph
-  presenting a realized long vowel opens one, and no pairing holds two glyphs
-  supplying a consonant.
+- **Under `grouping="cell"` no pairing splits a glyph**, every glyph supplying
+  a realized long vowel's length and not its quality opens one, and no pairing
+  holds two glyphs supplying a consonant.
 - **The pairings partition the selected text's glyph array.** Every glyph
   appears in exactly one pairing, except those carrying the `Structural`
   spelling edge, which have none. The edge decides this, never `kind`, and

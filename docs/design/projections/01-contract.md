@@ -614,10 +614,13 @@ A **cell** is a letter with the mark that vowels it, and a long vowel is a cell
 of its own. Four clauses, applied to the glyphs of the selected text in order.
 They group glyphs and never split one.
 
-1. A glyph presenting a vowel the reading makes **long** opens a cell. Length
-   here is what the reading realizes, never what the canon states: the spelling
-   edges are boundary-free and a cell is a thing a reader sees at one boundary
-   plan.
+1. A glyph supplying a vowel's **length and not its quality** opens a cell,
+   where the vowel is long in this reading. Two conditions and both are load
+   bearing. Length is what the reading realizes and never what the canon
+   states, because the spelling edges are boundary-free while a cell is what a
+   reader sees under one boundary plan. And a glyph supplying the quality too
+   opens nothing, because a cell exists to part a carrier from its letter and
+   there is no carrier to part when one mark does both.
 2. A glyph supplying that same vowel's quality joins it.
 3. A glyph presenting that vowel and supplying no fact joins it: the seat
    under a dagger, and the maddah.
