@@ -109,12 +109,14 @@ target rule list, and row order.
 
 ### 3.3 `letter_phoneme_mappings`
 
-This adapter owns the legacy presentation grouping. It starts from source
-glyph order, typed spelling edges and part-bearing attributions, then applies
-the versioned legacy merge policy. Row-for-row equality, including silent
-units merged left or right, lam shamsiyyah and hamza wasl elision, idgham source and
-host grouping, iltiqa shortening, waqf tanween and the otiose alif, and
-muqattaat expansions.
+Its rows are `alignment(text="source", grouping="cell")` with the harakat
+dropped from the characters and every soundless cell folded into a neighbour,
+because the flat mapping emits no row without a phoneme.
+[08-legacy-parity](08-legacy-parity.md) section 6 states which way each fold
+goes and derives it from `shares`. Row-for-row equality, including silent
+units merged left or right, lam shamsiyyah and hamza wasl elision, idgham
+source and host grouping, iltiqa shortening, waqf tanween and the otiose alif,
+and muqattaat expansions.
 
 ### 3.4 `character_phoneme_mappings`
 

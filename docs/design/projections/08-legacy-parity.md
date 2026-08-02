@@ -160,3 +160,44 @@ Three things the contract publishes that the shard cannot.
 
 Nothing the shard carries is unreachable, and the two columns a client
 actually branches on are the two with a field behind them.
+
+---
+
+## 6. The flat mapping, and which way a silence merges
+
+`letter_phoneme_mappings` is the other shipped consumer and it asks a question
+the cells do not: **it never emits a soundless row.** Every entry has at least
+one phoneme, so a glyph the reading silences is folded into a neighbour and the
+consumer highlighting a row always has something to hear.
+
+Its sounding rows are the cell grouping. A letter is bare and the mark that
+carries its length is the row after it -- `م` then `آ`, `ه` then `ۥ`, `ت` then
+`ٰ`, `ف` then `ي` -- and a disjoined-letter opening is one row per name. The
+one difference is the characters: a flat entry drops the harakat and keeps the
+letters, where a cell keeps what is written.
+
+So the flat mapping is the cell grouping with the soundless cells folded, and
+the fold is the only thing a consumer needs that is not already a field.
+
+| The silenced glyph | Merges |
+|---|---|
+| shares a sound | forward, into the pairing that owns it |
+| shares nothing | backward, into the pairing before it |
+| shares nothing, and is first in its word | forward |
+
+Forward is every assimilation and the elided seat: the article lam into its sun
+letter, an idgham source into its host, and into the next word where the host
+is there. Backward is `orthographic_silence`: the alif of the plural waw, the
+seat under a tanween at a join, the otiose alif. The third row is the wasl
+hamza, which is word-initial by definition and so has nothing behind it to join;
+it needs no rule of its own, because a glyph with nothing before it in its word
+has one direction available.
+
+A forward merge across a boundary carries the space, and the shipped rows show
+it: the baa of ٱرْكَب and the meem of مَّعَنَا are one entry whose characters
+are `ب م`.
+
+**This is what makes the highlighting the same.** A consumer wanting the flat
+rows walks the cells, and where one is `silent` it reads `shares` for the
+direction; a consumer wanting to light the silent glyph on its own has the cell
+the flat mapping folded away, which the flat mapping cannot give back.
