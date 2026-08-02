@@ -149,9 +149,34 @@ def helping_vowel(context: Context) -> Quality:
     return _helping_vowel(context)
 
 
+def _form_eight_lam(context: Context) -> bool:
+    """`ٱلْتَقَى` against `ٱلتَّقْوَىٰ`: a verb whose first radical is the lam."""
+    # Taa is a sun letter, so the article before one always writes the shadda
+    # of its assimilation, in either script. A bare taa after a quiescent lam
+    # therefore cannot be the article, and the only Arabic that puts one there
+    # is form VIII with lam for its first radical. `rules/` has to keep a
+    # lexeme list for the same question because the Score holds no shadda --
+    # the article's gemination is attested there, not canonical.
+    following, third = context.ahead(), context.ahead(2)
+    if following is None or following.has("shadda", *VOWEL_ROLES):
+        return False  # `ٱلَّتِى` doubles its lam, so the lam is not quiescent
+    return (
+        third is not None
+        and third.letter is CanonLetter.TA
+        and not third.has("shadda")
+    )
+
+
 def _helping_vowel(context: Context) -> Quality:
     following = context.ahead()
-    if following is not None and following.letter is CanonLetter.LAM:
+    if (
+        following is not None
+        and following.letter is CanonLetter.LAM
+        and not _form_eight_lam(context)
+    ):
+        # Fatha is the article's, and the article makes nouns. A verb takes a
+        # damma when its third letter carries one and a kasra otherwise, which
+        # is what the two branches below decide.
         return Quality.A
     if context.lexicon.takes_wasl_kasra(_skeleton(context)):
         return Quality.I
