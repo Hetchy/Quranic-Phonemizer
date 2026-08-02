@@ -42,6 +42,9 @@ proclitics: [و, ف]
 pairs:
   idgham_mutajanisayn_kamil:
     - [د, ت]
+    # `أَثْقَلَت دَّعَوَا` (7:189), `أُجِيبَت دَّعْوَتُكُمَا` (10:89). The pair runs
+    # both ways: taa and dal share a place, so either merges into the other.
+    - [ت, د]
     - [ت, ط]
     - [ذ, ظ]
     - [ث, ذ]
