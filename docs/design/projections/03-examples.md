@@ -41,12 +41,12 @@ is `heavy, tafkheem` and a light one is `named light, tarqeeq`, and the two
 sit in different edge families.
 
 **Part 2, pairings.** One row per pairing of the selected text, stated for
-`text="source"` and `grouping="cluster"` unless the example exists to show
+`text="source"` and `grouping="cell"` unless the example exists to show
 another quadrant.
 
 | Column | Holds |
 |---|---|
-| source | the pairing's source glyphs, as characters |
+| source | the pairing's source glyphs, as characters. A cell that opens on a mark is written with the dotted circle the mark needs to stand alone |
 | owns | the sounds this pairing owns |
 | shares | sounds it presents that another pairing owns |
 | silent | its own glyphs that are written and not said |
@@ -70,7 +70,7 @@ a sukun is there because `pausal_sukun` names it.
 A bare combining mark is written with a dotted circle: `◌َ` is a fatha, `◌ً` a
 fathatan, `◌ْ` a sukun, `◌ّ` a shadda, `◌ٰ` a dagger alif, `◌ٓ` a maddah. A
 tatweel carries the `Structural` edge and takes no pairing, so it is absent
-from the source cells a font would draw it in: `تَٰ` is the pairing of
+from the source cells a font would draw it in: `َٰ` is the vowel cell of
 `ٱلْكِتَـٰبُ`, and the tatweel between the fatha and the dagger is in neither.
 
 **Part 3, the walk.** The six relationships of
@@ -115,27 +115,30 @@ are word 2.
 | w2 ba | consonant | hosts `b` | |
 | w2 ba | vowel | hosts `u` | |
 
-**Part 2, pairings**, `text="source"`, `grouping="cluster"`.
+**Part 2, pairings**, `text="source"`, `grouping="cell"`.
 
 | source | owns | shares | silent | rules |
 |---|---|---|---|---|
 | ٱ | | | ٱ | `hamza_wasl_elision` |
 | لْ | `l` | | | `lam_qamariyyah` |
 | كِ | `k` `i` | | | |
-| تَٰ | `t` `a:` | | | `madd_tabii` |
+| ت | `t` | | | |
+| ◌َٰ | `a:` | | | `madd_tabii` |
 | بُ | `b` `u` | | | |
 
-The tatweel sits between the fatha and the dagger, carries the `Structural`
-edge, takes no pairing and is dropped (row 11); the space before the word
-carries the same edge and is kept (row 31). The elided seat produces no
-rendered glyph rather than an empty one, and the dagger's expansion into a
+The taa's vowel is long and written on a mark of its own, so it is a cell of
+its own and the letter is bare; every other letter here keeps the haraka that
+vowels it. The tatweel sits between the fatha and the dagger, carries the
+`Structural` edge, takes no pairing and is dropped (row 11); the space before
+the word carries the same edge and is kept (row 31). The elided seat produces
+no rendered glyph rather than an empty one, and the dagger's expansion into a
 written alif is row 26.
 
 **Part 3, the walk.** Every relationship is one call and one field read.
 
 Word 2 is the baseline the rest of the set is awkward against: one unit per
-cluster, one realization per part, no sound shared, no gap, and every rule
-reachable from the glyphs it is drawn on.
+cell or two where the vowel is long, one realization per part, no sound
+shared, no gap, and every rule reachable from the glyphs it is drawn on.
 
 ### E2. A dagger over a written carrier, and a seat that stops being silent
 
@@ -326,29 +329,33 @@ word 3's fathatan becomes a fatha (row 21), its seat stops being silent (row
 The waw of word 1 has no row here at all, and that is the whole of what
 `orthographic_silence` is.
 
-**Part 2, pairings**, `text="source"`, `grouping="cluster"`.
+**Part 2, pairings**, `text="source"`, `grouping="cell"`.
 
 | source | owns | shares | silent | rules |
 |---|---|---|---|---|
 | أُ | `ʔ` `u` | | | |
 | و۟ | | | و, ◌۟ | `orthographic_silence` |
-| لَٰٓ | `l` `a:` | | | `madd_wajib_muttasil` |
+| ل | `l` | | | |
+| ◌َٰٓ | `a:` | | | `madd_wajib_muttasil` |
 | ئِ | `ʔ` `i` | | | |
 | كَ | `k` `a` | | | |
 | عَ | `ʕ` `a` | | | |
-| لَ | `l` | `a:` | | `madd_tabii` |
-| ىٰ | `a:` | | | `madd_tabii` |
+| ل | `l` | | | |
+| ◌َىٰ | `a:` | | | `madd_tabii` |
 | هُ | `h` `u` | | | |
-| دً | `d` | `a:` | | `madd_tabii`, `iwad` |
-| ى | `a:` | | | `madd_tabii` |
+| د | `d` | | | |
+| ◌ًى | `a:` | | | `madd_tabii`, `iwad` |
 
 Two glyphs answer to no unit and take opposite treatment: the tatweel of word 1
 carries the `Structural` edge, takes no pairing and is dropped, and the waw
 with its round zero takes a pairing, owns nothing, and both its scalars are
-`silent` under one instance. The maddah is inside the third pairing; under
-`grouping="glyph"` it presents `a:` and supplies no fact. The alif maqsura of
-word 2 is written under a dagger and is replaced by the carrier the dagger
-spells; the bare one of word 3 is rewritten as the carrier the stop makes it.
+`silent` under one instance. The maddah joins the vowel cell it presents,
+which is the third clause; under `grouping="glyph"` it is a row of its own that
+presents `a:` and supplies no fact. The alif maqsura of word 2 is written
+under a dagger and is replaced by the carrier the dagger spells; the bare one
+of word 3 is rewritten as the carrier the stop makes it. Neither maqsura is a
+cell of its own: each carries a length whose quality the mark before it
+supplies, so the two are one cell and the letter they follow is bare.
 
 **Part 3, the walk.**
 
@@ -401,7 +408,7 @@ whose sound the source text does write; word 3 is row 19.
 | w3 ba | consonant | hosts `bb`, and the release `Q` beside it | the release is akbar, `qalqala_akbar` |
 | w3 ba | vowel | silent, `pausal_sukun` | |
 
-**Part 2, pairings**, `text="source"`, `grouping="cluster"`.
+**Part 2, pairings**, `text="source"`, `grouping="cell"`.
 
 | source | owns | shares | silent | rules |
 |---|---|---|---|---|
@@ -417,7 +424,7 @@ whose sound the source text does write; word 3 is row 19.
 | رَ | `rˤ` `aˤ` | | | `tafkheem` |
 | بِّ | `bb` `Q` | | ◌ِ | `qalqala_akbar`, `pausal_sukun` |
 
-**Respelling blocks**, `grouping="cluster"`, the two that are not one pairing to
+**Respelling blocks**, `grouping="cell"`, the two that are not one pairing to
 one on both sides.
 
 | source | recited |
@@ -474,7 +481,7 @@ coming, the stop cancels it, and the sukun has to be written back.
 | w4 noon | consonant | hosts `n` | |
 | w4 noon | vowel | absent | |
 
-**Part 2, pairings**, `text="source"`, `grouping="cluster"`.
+**Part 2, pairings**, `text="source"`, `grouping="cell"`.
 
 | source | owns | shares | silent | rules |
 |---|---|---|---|---|
@@ -578,15 +585,15 @@ go by row 7, and word 5 takes the shadda row 18 adds. Word 4's kasratan is
 | w7 noon (tanween) | consonant | silent, `pausal_sukun` | |
 | w7 noon (tanween) | vowel | absent | |
 
-**Part 2, pairings**, `text="source"`, `grouping="cluster"`.
+**Part 2, pairings**, `text="source"`, `grouping="cell"`.
 
 | source | owns | shares | silent | rules |
 |---|---|---|---|---|
 | ٱ | `ʔ` | | | `hamza_wasl_start` |
 | (gap, after ٱ) | `a` | | | `hamza_wasl_start` |
 | لَّ | `ll` `a` | | | |
-| ذِ | `ð` | `i:` | | `madd_jaiz_munfasil` |
-| ىٓ | `i:` | | | `madd_jaiz_munfasil` |
+| ذ | `ð` | | | |
+| ◌ِىٓ | `i:` | | | `madd_jaiz_munfasil` |
 | أَ | `ʔ` `a` | | | |
 | طْ | `tˤ` `Q` | | | `tafkheem`, `qalqala_sughra` |
 | عَ | `ʕ` `a` | | | |
@@ -595,12 +602,12 @@ go by row 7, and word 5 takes the shadda row 18 adds. Word 4's kasratan is
 | م | | `m̃` | | `idgham_shafawi` |
 | مِّ | `m̃` `i` | | | `idgham_shafawi` |
 | ن | `ŋ` | | | `ikhfaa_haqiqi` |
-| جُ | `ʒ` | `u:` | | `madd_tabii` |
-| و | `u:` | | | `madd_tabii` |
+| ج | `ʒ` | | | |
+| ◌ُو | `u:` | | | `madd_tabii` |
 | عٍ | `ʕ` `i` | `w̃` | | `idgham_bi_ghunnah` |
 | وَ | `w̃` `a` | | | `idgham_bi_ghunnah` |
-| ءَ | `ʔ` | `a:` | | `madd_tabii` |
-| ا | `a:` | | | `madd_tabii` |
+| ء | `ʔ` | | | |
+| ◌َا | `a:` | | | `madd_tabii` |
 | مَ | `m` `a` | | | |
 | نَ | `n` `a` | | | |
 | هُ | `h` `u` | | | |
@@ -704,7 +711,7 @@ and the kaf that doubles is not heavy.
 | w3 meem | consonant | hosts `m` | |
 | w3 meem | vowel | hosts `i` | |
 
-**Part 2, pairings**, `text="source"`, `grouping="cluster"`, plan A.
+**Part 2, pairings**, `text="source"`, `grouping="cell"`, plan A.
 
 | source | owns | shares | silent | rules |
 |---|---|---|---|---|
@@ -719,12 +726,12 @@ and the kaf that doubles is not heavy.
 | م | | `m̃` | | `idgham_shafawi` |
 | مِّ | `m̃` `i` | | | `idgham_shafawi` |
 | ن | | `m̃` | | `idgham_bi_ghunnah` |
-| مَّ | `m̃` | `a:` | | `idgham_bi_ghunnah`, `madd_wajib_muttasil` |
-| آ | `a:` | | | `madd_wajib_muttasil` |
+| مّ | `m̃` | | | `idgham_bi_ghunnah` |
+| ◌َآ | `a:` | | | `madd_wajib_muttasil` |
 | ءٍ | `ʔ` `i` | `m̃` | | `idgham_bi_ghunnah` |
 | مَّ | `m̃` `a` | | | `idgham_bi_ghunnah` |
-| هِ | `h` | `i:` | | `madd_arid_lil_sukun` |
-| ي | `i:` | | | `madd_arid_lil_sukun` |
+| ه | `h` | | | |
+| ◌ِي | `i:` | | | `madd_arid_lil_sukun` |
 | نٍ | `n` | | ◌ٍ | `pausal_sukun` |
 
 **Part 2**, plan B, the row that differs.
@@ -733,19 +740,20 @@ and the kaf that doubles is not heavy.
 |---|---|---|---|---|
 | مِّ | `m` `i` | | | |
 
-Four mergers in five words and three of them cross a boundary. Three of the
-table's `shares` point into the word after them; the others stay inside their
-own word, one from the merger inside نَخْلُقكُّم and two from a long vowel whose
-carrier owns what its haraka presents. أَلَمْ holds the quiescent meem that
-keeps its own sound. Starting on the third word takes a glyph out of the
-recited text that nothing accounts for.
+Four mergers in five words and three of them cross a boundary. Every `shares`
+in the table is a merger and three of them point into the word after: under
+this grouping a long vowel is one cell, so a haraka presenting what its carrier
+owns is no longer a row of its own and `shares` has narrowed to the one thing
+only a merger does. أَلَمْ holds the quiescent meem that keeps its own sound.
+Starting on the third word takes a glyph out of the recited text that nothing
+accounts for.
 
 **Part 3, the walk.**
 
 | relationship | what a consumer must do | cost |
 |---|---|---|
-| script - sound | ask what a cluster sounds like | six clusters present a sound another row owns, three of them a row in the next word, and ق owns nothing at all, so the pairing that answers is never the row the consumer is on |
-| script - rules | colour نَخْلُقكُّم | three rules over six clusters, two glyphs dropped under two different rules, and the pairing says which rule without saying where the sound went. That is on the instance's `host` |
+| script - sound | ask what a cell sounds like | four cells present a sound another row owns, three of them a row in the next word, and ق owns nothing at all, so the pairing that answers is never the row the consumer is on |
+| script - rules | colour نَخْلُقكُّم | three rules over six cells, two glyphs dropped under two different rules, and the pairing says which rule without saying where the sound went. That is on the instance's `host` |
 | script - recited | account for مِّ becoming مِ under plan B | **FINDING.** No rule instance owns the difference. An absent rendered index says only that the shadda is unrepresented, and the source side cannot name it either: a glyph in `silent` names its rule, and this one has none. Row 9 has no owner and no name in the vocabulary |
 | recited - rules | colour the recited word مِّ under plan A | it shows one rule, minted for the meem of the word before it. The noon this word loses into the word after writes nothing on the recited line and colours nothing there, so one of the word's two mergers is invisible on the text a consumer is drawing |
 | the other two | | one call and one field read |
@@ -807,7 +815,7 @@ written as the haa recitation says. Under plan B word 8 loses its shadda to row
 | w8 meem | consonant | hosts `m` | |
 | w8 meem | vowel | hosts `a:` | long, `madd_tabii` |
 
-**Part 2, pairings**, `text="source"`, `grouping="cluster"`, plan A.
+**Part 2, pairings**, `text="source"`, `grouping="cell"`, plan A.
 
 | source | owns | shares | silent | rules |
 |---|---|---|---|---|
@@ -815,11 +823,11 @@ written as the haa recitation says. Under plan B word 8 loses its shadda to row
 | ثَ | `θ` `a` | | | |
 | لً | `l` `a` | `m̃` | | `idgham_bi_ghunnah` |
 | ا | | | ا | `orthographic_silence` |
-| مَّ | `m̃` | `a:` | | `idgham_bi_ghunnah`, `madd_tabii` |
-| ا | `a:` | | | `madd_tabii` |
+| مّ | `m̃` | | | `idgham_bi_ghunnah` |
+| ◌َا | `a:` | | | `madd_tabii` |
 | بَ | `b` `a` | | | |
-| عُ | `ʕ` | `u:` | | `madd_tabii` |
-| و | `u:` | | | `madd_tabii` |
+| ع | `ʕ` | | | |
+| ◌ُو | `u:` | | | `madd_tabii` |
 | ضَ | `dˤ` `aˤ` | | | `tafkheem` |
 | ةً | `h` | | ◌ً | `taa_marbuta_pausal`, `pausal_sukun` |
 
@@ -827,9 +835,9 @@ written as the haa recitation says. Under plan B word 8 loses its shadda to row
 
 | source | owns | shares | silent | rules |
 |---|---|---|---|---|
-| مَّ | `m` | `a:` | | `madd_tabii` |
+| مّ | `m` | | | |
 
-**Respelling blocks**, `grouping="cluster"`, plan A, the three worth reading.
+**Respelling blocks**, `grouping="cell"`, plan A, the three worth reading.
 
 | source | recited |
 |---|---|
@@ -839,7 +847,7 @@ written as the haa recitation says. Under plan B word 8 loses its shadda to row
 
 The recited هْ names the taa marbuta it replaces and carries a different
 character, while ة stands unaltered in the source array beside it: neither text
-is the other with edits applied. The fathatan of that cluster shows two units'
+is the other with edits applied. The fathatan of that cell shows two units'
 silences and the pairing lists it once, so which part each silence took is on
 the attribution edges and nowhere else. Both marks of هْ are substitutions and
 neither is an insertion: row 20 turns a tanween that lengthens nothing into a
@@ -852,8 +860,8 @@ under it.
 |---|---|---|
 | script - recited | compare ةً with هْ under plan A | one block, and both its rendered glyphs are substitutions: the haa names the taa marbuta and the sukun names the fathatan. A consumer comparing characters sees a changed letter and a changed mark, and has to read `silent` and `rules` to learn which unit each one belongs to |
 | script - recited | account for مَّ becoming مَ under plan B | **FINDING.** No instance owns the missing shadda. This is the unowned deletion E7 shows under the same row, and the same dead end on both sides of it |
-| script - rules | say which rule reached which part of ةً | two rules sit on one cluster and the letter level cannot separate them |
-| script - sound | tell the two `shares` apart | لً shares a sound owned in the next word and عُ shares one owned by the carrier beside it, and the two read identically although one crosses a boundary and one does not |
+| script - rules | say which rule reached which part of ةً | two rules sit on one cell and the letter level cannot separate them |
+| script - sound | follow the one `shares` | لً shares a sound owned in the next word, and under this grouping that is the only kind of `shares` left: the long vowels of مَّا and عُو are each one cell and share nothing |
 | the other three | | one call and one field read |
 
 A rendered glyph carries a different character from the single source glyph it
@@ -913,7 +921,7 @@ Word 5 is row 20.
 | w5 noon (tanween) | consonant | silent, `pausal_sukun` | |
 | w5 noon (tanween) | vowel | absent | |
 
-**Part 2, pairings**, `text="source"`, `grouping="cluster"`.
+**Part 2, pairings**, `text="source"`, `grouping="cell"`.
 
 | source | owns | shares | silent | rules |
 |---|---|---|---|---|
@@ -924,7 +932,8 @@ Word 5 is row 20.
 | كُ | `k` `u` | | | |
 | ن | | `ll` | | `idgham_bila_ghunnah` |
 | لَّ | `ll` `a` | | | `idgham_bila_ghunnah` |
-| هُۥ | `h` `u:` | | | `madd_tabii` |
+| ه | `h` | | | |
+| ◌ُۥ | `u:` | | | `madd_tabii` |
 | كُ | `k` `u` | | | |
 | فُ | `f` `u` | | | |
 | وً | `w` `a` `n` | | | `izhar` |
@@ -933,7 +942,7 @@ Word 5 is row 20.
 | حَ | `ħ` `a` | | | |
 | دٌ | `d` `Q` | | ◌ٌ | `qalqala_kubra`, `pausal_sukun` |
 
-**Respelling blocks**, `grouping="cluster"`, the two that are not one pairing to
+**Respelling blocks**, `grouping="cell"`, the two that are not one pairing to
 one.
 
 | source | recited |
@@ -946,7 +955,7 @@ one.
 | relationship | what a consumer must do | cost |
 |---|---|---|
 | script - rules | colour a tanween mark | one field read, and the consumer chooses which of two units a highlight means: the fathatan of كُفُوًا shows the waw's vowel and the noon's `izhar`, and the dammatan of أَحَدٌ shows two units the stop takes together |
-| script - recited | read the two irregular blocks | one source cluster corresponds to two recited clusters and one to none, and each is one block. One call, and the block is the only place the correspondence is stated |
+| script - recited | read the two irregular blocks | one source cell corresponds to two recited cells and one to none, and each is one block. One call, and the block is the only place the correspondence is stated |
 | the other four | | one call and one field read |
 
 One mark is spelled two ways here: the fathatan becomes a fatha, a noon and a
@@ -999,7 +1008,7 @@ unchanged case, and so is the release.
 | w11 jeem | consonant | hosts `ʒ` | |
 | w11 jeem | vowel | hosts `a:` | long, `madd_tabii` |
 
-**Part 2, pairings**, `text="source"`, `grouping="cluster"`.
+**Part 2, pairings**, `text="source"`, `grouping="cell"`.
 
 | source | owns | shares | silent | rules |
 |---|---|---|---|---|
@@ -1011,17 +1020,19 @@ unchanged case, and so is the release.
 | عَ | `ʕ` `a` | | | |
 | ل | | `ll` | | `idgham_mutamathilayn` |
 | لَّ | `ll` `a` | | | `idgham_mutamathilayn` |
-| هُۥ | `h` `u:` | | | `madd_tabii` |
+| ه | `h` | | | |
+| ◌ُۥ | `u:` | | | `madd_tabii` |
 | عِ | `ʕ` `i` | | | |
 | وَ | `w` `a` | | | |
-| جَ | `ʒ` | `a:` | | `madd_tabii` |
-| اۜ | `a:` | | | `madd_tabii` |
+| ج | `ʒ` | | | |
+| ◌َا | `a:` | | | `madd_tabii` |
+| ◌ۜ | | | | |
 
 **Part 3, the walk.**
 
 | relationship | what a consumer must do | cost |
 |---|---|---|
-| script - rules | account for the sakt mark | **FINDING.** It belongs to its word, so it is not structural and takes a pairing, and no spelling edge fits it: it supplies no fact, witnesses no unit and decorates none. Sakt is not a rule either, so a pairing naming nothing is the only reading left, and calling the mark silent instead would owe a rule it cannot name. `Word.sakt_after` is where the fact belongs |
+| script - rules | account for the sakt mark | **FINDING.** It belongs to its word, so it is not structural and takes a pairing, and no spelling edge fits it: it supplies no fact, witnesses no unit and decorates none. Answering to no unit, it joins no other glyph's cell either, so it is a cell of its own naming nothing at all. Sakt is not a rule, and calling the mark silent instead would owe a rule it cannot name. `Word.sakt_after` is where the fact belongs |
 | script - recited | read the merger's spelling | the merger costs one deletion and buys no insertion, so the block over the merged lam has an empty recited side and the host's block runs one to one. One call |
 | the other four | | one call and one field read |
 
@@ -1103,7 +1114,7 @@ is row 19 too.
 | w9 heh | consonant | hosts `h` | |
 | w9 heh | vowel | silent, `pausal_sukun` | |
 
-**Part 2, pairings**, `text="source"`, `grouping="cluster"`, plan A.
+**Part 2, pairings**, `text="source"`, `grouping="cell"`, plan A.
 
 | source | owns | shares | silent | rules |
 |---|---|---|---|---|
@@ -1112,15 +1123,16 @@ is row 19 too.
 | ط | `tˤ` | | | `idgham_mutajanisayn_naqis`, `tafkheem` |
 | تُ | `t` `u` | | | |
 | بِ | `b` `i` | | | |
-| مَ | `m` | `a:` | | `madd_tabii` |
-| ا | `a:` | | | `madd_tabii` |
+| م | `m` | | | |
+| ◌َا | `a:` | | | `madd_tabii` |
 | لَ | `l` `a` | | | |
 | مْ | `m` | | | `izhar_shafawi` |
 | تُ | `t` `u` | | | |
 | حِ | `ħ` `i` | | | |
 | طْ | `tˤ` `Q` | | | `qalqala_sughra`, `tafkheem` |
 | بِ | `b` `i` | | | |
-| هِۦ | `h` `i:` | | | `madd_tabii` |
+| ه | `h` | | | |
+| ◌ِۦ | `i:` | | | `madd_tabii` |
 | وَ | `w` `a` | | | |
 | جِ | `ʒ` `i` | | | |
 | ئْ | `ʔ` | | | |
@@ -1133,13 +1145,17 @@ is row 19 too.
 |---|---|---|---|---|
 | هِۦ | `h` | | ◌ِ, ۦ | `pausal_sukun` |
 
+Three characters, two cells under plan A and one under plan B. The mini yeh
+supplies a length only where there is a vowel to be long, so at the stop no
+cell opens after the haa and the kasra never leaves it.
+
 **Part 3, the walk.**
 
 | relationship | what a consumer must do | cost |
 |---|---|---|
 | sound - rules | reach what the naqis did | one field read. The instance owns a `Classifies` on the tah's consonant and changes nothing about the sound, which is the whole of what a partial merger is: the letter keeps its own sound, and a notation that wants to write it differently has the instance sitting on it |
-| script - sound | ask which glyph of هِۦ owns the vowel | at `grouping="cluster"` they are one row and the question does not arise; at `grouping="glyph"` the ownership order gives `i:` to the small yeh, which supplies its length, and the kasra takes it in `shares`. One field read |
-| script - recited | read هِۦ under each plan | one source cluster corresponds to هِي under A and to هْ under B, one block each way. One call, two documents |
+| script - sound | ask which glyph of هِۦ owns the vowel | at `grouping="cell"` the mark and its carrier are one row under plan A and the question does not arise; at `grouping="glyph"` the ownership order gives `i:` to the small yeh, which supplies its length, and the kasra takes it in `shares`. One field read |
+| script - recited | read هِۦ under each plan | one source cell corresponds to هِي under A and to هْ under B, one block each way. One call, two documents |
 | the other three | | one call and one field read |
 
 An idgham with nothing shared and no host, beside a mark that owns a long vowel
@@ -1237,34 +1253,36 @@ leaves absent, which is the mirror of the stop that silences a vowel the canon
 states. No nasal rule fires on that noon, because a voweled noon has nothing to
 hide or merge.
 
-**Part 2, pairings**, `text="source"`, `grouping="cluster"`.
+**Part 2, pairings**, `text="source"`, `grouping="cell"`.
 
 | source | owns | shares | silent | rules |
 |---|---|---|---|---|
 | وَ | `w` `a` | | | |
-| نَ | `n` | `a:` | | `madd_tabii` |
-| ا | `a:` | | | `madd_tabii` |
-| دَ | `d` | `a:` | | `madd_tabii` |
-| ىٰ | `a:` | | | `madd_tabii` |
-| نُ | `n` | `u:` | | `madd_tabii` |
-| و | `u:` | | | `madd_tabii` |
+| ن | `n` | | | |
+| ◌َا | `a:` | | | `madd_tabii` |
+| د | `d` | | | |
+| ◌َىٰ | `a:` | | | `madd_tabii` |
+| ن | `n` | | | |
+| ◌ُو | `u:` | | | `madd_tabii` |
 | حٌ | `ħ` `u` `n` | | | `iltiqa_kasra` |
 | (gap, after حٌ) | the helping kasra | | | `iltiqa_kasra` |
 | ٱ | | | ٱ | `hamza_wasl_elision` |
 | بْ | `b` `Q` | | | `qalqala_sughra` |
 | نَ | `n` `a` | | | |
-| هُۥ | `h` `u:` | | | `madd_tabii` |
+| ه | `h` | | | |
+| ◌ُۥ | `u:` | | | `madd_tabii` |
 | وَ | `w` `a` | | | |
-| كَ | `k` | `a:` | | `madd_tabii` |
-| ا | `a:` | | | `madd_tabii` |
+| ك | `k` | | | |
+| ◌َا | `a:` | | | `madd_tabii` |
 | نَ | `n` `a` | | | |
-| فِ | `f` | `i:` | | `madd_tabii` |
-| ى | `i:` | | | `madd_tabii` |
+| ف | `f` | | | |
+| ◌ِى | `i:` | | | `madd_tabii` |
 | مَ | `m` `a` | | | |
 | عْ | `ʕ` | | | |
 | زِ | `z` `i` | | | |
 | لٍ | `l` `i` | `j̃` | | `idgham_bi_ghunnah` |
-| يَٰ | `j̃` `a:` | | | `idgham_bi_ghunnah`, `madd_tabii` |
+| ي | `j̃` | | | `idgham_bi_ghunnah` |
+| ◌َٰ | `a:` | | | `madd_tabii` |
 | بُ | `b` `u` | | | |
 | نَ | `n` `a` | | | |
 | ىَّ | `jj` `a` | | | |
@@ -1274,22 +1292,22 @@ hide or merge.
 | ب | | `m̃` | | `idgham_mutajanisayn_kamil` |
 | مَّ | `m̃` `a` | | | `idgham_mutajanisayn_kamil` |
 | عَ | `ʕ` `a` | | | |
-| نَ | `n` | `a:` | | `madd_tabii` |
-| ا | `a:` | | | `madd_tabii` |
+| ن | `n` | | | |
+| ◌َا | `a:` | | | `madd_tabii` |
 
-The ninth row is the gap pairing, `after` naming the cluster حٌ. The noon the
+The ninth row is the gap pairing, `after` naming the cell حٌ. The noon the
 tanween mark stands for has no source glyph of its own, so the vowel hosted on
 it has none either, and that is what puts a vowel with an ordinary `Hosts` edge
 in a gap row. The sukun of بْ supplies `vowel_absence`, shows no sound and is
 not `silent`.
 
-**Respelling blocks**, `grouping="cluster"`, the blocks of words 8, 13 and 14
+**Respelling blocks**, `grouping="cell"`, the blocks of words 8, 13 and 14
 that do not run one to one.
 
 | source | recited |
 |---|---|
 | حٌ, the gap after it | حُ, نِ |
-| يَٰ | يَّ, ا |
+| ي, ◌َٰ | يَّ, ا |
 | ٱ | |
 | ب | |
 
@@ -1407,15 +1425,15 @@ units here whose vowel the colour reaches.
 |---|---|---|---|
 | w7 heh | vowel | silent, `pausal_sukun` | |
 
-**Part 2, pairings**, `text="source"`, `grouping="cluster"`, plan A.
+**Part 2, pairings**, `text="source"`, `grouping="cell"`, plan A.
 
 | source | owns | shares | silent | rules |
 |---|---|---|---|---|
 | يَ | `j` `a` | | | |
 | ن | `ŋ` | | | `ikhfaa_haqiqi` |
 | قُ | `q` `u` | | | `tafkheem` |
-| ضُ | `dˤ` | `u:` | | `tafkheem`, `madd_tabii` |
-| و | `u:` | | | `madd_tabii` |
+| ض | `dˤ` | | | `tafkheem` |
+| ◌ُو | `u:` | | | `madd_tabii` |
 | نَ | `n` `a` | | | |
 | عَ | `ʕ` `a` | | | |
 | هْ | `h` | | | |
@@ -1429,17 +1447,19 @@ units here whose vowel the colour reaches.
 | بَ | `b` `a` | | | |
 | عْ | `ʕ` | | | |
 | دِ | `d` `i` | | | |
-| مِ | `m` | `i:` | | `madd_tabii` |
-| ي | `i:` | | | `madd_tabii` |
-| ثَٰ | `θ` `a:` | | | `madd_tabii` |
+| م | `m` | | | |
+| ◌ِي | `i:` | | | `madd_tabii` |
+| ث | `θ` | | | |
+| ◌َٰ | `a:` | | | `madd_tabii` |
 | قِ | `q` `i` | | | `tafkheem` |
-| هِۦ | `h` `i:` | | | `madd_tabii` |
+| ه | `h` | | | |
+| ◌ِۦ | `i:` | | | `madd_tabii` |
 | وَ | `w` `a` | | | |
 | يَ | `j` `a` | | | |
 | قْ | `q` `Q` | | | `tafkheem`, `qalqala_sughra` |
 | طَ | `tˤ` `aˤ` | | | `tafkheem` |
-| عُ | `ʕ` | `u:` | | `madd_arid_lil_sukun` |
-| و | `u:` | | | `madd_arid_lil_sukun` |
+| ع | `ʕ` | | | |
+| ◌ُو | `u:` | | | `madd_arid_lil_sukun` |
 | نَ | `n` | | ◌َ | `pausal_sukun` |
 
 **Part 2**, plan B, the row that differs.
@@ -1448,7 +1468,7 @@ units here whose vowel the colour reaches.
 |---|---|---|---|---|
 | هِۦ | `h` | | ◌ِ, ۦ | `pausal_sukun` |
 
-**Respelling blocks**, `grouping="cluster"`, word 4 under plan A.
+**Respelling blocks**, `grouping="cell"`, word 4 under plan A.
 
 | source | recited |
 |---|---|
@@ -1458,14 +1478,14 @@ units here whose vowel the colour reaches.
 | هِ | هِ |
 
 Two blocks with an empty `recited` for two unrelated reasons, and one block
-holding the alif no rasm writes beside the cluster whose length it carries.
+holding the alif no rasm writes beside the cell whose length it carries.
 
 **Part 3, the walk.**
 
 | relationship | what a consumer must do | cost |
 |---|---|---|
 | script - recited | list every glyph the recited text drops | **FINDING.** Both ٱ and ل are in a block with an empty `recited`, and only ٱ is in `silent`: a merged lam shows the geminate through `shares`, so no rule names its silence. No one list holds every dropped glyph, and the catalogue's "dropped" row says otherwise |
-| script - recited | draw the recited word لَّاهِ | the alif written for a length the rasm has no carrier for names no source glyph, and it owns the sound the source cluster owns, so the block holds the two together. One call |
+| script - recited | draw the recited word لَّاهِ | the alif written for a length the rasm has no carrier for names no source glyph, and it owns the sound the source cell owns, so the block holds the two together. One call |
 | script - recited | draw مِيثَاقِهْ under plan B | row 1 removes ۦ and row 19 writes the sukun the kasra becomes, which covers a silah vowel and a short one alike. One call |
 | sound - rules | highlight the geminate | one call and two rows: `lˤlˤ` is owned in the second lam and the instance names the first as its `source`, so the highlight reads one row through `sounds` and one through `shares` |
 | script - sound, script - rules | read any other row | one call and one field read, except that ٱ and ل both own nothing, and only `silent` read against `shares` separates an elision from a merger |
@@ -1553,27 +1573,28 @@ word 14 takes the shadda row 18 adds. Word 16 loses its carrier to row 10, word
 |---|---|---|---|
 | w12 heh | vowel | silent, `pausal_sukun` | |
 
-**Part 2, pairings**, `text="source"`, `grouping="cluster"`, plan A.
+**Part 2, pairings**, `text="source"`, `grouping="cell"`, plan A.
 
 | source | owns | shares | silent | rules |
 |---|---|---|---|---|
 | بِ | `b` `i` | | | |
-| هِۦٓ | `h` `i:` | | | `madd_jaiz_munfasil` |
+| ه | `h` | | | |
+| ◌ِۦٓ | `i:` | | | `madd_jaiz_munfasil` |
 | أَ | `ʔ` `a` | | | |
 | ن | | `j̃` | | `idgham_bi_ghunnah` |
-| يُ | `j̃` | `u:` | | `idgham_bi_ghunnah`, `madd_tabii` |
-| و | `u:` | | | `madd_tabii` |
+| ي | `j̃` | | | `idgham_bi_ghunnah` |
+| ◌ُو | `u:` | | | `madd_tabii` |
 | صَ | `sˤ` `aˤ` | | | `tafkheem` |
 | لَ | `l` `a` | | | |
 | وَ | `w` `a` | | | |
 | يُ | `j` `u` | | | |
 | فْ | `f` | | | |
 | سِ | `s` `i` | | | |
-| دُ | `d` | `u:` | | `madd_tabii` |
-| و | `u:` | | | `madd_tabii` |
+| د | `d` | | | |
+| ◌ُو | `u:` | | | `madd_tabii` |
 | نَ | `n` `a` | | | |
-| فِ | `f` `i` | | | `iltiqa_shortening` |
-| ى | | | | `iltiqa_shortening` |
+| ف | `f` | | | |
+| ◌ِى | `i` | | | `iltiqa_shortening` |
 | ٱ | | | ٱ | `hamza_wasl_elision` |
 | لْ | `l` | | | `lam_qamariyyah` |
 | أَ | `ʔ` `a` | | | |
@@ -1581,8 +1602,10 @@ word 14 takes the shadda row 18 adds. Word 16 loses its carrier to row 10, word
 | ضِ | `dˤ` | | ◌ِ | `tafkheem`, `pausal_sukun` |
 
 The stop sign ۚ carries the `Structural` edge, takes no pairing, and is kept in
-the recited text. The ى is dropped and is in no `silent` list: the shortening
-took a length and silenced no part, so no rule names a silence there.
+the recited text. The ى claims a length the canon states, so it opens a cell
+like any carrier and takes the kasra with it; what that cell owns is a short
+vowel. It is in no `silent` list either: the shortening took a length and
+silenced no part, so no rule names a silence there.
 
 **Part 2**, plan B.
 
@@ -1591,13 +1614,16 @@ took a length and silenced no part, so no rule names a silence there.
 | بِ | `b` `i` | | | |
 | هِۦٓ | `h` | | ◌ِ, ۦ, ◌ٓ | `pausal_sukun` |
 
-**Respelling blocks**, `grouping="cluster"`, word 16 under plan A and word 12
+Stopped, the vowel is gone and no glyph claims a length that is realized, so
+the three marks stay in the haa's cell; joined, the mini yeh opens one.
+
+**Respelling blocks**, `grouping="cell"`, word 16 under plan A and word 12
 under plan B.
 
 | source | recited |
 |---|---|
-| فِ | فِ |
-| ى | |
+| ف | ف |
+| ◌ِى | ◌ِ |
 | هِۦٓ | هْ |
 
 **Part 3, the walk.**
@@ -1605,8 +1631,8 @@ under plan B.
 | relationship | what a consumer must do | cost |
 |---|---|---|
 | sound - rules | ask فِى for its madd rule | **FINDING.** The converse law asks a canonically long vowel for a madd rule instance, and the only Length rule naming this one is `iltiqa_shortening`, which took the length away |
-| script - sound | ask why the fa's vowel is short | the ى owns nothing, shares nothing and is in no `silent` list, and that the vowel is canonically long is on the length edge of the sound and nowhere on either glyph, so the question takes a row read and an edge read |
-| script - recited | say why فِى loses its ى | the block has an empty `recited` and the pairing's `rules` names `iltiqa_shortening`. It is the shape E13 marks: the drop is read from the block and not from `silent` |
+| script - sound | ask why the fa's vowel is short | the cell holds a glyph claiming a length and owns a short vowel, and it is in no `silent` list, so the row states the outcome and not the conflict; that the vowel is canonically long is on the length edge of the sound and nowhere on either glyph, so the question takes a row read and an edge read |
+| script - recited | say why فِى loses its ى | the block's recited side is the kasra alone and the pairing's `rules` names `iltiqa_shortening`. It is the shape E13 marks: the drop is read from the block and not from `silent` |
 | script - recited | draw بِهِۦٓ stopped | row 1 removes the mark and its maddah together, and the maddah is a glyph that presented a sound it supplied no fact for. One field read |
 | the other three | | one call and one field read |
 
@@ -1771,39 +1797,39 @@ Under plan B the last vowel hosts `aˤ:`, long by `madd_tabii` and heavy by
 | w1 ra | consonant | hosts `r` | named light, `tarqeeq` |
 | w1 ra | vowel | silent, `pausal_sukun` | |
 
-**Part 2, pairings**, `text="source"`, `grouping="cluster"`. The first three
-clusters are the same word for word, plan for plan.
+**Part 2, pairings**, `text="source"`, `grouping="cell"`. The first three
+cells are the same word for word, plan for plan.
 
 | source | owns | shares | silent | rules |
 |---|---|---|---|---|
 | قَ | `q` `aˤ` | | | `tafkheem` |
-| وَ | `w` | `a:` | | `madd_tabii` |
-| ا | `a:` | | | `madd_tabii` |
+| و | `w` | | | |
+| ◌َا | `a:` | | | `madd_tabii` |
 
-**Part 2**, 76:15:8, the last four clusters under plan A.
+**Part 2**, 76:15:8, the last four cells under plan A.
 
 | source | owns | shares | silent | rules |
 |---|---|---|---|---|
-| رِ | `r` | `i:` | | `tarqeeq`, `madd_tabii` |
-| ي | `i:` | | | `madd_tabii` |
+| ر | `r` | | | `tarqeeq` |
+| ◌ِي | `i:` | | | `madd_tabii` |
 | رَ | `rˤ` `aˤ` | | | `tafkheem` |
 | ا۠ | | | ا, ◌۠ | `orthographic_silence` |
 
-The same word under plan B, where the last two clusters change.
+The same word under plan B, where the last two cells become one.
 
 | source | owns | shares | silent | rules |
 |---|---|---|---|---|
-| رَ | `rˤ` | `aˤ:` | | `tafkheem`, `madd_tabii` |
-| ا۠ | `aˤ:` | | | `madd_tabii` |
+| ر | `rˤ` | | | `tafkheem` |
+| ◌َا۠ | `aˤ:` | | | `madd_tabii`, `tafkheem` |
 
-**Part 2**, 76:16:1, the last four clusters, the same under both plans. The
+**Part 2**, 76:16:1, the last four cells, the same under both plans. The
 word is stopped on under both, so the long `i:` is a length the stop caused and
 not the plain one the same five letters carry in the verse before.
 
 | source | owns | shares | silent | rules |
 |---|---|---|---|---|
-| رِ | `r` | `i:` | | `tarqeeq`, `madd_arid_lil_sukun` |
-| ي | `i:` | | | `madd_arid_lil_sukun` |
+| ر | `r` | | | `tarqeeq` |
+| ◌ِي | `i:` | | | `madd_arid_lil_sukun` |
 | رَ | `r` | | ◌َ | `tarqeeq`, `pausal_sukun` |
 | ا۟ | | | ا, ◌۟ | `orthographic_silence` |
 
@@ -1901,7 +1927,7 @@ shadda the host needs, so row 18 adds nothing; word 6 is row 20.
 | w6 noon (tanween) | consonant | silent, `pausal_sukun` | |
 | w6 noon (tanween) | vowel | absent | |
 
-**Part 2, pairings**, `text="source"`, `grouping="cluster"`, plan A.
+**Part 2, pairings**, `text="source"`, `grouping="cell"`, plan A.
 
 | source | owns | shares | silent | rules |
 |---|---|---|---|---|
@@ -1910,28 +1936,29 @@ shadda the host needs, so row 18 adds nothing; word 6 is row 20.
 | تِ | `t` `i` | | | |
 | لْ | `l` | | | |
 | كَ | `k` `a` | | | |
-| ءَ | `ʔ` | `a:` | | `madd_tabii` |
-| ا | `a:` | | | `madd_tabii` |
-| يَٰ | `j` `a:` | | | `madd_tabii` |
+| ء | `ʔ` | | | |
+| ◌َا | `a:` | | | `madd_tabii` |
+| ي | `j` | | | |
+| ◌َٰ | `a:` | | | `madd_tabii` |
 | تُ | `t` `u` | | | |
 | ٱ | | | ٱ | `hamza_wasl_elision` |
 | لْ | `l` | | | `lam_qamariyyah` |
 | قُ | `q` `u` | | | `tafkheem` |
 | رْ | `rˤ` | | | `tafkheem` |
-| ءَ | `ʔ` | `a:` | | `madd_tabii` |
-| ا | `a:` | | | `madd_tabii` |
+| ء | `ʔ` | | | |
+| ◌َا | `a:` | | | `madd_tabii` |
 | نِ | `n` `i` | | | |
 | وَ | `w` `a` | | | |
 | كِ | `k` `i` | | | |
-| تَ | `t` | `a:` | | `madd_tabii` |
-| ا | `a:` | | | `madd_tabii` |
+| ت | `t` | | | |
+| ◌َا | `a:` | | | `madd_tabii` |
 | بٍ | `b` `i` | `m̃` | | `idgham_bi_ghunnah` |
 | مُّ | `m̃` `u` | | | `idgham_bi_ghunnah` |
-| بِ | `b` | `i:` | | `madd_tabii` |
-| ي | `i:` | | | `madd_tabii` |
+| ب | `b` | | | |
+| ◌ِي | `i:` | | | `madd_tabii` |
 | نٍ | `n` | | ◌ٍ | `pausal_sukun` |
 
-**Respelling blocks**, `grouping="cluster"`, word 1.
+**Respelling blocks**, `grouping="cell"`, word 1.
 
 | source | recited |
 |---|---|
@@ -1942,7 +1969,7 @@ The stop sign of word 1 carries the `Structural` edge and takes no pairing, so
 it has no row here, belongs to no block, and is present in both texts. Under
 plan B three rows change and one is added: ٱ owns `ʔ` and names
 `hamza_wasl_start`, the helping fatha takes a gap pairing after it and names
-the same rule, يَٰ names
+the same rule, ◌َٰ names
 `madd_arid_lil_sukun` where it named `madd_tabii`, and تُ owns `t` alone with
 its damma `silent` and `pausal_sukun` in its rules.
 
@@ -2052,7 +2079,7 @@ row 23 for the quiescent hamza. Word 17 is rows 26, 1 and 19.
 The meem hidden at the lips and the noon hidden behind the dad print one token,
 because the published sound carries no place of articulation.
 
-**Part 2, pairings**, `text="source"`, `grouping="cluster"`, plan A.
+**Part 2, pairings**, `text="source"`, `grouping="cell"`, plan A.
 
 | source | owns | shares | silent | rules |
 |---|---|---|---|---|
@@ -2072,25 +2099,26 @@ because the published sound carries no place of articulation.
 | دِّ | `dd` `i` | | | |
 | ٱ | | | ٱ | `hamza_wasl_elision` |
 | لَّ | `ll` `a` | | | |
-| ذِ | `ð` `i` | | | `madd_jaiz_munfasil`, `iltiqa_shortening` |
-| ى | | | | `iltiqa_shortening` |
+| ذ | `ð` | | | |
+| ◌ِى | `i` | | | `madd_jaiz_munfasil`, `iltiqa_shortening` |
 | ٱ | | | ٱ | `hamza_wasl_elision` |
 | ؤْ | `ʔ` | | | |
 | تُ | `t` `u` | | | |
 | مِ | `m` `i` | | | |
 | نَ | `n` `a` | | | |
 | أَ | `ʔ` `a` | | | |
-| مَٰ | `m` `a:` | | | `madd_tabii` |
+| م | `m` | | | |
+| ◌َٰ | `a:` | | | `madd_tabii` |
 | نَ | `n` `a` | | | |
 | تَ | `t` `a` | | | |
 | هُۥ | `h` | | ◌ُ, ۥ | `pausal_sukun` |
 
-Under plan B four rows change: ذِ owns `ð` and shares `i:` with `madd_tabii`; ى
-owns `i:` and names `madd_tabii`; ٱ of word 16 owns `ʔ` and names
-`hamza_wasl_start`; ؤْ owns `u:` and names `ibdal_hamza` and `madd_tabii`. The
-ى of plan A is dropped and in no `silent` list, for the reason E14 gives.
+Under plan B three rows change: ◌ِى owns `i:` and names `madd_jaiz_munfasil`
+alone; ٱ of word 16 owns `ʔ` and names `hamza_wasl_start`; ؤْ owns `u:` and
+names `ibdal_hamza` and `madd_tabii`. The ى of plan A is dropped and in no
+`silent` list, for the reason E14 gives.
 
-**Respelling blocks**, `grouping="cluster"`, word 16 under plan B.
+**Respelling blocks**, `grouping="cell"`, word 16 under plan B.
 
 | source | recited |
 |---|---|
@@ -2098,7 +2126,7 @@ owns `i:` and names `madd_tabii`; ٱ of word 16 owns `ʔ` and names
 | ؤْ | و |
 
 The damma the started-on seat takes is written in the recited text and nowhere
-in the rasm, so it shapes into a cluster whose block has a source and the
+in the rasm, so it shapes into a cell whose block has a source and the
 substituted hamza owns the vowel that sounds.
 
 **Part 3, the walk.**
@@ -2188,36 +2216,36 @@ the shadda.
 | w11 noon (tanween) | consonant | silent, `pausal_sukun` | |
 | w11 noon (tanween) | vowel | absent | |
 
-**Part 2, pairings**, `text="source"`, `grouping="cluster"`.
+**Part 2, pairings**, `text="source"`, `grouping="cell"`.
 
 | source | owns | shares | silent | rules |
 |---|---|---|---|---|
 | مَ | `m` `a` | | | |
 | جْ | `ʒ` `Q` | | | `qalqala_sughra` |
-| ر۪ | `r` | `i:` | | `tarqeeq`, `imala`, `madd_tabii` |
+| ر۪ | `r` | | | `tarqeeq`, `imala` |
 | ىٰ | `i:` | | | `imala`, `madd_tabii` |
-| هَ | `h` | `a:` | | `madd_tabii` |
-| ا | `a:` | | | `madd_tabii` |
+| ه | `h` | | | |
+| ◌َا | `a:` | | | `madd_tabii` |
 | وَ | `w` `a` | | | |
 | مُ | `m` `u` | | | |
 | رْ | `rˤ` | | | `tafkheem` |
-| سَ | `s` | `a:` | | `madd_tabii` |
-| ىٰ | `a:` | | | `madd_tabii` |
-| هَ | `h` | `a:` | | `madd_jaiz_munfasil` |
-| آ | `a:` | | | `madd_jaiz_munfasil` |
+| س | `s` | | | |
+| ◌َىٰ | `a:` | | | `madd_tabii` |
+| ه | `h` | | | |
+| ◌َآ | `a:` | | | `madd_jaiz_munfasil` |
 | إِ | `ʔ` `i` | | | |
 | نَّ | `ñ` `a` | | | `ghunnah_mushaddadah` |
 | رَ | `rˤ` `aˤ` | | | `tafkheem` |
-| بِّ | `bb` | `i:` | | `madd_tabii` |
-| ى | `i:` | | | `madd_tabii` |
+| بّ | `bb` | | | |
+| ◌ِى | `i:` | | | `madd_tabii` |
 | لَ | `l` `a` | | | |
 | غَ | `ɣ` `aˤ` | | | `tafkheem` |
-| فُ | `f` | `u:` | | `madd_tabii` |
-| و | `u:` | | | `madd_tabii` |
+| ف | `f` | | | |
+| ◌ُو | `u:` | | | `madd_tabii` |
 | رٌ | `rˤ` `u` | `rˤrˤ` | | `tafkheem`, `idgham_bila_ghunnah` |
 | رَّ | `rˤrˤ` `aˤ` | | | `idgham_bila_ghunnah`, `tafkheem` |
-| حِ | `ħ` | `i:` | | `madd_arid_lil_sukun` |
-| ي | `i:` | | | `madd_arid_lil_sukun` |
+| ح | `ħ` | | | |
+| ◌ِي | `i:` | | | `madd_arid_lil_sukun` |
 | مٌ | `m` | | ◌ٌ | `pausal_sukun` |
 
 **Part 3, the walk.**
@@ -2225,8 +2253,8 @@ the shadda.
 | relationship | what a consumer must do | cost |
 |---|---|---|
 | sound - rules | tell a colour from a classification | one field read each, and the sound's `emphatic` field alone gives the state of every raa here and the name of none: `tafkheem` recolours and `tarqeeq` only names |
-| script - rules | colour the imala | the mark and the vowel it tilts fall in two clusters and both name the instance, so a consumer colouring the mark alone lights half of it. One field read |
-| script - sound | derive a sound from a spelling | the source writes ىٰ, which spells a long a everywhere else in this request; the pairing answers and the glyph does not, so a consumer deriving sound from spelling is wrong at exactly this cluster |
+| script - rules | colour the imala | the mark and the vowel it tilts fall in two cells and both name the instance, so a consumer colouring the mark alone lights half of it. One field read |
+| script - sound | derive a sound from a spelling | the source writes ىٰ, which spells a long a everywhere else in this request; the pairing answers and the glyph does not, so a consumer deriving sound from spelling is wrong at exactly this cell |
 | the other three | | one call and one field read |
 
 The imala vowel prints as a long i under the shipped reading, so the quality
@@ -2276,22 +2304,22 @@ spelling is the recited spelling. Word 7 is row 26 and word 8 is row 19.
 
 `ishmam` has no row above. It is the unit's rule and it reaches neither part.
 
-**Part 2, pairings**, `text="source"`, `grouping="cluster"`.
+**Part 2, pairings**, `text="source"`, `grouping="cell"`.
 
 | source | owns | shares | silent | rules |
 |---|---|---|---|---|
-| لَ | `l` | `a:` | | `madd_tabii` |
-| ا | `a:` | | | `madd_tabii` |
+| ل | `l` | | | |
+| ◌َا | `a:` | | | `madd_tabii` |
 | تَ | `t` `a` | | | |
 | أْ | `ʔ` | | | |
 | مَ۫ | `m` `a` | | | `ishmam` |
-| نَّ | `ñ` | `a:` | | `ghunnah_mushaddadah`, `madd_tabii` |
-| ا | `a:` | | | `madd_tabii` |
+| نّ | `ñ` | | | `ghunnah_mushaddadah` |
+| ◌َا | `a:` | | | `madd_tabii` |
 | عَ | `ʕ` `a` | | | |
-| لَ | `l` | `a:` | | `madd_tabii` |
-| ىٰ | `a:` | | | `madd_tabii` |
-| يُ | `j` | `u:` | | `madd_tabii` |
-| و | `u:` | | | `madd_tabii` |
+| ل | `l` | | | |
+| ◌َىٰ | `a:` | | | `madd_tabii` |
+| ي | `j` | | | |
+| ◌ُو | `u:` | | | `madd_tabii` |
 | سُ | `s` `u` | | | |
 | فَ | `f` | | ◌َ | `pausal_sukun` |
 
@@ -2300,8 +2328,8 @@ spelling is the recited spelling. Word 7 is row 26 and word 8 is row 19.
 | relationship | what a consumer must do | cost |
 |---|---|---|
 | sound - rules | reach the ishmam from a sound | the instance names no sound, so no attribution and no modifier reaches it. It is in `m.rules` and in one pairing's `rules`, and a consumer animating by sound never meets it |
-| script - rules | say what the instance on that row reached | under `grouping="cluster"` the mark folds into the meem's cluster, so the instance sits on a row that owns two real sounds and nothing on the row says the rule reaches neither. `grouping="glyph"` separates the mark and the row it gets owns nothing at all |
-| script - sound | tell a soundless cluster from a soundless rule | **FINDING.** They are the same shape. `silent` distinguishes them, but only because it names glyphs recitation never says, and this mark is one the reciter performs |
+| script - rules | say what the instance on that row reached | under `grouping="cell"` the mark folds into the meem's cell, so the instance sits on a row that owns two real sounds and nothing on the row says the rule reaches neither. `grouping="glyph"` separates the mark and the row it gets owns nothing at all |
+| script - sound | tell a soundless cell from a soundless rule | **FINDING.** They are the same shape. `silent` distinguishes them, but only because it names glyphs recitation never says, and this mark is one the reciter performs |
 | the other three | | one call and one field read |
 
 **FINDING.** Learning that an instance produces nothing takes a scan of both
@@ -2365,15 +2393,17 @@ and word 10 takes the shadda row 18 adds; word 10 is row 20.
 | w10 noon (tanween) | consonant | silent, `pausal_sukun` | |
 | w10 noon (tanween) | vowel | absent | |
 
-**Part 2, pairings**, `text="source"`, `grouping="cluster"`.
+**Part 2, pairings**, `text="source"`, `grouping="cell"`.
 
 | source | owns | shares | silent | rules |
 |---|---|---|---|---|
-| ءَ | `ʔ` | `a:` | | `madd_tabii` |
-| ا | `a:` | | | `madd_tabii` |
-| يَٰ | `j` `a:` | | | `madd_tabii` |
+| ء | `ʔ` | | | |
+| ◌َا | `a:` | | | `madd_tabii` |
+| ي | `j` | | | |
+| ◌َٰ | `a:` | | | `madd_tabii` |
 | تُ | `t` `u` | | | |
-| هُۥٓ | `h` `u:` | | | `madd_jaiz_munfasil` |
+| ه | `h` | | | |
+| ◌ُۥٓ | `u:` | | | `madd_jaiz_munfasil` |
 | ءَ | `ʔ` `a` | | | |
 | ا۬ | `ʔ` `a` | | | `tashil` |
 | عْ | `ʕ` | | | |
@@ -2392,7 +2422,7 @@ and word 10 takes the shadda row 18 adds; word 10 is row 20.
 |---|---|---|
 | sound - rules | tell the eased hamza from the plain one | one field read to reach the rule and none at all to reach the manner: the two are the same token, the ease is a `Classifies` edge and no field of the sound, which is what the contract intends and what a consumer reading tokens alone cannot recover |
 | script - sound | ask an alif what it owns | one field read, and a consumer keyed on the base letter reads an alif twice and hears two different things: the ا۬ of word 9 owns a hamza and the vowel after it, where the plain ا of word 8 owns the long a of the letter before it |
-| script - recited | expand the silah mark | one call: the block holds the mark's cluster on one side and the haraka and its carrier on the other |
+| script - recited | expand the silah mark | one call: the block holds the mark's cell on one side and the haraka and its carrier on the other |
 | the other three | | one call and one field read |
 
 Manner is a rule here and nothing else, so two hamzas a reciter says
@@ -2406,7 +2436,7 @@ every instance's `labels`.
 
 ## 3. Coverage
 
-Three tables, one per thing that has to be covered. A blank cell is the point
+Three tables, one per thing that has to be covered. A blank entry is the point
 of the table: it says the set has no place where a consumer could see that
 thing, and section 4 says why.
 
@@ -2558,6 +2588,7 @@ example does catch it failing, the cell says so.
 | a soundless mark may present its rule instance | 4.5 | E20, E21 |
 | no audibility of a glyph is inferred from its unit | 4.5 | E2 |
 | the pairings partition the selected text's glyphs | 4.6 | E2 |
+| a cell never splits a glyph, and a written vowel is a cell of its own | 4.6 | E1, E11, E14, E17 |
 | the pairings cover every sound exactly once in `sounds` | 4.6 | E2, E5 |
 | a gap pairing has no glyphs, one sound and an `after` | 4.6 | E4 |
 | a sound takes a gap exactly when no glyph presents it | 4.6 | E4, E12 |

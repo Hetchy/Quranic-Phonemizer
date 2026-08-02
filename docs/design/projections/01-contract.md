@@ -24,9 +24,9 @@ the token stream is stable across every schema evolution of the graph.
 ```python
 m = mappings("2:255")
 
-m.rules                                          # every rule, in reading order
-m.alignment(text="source", grouping="cluster")   # writing lined up with sound
-m.respelling(grouping="cluster")                 # the two texts against each other
+m.rules                                       # every rule, in reading order
+m.alignment(text="source", grouping="cell")   # writing lined up with sound
+m.respelling(grouping="cell")                 # the two texts against each other
 ```
 
 What is not said is on the row that does not say it. `pairing.silent` names the
@@ -103,7 +103,7 @@ rejoin by index. Co-highlighting is the plain case: it reads `sounds` and
 can do it without the consumer rebuilding the row.
 
 Script against recited is the one that cannot be a column. It is many-to-many
-in both directions - a recited cluster can cover two source glyphs and one
+in both directions - a recited cell can cover two source glyphs and one
 source glyph can render as two - and a column on a row that partitions one text
 cannot hold a group that spans several rows of the other. `respelling` returns
 those groups directly, which is what a diff view or a two-line teleprompter
@@ -429,13 +429,13 @@ part still states one realization and carries the echo beside it.
 ## 6. Alignment and respelling
 
 ```python
-m.alignment(text="source"|"recited", grouping="glyph"|"cluster")
+m.alignment(text="source"|"recited", grouping="glyph"|"cell")
 ```
 
 | | `text="source"` | `text="recited"` |
 |---|---|---|
 | `grouping="glyph"` | one pairing per source scalar | one per rendered scalar |
-| `grouping="cluster"` | base letter plus the marks a font shapes with it | the same over the recited spelling |
+| `grouping="cell"` | section 6.4 | the same over the recited spelling |
 
 ```python
 @dataclass(frozen=True)
@@ -467,7 +467,7 @@ empty, because no rule silences a glyph recitation itself wrote.
 
 `sounds` and `shares` make co-highlighting a field. A sound is timed once and
 lights every pairing naming it in either list, so an idgham lights the
-merged-away letter and its host, and a tanween lights its cluster and again
+merged-away letter and its host, and a tanween lights its own cell and again
 with the letter it merges into.
 
 ### 6.1 Ownership
@@ -488,7 +488,7 @@ the text writes, not how the sound was attributed.
 ### 6.3 Respelling
 
 ```python
-m.respelling(grouping="glyph"|"cluster")
+m.respelling(grouping="glyph"|"cell")
 ```
 
 ```python
@@ -504,7 +504,7 @@ second closure is what places a sound the source does not write: its gap
 pairing and the rendered glyph that writes it own one sound, so they fall in
 one block, and neither is left for the reader to place. Where the two texts run one to one a block
 holds one pairing on each side; where a source glyph renders as two, or a
-recited cluster covers two source glyphs, it holds what it has to. A source
+recited cell covers two source glyphs, it holds what it has to. A source
 glyph the recited text drops gives a block with an empty `recited`. No block
 has an empty `source`: a rendered glyph the source did not produce still writes
 a sound, and the closure over sounds puts it beside the pairing that owns it,
@@ -515,12 +515,36 @@ silences stay on the pairings a block points at, so there is one place each
 fact is stated. This is a group-by with a name, published because every
 consumer showing both texts writes the same one.
 
-### 6.4 What a cluster is, and what a pairing is not
+### 6.4 What a cell is, and what a pairing is not
 
-A muqattaat glyph is one cluster row owning the sounds of a whole letter name.
-That is the granularity a font shapes and the granularity this grouping is
-named for; a consumer animating inside the name reads the units, which are
-already there and already ordered.
+A **cell** is a letter with the mark that vowels it, and a long vowel is a cell
+of its own. Four clauses, applied to the glyphs of the selected text in order.
+They group glyphs and never split one.
+
+1. A glyph supplying `vowel_length` opens a cell.
+2. A glyph supplying that same vowel's quality joins it.
+3. A glyph presenting that vowel and supplying no fact joins it: the seat
+   under a dagger, and the maddah.
+4. Every other glyph joins the cell of the glyph supplying its unit's
+   consonant, and is a cell of its own where there is none: a letter the rasm
+   carries that answers to no unit, and the sakt mark.
+
+So `مَا` is `م` then `َا`, and `ءَايَـٰتُ` gives `ي` then `َٰ`: the mark that
+carries the length takes the haraka with it and leaves the letter bare, which
+is the one thing a consumer colouring letter by letter cannot do for itself
+without knowing which vowel is long. A letter whose vowel is written only on
+it stays whole, so `كَ` and `بٍ` are one cell each, and so is a bare letter
+under a sukun.
+
+A muqattaat glyph is one cell owning the sounds of a whole letter name,
+because no clause can split a glyph; a consumer animating inside the name
+reads the units, which are already there and already ordered.
+
+**This is the grouping a renderer wants and `glyph` is not.** A haraka does not
+highlight on its own and a maddah does not animate on its own, and a font
+colours a letter, not a scalar. `glyph` is for a consumer asking what one
+character does, which is a different question and the one the spelling edges
+answer.
 
 Pairings are request-local and will never take a durable key. A consumer
 persisting records against them keys on position and defends against drift

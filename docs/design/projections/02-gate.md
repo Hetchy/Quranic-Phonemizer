@@ -118,6 +118,11 @@ muqattaat expansions.
 
 ### 3.4 `character_phoneme_mappings`
 
+Its rows are `alignment(text="source", grouping="glyph")` with the shadda
+folded onto its base; the renderer that consumes them regroups into
+`grouping="cell"`. [08-legacy-parity](08-legacy-parity.md) reads the shipped
+schema column by column, and this table is the mapping the adapter implements.
+
 | Cell field | Source |
 |---|---|
 | `chars` | source spelling, or the rendered glyph |
@@ -223,6 +228,9 @@ one glyph each.
 
 For every combination of `text` and `grouping`:
 
+- **Under `grouping="cell"` no pairing splits a glyph**, every glyph
+  supplying `vowel_length` opens one, and no pairing holds two glyphs
+  supplying a consonant.
 - **The pairings partition the selected text's glyph array.** Every glyph
   appears in exactly one pairing, except those carrying the `Structural`
   spelling edge, which have none. The edge decides this, never `kind`, and

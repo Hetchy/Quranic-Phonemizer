@@ -54,12 +54,13 @@ so neither has anything to add here.
 | `share_group` | section 4 |
 | `phoneme_rule_tags` | the units of the spelled name, each with its own rules |
 
-**The cell boundary is neither of the two groupings.** A cell splits a haraka
-from its letter, which is `grouping="glyph"`, and fuses a shadda into it,
-which is `grouping="cluster"`: the shipped cell for the meem of مُّبِينٍ is
-`مّ`. A client wanting the shipped boundary reads the glyph grouping and folds
-the shadda back onto the base it decorates, which is one rule and the only
-place the two shapes part.
+**The shard's cell is one scalar and its renderer's group is a letter.** The
+shard splits a haraka from its letter and fuses a shadda into it, so its row
+for the meem of مُّبِينٍ is `مّ`; that is `grouping="glyph"` with the shadda
+folded back onto the base it decorates, which is one rule and the only place
+the two shapes part. The renderer then groups those rows again, and what it
+groups them into is `grouping="cell"`. The two levels are the two the contract
+publishes, and the shard is the lower one because it is a transport.
 
 ---
 
@@ -104,19 +105,26 @@ needed and no client has to union anything; and section 6.1 says which of them
 owns it, which the shard leaves to whoever reads it. A client that wants the
 id keeps the sound's index and has exactly the shipped behaviour.
 
-**So the animation unit is the pairing, and a mark is one.** The dagger alif,
-the mini waw and yaa, the maddah and the small high seen each take their own
-row under `grouping="glyph"`, and each says whether it owns its sound or only
-presents it. A client animating a written word walks that array; one animating
-by cluster asks for clusters and gets the letter with its marks in one row;
-one animating inside a disjoined-letter opening reads the units, which are
+**The animation unit is the cell, and the renderer already agrees.** Its
+groups are `base`, a consonant with the short haraka that vowels it, and
+`vowel`, the haraka with the carrier it pairs with, and its own comment says
+the base of a long vowel renders separately. That is
+[01-contract](01-contract.md) section 6.4 clause for clause: `مَا` is `م` then
+`َا`, and `ءَايَـٰتُ` is `ي` then `َٰ`.
+
+This is why `glyph` is the wrong grouping to hand a renderer. A font colours a
+letter, a haraka does not highlight on its own and a maddah does not animate
+on its own; `glyph` is one row per scalar and asks the client to fold. A client
+animating inside a disjoined-letter opening still reads the units, which are
 ordered and are what the shard's slot 7 was added to reach.
 
-The shipped data agrees on where a dagger belongs. Its cell for the seat of
-وَنَادَىٰ is `ىٰ`, one cell holding the seat and the mark, sharing its group
-with the fatha before it; its cell for the dagger of ءَايَـٰتُ is the mark
-alone, sharing with the fatha the same way. The seat is written in one word
-and not the other, and the mark carries the length in both.
+The shipped data agrees on where a dagger belongs and on the one place a mark
+must not fuse. Its cells for the seat of وَنَادَىٰ are `ىٰ` and the fatha
+before it under one share group, and for ءَايَـٰتُ the dagger alone with its
+fatha the same way -- in both, the mark and its quality are one thing and the
+letter they follow is another. Fusing the mark into the letter, which is what a
+font-shaping cluster does, would put a long vowel and the consonant before it
+in one animation frame.
 
 ---
 
@@ -127,6 +135,13 @@ noon. Its data says the noon of طسٓ is plain and the noon of نٓ is plain, a
 the package this contract is written against hums the first into تِلْكَ and
 merges the second into وَٱلْقَلَمِ. [07-rules](07-rules.md) section 2.1 states
 the law and [01-contract](01-contract.md) section 8 checks it.
+
+The one place parity is not wanted is the shadda a started-on word keeps. A
+word whose first letter carries the trace of the previous word's idgham is not
+said doubled when recitation begins there, and the shard's cell keeps the
+shadda anyway; that is a defect of the cells and not behaviour to reproduce.
+The recited text drops it, which is
+[06-two-texts](06-two-texts.md) row 9.
 
 Three things the contract publishes that the shard cannot.
 
