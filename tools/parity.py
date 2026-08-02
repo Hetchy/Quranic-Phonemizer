@@ -1,6 +1,6 @@
 """Compare Uthmani phoneme output against the frozen snapshots.
 
-Run: python tools/parity.py [--mode word|verse] [--limit N]
+Run: python tools/parity.py [--mode word|verse|continuous] [--limit N]
 """
 from __future__ import annotations
 
@@ -32,10 +32,9 @@ from quranic_phonemizer.render.recite import phonemes_by_word  # noqa: E402
 SNAPSHOTS = ROOT / "tests" / "snapshots" / "phonemes"
 
 
-#: `continuous` joins across verse boundaries, so its unit is the surah, not
-#: the verse: one `Reading` per surah, every junction a join. Legacy froze it
-#: as a single call over the whole mushaf, so the seams between surahs are the
-#: one place this harness and that baseline can legitimately differ.
+#: `continuous` joins across verse ends, so the verse is not its unit. Legacy
+#: froze it as a single call over the whole mushaf; this reads it the same way,
+#: as one reading with every junction a join, seams between surahs included.
 MODES = ("word", "verse", "continuous")
 
 
@@ -47,23 +46,24 @@ def plan_for(mode: str, words: int) -> BoundaryPlan:
 
 
 def units(hafs, mode: str):
-    """The stretches a mode reads at once: a surah continuously, else a verse.
+    """The stretches a mode reads at once: the mushaf entire, else a verse.
 
     `read` takes the words it is given, so a stretch that spans verses is one
     reading and a rule can cross the seam inside it.
     """
-    packed = hafs.corpus
+    packed, carried = hafs.corpus, []
     for surah in range(1, 115):
         verses = [
             VerseRef(surah, ayah)
             for ayah in range(1, len(packed.surah_info[str(surah)]) + 1)
         ]
         if mode == "continuous":
-            words = tuple(word for v in verses for word in hafs.words(v))
-            yield verses[0], words
+            carried.extend(word for v in verses for word in hafs.words(v))
         else:
             for verse in verses:
                 yield verse, hafs.words(verse)
+    if carried:
+        yield VerseRef(1, 1), tuple(carried)
 
 
 def main() -> int:
@@ -74,7 +74,6 @@ def main() -> int:
     args = parser.parse_args()
 
     hafs, alphabet = recitation(Riwayah.HAFS), load_alphabet()
-    packed = hafs.corpus
 
     matched = total = 0
     bucketed = 0
@@ -101,10 +100,11 @@ def main() -> int:
             ]
             total += len(got_words)
             matched += len(got_words) - len(wrong)
-            if _same_sequence(got_words, want_words):
-                bucketed += len(wrong)
-            else:
-                for index in wrong:
+            whole = _same_sequence(got_words, want_words)
+            for index in wrong:
+                if whole or _moved_across_a_seam(got_words, want_words, index):
+                    bucketed += 1
+                else:
                     got, want = got_words[index], want_words[index]
                     diffs[_signature(got, want)] += 1
                     if len(mismatches) < args.show:
@@ -139,6 +139,21 @@ def main() -> int:
 def _same_sequence(got: list[list], want: list[list]) -> bool:
     """Same phonemes in the same order, ignoring where the words are cut."""
     return [t for word in got for t in word] == [t for word in want for t in word]
+
+
+def _moved_across_a_seam(got: list[list], want: list[list], index: int) -> bool:
+    """The pair differs only in which side of their shared seam a sound sits.
+
+    Checked on the pair, not the whole stretch: read at once, one real
+    difference would otherwise mask every merged sound after it.
+    """
+    for other in (index - 1, index + 1):
+        if not 0 <= other < len(got):
+            continue
+        low, high = min(index, other), max(index, other)
+        if got[low] + got[high] == want[low] + want[high]:
+            return True
+    return False
 
 
 def _signature(got: list, want: list) -> str:

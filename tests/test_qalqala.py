@@ -12,10 +12,10 @@ def _alone(ref: str, word: int) -> str:
 
 SUGHRA = [
     ("2:3", 7, "rˤaˤzaqQna:hum"),      # رَزَقْنَـٰهُمْ
-    ("2:19", 18, "muħi:tˤQ"),          # مُحِيطٌ
+    ("106:4", 2, "ʔatˤQʕamahum"),      # أَطْعَمَهُم
     ("2:4", 9, "qaˤbQlik"),            # قَبْلِكَ
     ("2:19", 9, "jaʒQʕalu:n"),         # يَجْعَلُونَ
-    ("2:19", 7, "warˤaˤʕdQ"),          # وَرَعْدٌ
+    ("46:4", 4, "tadQʕu:n"),           # تَدْعُونَ
 ]
 
 KUBRA = [
@@ -24,6 +24,13 @@ KUBRA = [
     ("1:7", 6, "ʔalmaɣdˤu:bQ"),        # ٱلْمَغْضُوبِ
     ("2:22", 12, "faʔaxrˤaˤʒQ"),       # فَأَخْرَجَ
     ("1:2", 1, "ʔalħamdQ"),            # ٱلْحَمْدُ
+]
+
+#: A qalqala letter the stop silences under its own tanween. The engine files
+#: these as the lighter degree; the phonemes are the same either way.
+TANWEEN_AT_A_STOP = [
+    ("2:19", 18, "muħi:tˤQ"),          # مُحِيطٌ
+    ("2:19", 7, "warˤaˤʕdQ"),          # وَرَعْدٌ
 ]
 
 AKBAR = [
@@ -43,6 +50,13 @@ def test_every_qalqala_letter_echoes_quiescent_inside_a_word(
 
 @pytest.mark.parametrize(("ref", "word", "expected"), KUBRA)
 def test_every_qalqala_letter_echoes_when_the_stop_silences_it(
+    ref, word, expected
+):
+    assert _alone(ref, word) == expected
+
+
+@pytest.mark.parametrize(("ref", "word", "expected"), TANWEEN_AT_A_STOP)
+def test_a_qalqala_letter_under_a_tanween_echoes_when_stopped_on(
     ref, word, expected
 ):
     assert _alone(ref, word) == expected
