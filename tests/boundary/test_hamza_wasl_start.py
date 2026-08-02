@@ -74,5 +74,5 @@ def test_the_helping_vowel_is_a_fatha_before_the_divine_name(r):
 @for_each_riwayah(ILTAQA, ibtidaa=6, waqf=6)
 def test_a_form_eight_verb_takes_a_kasra_and_not_the_article_fatha(r):
     # ٱلْتَقَى
-    # the engine says ʔaltaqaˤ:, sounding the fatha the article would take
+    # the engine gives it the fatha the article takes, reading it as one
     assert r.phonemes(6) == "ʔiltaqaˤ:"
