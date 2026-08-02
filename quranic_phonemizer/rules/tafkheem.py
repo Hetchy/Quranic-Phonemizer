@@ -106,9 +106,15 @@ def _raa_is_heavy(near, slot, plan, always_heavy) -> bool:
         # A raa after a leen yaa follows the yaa and stays light.
         return False
     following = near.after(slot.id)
-    if following is not None and following.letter in always_heavy:
+    if (
+        following is not None
+        and not near.crosses_word(slot.id)
+        and following.letter in always_heavy
+    ):
         # A letter of istilaa after a quiescent raa wins over whatever
-        # precedes it: `قِرْطَاسٍ` is heavy despite its kasra.
+        # precedes it: `قِرْطَاسٍ` is heavy despite its kasra. Only inside the
+        # word: `تُصَعِّرْ خَدَّكَ` and `فَٱصْبِرْ صَبْرًا` keep a light raa, because
+        # the letter that would weigh it belongs to the next word.
         return True
     governing = _governing(near, slot, plan)
     if governing is None:
