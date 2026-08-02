@@ -13,7 +13,7 @@ import pytest
 
 from quranic_phonemizer.api import alphabet as load_alphabet
 from quranic_phonemizer.api import recitation
-from quranic_phonemizer.model.address import Riwayah, Script
+from quranic_phonemizer.model.address import Riwayah, Script, VerseRef
 from quranic_phonemizer.render.recite import phonemes_by_word
 from tools.parity import (
     _moved_across_a_seam,
@@ -32,8 +32,27 @@ SNAPSHOTS = (
 FLOORS = {
     "word": (0.9992, 0.9992),
     "verse": (0.9767, 0.9982),
-    "continuous": (0.0, 0.0),
+    "continuous": (0.9742, 0.9955),
 }
+
+
+def _stretches(hafs, mode: str):
+    """A surah at a time for `continuous`, else whatever the tool reads.
+
+    `read` takes the words it is given, so a surah is one reading and a
+    rule crosses the verse seams inside it.
+    """
+    if mode != "continuous":
+        yield from units(hafs, mode)
+        return
+    for surah in range(1, 115):
+        verses = [
+            VerseRef(surah, ayah)
+            for ayah in range(1, len(hafs.corpus.surah_info[str(surah)]) + 1)
+        ]
+        yield verses[0], tuple(
+            word for verse in verses for word in hafs.words(verse)
+        )
 
 
 def _rates(mode: str) -> tuple[float, float]:
@@ -43,7 +62,7 @@ def _rates(mode: str) -> tuple[float, float]:
         SNAPSHOTS / f"{mode}.jsonl.gz", "rt", encoding="utf-8"
     ) as handle:
         expected = (json.loads(line) for line in handle)
-        for verse, source in units(hafs, mode):
+        for verse, source in _stretches(hafs, mode):
             score = hafs.build(hafs.read(Script.UTHMANI, verse, source)).score
             performance = hafs.perform(
                 score, plan_for(mode, len(score.words))
@@ -88,5 +107,5 @@ def test_a_verse_joined_throughout_holds_its_parity_floor():
 
 
 @pytest.mark.slow
-def test_the_whole_mushaf_read_at_once_holds_its_parity_floor():
+def test_a_surah_read_as_one_reading_holds_its_parity_floor():
     _assert_floor("continuous")

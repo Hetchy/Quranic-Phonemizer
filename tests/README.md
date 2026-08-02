@@ -66,6 +66,7 @@ non-ASCII.
 
 ```
 python -m pytest -m engine_bug   # just the known-wrong readings
+python -m pytest --runslow       # plus the corpus-wide parity floors
 ```
 
 CI runs the whole suite and these fail it. That is intended while the engine

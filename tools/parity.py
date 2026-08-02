@@ -32,9 +32,11 @@ from quranic_phonemizer.render.recite import phonemes_by_word  # noqa: E402
 SNAPSHOTS = ROOT / "tests" / "snapshots" / "phonemes"
 
 
-#: `continuous` joins across verse ends, so the verse is not its unit. Legacy
-#: froze it as a single call over the whole mushaf; this reads it the same way,
-#: as one reading with every junction a join, seams between surahs included.
+#: `continuous` joins across verse ends, so the verse is not its unit; the
+#: surah is. Legacy froze it as a single call over the whole mushaf, but a
+#: reading costs time quadratic in its length, and the mushaf entire takes
+#: hours. The surah crosses every verse seam, which is what the mode is for,
+#: and leaves the seams between surahs read as stops.
 MODES = ("word", "verse", "continuous")
 
 
@@ -46,24 +48,24 @@ def plan_for(mode: str, words: int) -> BoundaryPlan:
 
 
 def units(hafs, mode: str):
-    """The stretches a mode reads at once: the mushaf entire, else a verse.
+    """The stretches a mode reads at once: a surah continuously, else a verse.
 
     `read` takes the words it is given, so a stretch that spans verses is one
     reading and a rule can cross the seam inside it.
     """
-    packed, carried = hafs.corpus, []
+    packed = hafs.corpus
     for surah in range(1, 115):
         verses = [
             VerseRef(surah, ayah)
             for ayah in range(1, len(packed.surah_info[str(surah)]) + 1)
         ]
         if mode == "continuous":
-            carried.extend(word for v in verses for word in hafs.words(v))
+            yield verses[0], tuple(
+                word for v in verses for word in hafs.words(v)
+            )
         else:
             for verse in verses:
                 yield verse, hafs.words(verse)
-    if carried:
-        yield VerseRef(1, 1), tuple(carried)
 
 
 def main() -> int:
