@@ -118,10 +118,10 @@ are word 2.
 | بُ | بُ | `b` `u` | | | |
 
 The tatweel sits between the fatha and the dagger, carries the `Structural`
-edge, takes no pairing and is dropped (row 12); the space before the word
-carries the same edge and is kept (row 32). The elided seat produces no
+edge, takes no pairing and is dropped (row 11); the space before the word
+carries the same edge and is kept (row 31). The elided seat produces no
 rendered glyph rather than an empty one, and the dagger's expansion into a
-written alif is row 27.
+written alif is row 26.
 
 **Part 3, the walk.** Every relationship is one call and one field read.
 
@@ -148,8 +148,8 @@ Plan B: `mappings("2:28:4-2:28:5")`, joined, stopping after word 5.
 | 5 | أَمْوَٰتًا | أَمْوَاتَا | `ʔ a m w a: t a:` |
 
 Word 5's fathatan is 4.1a's ikhfaa line under plan A, the haraka then a bare
-noon, and its seat goes by row 5; under plan B the fathatan becomes a fatha
-(row 22) and the same seat stops being silent (row 29).
+noon, and its seat goes by row 4; under plan B the fathatan becomes a fatha
+(row 21) and the same seat stops being silent (row 28).
 
 **Part 1, units and parts**, plan A.
 
@@ -251,7 +251,7 @@ vowel: the dagger supplies the length and owns the sound, the fatha supplies
 the quality and shares it. The final seat is one character in one place under
 both plans, `silent` under A and owning the length under B. Word 6 carries a
 tatweel, a space and the stop sign ۖ; all three take no pairing, and the
-recited text drops the first (row 12) and keeps the other two (rows 32 and 31).
+recited text drops the first (row 11) and keeps the other two (rows 31 and 30).
 
 **Part 3, the walk.**
 
@@ -277,9 +277,9 @@ silent, with no character changed anywhere.
 | 2 | عَلَىٰ | عَلَا | `ʕ a l a:` |
 | 3 | هُدًى | هُدَا | `h u d a:` |
 
-Word 1's waw and its round zero are rows 4 and 6; word 2's dagger is row 27;
-word 3's fathatan becomes a fatha (row 22), its seat stops being silent (row
-31) and is written as the carrier the long a takes (row 18).
+Word 1's waw and its round zero are rows 3 and 5; word 2's dagger is row 26;
+word 3's fathatan becomes a fatha (row 21), its seat stops being silent (row
+31) and is written as the carrier the long a takes (row 17).
 
 **Part 1, units and parts.**
 
@@ -354,8 +354,8 @@ begins, joined, stopping after word 3.
 | 2 | لِلَّهِ | لِلَّاهِ | `l i ll a: h i` |
 | 3 | رَبِّ | رَبّْ | `rˤ aˤ bb Q` |
 
-Word 1 is rows 25 and 14 on the wasl seat; word 2 is row 17, the one insertion
-whose sound the source text does write; word 3 is row 20.
+Word 1 is rows 24 and 13 on the wasl seat; word 2 is row 16, the one insertion
+whose sound the source text does write; word 3 is row 19.
 
 **Part 1, units and parts.**
 
@@ -429,8 +429,8 @@ vowel is shown by nothing, because the rasm writes no haraka over the seat.
 | 3 | هُدًى | هُدَ | `h u d a` |
 | 4 | مِّن | مِّنْ | `m̃ i n` |
 
-Word 3 is 4.1a's idgham line, the haraka alone, and its seat goes by row 5.
-Word 4 takes row 13: the rasm left the noon bare because an assimilation was
+Word 3 is 4.1a's idgham line, the haraka alone, and its seat goes by row 4.
+Word 4 takes row 12: the rasm left the noon bare because an assimilation was
 coming, the stop cancels it, and the sukun has to be written back.
 
 **Part 1, units and parts.**
@@ -491,9 +491,9 @@ is silent, and `shares` is the only thing joining them.
 | 6 | مِّنْ | مِّنْ | `m̃ i n` |
 | 7 | خَوْفٍ | خَوْفْ | `x aˤ w f` |
 
-Word 1 is rows 25 and 14 on the wasl seat. The quiescent meems of words 2 and 5
-go by row 8, and word 5 takes the shadda row 19 adds. Word 4's kasratan is
-4.1a's idgham line and word 7's is row 21.
+Word 1 is rows 24 and 13 on the wasl seat. The quiescent meems of words 2 and 5
+go by row 7, and word 5 takes the shadda row 18 adds. Word 4's kasratan is
+4.1a's idgham line and word 7's is row 20.
 
 **Part 1, units and parts.**
 
@@ -623,9 +623,9 @@ word 5.
 |---|---|---|---|
 | 3 | مِّن | مِ | `m i` |
 
-Word 2's qaf and its final meem go by row 8, and so does word 3's noon; the
-hosts already carry their shadda, so row 19 adds nothing. Word 5 is row 21.
-Under plan B word 3 loses its shadda to row 10.
+Word 2's qaf and its final meem go by row 7, and so does word 3's noon; the
+hosts already carry their shadda, so row 18 adds nothing. Word 5 is row 20.
+Under plan B word 3 loses its shadda to row 9.
 
 **Part 1, units and parts**, plan A.
 
@@ -744,9 +744,9 @@ word 9.
 |---|---|---|---|
 | 8 | مَّا | مَا | `m a:` |
 
-Word 7 is 4.1a's idgham line and its seat goes by row 5. Word 9 is rows 1 and
+Word 7 is 4.1a's idgham line and its seat goes by row 4. Word 9 is rows 1 and
 24: the tanween goes and leaves no alif, and the taa marbuta is written as the
-haa recitation says. Under plan B word 8 loses its shadda to row 10.
+haa recitation says. Under plan B word 8 loses its shadda to row 9.
 
 **Part 1, units and parts**, plan A.
 
@@ -807,7 +807,7 @@ character, while ة stands unaltered in the source array beside it: neither text
 is the other with edits applied. The fathatan of that cluster shows two units'
 silences and the pairing lists it once, so which part each silence took is on
 the attribution edges and nowhere else. No catalogue row inserts the sukun on
-that haa: row 1 takes the tanween, row 23 substitutes the letter, and rows 13,
+that haa: row 20 turns the tanween into a sukun, row 22 substitutes the letter, and rows 12,
 22 and 23 each want a shape this word does not have.
 
 **Part 3, the walk.**
@@ -835,10 +835,10 @@ names, and the source array stands unchanged beside it.
 | 4 | كُفُوًا | كُفُوَنْ | `k u f u w a n` |
 | 5 | أَحَدٌ | أَحَدْ | `ʔ a ħ a d Q` |
 
-Word 2's noon goes by row 8 and the host already carries its shadda. Word 3 is
-row 28, the silah mark written out as a haraka and a carrier. Word 4 is 4.1a's
-izhar line, the haraka then a noon bearing a sukun, and its seat goes by row 5.
-Word 5 is row 21.
+Word 2's noon goes by row 7 and the host already carries its shadda. Word 3 is
+row 27, the silah mark written out as a haraka and a carrier. Word 4 is 4.1a's
+izhar line, the haraka then a noon bearing a sukun, and its seat goes by row 4.
+Word 5 is row 20.
 
 **Part 1, units and parts.**
 
@@ -922,8 +922,8 @@ dal; the table carries the degree the converse law requires.
 | 10 | لَّهُۥ | لَّهُو | `ll a h u:` |
 | 11 | عِوَجَاۜ | عِوَجَاۜ | `ʕ i w a ʒ a:` |
 
-The merger of word 9 is row 8 alone: the mushaf already doubles the host, so
-row 19 has nothing to add. Word 10 is row 28. The sakt mark of word 11 is 4.7's
+The merger of word 9 is row 7 alone: the mushaf already doubles the host, so
+row 18 has nothing to add. Word 10 is row 27. The sakt mark of word 11 is 4.7's
 unchanged case, and so is the release.
 
 **Part 1, units and parts.**
@@ -1006,9 +1006,9 @@ Plan B: `mappings("27:22:5-27:22:9")`, joined, stopping after word 9.
 | 9 | بِهِۦ | بِهْ | `b i h` |
 
 Word 5 is 4.7's unchanged case for the naqis, whose letters the recited text
-writes exactly as the rasm does. Word 9 is row 28 under plan A; under plan B
-row 2 takes the silah mark and the sukun that replaces its kasra is covered by
-no row. Word 10 is row 20.
+writes exactly as the rasm does. Word 9 is row 27 under plan A; under plan B
+row 1 takes the silah mark and the sukun that replaces its kasra is covered by
+no row. Word 10 is row 19.
 
 **Part 1, units and parts**, plan A.
 
@@ -1119,8 +1119,8 @@ naqis rule's trigger in the tuple position a merger uses for its host.
 | 15 | مَّعَنَا | مَّعَنَا | `mm a ʕ a n a:` |
 
 Word 8 is 4.1a's `iltiqa_kasra` line, the haraka then a noon with a kasra, and
-row 15 writes the kasra itself. Word 13 takes rows 12, 19 and 27 together, and
-word 14 rows 7 and 8.
+row 14 writes the kasra itself. Word 13 takes rows 11, 18 and 26 together, and
+word 14 rows 6 and 7.
 
 **Part 1, units and parts.**
 
@@ -1234,7 +1234,7 @@ takes it and a voweled noon has nothing to hide or merge.
 
 The ninth row is the gap pairing, `after` naming the cluster حٌ. The tanween
 mark writes the haraka and the noon, and the kasra beside them is the
-insertion's own glyph, which is why row 15 writes a letter and not only a mark.
+insertion's own glyph, which is why row 14 writes a letter and not only a mark.
 
 **Part 3, the walk.**
 
@@ -1273,11 +1273,11 @@ Plan B: `mappings("2:27:2-2:27:7")`, joined throughout, stopping after word 7.
 |---|---|---|---|
 | 7 | مِيثَـٰقِهِۦ | مِيثَاقِهْ | `m i: θ a: q i h` |
 
-Word 4 is rows 7, 9 and 17: the wasl seat goes, the article lam goes, and the
+Word 4 is rows 6, 8 and 16: the wasl seat goes, the article lam goes, and the
 long a the rasm has no carrier for is written. Word 5 is 4.7's unchanged case
-for a joined iqlab. Word 7 is row 27 on the dagger and row 28 on the silah mark
-under plan A; under plan B row 2 takes the mark and the sukun that replaces its
-kasra is covered by no row. Word 8 is row 20.
+for a joined iqlab. Word 7 is row 26 on the dagger and row 27 on the silah mark
+under plan A; under plan B row 1 takes the mark and the sukun that replaces its
+kasra is covered by no row. Word 8 is row 19.
 
 **Part 1, units and parts**, plan A.
 
@@ -1395,7 +1395,7 @@ units here whose vowel the colour reaches.
 |---|---|---|
 | script - recited | list every glyph the recited text drops | **FINDING.** `rendered` is empty for ٱ and for ل, and only ٱ is in `silent`: a merged lam shows the geminate through `shares`, so it is neither a `Silent` attribution nor a glyph showing no sound. No one list holds both, and the catalogue's "dropped" row says otherwise |
 | script - recited | draw the recited word لَّاهِ | **FINDING**, the one E4 records. The alif written for a length the rasm has no carrier for names no source glyph and sits in no source row's `rendered`, so the source rows concatenate to a text one character short of what recitation says |
-| script - recited | draw مِيثَاقِهْ under plan B | **FINDING.** Row 2 removes ۦ, and the kasra becoming a sukun is covered by no row: row 20 wants a vowel short in its joined form, row 21 a nunation, row 22 a fathatan, row 13 a bare consonant |
+| script - recited | draw مِيثَاقِهْ under plan B | **FINDING.** Row 2 removes ۦ, and the kasra becoming a sukun is covered by no row: row 19 wants a vowel short in its joined form, row 20 a nunation, row 21 a fathatan, row 12 a bare consonant |
 | sound - rules | highlight the geminate | one call and two rows: `lˤlˤ` is owned in the second lam and the instance names the first as its `source`, so the highlight reads one row through `sounds` and one through `shares` |
 | script - sound, script - rules | read any other row | one call and one field read, except that ٱ and ل both own nothing, and only `silent` read against `shares` separates an elision from a merger |
 | the other two | | one call and one field read |
@@ -1427,11 +1427,11 @@ Plan B: `mappings("2:27:12")`, one word, stopped.
 |---|---|---|---|
 | 12 | بِهِۦٓ | بِهْ | `b i h` |
 
-Word 12 is row 28 under plan A; under plan B rows 2 and 3 take the mark and its
+Word 12 is row 27 under plan A; under plan B rows 1 and 2 take the mark and its
 maddah together, and the sukun that replaces its kasra is covered by no row.
-Word 13's noon goes by row 8 and
-word 14 takes the shadda row 19 adds. Word 16 loses its carrier to row 11, word
-17 its wasl seat to row 7, and the stop sign is row 31.
+Word 13's noon goes by row 7 and
+word 14 takes the shadda row 18 adds. Word 16 loses its carrier to row 10, word
+17 its wasl seat to row 6, and the stop sign is row 30.
 
 **Part 1, units and parts**, plan A.
 
@@ -1525,7 +1525,7 @@ The stop sign ۚ carries the `Structural` edge, takes no pairing, and is kept in
 |---|---|---|
 | sound - rules | ask فِى for its madd rule | **FINDING.** The converse law asks a canonically long vowel for a madd rule instance, and the only Length rule naming this one is `iltiqa_shortening`, which took the length away |
 | script - sound | ask why the fa's vowel is short | the ى owns nothing and is `silent`, and that the vowel is canonically long is on the length edge of the sound and nowhere on either glyph, so the question takes a row read and an edge read |
-| script - recited | draw بِهِۦٓ stopped | rows 2 and 3 remove the mark and its maddah together, and the maddah is a glyph that presented a sound it supplied no fact for. One field read |
+| script - recited | draw بِهِۦٓ stopped | rows 1 and 2 remove the mark and its maddah together, and the maddah is a glyph that presented a sound it supplied no fact for. One field read |
 | the other three | | one call and one field read |
 
 The maddah goes with the plan and the carrier goes with the join, and neither
@@ -1545,9 +1545,9 @@ request begins, joined, stopping after word 11.
 | 10 | ٱلسَّمَآءِ | أَسَّمَآءِ | `ʔ a ss a m a: ʔ i` |
 | 11 | مَآءً | مَآءَا | `m a: ʔ a:` |
 
-Word 10 is rows 25 and 14 on the wasl seat and row 9 on the article lam. Word
+Word 10 is rows 24 and 13 on the wasl seat and row 8 on the article lam. Word
 11's fathatan becomes a fatha and an alif is written where the rasm has no seat
-for it to lengthen, which is row 16 beside row 22.
+for it to lengthen, which is row 15 beside row 21.
 
 **Part 1, units and parts.**
 
@@ -1602,7 +1602,7 @@ cell, which is what an insertion is; the lam of ٱلسَّمَآءِ has no row 
 | relationship | what a consumer must do | cost |
 |---|---|---|
 | script - sound | ask what the merged lam sounds like | not answerable from this quadrant. The lam is written and not recited, so it has no rendered glyph and no row here; the source quadrants are where it is |
-| script - recited | read the fathatan's two rendered rows | the fatha it becomes and the alif that was never written. Row 23 names a written seat this word does not have and row 16 is the one that supplies the alif, so the substitution is stated by neither alone |
+| script - recited | read the fathatan's two rendered rows | the fatha it becomes and the alif that was never written. Row 23 names a written seat this word does not have and row 15 is the one that supplies the alif, so the substitution is stated by neither alone |
 | the other four | | one call and one field read on every row. No sound takes a gap pairing, and the two insertions are ordinary rows with an empty source cell rather than a second array |
 
 The quadrant settles which array a colouring consumer should be reading: on the
@@ -1629,8 +1629,8 @@ started on.
 The two plans print one phoneme string. The recited spellings above and the
 tables below state the vowel's two forms, which is where the plans part: the
 first word's final vowel is short in its joined form and long in its stopped
-form, so its seat is row 5; the second word's is short in both, so nothing but
-the stop takes it and its seat is row 4. Both silence signs are row 6. This is
+form, so its seat is row 4; the second word's is short in both, so nothing but
+the stop takes it and its seat is row 3. Both silence signs are row 5. This is
 the one place where the tables and the phoneme line disagree: the package gives
 the long form under both plans, and the tables state the reading the contract's
 correction to the seven alifs requires.
@@ -1705,7 +1705,7 @@ not the plain one the same five letters carry in the verse before.
 
 | relationship | what a consumer must do | cost |
 |---|---|---|
-| script - rules | attribute the silence signs | **FINDING.** Both are written and not said under every plan, and row 6 drops them with no owner. Where the seat beside the sign is silent too, the pairing names `orthographic_silence` and the law that every silence names a rule is met by the seat's instance; on the stopped 76:15:8 the alif sounds, the sign alone is silent, and the pairing's rules name only a madd |
+| script - rules | attribute the silence signs | **FINDING.** Both are written and not said under every plan, and row 5 drops them with no owner. Where the seat beside the sign is silent too, the pairing names `orthographic_silence` and the law that every silence names a rule is met by the seat's instance; on the stopped 76:15:8 the alif sounds, the sign alone is silent, and the pairing's rules name only a madd |
 | identity | tell the two requests apart | **FINDING.** They differ only in the junction after 76:15:8 and the package prints one phoneme string for both, so a consumer reading `phonemes` alone cannot separate them |
 | script - sound | ask an alif what it sounds like | one call and one field read, and the answer is what the character cannot give: two alifs with the same neighbours and the same harakat, one owning a long vowel at a pause and one owning nothing under any plan |
 | sound - rules | reach `orthographic_silence` | one call and one field read. It owns no attribution in either word, so it is reached only through the seat's pairing |
@@ -1737,10 +1737,10 @@ Plan B: `mappings("27:1", stops=("27:1:3",))`, the same with a stop after word
 | 3 | ءَايَـٰتُ | ءَايَاتْ | `ʔ a: j a: t` |
 | 4 | ٱلْقُرْءَانِ | أَلْقُرْءَانِ | `ʔ a l q u rˤ ʔ a: n i` |
 
-Word 1 is one glyph per letter name, so row 26 spells it as two names with a
+Word 1 is one glyph per letter name, so row 25 spells it as two names with a
 space between them; the noon of `seen` is left bare because an assimilation
 follows. Word 5's kasratan is 4.1a's idgham line and word 6 already carries the
-shadda the host needs, so row 19 adds nothing; word 6 is row 21.
+shadda the host needs, so row 18 adds nothing; word 6 is row 20.
 
 **Part 1, units and parts.** Plan A, with the plan B reading where it differs.
 
@@ -1869,9 +1869,9 @@ Plan B: the same request with `stops=("2:283:15",)`, so word 16 is started on.
 | 16 | ٱؤْتُمِنَ | أُوتُمِنَ | `ʔ u: t u m i n a` |
 
 Word 13 is 4.1a's ikhfaa line, the haraka then a bare noon, and its seat goes
-by row 5. Word 15 loses its carrier to row 11 under plan A and keeps it under
-plan B. Word 16 under plan B is row 25 on the seat, row 14 for the haraka and
-row 24 for the quiescent hamza. Word 17 is rows 27 and 2, and the sukun that
+by row 4. Word 15 loses its carrier to row 10 under plan A and keeps it under
+plan B. Word 16 under plan B is row 24 on the seat, row 13 for the haraka and
+row 23 for the quiescent hamza. Word 17 is rows 26 and 1, and the sukun that
 replaces its damma is covered by no row.
 
 **Part 1, units and parts.** Plan A, with the plan B reading where it differs.
@@ -1982,7 +1982,7 @@ owns the one that sounds.
 |---|---|---|
 | script - recited | read `from_glyphs` on the rendered waw at the ibdal | **FINDING.** Row 25 promises a glyph covering the vowel's source glyph and the hamza's; here the vowel is itself an insertion, so the tuple has one member |
 | sound - rules | order the thal's lengthening against its shortening | no order between them is published. The sound's own `long` field is the answer; the two modifier edges are the account, and a consumer reading only the first is wrong |
-| script - rules | account for word 15's yaa | one field read, and a consumer that reached for the reclass finds a deletion: the yaa is written in one plan and not in the other, and the rule that removes it is `iltiqa_shortening` rather than row 30's reclass |
+| script - rules | account for word 15's yaa | one field read, and a consumer that reached for the reclass finds a deletion: the yaa is written in one plan and not in the other, and the rule that removes it is `iltiqa_shortening` rather than row 29's reclass |
 | identity | tell the two plans apart | **FINDING**, the one E17 records, and here it separates two readings of the same six words |
 | the other three | | one call and one field read |
 
@@ -2006,12 +2006,12 @@ in this request carries the `silah` label.
 | 10 | لَغَفُورٌ | لَغَفُورُ | `l a ɣ aˤ f u: rˤ u` |
 | 11 | رَّحِيمٌ | رَّحِيمْ | `rˤrˤ aˤ ħ i: m` |
 
-Word 6 is row 27 on a dagger whose vowel is not a long a: the expansion writes
+Word 6 is row 26 on a dagger whose vowel is not a long a: the expansion writes
 the haraka the unit carries and the carrier that quality takes, and the imala
 mark itself is kept. No row of the catalogue states that respelling, so it is
-row 27 read together with the unit's own quality. The maddah of word 7 stands
-because the plan joins, which is the contrast row 3 is stated against, and its
-stop sign is row 31. Word 10 is 4.1a's idgham line and word 11 already carries
+row 26 read together with the unit's own quality. The maddah of word 7 stands
+because the plan joins, which is the contrast row 2 is stated against, and its
+stop sign is row 30. Word 10 is 4.1a's idgham line and word 11 already carries
 the shadda.
 
 **Part 1, units and parts.**
@@ -2122,7 +2122,7 @@ single `emphatic` field cannot show.
 
 The ishmam mark survives into the recited text under 4.7's unchanged case for
 the tashil and ishmam marks: the mark is what the reciter reads, so the source
-spelling is the recited spelling. Word 7 is row 27 and word 8 is row 20.
+spelling is the recited spelling. Word 7 is row 26 and word 8 is row 19.
 
 **Part 1, units and parts.**
 
@@ -2196,10 +2196,10 @@ else in the four words is ordinary, which is what makes the cost visible.
 | 9 | ءَا۬عْجَمِىٌّ | ءَا۬عْجَمِىُّ | `ʔ a ʔ a ʕ ʒ a m i jj u` |
 | 10 | وَعَرَبِىٌّ ۗ | وَّعَرَبِىّْ ۗ | `w̃ a ʕ a rˤ aˤ b i jj` |
 
-Word 8 is row 27 on the dagger and row 28 on the silah mark, which the joining
+Word 8 is row 26 on the dagger and row 27 on the silah mark, which the joining
 plan keeps, with the maddah standing on the carrier it expands into. The tashil
 mark of word 9 is 4.7's unchanged case. Word 9's dammatan is 4.1a's idgham line
-and word 10 takes the shadda row 19 adds; word 10 is row 21.
+and word 10 takes the shadda row 18 adds; word 10 is row 20.
 
 **Part 1, units and parts.**
 
@@ -2481,8 +2481,8 @@ What a reader should not go looking for, and why it is not here.
 | byte-stable serialization | a property of the harness, and no table can carry a canonical serialization, so nothing on a page could disagree with it |
 | an index out of range or of the wrong kind | the tables print resolved letters, sounds and rules rather than indices, so a wrong index is invisible in this format |
 | the iqlab mark | this script does not write one, so the catalogue has no row for it and no passage could show it. E13 shows what an iqlab does to the noon and to a tanween |
-| the imala mark respelled | the mark is written and stays written, so the catalogue has no row for it. E19 writes the vowel's quality from the unit and the carrier from row 27 |
-| row 30, the word-final role flip | no word in the set ends in a voweled yaa, waw or alif maqsura at a stop. E18 reaches for the row and finds a deletion instead |
+| the imala mark respelled | the mark is written and stays written, so the catalogue has no row for it. E19 writes the vowel's quality from the unit and the carrier from row 26 |
+| row 29, the word-final role flip | no word in the set ends in a voweled yaa, waw or alif maqsura at a stop. E18 reaches for the row and finds a deletion instead |
 | the verse marker | it is not a glyph in this corpus, so it cannot be shown taking no pairing, and the concatenation law's third constituent cannot appear. E2 concatenates a space and a stop sign back to the printed source string; the tatweel is in E1 and E3 and the stop sign in E2, E14, E17, E19 and E21 |
 | a gap pairing with no `after` | every sound in the corpus with no source glyph is a helping vowel or an insertion following a seat that already presents a sound, so no gap can precede every pairing. E4 gives the other half of the law |
 

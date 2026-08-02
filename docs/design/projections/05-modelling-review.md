@@ -5,8 +5,8 @@ whether its claims are true - five rounds have checked that, and the claims
 are true. Every defect this brief is written to catch survived those rounds
 because it was consistent with the code, consistent with itself, and wrong.
 
-**Read:** `01-contract`, `02-gate`, `03-examples`, `04-open-questions`,
-`06-two-texts`, `07-rules`, plus
+**Read:** `01-contract`, `02-gate`, `03-examples`, `06-two-texts`,
+`07-rules`, plus
 `../03-canonical-vocabulary.md` and `../../domain-facts.md`.
 
 **Against:** the sources in section 2, in the order of authority given there.
@@ -200,7 +200,7 @@ made - a measurement, a code path, a named consumer.
 - ASCII transliteration, no diacritics, no section sign, em dash or curly
   quotes.
 
-`04-open-questions` holds what awaits a decision. Do not answer those. If a
+Nothing awaits an owner decision today. If a
 finding is genuinely a question for the owner, mark it **FOR OWNER**.
 
 ---

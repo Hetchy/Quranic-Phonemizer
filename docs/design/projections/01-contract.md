@@ -26,15 +26,16 @@ m = mappings("2:255")
 
 m.rules                                          # every rule, in reading order
 m.alignment(text="source", grouping="cluster")   # writing lined up with sound
+m.respelling(grouping="cluster")                 # the two texts against each other
 ```
 
 What is not said is on the row that does not say it. `pairing.silent` names the
-glyphs, and each one names its rule twice over: a unit the reading silenced has
-a `Silent` edge, and a letter the rasm carries and recitation never says has no
-unit to silence, so its pairing names the rule instead.
+glyphs, and each names its rule: a unit the reading silenced has a `Silent`
+edge, and a letter the rasm carries and recitation never says has no unit to
+silence, so its pairing names the rule instead.
 
-Section 6 is the whole of `alignment`. Everything past section 4 is for a
-consumer that needs a join no method offers.
+Section 6 is the whole of `alignment` and `respelling`. Everything past
+section 4 is for a consumer that needs a join no method offers.
 
 ### 1.1 The call
 
@@ -69,7 +70,7 @@ writes its own is free to; a consumer that does not should not have to.
 
 ---
 
-## 2. Two calls, and why they cover everything
+## 2. Three calls, and why they cover everything
 
 A consumer wants four things and every question is a relationship between two
 of them.
@@ -82,8 +83,8 @@ of them.
 | **rules** | what happened, and why |
 
 Four things make six pairings. This table is a coverage proof and not a menu:
-five of the six are columns of one row of one table, and the sixth is the rule
-list.
+four of the six are columns of one row of one table, and the other two have a
+call each.
 
 | Pairing | Answered by |
 |---|---|
@@ -91,25 +92,26 @@ list.
 | script - rules | `alignment(text="source")`, `pairing.rules` |
 | recited - sound | `alignment(text="recited")`, `pairing.sounds` |
 | recited - rules | `alignment(text="recited")`, `pairing.rules` |
-| script - recited | `pairing.rendered` beside `pairing.glyphs`, on one row |
+| script - recited | `m.respelling()` |
 | sound - rules | `m.rules`, and `by` on every attribution and modifier |
 
-**So there are two calls and not six**, and the reason is not economy. A
-pairing given its own call is a second traversal of one join, and a consumer
-that wants two of them has to rejoin the results by index - which is the join
-this document exists to have done already. Co-highlighting is the plain case:
-it reads `sounds` and `shares` off one row, and no arrangement in which those
-arrive from two calls can do it without the consumer rebuilding the row.
+**So there are three calls and not six**, and the reason is not economy. Four
+of the pairings are columns of one row, because a pairing given its own call is
+a second traversal of one join and a consumer wanting two of them has to
+rejoin by index. Co-highlighting is the plain case: it reads `sounds` and
+`shares` off one row, and no arrangement in which those arrive from two calls
+can do it without the consumer rebuilding the row.
 
-The script-recited pairing is the one that settles it. It is many-to-many in
-both directions, because a recited cluster can cover two source glyphs and one
-source glyph can render as two, so there is no key a separate call could
-return it against. It is a column beside `glyphs`, which is what a diff view
-or a two-line teleprompter reads.
+Script against recited is the one that cannot be a column. It is many-to-many
+in both directions - a recited cluster can cover two source glyphs and one
+source glyph can render as two - and a column on a row that partitions one text
+cannot hold a group that spans several rows of the other. `respelling` returns
+those groups directly, which is what a diff view or a two-line teleprompter
+reads.
 
-`text` and `grouping` are the two axes and not two more calls: both arrays are
-always populated, and `text` says only which of them the rows partition.
-Partitioning both at once is what the many-to-many forbids.
+`text` and `grouping` are axes of `alignment` and not two more calls: `text`
+says which text the rows partition, and a pairing holds that text's glyphs
+alone.
 
 ---
 
@@ -296,6 +298,7 @@ needs no second list of source glyphs: it reads them through here.
 | `vowel_letter` | alif, waw or yaa carrying length; occurs in `rendered` only |
 | `small_vowel` | the dagger alif, the mini waw and yaa |
 | `madd_sign` | the maddah |
+| `sukun` | the mark stating a unit has no vowel |
 | `silence_sign` | the round and rectangular zeros |
 | `tajweed_mark` | the imala, ishmam and tashil marks |
 | `stop_sign` | the mushaf's advice |
@@ -381,7 +384,6 @@ a colouring scheme is a convention a consumer picks.
 | `Hosts(unit, part, sound, by?)` | the unit | this unit produces this sound |
 | `MergedInto(unit, part, sound, by?)` | the unit | this unit disappeared into that sound |
 | `Silent(unit, part, by)` | the unit | this unit lost its sound |
-| `Insertion(anchor, part, sound, by?)` | nobody | a sound no unit owns |
 | **modifiers** | | |
 | `Recolours(sound, by)` | the rule | tafkheem made this consonant heavy |
 | `SetsLength(sound, by, length)` | the rule | iltiqa shortened this madd |
@@ -392,8 +394,10 @@ already a pair of edges over one sound, which is what carries the sharing, and
 a long vowel is shared by *graphemes*, which the spelling edges and the glyph
 edges carry.
 
-An insertion has no side. The one sound in the design that no unit owns is the
-helping vowel of an iltiqa, and it lands after its anchor.
+Every sound has a unit. The helping vowel of an iltiqa is the vowel of the
+unit the reading vowels - a tanween's noon, or the meem of a spelled name -
+hosted on a vowel part the canon leaves absent, which is the mirror of a stop
+silencing a vowel the canon states.
 
 `Recolours` carries no value. Emphasis is the only feature a rule sets, only
 one rule sets it, and the resulting state is `emphatic` on the sound; the edge
@@ -402,7 +406,7 @@ and no rule fires, so there is nothing for a second value to mean. `length` is
 `short` or `long`.
 
 `Supplies.fact`: `letter` · `consonant` · `vowel_quality` · `vowel_length` ·
-`tajweed_mark`. Quality and length are separate facts, because otherwise a
+`vowel_absence` · `tajweed_mark`. Quality and length are separate facts, because otherwise a
 haraka and its carrier make the identical claim about the identical unit and
 section 6.1 cannot be evaluated. Sakt is not a unit-level fact: it is stated
 on the word.
@@ -424,7 +428,7 @@ part still states one realization and carries the echo beside it.
 
 ---
 
-## 6. Alignment
+## 6. Alignment and respelling
 
 ```python
 m.alignment(text="source"|"recited", grouping="glyph"|"cluster")
@@ -438,8 +442,7 @@ m.alignment(text="source"|"recited", grouping="glyph"|"cluster")
 ```python
 @dataclass(frozen=True)
 class Pairing:
-    glyphs:   tuple[int, ...]   # source glyphs
-    rendered: tuple[int, ...]   # rendered glyphs
+    glyphs:   tuple[int, ...]   # glyphs of the selected text
     sounds:   tuple[int, ...]   # the sounds this pairing owns
     shares:   tuple[int, ...]   # sounds it presents that another owns
     silent:   tuple[int, ...]   # its glyphs that are written and not said
@@ -453,8 +456,16 @@ because a colouring consumer asks what happened here and not through which
 edge family it happened. Which part or sound each one reached is on the
 edges.
 
-`text` selects which array is partitioned; both are always populated, which is
-what makes the script-recited pairing a column rather than a call.
+`text` selects which array is partitioned, and a pairing holds only that
+text's glyphs. The two texts are related by `respelling`, not by a column: the
+mapping between them is many-to-many in both directions and a column on one row
+cannot carry that.
+
+`silent` holds a glyph whose silence a rule names, and nothing else - a glyph
+with a `Silent` attribution, or one carrying an `orthographic_silence`. A mark
+that states a fact and makes no sound is not silent: a sukun, a shadda and a
+carrier under a dagger stay out. Under `text="recited"` the list is always
+empty, because no rule silences a glyph recitation itself wrote.
 
 `sounds` and `shares` make co-highlighting a field. A sound is timed once and
 lights every pairing naming it in either list, so an idgham lights the
@@ -476,7 +487,32 @@ A sound no glyph of the selected text presents takes a **gap pairing**:
 `glyphs` empty, `after` naming the pairing it follows. The criterion is what
 the text writes, not how the sound was attributed.
 
-### 6.3 What a cluster is, and what a pairing is not
+### 6.3 Respelling
+
+```python
+m.respelling(grouping="glyph"|"cluster")
+```
+
+```python
+@dataclass(frozen=True)
+class Block:
+    source:  tuple[int, ...]   # pairings of alignment(text="source")
+    recited: tuple[int, ...]   # pairings of alignment(text="recited")
+```
+
+A block is the smallest group of pairings on each side that corresponds as a
+unit, closed under `from_glyphs`. Where the two texts run one to one a block
+holds one pairing on each side; where a source glyph renders as two, or a
+recited cluster covers two source glyphs, it holds what it has to. A source
+glyph the recited text drops gives a block with an empty `recited`, and a
+rendered glyph no source glyph produced gives one with an empty `source`.
+
+It carries nothing the two alignments do not. The sounds, the rules and the
+silences stay on the pairings a block points at, so there is one place each
+fact is stated. This is a group-by with a name, published because every
+consumer showing both texts writes the same one.
+
+### 6.4 What a cluster is, and what a pairing is not
 
 A muqattaat glyph is one cluster row owning the sounds of a whole letter name.
 That is the granularity a font shapes and the granularity this grouping is
@@ -487,7 +523,7 @@ Pairings are request-local and will never take a durable key. A consumer
 persisting records against them keys on position and defends against drift
 with a content snapshot, which is the right shape for content that changes.
 
-### 6.4 Word-by-word
+### 6.5 Word-by-word
 
 Not a grouping. Every node carries its word and a merged sound's word is its
 host's, so a consumer animating whole words reads which words a sound touches
@@ -554,18 +590,22 @@ Mutually exclusive per unit and per part.
 |---|
 | Every glyph appears in exactly one pairing of its text, unless it is structural |
 | Every sound appears in exactly one pairing's `sounds`, and any number of `shares` |
-| Every unit states one realization per applicable part: hosted, merged, or silent |
-| Every sound has one primary origin: a `Hosts` or an `Insertion` |
+| Every unit states one realization per part: hosted, merged, silent, or absent |
+| Every sound has one primary origin, a `Hosts` |
 | Every merger is a `Hosts` and `MergedInto` pair sharing sound and rule |
 | Every silence names a rule |
 | Concatenating `glyphs` in `source_index` order reproduces the source text |
 | Under `text="recited"`, no sound takes a gap pairing |
 
-A part is applicable unless the unit's vowel is absent in both forms, which is
-a unit the reading never vowels: it has nothing for a rule to take and states
-no vowel realization. That covers the sukun, the bare consonant, the tanween's
-noon and a letter of a spelled name alike. The consonant part is always
-applicable.
+**Absent is not silent.** A part is silent when it had a sound and the reading
+took it, and absent when it never had one: the sukun, the bare consonant, the
+tanween's noon and a letter of a spelled name. Silence names a rule and absence
+does not, which is why the two cannot be one value.
+
+Absence is stated by having no attribution rather than by an edge for it. The
+producer emits nothing where nothing happened, which is what it would do
+anyway, and [02-gate](02-gate.md) checks the converse over the corpus: a part
+with no attribution has a canonically absent vowel and no rule sounding it.
 
 ---
 
@@ -603,7 +643,9 @@ changes.
    it corrects every `أَنَا۠` in the corpus, which is long when joined today
    and should be short, and `02-gate` section 1 requires those refs be
    allowlisted before the change lands.
-5. **`origin` replaces two booleans**, which today admit an impossible state.
+5. **`origin` stays one enum.** A letter name is spelled out and takes no
+   grammatical ending, so a slot cannot be both spelled and nunated, and two
+   booleans would publish a state that cannot exist.
 6. **`Supplies.fact` distinguishes quality from length.** Without it a haraka
    and its carrier make identical claims and ownership cannot be evaluated.
 7. **The rule family and phase leave the model.** Three readers must be
@@ -662,8 +704,9 @@ changes.
     word-final yaa, waw or alif maqsura takes at a pause. Neither has a name,
     neither has a converse trigger, and [06-two-texts](06-two-texts.md) is
     where the transformation each performs is written down.
-25. **The iltiqa helping vowel** is constructed nowhere. It is one insertion,
-    at a handful of sites, and it is the only sound in the design no unit owns.
+25. **The iltiqa helping vowel** is constructed nowhere. It is the vowel of
+    the unit the reading vowels - a tanween's noon, or the meem of a spelled
+    name - hosted on a vowel part the canon leaves absent.
 26. **Split the boundary rules to match the names.** One code rule covers
     `pausal_sukun` and `taa_marbuta_pausal`; another mints an iwad name the
     contract does not have.
@@ -681,7 +724,7 @@ changes.
 29. **A writer for the recited text.** The one that exists takes a Score, so
     it has no boundary plan and no performance and cannot spell a pausal,
     merged or started-on form. `rendered` needs glyph records carrying
-    `from_glyphs` and their own pairings.
+    `from_glyphs`, their own pairings, and the blocks `respelling` returns.
 30. **Total glyph pairing.** The join saying which outcomes each glyph
     presents, distinguishing a sounded dagger from its silent carrier and a
     performance deletion from orthographic zero.

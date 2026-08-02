@@ -41,13 +41,13 @@ modifiers, and producing nothing is a rule that owns neither.
 |---|---|---|---|---|---|
 | `ikhfaa_haqiqi` | a sakin noon, or a tanween's noon | the ikhfaa letter | always for a tanween, may otherwise | the noon's consonant is a hum | unchanged |
 | `iqlab` | a sakin noon, or a tanween's noon | the following baa | always for a tanween, may otherwise | the noon's consonant is a hum made at the lips | unchanged |
-| `idgham_bi_ghunnah` | a sakin noon, or a tanween's noon | the following letter | always | the noon merges into the host, which is held | rows 8 and 19 |
-| `idgham_bila_ghunnah` | a sakin noon, or a tanween's noon | the following lam or raa | always | the noon merges into the host | rows 8 and 19 |
+| `idgham_bi_ghunnah` | a sakin noon, or a tanween's noon | the following letter | always | the noon merges into the host, which is held | rows 7 and 18 |
+| `idgham_bila_ghunnah` | a sakin noon, or a tanween's noon | the following lam or raa | always | the noon merges into the host | rows 7 and 18 |
 | `izhar` | a sakin noon, or a tanween's noon | a throat letter, or the waw or yaa of its own word | may | names the noon's own sound | unchanged |
 | `ghunnah_mushaddadah` | a geminate noon or meem | - | never | names its own held sound | unchanged |
 | `izhar_shafawi` | a sakin meem | the following letter | may | names the meem's own sound | unchanged |
 | `ikhfaa_shafawi` | a sakin meem | the following baa | always | the meem is held | unchanged |
-| `idgham_shafawi` | a sakin meem | the following meem | always | the meem merges into the host, which is held | rows 8 and 19 |
+| `idgham_shafawi` | a sakin meem | the following meem | always | the meem merges into the host, which is held | rows 7 and 18 |
 
 `iqlab` substitutes a unit and does not merge one: the baa is untouched and no
 sound is shared. The recited text writes the rasm unchanged where the noon is
@@ -64,16 +64,16 @@ with a shadda and is `ghunnah_mushaddadah`.
 
 | Rule | Source | Trigger | Crosses | On the sound | Recited |
 |---|---|---|---|---|---|
-| `idgham_mutamathilayn` | the first of two identical consonants | the second | may | merges into the host | rows 8 and 19 |
-| `idgham_mutaqaribayn` | the first of two close consonants | the second | may | merges into the host | rows 8 and 19 |
-| `idgham_mutajanisayn_kamil` | the first of two homorganic consonants | the second | may | merges into the host | rows 8 and 19 |
-| `idgham_mutajanisayn_naqis` | the first of two homorganic consonants | the second | may | keeps its own sound and changes only its manner | unchanged |
-| `lam_shamsiyyah` | the article's lam | the following letter | never | merges into the host | row 9 |
+| `idgham_mutamathilayn` | the first of two identical consonants | the second | may | merges into the host | rows 7 and 18 |
+| `idgham_mutaqaribayn` | the first of two close consonants | the second | may | merges into the host | rows 7 and 18 |
+| `idgham_mutajanisayn_kamil` | the first of two homorganic consonants | the second | may | merges into the host | rows 7 and 18 |
+| `idgham_mutajanisayn_naqis` | the first of two homorganic consonants | the second | may | names the pair; the sound is unchanged | unchanged |
+| `lam_shamsiyyah` | the article's lam | the following letter | never | merges into the host | row 8 |
 | `lam_qamariyyah` | the article's lam | the following letter | never | names the lam's own sound | unchanged |
 
 A `lam_shamsiyyah` and a cross-word idgham are the same edge shape and differ
 in what the recited text writes: the rasm already doubles the sun letter, so
-row 9 deletes and adds nothing, where row 19 has a shadda to add.
+row 8 deletes and adds nothing, where row 18 has a shadda to add.
 
 ### 2.3 Length
 
@@ -82,13 +82,13 @@ caused it, and for two of them it is the boundary plan rather than a unit.
 
 | Rule | Source | Trigger | Crosses | On the sound | Recited |
 |---|---|---|---|---|---|
-| `madd_tabii` | the unit whose vowel is long | - | never | sets the length | rows 17, 18, 27, 28 |
+| `madd_tabii` | the unit whose vowel is long | - | never | sets the length | rows 16, 17, 26, 27 |
 | `madd_wajib_muttasil` | the unit whose vowel is long | the hamza in the same word | never | sets the length | as above |
-| `madd_jaiz_munfasil` | the unit whose vowel is long | the hamza that begins the next word | always | sets the length | as above, and row 3 when the plan stops |
+| `madd_jaiz_munfasil` | the unit whose vowel is long | the hamza that begins the next word | always | sets the length | as above, and row 2 when the plan stops |
 | `madd_lazim` | the unit whose vowel is long | the unit whose permanent sukun or gemination follows | never | sets the length | as above |
 | `madd_arid_lil_sukun` | the unit whose vowel is long | the unit the stop silenced | never | sets the length | as above |
 | `madd_leen` | the unit whose silent waw or yaa follows a short a | the unit the stop silenced | never | names the sound | unchanged |
-| `iltiqa_shortening` | the unit whose long vowel shortens | the sakin it met | always | sets the length to short | row 11 |
+| `iltiqa_shortening` | the unit whose long vowel shortens | the sakin it met | always | sets the length to short | row 10 |
 
 `madd_leen` names rather than lengthens, because a leen is not a long vowel:
 its waw or yaa is silent and the vowel before it stays short.
@@ -124,28 +124,28 @@ is empty.
 
 | Rule | Source | Trigger | Crosses | On the sound | Recited |
 |---|---|---|---|---|---|
-| `hamza_wasl_start` | the word-initial unit whose consonant sounds only when started on | - | never | hosts the consonant and its vowel | rows 14 and 25 |
-| `hamza_wasl_elision` | the same unit, not started on or not word-initial | - | never | silences both parts | row 7 |
-| `iltiqa_kasra` | the unit the inserted vowel is anchored on | - | always | inserts a vowel no unit owns | row 15 |
-| `pausal_sukun` | the unit whose part the stop takes | - | never | silences the part | rows 1, 2, 13, 20, 21, 22 |
-| `taa_marbuta_pausal` | the taa marbuta unit | - | never | realizes the letter as a haa | row 23 |
+| `hamza_wasl_start` | the word-initial unit whose consonant sounds only when started on | - | never | hosts the consonant and its vowel | rows 13 and 24 |
+| `hamza_wasl_elision` | the same unit, not started on or not word-initial | - | never | silences both parts | row 6 |
+| `iltiqa_kasra` | the unit the reading vowels | - | always | hosts a vowel on a part the canon leaves absent | row 14 |
+| `pausal_sukun` | the unit whose part the stop takes | - | never | silences the part | rows 1, 12, 19, 20, 21 |
+| `taa_marbuta_pausal` | the taa marbuta unit | - | never | realizes the letter as a haa | row 22 |
 
 `pausal_sukun` reaches the most catalogue rows of any rule, and the reason is
 that it is one event with several spellings: the haraka it takes may be a
 haraka, a tanween, a silah mark or nothing written at all, and the sukun it
-writes is a replacement in the first three cases and an insertion in the
+writes is a replacement in the first three cases and an addition in the
 fourth.
 
-`iltiqa_kasra` is the only rule in the design whose sound no unit owns, and the
-only one whose letter-level relation exists on one text and not the other. See
-section 6.
+`iltiqa_kasra` is the only rule that sounds a part the canon leaves absent, and
+the only one whose letter-level relation exists on one text and not the other.
+See section 6.
 
 ### 2.7 Substitution and orthography
 
 | Rule | Source | Trigger | Crosses | On the sound | Recited |
 |---|---|---|---|---|---|
-| `ibdal_hamza` | the unit whose quiescent hamza the reading substitutes | - | never | the letter is realized as the vowel letter of the vowel before it | row 24 |
-| `orthographic_silence` | see section 5 | - | never | produces nothing | rows 4 and 5 |
+| `ibdal_hamza` | the unit whose quiescent hamza the reading substitutes | - | never | the letter is realized as the vowel letter of the vowel before it | row 23 |
+| `orthographic_silence` | see section 5 | - | never | produces nothing | rows 3 and 4 |
 
 ---
 
@@ -170,8 +170,12 @@ word that lost it, and a consumer animating whole words reads a sound in the
 second word that the first word's letter helped make.
 
 Two rules look like mergers and are not. `idgham_mutajanisayn_naqis` keeps the
-letter's own sound and changes only its manner, so no sound is shared. `iqlab`
-substitutes one unit and leaves the following baa untouched.
+letter's own sound, so no sound is shared: the letter loses its own place of
+articulation and keeps its heaviness, and this model has no manner axis to
+record that on, so the instance owns a `Classifies` and changes nothing. A
+notation that wanted to write a naqis letter differently has the instance
+already sitting there. `iqlab` substitutes one unit and leaves the following
+baa untouched.
 
 ---
 
@@ -216,7 +220,7 @@ pairing's `silent` and the pairing's `rules` names this instance. That pairing
 is the only place the instance is reachable from, which makes it the one rule
 whose entire relation to the document is at the letter level.
 
-Its two behaviours are catalogue rows 4 and 5, and `letter` does not tell them
+Its two behaviours are catalogue rows 3 and 4, and `letter` does not tell them
 apart: an alif the rasm never says and an alif the rasm says only at a pause
 are the same letter in the same position, distinguished by the sign written
 over them.
@@ -244,7 +248,7 @@ is a defect to be repaired.
 | 2 | **one unit, no glyph** - the tanween's noon | the noon is the `source` of every noon rule when `origin` is `tanween` | the instance is reached through the tanween mark, which also supplies the previous unit's vowel. One scalar shows two units' facts, so colouring the noon and colouring the vowel colour the same character |
 | 3 | **one sound, two words** - a cross-word merger | `source` and host are units in different words, and the host's word owns the sound | the instance appears in two pairings: the source glyph's, where the glyph is `silent`, and the host's, where the sound is owned. `shares` is what joins them |
 | 4 | **a sound with no letter** - a release | the release is a separate sound hosted on the consonant part, beside that part's own realization | it has no glyph, so the base letter's pairing owns two sounds for one part, and the recited text writes nothing for it |
-| 5 | **a sound with no unit** - `iltiqa_kasra` | an insertion with an anchor, and the only one in the design | there is no source glyph, so the sound takes a gap pairing under `text="source"` and an ordinary one under `text="recited"`. The only rule whose letter-level relation differs between the two texts |
+| 5 | **a sound with no glyph** - `iltiqa_kasra` | the vowel of a unit the canon leaves vowelless, and the only rule that sounds one | no source glyph states it, so the sound takes a gap pairing under `text="source"` and an ordinary one under `text="recited"`. The only rule whose letter-level relation differs between the two texts |
 | 6 | **a glyph with no unit** - `orthographic_silence` | nothing to reach: no unit, no sound, no attribution | the seat's pairing carries the instance and the glyph. The exact inverse of case 5, and the relation exists only on the source side |
 
 Case 1 is where a consumer expects to be stuck and is not. One compact glyph

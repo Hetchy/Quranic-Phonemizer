@@ -122,7 +122,7 @@ muqattaat expansions.
 |---|---|
 | `chars` | source spelling, or the rendered glyph |
 | `role` | folded glyph kind |
-| `status` | `from_glyph` presence and difference |
+| `status` | `from_glyphs` presence and difference |
 | `phonemes` | the sounds the glyph's pairing owns and shares |
 | `phoneme_indices` | sound indices rebased word-local |
 | `tag` | legacy priority over compatible rule instances |
@@ -137,7 +137,7 @@ records on cell position.
 
 The priority order and the role fold are compatibility policy in this adapter,
 not facts in the core schema. Named fixtures cover every former frontend
-synthesis: helping vowels in all qualities, the iltiqa insertion, the divine
+synthesis: helping vowels in all qualities, the iltiqa repair, the divine
 name's dagger alif, madd iwad at pause, dropped silah, taa marbuta, the iqlab
 noon and small meem, and each muqattaat opening.
 
@@ -169,15 +169,16 @@ These run over the whole corpus in all three boundary modes.
 
 ### 4.3 Attribution
 
-- For each unit and each applicable part, exactly one realization is stated:
-  hosted, merged, or silent. A release sound is an addition rather than a
-  realization, so a part may carry one of each and no more.
-- Every sound has exactly one primary origin, one `Hosts` or one `Insertion`.
-  `MergedInto` never becomes a second owner.
+- For each unit and each part, at most one realization is stated: hosted,
+  merged, or silent. A release sound is an addition rather than a realization,
+  so a part may carry one of each and no more.
+- A part with no realization is absent, and the converse holds: its canonical
+  vowel is absent in both forms and no rule sounded it. This is the check that
+  keeps absence from hiding a realization the producer dropped.
+- Every sound has exactly one primary origin, one `Hosts`. `MergedInto` never
+  becomes a second owner.
 - Every merger is a `Hosts` and `MergedInto` pair sharing sound and rule
   instance, with distinct host and contributor units.
-- Every insertion has a valid anchor, part, sound and rule instance, and lands
-  after its anchor.
 - Every silence names a rule instance and carries no sound.
 - Every release sound is hosted on a consonant, never on a vowel, and no part
   carries two of them.
@@ -210,7 +211,9 @@ one glyph each.
   compatible with its glyph's spelling edges.
 - Structural glyphs take no pairing.
 - A haraka and an ordinary carrier may both present one hosted vowel sound.
-- A carrier under a dagger presents nothing; the dagger presents the vowel.
+- A carrier under a dagger does not present the vowel; the dagger does. What
+  else the carrier presents is its own business: a waw under a dagger presents
+  the consonant it is.
 - A maddah may present a target although it supplies no canonical fact.
 - A soundless process mark may present its rule instance without a fabricated
   sound.
@@ -233,20 +236,20 @@ For every combination of `text` and `grouping`:
 - A sound takes a gap pairing exactly when no glyph of the selected text
   presents it. How it was attributed does not enter into it.
 - `shares` names only sounds owned by another pairing.
-- `silent` names glyphs that are written and not said: those showing a
-  `Silent` attribution, and those showing no sound at all because the script
-  wrote them and recitation never says them.
-- Both `glyphs` and `rendered` are populated whichever text is selected, so
-  the script-recited pairing is readable from either.
+- `silent` names glyphs whose silence a rule names: those showing a `Silent`
+  attribution and those carrying an `orthographic_silence`, and nothing else. A
+  mark that states a fact and makes no sound is not silent.
+- Under `text="recited"`, `silent` is empty.
+- Every block of `respelling` names at least one pairing, its pairings are of
+  the matching text, and the blocks partition both alignments.
 - Ownership follows the published order, and the order is total: no pairing
   set requires a tiebreak the order does not decide.
 
 ### 4.7 Recited writing
 
-- The writer is total for every unit that has a recited representation, and
-  for every insertion.
-- Every rendered glyph either names a source glyph or is an insertion carrying
-  the character to draw.
+- The writer is total for every unit that has a recited representation.
+- Every rendered glyph either names the source glyphs it renders or names none,
+  and one that names none carries the character to draw.
 - Source glyph order and values never change.
 - No rendered glyph carries an empty character.
 
@@ -267,7 +270,7 @@ guaranteed failure.
 | a vowel long in its stopped form, on a stopped word | a madd rule instance |
 | a vowel long in its joined form, on a joined word | a madd rule instance |
 | a silent waw or yaa after a short a, whose following letter the stop silences | `madd_leen` |
-| a sakin noon or a tanween, joined to a following consonant | one of the noon rules |
+| a sakin noon or a tanween, joined to a following consonant, and not itself vowelled by an iltiqa | one of the noon rules |
 | a sakin meem, joined to a following consonant | one of the meem rules |
 | a geminate noon or meem | `ghunnah_mushaddadah` |
 | two identical, close or homorganic consonants, the first sakin and joined to the second | an idgham rule |
@@ -343,7 +346,7 @@ relationship blocks the contract; an adapter may not repair it.
 | waqf endings | vowel deletion with the consonant retained, taa marbuta, iwad, arid, leen, qalqala |
 | ibtidaa | start boundary, wasl vowel, gemination, right context |
 | marks and advice | imala, ishmam, tashil, sakt, seen and sad, iqlab, maddah, stop advice |
-| slotless repair | order, rule instance, sound, gap row, rendered form |
+| the iltiqa repair | order, rule instance, sound, gap row, rendered form |
 | source structure | spaces, tatweel, stop signs and verse markers round-trip exactly |
 
 ## 7. The consumer gate

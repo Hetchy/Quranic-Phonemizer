@@ -33,7 +33,7 @@ Ten branches, each asking exactly one question. `WRITTEN` has zero readers and
 means "neither of the other two". The enum is also hashed into the round-trip
 digest at `canon/assemble.py:61` as `slot.origin.value`.
 
-**The decomposition is mechanical.**
+**Every branch reads one member and none reads a pair.**
 
 ## 3. Census: `Annotation` against sound
 
@@ -114,20 +114,22 @@ may derive `conditional: bool`, so no consumer has to infer it from sounds
 
 ## 6. Decisions
 
-**D1 -- `SlotOrigin` decomposes into two booleans.** `nunation: bool` and
-`spelled: bool` on `Slot`, replacing `origin`. Every one of the ten branches
-converts one-for-one; `WRITTEN` is `not nunation and not spelled` and nothing
-asks. `Slot.spelled` stays as a field instead of a property. The digest at
-`canon/assemble.py:61` takes the two flags in place of `origin.value`, which
-changes every digest -- so the ledger fixtures regenerate in the same commit.
+**D1 -- `SlotOrigin` stays one enum.** A letter name is spelled out and takes
+no grammatical ending, so a slot cannot be both spelled and nunation and the
+combination is a law rather than a gap. Two booleans would publish a fourth
+state that cannot exist, and the projection publishes `origin` with three
+values for the same reason.
 
-Rejected: keeping the enum and documenting the pair as impossible. A slot cannot
-be both spelled and nunation *today*, but nothing in the domain says a spelled
-letter name may never end in tanween, and the enum makes that unsayable for no
-gain.
+Rejected: decomposing into `nunation` and `spelled`. The case for it was that
+nothing in the domain forbids a nunated letter name, which is an argument from
+silence; the burden belongs to whoever adds a state. Decomposing would also
+change the digest at `canon/assemble.py:61` and regenerate every ledger
+fixture, for a case that does not exist.
 
-**D2 -- lexical identity and recitation processes split.** ADR-013 amends the
-earlier `SlotTag` proposal. `DIVINE_NAME` becomes a word-level `LexemeClass`;
+Reopens if: a riwayah or a script spells out something that carries a tanween.
+
+**D2 -- lexical identity and recitation processes split.** `DIVINE_NAME`
+becomes a word-level `LexemeClass`;
 `IMALA` and `ISHMAM` are rule occurrences. A lexical fact is not put in the
 same enum as two recitation processes merely because all three arrived from
 annotations in the source corpus.
@@ -170,7 +172,7 @@ discriminated value and may derive a convenience boolean.
 
 | | Change | Size |
 |---|---|---|
-| D1 | `SlotOrigin` -> `nunation` + `spelled`; 10 branches; digest; fixtures | medium |
+| D1 | none | -- |
 | D2 | `DIVINE_NAME` -> word `LexemeClass`; imala and ishmam -> occurrences | medium |
 | D3 | none | -- |
 | D4 | `NucleusKind` docstring names the two axes | trivial |

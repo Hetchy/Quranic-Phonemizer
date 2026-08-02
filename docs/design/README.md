@@ -31,7 +31,7 @@ wrong today rather than merely awkward.
 [projections/](projections/) is the public projection API that ADR-005 put out
 of scope: two projections over the layered model (`phonemes` and `Mappings`),
 the equivalence and completeness gate that replacement has to pass, and the
-worked examples. It supersedes ADR-013.
+worked examples.
 
 ## Closed
 
