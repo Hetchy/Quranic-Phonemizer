@@ -24,10 +24,6 @@ LIGHT = [
 
 ASSIRAT = Site(hafs=("1:6", (2,)))
 ADDALLIN = Site(hafs=("1:7", (9,)))
-QALA = Site(hafs=("2:33", (1,)))
-KANA = Site(hafs=("2:97", (3,)))
-TABAA = Site(hafs=("16:108", (3,)))
-TABIA = Site(hafs=("2:38", (10,)))
 DAKHALA = Site(hafs=("3:37", (11,)))
 QUL = Site(hafs=("2:80", (8,)))
 KHUDHU = Site(hafs=("2:63", (7,)))
@@ -57,30 +53,6 @@ def test_a_sad_is_heavy_and_carries_its_alif_with_it(r):
 def test_a_daad_is_heavy_and_carries_its_alif_with_it(r):
     # ٱلضَّآلِّينَ
     assert r.phonemes(9) == "ʔadˤdˤaˤ:lli:n"
-
-
-@for_each_riwayah(QALA, isolated=1)
-def test_a_qaf_is_heavy_and_carries_its_alif_with_it(r):
-    # قَالَ
-    assert r.phonemes(1) == "qaˤ:l"
-
-
-@for_each_riwayah(KANA, isolated=3)
-def test_the_same_shape_with_a_kaf_stays_light_throughout(r):
-    # كَانَ
-    assert r.phonemes(3) == "ka:n"
-
-
-@for_each_riwayah(TABAA, isolated=3)
-def test_a_taa_is_heavy_and_carries_its_fatha_with_it(r):
-    # طَبَعَ
-    assert r.phonemes(3) == "tˤaˤbaʕ"
-
-
-@for_each_riwayah(TABIA, isolated=10)
-def test_the_same_shape_with_a_light_taa_stays_light(r):
-    # تَبِعَ
-    assert r.phonemes(10) == "tabiʕ"
 
 
 @for_each_riwayah(DAKHALA, isolated=11)

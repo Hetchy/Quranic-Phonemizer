@@ -4,8 +4,6 @@ import pytest
 
 from tests.support import Site, for_each_riwayah, reading
 
-HUDAN_MIN = Site(hafs=("2:5", (3, 4)))
-MAN_YASHAA = Site(hafs=("3:74", (3, 4)))
 TA_SEEN_MEEM = Site(hafs=("26:1", (1,)))
 
 NOON_ACROSS_A_BOUNDARY = [
@@ -20,14 +18,14 @@ NOON_ACROSS_A_BOUNDARY = [
 ]
 
 TANWEEN_ACROSS_A_BOUNDARY = [
-    ("2:179", (4, 5), ("ħaja:tu", "j̃a:ʔuli:")),          # حَيَوٰةٌ يَـٰٓأُو۟لِى
-    ("6:105", (7, 8), ("liqaˤwmi", "j̃aʕlamu:n")),        # لِقَوْمٍ يَعْلَمُونَ
-    ("19:41", (7, 8), ("sˤiddi:qaˤ", "ñabijja:")),        # صِدِّيقًا نَّبِيًّا
-    ("25:51", (6, 7), ("qaˤrˤjati", "ñaði:rˤaˤ:")),       # قَرْيَةٍ نَّذِيرًا
-    ("2:5", (3, 4), ("huda", "m̃in")),                    # هُدًى مِّن
-    ("3:51", (7, 8), ("sˤirˤaˤ:tˤu", "m̃ustaqi:m")),      # صِرَٰطٌ مُّسْتَقِيمٌ
-    ("3:34", (4, 5), ("baʕdˤi", "w̃alˤlˤaˤ:h")),          # بَعْضٍ وَٱللَّهُ
-    ("3:46", (5, 6), ("wakahla", "w̃amin")),              # وَكَهْلًا وَمِنَ
+    ("2:179", (4, 5), ("ħaja:tu", "j̃a:ʔuli:")),        # حَيَوٰةٌ يَـٰٓأُو۟لِى
+    ("6:105", (7, 8), ("liqaˤwmi", "j̃aʕlamu:n")),      # لِقَوْمٍ يَعْلَمُونَ
+    ("19:41", (7, 8), ("sˤiddi:qaˤ", "ñabijja:")),      # صِدِّيقًا نَّبِيًّا
+    ("25:51", (6, 7), ("qaˤrˤjati", "ñaði:rˤaˤ:")),     # قَرْيَةٍ نَّذِيرًا
+    ("2:5", (3, 4), ("huda", "m̃in")),                  # هُدًى مِّن
+    ("3:51", (7, 8), ("sˤirˤaˤ:tˤu", "m̃ustaqi:m")),    # صِرَٰطٌ مُّسْتَقِيمٌ
+    ("3:34", (4, 5), ("baʕdˤi", "w̃alˤlˤaˤ:h")),        # بَعْضٍ وَٱللَّهُ
+    ("3:46", (5, 6), ("wakahla", "w̃amin")),            # وَكَهْلًا وَمِنَ
 ]
 
 
@@ -47,27 +45,6 @@ def test_a_tanween_merges_with_a_hum_into_each_letter(ref, words, expected):
     first, last = words
     r = reading(Site(hafs=(ref, words)), ibtidaa=first, waqf=last)
     assert (r.phonemes(first), r.phonemes(last)) == expected
-
-
-@for_each_riwayah(HUDAN_MIN, ibtidaa=3, waqf=4)
-def test_a_tanween_merges_into_the_meem_of_the_next_word(r):
-    # هُدًى مِّن
-    assert r.phonemes(3) == "huda"
-    assert r.phonemes(4) == "m̃in"
-
-
-@for_each_riwayah(HUDAN_MIN, isolated=3)
-def test_the_same_tanween_lengthens_instead_when_stopped_on(r):
-    # هُدًى
-    assert r.phonemes(3) == "huda:"
-    assert r.silent(3) == {"ً", "ى"}
-
-
-@for_each_riwayah(MAN_YASHAA, ibtidaa=3, waqf=4)
-def test_a_quiescent_noon_merges_into_the_yaa_of_the_next_word(r):
-    # مَن يَشَآءُ
-    assert r.phonemes(3) == "ma"
-    assert r.phonemes(4) == "j̃aʃa:ʔ"
 
 
 @for_each_riwayah(TA_SEEN_MEEM, isolated=1)

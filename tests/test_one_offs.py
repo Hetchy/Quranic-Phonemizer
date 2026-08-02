@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+import pytest
+
 from tests.support import Site, for_each_riwayah
 
 MAJRAHA = Site(hafs=("11:41", (6,)))
 TAMANNA = Site(hafs=("12:11", (6,)))
 AAJAMIYY = Site(hafs=("41:44", (9,)))
-MAN = Site(hafs=("75:27", (2,)))
+MAN_RAQIN = Site(hafs=("75:27", (2, 3)))
 NUNJI = Site(hafs=("21:88", (7,)))
 
 
@@ -27,10 +29,13 @@ def test_the_one_tashil_in_the_corpus(r):
     assert r.phonemes(9) == "ʔaʔaʕʒamijj"
 
 
-@for_each_riwayah(MAN, isolated=2)
+@pytest.mark.engine_bug
+@for_each_riwayah(MAN_RAQIN, ibtidaa=2, waqf=3)
 def test_a_sakt_breaks_the_reading_without_stopping_it(r):
-    # مَنْ ۜ
+    # مَنْ ۜ رَاقٍ
+    # the engine ignores the sakt and merges the noon into the raa
     assert r.phonemes(2) == "man"
+    assert r.phonemes(3) == "rˤaˤ:qQ"
 
 
 @for_each_riwayah(NUNJI, isolated=7)

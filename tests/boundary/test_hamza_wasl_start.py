@@ -37,7 +37,7 @@ IRREGULAR_NOUN = [
 
 
 def _started_on(ref, word):
-    return reading(Site(hafs=(ref, (word,))), ibtidaa=word, waqf=word)
+    return reading(Site(hafs=(ref, (word,))), isolated=word)
 
 
 @pytest.mark.parametrize(("ref", "word", "expected"), AFTER_THE_ARTICLE)
@@ -64,14 +64,14 @@ def test_the_seven_nouns_that_take_a_kasra_of_their_own(ref, word, expected):
     assert _started_on(ref, word).phonemes(word) == expected
 
 
-@for_each_riwayah(ALLAHU, ibtidaa=1, waqf=1)
+@for_each_riwayah(ALLAHU, isolated=1)
 def test_the_helping_vowel_is_a_fatha_before_the_divine_name(r):
     # ٱللَّهُ
     assert r.phonemes(1) == "ʔalˤlˤaˤ:h"
 
 
 @pytest.mark.engine_bug
-@for_each_riwayah(ILTAQA, ibtidaa=6, waqf=6)
+@for_each_riwayah(ILTAQA, isolated=6)
 def test_a_form_eight_verb_takes_a_kasra_and_not_the_article_fatha(r):
     # ٱلْتَقَى
     # the engine gives it the fatha the article takes, reading it as one

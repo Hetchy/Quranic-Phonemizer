@@ -4,10 +4,7 @@ import pytest
 
 from tests.support import Site, for_each_riwayah, reading
 
-YUNFIQUN = Site(hafs=("2:3", (8,)))
-ANTUM = Site(hafs=("2:42", (7,)))
 MIN_ZULUMAT = Site(hafs=("6:63", (4, 5)))
-HAYYATUN_TASA = Site(hafs=("20:20", (4, 5)))
 
 INSIDE_ONE_WORD = [
     ("2:42", 7, "waʔaŋtum"),        # وَأَنتُمْ
@@ -61,34 +58,8 @@ def test_every_hiding_letter_hides_a_tanween_noon(ref, words, expected):
     assert (r.phonemes(first), r.phonemes(last)) == expected
 
 
-@for_each_riwayah(YUNFIQUN, isolated=8)
-def test_a_quiescent_noon_before_a_faa_is_hidden(r):
-    # يُنفِقُونَ
-    assert r.phonemes(8) == "juŋfiqu:n"
-
-
-@for_each_riwayah(ANTUM, isolated=7)
-def test_a_noon_written_without_a_sukun_is_still_hidden(r):
-    # وَأَنتُمْ
-    assert r.phonemes(7) == "waʔaŋtum"
-
-
 @for_each_riwayah(MIN_ZULUMAT, ibtidaa=4, waqf=5)
 def test_a_noon_is_hidden_when_the_hiding_letter_starts_a_word(r):
     # مِّن ظُلُمَـٰتِ
     assert r.phonemes(4) == "miŋ"
     assert r.phonemes(5) == "ðˤuluma:t"
-
-
-@for_each_riwayah(HAYYATUN_TASA, ibtidaa=4, waqf=5)
-def test_a_tanween_is_hidden_before_the_next_word(r):
-    # حَيَّةٌ تَسْعَىٰ
-    assert r.phonemes(4) == "ħajjatuŋ"
-    assert r.phonemes(5) == "tasʕa:"
-
-
-@for_each_riwayah(HAYYATUN_TASA, isolated=4)
-def test_the_same_tanween_is_dropped_when_stopped_on(r):
-    # حَيَّةٌ
-    assert r.phonemes(4) == "ħajjah"
-    assert r.silent(4) == {"ٌ"}

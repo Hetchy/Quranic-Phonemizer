@@ -8,10 +8,7 @@ ATHQALAT_DAAWA = Site(hafs=("7:189", (20, 21)))
 
 ACROSS_A_BOUNDARY = [
     ("2:256", (5, 6), ("qaˤ", "ttabajjan")),        # قَد تَّبَيَّنَ
-    ("6:94", (22, 23), ("laqaˤ", "ttaqaˤtˤtˤaˤʕ")),  # لَقَد تَّقَطَّعَ
     ("3:69", (1, 2), ("wadda", "tˤtˤaˤ:ʔifah")),    # وَدَّت طَّآئِفَةٌ
-    ("3:122", (2, 3),
-     ("ham̃a", "tˤtˤaˤ:ʔifata:n")),                 # هَمَّت طَّآئِفَتَانِ
     ("4:64", (11, 12), ("ʔi", "ðˤðˤaˤlamu:")),      # إِذ ظَّلَمُوٓا۟
     ("11:42", (14, 15), ("ʔirˤka", "mmaʕana:")),    # ٱرْكَب مَّعَنَا
     ("7:176", (20, 21), ("jalha", "ðða:lik")),      # يَلْهَث ذَّٰلِكَ
@@ -36,7 +33,7 @@ def test_a_letter_merges_wholly_into_its_neighbour_of_the_same_family(
 
 @pytest.mark.parametrize(("ref", "word", "expected"), INSIDE_ONE_WORD)
 def test_a_daal_merges_wholly_into_a_taa_inside_one_word(ref, word, expected):
-    r = reading(Site(hafs=(ref, (word,))), ibtidaa=word, waqf=word)
+    r = reading(Site(hafs=(ref, (word,))), isolated=word)
     assert r.phonemes(word) == expected
 
 

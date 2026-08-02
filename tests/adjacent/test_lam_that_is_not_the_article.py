@@ -21,7 +21,7 @@ def test_the_article_lam_in_the_same_shape_does_merge(r):
     assert r.phonemes(11) == "ttaqQwa:"
 
 
-@for_each_riwayah(ADHDHAKARAYN, ibtidaa=10, waqf=10)
+@for_each_riwayah(ADHDHAKARAYN, isolated=10)
 def test_the_article_after_an_interrogative_hamza(r):
     # ءَآلذَّكَرَيْنِ
     assert r.phonemes(10) == "ʔa:ððakarˤaˤjn"

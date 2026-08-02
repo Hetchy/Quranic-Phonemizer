@@ -32,15 +32,38 @@ from quranic_phonemizer.render.recite import phonemes_by_word  # noqa: E402
 SNAPSHOTS = ROOT / "tests" / "snapshots" / "phonemes"
 
 
-#: `continuous` is not offered: it joins across verse boundaries, which a verse-by-verse harness cannot plan for.
-MODES = ("word", "verse")
+#: `continuous` joins across verse boundaries, so its unit is the surah, not
+#: the verse: one `Reading` per surah, every junction a join. Legacy froze it
+#: as a single call over the whole mushaf, so the seams between surahs are the
+#: one place this harness and that baseline can legitimately differ.
+MODES = ("word", "verse", "continuous")
 
 
 def plan_for(mode: str, words: int) -> BoundaryPlan:
-    """`word` stops after every word; `verse` joins within a verse and stops at its end."""
+    """`word` stops after every word; the others join and stop at the end."""
     if mode == "word":
         return BoundaryPlan((Junction.STOP,) * (words - 1) + (Junction.EDGE,))
     return BoundaryPlan((Junction.JOIN,) * (words - 1) + (Junction.EDGE,))
+
+
+def units(hafs, mode: str):
+    """The stretches a mode reads at once: a surah continuously, else a verse.
+
+    `read` takes the words it is given, so a stretch that spans verses is one
+    reading and a rule can cross the seam inside it.
+    """
+    packed = hafs.corpus
+    for surah in range(1, 115):
+        verses = [
+            VerseRef(surah, ayah)
+            for ayah in range(1, len(packed.surah_info[str(surah)]) + 1)
+        ]
+        if mode == "continuous":
+            words = tuple(word for v in verses for word in hafs.words(v))
+            yield verses[0], words
+        else:
+            for verse in verses:
+                yield verse, hafs.words(verse)
 
 
 def main() -> int:
@@ -60,40 +83,36 @@ def main() -> int:
 
     with gzip.open(SNAPSHOTS / f"{args.mode}.jsonl.gz", "rt", encoding="utf-8") as fh:
         expected = (json.loads(line) for line in fh)
-        for surah in range(1, 115):
-            for ayah in range(1, len(packed.surah_info[str(surah)]) + 1):
-                verse = VerseRef(surah, ayah)
-                built = hafs.build(
-                    hafs.read(Script.UTHMANI, verse, hafs.words(verse))
-                )
-                score = built.score
-                check_inscription(built.inscription, score)
-                performance = hafs.perform(
-                    score, plan_for(args.mode, len(score.words))
-                )
-                check_performance(performance, score)
-                produced = phonemes_by_word(performance, score, alphabet)
-                got_words = [list(word) for word in produced]
-                want_words = [next(expected) for _ in got_words]
-                wrong = [
-                    index
-                    for index, (got, want) in enumerate(zip(got_words, want_words))
-                    if got != want
-                ]
-                total += len(got_words)
-                matched += len(got_words) - len(wrong)
-                if _same_sequence(got_words, want_words):
-                    bucketed += len(wrong)
-                    continue
+        for verse, source in units(hafs, args.mode):
+            built = hafs.build(hafs.read(Script.UTHMANI, verse, source))
+            score = built.score
+            check_inscription(built.inscription, score)
+            performance = hafs.perform(
+                score, plan_for(args.mode, len(score.words))
+            )
+            check_performance(performance, score)
+            produced = phonemes_by_word(performance, score, alphabet)
+            got_words = [list(word) for word in produced]
+            want_words = [next(expected) for _ in got_words]
+            wrong = [
+                index
+                for index, (got, want) in enumerate(zip(got_words, want_words))
+                if got != want
+            ]
+            total += len(got_words)
+            matched += len(got_words) - len(wrong)
+            if _same_sequence(got_words, want_words):
+                bucketed += len(wrong)
+            else:
                 for index in wrong:
                     got, want = got_words[index], want_words[index]
                     diffs[_signature(got, want)] += 1
                     if len(mismatches) < args.show:
-                        mismatches.append(
-                            (f"{surah}:{ayah}:{index + 1}", got, want)
-                        )
-                if args.limit and total >= args.limit:
-                    break
+                        where = source[index][0]
+                        mismatches.append((
+                            f"{where.surah}:{where.ayah}:{where.word}",
+                            got, want,
+                        ))
             if args.limit and total >= args.limit:
                 break
 

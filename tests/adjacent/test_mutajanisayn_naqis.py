@@ -16,5 +16,5 @@ A_TAH_BEFORE_A_TAA = [
 def test_a_taa_takes_the_place_of_the_tah_but_not_its_heaviness(
     ref, word, expected
 ):
-    r = reading(Site(hafs=(ref, (word,))), ibtidaa=word, waqf=word)
+    r = reading(Site(hafs=(ref, (word,))), isolated=word)
     assert r.phonemes(word) == expected

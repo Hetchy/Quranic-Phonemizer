@@ -8,7 +8,7 @@ UTUMINA = Site(hafs=("2:283", (15, 16)))
 ITUNI_JOINED = Site(hafs=("12:50", (2, 3)))
 
 
-@for_each_riwayah(ITUNI, ibtidaa=18, waqf=18)
+@for_each_riwayah(ITUNI, isolated=18)
 def test_a_quiescent_hamza_becomes_a_length_when_started_on(r):
     # ٱئْتُونِى
     assert r.phonemes(18) == "ʔi:tu:ni:"
@@ -23,7 +23,7 @@ def test_the_same_hamza_is_said_as_a_hamza_when_the_word_before_joins(r):
     assert r.silent(3) == {"ٱ"}
 
 
-@for_each_riwayah(ITHAN, ibtidaa=4, waqf=4)
+@for_each_riwayah(ITHAN, isolated=4)
 def test_a_quiescent_hamza_after_a_kasra_lengthens_into_a_yaa(r):
     # ٱئْذَن
     assert r.phonemes(4) == "ʔi:ðan"
@@ -36,7 +36,7 @@ def test_that_same_word_keeps_its_hamza_once_it_is_joined_into(r):
     assert r.phonemes(4) == "ʔðan"
 
 
-@for_each_riwayah(UTUMINA, ibtidaa=16, waqf=16)
+@for_each_riwayah(UTUMINA, isolated=16)
 def test_a_quiescent_hamza_after_a_damma_lengthens_into_a_waw(r):
     # ٱؤْتُمِنَ
     assert r.phonemes(16) == "ʔu:tumin"

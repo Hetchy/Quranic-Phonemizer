@@ -7,7 +7,7 @@ YAYASU = Site(hafs=("12:87", (13, 14)))
 YAYASI = Site(hafs=("13:31", (20,)))
 
 
-@for_each_riwayah(TAYASU, ibtidaa=8, waqf=8)
+@for_each_riwayah(TAYASU, isolated=8)
 def test_a_bare_alif_inside_a_leen_needs_neither_carrier_nor_hamza(r):
     # تَا۟يْـَٔسُوا۟
     assert r.phonemes(8) == "tajʔasu:"
@@ -20,7 +20,7 @@ def test_the_same_alif_in_the_third_person_of_that_verb(r):
     assert r.phonemes(14) == "jajʔas"
 
 
-@for_each_riwayah(YAYASI, ibtidaa=20, waqf=20)
+@for_each_riwayah(YAYASI, isolated=20)
 def test_the_same_alif_where_the_verb_ends_in_a_kasra(r):
     # يَا۟يْـَٔسِ
     assert r.phonemes(20) == "jajʔas"

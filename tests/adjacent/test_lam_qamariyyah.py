@@ -26,7 +26,7 @@ MOON_LETTERS = [
 
 @pytest.mark.parametrize(("ref", "word", "expected"), MOON_LETTERS)
 def test_the_article_lam_is_said_before_each_moon_letter(ref, word, expected):
-    r = reading(Site(hafs=(ref, (word,))), ibtidaa=word, waqf=word)
+    r = reading(Site(hafs=(ref, (word,))), isolated=word)
     assert r.phonemes(word) == expected
 
 

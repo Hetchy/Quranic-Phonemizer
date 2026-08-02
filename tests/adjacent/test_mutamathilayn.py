@@ -10,10 +10,8 @@ THE_SAME_LETTER_TWICE = [
     ("2:16", (7, 8),
      ("rˤaˤbiħa", "ttiʒa:rˤaˤtuhum")),           # رَبِحَت تِّجَـٰرَتُهُمْ
     ("2:33", (10, 11), ("ʔaqu", "llakum")),      # أَقُل لَّكُمْ
-    ("3:154", (23, 24), ("ha", "llana:")),       # هَل لَّنَا
     ("2:60", (6, 7), ("ʔidˤri", "bbiʕasˤaˤ:k")),  # ٱضْرِب بِّعَصَاكَ
     ("2:61", (57, 58), ("ʕasˤaˤ", "wwaka:nu:")),  # عَصَوا۟ وَّكَانُوا۟
-    ("83:3", (3, 4), ("ʔa", "wwazanu:hum")),     # أَو وَّزَنُوهُمْ
     ("3:41", (15, 16), ("waðku", "rˤrˤaˤbbak")),  # وَٱذْكُر رَّبَّكَ
     ("5:61", (5, 6), ("waqaˤ", "ddaxaˤlu:")),    # وَقَد دَّخَلُوا۟
     ("21:87", (3, 4), ("ʔi", "ððahabQ")),        # إِذ ذَّهَبَ
@@ -31,7 +29,7 @@ def test_a_letter_merges_into_the_same_letter_across_a_boundary(
     assert (r.phonemes(first), r.phonemes(last)) == expected
 
 
-@for_each_riwayah(YUDRIKKUM, ibtidaa=3, waqf=3)
+@for_each_riwayah(YUDRIKKUM, isolated=3)
 def test_the_same_merger_inside_one_word(r):
     # يُدْرِككُّمُ
     assert r.phonemes(3) == "judQrikkum"

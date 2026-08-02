@@ -15,12 +15,12 @@ RAA = KhilafId.RAA_TAFKHEEM
 
 SITES = [
     ("26:63", 11, "فiرقiن", "firˤqiŋ", "firˤqQ", "join"),
-    ("34:12", 10, "ءaلقiطرi", "lqitˤQri", "ʔalqitˤQr", "stop"),
+    ("34:12", 10, "ءaلقiطرi", "ʔalqitˤQri", "ʔalqitˤQr", "stop"),
     ("12:99", 10, "مiصرa", "misˤrˤaˤ", "misˤrˤ", "stop"),
     ("10:87", 8, "بiمiصرa", "bimisˤrˤaˤ", "bimisˤrˤ", "stop"),
-    ("54:16", 4, "وaنuذuرi", "wanuðurˤ", "wanuðurˤ", "stop"),
-    ("54:23", 3, "بiءaلنuذuرi", "biñuðurˤ", "biñuðurˤ", "stop"),
-    ("89:4", 3, "يaسرi", "jasr", "jasr", "stop"),
+    ("54:16", 4, "وaنuذuرi", "wanuðuri", "wanuðurˤ", "stop"),
+    ("54:23", 3, "بiءaلنuذuرi", "biñuðuri", "biñuðurˤ", "stop"),
+    ("89:4", 3, "يaسرi", "jasri", "jasr", "stop"),
     ("20:77", 6, "ءaسرi", "ʔasri", "ʔasr", "stop"),
     ("11:81", 9, "فaءaسرi", "faʔasri", "faʔasr", "stop"),
 ]
@@ -28,7 +28,8 @@ SITES = [
 
 def _read(ref, word, selection, stopped):
     site = Site(hafs=(ref, (word,)))
-    plan = {"isolated": word} if stopped else {}
+    plan = ({"isolated": word} if stopped
+            else {"ibtidaa": word, "wasl": word})
     return reading(site, selection=selection, **plan).phonemes(word)
 
 
@@ -58,7 +59,7 @@ def test_both_wajh_are_reachable(
 DUF = Site(hafs=("30:54", (5,)))
 
 
-@for_each_riwayah(DUF, waqf=5)
+@for_each_riwayah(DUF, isolated=5)
 def test_a_vowel_khilaf_is_settled_before_there_is_a_performance(r):
     # ضَعْفٍ
     assert r.phonemes(5)

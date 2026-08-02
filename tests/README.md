@@ -74,9 +74,12 @@ Currently recorded:
 | --- | --- | --- |
 | The seven pausal alifs joined forward — `waqf/test_seven_alifs.py` | short: `ʔana`, `ʔassabi:la`, … | long at either junction |
 | `أَمِ ٱرْتَابُوٓا۟` joined — `tafkheem/test_raa.py` | `rˤta:bu:`, heavy | `rta:bu:`, light |
+| `مَنْ ۜ رَاقٍ` — `test_one_offs.py` | the sakt holds the noon clear | the noon merges into the raa |
+| `أَثْقَلَت دَّعَوَا` — `adjacent/test_mutajanisayn_kamil.py` | the taa merges wholly into the daal | the taa is sounded and the daal stays single |
+| `ٱلْتَقَى` started on — `boundary/test_hamza_wasl_start.py` | a form eight kasra | the fatha the article takes |
 
-Both are regressions against the published phonemizer, which reads them
-correctly. The mark that distinguishes the two pausal alif families is the
+The first two are regressions against the published phonemizer, which reads
+them correctly. The mark that distinguishes the two pausal alif families is the
 telling case: the engine handles the round zero correctly at both junctions and
 does not consult the rectangular one at all.
 

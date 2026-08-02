@@ -26,7 +26,7 @@ SUN_LETTERS = [
 
 @pytest.mark.parametrize(("ref", "word", "expected"), SUN_LETTERS)
 def test_the_article_lam_merges_into_each_sun_letter(ref, word, expected):
-    r = reading(Site(hafs=(ref, (word,))), ibtidaa=word, waqf=word)
+    r = reading(Site(hafs=(ref, (word,))), isolated=word)
     assert r.phonemes(word) == expected
 
 

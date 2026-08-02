@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from tests.support import Site, for_each_riwayah
 
-HUWA = Site(hafs=("2:29", (1,)))
 BIMA = Site(hafs=("2:10", (10,)))
 ULAIKA = Site(hafs=("2:5", (1,)))
 BIMA_UNZILA = Site(hafs=("2:4", (3, 4)))
@@ -11,12 +10,6 @@ ADHDHAKARAYN = Site(hafs=("6:143", (10,)))
 YUNFIQUN = Site(hafs=("2:3", (8,)))
 ADDALLIN = Site(hafs=("1:7", (9,)))
 YAWMI = Site(hafs=("1:4", (2,)))
-
-
-@for_each_riwayah(HUWA, isolated=1)
-def test_a_final_waw_becomes_the_length_of_the_vowel_before_it(r):
-    # هُوَ
-    assert r.phonemes(1) == "hu:"
 
 
 @for_each_riwayah(BIMA, isolated=10)
@@ -50,14 +43,14 @@ def test_the_same_length_after_an_interrogative_hamza(r):
     assert r.phonemes(10) == "ʔa:ððakarˤaˤjn"
 
 
-@for_each_riwayah(YUNFIQUN, ibtidaa=8)
+@for_each_riwayah(YUNFIQUN, isolated=8)
 def test_a_long_vowel_before_a_letter_the_stop_silences(r):
     # يُنفِقُونَ
     assert r.phonemes(8) == "juŋfiqu:n"
     assert r.silent(8) == {"َ"}
 
 
-@for_each_riwayah(ADDALLIN, ibtidaa=9)
+@for_each_riwayah(ADDALLIN, isolated=9)
 def test_the_length_the_stop_creates_sits_on_an_already_long_vowel(r):
     # ٱلضَّآلِّينَ
     assert r.phonemes(9) == "ʔadˤdˤaˤ:lli:n"

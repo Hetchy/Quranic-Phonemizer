@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from tests.support import Site, for_each_riwayah, reading
+from tests.support import Site, reading
 
 OPENINGS = {
     "2:1": "ʔalifla:m̃i:m",              # الٓمٓ
@@ -24,20 +24,4 @@ OPENINGS = {
 
 @pytest.mark.parametrize(("ref", "expected"), sorted(OPENINGS.items()))
 def test_every_opening_is_spelled_out_by_letter_name(ref, expected):
-    assert reading(Site(hafs=(ref, (1,))), waqf=1).phonemes(1) == expected
-
-
-ALIF_LAM_MEEM = Site(hafs=("2:1", (1,)))
-ALIF_LAM_MEEM_SAD = Site(hafs=("7:1", (1,)))
-
-
-@for_each_riwayah(ALIF_LAM_MEEM, waqf=1)
-def test_the_hum_between_two_names_comes_from_the_ordinary_rules(r):
-    # الٓمٓ
-    assert r.phonemes(1) == "ʔalifla:m̃i:m"
-
-
-@for_each_riwayah(ALIF_LAM_MEEM_SAD, waqf=1)
-def test_the_echo_at_the_end_comes_from_the_ordinary_rules(r):
-    # الٓمٓصٓ
-    assert r.phonemes(1) == "ʔalifla:m̃i:msˤaˤ:dQ"
+    assert reading(Site(hafs=(ref, (1,))), isolated=1).phonemes(1) == expected

@@ -4,9 +4,6 @@ import pytest
 
 from tests.support import Site, for_each_riwayah, reading
 
-ANAMTA = Site(hafs=("1:7", (3,)))
-DUNYA = Site(hafs=("2:85", (38,)))
-MIN_HADID = Site(hafs=("22:21", (3, 4)))
 SALAMUN_HIYA = Site(hafs=("97:5", (1, 2)))
 
 INSIDE_ONE_WORD = [
@@ -72,25 +69,6 @@ def test_every_throat_letter_keeps_a_tanween_noon_clear(ref, words, expected):
 def test_the_four_words_hold_their_noon_against_a_glide(ref, word, expected):
     site = Site(hafs=(ref, (word,)))
     assert reading(site, isolated=word).phonemes(word) == expected
-
-
-@for_each_riwayah(ANAMTA, isolated=3)
-def test_a_quiescent_noon_before_a_throat_letter_stays_clear(r):
-    # أَنْعَمْتَ
-    assert r.phonemes(3) == "ʔanʕamt"
-
-
-@for_each_riwayah(DUNYA, isolated=38)
-def test_a_noon_before_a_glide_inside_one_word_stays_clear(r):
-    # ٱلدُّنْيَا
-    assert r.phonemes(38) == "ʔaddunja:"
-
-
-@for_each_riwayah(MIN_HADID, ibtidaa=3, waqf=4)
-def test_a_noon_stays_clear_when_the_throat_letter_starts_a_word(r):
-    # مِنْ حَدِيدٍ
-    assert r.phonemes(3) == "min"
-    assert r.phonemes(4) == "ħadi:dQ"
 
 
 @for_each_riwayah(SALAMUN_HIYA, ibtidaa=1, waqf=2)
