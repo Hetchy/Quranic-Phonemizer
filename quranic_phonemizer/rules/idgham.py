@@ -14,6 +14,7 @@ from ..model.canon import CanonLetter as L
 from ..model.canon import CanonLetter, NucleusKind, Phase, Rule
 from ..model.performance import Aspect, Consonant, Occurrence, Participants
 from .lam_shamsiyyah import ArticleShape
+from .meem_sakinah import NASAL_LETTERS
 from .tables import Pairs
 
 
@@ -76,7 +77,16 @@ class Idgham:
                 Realize(
                     following.id,
                     Aspect.ONSET,
-                    Consonant(following.letter, geminate=True),
+                    Consonant(
+                        following.letter,
+                        geminate=True,
+                        # A doubled noon or meem is held on its ghunnah
+                        # wherever it stands, and one the idgham doubled is
+                        # no different: the meem of `ٱرْكَب مَّعَنَا` is nasal,
+                        # exactly as `GhunnahMushaddadah` would have made it
+                        # had the rasm written the shadda for itself.
+                        nasal=following.letter in NASAL_LETTERS,
+                    ),
                 ),
                 MergeInto(at, Aspect.ONSET, following.id, Aspect.ONSET),
             ),
