@@ -282,7 +282,8 @@ guaranteed failure.
 | an istilaa letter, or a raa in a colouring context | `tafkheem` or `tarqeeq` |
 | a taa marbuta at a stop | `taa_marbuta_pausal` |
 | a quiescent hamza the reading substitutes for a vowel | `ibdal_hamza` |
-| a final short vowel at a stop, or a tanween at a stop, or a silah vowel at a stop | `pausal_sukun` |
+| a final short vowel at a stop, or a silah vowel at a stop, or a dammatan or kasratan at a stop, or a fathatan at a stop on a taa marbuta | `pausal_sukun` |
+| any other fathatan at a stop | `iwad` |
 | an imala, ishmam or tashil mark | that rule |
 | an ikhfaa before an istilaa letter | a heavy ghunnah |
 | a written letter the canonical layer returns its no-sound verdict for | `orthographic_silence` |

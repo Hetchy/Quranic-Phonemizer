@@ -189,7 +189,7 @@ than under `spell out` because there is nothing in the rasm to spell out from.
 |---|---|---|---|---|---|
 | 19 | the haraka of a vowel the stop silences becomes a sukun | a stopped word whose final vowel the stop takes, short or long | performance | stopped | `pausal_sukun` |
 | 20 | a final tanween that leaves no lengthening becomes a sukun | a stopped word, nunated, where nothing lengthens: a dammatan, a kasratan, or a fathatan on a taa marbuta | performance | stopped | `pausal_sukun` |
-| 21 | a fathatan becomes a fatha | a stopped word whose fathatan lengthens, whether the seat is written or row 15 invents it | performance | stopped | `pausal_sukun` |
+| 21 | a fathatan becomes a fatha | a stopped word whose fathatan lengthens, whether the seat is written or row 15 invents it | performance | stopped | a madd rule |
 | 22 | a taa marbuta becomes a haa | a stopped word ending in taa marbuta | performance | stopped | `taa_marbuta_pausal` |
 | 23 | a quiescent hamza becomes a vowel letter | the reading substitutes it | orthographic | none | `ibdal_hamza` |
 | 24 | the hamza wasl seat becomes the hamza its vowel calls for | started on | performance | started | `hamza_wasl_start` |

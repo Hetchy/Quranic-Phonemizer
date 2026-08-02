@@ -560,7 +560,7 @@ names because the meem's outcomes are its own.
 **Colour and manner.** `tafkheem` · `tarqeeq` · `imala` · `tashil` · `ishmam`
 
 **Boundary.** `hamza_wasl_start` · `hamza_wasl_elision` · `iltiqa_kasra` ·
-`pausal_sukun` · `taa_marbuta_pausal`
+`pausal_sukun` · `iwad` · `taa_marbuta_pausal`
 
 Sakt is not here. It is a silence the reciter holds between two words, it
 produces no sound and reaches no unit, and `Word.sakt_after` already says
@@ -579,7 +579,7 @@ means one thing to a letter and another to a sound are all in
 
 | | |
 |---|---|
-| a sound goes | `pausal_sukun` |
+| a sound goes | `pausal_sukun`, or `iwad` on the noon of a lengthening fathatan |
 | a vowel lengthens | a madd rule |
 | a letter is realized differently | `taa_marbuta_pausal` |
 
@@ -599,6 +599,7 @@ Mutually exclusive per unit and per part.
 | Every silence names a rule |
 | Concatenating `glyphs` in `source_index` order reproduces the source text |
 | Under `text="recited"`, no sound takes a gap pairing |
+| No rule instance holds a `muqattaat` unit and a unit of another word |
 
 **Absent is not silent.** A part is silent when it had a sound and the reading
 took it, and absent when nothing put one there. The canon leaves a vowel
@@ -714,8 +715,8 @@ changes.
     the unit the reading vowels - a tanween's noon, or the meem of a spelled
     name - hosted on a vowel part the canon leaves absent.
 26. **Split the boundary rules to match the names.** One code rule covers
-    `pausal_sukun` and `taa_marbuta_pausal`; another mints an iwad name the
-    contract does not have.
+    `pausal_sukun` and `taa_marbuta_pausal`. The iwad is already its own rule
+    and keeps its name.
 27. **A colour is not minted for a part a complete merger consumed.** The
     letter has no sound of its own to be heavy, which is the whole difference
     between a complete idgham and a partial one. The producer already declines
@@ -724,20 +725,30 @@ changes.
     any realization as claiming the part, so moving only the effect deletes
     the consonant's own sound. Every release in the corpus sits on the vowel
     today, so this is not a repair at the margin.
+29. **A merger host keeps its ghunnah.** The pair-table family builds its host
+    consonant with no nasal fact, and the corpus has one merger of that family
+    whose host is a nasal letter: the baa of `ٱرْكَب` into the meem of
+    `مَّعَنَا`, which is held today without a hum.
+30. **A spelled name is closed.** The noon that ends a disjoined-letter
+    opening takes the nasal rules of the word after it, so `طسٓ` hums into
+    `تِلْكَ` and `نٓ` merges into `وَٱلْقَلَمِ` and loses its own consonant.
+    A unit whose `origin` is `muqattaat` neither takes a rule from another
+    word nor gives one, and the last unit of the last name takes `izhar`.
+    The rules between the names of one opening are unaffected.
 
 **Machinery**
 
-29. **A writer for the recited text.** The one that exists takes a Score, so
+31. **A writer for the recited text.** The one that exists takes a Score, so
     it has no boundary plan and no performance and cannot spell a pausal,
     merged or started-on form. `rendered` needs glyph records carrying
     `from_glyphs`, their own pairings, and the blocks `respelling` returns.
-30. **Total glyph pairing.** The join saying which outcomes each glyph
+32. **Total glyph pairing.** The join saying which outcomes each glyph
     presents, distinguishing a sounded dagger from its silent carrier and a
     performance deletion from orthographic zero.
-31. **Sub-verse requests.** A request clipping a ledger-addressed word raises
+33. **Sub-verse requests.** A request clipping a ledger-addressed word raises
     rather than building.
-32. **Continuous assembly** overlaps by two words, because cross-word
+34. **Continuous assembly** overlaps by two words, because cross-word
     lookahead reaches past a one-slot word.
-33. **Request orchestration.** Resolve `(ref, boundaries, variant)`, build,
+35. **Request orchestration.** Resolve `(ref, boundaries, variant)`, build,
     perform, and assemble one index space. Internal starts, arbitrary stops,
     sakt and cross-verse joins use the same path.

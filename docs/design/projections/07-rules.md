@@ -43,7 +43,7 @@ modifiers, and producing nothing is a rule that owns neither.
 | `iqlab` | a sakin noon, or a tanween's noon | the following baa | always for a tanween, may otherwise | the noon's consonant is a hum made at the lips | unchanged |
 | `idgham_bi_ghunnah` | a sakin noon, or a tanween's noon | the following letter | always | the noon merges into the host, which is held | rows 7 and 18 |
 | `idgham_bila_ghunnah` | a sakin noon, or a tanween's noon | the following lam or raa | always | the noon merges into the host | rows 7 and 18 |
-| `izhar` | a sakin noon, or a tanween's noon | a throat letter, or the waw or yaa of its own word | may | names the noon's own sound | unchanged |
+| `izhar` | a sakin noon, or a tanween's noon | a throat letter, the waw or yaa of its own word, or the end of a spelled name | may | names the noon's own sound | unchanged |
 | `ghunnah_mushaddadah` | a geminate noon or meem | - | never | names its own held sound | unchanged |
 | `izhar_shafawi` | a sakin meem | the following letter | may | names the meem's own sound | unchanged |
 | `ikhfaa_shafawi` | a sakin meem | the following baa | always | the meem is held | unchanged |
@@ -59,6 +59,15 @@ text spells the two units apart and the noon is bare, which is
 The meem's three rules never fire inside a word: a quiescent meem meets a baa
 or a meem only across a boundary, and a meem doubled inside a word is written
 with a shadda and is `ghunnah_mushaddadah`.
+
+**A spelled name is closed.** A unit whose `origin` is `muqattaat` takes no
+rule from outside the word it is in and gives none to the word after it. Its
+letters are names being recited, not a word being read, so they are said the
+same whether the plan joins or stops. The rules of the opening still fire
+between its own names -- the seen of طسٓمٓ merges its noon into the following
+meem, and the ain of عٓسٓقٓ hums its noon before the seen -- and the last unit
+of the last name is said plainly, which is what puts a third trigger in
+`izhar`'s row. This is the one law in this document a reading has no say in.
 
 ### 2.2 Adjacent consonants
 
@@ -127,7 +136,8 @@ is empty.
 | `hamza_wasl_start` | the word-initial unit whose consonant sounds only when started on | - | never | hosts the consonant and its vowel | rows 13 and 24 |
 | `hamza_wasl_elision` | the same unit, not started on or not word-initial | - | never | silences both parts | row 6 |
 | `iltiqa_kasra` | the unit the reading vowels | - | always | hosts a vowel on a part the canon leaves absent | row 14 |
-| `pausal_sukun` | the unit whose part the stop takes | - | never | silences the part | rows 1, 12, 19, 20, 21 |
+| `pausal_sukun` | the unit whose part the stop takes | - | never | silences the part | rows 1, 12, 19, 20 |
+| `iwad` | a tanween's noon whose fathatan lengthens at a stop | - | never | silences the consonant | rows 15, 21, 28 |
 | `taa_marbuta_pausal` | the taa marbuta unit | - | never | realizes the letter as a haa | row 22 |
 
 `pausal_sukun` reaches the most catalogue rows of any rule, and the reason is
@@ -135,6 +145,12 @@ that it is one event with several spellings: the haraka it takes may be a
 haraka, a tanween, a silah mark or nothing written at all, and the sukun it
 writes is a replacement in the first three cases and an addition in the
 fourth.
+
+`iwad` is a separate rule and not a case of it, because nothing is lost. The
+other three tanween at a stop lose their noon and write a sukun; a fathatan's
+noon becomes the length in front of it, so the unit before gains a long vowel
+where the others gain nothing. A rule named for what a stop takes may not be
+the rule for the one stop that takes nothing.
 
 `iltiqa_kasra` is the only rule that sounds a part the canon leaves absent, and
 the only one whose letter-level relation exists on one text and not the other.
@@ -189,7 +205,7 @@ happen.
 
 | Label | Holds when |
 |---|---|
-| `madd_iwad` | a madd on a unit whose tanween noon is silenced at a stop |
+| `madd_iwad` | a madd on the unit before a noon that `iwad` silenced |
 | `madd_badal` | a madd on a unit whose letter is hamza |
 | `silah` | a madd on a unit whose vowel is long joined and absent stopped |
 | `silah_kubra` | the same, where the rule is `madd_jaiz_munfasil` |
@@ -200,6 +216,11 @@ of a `madd_tabii`, so it names a configuration rather than setting one.
 
 `ibdal_hamza` is a rule and not on this list, because substituting a hamza for
 a vowel is an outcome. Madd badal is the length that follows it.
+
+`iwad` and `madd_iwad` are a rule and a label with nearly one name, and they
+are two things: the rule is what happened to the noon, the label is what to
+call the length beside it. The label is on the madd instance, the rule is on
+the noon, and neither claims the other's unit.
 
 ---
 

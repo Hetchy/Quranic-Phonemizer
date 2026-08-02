@@ -219,7 +219,7 @@ are outside the request.
 | unit | part | realization | on the sound |
 |---|---|---|---|
 | w5 ta | vowel | hosts `a:` | long, `madd_tabii`; labelled `madd_iwad` |
-| w5 noon (tanween) | consonant | silent, `pausal_sukun` | |
+| w5 noon (tanween) | consonant | silent, `iwad` | |
 
 **Part 2, pairings**, word 5, `text="source"`, `grouping="glyph"`. A token that
 repeats in the word carries its position in that word's phoneme string.
@@ -251,7 +251,7 @@ Plan B:
 | ◌َ | | `a:` (5) | | `madd_tabii` |
 | ◌ٰ | `a:` (5) | | | `madd_tabii` |
 | ت | `t` | | | |
-| ◌ً | | `a:` (7) | | `madd_tabii`, `pausal_sukun` |
+| ◌ً | | `a:` (7) | | `madd_tabii`, `iwad` |
 | ا | `a:` (7) | | | `madd_tabii` |
 
 **Respelling blocks**, word 5 under plan A, the two that are not one glyph to
@@ -320,7 +320,7 @@ word 3's fathatan becomes a fatha (row 21), its seat stops being silent (row
 | w3 heh | vowel | hosts `u` | |
 | w3 dal | consonant | hosts `d` | |
 | w3 dal | vowel | hosts `a:` | long, `madd_tabii`; labelled `madd_iwad` |
-| w3 noon (tanween) | consonant | silent, `pausal_sukun` | |
+| w3 noon (tanween) | consonant | silent, `iwad` | |
 | w3 noon (tanween) | vowel | absent | |
 
 The waw of word 1 has no row here at all, and that is the whole of what
@@ -339,7 +339,7 @@ The waw of word 1 has no row here at all, and that is the whole of what
 | لَ | `l` | `a:` | | `madd_tabii` |
 | ىٰ | `a:` | | | `madd_tabii` |
 | هُ | `h` `u` | | | |
-| دً | `d` | `a:` | | `madd_tabii`, `pausal_sukun` |
+| دً | `d` | `a:` | | `madd_tabii`, `iwad` |
 | ى | `a:` | | | `madd_tabii` |
 
 Two glyphs answer to no unit and take opposite treatment: the tatweel of word 1
@@ -1161,7 +1161,7 @@ naqis rule's trigger in the tuple position a merger uses for its host.
 | 12 | مَعْزِلٍ | مَعْزِلِ | `m a ʕ z i l i` |
 | 13 | يَـٰبُنَىَّ | يَّابُنَىَّ | `j̃ a: b u n a jj a` |
 | 14 | ٱرْكَب | رْكَ | `rˤ k a` |
-| 15 | مَّعَنَا | مَّعَنَا | `mm a ʕ a n a:` |
+| 15 | مَّعَنَا | مَّعَنَا | `m̃ a ʕ a n a:` |
 
 Word 8 is 4.1a's `iltiqa_kasra` line, the haraka then a noon with a kasra, and
 row 14 writes the kasra itself. Word 13 takes rows 11, 18 and 26 together, and
@@ -1223,9 +1223,9 @@ word 14 rows 6 and 7.
 | w14 ra | vowel | absent | |
 | w14 kaf | consonant | hosts `k` | |
 | w14 kaf | vowel | hosts `a` | |
-| w14 ba | consonant | merged into `mm`, by `idgham_mutajanisayn_kamil` | |
+| w14 ba | consonant | merged into `m̃`, by `idgham_mutajanisayn_kamil` | |
 | w14 ba | vowel | absent | |
-| w15 meem | consonant | hosts `mm`, by `idgham_mutajanisayn_kamil` | doubled |
+| w15 meem | consonant | hosts `m̃`, by `idgham_mutajanisayn_kamil` | doubled, with ghunnah |
 | w15 meem | vowel | hosts `a` | |
 | w15 ain | consonant | hosts `ʕ` | |
 | w15 ain | vowel | hosts `a` | |
@@ -1271,8 +1271,8 @@ hide or merge.
 | ٱ | | | ٱ | `hamza_wasl_elision` |
 | رْ | `rˤ` | | | `tafkheem` |
 | كَ | `k` `a` | | | |
-| ب | | `mm` | | `idgham_mutajanisayn_kamil` |
-| مَّ | `mm` `a` | | | `idgham_mutajanisayn_kamil` |
+| ب | | `m̃` | | `idgham_mutajanisayn_kamil` |
+| مَّ | `m̃` `a` | | | `idgham_mutajanisayn_kamil` |
 | عَ | `ʕ` `a` | | | |
 | نَ | `n` | `a:` | | `madd_tabii` |
 | ا | `a:` | | | `madd_tabii` |
@@ -1308,7 +1308,9 @@ the same passage, and the same letter fires and does not fire on one page. The
 package sounds no helping vowel, so its output puts the tanween noon straight
 against the sakin baa and classifies it against a wasl hamza it then elides;
 the dagger alif of وَنَادَىٰ reaches no unit while the alif maqsura under it
-carries the vowel.
+carries the vowel; and the meem the baa merges into loses its ghunnah, because
+the pair-table family builds its host consonant without one and the only
+nasal host that family has is this meem.
 
 ### E13. The hum at the lips, the heavy hum, and the heavy lam
 
@@ -1647,8 +1649,13 @@ for it to lengthen, which is row 15 beside row 21.
 | w11 meem | vowel | hosts `a:` | long, `madd_wajib_muttasil` |
 | w11 hamza | consonant | hosts `ʔ` | |
 | w11 hamza | vowel | hosts `a:` | long, `madd_tabii`; labelled `madd_iwad` |
-| w11 noon (tanween) | consonant | silent, `pausal_sukun` | |
+| w11 noon (tanween) | consonant | silent, `iwad` | |
 | w11 noon (tanween) | vowel | absent | |
+
+The stop takes no part of this word, so `pausal_sukun` fires nowhere in it. A
+fathatan at a pause becomes the length in front of it: `iwad` silences the
+noon, and the hamza keeps a long vowel where a dammatan or a kasratan would
+have left it a bare consonant.
 
 **Part 2, pairings**, `text="recited"`, `grouping="glyph"`.
 
@@ -1670,7 +1677,7 @@ for it to lengthen, which is row 15 beside row 21.
 | ا | `a:` | | | `madd_wajib_muttasil` |
 | ◌ٓ | | `a:` | | `madd_wajib_muttasil` |
 | ء | `ʔ` | | | |
-| ◌َ | | `a:` | | `pausal_sukun`, `madd_tabii` |
+| ◌َ | | `a:` | | `madd_tabii`, `iwad` |
 | ا | `a:` | | | `madd_tabii` |
 
 Every `silent` cell is empty, and on this text it always is: no rule silences a
@@ -1711,7 +1718,7 @@ stopping after the second word.
 
 | word | source | recited | phonemes |
 |---|---|---|---|
-| 76:15:8 | قَوَارِيرَا۠ | قَوَارِيرَ | `q aˤ w a: r i: rˤ aˤ:` |
+| 76:15:8 | قَوَارِيرَا۠ | قَوَارِيرَ | `q aˤ w a: r i: rˤ aˤ` |
 | 76:16:1 | قَوَارِيرَا۟ | قَوَارِيرْ | `q aˤ w a: r i: r` |
 
 Plan B: the same request with `stops=("76:15:8",)`, so the second word is
@@ -1721,14 +1728,18 @@ started on.
 |---|---|---|---|
 | 76:15:8 | قَوَارِيرَا۠ | قَوَارِيرَا | `q aˤ w a: r i: rˤ aˤ:` |
 
-The two plans print one phoneme string. The recited spellings above and the
-tables below state the vowel's two forms, which is where the plans part: the
-first word's final vowel is short in its joined form and long in its stopped
-form, so its seat is row 4; the second word's is short in both, so nothing but
-the stop takes it and its seat is row 3. Both silence signs are row 5. This is
-the one place where the tables and the phoneme line disagree: the package gives
-the long form under both plans, and the tables state the reading the contract's
-correction to the seven alifs requires.
+The two plans differ in one phoneme, and it is the last one of the first word.
+The first word's final vowel is short in its joined form and long in its
+stopped form, so its seat is row 4; the second word's is short in both, so
+nothing but the stop takes it and its seat is row 3. Both silence signs are
+row 5.
+
+This is the one example whose phoneme lines the package does not produce. It
+gives the long form for 76:15:8 under both plans, because the vowel's kind
+already says `pausal_long` and the rule that realizes it does not read the
+junction. The tables state the reading the seven alifs require, and the
+package's is a defect of the same shape as the two in E17: a boundary fact
+decided without the boundary.
 
 **Part 1, units and parts**, 76:15:8 under plan A. Words are numbered within
 their own verse.
@@ -1801,7 +1812,7 @@ not the plain one the same five letters carry in the verse before.
 | relationship | what a consumer must do | cost |
 |---|---|---|
 | script - rules | attribute the silence signs | **FINDING.** Both are written and not said under every plan, and row 5 drops them with no owner. Where the seat beside the sign is silent too, the pairing names `orthographic_silence` and both scalars are `silent` under it; on the stopped 76:15:8 the alif sounds and no rule names the sign's silence, so it is in no list and the pairing's rules name only a madd |
-| identity | tell the two requests apart | **FINDING.** They differ only in the junction after 76:15:8 and the package prints one phoneme string for both, so a consumer reading `phonemes` alone cannot separate them |
+| identity | tell the two requests apart | **FINDING.** They differ only in the junction after 76:15:8. One phoneme separates them under the reading the tables state, and none under what the package emits, and either way section 3 publishes no boundary field, so the identity is the same document twice. E17's version of this finding is the general one |
 | script - sound | ask an alif what it sounds like | one call and one field read, and the answer is what the character cannot give: two alifs with the same neighbours and the same harakat, one owning a long vowel at a pause and one owning nothing under any plan |
 | sound - rules | reach `orthographic_silence` | one call and one field read. It owns no attribution in either word, so it is reached only through the seat's pairing |
 | the other three | | one call and one field read |
@@ -1817,7 +1828,7 @@ Plan A: `mappings("27:1")`, joined throughout, stopping after word 6.
 
 | word | source | recited | phonemes |
 |---|---|---|---|
-| 1 | طسٓ ۚ | طَا سِيٓن ۚ | `tˤ aˤ: s i: ŋ` |
+| 1 | طسٓ ۚ | طَا سِيٓنْ ۚ | `tˤ aˤ: s i: n` |
 | 2 | تِلْكَ | تِلْكَ | `t i l k a` |
 | 3 | ءَايَـٰتُ | ءَايَاتُ | `ʔ a: j a: t u` |
 | 4 | ٱلْقُرْءَانِ | لْقُرْءَانِ | `l q u rˤ ʔ a: n i` |
@@ -1833,8 +1844,8 @@ Plan B: `mappings("27:1", stops=("27:1:3",))`, the same with a stop after word
 | 4 | ٱلْقُرْءَانِ | أَلْقُرْءَانِ | `ʔ a l q u rˤ ʔ a: n i` |
 
 Word 1 is one glyph per letter name, so row 25 spells it as two names with a
-space between them; the noon of `seen` is left bare because an assimilation
-follows. Word 5's kasratan is 4.1a's idgham line and word 6 already carries the
+space between them; the noon of `seen` takes a sukun because it is said
+plainly, which is 4.1a's izhar line. Word 5's kasratan is 4.1a's idgham line and word 6 already carries the
 shadda the host needs, so row 18 adds nothing; word 6 is row 20.
 
 **Part 1, units and parts.** Plan A, with the plan B reading where it differs.
@@ -1845,7 +1856,7 @@ shadda the host needs, so row 18 adds nothing; word 6 is row 20.
 | w1 tah (spelled) | vowel | hosts `aˤ:` | heavy, `tafkheem`; long, `madd_tabii` |
 | w1 seen (spelled) | consonant | hosts `s` | |
 | w1 seen (spelled) | vowel | hosts `i:` | long, `madd_lazim` |
-| w1 noon (spelled) | consonant | hosts `ŋ`, by `ikhfaa_haqiqi` | a hum, not doubled |
+| w1 noon (spelled) | consonant | hosts `n`, by `izhar` | |
 | w1 noon (spelled) | vowel | absent | |
 | w2 ta | consonant | hosts `t` | |
 | w2 ta | vowel | hosts `i` | |
@@ -1895,7 +1906,7 @@ shadda the host needs, so row 18 adds nothing; word 6 is row 20.
 | source | owns | shares | silent | rules |
 |---|---|---|---|---|
 | ط | `tˤ` `aˤ:` | | | `tafkheem`, `madd_tabii` |
-| سٓ | `s` `i:` `ŋ` | | | `madd_lazim`, `ikhfaa_haqiqi` |
+| سٓ | `s` `i:` `n` | | | `madd_lazim`, `izhar` |
 | تِ | `t` `i` | | | |
 | لْ | `l` | | | |
 | كَ | `k` `a` | | | |
@@ -1925,7 +1936,7 @@ shadda the host needs, so row 18 adds nothing; word 6 is row 20.
 | source | recited |
 |---|---|
 | ط | طَ, ا |
-| سٓ | سِ, يٓ, ن |
+| سٓ | سِ, يٓ, نْ |
 
 The stop sign of word 1 carries the `Structural` edge and takes no pairing, so
 it has no row here, belongs to no block, and is present in both texts. Under
@@ -1940,15 +1951,18 @@ its damma `silent` and `pausal_sukun` in its rules.
 | relationship | what a consumer must do | cost |
 |---|---|---|
 | script - sound | ask the pairing of سٓ | it receives the sounds of a whole letter name at once. The glyph has no sub-range, so a consumer painting one letter of the name reads the recited text instead, where each name is spelled out |
-| script - rules | light the ikhfaa's trigger | the rule is in the سٓ pairing and the letter that fired it is in the next word and names nothing, so a legend that wants the trigger locates it itself. One field read |
+| script - rules | light the izhar's trigger | one field read, and there is nothing outside the pairing to light: the taa that begins word 2 fired nothing, because a spelled name is closed and its last unit is said plainly whatever follows |
 | script - recited | expand one source glyph | one call: the block holds one source pairing and the whole spelled name on the recited side |
 | identity | tell the two plans apart | **FINDING.** They are two documents whose `ref`, `riwayah`, `script`, `variant` and `canon_digest` are identical. Section 3 publishes no boundary field, so nothing in the identity separates them, and a consumer keyed on identity serves plan A's document for a plan B request |
 | the other three | | one call and one field read |
 
-One glyph is one pairing owning a whole name, and the noon inside that name
-fires into the following word, so a spelled name is not closed. The stop before
-word 4 moves the same wasl seat from silent to sounding while every source
-glyph stands.
+One glyph is one pairing owning a whole name, and that name is closed: its
+letters assimilate to each other and to nothing outside, so the same seen
+before a meem inside طسٓمٓ merges and here says its noon plainly. The stop
+before word 4 moves the same wasl seat from silent to sounding while every
+source glyph stands. The package fires an ikhfaa out of this noon into word 2,
+and merges the noon of نٓ into the waw of 68:1's second word; both are the
+one law this example is for.
 
 ### E18. A hamza written as the vowel before it
 
@@ -2400,11 +2414,11 @@ thing, and section 4 says why.
 
 | Rule | Exercised by |
 |---|---|
-| `ikhfaa_haqiqi` | E2, E6, E13, E17, E18 |
+| `ikhfaa_haqiqi` | E2, E6, E13, E18 |
 | `iqlab` | E13 |
 | `idgham_bi_ghunnah` | E5, E6, E7, E8, E12, E14, E17, E21 |
 | `idgham_bila_ghunnah` | E9, E19 |
-| `izhar` | E6, E9 |
+| `izhar` | E6, E9, E17 |
 | `ghunnah_mushaddadah` | E2, E19, E20 |
 | `izhar_shafawi` | E2, E4, E7, E9, E10, E11 |
 | `ikhfaa_shafawi` | E18 |
@@ -2433,7 +2447,8 @@ thing, and section 4 says why.
 | `hamza_wasl_start` | E4, E6, E15, E17, E18 |
 | `hamza_wasl_elision` | E1, E12, E13, E14, E17, E18 |
 | `iltiqa_kasra` | E12 |
-| `pausal_sukun` | E2, E3, E4, E6 to E9, E11, E13 to E21 |
+| `pausal_sukun` | E4, E6 to E9, E11, E13, E14, E16 to E21 |
+| `iwad` | E2, E3, E15 |
 | `taa_marbuta_pausal` | E8 |
 | `ibdal_hamza` | E18 |
 | `orthographic_silence` | E2, E3, E5, E8, E9, E16, E18 |
@@ -2462,7 +2477,7 @@ subsection.
 | 10 the shortened carrier | E14, E18 |
 | 11 the verse marker and the tatweel | E1, E2, E3, E12, E13, E17, E18, E21 |
 | 4.1a spelled apart | |
-| `izhar` | E9 |
+| `izhar` | E9, E17 |
 | `ikhfaa_haqiqi`, `iqlab` | E2, E18 |
 | an idgham | E5, E6, E7, E8, E12, E17, E19, E21 |
 | `iltiqa_kasra` | E12 |
@@ -2574,6 +2589,8 @@ example does catch it failing, the cell says so.
 | a taa marbuta at a stop requires `taa_marbuta_pausal` | 4.8 | E8 |
 | a substituted quiescent hamza requires `ibdal_hamza` | 4.8 | E18 |
 | a vowel, tanween or silah the stop takes requires `pausal_sukun` | 4.8 | E6, E11, E18, E20 |
+| a fathatan the stop lengthens requires `iwad` | 4.8 | E2, E3, E15 |
+| no rule holds a `muqattaat` unit and a unit of another word | contract 8 | E17 |
 | an imala, ishmam or tashil mark requires that rule | 4.8 | E19, E20, E21 |
 | an ikhfaa before an istilaa letter requires a heavy ghunnah | 4.8 | E13 |
 | a letter the canonical layer gives no sound requires `orthographic_silence` | 4.8 | E3, E16 |
