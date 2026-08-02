@@ -21,3 +21,4 @@ build/
 .coverage
 
 docs/mualem_conversion.md
+.claude/worktrees/
