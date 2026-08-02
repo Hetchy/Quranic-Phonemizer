@@ -3,16 +3,92 @@ from __future__ import annotations
 from tests.support import Site, for_each_riwayah
 
 LAHU = Site(hafs=("112:4", (3,)))
+HAWLAHU = Site(hafs=("2:17", (9,)))
+BIHI = Site(hafs=("2:26", (30,)))
+BI_IDHNIHI = Site(hafs=("2:255", (26,)))
+FIHI = Site(hafs=("2:20", (9,)))
+ANNAHU = Site(hafs=("2:26", (16,)))
 
 
-@for_each_riwayah(LAHU, wasl=3)
+@for_each_riwayah(LAHU, ibtidaa=3, wasl=3)
 def test_the_pronoun_haa_is_long_when_the_reading_carries_on(r):
     # لَّهُۥ
-    assert r.phonemes(3) == "llahu:"
+    assert r.phonemes(3) == "lahu:"
+    assert r.silent(3) == frozenset()
 
 
-@for_each_riwayah(LAHU, waqf=3)
+@for_each_riwayah(LAHU, isolated=3)
 def test_the_same_haa_loses_its_length_at_a_stop(r):
     # لَّهُۥ
-    assert r.phonemes(3) == "llah"
+    assert r.phonemes(3) == "lah"
     assert r.silent(3) == {"ُ", "ۥ"}
+
+
+@for_each_riwayah(HAWLAHU, ibtidaa=9, wasl=9)
+def test_a_haa_with_damma_is_drawn_out_when_joined_forward(r):
+    # حَوْلَهُۥ
+    assert r.phonemes(9) == "ħawlahu:"
+    assert r.silent(9) == frozenset()
+
+
+@for_each_riwayah(HAWLAHU, isolated=9)
+def test_that_damma_haa_is_bare_at_a_stop(r):
+    # حَوْلَهُۥ
+    assert r.phonemes(9) == "ħawlah"
+    assert r.silent(9) == {"ُ", "ۥ"}
+
+
+@for_each_riwayah(BIHI, ibtidaa=30, wasl=30)
+def test_a_haa_with_kasra_is_drawn_out_when_joined_forward(r):
+    # بِهِۦ
+    assert r.phonemes(30) == "bihi:"
+    assert r.silent(30) == frozenset()
+
+
+@for_each_riwayah(BIHI, isolated=30)
+def test_that_kasra_haa_is_bare_at_a_stop(r):
+    # بِهِۦ
+    assert r.phonemes(30) == "bih"
+    assert r.silent(30) == {"ِ", "ۦ"}
+
+
+@for_each_riwayah(BI_IDHNIHI, ibtidaa=26, wasl=26)
+def test_a_second_kasra_haa_is_drawn_out_when_joined_forward(r):
+    # بِإِذْنِهِۦ
+    assert r.phonemes(26) == "biʔiðnihi:"
+    assert r.silent(26) == frozenset()
+
+
+@for_each_riwayah(BI_IDHNIHI, isolated=26)
+def test_that_second_kasra_haa_is_bare_at_a_stop(r):
+    # بِإِذْنِهِۦ
+    assert r.phonemes(26) == "biʔiðnih"
+    assert r.silent(26) == {"ِ", "ۦ"}
+
+
+@for_each_riwayah(FIHI, ibtidaa=9, wasl=9)
+def test_a_haa_after_a_quiescent_letter_gets_no_length(r):
+    # فِيهِ
+    assert r.phonemes(9) == "fi:hi"
+    assert r.silent(9) == frozenset()
+
+
+@for_each_riwayah(FIHI, isolated=9)
+def test_that_haa_is_bare_at_a_stop_too(r):
+    # فِيهِ
+    assert r.phonemes(9) == "fi:h"
+    assert r.silent(9) == {"ِ"}
+
+
+@for_each_riwayah(ANNAHU, ibtidaa=16, wasl=16)
+def test_a_haa_before_a_quiescent_letter_gets_no_length(r):
+    # أَنَّهُ
+    assert r.phonemes(16) == "ʔañahu"
+    assert r.silent(16) == frozenset()
+
+
+@for_each_riwayah(ANNAHU, isolated=16)
+def test_that_short_haa_is_bare_at_a_stop_as_well(r):
+    # أَنَّهُ
+    assert r.phonemes(16) == "ʔañah"
+    assert r.silent(16) == {"ُ"}
