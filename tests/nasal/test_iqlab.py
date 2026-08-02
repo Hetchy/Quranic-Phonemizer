@@ -5,6 +5,7 @@ import pytest
 from tests.support import Site, for_each_riwayah, reading
 
 MIN_BADI = Site(hafs=("2:56", (3, 4)))
+QUSURAN = Site(hafs=("25:10", (17,)))
 
 INSIDE_ONE_WORD = [
     ("19:92", 2, "jaŋbaɣi:"),      # يَنبَغِى
@@ -46,3 +47,10 @@ def test_a_quiescent_noon_turns_across_a_word_seam(r):
     # مِّن بَعْدِ
     assert r.phonemes(3) == "miŋ"
     assert r.phonemes(4) == "baʕdQ"
+
+
+@for_each_riwayah(QUSURAN, ibtidaa=17, wasl=17)
+def test_a_tanween_at_a_verse_end_turns_across_the_seam(r):
+    # قُصُورًا بَلْ
+    assert r.phonemes(17) == "qusˤu:rˤaˤŋ"
+    assert r.phonemes(18) == "bal"

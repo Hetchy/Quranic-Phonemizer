@@ -5,6 +5,7 @@ import pytest
 from tests.support import Site, for_each_riwayah, reading
 
 SALAMUN_HIYA = Site(hafs=("97:5", (1, 2)))
+QADIRUN = Site(hafs=("2:106", (19,)))
 
 INSIDE_ONE_WORD = [
     ("6:26", 4, "wajanʔawn"),         # وَيَنْـَٔوْنَ
@@ -76,3 +77,10 @@ def test_a_tanween_before_a_throat_letter_keeps_its_own_noon(r):
     # سَلَـٰمٌ هِىَ
     assert r.phonemes(1) == "sala:mun"
     assert r.phonemes(2) == "hi:"
+
+
+@for_each_riwayah(QADIRUN, ibtidaa=19, wasl=19)
+def test_a_tanween_at_a_verse_end_keeps_its_noon_clear_across_the_seam(r):
+    # قَدِيرٌ أَلَمْ
+    assert r.phonemes(19) == "qaˤdi:rˤun"
+    assert r.phonemes(20) == "ʔalam"

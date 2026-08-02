@@ -18,21 +18,7 @@ jobs:
         with:
           python-version: "3.13"
       - run: pip install -e ".[dev]"
-      - run: python -m pytest tests/ -q -m "not engine_bug"
-
-  known-bugs:
-    # Readings the engine gets wrong. The tests state what is correct, so they
-    # fail, and the count is the worklist. Reported, never blocking: a fix
-    # belongs in its own change, not in whatever change is passing through.
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
-      - run: pip install -e ".[dev]"
-      - run: python -m pytest tests/ -q -m engine_bug
+      - run: python -m pytest tests/ -q
 
   comments:
     # The comment rules in CLAUDE.md, checked rather than remembered.

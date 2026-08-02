@@ -26,6 +26,14 @@ A_VOWEL_PUT_IN_TO_REPAIR_THE_MEETING = [
     # ٱشْتَرَوُا۟ ٱلضَّلَـٰلَةَ
 ]
 
+A_TANWEEN_MEETING_A_PROSTHETIC_HAMZA = [
+    ("2:61", (30, 31), ("xaˤjrˤuni", "hbitˤu:")),        # خَيْرٌ ٱهْبِطُوا۟
+    ("11:42", (8, 9), ("nu:ħuni", "bQnah")),             # نُوحٌ ٱبْنَهُۥ
+    ("9:30", (3, 4), ("ʕuzajrˤuni", "bQn")),             # عُزَيْرٌ ٱبْنُ
+    ("4:171", (31, 32), ("θala:θatuni", "ŋtahu:")),      # ثَلَـٰثَةٌ ٱنتَهُوا۟
+    ("7:8", (2, 3), ("jawmaʔiðini", "lħaqqQ")),          # يَوْمَئِذٍ ٱلْحَقُّ
+]
+
 
 def _joined(ref, words):
     first, last = words
@@ -44,4 +52,15 @@ def test_a_long_vowel_shortens_before_a_quiescent_letter(ref, words, expected):
 def test_a_vowel_is_put_on_the_first_word_when_it_cannot_shorten(
     ref, words, expected
 ):
+    assert _joined(ref, words) == expected
+
+
+@pytest.mark.engine_bug
+@pytest.mark.parametrize(
+    ("ref", "words", "expected"), A_TANWEEN_MEETING_A_PROSTHETIC_HAMZA
+)
+def test_a_tanween_takes_a_linking_kasra_before_a_prosthetic_hamza(
+    ref, words, expected
+):
+    # the engine leaves the tanween bare and joins on no vowel at all
     assert _joined(ref, words) == expected

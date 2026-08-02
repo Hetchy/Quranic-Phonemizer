@@ -5,6 +5,7 @@ import pytest
 from tests.support import Site, for_each_riwayah, reading
 
 MIN_ZULUMAT = Site(hafs=("6:63", (4, 5)))
+HEENIN = Site(hafs=("2:36", (19,)))
 
 INSIDE_ONE_WORD = [
     ("2:42", 7, "waʔaŋtum"),        # وَأَنتُمْ
@@ -63,3 +64,10 @@ def test_a_noon_is_hidden_when_the_hiding_letter_starts_a_word(r):
     # مِّن ظُلُمَـٰتِ
     assert r.phonemes(4) == "miŋ"
     assert r.phonemes(5) == "ðˤuluma:t"
+
+
+@for_each_riwayah(HEENIN, ibtidaa=19, wasl=19)
+def test_a_tanween_at_a_verse_end_is_hidden_across_the_seam(r):
+    # حِينٍ فَتَلَقَّىٰٓ
+    assert r.phonemes(19) == "ħi:niŋ"
+    assert r.phonemes(20) == "fatalaqqaˤ:"

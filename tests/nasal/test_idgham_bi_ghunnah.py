@@ -5,6 +5,7 @@ import pytest
 from tests.support import Site, for_each_riwayah, reading
 
 TA_SEEN_MEEM = Site(hafs=("26:1", (1,)))
+AZEEMUN = Site(hafs=("2:7", (12,)))
 
 NOON_ACROSS_A_BOUNDARY = [
     ("3:74", (3, 4), ("ma", "j̃aʃa:ʔ")),           # مَن يَشَآءُ

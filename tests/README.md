@@ -65,11 +65,11 @@ does instead — no phoneme strings, the comment lint allows only Arabic script 
 non-ASCII.
 
 ```
-python -m pytest -m "not engine_bug"   # what should be green
-python -m pytest -m engine_bug         # the known-wrong readings
+python -m pytest -m engine_bug   # just the known-wrong readings
 ```
 
-Never change a correct expectation to match the engine.
+CI runs the whole suite and these fail it. That is intended while the engine
+catches up. Never change a correct expectation to match the engine.
 
 ## Layout
 
