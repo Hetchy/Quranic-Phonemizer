@@ -120,7 +120,7 @@ whose trigger is the next word goes as soon as the plan stops. Both are
 | 1 | the silah mark goes, and any maddah on it | a stopped word whose vowel is long joined and absent stopped | performance | stopped | `pausal_sukun` |
 | 2 | the maddah over a madd the stop reverts goes | a stopped word whose final vowel carried a maddah for `madd_jaiz_munfasil` | performance | stopped | **-** |
 | 3 | a letter the rasm carries and recitation never says goes | the canonical no-sound verdict | orthographic | none | `orthographic_silence` |
-| 4 | the same letter goes when the plan joins, and stays when it stops | the verdict, on a unit whose vowel is short joined and long stopped | orthographic | joined | `orthographic_silence` |
+| 4 | the same letter goes when the plan joins, and stays when it stops | the verdict, on a unit whose vowel is short joined and long stopped | performance | joined | `orthographic_silence` |
 | 5 | the silence sign goes | a round or a rectangular zero | orthographic | none | **-** |
 | 6 | the hamza wasl seat goes | not started on, or not word-initial | performance | joined | `hamza_wasl_elision` |
 | 7 | the merged-away consonant goes, with its sukun | joined, an idgham fires | performance | joined | the idgham rule |
@@ -257,9 +257,9 @@ kind marked unchanged is not evidence that every case under it was examined.
 |---|---|
 | a shadda marking root gemination | the sound is doubled and the mark says so |
 | the maddah over a `madd_wajib_muttasil` | the trigger hamza is inside the word, so no plan removes it. Contrast row 2 |
-| an iqlab, when the plan joins | the sound is a hum, not a meem. The rasm's noon and small meem already spell a hummed noon, and writing a plain meem would assert a consonant nobody says |
+| an iqlab, when the plan joins | the sound is a hum, not a meem. The rasm writes the noon bare and this script has no mark for the hum, so writing a plain meem would assert a consonant nobody says |
 | `idgham_mutajanisayn_naqis` | the letter keeps its own sound and only its manner changes |
-| every ikhfaa and every izhar | the hum belongs to no letter and nothing writes it |
+| every ikhfaa and every izhar | the outcome is a state of the noon already written, and no mark records it |
 | `tafkheem` and `tarqeeq` | a colour on a sound; no glyph carries it |
 | the tashil and the ishmam mark | the mark is what the reciter reads, so the source spelling is the recited spelling |
 | the sakt mark | it instructs the reciter rather than advising him, so it survives where row 30's sign would not have |
@@ -306,7 +306,7 @@ place in this catalogue, and a reader comparing the two should know which.
 |---|---|
 | an alif maqsura is respelled as a yaa where the letter sounds as a yaa | **no analogue.** Uthmani writes `ى` throughout, and the role is a fact of the unit. Row 29 is the general case |
 | a dagger alif is inserted into the divine name | the same fact. The Uthmani rasm writes no dagger on this word either, so row 16 is an insertion in both scripts |
-| an iqlab is written as a plain vowel plus a small meem | the same fact with a different encoding: Uthmani writes the tanween and the small meem |
+| an iqlab is written as a plain vowel plus a small meem | a script that marks the hum. Uthmani writes neither mark, so the noon stands bare and the rule is the only record |
 | a tatweel seats a dagger alif | cosmetic; Uthmani seats its daggers on the letter |
 | precomposed hamza seats are decomposed | encoding only |
 | a stop sign attaches with no preceding space | cosmetic |

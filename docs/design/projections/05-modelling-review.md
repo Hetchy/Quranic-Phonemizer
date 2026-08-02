@@ -37,7 +37,7 @@ higher on this list wins.
 | | Source | Trust |
 |---|---|---|
 | 1 | `corpus_sources/riwayat/hafs/scripts/uthmani/quran.json` | the script text. Ground truth for what is written, full stop |
-| 2 | today's phoneme output, from the code at this head | **correct**. If a change would alter a token, the change is wrong |
+| 2 | today's phoneme output, from the code at this head | **correct until shown otherwise**. A change that alters a token owes evidence that the token was wrong |
 | 3 | the legacy rules and mappings on `main`, and the frozen baselines under `research/legacy-baselines/` | **almost always right**. A disagreement is usually the model's fault, occasionally legacy's |
 | 4 | `../../domain-facts.md` | authoritative guidance, not a constitution |
 

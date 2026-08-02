@@ -3,11 +3,16 @@
 Status: **proposed**. Scope: Uthmani, Hafs.
 
 Twenty-one passages, each written out as the document
-[01-contract](01-contract.md) says it must look. Every phoneme string is the
-package's own output for that request and boundary plan, in the notation it
-ships; the source words are taken from the corpus, and everything else - the
-recited spelling, the unit rows, the pairings and the rule names - is authored,
-because none of it exists yet. A reader checks three things with them: that the
+[01-contract](01-contract.md) says it must look. The source words are the
+corpus text scalar for scalar. Every phoneme string is the package's own output
+for that request and boundary plan, in the notation it ships, with three
+exceptions where the string is what section 9 will make it: E12's `m̃` for the
+meem of مَّعَنَا, E16's short `aˤ` for the joined قَوَارِيرَا۠, and E17's `n`
+for the noon of طسٓ. The package emits `mm`, `aˤ:` and `ŋ` there today, each
+example says so where it happens, and each is a token-changing item of section
+9. Everything else - the recited spelling, the unit rows, the pairings and the
+rule names - is authored, because none of it exists yet. A reader checks three
+things with them: that the
 laws of [02-gate](02-gate.md) hold on a real passage, that every row of
 [06-two-texts](06-two-texts.md) and every rule of [07-rules](07-rules.md) has a
 place where a consumer can see it, and that the six relationships of
@@ -153,7 +158,7 @@ word 8.
 | 4 | وَكُنتُمْ | وَكُنتُمْ | `w a k u ŋ t u m` |
 | 5 | أَمْوَٰتًا | أَمْوَاتَن | `ʔ a m w a: t a ŋ` |
 | 6 | فَأَحْيَـٰكُمْ ۖ | فَأَحْيَاكُمْ ۖ | `f a ʔ a ħ j a: k u m` |
-| 7 | ثُمَّ | ثُمَّ | `θ u m̃ a` |
+| 7 | ثُمَّ | ثُمَّ | `θ u m̃ a` |
 | 8 | يُمِيتُكُمْ | يُمِيتُكُمْ | `j u m i: t u k u m` |
 
 Plan B: `pm.phonemize("2:28:4-2:28:5")`, joined, stopping after word 5.
@@ -381,8 +386,8 @@ begins, joined, stopping after word 3.
 | word | source | recited | phonemes |
 |---|---|---|---|
 | 1 | ٱلْحَمْدُ | أَلْحَمْدُ | `ʔ a l ħ a m d u` |
-| 2 | لِلَّهِ | لِلَّاهِ | `l i ll a: h i` |
-| 3 | رَبِّ | رَبّْ | `rˤ aˤ bb Q` |
+| 2 | لِلَّهِ | لِلَّاهِ | `l i ll a: h i` |
+| 3 | رَبِّ | رَبّْ | `rˤ aˤ bb Q` |
 
 Word 1 is rows 24 and 13 on the wasl seat; word 2 is row 16, the one insertion
 whose sound the source text does write; word 3 is row 19.
@@ -464,7 +469,7 @@ vowel is shown by nothing, because the rasm writes no haraka over the seat.
 | word | source | recited | phonemes |
 |---|---|---|---|
 | 3 | هُدًى | هُدَ | `h u d a` |
-| 4 | مِّن | مِّنْ | `m̃ i n` |
+| 4 | مِّن | مِّنْ | `m̃ i n` |
 
 Word 3 is 4.1a's idgham line, the haraka alone, and its seat goes by row 4.
 Word 4 takes row 12: the rasm left the noon bare because an assimilation was
@@ -520,12 +525,12 @@ is silent, and `shares` is the only thing joining them.
 
 | word | source | recited | phonemes |
 |---|---|---|---|
-| 1 | ٱلَّذِىٓ | أَلَّذِىٓ | `ʔ a ll a ð i:` |
+| 1 | ٱلَّذِىٓ | أَلَّذِىٓ | `ʔ a ll a ð i:` |
 | 2 | أَطْعَمَهُم | أَطْعَمَهُ | `ʔ a tˤ Q ʕ a m a h u` |
-| 3 | مِّن | مِّن | `m̃ i ŋ` |
+| 3 | مِّن | مِّن | `m̃ i ŋ` |
 | 4 | جُوعٍ | جُوعِ | `ʒ u: ʕ i` |
 | 5 | وَءَامَنَهُم | وَّءَامَنَهُ | `w̃ a ʔ a: m a n a h u` |
-| 6 | مِّنْ | مِّنْ | `m̃ i n` |
+| 6 | مِّنْ | مِّنْ | `m̃ i n` |
 | 7 | خَوْفٍ | خَوْفْ | `x aˤ w f` |
 
 Word 1 is rows 24 and 13 on the wasl seat. The quiescent meems of words 2 and 5
@@ -648,17 +653,17 @@ Plan A: `pm.phonemize("77:20")`, joined throughout, stopping after word 5.
 | word | source | recited | phonemes |
 |---|---|---|---|
 | 1 | أَلَمْ | أَلَمْ | `ʔ a l a m` |
-| 2 | نَخْلُقكُّم | نَخْلُكُّ | `n a x l u kk u` |
-| 3 | مِّن | مِّ | `m̃ i` |
-| 4 | مَّآءٍ | مَّآءِ | `m̃ a: ʔ i` |
-| 5 | مَّهِينٍ | مَّهِينْ | `m̃ a h i: n` |
+| 2 | نَخْلُقكُّم | نَخْلُكُّ | `n a x l u kk u` |
+| 3 | مِّن | مِّ | `m̃ i` |
+| 4 | مَّآءٍ | مَّآءِ | `m̃ a: ʔ i` |
+| 5 | مَّهِينٍ | مَّهِينْ | `m̃ a h i: n` |
 
 Plan B: `pm.phonemize("77:20:3-77:20:5")`, started on مِّن, joined, stopping
 after word 5.
 
 | word | source | recited | phonemes |
 |---|---|---|---|
-| 3 | مِّن | مِ | `m i` |
+| 3 | مِّن | مِ | `m i` |
 
 Word 2's qaf and its final meem go by row 7, and so does word 3's noon; the
 hosts already carry their shadda, so row 18 adds nothing. Word 5 is row 20.
@@ -772,7 +777,7 @@ Plan A: `pm.phonemize("2:26:7-2:26:9")`, joined, stopping after word 9.
 | word | source | recited | phonemes |
 |---|---|---|---|
 | 7 | مَثَلًا | مَثَلَ | `m a θ a l a` |
-| 8 | مَّا | مَّا | `m̃ a:` |
+| 8 | مَّا | مَّا | `m̃ a:` |
 | 9 | بَعُوضَةً | بَعُوضَهْ | `b a ʕ u: dˤ aˤ h` |
 
 Plan B: `pm.phonemize("2:26:8-2:26:9")`, started on مَّا, joined, stopping after
@@ -780,7 +785,7 @@ word 9.
 
 | word | source | recited | phonemes |
 |---|---|---|---|
-| 8 | مَّا | مَا | `m a:` |
+| 8 | مَّا | مَا | `m a:` |
 
 Word 7 is 4.1a's idgham line and its seat goes by row 4. Word 9 is rows 20 and
 22: the tanween lengthens nothing and becomes a sukun, and the taa marbuta is
@@ -879,7 +884,7 @@ names, and the source array stands unchanged beside it.
 |---|---|---|---|
 | 1 | وَلَمْ | وَلَمْ | `w a l a m` |
 | 2 | يَكُن | يَكُ | `j a k u` |
-| 3 | لَّهُۥ | لَّهُو | `ll a h u:` |
+| 3 | لَّهُۥ | لَّهُو | `ll a h u:` |
 | 4 | كُفُوًا | كُفُوَنْ | `k u f u w a n` |
 | 5 | أَحَدٌ | أَحَدْ | `ʔ a ħ a d Q` |
 
@@ -976,7 +981,7 @@ dal; the table carries the degree the converse law requires.
 |---|---|---|---|
 | 8 | وَلَمْ | وَلَمْ | `w a l a m` |
 | 9 | يَجْعَل | يَجْعَ | `j a ʒ Q ʕ a` |
-| 10 | لَّهُۥ | لَّهُو | `ll a h u:` |
+| 10 | لَّهُۥ | لَّهُو | `ll a h u:` |
 | 11 | عِوَجَاۜ | عِوَجَاۜ | `ʕ i w a ʒ a:` |
 
 The merger of word 9 is row 7 alone: the mushaf already doubles the host, so
@@ -1179,9 +1184,9 @@ naqis rule's trigger in the tuple position a merger uses for its host.
 | 10 | وَكَانَ | وَكَانَ | `w a k a: n a` |
 | 11 | فِى | فِى | `f i:` |
 | 12 | مَعْزِلٍ | مَعْزِلِ | `m a ʕ z i l i` |
-| 13 | يَـٰبُنَىَّ | يَّابُنَىَّ | `j̃ a: b u n a jj a` |
+| 13 | يَـٰبُنَىَّ | يَّابُنَىَّ | `j̃ a: b u n a jj a` |
 | 14 | ٱرْكَب | رْكَ | `rˤ k a` |
-| 15 | مَّعَنَا | مَّعَنَا | `m̃ a ʕ a n a:` |
+| 15 | مَّعَنَا | مَّعَنَا | `m̃ a ʕ a n a:` |
 
 Word 8 is 4.1a's `iltiqa_kasra` line, the haraka then a noon with a kasra, and
 row 14 writes the kasra itself. Word 13 takes rows 11, 18 and 26 together, and
@@ -1343,7 +1348,7 @@ word 8.
 |---|---|---|---|
 | 2 | يَنقُضُونَ | يَنقُضُونَ | `j a ŋ q u dˤ u: n a` |
 | 3 | عَهْدَ | عَهْدَ | `ʕ a h d a` |
-| 4 | ٱللَّهِ | لَّاهِ | `lˤlˤ aˤ: h i` |
+| 4 | ٱللَّهِ | لَّاهِ | `lˤlˤ aˤ: h i` |
 | 5 | مِن | مِن | `m i ŋ` |
 | 6 | بَعْدِ | بَعْدِ | `b a ʕ d i` |
 | 7 | مِيثَـٰقِهِۦ | مِيثَاقِهِي | `m i: θ a: q i h i:` |
@@ -1600,7 +1605,7 @@ word 14 takes the shadda row 18 adds. Word 16 loses its carrier to row 10, word
 | ◌ُو | `u:` | | | `madd_tabii` |
 | نَ | `n` `a` | | | |
 | ف | `f` | | | |
-| ◌ِى | `i` | | | `iltiqa_shortening` |
+| فِى | `f` `i` | | | `iltiqa_shortening` |
 | ٱ | | | ٱ | `hamza_wasl_elision` |
 | لْ | `l` | | | `lam_qamariyyah` |
 | أَ | `ʔ` `a` | | | |
@@ -1608,10 +1613,16 @@ word 14 takes the shadda row 18 adds. Word 16 loses its carrier to row 10, word
 | ضِ | `dˤ` | | ◌ِ | `tafkheem`, `pausal_sukun` |
 
 The stop sign ۚ carries the `Structural` edge, takes no pairing, and is kept in
-the recited text. The ى claims a length the canon states, so it opens a cell
-like any carrier and takes the kasra with it; what that cell owns is a short
-vowel. It is in no `silent` list either: the shortening took a length and
-silenced no part, so no rule names a silence there.
+the recited text. The ى claims a length the canon states and the reading does
+not realize it, so no cell opens on it and the whole word is one cell: clause 1
+reads the vowel that sounds, which is short here. It is in no `silent` list
+either, because the shortening took a length and silenced no part, so no rule
+names a silence there.
+
+That is the same clause E11 and this example's own plan B apply to a stopped
+silah, where the vowel is gone and the marks stay in the haa's cell. A carrier
+opens a cell when the vowel it carries is long in this reading and not
+otherwise.
 
 **Part 2**, plan B.
 
@@ -1656,8 +1667,8 @@ request begins, joined, stopping after word 11.
 
 | word | source | recited | phonemes |
 |---|---|---|---|
-| 10 | ٱلسَّمَآءِ | أَسَّمَآءِ | `ʔ a ss a m a: ʔ i` |
-| 11 | مَآءً | مَآءَا | `m a: ʔ a:` |
+| 10 | ٱلسَّمَآءِ | أَسَّمَآءِ | `ʔ a ss a m a: ʔ i` |
+| 11 | مَآءً | مَآءَا | `m a: ʔ a:` |
 
 Word 10 is rows 24 and 13 on the wasl seat and row 8 on the article lam. Word
 11's fathatan becomes a fatha and an alif is written where the rasm has no seat
@@ -1865,7 +1876,7 @@ Plan A: `pm.phonemize("27:1")`, joined throughout, stopping after word 6.
 | 3 | ءَايَـٰتُ | ءَايَاتُ | `ʔ a: j a: t u` |
 | 4 | ٱلْقُرْءَانِ | لْقُرْءَانِ | `l q u rˤ ʔ a: n i` |
 | 5 | وَكِتَابٍ | وَكِتَابِ | `w a k i t a: b i` |
-| 6 | مُّبِينٍ | مُّبِينْ | `m̃ u b i: n` |
+| 6 | مُّبِينٍ | مُّبِينْ | `m̃ u b i: n` |
 
 Plan B: `pm.phonemize("27:1", stop_refs=("27:1:3",))`, the same with a stop
 after word 3, so word 4 is started on.
@@ -2006,8 +2017,8 @@ word 17.
 |---|---|---|---|
 | 12 | بَعْضُكُم | بَعْضُكُم | `b a ʕ dˤ u k u ŋ` |
 | 13 | بَعْضًا | بَعْضَن | `b a ʕ dˤ aˤ ŋ` |
-| 14 | فَلْيُؤَدِّ | فَلْيُؤَدِّ | `f a l j u ʔ a dd i` |
-| 15 | ٱلَّذِى | لَّذِ | `ll a ð i` |
+| 14 | فَلْيُؤَدِّ | فَلْيُؤَدِّ | `f a l j u ʔ a dd i` |
+| 15 | ٱلَّذِى | لَّذِ | `ll a ð i` |
 | 16 | ٱؤْتُمِنَ | ؤْتُمِنَ | `ʔ t u m i n a` |
 | 17 | أَمَـٰنَتَهُۥ | أَمَانَتَهْ | `ʔ a m a: n a t a h` |
 
@@ -2016,7 +2027,7 @@ on.
 
 | word | source | recited | phonemes |
 |---|---|---|---|
-| 15 | ٱلَّذِى | لَّذِى | `ll a ð i:` |
+| 15 | ٱلَّذِى | لَّذِى | `ll a ð i:` |
 | 16 | ٱؤْتُمِنَ | أُوتُمِنَ | `ʔ u: t u m i n a` |
 
 Word 13 is 4.1a's ikhfaa line, the haraka then a bare noon, and its seat goes
@@ -2160,11 +2171,11 @@ in this request carries the `silah` label.
 | word | source | recited | phonemes |
 |---|---|---|---|
 | 6 | مَجْر۪ىٰهَا | مَجْرِ۪ىهَا | `m a ʒ Q r i: h a:` |
-| 7 | وَمُرْسَىٰهَآ ۚ | وَمُرْسَاهَآ ۚ | `w a m u rˤ s a: h a:` |
-| 8 | إِنَّ | إِنَّ | `ʔ i ñ a` |
-| 9 | رَبِّى | رَبِّى | `rˤ aˤ bb i:` |
+| 7 | وَمُرْسَىٰهَآ ۚ | وَمُرْسَاهَآ ۚ | `w a m u rˤ s a: h a:` |
+| 8 | إِنَّ | إِنَّ | `ʔ i ñ a` |
+| 9 | رَبِّى | رَبِّى | `rˤ aˤ bb i:` |
 | 10 | لَغَفُورٌ | لَغَفُورُ | `l a ɣ aˤ f u: rˤ u` |
-| 11 | رَّحِيمٌ | رَّحِيمْ | `rˤrˤ aˤ ħ i: m` |
+| 11 | رَّحِيمٌ | رَّحِيمْ | `rˤrˤ aˤ ħ i: m` |
 
 Word 6 is row 26 on a dagger whose vowel is not a long a: the expansion writes
 the haraka the unit carries and the carrier that quality takes, and the imala
@@ -2276,7 +2287,7 @@ single `emphatic` field cannot show.
 | word | source | recited | phonemes |
 |---|---|---|---|
 | 5 | لَا | لَا | `l a:` |
-| 6 | تَأْمَ۫نَّا | تَأْمَ۫نَّا | `t a ʔ m a ñ a:` |
+| 6 | تَأْمَ۫نَّا | تَأْمَ۫نَّا | `t a ʔ m a ñ a:` |
 | 7 | عَلَىٰ | عَلَا | `ʕ a l a:` |
 | 8 | يُوسُفَ | يُوسُفْ | `j u: s u f` |
 
@@ -2353,8 +2364,8 @@ else in the four words is ordinary, which is what makes the cost visible.
 | word | source | recited | phonemes |
 |---|---|---|---|
 | 8 | ءَايَـٰتُهُۥٓ ۖ | ءَايَاتُهُوٓ ۖ | `ʔ a: j a: t u h u:` |
-| 9 | ءَا۬عْجَمِىٌّ | ءَا۬عْجَمِىُّ | `ʔ a ʔ a ʕ ʒ a m i jj u` |
-| 10 | وَعَرَبِىٌّ ۗ | وَّعَرَبِىّْ ۗ | `w̃ a ʕ a rˤ aˤ b i jj` |
+| 9 | ءَا۬عْجَمِىٌّ | ءَا۬عْجَمِىُّ | `ʔ a ʔ a ʕ ʒ a m i jj u` |
+| 10 | وَعَرَبِىٌّ ۗ | وَّعَرَبِىّْ ۗ | `w̃ a ʕ a rˤ aˤ b i jj` |
 
 Word 8 is row 26 on the dagger and row 27 on the silah mark, which the joining
 plan keeps, with the maddah standing on the carrier it expands into. The tashil

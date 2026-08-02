@@ -80,8 +80,9 @@ vowel the pause takes.
 
 There is no `starts`. Where recitation begins is where it last stopped, so
 `Word.is_started_on` is derived rather than asked for, and a passage started on
-mid-ref is a stop before it. Sakt is not asked for either: the mark is in the
-rasm and `Word.sakt_after` reads it.
+mid-ref is a stop before it. Sakt is not asked for either: it is a fact of the
+word, and where it falls is data the riwayah carries rather than a request
+field.
 
 The two things that raise rather than guess: a `ref` outside the corpus, and a
 `ref` that clips a word the riwayah's data addresses as a whole. A stop asked
@@ -229,9 +230,10 @@ rather than composing one.
 `seen_sad` is published and has no sites in the shipped Hafs data, so nothing
 selects it yet. The two nasal placement points are not here: see section 4.4.
 
-**Every point in the shipped Hafs data is a set of sites, and defaults differ
-between the sites of one point.** So a whole-point choice is a broadcast that
-moves some sites off their default, not a name for a reading. `r.variant`
+**Every point in the shipped Hafs data is a set of sites, and one of them has
+sites whose defaults differ from each other.** So a whole-point choice is a
+broadcast that can move a site off its default rather than a name for a
+reading, which `raa_tafkheem` and its nine sites already show. `r.variant`
 publishes the resolved selection, every site with the value actually read, so a
 caller who passed nothing can still see what was taken where.
 
@@ -385,7 +387,7 @@ needs no second list of source glyphs: it reads them through here.
 | `silence_sign` | the round and rectangular zeros |
 | `tajweed_mark` | the imala, ishmam and tashil marks |
 | `stop_sign` | the mushaf's advice |
-| `structural` | space, verse marker, tatweel |
+| `structural` | space, tatweel, the hizb and sajdah marks, the right-to-left mark |
 
 What each becomes in `rendered` is not a property of its kind, and there is no
 spelling policy to choose: the recited text is what recitation writes, once.
@@ -604,7 +606,10 @@ A **cell** is a letter with the mark that vowels it, and a long vowel is a cell
 of its own. Four clauses, applied to the glyphs of the selected text in order.
 They group glyphs and never split one.
 
-1. A glyph supplying `vowel_length` opens a cell.
+1. A glyph presenting a vowel the reading makes **long** opens a cell. Length
+   here is what the reading realizes, never what the canon states: the spelling
+   edges are boundary-free and a cell is a thing a reader sees at one boundary
+   plan.
 2. A glyph supplying that same vowel's quality joins it.
 3. A glyph presenting that vowel and supplying no fact joins it: the seat
    under a dagger, and the maddah.
@@ -650,10 +655,12 @@ on a node. Noon and tanween ikhfaa are one rule, and `origin` says which.
 `idgham_bila_ghunnah` · `izhar` · `ghunnah_mushaddadah` · `izhar_shafawi` ·
 `ikhfaa_shafawi` · `idgham_shafawi`
 
-`izhar` is one rule. Saying the noon plainly before a throat letter and saying
-it plainly before the waw or yaa of a word it shares is one outcome with two
-triggers, and a name may not carry a trigger. The meem's three keep their own
-names because the meem's outcomes are its own.
+`izhar` is one rule. Saying the noon plainly before a throat letter, before
+the waw or yaa of a word it shares, and at the end of a spelled name is one
+outcome with three triggers, and a name may not carry a trigger. The meem's
+three keep their own names because the meem's outcomes are its own, and
+`izhar_shafawi` takes the same third trigger where a spelled name ends in a
+meem.
 
 **Adjacent consonants.** `idgham_mutamathilayn` · `idgham_mutaqaribayn` ·
 `idgham_mutajanisayn_kamil` · `idgham_mutajanisayn_naqis` · `lam_shamsiyyah` ·
@@ -846,8 +853,11 @@ changes.
     opening takes the nasal rules of the word after it, so `طسٓ` hums into
     `تِلْكَ` and `نٓ` merges into `وَٱلْقَلَمِ` and loses its own consonant.
     A unit whose `origin` is `muqattaat` neither takes a rule from another
-    word nor gives one, and the last unit of the last name takes `izhar`.
-    The rules between the names of one opening are unaffected.
+    word nor gives one, and the last unit of the last name takes the
+    plain-articulation rule of its own letter: `izhar` after a noon and
+    `izhar_shafawi` after a meem, which nine of the openings need. The rules
+    between the names of one opening are unaffected, and the three disputed
+    sites are khilaf points rather than exceptions.
 
 **Machinery**
 
@@ -875,3 +885,8 @@ changes.
 39. **The optional phonemes are gated at the notation.** Section 3.2's three
     names select tokens and reach no node and no edge, so the gate belongs
     beside the alphabet and nowhere in the producer.
+40. **The teaching labels are derived.** Section 4.5 publishes `labels` and
+    [07-rules](07-rules.md) section 4 defines four of them; nothing computes
+    any. Each is a predicate over an instance and the unit it names, so they
+    are derived where the instance is assembled and mint no instance of their
+    own.

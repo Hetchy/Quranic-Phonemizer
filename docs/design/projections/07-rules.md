@@ -45,7 +45,7 @@ modifiers, and producing nothing is a rule that owns neither.
 | `idgham_bila_ghunnah` | a sakin noon, or a tanween's noon | the following lam or raa | always | the noon merges into the host | rows 7 and 18 |
 | `izhar` | a sakin noon, or a tanween's noon | a throat letter, the waw or yaa of its own word, or the end of a spelled name | may | names the noon's own sound | unchanged |
 | `ghunnah_mushaddadah` | a geminate noon or meem | - | never | names its own held sound | unchanged |
-| `izhar_shafawi` | a sakin meem | the following letter | may | names the meem's own sound | unchanged |
+| `izhar_shafawi` | a sakin meem | the following letter, or the end of a spelled name | may | names the meem's own sound | unchanged |
 | `ikhfaa_shafawi` | a sakin meem | the following baa | always | the meem is held | unchanged |
 | `idgham_shafawi` | a sakin meem | the following meem | always | the meem merges into the host, which is held | rows 7 and 18 |
 
@@ -56,18 +56,30 @@ assert a consonant nobody says. Where the noon is a tanween's, the recited
 text spells the two units apart and the noon is bare, which is
 [06-two-texts](06-two-texts.md) section 4.1a for every noon rule at once.
 
-The meem's three rules never fire inside a word: a quiescent meem meets a baa
-or a meem only across a boundary, and a meem doubled inside a word is written
-with a shadda and is `ghunnah_mushaddadah`.
+`ikhfaa_shafawi` and `idgham_shafawi` never fire inside a word: a quiescent
+meem meets a baa or a meem only across a boundary, and a meem doubled inside a
+word is written with a shadda and is `ghunnah_mushaddadah`. `izhar_shafawi` has
+no such limit and fires wherever a sakin meem meets any other letter, which is
+inside a word as often as across one.
 
 **A spelled name is closed.** A unit whose `origin` is `muqattaat` takes no
 rule from outside the word it is in and gives none to the word after it. Its
 letters are names being recited, not a word being read, so they are said the
 same whether the plan joins or stops. The rules of the opening still fire
 between its own names -- the seen of طسٓمٓ merges its noon into the following
-meem, and the ain of عٓسٓقٓ hums its noon before the seen -- and the last unit
-of the last name is said plainly, which is what puts a third trigger in
-`izhar`'s row. This is the one law in this document a reading has no say in.
+meem, and the ain of عٓسٓقٓ hums its noon before the seen.
+
+The last unit of the last name is said plainly, and the rule that names it is
+the plain-articulation rule of its own letter: `izhar` where the name ends in a
+noon, `izhar_shafawi` where it ends in a meem. That is the third trigger in
+each of their rows, and it is what keeps the converse laws whole -- a sakin
+meem joined to a following consonant still owns a rule at `الٓمٓ` and `طسٓمٓ`
+and `حمٓ`, which is nine of the twenty-nine openings.
+
+Three sites are disputed and none is wired: the noon of `نٓ` and of `يسٓ`
+before a following waw, and the meem of `الٓمٓ` before `ٱللَّهُ`. Each is a
+khilaf point rather than an exception to this law, so the closed reading is
+what the default document states and a selection is what changes it.
 
 ### 2.2 Adjacent consonants
 
@@ -206,7 +218,7 @@ happen.
 | Label | Holds when |
 |---|---|
 | `madd_iwad` | a madd on the unit before a noon that `iwad` silenced |
-| `madd_badal` | a madd on a unit whose letter is hamza |
+| `madd_badal` | a madd on a unit whose letter is hamza, and whose length the canon states |
 | `silah` | a madd on a unit whose vowel is long joined and absent stopped |
 | `silah_kubra` | the same, where the rule is `madd_jaiz_munfasil` |
 

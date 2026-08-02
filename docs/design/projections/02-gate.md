@@ -10,13 +10,13 @@ The **proof** is graph completeness. Every typed relation is complete and obeys
 its domain laws, including the facts for which legacy has no oracle. That alone
 decides whether the contract is implemented, and section 4 is the whole of it.
 
-The **confirmation** is legacy parity: every legacy view reproduced by a pure
-adapter over `PhonemizeResult`. It is a coverage instrument and never an
-acceptance criterion, and it promises no consumer anything. The old views were
-traversals of a join the model could not hold, so where one disagrees with the
-contract the contract is the more likely to be right - which is what this
-document's own corrections record. A residue is a question to answer, never a
-merge failure.
+The **confirmation** is legacy parity: how much of each legacy view a pure
+adapter over `PhonemizeResult` reproduces. It is a coverage measurement and
+never an acceptance criterion. It claims no view is reproduced in full and
+promises no consumer anything. The old views were traversals of a join the
+model could not hold, so where one disagrees with the contract the contract is
+the more likely to be right, which is what this document's own corrections
+record. A residue is a question to answer, never a merge failure.
 
 The frozen legacy data is an information-coverage reference, not a correctness
 oracle. Every mismatch is still dispositioned, so that the coverage claim stays
@@ -154,9 +154,9 @@ keys persisted records on cell position.
 
 The priority order and the role fold are compatibility policy in this adapter,
 not facts in the core schema. Named fixtures cover every former frontend
-synthesis: helping vowels in all qualities, the iltiqa repair, the divine
-name's dagger alif, madd iwad at pause, dropped silah, taa marbuta, the iqlab
-noon and small meem, and each muqattaat opening.
+synthesis: the helping vowel, the iltiqa repair, the divine name's dagger
+alif, madd iwad at pause, dropped silah, taa marbuta, the bare iqlab noon, and
+each muqattaat opening.
 
 ## 4. Completeness laws
 
@@ -206,8 +206,9 @@ These run over the whole corpus in all three boundary modes.
 
 - Every `source` and `host` names a valid unit, `source` is the unit the rule
   is about for every rule alike, and only a merger carries a host.
-- Every applied recolour and length change has exactly one retained modifier
-  edge carrying its value.
+- Every applied recolour and length change retains exactly one modifier edge.
+  `SetsLength` carries the length; `Recolours` carries none, because emphasis
+  is the only feature a rule sets and the state is on the sound.
 - Every classification-only rule that names a sound has a `Classifies` edge,
   and the sound it names exists.
 - Every rule instance owns at least one attribution or one modifier edge. The
@@ -241,7 +242,7 @@ one glyph each.
 For every combination of `text` and `grouping`:
 
 - **Under `grouping="cell"` no pairing splits a glyph**, every glyph
-  supplying `vowel_length` opens one, and no pairing holds two glyphs
+  presenting a realized long vowel opens one, and no pairing holds two glyphs
   supplying a consonant.
 - **The pairings partition the selected text's glyph array.** Every glyph
   appears in exactly one pairing, except those carrying the `Structural`
