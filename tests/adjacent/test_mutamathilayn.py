@@ -5,6 +5,8 @@ import pytest
 from tests.support import Site, for_each_riwayah, reading
 
 YUDRIKKUM = Site(hafs=("4:78", (3,)))
+AQUL_LAKUM = Site(hafs=("2:33", (10, 11)))
+MALIYAH = Site(hafs=("69:28", (4,)))
 
 THE_SAME_LETTER_TWICE = [
     ("2:16", (7, 8),
@@ -33,3 +35,17 @@ def test_a_letter_merges_into_the_same_letter_across_a_boundary(
 def test_the_same_merger_inside_one_word(r):
     # يُدْرِككُّمُ
     assert r.phonemes(3) == "judQrikkum"
+
+
+@for_each_riwayah(AQUL_LAKUM, isolated=10)
+def test_a_stop_after_the_first_lam_undoes_the_merger(r):
+    # أَقُل
+    assert r.phonemes(10) == "ʔaqul"
+
+
+@for_each_riwayah(MALIYAH, ibtidaa=4, wasl=4)
+def test_a_haa_at_a_verse_end_merges_into_the_next_verse(r):
+    # مَالِيَهْ هَلَكَ
+    # a second reading holds the two haa apart; supporting both is later work
+    assert r.phonemes(4) == "ma:lija"
+    assert r.phonemes(5) == "hhalaka"

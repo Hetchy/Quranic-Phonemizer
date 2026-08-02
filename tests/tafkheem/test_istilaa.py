@@ -22,7 +22,6 @@ LIGHT = [
     ("2:97", 3, "ka:n"),           # كَانَ
 ]
 
-ASSIRAT = Site(hafs=("1:6", (2,)))
 ADDALLIN = Site(hafs=("1:7", (9,)))
 DAKHALA = Site(hafs=("3:37", (11,)))
 QUL = Site(hafs=("2:80", (8,)))
@@ -41,12 +40,6 @@ def test_every_istilaa_letter_is_heavy(ref, word, expected):
 def test_the_light_counterpart_letters_stay_light(ref, word, expected):
     site = Site(hafs=(ref, (word,)))
     assert reading(site, isolated=word).phonemes(word) == expected
-
-
-@for_each_riwayah(ASSIRAT, isolated=2)
-def test_a_sad_is_heavy_and_carries_its_alif_with_it(r):
-    # ٱلصِّرَٰطَ
-    assert r.phonemes(2) == "ʔasˤsˤirˤaˤ:tˤQ"
 
 
 @for_each_riwayah(ADDALLIN, isolated=9)

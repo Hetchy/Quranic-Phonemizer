@@ -8,6 +8,7 @@ MAJRAHA = Site(hafs=("11:41", (6,)))
 TAMANNA = Site(hafs=("12:11", (6,)))
 AAJAMIYY = Site(hafs=("41:44", (9,)))
 MAN_RAQIN = Site(hafs=("75:27", (2, 3)))
+BAL_RANA = Site(hafs=("83:14", (2, 3)))
 NUNJI = Site(hafs=("21:88", (7,)))
 
 
@@ -36,6 +37,15 @@ def test_a_sakt_breaks_the_reading_without_stopping_it(r):
     # the engine ignores the sakt and merges the noon into the raa
     assert r.phonemes(2) == "man"
     assert r.phonemes(3) == "rˤaˤ:qQ"
+
+
+@pytest.mark.engine_bug
+@for_each_riwayah(BAL_RANA, ibtidaa=2, waqf=3)
+def test_a_sakt_keeps_a_lam_clear_of_the_raa_after_it(r):
+    # بَلْ ۜ رَانَ
+    # the engine ignores the sakt and merges the lam into the raa
+    assert r.phonemes(2) == "bal"
+    assert r.phonemes(3) == "rˤaˤ:n"
 
 
 @for_each_riwayah(NUNJI, isolated=7)

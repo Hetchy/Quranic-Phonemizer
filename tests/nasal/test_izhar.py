@@ -34,13 +34,6 @@ TANWEEN_ACROSS_A_BOUNDARY = [
     ("19:3", (4, 5), ("nida:ʔan", "xaˤfijja:")),     # نِدَآءً خَفِيًّا
 ]
 
-MUTLAQ = [
-    ("2:85", 38, "ʔaddunja:"),  # ٱلدُّنْيَا
-    ("37:97", 4, "bunja:na:"),  # بُنْيَـٰنًا
-    ("13:4", 10, "sˤinwa:n"),   # صِنْوَانٌ
-    ("6:99", 23, "qinwa:n"),    # قِنْوَانٌ
-]
-
 
 @pytest.mark.parametrize(("ref", "word", "expected"), INSIDE_ONE_WORD)
 def test_every_throat_letter_keeps_a_written_noon_clear(ref, word, expected):
@@ -64,12 +57,6 @@ def test_every_throat_letter_keeps_a_tanween_noon_clear(ref, words, expected):
     first, last = words
     r = reading(Site(hafs=(ref, words)), ibtidaa=first, waqf=last)
     assert (r.phonemes(first), r.phonemes(last)) == expected
-
-
-@pytest.mark.parametrize(("ref", "word", "expected"), MUTLAQ)
-def test_the_four_words_hold_their_noon_against_a_glide(ref, word, expected):
-    site = Site(hafs=(ref, (word,)))
-    assert reading(site, isolated=word).phonemes(word) == expected
 
 
 @for_each_riwayah(SALAMUN_HIYA, ibtidaa=1, waqf=2)

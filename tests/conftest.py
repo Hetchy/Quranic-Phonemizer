@@ -8,6 +8,24 @@ from quranic_phonemizer.engine.boundary_plan import all_join
 from quranic_phonemizer.model.address import Location, Riwayah, Script, VerseRef
 
 
+def pytest_addoption(parser):
+    parser.addoption(
+        "--runslow", action="store_true",
+        help="run the corpus-wide tests marked slow",
+    )
+
+
+def pytest_collection_modifyitems(config, items):
+    """A corpus-wide test costs minutes, so it is opt-in rather than
+    deselected by an `-m` the caller may already be using."""
+    if config.getoption("--runslow"):
+        return
+    skip = pytest.mark.skip(reason="corpus-wide; pass --runslow")
+    for item in items:
+        if "slow" in item.keywords:
+            item.add_marker(skip)
+
+
 @pytest.fixture(scope="session")
 def hafs():
     """The whole riwayah, assembled once. Anything a test needs to build or

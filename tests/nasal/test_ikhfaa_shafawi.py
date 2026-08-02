@@ -10,3 +10,9 @@ def test_a_quiescent_meem_before_a_baa_is_hidden_at_the_lips(r):
     # هُم بِمُؤْمِنِينَ
     assert r.phonemes(10) == "huŋ"
     assert r.phonemes(11) == "bimuʔmini:n"
+
+
+@for_each_riwayah(HUM_BIMUMININ, isolated=10)
+def test_a_stop_after_the_meem_undoes_the_hiding_at_the_lips(r):
+    # هُم
+    assert r.phonemes(10) == "hum"

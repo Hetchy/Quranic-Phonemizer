@@ -3,12 +3,11 @@ from __future__ import annotations
 from tests.support import Site, for_each_riwayah
 
 BIMA = Site(hafs=("2:10", (10,)))
-ULAIKA = Site(hafs=("2:5", (1,)))
+SAWAA = Site(hafs=("2:6", (4,)))
 BIMA_UNZILA = Site(hafs=("2:4", (3, 4)))
 ALIF_LAM_MEEM = Site(hafs=("2:1", (1,)))
 ADHDHAKARAYN = Site(hafs=("6:143", (10,)))
 YUNFIQUN = Site(hafs=("2:3", (8,)))
-ADDALLIN = Site(hafs=("1:7", (9,)))
 YAWMI = Site(hafs=("1:4", (2,)))
 
 
@@ -18,10 +17,10 @@ def test_an_ordinary_long_vowel_needs_no_rule_to_be_long(r):
     assert r.phonemes(10) == "bima:"
 
 
-@for_each_riwayah(ULAIKA, isolated=1)
+@for_each_riwayah(SAWAA, isolated=4)
 def test_a_long_vowel_before_a_hamza_in_the_same_word(r):
-    # أُو۟لَـٰٓئِكَ
-    assert r.phonemes(1) == "ʔula:ʔik"
+    # سَوَآءٌ
+    assert r.phonemes(4) == "sawa:ʔ"
 
 
 @for_each_riwayah(BIMA_UNZILA, ibtidaa=3, waqf=4)
@@ -48,12 +47,6 @@ def test_a_long_vowel_before_a_letter_the_stop_silences(r):
     # يُنفِقُونَ
     assert r.phonemes(8) == "juŋfiqu:n"
     assert r.silent(8) == {"َ"}
-
-
-@for_each_riwayah(ADDALLIN, isolated=9)
-def test_the_length_the_stop_creates_sits_on_an_already_long_vowel(r):
-    # ٱلضَّآلِّينَ
-    assert r.phonemes(9) == "ʔadˤdˤaˤ:lli:n"
 
 
 @for_each_riwayah(YAWMI, isolated=2)

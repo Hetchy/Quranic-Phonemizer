@@ -13,7 +13,7 @@ def _alone(ref: str, word: int) -> str:
 SUGHRA = [
     ("2:3", 7, "rˤaˤzaqQna:hum"),      # رَزَقْنَـٰهُمْ
     ("106:4", 2, "ʔatˤQʕamahum"),      # أَطْعَمَهُم
-    ("2:4", 9, "qaˤbQlik"),            # قَبْلِكَ
+    ("2:17", 17, "jubQsˤirˤu:n"),      # يُبْصِرُونَ
     ("2:19", 9, "jaʒQʕalu:n"),         # يَجْعَلُونَ
     ("46:4", 4, "tadQʕu:n"),           # تَدْعُونَ
 ]
@@ -23,7 +23,7 @@ KUBRA = [
     ("1:6", 2, "ʔasˤsˤirˤaˤ:tˤQ"),     # ٱلصِّرَٰطَ
     ("1:7", 6, "ʔalmaɣdˤu:bQ"),        # ٱلْمَغْضُوبِ
     ("2:22", 12, "faʔaxrˤaˤʒQ"),       # فَأَخْرَجَ
-    ("1:2", 1, "ʔalħamdQ"),            # ٱلْحَمْدُ
+    ("2:20", 1, "jaka:dQ"),            # يَكَادُ
 ]
 
 #: A qalqala letter the stop silences under its own tanween. The engine files
