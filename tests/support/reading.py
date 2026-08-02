@@ -8,7 +8,6 @@ from pathlib import Path
 from quranic_phonemizer.api import alphabet as load_alphabet
 from quranic_phonemizer.api import recitation
 from quranic_phonemizer.model.address import (
-    Junction,
     Location,
     Riwayah,
     Script,
@@ -18,7 +17,7 @@ from quranic_phonemizer.model.address import (
 from quranic_phonemizer.render.anchored import anchored, graphemes_by_id
 from quranic_phonemizer.render.recite import phonemes_by_word
 
-from .boundary import UnreachableWasl, plan_for
+from .boundary import UnreachableWasl, plan_for, reaches_past
 from .site import Site
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -72,17 +71,20 @@ def _after(recitation_, verse: VerseRef) -> VerseRef | None:
     return None
 
 
-def _right_context(recitation_, riwayah, script, verse):
-    """The next verse, read but not performed, so a tanween can reach it."""
+def _through(recitation_, riwayah, script, verse):
+    """This verse's words and the next one's, read as a single stretch.
+
+    A reading that carries on past a verse end is not two readings: the rule
+    that crosses the seam needs both sides in one score.
+    """
     following = _after(recitation_, verse)
     if following is None:
         raise UnreachableWasl(
             f"{verse.surah}:{verse.ayah} is the last verse of the corpus, "
             f"so it has nothing to join into"
         )
-    return recitation_.read(
-        script, following, _words(recitation_, riwayah, script, following)
-    )
+    return (_words(recitation_, riwayah, script, verse)
+            + _words(recitation_, riwayah, script, following))
 
 
 class Reading:
@@ -93,7 +95,7 @@ class Reading:
         self.script = script
         self.score = built.score
         self.performance = performance
-        self._text = {location.word: text for location, text in words}
+        self._text = dict(enumerate((t for _, t in words), start=1))
         self._chars = graphemes_by_id(built.inscription)
         self._view = anchored(performance, built.inscription, _alphabet())
         self._phonemes = phonemes_by_word(
@@ -151,16 +153,12 @@ def reading(
     recitation_ = _recitation(name)
     address = site.address(riwayah)
     words = _words(recitation_, name, script, address.verse)
-    plan = plan_for(len(words), **boundary)
-    carries_on = plan.junctions[-1] is Junction.JOIN
+    if reaches_past(len(words), **boundary):
+        words = _through(recitation_, name, script, address.verse)
     built = recitation_.build(
-        recitation_.read(script, address.verse, words),
-        selection=selection,
-        right_context=(
-            _right_context(recitation_, name, script, address.verse)
-            if carries_on else None
-        ),
+        recitation_.read(script, address.verse, words), selection=selection
     )
+    plan = plan_for(len(words), **boundary)
     return Reading(
         riwayah, script, built,
         recitation_.perform(built.score, plan, selection=selection), words,

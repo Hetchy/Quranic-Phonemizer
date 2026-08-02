@@ -41,9 +41,16 @@ def plan_for(
 
     for word in _requested(wasl):
         if word == words:
-            junctions[-1] = Junction.JOIN   # joins into the verse after it
-        elif junctions[word - 1] is not Junction.JOIN:
+            raise UnreachableWasl(
+                f"word {word} has nothing after it to join into"
+            )
+        if junctions[word - 1] is not Junction.JOIN:
             raise UnreachableWasl(
                 f"word {word} is asked to join forward and to stop"
             )
     return BoundaryPlan(tuple(junctions))
+
+
+def reaches_past(words: int, *, wasl=None, **_) -> bool:
+    """Whether the plan asks the last word of the verse to join forward."""
+    return words in _requested(wasl)
