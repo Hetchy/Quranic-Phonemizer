@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from typing import Protocol
 
-from ..model.address import VariantSelection, VerseRef
+from ..model.address import VariantSelection
 from ..model.canon import (
     ABJAD,
     Annotation,
@@ -67,7 +67,7 @@ def apply_ledger(reading: Reading, drafts, ledger: Ledger, track) -> None:
     """
     _check_witnesses(reading, drafts, ledger)
     for supply in ledger.supplies:
-        if not _addresses(supply.ref, reading.verse):
+        if not _addresses(reading, supply.ref):
             continue
         ordinal = _resolve(reading, drafts, supply.ref)
         _check_skeleton(reading, drafts, ordinal, supply.skeleton)
@@ -81,7 +81,7 @@ def _check_witnesses(reading: Reading, drafts, ledger: Ledger) -> None:
     for row in ledger.asserts:
         if row.script is not reading.script:
             continue
-        if not _addresses(row.ref, reading.verse):
+        if not _addresses(reading, row.ref):
             continue
         ordinal = _resolve(reading, drafts, row.ref)
         _check_skeleton(reading, drafts, ordinal, row.skeleton)
@@ -112,22 +112,25 @@ def _resolve(reading: Reading, drafts, ref) -> int:
     return ordinal
 
 
-def _addresses(ref, verse: VerseRef) -> bool:
-    """Is this entry about this verse at all? Separating the two meanings of
-    an unresolved address is what lets the second one be loud."""
+def _addresses(reading: Reading, ref) -> bool:
+    """Is this entry about a word this reading holds? A reading carrying past
+    a verse end is one reading, so a word-scoped entry is sought among its
+    words, not against the one verse it is anchored at."""
+    # Separating the two meanings of an unresolved address -- not ours, and
+    # ours but broken -- is what lets the second one be loud.
     if isinstance(ref, VerseSlot):
-        return ref.verse == verse
-    return isinstance(ref, WordSlot) and ref.location.verse == verse
+        return ref.verse == reading.verse
+    return isinstance(ref, WordSlot) and ref.location in reading.words
 
 
 def _ordinal(reading: Reading, drafts, ref) -> int | None:
     """A verse-scoped ordinal is robust but unreadable, so entries may also
-    be written word-relative and are resolved to a verse ordinal here."""
+    be written word-relative and are resolved to a reading ordinal here."""
     if isinstance(ref, VerseSlot):
         return ref.ordinal if ref.verse == reading.verse else None
-    if not isinstance(ref, WordSlot) or ref.location.verse != reading.verse:
+    if not isinstance(ref, WordSlot) or ref.location not in reading.words:
         return None
-    word = ref.location.word - 1
+    word = reading.words.index(ref.location)
     span = [i for i, d in enumerate(drafts) if word_of(reading, d) == word]
     return span[ref.index] if 0 <= ref.index < len(span) else None
 
