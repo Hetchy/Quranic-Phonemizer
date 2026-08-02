@@ -1,19 +1,84 @@
 from __future__ import annotations
 
-from tests.support import Site, for_each_riwayah
+import pytest
+
+from tests.support import Site, for_each_riwayah, reading
 
 ALIMUN_BIMA = Site(hafs=("2:10", (9, 10)))
+YANBAGHI = Site(hafs=("19:92", (2,)))
+MIN_BADI = Site(hafs=("2:56", (3, 4)))
+
+INSIDE_ONE_WORD = [
+    ("19:92", 2, "jaŋbaɣi:"),      # يَنبَغِى
+    ("26:6", 4, "ʔaŋba:ʔ"),        # أَنبَـٰٓؤُا۟
+    ("37:146", 1, "waʔaŋbatna:"),  # وَأَنبَتْنَا
+    ("80:27", 1, "faʔaŋbatna:"),   # فَأَنبَتْنَا
+]
+
+NOON_ACROSS_A_BOUNDARY = [
+    ("2:52", (4, 5), ("miŋ", "baʕdQ")),  # مِّن بَعْدِ
+    ("2:56", (3, 4), ("miŋ", "baʕdQ")),  # مِّن بَعْدِ
+]
+
+TANWEEN_ACROSS_A_BOUNDARY = [
+    ("2:18", (1, 2), ("sˤum̃uŋ", "bukm")),              # صُمٌّ بُكْمٌ
+    ("3:34", (1, 2), ("ðurrijjataŋ", "baʕdˤuha:")),     # ذُرِّيَّةً بَعْضُهَا
+    ("19:14", (1, 2), ("wabarˤrˤaˤŋ", "biwa:lidajh")),  # وَبَرًّا بِوَٰلِدَيْهِ
+    ("2:241", (2, 3), ("mata:ʕuŋ", "bilmaʕrˤu:f")),     # مَتَـٰعٌ بِٱلْمَعْرُوفِ
+    ("2:10", (9, 10), ("ʔali:muŋ", "bima:")),           # أَلِيمٌ بِمَا
+]
 
 
-@for_each_riwayah(ALIMUN_BIMA, wasl=9, waqf=10)
+@pytest.mark.parametrize(("ref", "word", "expected"), INSIDE_ONE_WORD)
+def test_a_written_noon_before_a_baa_turns_inside_one_word(
+    ref, word, expected
+):
+    site = Site(hafs=(ref, (word,)))
+    assert reading(site, isolated=word).phonemes(word) == expected
+
+
+@pytest.mark.parametrize(("ref", "words", "expected"), NOON_ACROSS_A_BOUNDARY)
+def test_a_quiescent_noon_turns_when_a_baa_starts_the_next_word(
+    ref, words, expected
+):
+    first, last = words
+    r = reading(Site(hafs=(ref, words)), ibtidaa=first, waqf=last)
+    assert (r.phonemes(first), r.phonemes(last)) == expected
+
+
+@pytest.mark.parametrize(
+    ("ref", "words", "expected"), TANWEEN_ACROSS_A_BOUNDARY
+)
+def test_a_tanween_turns_when_a_baa_starts_the_next_word(
+    ref, words, expected
+):
+    first, last = words
+    r = reading(Site(hafs=(ref, words)), ibtidaa=first, waqf=last)
+    assert (r.phonemes(first), r.phonemes(last)) == expected
+
+
+@for_each_riwayah(ALIMUN_BIMA, ibtidaa=9, waqf=10)
 def test_a_tanween_before_a_baa_turns_into_a_nasal(r):
     # أَلِيمٌ بِمَا
     assert r.phonemes(9) == "ʔali:muŋ"
     assert r.phonemes(10) == "bima:"
 
 
-@for_each_riwayah(ALIMUN_BIMA, waqf=(9, 10))
+@for_each_riwayah(ALIMUN_BIMA, isolated=9)
 def test_the_same_tanween_does_not_turn_when_stopped_on(r):
     # أَلِيمٌ
     assert r.phonemes(9) == "ʔali:m"
     assert r.silent(9) == {"ٌ"}
+
+
+@for_each_riwayah(YANBAGHI, isolated=2)
+def test_a_noon_before_a_baa_turns_inside_one_word(r):
+    # يَنبَغِى
+    assert r.phonemes(2) == "jaŋbaɣi:"
+
+
+@for_each_riwayah(MIN_BADI, ibtidaa=3, waqf=4)
+def test_a_quiescent_noon_turns_across_a_word_seam(r):
+    # مِّن بَعْدِ
+    assert r.phonemes(3) == "miŋ"
+    assert r.phonemes(4) == "baʕdQ"
