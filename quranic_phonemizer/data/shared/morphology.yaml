@@ -10,3 +10,9 @@ schema_version: 1
 # `إيمانهم` without either being listed.
 clitic_pronouns: ["ه", "هم", "هما", "هن", "ك", "كم", "كما", "كن", "نا", "ي",
                   "ني", "همء"]
+
+# The single letters that may stand before a word without changing which word
+# it is: the two conjunctions, the preposition and the two particles. Also a
+# closed class, and what tells `وَأَنَا` -- `أنا` behind a proclitic -- from
+# `جَآءَنَا`, which merely ends in the same letters and vowels.
+proclitics: ["و", "ف", "ب", "ل", "ك"]

@@ -13,7 +13,8 @@ from quranic_phonemizer.canon.lexicon import (
     EMPTY,
     MatchMode,
     LexiconError,
-    load_clitic_pronouns,
+    Affixes,
+    load_affixes,
     load_lexicon,
 )
 from quranic_phonemizer.riwayat.hafs.resources import DATA
@@ -25,7 +26,7 @@ SHARED = DATA.parents[1] / "shared"
 def lexicon():
     return load_lexicon(
         DATA / "lexicon.yaml",
-        clitics=load_clitic_pronouns(SHARED / "morphology.yaml"),
+        affixes=load_affixes(SHARED / "morphology.yaml"),
     )
 
 
@@ -37,7 +38,7 @@ def _text(name: str = "lexicon.yaml") -> str:
 def _load(tmp_path: Path, text: str):
     path = tmp_path / "lexicon.yaml"
     path.write_text(text, encoding="utf-8")
-    return load_lexicon(path, clitics=frozenset({"هم"}))
+    return load_lexicon(path, affixes=Affixes(clitics=frozenset({"هم"})))
 
 
 # -- the budget -----------------------------------------------------------
@@ -90,6 +91,13 @@ def test_proclitic_takes_the_key_after_exactly_one_proclitic(lexicon):
     assert not lexicon.is_pausal("وaلaءaنa")
 
 
+def test_a_two_character_prefix_that_is_not_a_proclitic_does_not_match(lexicon):
+    """`جَآءَنَا` ends in the letters and vowels of `أَنَا` behind two characters,
+    and the vocalised notation writes no length, so counting them is not
+    enough to tell it from `وَأَنَا`."""
+    assert not lexicon.is_pausal("جaءaنa")
+
+
 def test_a_lexicon_with_no_sections_answers_no_to_everything():
     assert not EMPTY.is_divine_name("له")
     assert not EMPTY.is_wasl_exempt("ءمن")
@@ -137,7 +145,7 @@ def test_the_clitic_pronouns_are_shared_not_this_riwayah_s(lexicon):
     it would assert something false about every other riwayah."""
     assert (SHARED / "morphology.yaml").exists()
     assert not (DATA / "morphology.yaml").exists()
-    assert lexicon.clitics
+    assert lexicon.affixes.clitics and lexicon.affixes.proclitics
 
 
 def test_a_repeated_clitic_pronoun_is_a_load_error(tmp_path):
@@ -146,4 +154,4 @@ def test_a_repeated_clitic_pronoun_is_a_load_error(tmp_path):
         _text("morphology.yaml").replace('"ه", "هم"', '"ه", "ه"'), encoding="utf-8"
     )
     with pytest.raises(LexiconError, match="twice"):
-        load_clitic_pronouns(path)
+        load_affixes(path)
