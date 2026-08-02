@@ -11,7 +11,6 @@ ACROSS_A_BOUNDARY = [
     ("2:256", (5, 6), ("qaˤ", "ttabajjan")),        # قَد تَّبَيَّنَ
     ("3:69", (1, 2), ("wadda", "tˤtˤaˤ:ʔifah")),    # وَدَّت طَّآئِفَةٌ
     ("4:64", (11, 12), ("ʔi", "ðˤðˤaˤlamu:")),      # إِذ ظَّلَمُوٓا۟
-    ("11:42", (14, 15), ("ʔirˤka", "mmaʕana:")),    # ٱرْكَب مَّعَنَا
     ("7:176", (20, 21), ("jalha", "ðða:lik")),      # يَلْهَث ذَّٰلِكَ
 ]
 
@@ -51,3 +50,15 @@ def test_a_quiescent_taa_merges_wholly_into_a_following_daal(r):
     # the engine sounds the taa and leaves the daal single
     assert r.phonemes(20) == "ʔaθqaˤla"
     assert r.phonemes(21) == "ddaʕawa:"
+
+
+IRKAB_MAANA = Site(hafs=("11:42", (14, 15)))
+
+
+@pytest.mark.engine_bug
+@for_each_riwayah(IRKAB_MAANA, ibtidaa=14, waqf=15)
+def test_a_baa_merged_into_a_meem_is_held_on_its_ghunnah(r):
+    # ٱرْكَب مَّعَنَا
+    # the engine doubles the meem plainly instead of nasalising it
+    assert r.phonemes(14) == "ʔirˤka"
+    assert r.phonemes(15) == "m̃aʕana:"

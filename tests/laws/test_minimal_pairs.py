@@ -48,10 +48,11 @@ PAIRS = [
         "the name of God against a word that opens the same and carries a "
         "third radical",
     ),
-    (
-        ((3, 13, 7), "ʔaltaqaˤta:"),
+    pytest.param(
+        ((3, 13, 7), "ʔiltaqaˤta:"),
         ((2, 197, 26), "ʔattaqQwa:"),
         "a form VIII lam inflected for agreement is still not the article",
+        marks=pytest.mark.engine_bug,
     ),
     (
         ((18, 61, 5), "nasija:"),

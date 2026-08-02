@@ -10,6 +10,7 @@ AAJAMIYY = Site(hafs=("41:44", (9,)))
 MAN_RAQIN = Site(hafs=("75:27", (2, 3)))
 BAL_RANA = Site(hafs=("83:14", (2, 3)))
 NUNJI = Site(hafs=("21:88", (7,)))
+MALIYAH = Site(hafs=("69:28", (4,)))
 
 
 @for_each_riwayah(MAJRAHA, isolated=6)
@@ -52,3 +53,12 @@ def test_a_sakt_keeps_a_lam_clear_of_the_raa_after_it(r):
 def test_the_one_small_noon_in_the_corpus_is_a_noon_that_is_hidden(r):
     # نُـۨجِى
     assert r.phonemes(7) == "nuŋʒi:"
+
+
+@pytest.mark.engine_bug
+@for_each_riwayah(MALIYAH, ibtidaa=4, wasl=4)
+def test_a_sakt_keeps_the_haa_clear_of_the_haa_after_it(r):
+    # مَالِيَهْ ۜ هَلَكَ
+    # the engine merges the two haa as though nothing stood between them
+    assert r.phonemes(4) == "ma:lijah"
+    assert r.phonemes(5) == "halaka"
