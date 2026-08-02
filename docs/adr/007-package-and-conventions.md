@@ -176,8 +176,9 @@ A consequence worth naming: `rules` cannot import `canon`, so the waṣl helping
 vowel cannot be a `BOUNDARY`-phase decision — the waṣl derivation is not
 legally reachable from a rule (ADR-003 §6.3).
 
-Test: `tests/test_import_boundaries.py` walks the AST of every module and
-asserts the table. It is the only defence that survives a careless refactor.
+Check: `tools/structure_lint.py` walks the AST of every module and asserts the
+table, as a CI job of its own. It is the only defence that survives a careless
+rewrite.
 
 ## 3. Data-file schemas
 

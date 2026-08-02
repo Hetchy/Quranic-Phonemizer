@@ -9,7 +9,7 @@ gated on. Nothing here is advisory.
 Split into two groups, because the first draft presented 26 checks of which
 several were true by construction. **Group A is a runtime assertion over a
 constructed object. Group B is a type or AST fact**, checked once by mypy or by
-`tests/test_import_boundaries.py`, and it proves nothing about data.
+`tools/structure_lint.py`, and it proves nothing about data.
 
 ### 1.1 Group A — Score (ADR-001)
 
