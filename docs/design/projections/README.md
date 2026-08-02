@@ -6,7 +6,7 @@ public projection API out of scope. This is that API.
 | | Document | Answers |
 |---|---|---|
 | [01](01-contract.md) | Contract | The two projections, the nodes and edges, the read API, and what the producer must still build |
-| [02](02-gate.md) | Gate | The legacy adapters, the completeness and converse laws, and the order of work |
+| [02](02-gate.md) | Gate | The completeness and converse laws, the legacy adapters that confirm them, and the order of work |
 | [03](03-examples.md) | Examples | One generated example per linguistic case, per rule, and per alignment quadrant |
 | [05](05-modelling-review.md) | Review brief | How to review this as a model rather than as a set of claims |
 | [06](06-two-texts.md) | The two texts | What the mushaf writes against what recitation writes, and every transformation between them |

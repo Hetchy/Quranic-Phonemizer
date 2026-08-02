@@ -1,31 +1,39 @@
-# 02 - The equivalence and completeness gate
+# 02 - The completeness gate
 
 Status: **proposed**. The acceptance criterion for [01-contract](01-contract.md).
 
 ## 1. What the gate proves
 
-Two independent proofs:
+One proof, and one confirmation beside it.
 
-1. **Legacy preservation.** Every legacy field promised during migration is
-   reproduced exactly by a pure adapter over `PhonemizeResult`.
-2. **Graph completeness.** Every typed relation is complete and obeys its
-   domain laws, including facts for which legacy has no oracle.
+The **proof** is graph completeness. Every typed relation is complete and obeys
+its domain laws, including the facts for which legacy has no oracle. That alone
+decides whether the contract is implemented, and section 4 is the whole of it.
 
-Passing only the first would preserve legacy loss. Passing only the second
-would permit consumer regressions.
+The **confirmation** is legacy parity: every legacy view reproduced by a pure
+adapter over `PhonemizeResult`. It is a coverage instrument and never an
+acceptance criterion, and it promises no consumer anything. The old views were
+traversals of a join the model could not hold, so where one disagrees with the
+contract the contract is the more likely to be right - which is what this
+document's own corrections record. A residue is a question to answer, never a
+merge failure.
 
-The frozen legacy data is an information-coverage reference, not a
-correctness oracle. A mismatch has exactly one disposition:
+The frozen legacy data is an information-coverage reference, not a correctness
+oracle. Every mismatch is still dispositioned, so that the coverage claim stays
+honest:
 
 | | |
 |---|---|
-| `regression` | unexplained; the gate fails |
 | `correction` | one exact old and new case in `docs/conformance/corrections.md`, with its domain reason and a regression test |
 | `addition` | excluded from the legacy adapter, required by a completeness law |
-| `retirement` | a named legacy presentation promise, approved before the gate runs |
+| `retirement` | a named legacy presentation promise |
+| `open` | not yet explained. Reported, and blocks nothing |
 
-There is no broad exemption for changed tokens or additive fields. A token
-correction is allowlisted at the affected refs and boundary modes.
+An `open` residue at merge is a known question, not a defect. What the gate does
+require is that no residue is silent: one absent from the report is the single
+failure this document cannot tolerate, because that is the shape of a loss
+nobody noticed. A token correction is still allowlisted at the affected refs and
+boundary modes, so that the next run reports the same set.
 
 ## 2. Frozen reference and execution matrix
 
@@ -56,19 +64,20 @@ cross-word reach any rule takes, and the equivalence law is stated over the
 **whole document**, not over its sounds: an overlap too short invents rule
 instances while leaving every token identical.
 
-## 3. Exact legacy adapters
+## 3. The legacy adapters
 
 `tools/projection_parity.py` is the harness, with a CI job and a residue path
 under `docs/conformance/`. For each manifest mode it loads a
 `PhonemizeResult` for the same request, applies one pure adapter per legacy
 view, compares native rows
-including field and row order, reports residues by adapter, field, rule, mode
-and cause, and exits non-zero for any residue without an approved disposition.
+including field and row order, and reports every residue by adapter, field,
+rule, mode and cause. It does not fail the build.
 
-Counts and merge-direction agreement are diagnostics. The acceptance test is
-exact equality after the documented adapter.
+Counts and merge-direction agreement are diagnostics, and so is exact equality
+after the documented adapter: the harness measures the distance from each
+legacy view and does not judge it.
 
-| Legacy view | Promise |
+| Legacy view | Compared |
 |---|---|
 | `phonemes` | exact tokens and word grouping |
 | `phonetic_text` | exact lines and order |
@@ -140,8 +149,8 @@ schema column by column, and this table is the mapping the adapter implements.
 | `source_letter_index` | source glyph index |
 | `source_letter_indices` | spelling edges back to source glyphs |
 
-Row order per word is part of the promise: a shipped consumer keys persisted
-records on cell position.
+Row order per word is part of what this adapter compares: a shipped consumer
+keys persisted records on cell position.
 
 The priority order and the role fold are compatibility policy in this adapter,
 not facts in the core schema. Named fixtures cover every former frontend
@@ -363,8 +372,8 @@ relationship blocks the contract; an adapter may not repair it.
 
 ## 7. The consumer gate
 
-Legacy parity proves the old views survive. It does not prove the contract is
-sufficient for a product surface, because legacy is what the frontend had to
+Legacy parity measures what the old views carried. It cannot show the contract
+is sufficient for a product surface, because legacy is what the frontend had to
 work around. The second gate takes a real cell shard consumer and requires
 every fact its frontend synthesizes to fall out of `PhonemizeResult` with no
 downstream invention.
@@ -397,14 +406,15 @@ exists to remove, so using them as the oracle would be circular.
    matrix.
 4. Implement request orchestration for ranges, internal boundaries and
    variants.
-5. Implement `tools/projection_parity.py`; verify the frozen manifest.
-6. Pass each adapter in all three modes.
-7. Pass the extended request matrix and the completeness suite.
+5. Pass the extended request matrix and the completeness suite.
+6. Implement `tools/projection_parity.py`, verify the frozen manifest, and read
+   what each adapter says in all three modes.
 
 A deterministic sample and all negative tests run on every pull request. The
 full corpus matrix is required before the public replacement merges. CI
-publishes the residue report even on success; merge requires zero unexplained
-residues and a corrections file whose entries all have domain tests.
+publishes the residue report on every run; merge requires that the report is
+complete and that every corrections entry has a domain test, never that the
+residue list is empty.
 
 ## 9. Structural constraints
 

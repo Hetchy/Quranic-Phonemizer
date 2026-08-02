@@ -756,7 +756,7 @@ changes.
    vowel has no effect on any token, so this item is the first to change one:
    it corrects every `أَنَا۠` in the corpus, which is long when joined today
    and should be short, and `02-gate` section 1 requires those refs be
-   allowlisted before the change lands.
+   allowlisted so the parity report names them.
 5. **`origin` stays one enum.** A letter name is spelled out and takes no
    grammatical ending, so a slot cannot be both spelled and nunated, and two
    booleans would publish a state that cannot exist.
