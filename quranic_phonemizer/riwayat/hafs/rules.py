@@ -14,6 +14,7 @@ from ...rules.boundary import (
     SoftenedHamza,
     TaaMarbutaAtWaqf,
     TanweenAtWaqf,
+    TanweenBeforeWasl,
     WaqfEnding,
     WaslHamza,
 )
@@ -38,6 +39,7 @@ def _build() -> RuleSet:
         {
             Phase.BOUNDARY: (
                 WaslHamza(), SoftenedHamza(), TanweenAtWaqf(), PausalAlif(),
+                TanweenBeforeWasl(),
                 WaqfEnding(yaa=khilaf().yaa),
                 TaaMarbutaAtWaqf(), Sakt(),
             ),

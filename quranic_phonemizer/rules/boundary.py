@@ -172,6 +172,41 @@ class SoftenedHamza:
 
 
 @dataclass(frozen=True, slots=True)
+class TanweenBeforeWasl:
+    """A tanween noon grows a kasra to reach the word after it."""
+    # `خَيْرٌ ٱهْبِطُوا۟` joins a quiescent noon to the quiescent letter the elided
+    # prosthetic hamza leaves bare, and two of them cannot meet: the noon
+    # takes the kasra that breaks them. The other half of the same repair
+    # shortens a madd instead -- see `rules/madd.py::IltiqaRepair`.
+
+    rule: Rule = Rule.ILTIQA_REPAIR
+    phase: Phase = Phase.BOUNDARY
+    triggers: frozenset = frozenset({CanonLetter.NOON})
+
+    def look(
+        self, near: Neighbourhood, plan: Plan, at: SlotId,
+        boundaries: BoundaryPlan,
+    ) -> Verdict | None:
+        del plan, boundaries
+        slot = near.slot(at)
+        if slot is None or slot.origin is not SlotOrigin.NUNATION:
+            return None
+        if not near.last_of_word(at):
+            return None
+        # `after` is `None` at a stop, where `TanweenAtWaqf` owns the noon.
+        following = near.after(at)
+        if following is None or following.onset is not Onset.WASL:
+            return None
+        return Verdict(
+            Occurrence(
+                mint(Rule.ILTIQA_REPAIR, at, variant=1), Rule.ILTIQA_REPAIR,
+                Participants((at, following.id)),
+            ),
+            (Realize(at, Aspect.NUCLEUS, Vowel(Quality.I)),),
+        )
+
+
+@dataclass(frozen=True, slots=True)
 class PausalAlif:
     """The seven alifs: long at a pause, short when the word is joined to.
 

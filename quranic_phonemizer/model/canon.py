@@ -359,7 +359,9 @@ CLASSIFICATION_ONLY: frozenset[Rule] = frozenset(
         Rule.ILTIQA_REPAIR,
         Rule.PAUSAL_ALIF,
         # Both emit `Relength`, which modifies a sound rather than producing
-        # one - the same footing as TAFKHEEM/TARQEEQ.
+        # one - the same footing as TAFKHEEM/TARQEEQ. Listing a rule here
+        # permits an occurrence with no attribution; it does not forbid one,
+        # so the tanween half of ILTIQA_REPAIR may still realize its kasra.
         Rule.IMALA,
         Rule.TASHIL,
         Rule.ISHMAM,
