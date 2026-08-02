@@ -1613,7 +1613,6 @@ word 14 takes the shadda row 18 adds. Word 16 loses its carrier to row 10, word
 | د | `d` | | | |
 | ◌ُو | `u:` | | | `madd_tabii` |
 | نَ | `n` `a` | | | |
-| ف | `f` | | | |
 | فِى | `f` `i` | | | `iltiqa_shortening` |
 | ٱ | | | ٱ | `hamza_wasl_elision` |
 | لْ | `l` | | | `lam_qamariyyah` |
@@ -1648,8 +1647,7 @@ under plan B.
 
 | source | recited |
 |---|---|
-| ف | ف |
-| ◌ِى | ◌ِ |
+| فِى | فِ |
 | هِۦٓ | هْ |
 
 **Part 3, the walk.**

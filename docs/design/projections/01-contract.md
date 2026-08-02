@@ -486,12 +486,13 @@ a long vowel is shared by *graphemes*, which the spelling edges and the glyph
 edges carry.
 
 Every sound has a unit. The helping vowel of an iltiqa is the vowel of the
-unit the reading vowels - a tanween's noon, or the meem of a spelled name -
-hosted on a vowel part the canon leaves absent, which is the mirror of a stop
-silencing a vowel the canon states.
+unit the reading vowels, a tanween's noon, hosted on a vowel part the canon
+leaves absent, which is the mirror of a stop silencing a vowel the canon
+states. The meem of a spelled name is not one of them: section 7 seals it, and
+the vowel `ٱللَّهُ` gives the meem of `الٓمٓ` is a khilaf point nothing wires.
 
-`Recolours` carries no value. Emphasis is the only feature a rule sets, only
-one rule sets it, and the resulting state is `emphatic` on the sound; the edge
+`Recolours` carries no value. Emphasis is the only feature a rule sets and the
+resulting state is `emphatic` on the sound; the edge
 exists to say which rule put it there. A light letter is the ordinary letter
 and no rule fires, so there is nothing for a second value to mean. `length` is
 `short` or `long`.
@@ -843,8 +844,8 @@ changes.
     neither has a converse trigger, and [06-two-texts](06-two-texts.md) is
     where the transformation each performs is written down.
 26. **The iltiqa helping vowel** is constructed nowhere. It is the vowel of
-    the unit the reading vowels - a tanween's noon, or the meem of a spelled
-    name - hosted on a vowel part the canon leaves absent.
+    the unit the reading vowels, a tanween's noon, hosted on a vowel part the
+    canon leaves absent.
 27. **Split the boundary rules to match the names.** One code rule covers
     `pausal_sukun` and `taa_marbuta_pausal`. The iwad is already its own rule
     and keeps its name.
@@ -866,7 +867,7 @@ changes.
     A unit whose `origin` is `muqattaat` neither takes a rule from another
     word nor gives one, and the last unit of the last name takes the
     plain-articulation rule of its own letter: `izhar` after a noon and
-    `izhar_shafawi` after a meem, which nine of the openings need. The rules
+    `izhar_shafawi` after a meem, which the meem-final openings need. The rules
     between the names of one opening are unaffected, and the three disputed
     sites are khilaf points rather than exceptions.
 

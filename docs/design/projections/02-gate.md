@@ -206,9 +206,12 @@ These run over the whole corpus in all three boundary modes.
 
 - Every `source` and `host` names a valid unit, `source` is the unit the rule
   is about for every rule alike, and only a merger carries a host.
+  `orthographic_silence` is the one rule whose `source` is absent, because the
+  letter it is about answers to no unit.
 - Every applied recolour and length change retains exactly one modifier edge.
   `SetsLength` carries the length; `Recolours` carries none, because emphasis
-  is the only feature a rule sets and the state is on the sound.
+  is the only feature a rule sets and the state is on the sound. More than one
+  rule sets it: `tafkheem`, and an ikhfaa before an istilaa letter.
 - Every classification-only rule that names a sound has a `Classifies` edge,
   and the sound it names exists.
 - Every rule instance owns at least one attribution or one modifier edge. The
@@ -290,7 +293,7 @@ guaranteed failure.
 | a vowel canonically long | a madd rule instance |
 | a vowel long in its stopped form, on a stopped word | a madd rule instance |
 | a vowel long in its joined form, on a joined word | a madd rule instance |
-| a silent waw or yaa after a short a, whose following letter the stop silences | `madd_leen` |
+| a waw or yaa whose vowel is absent, after a short a, whose following letter the stop silences | `madd_leen` |
 | a sakin noon or a tanween, joined to a following consonant, and not itself vowelled by an iltiqa | one of the noon rules |
 | a sakin meem, joined to a following consonant | one of the meem rules |
 | a geminate noon or meem | `ghunnah_mushaddadah` |
@@ -299,7 +302,7 @@ guaranteed failure.
 | a consonant that sounds only when started on, word-initial and started on | `hamza_wasl_start` |
 | a consonant that sounds only when started on, not started on or not word-initial | `hamza_wasl_elision` |
 | two sakins meeting across a word boundary and joined | `iltiqa_shortening` or `iltiqa_kasra` |
-| a qalqala letter with a silent vowel, not merged away | a qalqala rule at the right degree |
+| a qalqala letter whose vowel is absent, or one a stop silenced, and not merged away | a qalqala rule at the right degree |
 | an istilaa letter, or a raa in a colouring context | `tafkheem` or `tarqeeq` |
 | a taa marbuta at a stop | `taa_marbuta_pausal` |
 | a quiescent hamza the reading substitutes for a vowel | `ibdal_hamza` |

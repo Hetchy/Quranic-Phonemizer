@@ -12,6 +12,7 @@ public projection API out of scope. This is that API.
 | [06](06-two-texts.md) | The two texts | What the mushaf writes against what recitation writes, and every transformation between them |
 | [07](07-rules.md) | Rules | Every rule with its source, trigger and host, the teaching labels, and where a letter and a sound relate to a rule differently |
 | [08](08-legacy-parity.md) | Legacy parity | The shipped per-character cell schema read column by column against the contract |
+| [09](09-open-questions.md) | Open questions | What four adversarial reviews found that this set has not settled, and what would settle each |
 
 Scope: Uthmani, Hafs. IndoPak is deferred and nothing here depends on it.
 

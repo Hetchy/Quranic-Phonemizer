@@ -74,7 +74,7 @@ the plain-articulation rule of its own letter: `izhar` where the name ends in a
 noon, `izhar_shafawi` where it ends in a meem. That is the third trigger in
 each of their rows, and it is what keeps the converse laws whole -- a sakin
 meem joined to a following consonant still owns a rule at `الٓمٓ` and `طسٓمٓ`
-and `حمٓ`, which is nine of the twenty-nine openings.
+and `حمٓ`.
 
 Three sites are disputed and none is wired: the noon of `نٓ` and of `يسٓ`
 before a following waw, and the meem of `الٓمٓ` before `ٱللَّهُ`. Each is a
@@ -108,7 +108,7 @@ caused it, and for two of them it is the boundary plan rather than a unit.
 | `madd_jaiz_munfasil` | the unit whose vowel is long | the hamza that begins the next word | always | sets the length | as above, and row 2 when the plan stops |
 | `madd_lazim` | the unit whose vowel is long | the unit whose permanent sukun or gemination follows | never | sets the length | as above |
 | `madd_arid_lil_sukun` | the unit whose vowel is long | the unit the stop silenced | never | sets the length | as above |
-| `madd_leen` | the unit whose silent waw or yaa follows a short a | the unit the stop silenced | never | names the sound | unchanged |
+| `madd_leen` | the unit whose waw or yaa has no vowel and follows a short a | the unit the stop silenced | never | names the sound | unchanged |
 | `iltiqa_shortening` | the unit whose long vowel shortens | the sakin it met | always | sets the length to short | row 10 |
 
 `madd_leen` names rather than lengthens, because a leen is not a long vowel:

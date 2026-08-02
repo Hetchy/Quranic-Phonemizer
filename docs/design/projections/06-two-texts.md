@@ -208,7 +208,7 @@ source glyph and the hamza's.
 |---|---|---|---|---|---|
 | 25 | a muqattaat glyph becomes its spelled letter names | a disjoined-letter opening | orthographic | none | **-** |
 | 26 | a dagger alif becomes a haraka and a full carrier | any dagger alif | orthographic | none | **-** |
-| 27 | a silah mark becomes a haraka and a full carrier | joined, a vowel long in its joined form | orthographic | joined | a madd rule |
+| 27 | a silah mark becomes a haraka and a full carrier | joined, a vowel long in its joined form | performance | joined | a madd rule |
 
 Rows 26 and 27 are two instances of one policy: **a long vowel is written as
 its haraka and then its carrier, whatever the rasm abbreviated it to.** A
@@ -278,8 +278,8 @@ kind marked unchanged is not evidence that every case under it was examined.
 | **transformations** | **31** |
 | cases examined and unchanged | 9 |
 | transformations reachable through no rule instance | 10 |
-| orthographic | 10 |
-| performance | 20 |
+| orthographic | 8 |
+| performance | 22 |
 | advice | 1 |
 | boundary-dependent | 21 |
 
