@@ -102,8 +102,7 @@ def test_izhar_is_classification_only(packed, hafs) -> None:
     find it."""
     _, performance = performance_for(packed, hafs, 2, 6, RULES)
     izhar = [o for o in performance.occurrences if o.rule is Rule.IZHAR_HALQI]
-    if not izhar:
-        pytest.skip("no izhar in this verse")
+    assert izhar, "2:6 has a noon before a throat letter"
     owned = {a.by for a in performance.attributions}
     assert all(o.id not in owned for o in izhar)
 

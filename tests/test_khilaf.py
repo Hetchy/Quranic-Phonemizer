@@ -12,18 +12,31 @@ from tests.support import (
 )
 
 RAA = KhilafId.RAA_TAFKHEEM
+NUCLEUS = KhilafId.NUCLEUS_VOWEL
 
 SITES = [
-    ("26:63", 11, "فiرقiن", "firˤqiŋ", "firˤqQ", "join"),
-    ("34:12", 10, "ءaلقiطرi", "ʔalqitˤQri", "ʔalqitˤQr", "stop"),
-    ("12:99", 10, "مiصرa", "misˤrˤaˤ", "misˤrˤ", "stop"),
-    ("10:87", 8, "بiمiصرa", "bimisˤrˤaˤ", "bimisˤrˤ", "stop"),
-    ("54:16", 4, "وaنuذuرi", "wanuðuri", "wanuðurˤ", "stop"),
-    ("54:23", 3, "بiءaلنuذuرi", "biñuðuri", "biñuðurˤ", "stop"),
-    ("89:4", 3, "يaسرi", "jasri", "jasr", "stop"),
-    ("20:77", 6, "ءaسرi", "ʔasri", "ʔasr", "stop"),
-    ("11:81", 9, "فaءaسرi", "faʔasri", "faʔasr", "stop"),
+    ("26:63", 11, "فiرقiن", "join",
+     "firˤqiŋ", "firˤqQ", "firˤqiŋ", "firqiŋ"),
+    ("34:12", 10, "ءaلقiطرi", "stop",
+     "ʔalqitˤQri", "ʔalqitˤQr", "ʔalqitˤQrˤ", "ʔalqitˤQr"),
+    ("12:99", 10, "مiصرa", "stop",
+     "misˤrˤaˤ", "misˤrˤ", "misˤrˤ", "misˤr"),
+    ("10:87", 8, "بiمiصرa", "stop",
+     "bimisˤrˤaˤ", "bimisˤrˤ", "bimisˤrˤ", "bimisˤr"),
+    ("54:16", 4, "وaنuذuرi", "stop",
+     "wanuðuri", "wanuðurˤ", "wanuðurˤ", "wanuður"),
+    ("54:23", 3, "بiءaلنuذuرi", "stop",
+     "biñuðuri", "biñuðurˤ", "biñuðurˤ", "biñuður"),
+    ("89:4", 3, "يaسرi", "stop",
+     "jasri", "jasr", "jasrˤ", "jasr"),
+    ("20:77", 6, "ءaسرi", "stop",
+     "ʔasri", "ʔasr", "ʔasrˤ", "ʔasr"),
+    ("11:81", 9, "فaءaسرi", "stop",
+     "faʔasri", "faʔasr", "faʔasrˤ", "faʔasr"),
 ]
+
+COLUMNS = ("ref", "word", "key", "disputed", "joined", "stopped",
+           "heavy", "light")
 
 
 def _read(ref, word, selection, stopped):
@@ -33,27 +46,24 @@ def _read(ref, word, selection, stopped):
     return reading(site, selection=selection, **plan).phonemes(word)
 
 
-@pytest.mark.parametrize(
-    ("ref", "word", "key", "joined", "stopped", "disputed"), SITES
-)
+@pytest.mark.parametrize(COLUMNS, SITES)
 def test_the_documented_default_is_taken(
-    ref, word, key, joined, stopped, disputed
+    ref, word, key, disputed, joined, stopped, heavy, light
 ):
     plain = VariantSelection()
     assert _read(ref, word, plain, False) == joined
     assert _read(ref, word, plain, True) == stopped
 
 
-@pytest.mark.parametrize(
-    ("ref", "word", "key", "joined", "stopped", "disputed"), SITES
-)
+@pytest.mark.parametrize(COLUMNS, SITES)
 def test_both_wajh_are_reachable(
-    ref, word, key, joined, stopped, disputed
+    ref, word, key, disputed, joined, stopped, heavy, light
 ):
-    heavy = VariantSelection((Option(RAA, "heavy", key),))
-    light = VariantSelection((Option(RAA, "light", key),))
     at_stop = disputed == "stop"
-    assert _read(ref, word, heavy, at_stop) != _read(ref, word, light, at_stop)
+    picked = VariantSelection((Option(RAA, "heavy", key),))
+    assert _read(ref, word, picked, at_stop) == heavy
+    picked = VariantSelection((Option(RAA, "light", key),))
+    assert _read(ref, word, picked, at_stop) == light
 
 
 DUF = Site(hafs=("30:54", (5,)))
@@ -62,4 +72,10 @@ DUF = Site(hafs=("30:54", (5,)))
 @for_each_riwayah(DUF, isolated=5)
 def test_a_vowel_khilaf_is_settled_before_there_is_a_performance(r):
     # ضَعْفٍ
-    assert r.phonemes(5)
+    assert r.phonemes(5) == "dˤaˤʕf"
+
+
+def test_the_other_vowel_wajh_gives_the_other_word():
+    # ضَعْفٍ
+    picked = VariantSelection((Option(NUCLEUS, "damma", "ضعف"),))
+    assert _read("30:54", 5, picked, True) == "dˤuʕf"
