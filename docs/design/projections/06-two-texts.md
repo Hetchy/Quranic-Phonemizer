@@ -65,7 +65,7 @@ glyph the recited text does not write, and that is read from the source side.
 | inserted | `from_glyphs` empty |
 | split | several rendered glyphs naming one source glyph |
 | merged | one rendered glyph naming several source glyphs |
-| dropped | the source glyph is in its pairing's `silent`, and that pairing's `rules` says why |
+| dropped | no rendered glyph names the source glyph in its `from_glyphs`. Silence is a different question: a merged-away letter and a shortened carrier are dropped and not silent |
 
 **Dropped is the one that is not read from `from_glyphs`, and it is the one
 where the answer matters most.** Scanning `rendered` for an absent source index
@@ -129,7 +129,7 @@ whose trigger is the next word goes as soon as the plan stops. Both are
 | 10 | the carrier of a shortened long vowel goes | joined, two sakins meet | performance | joined | `iltiqa_shortening` |
 | 11 | the verse marker and the tatweel go | a structural glyph | orthographic | none | **-** |
 
-Rows 5 and 6 are one rule and two behaviours, and `letter` does not tell them
+Rows 3 and 4 are one rule and two behaviours, and `letter` does not tell them
 apart: the same alif is row 3 in one word and row 4 in another. What separates
 them is the sign the rasm wrote over it, which
 [07-rules](07-rules.md) section 5 places with the script adapter rather than
@@ -166,20 +166,20 @@ already uses on a written noon.
 | 17 | a carrier is written for a word-final long a the rasm writes bare | a stopped word ending in a bare alif maqsura that sounds as a long a | performance | stopped | a madd rule |
 | 18 | a shadda is written on an idgham host the rasm does not double | joined, a cross-word idgham | performance | joined | the idgham rule |
 
-Row 14 is the largest population in the catalogue and the one a per-kind
+Row 12 is the largest population in the catalogue and the one a per-kind
 account cannot reach. Where the rasm wrote a haraka, the stop replaces it (row
-21). Where the rasm left the consonant bare because a cross-word rule was going
+19). Where the rasm left the consonant bare because a cross-word rule was going
 to take it, there is no haraka to replace and the write is the whole
 transformation. Bareness is not an absence of information in the rasm: it says
 an assimilation follows. A stop cancels the assimilation, so the sukun the rasm
 left out has to be written back.
 
-Row 16 writes a letter and not only a mark. The tanween's noon is a unit no
+Row 14 writes a letter and not only a mark. The tanween's noon is a unit no
 glyph writes, so a recited text that wrote the kasra alone would leave that
 noon's consonant presented by no rendered glyph, which
 [02-gate](02-gate.md) section 4.5 forbids.
 
-Row 18 is the one insertion whose sound the source text does write: the fatha
+Row 16 is the one insertion whose sound the source text does write: the fatha
 supplies the vowel and only its length carrier is missing. It is here rather
 than under `spell out` because there is nothing in the rasm to spell out from.
 
@@ -189,16 +189,16 @@ than under `spell out` because there is nothing in the rasm to spell out from.
 |---|---|---|---|---|---|
 | 19 | the haraka of a vowel the stop silences becomes a sukun | a stopped word whose final vowel the stop takes, short or long | performance | stopped | `pausal_sukun` |
 | 20 | a final tanween that leaves no lengthening becomes a sukun | a stopped word, nunated, where nothing lengthens: a dammatan, a kasratan, or a fathatan on a taa marbuta | performance | stopped | `pausal_sukun` |
-| 21 | a fathatan becomes a fatha | a stopped word whose fathatan precedes a written seat | performance | stopped | `pausal_sukun` |
+| 21 | a fathatan becomes a fatha | a stopped word whose fathatan lengthens, whether the seat is written or row 15 invents it | performance | stopped | `pausal_sukun` |
 | 22 | a taa marbuta becomes a haa | a stopped word ending in taa marbuta | performance | stopped | `taa_marbuta_pausal` |
 | 23 | a quiescent hamza becomes a vowel letter | the reading substitutes it | orthographic | none | `ibdal_hamza` |
 | 24 | the hamza wasl seat becomes the hamza its vowel calls for | started on | performance | started | `hamza_wasl_start` |
 
-Row 24 changes the glyph. The pausal realization of a taa marbuta is a haa, and
+Row 22 changes the glyph. The pausal realization of a taa marbuta is a haa, and
 the recited text writes what is said, so it writes a haa. The taa marbuta in
 `glyphs` is untouched, which is a different statement about a different array.
 
-Row 25 is the case that makes `from_glyphs` a tuple: the hamza is written as
+Row 23 is the case that makes `from_glyphs` a tuple: the hamza is written as
 the madd letter of the vowel before it, so one recited glyph covers the vowel's
 source glyph and the hamza's.
 
@@ -210,14 +210,14 @@ source glyph and the hamza's.
 | 26 | a dagger alif becomes a haraka and a full carrier | any dagger alif | orthographic | none | **-** |
 | 27 | a silah mark becomes a haraka and a full carrier | joined, a vowel long in its joined form | orthographic | joined | a madd rule |
 
-Rows 29 and 30 are two instances of one policy: **a long vowel is written as
+Rows 26 and 27 are two instances of one policy: **a long vowel is written as
 its haraka and then its carrier, whatever the rasm abbreviated it to.** A
 maddah is kept where the rasm wrote one and never added, which is section 4.7.
 The policy has no row of its own because it fires wherever a long vowel does,
 and rows 16 and 17 are the two places it has to invent a carrier rather than
 expand one.
 
-Row 28 owns nothing and cannot. The expansion is not the outcome of a rule; the
+Row 25 owns nothing and cannot. The expansion is not the outcome of a rule; the
 rules that fire inside a spelled name own their own effects and nothing owns
 the act of spelling out. It is the case where the letter-level and the
 phoneme-level relation to a rule diverge furthest, which
@@ -230,7 +230,7 @@ phoneme-level relation to a rule diverge furthest, which
 | 28 | the seat of a fathatan stops being silent | a stopped word whose written seat follows a fathatan | performance | stopped | a madd rule |
 | 29 | a word-final yaa, waw or alif maqsura changes between consonant and vowel | a stopped word ending in one of them, voweled | performance | stopped | **-** |
 
-Row 31 is why the catalogue cannot be a diff. Both arrays hold the same seat at
+Row 28 is why the catalogue cannot be a diff. Both arrays hold the same seat at
 the same place with the same character, and the fact that changed is that the
 seat now shows a sound. A consumer comparing characters sees nothing.
 
@@ -304,7 +304,7 @@ place in this catalogue, and a reader comparing the two should know which.
 
 | Its transformation | The Uthmani position |
 |---|---|
-| an alif maqsura is respelled as a yaa where the letter sounds as a yaa | **no analogue.** Uthmani writes `ى` throughout, and the role is a fact of the unit. Row 32 is the general case |
+| an alif maqsura is respelled as a yaa where the letter sounds as a yaa | **no analogue.** Uthmani writes `ى` throughout, and the role is a fact of the unit. Row 29 is the general case |
 | a dagger alif is inserted into the divine name | the same fact. The Uthmani rasm writes no dagger on this word either, so row 16 is an insertion in both scripts |
 | an iqlab is written as a plain vowel plus a small meem | the same fact with a different encoding: Uthmani writes the tanween and the small meem |
 | a tatweel seats a dagger alif | cosmetic; Uthmani seats its daggers on the letter |

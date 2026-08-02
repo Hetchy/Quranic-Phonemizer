@@ -351,10 +351,8 @@ A sound has no `word` field: its word is the word of its primary origin.
 | `labels` | teaching names for this instance, [07-rules](07-rules.md) |
 
 A rule is read against its `source`: a lam shamsiyyah belongs to the lam that
-disappears, not to the letter that doubles. `source` is absent for the two
-rules with no subject unit: an `orthographic_silence`, which is about a letter
-no unit answers to, and an `iltiqa_kasra`, whose sound is inserted between two
-units and belongs to neither.
+disappears, not to the letter that doubles. `source` is absent for one rule
+only, `orthographic_silence`, which is about a letter no unit answers to.
 
 **A trigger is not a participant.** What a rule read in order to fire is data
 on a node, and where that data sits is not the same from rule to rule: the
@@ -501,11 +499,16 @@ class Block:
 ```
 
 A block is the smallest group of pairings on each side that corresponds as a
-unit, closed under `from_glyphs`. Where the two texts run one to one a block
+unit, closed under `from_glyphs` and under the sounds the pairings own. The
+second closure is what places a sound the source does not write: its gap
+pairing and the rendered glyph that writes it own one sound, so they fall in
+one block, and neither is left for the reader to place. Where the two texts run one to one a block
 holds one pairing on each side; where a source glyph renders as two, or a
 recited cluster covers two source glyphs, it holds what it has to. A source
-glyph the recited text drops gives a block with an empty `recited`, and a
-rendered glyph no source glyph produced gives one with an empty `source`.
+glyph the recited text drops gives a block with an empty `recited`. No block
+has an empty `source`: a rendered glyph the source did not produce still writes
+a sound, and the closure over sounds puts it beside the pairing that owns it,
+which is a gap pairing where no glyph states it.
 
 It carries nothing the two alignments do not. The sounds, the rules and the
 silences stay on the pairings a block points at, so there is one place each
@@ -598,9 +601,12 @@ Mutually exclusive per unit and per part.
 | Under `text="recited"`, no sound takes a gap pairing |
 
 **Absent is not silent.** A part is silent when it had a sound and the reading
-took it, and absent when it never had one: the sukun, the bare consonant, the
-tanween's noon and a letter of a spelled name. Silence names a rule and absence
-does not, which is why the two cannot be one value.
+took it, and absent when nothing put one there. The canon leaves a vowel
+absent at the sukun, the bare consonant, the tanween's noon and a letter of a
+spelled name, and at almost all of them nothing ever does: the exception is the
+iltiqa, which sounds the noon's vowel and makes that part hosted like any
+other. Silence names a rule and absence does not, which is why the two cannot
+be one value.
 
 Absence is stated by having no attribution rather than by an edge for it. The
 producer emits nothing where nothing happened, which is what it would do
