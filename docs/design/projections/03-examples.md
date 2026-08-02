@@ -5,12 +5,21 @@ Status: **proposed**. Scope: Uthmani, Hafs.
 Twenty-one passages, each written out as the document
 [01-contract](01-contract.md) says it must look. The source words are the
 corpus text scalar for scalar. Every phoneme string is the package's own output
-for that request and boundary plan, in the notation it ships, with three
+for that request and boundary plan, under the default notation, with three
 exceptions where the string is what section 9 will make it: E12's `m̃` for the
-meem of مَّعَنَا, E16's short `aˤ` for the joined قَوَارِيرَا۠, and E17's `n`
-for the noon of طسٓ. The package emits `mm`, `aˤ:` and `ŋ` there today, each
+meem of مَّعَنَا, E16's short `a` for the joined قَوَارِيرَا۠, and E17's `n`
+for the noon of طسٓ. The package emits `mm`, `a:` and `ŋ` there today, each
 example says so where it happens, and each is a token-changing item of section
-9. Everything else - the recited spelling, the unit rows, the pairings and the
+9.
+
+The default notation spends no token on an emphatic vowel, which
+[01-contract](01-contract.md) section 3.2 puts behind `emphatic_fatha`. The
+package spends one today, so every `a` these tables give after an emphatic
+letter is written `aˤ` by the code at this head. The vowel is the same vowel
+either way: what made it heavy is on the sound and on the `Recolours` edge that
+set it, which the modifier column of every Part 1 row still names.
+
+Everything else - the recited spelling, the unit rows, the pairings and the
 rule names - is authored, because none of it exists yet. A reader checks three
 things with them: that the
 laws of [02-gate](02-gate.md) hold on a real passage, that every row of
@@ -387,7 +396,7 @@ begins, joined, stopping after word 3.
 |---|---|---|---|
 | 1 | ٱلْحَمْدُ | أَلْحَمْدُ | `ʔ a l ħ a m d u` |
 | 2 | لِلَّهِ | لِلَّاهِ | `l i ll a: h i` |
-| 3 | رَبِّ | رَبّْ | `rˤ aˤ bb Q` |
+| 3 | رَبِّ | رَبّْ | `rˤ a bb Q` |
 
 Word 1 is rows 24 and 13 on the wasl seat; word 2 is row 16, the one insertion
 whose sound the source text does write; word 3 is row 19.
@@ -413,7 +422,7 @@ whose sound the source text does write; word 3 is row 19.
 | w2 heh | consonant | hosts `h` | |
 | w2 heh | vowel | hosts `i` | |
 | w3 ra | consonant | hosts `rˤ` | heavy, `tafkheem` |
-| w3 ra | vowel | hosts `aˤ` | heavy, `tafkheem` |
+| w3 ra | vowel | hosts `a` | heavy, `tafkheem` |
 | w3 ba | consonant | hosts `bb`, and the release `Q` beside it | the release is akbar, `qalqala_akbar` |
 | w3 ba | vowel | silent, `pausal_sukun` | |
 
@@ -430,7 +439,7 @@ whose sound the source text does write; word 3 is row 19.
 | لِ | `l` `i` | | | |
 | لَّ | `ll` `a:` | | | `madd_tabii` |
 | هِ | `h` `i` | | | |
-| رَ | `rˤ` `aˤ` | | | `tafkheem` |
+| رَ | `rˤ` `a` | | | `tafkheem` |
 | بِّ | `bb` `Q` | | ◌ِ | `qalqala_akbar`, `pausal_sukun` |
 
 **Respelling blocks**, `grouping="cell"`, the two that are not one pairing to
@@ -531,7 +540,7 @@ is silent, and `shares` is the only thing joining them.
 | 4 | جُوعٍ | جُوعِ | `ʒ u: ʕ i` |
 | 5 | وَءَامَنَهُم | وَّءَامَنَهُ | `w̃ a ʔ a: m a n a h u` |
 | 6 | مِّنْ | مِّنْ | `m̃ i n` |
-| 7 | خَوْفٍ | خَوْفْ | `x aˤ w f` |
+| 7 | خَوْفٍ | خَوْفْ | `x a w f` |
 
 Word 1 is rows 24 and 13 on the wasl seat. The quiescent meems of words 2 and 5
 go by row 7, and word 5 takes the shadda row 18 adds. Word 4's kasratan is
@@ -586,7 +595,7 @@ go by row 7, and word 5 takes the shadda row 18 adds. Word 4's kasratan is
 | w6 noon | consonant | hosts `n` | named plain, `izhar` |
 | w6 noon | vowel | absent | |
 | w7 kha | consonant | hosts `x` | heavy, `tafkheem` |
-| w7 kha | vowel | hosts `aˤ` | heavy, `tafkheem` |
+| w7 kha | vowel | hosts `a` | heavy, `tafkheem` |
 | w7 waw | consonant | hosts `w` | named leen, `madd_leen` |
 | w7 waw | vowel | absent | |
 | w7 fa | consonant | hosts `f` | |
@@ -623,7 +632,7 @@ go by row 7, and word 5 takes the shadda row 18 adds. Word 4's kasratan is
 | م | | `m̃` | | `idgham_shafawi` |
 | مِّ | `m̃` `i` | | | `idgham_shafawi` |
 | نْ | `n` | | | `izhar` |
-| خَ | `x` `aˤ` | | | `tafkheem` |
+| خَ | `x` `a` | | | `tafkheem` |
 | وْ | `w` | | | `madd_leen` |
 | فٍ | `f` | | ◌ٍ | `pausal_sukun` |
 
@@ -778,7 +787,7 @@ Plan A: `pm.phonemize("2:26:7-2:26:9")`, joined, stopping after word 9.
 |---|---|---|---|
 | 7 | مَثَلًا | مَثَلَ | `m a θ a l a` |
 | 8 | مَّا | مَّا | `m̃ a:` |
-| 9 | بَعُوضَةً | بَعُوضَهْ | `b a ʕ u: dˤ aˤ h` |
+| 9 | بَعُوضَةً | بَعُوضَهْ | `b a ʕ u: dˤ a h` |
 
 Plan B: `pm.phonemize("2:26:8-2:26:9")`, started on مَّا, joined, stopping after
 word 9.
@@ -811,7 +820,7 @@ written as the haa recitation says. Under plan B word 8 loses its shadda to row
 | w9 ain | consonant | hosts `ʕ` | |
 | w9 ain | vowel | hosts `u:` | long, `madd_tabii` |
 | w9 dad | consonant | hosts `dˤ` | heavy, `tafkheem` |
-| w9 dad | vowel | hosts `aˤ` | heavy, `tafkheem` |
+| w9 dad | vowel | hosts `a` | heavy, `tafkheem` |
 | w9 taa marbuta | consonant | hosts `h`, by `taa_marbuta_pausal` | |
 | w9 taa marbuta | vowel | silent, `pausal_sukun` | |
 | w9 noon (tanween) | consonant | silent, `pausal_sukun` | |
@@ -837,7 +846,7 @@ written as the haa recitation says. Under plan B word 8 loses its shadda to row
 | بَ | `b` `a` | | | |
 | ع | `ʕ` | | | |
 | ◌ُو | `u:` | | | `madd_tabii` |
-| ضَ | `dˤ` `aˤ` | | | `tafkheem` |
+| ضَ | `dˤ` `a` | | | `tafkheem` |
 | ةً | `h` | | ◌ً | `taa_marbuta_pausal`, `pausal_sukun` |
 
 **Part 2**, plan B, the row that differs.
@@ -1348,11 +1357,11 @@ word 8.
 |---|---|---|---|
 | 2 | يَنقُضُونَ | يَنقُضُونَ | `j a ŋ q u dˤ u: n a` |
 | 3 | عَهْدَ | عَهْدَ | `ʕ a h d a` |
-| 4 | ٱللَّهِ | لَّاهِ | `lˤlˤ aˤ: h i` |
+| 4 | ٱللَّهِ | لَّاهِ | `lˤlˤ a: h i` |
 | 5 | مِن | مِن | `m i ŋ` |
 | 6 | بَعْدِ | بَعْدِ | `b a ʕ d i` |
 | 7 | مِيثَـٰقِهِۦ | مِيثَاقِهِي | `m i: θ a: q i h i:` |
-| 8 | وَيَقْطَعُونَ | وَيَقْطَعُونْ | `w a j a q Q tˤ aˤ ʕ u: n` |
+| 8 | وَيَقْطَعُونَ | وَيَقْطَعُونْ | `w a j a q Q tˤ a ʕ u: n` |
 
 Plan B: `pm.phonemize("2:27:2-2:27:7")`, joined throughout, stopping after
 word 7.
@@ -1392,7 +1401,7 @@ that replaces its kasra. Word 8 is row 19 as well.
 | w4 lam | consonant | merged into `lˤlˤ`, by `lam_shamsiyyah` | |
 | w4 lam | vowel | absent | |
 | w4 lam | consonant | hosts `lˤlˤ`, by `lam_shamsiyyah` | doubled; heavy, `tafkheem` |
-| w4 lam | vowel | hosts `aˤ:` | long, `madd_tabii`; heavy, `tafkheem` |
+| w4 lam | vowel | hosts `a:` | long, `madd_tabii`; heavy, `tafkheem` |
 | w4 heh | consonant | hosts `h` | |
 | w4 heh | vowel | hosts `i` | |
 | w5 meem | consonant | hosts `m` | |
@@ -1420,7 +1429,7 @@ that replaces its kasra. Word 8 is row 19 as well.
 | w8 qaf | consonant | hosts `q`, and the release `Q` beside it | heavy, `tafkheem`; the release is sughra, `qalqala_sughra` |
 | w8 qaf | vowel | absent | |
 | w8 tah | consonant | hosts `tˤ` | heavy, `tafkheem` |
-| w8 tah | vowel | hosts `aˤ` | heavy, `tafkheem` |
+| w8 tah | vowel | hosts `a` | heavy, `tafkheem` |
 | w8 ain | consonant | hosts `ʕ` | |
 | w8 ain | vowel | hosts `u:` | long, `madd_arid_lil_sukun` |
 | w8 noon | consonant | hosts `n` | |
@@ -1451,7 +1460,7 @@ units here whose vowel the colour reaches.
 | دَ | `d` `a` | | | |
 | ٱ | | | ٱ | `hamza_wasl_elision` |
 | ل | | `lˤlˤ` | | `lam_shamsiyyah` |
-| لَّ | `lˤlˤ` `aˤ:` | | | `lam_shamsiyyah`, `tafkheem`, `madd_tabii` |
+| لَّ | `lˤlˤ` `a:` | | | `lam_shamsiyyah`, `tafkheem`, `madd_tabii` |
 | هِ | `h` `i` | | | |
 | مِ | `m` `i` | | | |
 | ن | `ŋ` | | | `iqlab` |
@@ -1468,7 +1477,7 @@ units here whose vowel the colour reaches.
 | وَ | `w` `a` | | | |
 | يَ | `j` `a` | | | |
 | قْ | `q` `Q` | | | `tafkheem`, `qalqala_sughra` |
-| طَ | `tˤ` `aˤ` | | | `tafkheem` |
+| طَ | `tˤ` `a` | | | `tafkheem` |
 | ع | `ʕ` | | | |
 | ◌ُو | `u:` | | | `madd_arid_lil_sukun` |
 | نَ | `n` | | ◌َ | `pausal_sukun` |
@@ -1518,7 +1527,7 @@ word 17.
 |---|---|---|---|
 | 12 | بِهِۦٓ | بِهِيٓ | `b i h i:` |
 | 13 | أَن | أَ | `ʔ a` |
-| 14 | يُوصَلَ | يُّوصَلَ | `j̃ u: sˤ aˤ l a` |
+| 14 | يُوصَلَ | يُّوصَلَ | `j̃ u: sˤ a l a` |
 | 15 | وَيُفْسِدُونَ | وَيُفْسِدُونَ | `w a j u f s i d u: n a` |
 | 16 | فِى | فِ | `f i` |
 | 17 | ٱلْأَرْضِ ۚ | لْأَرْضْ ۚ | `l ʔ a rˤ dˤ` |
@@ -1550,7 +1559,7 @@ word 14 takes the shadda row 18 adds. Word 16 loses its carrier to row 10, word
 | w14 ya | consonant | hosts `j̃`, by `idgham_bi_ghunnah` | doubled, with ghunnah |
 | w14 ya | vowel | hosts `u:` | long, `madd_tabii` |
 | w14 sad | consonant | hosts `sˤ` | heavy, `tafkheem` |
-| w14 sad | vowel | hosts `aˤ` | heavy, `tafkheem` |
+| w14 sad | vowel | hosts `a` | heavy, `tafkheem` |
 | w14 lam | consonant | hosts `l` | |
 | w14 lam | vowel | hosts `a` | |
 | w15 waw | consonant | hosts `w` | |
@@ -1595,7 +1604,7 @@ word 14 takes the shadda row 18 adds. Word 16 loses its carrier to row 10, word
 | ن | | `j̃` | | `idgham_bi_ghunnah` |
 | ي | `j̃` | | | `idgham_bi_ghunnah` |
 | ◌ُو | `u:` | | | `madd_tabii` |
-| صَ | `sˤ` `aˤ` | | | `tafkheem` |
+| صَ | `sˤ` `a` | | | `tafkheem` |
 | لَ | `l` `a` | | | |
 | وَ | `w` `a` | | | |
 | يُ | `j` `u` | | | |
@@ -1761,15 +1770,15 @@ stopping after the second word.
 
 | word | source | recited | phonemes |
 |---|---|---|---|
-| 76:15:8 | قَوَارِيرَا۠ | قَوَارِيرَ | `q aˤ w a: r i: rˤ aˤ` |
-| 76:16:1 | قَوَارِيرَا۟ | قَوَارِيرْ | `q aˤ w a: r i: r` |
+| 76:15:8 | قَوَارِيرَا۠ | قَوَارِيرَ | `q a w a: r i: rˤ a` |
+| 76:16:1 | قَوَارِيرَا۟ | قَوَارِيرْ | `q a w a: r i: r` |
 
 Plan B: the same request with `stop_refs=("76:15:8",)`, so the second word is
 started on.
 
 | word | source | recited | phonemes |
 |---|---|---|---|
-| 76:15:8 | قَوَارِيرَا۠ | قَوَارِيرَا | `q aˤ w a: r i: rˤ aˤ:` |
+| 76:15:8 | قَوَارِيرَا۠ | قَوَارِيرَا | `q a w a: r i: rˤ a:` |
 
 The two plans differ in one phoneme, and it is the last one of the first word.
 The first word's final vowel is short in its joined form and long in its
@@ -1790,15 +1799,15 @@ their own verse.
 | unit | part | realization | on the sound |
 |---|---|---|---|
 | w8 qaf | consonant | hosts `q` | heavy, `tafkheem` |
-| w8 qaf | vowel | hosts `aˤ` | heavy, `tafkheem` |
+| w8 qaf | vowel | hosts `a` | heavy, `tafkheem` |
 | w8 waw | consonant | hosts `w` | |
 | w8 waw | vowel | hosts `a:` | long, `madd_tabii` |
 | w8 ra | consonant | hosts `r` | named light, `tarqeeq` |
 | w8 ra | vowel | hosts `i:` | long, `madd_tabii` |
 | w8 ra | consonant | hosts `rˤ` | heavy, `tafkheem` |
-| w8 ra | vowel | hosts `aˤ` | heavy, `tafkheem` |
+| w8 ra | vowel | hosts `a` | heavy, `tafkheem` |
 
-Under plan B the last vowel hosts `aˤ:`, long by `madd_tabii` and heavy by
+Under plan B the last vowel hosts `a:`, long by `madd_tabii` and heavy by
 `tafkheem`.
 
 **Part 1**, 76:16:1, the same under both plans.
@@ -1806,7 +1815,7 @@ Under plan B the last vowel hosts `aˤ:`, long by `madd_tabii` and heavy by
 | unit | part | realization | on the sound |
 |---|---|---|---|
 | w1 qaf | consonant | hosts `q` | heavy, `tafkheem` |
-| w1 qaf | vowel | hosts `aˤ` | heavy, `tafkheem` |
+| w1 qaf | vowel | hosts `a` | heavy, `tafkheem` |
 | w1 waw | consonant | hosts `w` | |
 | w1 waw | vowel | hosts `a:` | long, `madd_tabii` |
 | w1 ra | consonant | hosts `r` | named light, `tarqeeq` |
@@ -1819,7 +1828,7 @@ cells are the same word for word, plan for plan.
 
 | source | owns | shares | silent | rules |
 |---|---|---|---|---|
-| قَ | `q` `aˤ` | | | `tafkheem` |
+| قَ | `q` `a` | | | `tafkheem` |
 | و | `w` | | | |
 | ◌َا | `a:` | | | `madd_tabii` |
 
@@ -1829,7 +1838,7 @@ cells are the same word for word, plan for plan.
 |---|---|---|---|---|
 | ر | `r` | | | `tarqeeq` |
 | ◌ِي | `i:` | | | `madd_tabii` |
-| رَ | `rˤ` `aˤ` | | | `tafkheem` |
+| رَ | `rˤ` `a` | | | `tafkheem` |
 | ا۠ | | | ا, ◌۠ | `orthographic_silence` |
 
 The same word under plan B, where the last two cells become one.
@@ -1837,7 +1846,7 @@ The same word under plan B, where the last two cells become one.
 | source | owns | shares | silent | rules |
 |---|---|---|---|---|
 | ر | `rˤ` | | | `tafkheem` |
-| ◌َا۠ | `aˤ:` | | | `madd_tabii`, `tafkheem` |
+| ◌َا۠ | `a:` | | | `madd_tabii`, `tafkheem` |
 
 **Part 2**, 76:16:1, the last four cells, the same under both plans. The
 word is stopped on under both, so the long `i:` is a length the stop caused and
@@ -1871,7 +1880,7 @@ Plan A: `pm.phonemize("27:1")`, joined throughout, stopping after word 6.
 
 | word | source | recited | phonemes |
 |---|---|---|---|
-| 1 | طسٓ ۚ | طَا سِيٓنْ ۚ | `tˤ aˤ: s i: n` |
+| 1 | طسٓ ۚ | طَا سِيٓنْ ۚ | `tˤ a: s i: n` |
 | 2 | تِلْكَ | تِلْكَ | `t i l k a` |
 | 3 | ءَايَـٰتُ | ءَايَاتُ | `ʔ a: j a: t u` |
 | 4 | ٱلْقُرْءَانِ | لْقُرْءَانِ | `l q u rˤ ʔ a: n i` |
@@ -1896,7 +1905,7 @@ shadda the host needs, so row 18 adds nothing; word 6 is row 20.
 | unit | part | realization | on the sound |
 |---|---|---|---|
 | w1 tah (spelled) | consonant | hosts `tˤ` | heavy, `tafkheem` |
-| w1 tah (spelled) | vowel | hosts `aˤ:` | heavy, `tafkheem`; long, `madd_tabii` |
+| w1 tah (spelled) | vowel | hosts `a:` | heavy, `tafkheem`; long, `madd_tabii` |
 | w1 seen (spelled) | consonant | hosts `s` | |
 | w1 seen (spelled) | vowel | hosts `i:` | long, `madd_lazim` |
 | w1 noon (spelled) | consonant | hosts `n`, by `izhar` | |
@@ -1948,7 +1957,7 @@ shadda the host needs, so row 18 adds nothing; word 6 is row 20.
 
 | source | owns | shares | silent | rules |
 |---|---|---|---|---|
-| ط | `tˤ` `aˤ:` | | | `tafkheem`, `madd_tabii` |
+| ط | `tˤ` `a:` | | | `tafkheem`, `madd_tabii` |
 | سٓ | `s` `i:` `n` | | | `madd_lazim`, `izhar` |
 | تِ | `t` `i` | | | |
 | لْ | `l` | | | |
@@ -2016,7 +2025,7 @@ word 17.
 | word | source | recited | phonemes |
 |---|---|---|---|
 | 12 | بَعْضُكُم | بَعْضُكُم | `b a ʕ dˤ u k u ŋ` |
-| 13 | بَعْضًا | بَعْضَن | `b a ʕ dˤ aˤ ŋ` |
+| 13 | بَعْضًا | بَعْضَن | `b a ʕ dˤ a ŋ` |
 | 14 | فَلْيُؤَدِّ | فَلْيُؤَدِّ | `f a l j u ʔ a dd i` |
 | 15 | ٱلَّذِى | لَّذِ | `ll a ð i` |
 | 16 | ٱؤْتُمِنَ | ؤْتُمِنَ | `ʔ t u m i n a` |
@@ -2054,7 +2063,7 @@ row 23 for the quiescent hamza. Word 17 is rows 26, 1 and 19.
 | w13 ain | consonant | hosts `ʕ` | |
 | w13 ain | vowel | absent | |
 | w13 dad | consonant | hosts `dˤ` | heavy, `tafkheem` |
-| w13 dad | vowel | hosts `aˤ` | heavy, `tafkheem` |
+| w13 dad | vowel | hosts `a` | heavy, `tafkheem` |
 | w13 noon (tanween) | consonant | hosts `ŋ`, by `ikhfaa_haqiqi` | a hum, not doubled |
 | w13 noon (tanween) | vowel | absent | |
 | w14 fa | consonant | hosts `f` | |
@@ -2108,7 +2117,7 @@ because the published sound carries no place of articulation.
 | م | `ŋ` | | | `ikhfaa_shafawi` |
 | بَ | `b` `a` | | | |
 | عْ | `ʕ` | | | |
-| ضً | `dˤ` `aˤ` `ŋ` | | | `tafkheem`, `ikhfaa_haqiqi` |
+| ضً | `dˤ` `a` `ŋ` | | | `tafkheem`, `ikhfaa_haqiqi` |
 | ا | | | ا | `orthographic_silence` |
 | فَ | `f` `a` | | | |
 | لْ | `l` | | | |
@@ -2173,9 +2182,9 @@ in this request carries the `silah` label.
 | 6 | مَجْر۪ىٰهَا | مَجْرِ۪ىهَا | `m a ʒ Q r i: h a:` |
 | 7 | وَمُرْسَىٰهَآ ۚ | وَمُرْسَاهَآ ۚ | `w a m u rˤ s a: h a:` |
 | 8 | إِنَّ | إِنَّ | `ʔ i ñ a` |
-| 9 | رَبِّى | رَبِّى | `rˤ aˤ bb i:` |
-| 10 | لَغَفُورٌ | لَغَفُورُ | `l a ɣ aˤ f u: rˤ u` |
-| 11 | رَّحِيمٌ | رَّحِيمْ | `rˤrˤ aˤ ħ i: m` |
+| 9 | رَبِّى | رَبِّى | `rˤ a bb i:` |
+| 10 | لَغَفُورٌ | لَغَفُورُ | `l a ɣ a f u: rˤ u` |
+| 11 | رَّحِيمٌ | رَّحِيمْ | `rˤrˤ a ħ i: m` |
 
 Word 6 is row 26 on a dagger whose vowel is not a long a: the expansion writes
 the haraka the unit carries and the carrier that quality takes, and the imala
@@ -2212,13 +2221,13 @@ the shadda.
 | w8 noon | consonant | hosts `ñ` | doubled, with ghunnah; named, `ghunnah_mushaddadah` |
 | w8 noon | vowel | hosts `a` | |
 | w9 ra | consonant | hosts `rˤ` | heavy, `tafkheem` |
-| w9 ra | vowel | hosts `aˤ` | heavy, `tafkheem` |
+| w9 ra | vowel | hosts `a` | heavy, `tafkheem` |
 | w9 ba | consonant | hosts `bb` | |
 | w9 ba | vowel | hosts `i:` | long, `madd_tabii` |
 | w10 lam | consonant | hosts `l` | |
 | w10 lam | vowel | hosts `a` | |
 | w10 ghain | consonant | hosts `ɣ` | heavy, `tafkheem` |
-| w10 ghain | vowel | hosts `aˤ` | heavy, `tafkheem` |
+| w10 ghain | vowel | hosts `a` | heavy, `tafkheem` |
 | w10 fa | consonant | hosts `f` | |
 | w10 fa | vowel | hosts `u:` | long, `madd_tabii` |
 | w10 ra | consonant | hosts `rˤ` | heavy, `tafkheem` |
@@ -2226,7 +2235,7 @@ the shadda.
 | w10 noon (tanween) | consonant | merged into `rˤrˤ`, by `idgham_bila_ghunnah` | |
 | w10 noon (tanween) | vowel | absent | |
 | w11 ra | consonant | hosts `rˤrˤ`, by `idgham_bila_ghunnah` | doubled; heavy, `tafkheem` |
-| w11 ra | vowel | hosts `aˤ` | heavy, `tafkheem` |
+| w11 ra | vowel | hosts `a` | heavy, `tafkheem` |
 | w11 ha | consonant | hosts `ħ` | |
 | w11 ha | vowel | hosts `i:` | long, `madd_arid_lil_sukun` |
 | w11 meem | consonant | hosts `m` | |
@@ -2253,15 +2262,15 @@ the shadda.
 | ◌َآ | `a:` | | | `madd_jaiz_munfasil` |
 | إِ | `ʔ` `i` | | | |
 | نَّ | `ñ` `a` | | | `ghunnah_mushaddadah` |
-| رَ | `rˤ` `aˤ` | | | `tafkheem` |
+| رَ | `rˤ` `a` | | | `tafkheem` |
 | بّ | `bb` | | | |
 | ◌ِى | `i:` | | | `madd_tabii` |
 | لَ | `l` `a` | | | |
-| غَ | `ɣ` `aˤ` | | | `tafkheem` |
+| غَ | `ɣ` `a` | | | `tafkheem` |
 | ف | `f` | | | |
 | ◌ُو | `u:` | | | `madd_tabii` |
 | رٌ | `rˤ` `u` | `rˤrˤ` | | `tafkheem`, `idgham_bila_ghunnah` |
-| رَّ | `rˤrˤ` `aˤ` | | | `idgham_bila_ghunnah`, `tafkheem` |
+| رَّ | `rˤrˤ` `a` | | | `idgham_bila_ghunnah`, `tafkheem` |
 | ح | `ħ` | | | |
 | ◌ِي | `i:` | | | `madd_arid_lil_sukun` |
 | مٌ | `m` | | ◌ٌ | `pausal_sukun` |
@@ -2365,7 +2374,7 @@ else in the four words is ordinary, which is what makes the cost visible.
 |---|---|---|---|
 | 8 | ءَايَـٰتُهُۥٓ ۖ | ءَايَاتُهُوٓ ۖ | `ʔ a: j a: t u h u:` |
 | 9 | ءَا۬عْجَمِىٌّ | ءَا۬عْجَمِىُّ | `ʔ a ʔ a ʕ ʒ a m i jj u` |
-| 10 | وَعَرَبِىٌّ ۗ | وَّعَرَبِىّْ ۗ | `w̃ a ʕ a rˤ aˤ b i jj` |
+| 10 | وَعَرَبِىٌّ ۗ | وَّعَرَبِىّْ ۗ | `w̃ a ʕ a rˤ a b i jj` |
 
 Word 8 is row 26 on the dagger and row 27 on the silah mark, which the joining
 plan keeps, with the maddah standing on the carrier it expands into. The tashil
@@ -2403,7 +2412,7 @@ and word 10 takes the shadda row 18 adds; word 10 is row 20.
 | w10 ain | consonant | hosts `ʕ` | |
 | w10 ain | vowel | hosts `a` | |
 | w10 ra | consonant | hosts `rˤ` | heavy, `tafkheem` |
-| w10 ra | vowel | hosts `aˤ` | heavy, `tafkheem` |
+| w10 ra | vowel | hosts `a` | heavy, `tafkheem` |
 | w10 ba | consonant | hosts `b` | |
 | w10 ba | vowel | hosts `i` | |
 | w10 ya | consonant | hosts `jj` | doubled |
@@ -2430,7 +2439,7 @@ and word 10 takes the shadda row 18 adds; word 10 is row 20.
 | ىٌّ | `jj` `u` | `w̃` | | `idgham_bi_ghunnah` |
 | وَ | `w̃` `a` | | | `idgham_bi_ghunnah` |
 | عَ | `ʕ` `a` | | | |
-| رَ | `rˤ` `aˤ` | | | `tafkheem` |
+| رَ | `rˤ` `a` | | | `tafkheem` |
 | بِ | `b` `i` | | | |
 | ىٌّ | `jj` | | ◌ٌ | `pausal_sukun` |
 

@@ -250,17 +250,25 @@ spend a token on. All default off.
 | Name | Off | On |
 |---|---|---|
 | `tashil` | the hamza token | a token of its own |
-| `heavy_ikhfaa` | one ghunnah token | the emphatic form |
+| `emphatic_fatha` | `a` | `a` and its emphatic form apart |
+| `emphatic_ikhfaa` | one ghunnah token | the emphatic form |
 | `qalqala_degree` | one release token | sughra apart from kubra and akbar |
 
 `qalqala_degree` is a two-way split: kubra and akbar share a token and akbar
-takes no third.
+takes no third. Emphasis spreads onto an `a` and onto no other vowel, so
+`emphatic_fatha` names the only vowel that has a second form.
 
-**Switching one on changes no node and no edge.** `Sound.emphatic` on a ghunnah
-is true whether or not the token shows it, and a qalqala's degree is on the
-sound either way, so nothing is lost by leaving a toggle off and a consumer can
-always read the distinction from the graph. That is what separates this from
-`variants`, which changes what is read.
+**Switching one on changes no node and no edge.** `Sound.emphatic` is true on a
+ghunnah and on a spread-to vowel whether or not the token shows it, a qalqala's
+degree is on the sound either way, and the `Recolours` edge that made a sound
+heavy is in `modifiers` regardless. So nothing is lost by leaving a toggle off,
+and a consumer can always read the distinction from the graph. That is what
+separates these from `variants`, which changes what is read.
+
+`emphatic_fatha` is the one whose default the package does not have yet: it
+spends the emphatic token today, on about three per cent of the corpus. Turning
+it off is a notation default and not a correction, because the vowel is the
+same vowel and its emphasis is still on the sound and on the edge that set it.
 
 Indices are local to one document, and pairings are request-local.
 
@@ -468,7 +476,7 @@ a colouring scheme is a convention a consumer picks.
 | `MergedInto(unit, part, sound, by?)` | the unit | this unit disappeared into that sound |
 | `Silent(unit, part, by)` | the unit | this unit lost its sound |
 | **modifiers** | | |
-| `Recolours(sound, by)` | the rule | tafkheem made this consonant heavy |
+| `Recolours(sound, by)` | the rule | tafkheem made this sound heavy |
 | `SetsLength(sound, by, length)` | the rule | iltiqa shortened this madd |
 | `Classifies(sound, by)` | the rule | names this sound without changing it |
 
@@ -882,7 +890,7 @@ changes.
 38. **The three module functions.** `supported_riwayat`, `available_variants`
     and `tajweed_rules`, answering without an instance, and
     `available_variants` returning the nesting `variants` accepts.
-39. **The optional phonemes are gated at the notation.** Section 3.2's three
+39. **The optional phonemes are gated at the notation.** Section 3.2's four
     names select tokens and reach no node and no edge, so the gate belongs
     beside the alphabet and nowhere in the producer.
 40. **The teaching labels are derived.** Section 4.5 publishes `labels` and
