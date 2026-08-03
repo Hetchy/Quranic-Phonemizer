@@ -41,10 +41,15 @@ class NoonSakinah:
         boundaries: BoundaryPlan,
     ) -> Verdict | None:
         del plan, boundaries  # `near` already refuses to look across a junction
-        if not is_quiescent(near.slot(at)):
+        slot = near.slot(at)
+        if not is_quiescent(slot):
             return None
         following = near.after(at)
         if following is None:
+            if slot.origin is SlotOrigin.SPELLED and near.last_of_word(at):
+                # The noon closing a disjoined-letter opening takes its own
+                # plain articulation rather than reaching into the next word.
+                return _classification(Rule.IZHAR, at, None)
             return None
 
         match self.followers.of(following.letter):
@@ -84,7 +89,7 @@ def _between_names(slot, following) -> bool:
     )
 
 
-def _classification(rule: Rule, at: SlotId, other: SlotId) -> Verdict:
+def _classification(rule: Rule, at: SlotId, other: SlotId | None) -> Verdict:
     """Izhar produces no sound of its own; the occurrence exists so a
     projection can find it."""
     return Verdict(Occurrence(mint(rule, at), rule, Participants(at, other)), ())

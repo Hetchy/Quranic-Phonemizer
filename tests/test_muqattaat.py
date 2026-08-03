@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import pytest
 
+from quranic_phonemizer.model.canon import Rule
 from tests.support import Site, for_each_riwayah, reading
 
 TA_SEEN = Site(hafs=("27:1", (1,)))
@@ -78,3 +79,26 @@ def test_the_noon_of_the_opening_noon_stays_clear_before_the_waw(r):
     # a second reading merges it; supporting both is later work
     assert r.phonemes(1) == "nu:n"
     assert r.phonemes(2) == "walqaˤlami"
+
+
+def _closing_rules(r, word: int) -> set[Rule]:
+    last = r.score.words[word - 1].slots[-1]
+    return {o.rule for o in r.performance.occurrences if o.parts.source == last.id}
+
+
+@for_each_riwayah(NOON, ibtidaa=1, wasl=1)
+def test_the_opening_noon_takes_its_own_izhar_rather_than_none(r):
+    # نٓ closes on its own plain articulation; it neither merges into
+    # `وَٱلْقَلَمِ` nor takes a rule from it.
+    assert _closing_rules(r, 1) == {Rule.IZHAR}
+
+
+@for_each_riwayah(TA_SEEN, ibtidaa=1, wasl=1)
+def test_the_opening_noon_of_ta_seen_takes_its_own_izhar(r):
+    assert _closing_rules(r, 1) == {Rule.IZHAR}
+
+
+@pytest.mark.parametrize("ref", ["2:1", "40:1"])
+def test_a_meem_final_opening_takes_its_own_izhar_shafawi(ref):
+    r = reading(Site(hafs=(ref, (1,))), ibtidaa=1, wasl=1)
+    assert _closing_rules(r, 1) == {Rule.IZHAR_SHAFAWI}
