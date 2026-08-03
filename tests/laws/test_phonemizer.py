@@ -5,6 +5,8 @@ functions and the laws of section 8 are checked over a small sample.
 """
 from __future__ import annotations
 
+import dataclasses
+
 import pytest
 
 from quranic_phonemizer import Phonemizer, PhonemizeResult, available_variants
@@ -46,6 +48,9 @@ def test_equality_and_repr_ignore_assembled_bookkeeping():
     b = Phonemizer().phonemize("1:1")
     assert a == b
     assert "_assembled" not in repr(a)
+    field_names = {f.name for f in dataclasses.fields(PhonemizeResult)}
+    assert "_assembled" not in field_names
+    assert len(field_names) == 16
 
 
 def test_identity_fields_are_seven_and_flat():

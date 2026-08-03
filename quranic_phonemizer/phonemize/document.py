@@ -5,7 +5,7 @@
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from . import edges as ed
 from . import nodes as nd
@@ -54,8 +54,12 @@ def text(assembled: Assembled, which: str = "source") -> str:
     return "".join(glyph.char for glyph in glyphs)
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class PhonemizeResult:
+    """`slots=True` is off: `_assembled` below is set post-construction via
+    `object.__setattr__`, which a slotted frozen dataclass has no room for
+    unless the field list grows past 01-contract section 3's sixteen."""
+
     ref: str
     riwayah: str
     script: str
@@ -74,11 +78,6 @@ class PhonemizeResult:
     spellings: tuple[ed.SpellingEdge, ...]
     attributions: tuple[ed.AttributionEdge, ...]
     modifiers: tuple[ed.ModifierEdge, ...]
-
-    #: `Assembled`'s own bookkeeping, not one of the contract's sixteen
-    #: fields: excluded from `repr` and `==` so a document still compares
-    #: and prints by what it publishes.
-    _assembled: Assembled = field(repr=False, compare=False)
 
     def phonemes(
         self, by: str | None = None
@@ -107,7 +106,7 @@ def build_result(
     canon_digest: str,
     assembled: Assembled,
 ) -> PhonemizeResult:
-    return PhonemizeResult(
+    result = PhonemizeResult(
         ref=ref, riwayah=riwayah, script=script, variant=variant,
         extra_phonemes=extra_phonemes, schema_version=SCHEMA_VERSION,
         canon_digest=canon_digest,
@@ -116,8 +115,11 @@ def build_result(
         sounds=assembled.sounds, rules=assembled.rules,
         spellings=assembled.spellings, attributions=assembled.attributions,
         modifiers=assembled.modifiers,
-        _assembled=assembled,
     )
+    # Not a dataclass field: kept off `repr`/`==`/`dataclasses.fields` by
+    # construction rather than by opting out field-by-field.
+    object.__setattr__(result, "_assembled", assembled)
+    return result
 
 
 __all__ = ["PhonemizeResult", "SCHEMA_VERSION", "build_result", "phonemes", "text"]
