@@ -11,7 +11,6 @@ from quranic_phonemizer.engine.boundary_plan import all_join
 from quranic_phonemizer.engine.laws import LawError, check_inscription
 from quranic_phonemizer.engine.run import perform
 from quranic_phonemizer.model.address import SlotId
-from quranic_phonemizer.model.canon import Rule
 from quranic_phonemizer.model.inscription import Attests, Decorates, Evidences
 from quranic_phonemizer.render.anchored import anchored, graphemes_by_id
 from quranic_phonemizer.riwayat.hafs import HAFS
@@ -68,7 +67,7 @@ def test_a_merged_sound_names_both_its_letters(packed, hafs, alphabet):
     merged = [sound for sound in view.sounds if sound.merged_from]
     assert merged, "112:2 has an assimilating article lam"
     for sound in merged:
-        assert sound.rule is not Rule.PLAIN
+        assert sound.rule is not None
         assert len(sound.graphemes) > 1, (
             f"{sound.token} came from a merger and names one grapheme"
         )
@@ -81,7 +80,7 @@ def test_a_silent_letter_names_the_rule_that_silenced_it(
     chars = graphemes_by_id(built.inscription)
     assert view.silent, "2:20 elides at least one wasl hamza"
     for silent in view.silent:
-        assert silent.rule is not Rule.PLAIN
+        assert silent.rule is not None
         # Every silent letter must be pointable at in the source text.
         assert all(grapheme in chars for grapheme in silent.graphemes)
 

@@ -237,8 +237,7 @@ class Phase(StrEnum):
 class Rule(StrEnum):
     """The only rule vocabulary. One name, one place."""
 
-    IZHAR_HALQI = "izhar_halqi"
-    IZHAR_MUTLAQ = "izhar_mutlaq"
+    IZHAR = "izhar"
     IKHFAA_HAQIQI = "ikhfaa_haqiqi"
     IQLAB = "iqlab"
     IDGHAM_BI_GHUNNAH = "idgham_bi_ghunnah"
@@ -282,16 +281,12 @@ class Rule(StrEnum):
     WAQF_ENDING = "waqf_ending"
     PAUSAL_ALIF = "pausal_alif"
     SILAH = "silah"
-    SAKT = "sakt"
-
-    PLAIN = "plain"
 
 
 #: Every `Rule` declares its family, which is what a script may attest
 #: and gives projections a coarse grouping for free.
 FAMILY_OF: dict[Rule, RuleFamily] = {
-    Rule.IZHAR_HALQI: RuleFamily.NASALIZATION,
-    Rule.IZHAR_MUTLAQ: RuleFamily.NASALIZATION,
+    Rule.IZHAR: RuleFamily.NASALIZATION,
     Rule.IKHFAA_HAQIQI: RuleFamily.NASALIZATION,
     Rule.IQLAB: RuleFamily.NASALIZATION,
     Rule.IDGHAM_BI_GHUNNAH: RuleFamily.ASSIMILATION,
@@ -328,8 +323,6 @@ FAMILY_OF: dict[Rule, RuleFamily] = {
     Rule.WAQF_ENDING: RuleFamily.ELISION,
     Rule.PAUSAL_ALIF: RuleFamily.ELISION,
     Rule.SILAH: RuleFamily.LENGTHENING,
-    Rule.SAKT: RuleFamily.RELEASE,
-    Rule.PLAIN: RuleFamily.ELISION,
 }
 
 #: Rules that classify without producing a sound of their own.
@@ -346,8 +339,7 @@ CLASSIFICATION_ONLY: frozenset[Rule] = frozenset(
         Rule.IDGHAM_MUTAJANISAYN_NAQIS,
         # The first letter colours the second rather than merging into
         # it, so there is no separate sound to attribute.
-        Rule.IZHAR_HALQI,
-        Rule.IZHAR_MUTLAQ,
+        Rule.IZHAR,
         Rule.IZHAR_SHAFAWI,
         Rule.LAM_QAMARIYYAH,
         Rule.MADD_TABII,
@@ -366,7 +358,6 @@ CLASSIFICATION_ONLY: frozenset[Rule] = frozenset(
         Rule.TASHIL,
         Rule.ISHMAM,
         Rule.SILAH,
-        Rule.SAKT,
         # Canonical Score facts, realized already coloured by the plain
         # default; these rules exist only to give a projection a name for
         # what it sees. See `rules/annotation.py`.

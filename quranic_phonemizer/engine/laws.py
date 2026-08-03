@@ -61,11 +61,11 @@ def _every_attribution_resolves(performance: Performance) -> None:
             f"produced it."
         )
     for attribution in performance.attributions:
-        if attribution.by not in known:
+        if attribution.by is not None and attribution.by not in known:
             raise LawError(
                 f"P2: attribution cites occurrence {attribution.by}, which "
                 f"does not exist. No sound exists except as the output of a "
-                f"named occurrence."
+                f"named occurrence, or as the Score's own unclaimed default."
             )
 
 

@@ -1,6 +1,6 @@
 """Classifiers for facts already decided on the Slot: imala, tashil,
-ishmam, silah and sakt. Each gets a named occurrence so a projection can
-find it; none of them emits an effect on the sound.
+ishmam and silah. Each gets a named occurrence so a projection can find
+it; none of them emits an effect on the sound.
 """
 from __future__ import annotations
 
@@ -81,28 +81,6 @@ class Silah:
             # At a pause the silah is absent; `WaqfEnding` accounts for the slot.
             return None
         return _classification(Rule.SILAH, at)
-
-
-@dataclass(frozen=True, slots=True)
-class Sakt:
-    """The brief pause without a breath, at Hafs' four sites."""
-
-    rule: Rule = Rule.SAKT
-    phase: Phase = Phase.BOUNDARY
-    triggers: frozenset = frozenset()
-
-    def look(
-        self, near: Neighbourhood, plan: Plan, at: SlotId,
-        boundaries: BoundaryPlan,
-    ) -> Verdict | None:
-        del plan, boundaries
-        word = near.word_of(at)
-        if word is None or not near.score.words[word].sakt_after:
-            return None
-        slots = near.score.words[word].slots
-        if not slots or slots[-1].id != at:
-            return None
-        return _classification(Rule.SAKT, at)
 
 
 @dataclass(frozen=True, slots=True)

@@ -44,7 +44,7 @@ def test_the_outcome_sets_have_the_counts_the_domain_gives_them() -> None:
     """Ikhfaa is the remainder, so a union check alone cannot catch a
     miscounted member."""
     by_rule = FOLLOWERS.by_rule
-    assert len(by_rule[Rule.IZHAR_HALQI]) == 6, "the six throat letters"
+    assert len(by_rule[Rule.IZHAR]) == 6, "the six throat letters"
     assert len(by_rule[Rule.IQLAB]) == 1, "only the baa"
     assert len(by_rule[Rule.IDGHAM_BI_GHUNNAH]) == 4, "يرملون minus two"
     assert len(by_rule[Rule.IDGHAM_BILA_GHUNNAH]) == 2, "lam and raa"
@@ -78,7 +78,6 @@ def test_tanween_and_noon_sakinah_are_one_rule(packed, hafs) -> None:
     named = {
         parts
         for o in performance.occurrences
-        if o.rule is not Rule.PLAIN
         for parts in o.parts.slots
     }
     assert triggers & named, "no noon slot participated in any occurrence"
@@ -101,7 +100,7 @@ def test_izhar_is_classification_only(packed, hafs) -> None:
     """It produces no sound of its own and still exists, so a projection can
     find it."""
     _, performance = performance_for(packed, hafs, 2, 6, RULES)
-    izhar = [o for o in performance.occurrences if o.rule is Rule.IZHAR_HALQI]
+    izhar = [o for o in performance.occurrences if o.rule is Rule.IZHAR]
     assert izhar, "2:6 has a noon before a throat letter"
     owned = {a.by for a in performance.attributions}
     assert all(o.id not in owned for o in izhar)
@@ -156,7 +155,7 @@ def test_every_sound_has_a_named_occurrence(packed, hafs) -> None:
     """Every attribution must name an occurrence that actually exists."""
     _, performance = performance_for(packed, hafs, 2, 2, RULES)
     known = {o.id for o in performance.occurrences}
-    assert all(a.by in known for a in performance.attributions)
+    assert all(a.by is None or a.by in known for a in performance.attributions)
     counts = collections.Counter(
         a.by for a in performance.attributions if isinstance(a, Hosts)
     )

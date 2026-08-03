@@ -90,12 +90,16 @@ class Occurrence:
 
 @dataclass(frozen=True, slots=True)
 class Hosts:
-    """Ordinary realization. `len(slots) > 1` is joint ownership."""
+    """Ordinary realization. `len(slots) > 1` is joint ownership.
+
+    `by` is `None` where the Score's own default fills the sound: no rule
+    claimed it, so there is nothing to cite.
+    """
 
     slots: tuple[SlotId, ...]
     aspect: Aspect
     sound: SoundId
-    by: OccurrenceId
+    by: OccurrenceId | None
 
 
 @dataclass(frozen=True, slots=True)
@@ -106,7 +110,7 @@ class Inserted:
     anchor: tuple[SlotId, Side]
     aspect: Aspect
     sound: SoundId
-    by: OccurrenceId
+    by: OccurrenceId | None
 
 
 @dataclass(frozen=True, slots=True)
@@ -117,7 +121,7 @@ class MergedInto:
     slots: tuple[SlotId, ...]
     aspect: Aspect
     sound: SoundId
-    by: OccurrenceId
+    by: OccurrenceId | None
 
 
 @dataclass(frozen=True, slots=True)
@@ -126,7 +130,7 @@ class Silent:
 
     slots: tuple[SlotId, ...]
     aspect: Aspect
-    by: OccurrenceId
+    by: OccurrenceId | None
 
 
 Attribution: TypeAlias = Hosts | Inserted | MergedInto | Silent

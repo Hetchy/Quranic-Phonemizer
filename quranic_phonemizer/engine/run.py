@@ -8,7 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from ..model.address import BoundaryPlan, SlotId, SoundId, VariantSelection
-from ..model.canon import NucleusKind, Onset, Phase, Rule, Score, Slot
+from ..model.canon import NucleusKind, Onset, Phase, Score, Slot
 from ..model.performance import (
     Aspect,
     Attribution,
@@ -18,7 +18,6 @@ from ..model.performance import (
     MergedInto,
     Nasal,
     Occurrence,
-    Participants,
     Performance,
     Silent,
     Sound,
@@ -37,7 +36,6 @@ from .plan import (
     Silence,
     SoundFeature,
 )
-from .plan import mint as plan_mint
 
 class MaterialisationError(AssertionError):
     """A Plan that cannot become a Performance. Names both addresses."""
@@ -92,10 +90,7 @@ def perform(
 
 
 def _fill_plain(plan: Plan, score: Score) -> list[tuple]:
-    """Realize every (slot, aspect) no verdict claimed, tagged `Rule.PLAIN`.
-
-    `PLAIN` can't be a classifier: it would conflict with every claiming rule.
-    """
+    """Every (slot, aspect) no verdict claimed, filled from the Score itself."""
     # Only effects that produce or remove a sound claim the slot; Recolour
     # and Relength modify an existing one and must not count as claiming it.
     claimed = {
@@ -137,13 +132,6 @@ def _materialise(
     selection: VariantSelection,
 ) -> Performance:
     mint = _Mint(score.words[0].location.verse if score.words else None)
-    # Minted through the same `plan_mint` scheme as every other occurrence,
-    # so its id cannot collide with one a rule mints independently.
-    plain = Occurrence(
-        plan_mint(Rule.PLAIN, SlotId(score.words[0].location.verse, 0)),
-        Rule.PLAIN,
-        Participants(),
-    )
     sounds: list[tuple[SoundId, Sound]] = []
     attributions: list[Attribution] = []
     occurrences: list[Occurrence] = []
@@ -152,10 +140,9 @@ def _materialise(
 
     for _, verdict in plan.entries:
         occurrences.append(verdict.occurrence)
-    occurrences.append(plain)
 
     _realize(plan, mint, colours, sounds, attributions, hosted)
-    _fill(plan, score, mint, colours, sounds, attributions, hosted, plain)
+    _fill(plan, score, mint, colours, sounds, attributions, hosted)
     _resolve_merges(plan, hosted, attributions)
 
     return Performance(
@@ -209,7 +196,7 @@ def _realize(plan, mint, colours, sounds, attributions, hosted) -> None:
                 )
 
 
-def _fill(plan, score, mint, colours, sounds, attributions, hosted, plain) -> None:
+def _fill(plan, score, mint, colours, sounds, attributions, hosted) -> None:
     """Every aspect no rule spoke for, said as the Score writes it."""
     lengths = {
         e.slot: e.length for e in plan.effects() if isinstance(e, Relength)
@@ -218,7 +205,7 @@ def _fill(plan, score, mint, colours, sounds, attributions, hosted, plain) -> No
         sound_id = mint.sound()
         sounds.append((sound_id, _plain_sound(slot, aspect, colours, lengths)))
         hosted[(slot.id, aspect)] = sound_id
-        attributions.append(Hosts((slot.id,), aspect, sound_id, plain.id))
+        attributions.append(Hosts((slot.id,), aspect, sound_id, None))
 
 
 def _resolve_merges(plan, hosted, attributions) -> None:

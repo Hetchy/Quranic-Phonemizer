@@ -46,8 +46,8 @@ class NoonSakinah:
             return None
 
         match self.followers.of(following.letter):
-            case Rule.IZHAR_HALQI:
-                return _classification(Rule.IZHAR_HALQI, at, following.id)
+            case Rule.IZHAR:
+                return _classification(Rule.IZHAR, at, following.id)
             case Rule.IQLAB:
                 return _nasal(
                     Rule.IQLAB, at, following.id,
@@ -59,7 +59,7 @@ class NoonSakinah:
                 ):
                     # Izhar mutlaq: inside one word the noon keeps itself.
                     # دنيا، بنيان، قنوان، صنوان are the only sites.
-                    return _classification(Rule.IZHAR_MUTLAQ, at, following.id)
+                    return _classification(Rule.IZHAR, at, following.id)
                 return _merge(Rule.IDGHAM_BI_GHUNNAH, at, following, nasal=True)
             case Rule.IDGHAM_BILA_GHUNNAH:
                 return _merge(

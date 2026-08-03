@@ -46,7 +46,9 @@ class AnchoredSound:
     slots: tuple[SlotId, ...]
     """Every slot that produced it. More than one is a merger."""
     graphemes: tuple[GraphemeId, ...]
-    rule: Rule
+    rule: Rule | None
+    """`None` where the Score's own default filled the sound: no rule
+    claimed it."""
     merged_from: tuple[SlotId, ...] = ()
     """Slots whose own sound was folded into this one."""
 
@@ -57,7 +59,7 @@ class SilentLetter:
 
     slot: SlotId
     graphemes: tuple[GraphemeId, ...]
-    rule: Rule
+    rule: Rule | None
 
 
 @dataclass(frozen=True, slots=True)
@@ -102,7 +104,7 @@ def anchored(
         SilentLetter(
             slot=slot,
             graphemes=_graphemes_for(writes, (slot,), attribution.aspect),
-            rule=rule_of[attribution.by],
+            rule=rule_of.get(attribution.by),
         )
         for attribution in performance.attributions
         if isinstance(attribution, Silent)
@@ -113,13 +115,13 @@ def anchored(
 
 def _owners(performance: Performance, rule_of) -> dict:
     """Which slots each sound is attributed to, and by which rule."""
-    out: dict[SoundId, tuple[tuple[SlotId, ...], Aspect, Rule]] = {}
+    out: dict[SoundId, tuple[tuple[SlotId, ...], Aspect, Rule | None]] = {}
     for attribution in performance.attributions:
         match attribution:
             case Hosts(slots=slots, aspect=aspect, sound=sound):
-                out[sound] = (slots, aspect, rule_of[attribution.by])
+                out[sound] = (slots, aspect, rule_of.get(attribution.by))
             case Inserted(anchor=(slot, _), aspect=aspect, sound=sound):
-                out[sound] = ((slot,), aspect, rule_of[attribution.by])
+                out[sound] = ((slot,), aspect, rule_of.get(attribution.by))
     return out
 
 

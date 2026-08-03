@@ -8,7 +8,7 @@ from __future__ import annotations
 from ...engine.classifier import RuleSet
 from ...model.address import Riwayah
 from ...model.canon import Phase
-from ...rules.annotation import CanonicalColour, Sakt, Silah, Tarqeeq
+from ...rules.annotation import CanonicalColour, Silah, Tarqeeq
 from ...rules.boundary import (
     PausalAlif,
     SoftenedHamza,
@@ -41,7 +41,7 @@ def _build() -> RuleSet:
                 WaslHamza(), SoftenedHamza(), TanweenAtWaqf(), PausalAlif(),
                 TanweenBeforeWasl(),
                 WaqfEnding(yaa=khilaf().yaa),
-                TaaMarbutaAtWaqf(), Sakt(),
+                TaaMarbutaAtWaqf(),
             ),
             Phase.MERGE: (
                 NoonSakinah(followers=tables.followers_of_noon),
