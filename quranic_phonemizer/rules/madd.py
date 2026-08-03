@@ -20,16 +20,11 @@ from ..engine.plan import (
 )
 from ..model.address import BoundaryPlan, SlotId
 from ..model.canon import CanonLetter as L
-from ..model.canon import NucleusKind, Onset, Quality, Rule
+from ..model.canon import Onset, Quality, Rule, VowelForm
 from ..model.performance import Aspect, Occurrence, Participants, Vowel
 
 #: Which glide lengthens which vowel.
 GLIDE_OF = {Quality.U: L.WAW, Quality.I: L.YA}
-
-#: Nuclei a stop leaves standing. Only a final short vowel drops.
-KEPT_AT_A_STOP = frozenset(
-    {NucleusKind.LONG, NucleusKind.SILAH, NucleusKind.PAUSAL_LONG}
-)
 
 
 @dataclass(frozen=True, slots=True)
@@ -54,12 +49,12 @@ class PausalGlide:
         if slot.onset is Onset.GEMINATE:
             # A doubled glide is a consonant -- `ٱلْعَلِىُّ` ends `-iyy`, not `-ii`.
             return None
-        if slot.nucleus.kind in KEPT_AT_A_STOP:
+        if slot.nucleus.sounds_long:
             # A glide the stop cannot strip still carries its own vowel, so it
             # is a consonant: `نَسِيَا` ends `-iyaa`, not `-iiaa`.
             return None
         before = near.before(at)
-        if before is None or before.nucleus.kind is not NucleusKind.SHORT:
+        if before is None or not before.nucleus.is_short:
             return None
         if GLIDE_OF.get(before.nucleus.quality) is not slot.letter:
             return None
@@ -92,7 +87,7 @@ class IltiqaRepair:
 
     rule: Rule = Rule.ILTIQA_REPAIR
     phase: Phase = Phase.LENGTH
-    triggers: frozenset = frozenset({NucleusKind.LONG, NucleusKind.SILAH})
+    triggers: frozenset = frozenset({VowelForm.LONG})
 
     def look(
         self, near: Neighbourhood, plan: Plan, at: SlotId,
@@ -102,7 +97,7 @@ class IltiqaRepair:
         slot, word = near.slot(at), near.word_of(at)
         if slot is None or word is None:
             return None
-        if slot.nucleus.kind not in (NucleusKind.LONG, NucleusKind.SILAH):
+        if not (slot.nucleus.is_long or slot.nucleus.is_silah):
             return None
         slots = near.score.words[word].slots
         if not slots or slots[-1].id != at:
@@ -134,10 +129,7 @@ class IltiqaRepair:
 def _opens_on_a_sakin(slot) -> bool:
     """A geminate consonant is a sakin plus a voweled one, so `ٱلَّذِى` meets a
     preceding madd with a sakin exactly as a written sukun would."""
-    return (
-        slot.nucleus.kind is NucleusKind.SILENT
-        or slot.onset is Onset.GEMINATE
-    )
+    return slot.nucleus.is_silent or slot.onset is Onset.GEMINATE
 
 
 @dataclass(frozen=True, slots=True)
@@ -150,9 +142,7 @@ class MaddClass:
 
     rule: Rule = Rule.MADD_LAZIM
     phase: Phase = Phase.LENGTH
-    triggers: frozenset = frozenset(
-        {NucleusKind.LONG, NucleusKind.PAUSAL_LONG, NucleusKind.SILAH}
-    )
+    triggers: frozenset = frozenset({VowelForm.LONG})
 
     def look(
         self, near: Neighbourhood, plan: Plan, at: SlotId,
@@ -162,7 +152,7 @@ class MaddClass:
         slot, word = near.slot(at), near.word_of(at)
         if slot is None or word is None:
             return None
-        if slot.nucleus.kind not in self.triggers:
+        if not slot.nucleus.sounds_long:
             return None
         slots = near.score.words[word].slots
         final = bool(slots) and slots[-1].id == at
@@ -182,7 +172,7 @@ class MaddClass:
             )
             return _classify(rule, at, following.id)
 
-        if following.nucleus.kind is NucleusKind.SILENT:
+        if following.nucleus.is_silent:
             # A sakin already in the Score is permanent -- `ٱلضَّآلِّينَ` and any muqattaat letter ending in one. Lazim.
             return _classify(Rule.MADD_LAZIM, at, following.id)
 
@@ -213,12 +203,12 @@ class MaddLeen:
         slot, word = near.slot(at), near.word_of(at)
         if slot is None or word is None:
             return None
-        if slot.nucleus.kind is not NucleusKind.SILENT:
+        if not slot.nucleus.is_silent:
             return None
         if slot.onset is Onset.GEMINATE:
             return None
         before = near.before(at)
-        if before is None or before.nucleus.kind is not NucleusKind.SHORT:
+        if before is None or not before.nucleus.is_short:
             return None
         if before.nucleus.quality is not Quality.A:
             return None

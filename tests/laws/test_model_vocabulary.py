@@ -59,6 +59,13 @@ def test_deleted_names_stay_deleted() -> None:
         (canon, "Colouring"),
         (canon, "Condition"),
         (canon, "SPELLING_EXPANSION"),
+        (canon, "NucleusKind"),
+        (canon, "Silent"),
+        (canon, "Short"),
+        (canon, "Long"),
+        (canon, "Silah"),
+        (canon, "PausalLong"),
+        (canon, "SILENT"),
         (performance, "Attach"),
         (performance, "SilenceReason"),
         (inscription, "Inert"),
@@ -85,17 +92,24 @@ def test_slot_origin_meets_the_conditions_that_let_it_return() -> None:
     )
     slot = canon.Slot(
         id=None, letter=canon.CanonLetter.NOON, onset=canon.Onset.PLAIN,
-        nucleus=canon.SILENT, origin=canon.SlotOrigin.SPELLED,
+        nucleus=canon.Nucleus.silent(), origin=canon.SlotOrigin.SPELLED,
     )
     assert slot.spelled, "the old flag stays readable through the enum"
 
 
 def test_nucleus_union_covers_the_conditionality_table() -> None:
     """Conditionality lives in the canonical vocabulary, in exactly one
-    place."""
-    kinds = {member.value for member in canon.NucleusKind}
-    assert kinds == {"silent", "short", "long", "silah", "pausal_long"}
-    assert canon.Onset.WASL and canon.Onset.SILAH, "the two mirrors"
+    place: the joined and stopped readings of one `Nucleus`."""
+    forms = {member.value for member in canon.VowelForm}
+    assert forms == {"absent", "short", "long"}
+    silent = canon.Nucleus.silent()
+    short = canon.Nucleus.short(canon.Quality.A)
+    long = canon.Nucleus.long(canon.Quality.A)
+    silah = canon.Nucleus.silah(canon.Quality.A)
+    pausal_long = canon.Nucleus.pausal_long(canon.Quality.A)
+    assert (silent.is_silent, short.is_short, long.is_long) == (True, True, True)
+    assert (silah.is_silah, pausal_long.is_pausal_long) == (True, True)
+    assert canon.Onset.WASL and canon.Onset.GLIDE, "the two mirrors"
 
 
 def test_spelling_union_has_the_four_members() -> None:

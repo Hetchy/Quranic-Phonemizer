@@ -4,7 +4,7 @@ grammar; a list cannot.
 """
 from __future__ import annotations
 
-from ...model.canon import ABJAD, CanonLetter, Onset, Quality, Short
+from ...model.canon import ABJAD, CanonLetter, Nucleus, Onset, Quality
 from ...model.inscription import SlotFact
 from .lexeme import alif_in_leen
 from .vocabulary import Context, Outcome, Sets, register
@@ -203,7 +203,7 @@ def hamzat_wasl(context: Context) -> Outcome:
     "sukun", "dagger", "combining_hamza", "madd",
 ))
 def wasl_helping_vowel(context: Context) -> Outcome:
-    return Sets(SlotFact.NUCLEUS, Short(_helping_vowel(context)))
+    return Sets(SlotFact.NUCLEUS, Nucleus.short(_helping_vowel(context)))
 
 
 def _after_proclitics(context: Context) -> bool:

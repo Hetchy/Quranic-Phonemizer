@@ -9,11 +9,8 @@ from ...model.canon import (
     CARRIER_OF,
     CARRIERS,
     CanonLetter,
-    Long,
-    NucleusKind,
-    PausalLong,
+    Nucleus,
     Quality,
-    Silah,
 )
 from ...model.inscription import SlotFact
 from .vocabulary import Absent, Context, Outcome, Sets, Shows, Target, register
@@ -33,9 +30,6 @@ VOWEL_ROLES = frozenset(
         "silah_ya",
     }
 )
-LONG_KINDS = frozenset(
-    {NucleusKind.LONG, NucleusKind.PAUSAL_LONG, NucleusKind.SILAH}
-)
 
 
 @register("length_a", requires=(
@@ -51,16 +45,16 @@ def dagger(context: Context) -> Outcome:
     cluster = context.cluster
     previous = context.previous_nucleus
     if not (cluster.dagger_host and not cluster.has(*VOWEL_ROLES)):
-        return Sets(SlotFact.NUCLEUS, Long(Quality.A))
+        return Sets(SlotFact.NUCLEUS, Nucleus.long(Quality.A))
     if previous is None:
-        return Sets(SlotFact.NUCLEUS, Long(Quality.A))
-    if previous.kind is NucleusKind.SHORT and previous.quality is Quality.A:
-        return Sets(SlotFact.NUCLEUS, Long(Quality.A), Target.PREVIOUS)
-    if previous.kind in LONG_KINDS:
+        return Sets(SlotFact.NUCLEUS, Nucleus.long(Quality.A))
+    if previous.is_short and previous.quality is Quality.A:
+        return Sets(SlotFact.NUCLEUS, Nucleus.long(Quality.A), Target.PREVIOUS)
+    if previous.sounds_long:
         # The rasm carrier of a length already written: `مَجْر۪ىٰهَا` puts the
         # imala on the raa and draws the yaa that carries it.
         return Absent()
-    return Sets(SlotFact.NUCLEUS, Long(Quality.A))
+    return Sets(SlotFact.NUCLEUS, Nucleus.long(Quality.A))
 
 
 @register("carrier", requires=(
@@ -92,11 +86,11 @@ def carrier(context: Context) -> Outcome:
         # whose seat Uthmani precomposes.
         return Sets(SlotFact.LETTER, letter)
 
-    if previous.kind is NucleusKind.SHORT:
+    if previous.is_short:
         if letter is CARRIER_OF[previous.quality]:
             # The pronoun haa's vowel is absent when the word is stopped on,
             # so the carrier the rasm omits there spells a conditional length.
-            length = Silah if carries_silah(context) else Long
+            length = Nucleus.silah if carries_silah(context) else Nucleus.long
             return Sets(SlotFact.NUCLEUS, length(previous.quality), Target.PREVIOUS)
         if (
             cluster.bare_rasm
@@ -107,10 +101,10 @@ def carrier(context: Context) -> Outcome:
             # IndoPak writes the alif maqsura as a plain yaa; Uthmani writes
             # `ى`. Both stand for an alif nobody wrote - unless a sukun says
             # the yaa is the consonant of a diphthong, as in `ٱثْنَىْ`.
-            return Sets(SlotFact.NUCLEUS, Long(Quality.A), Target.PREVIOUS)
-    if previous.kind in LONG_KINDS:
+            return Sets(SlotFact.NUCLEUS, Nucleus.long(Quality.A), Target.PREVIOUS)
+    if previous.sounds_long:
         return Absent()
-    if previous.kind is NucleusKind.SILENT and letter is not CanonLetter.ALIF:
+    if previous.is_silent and letter is not CanonLetter.ALIF:
         return Absent()
     return Sets(SlotFact.LETTER, letter)
 
@@ -126,7 +120,7 @@ def pausal_length(context: Context) -> Outcome:
     the slot before it; IndoPak writes no equivalent mark at all.
     """
     del context
-    return Sets(SlotFact.NUCLEUS, PausalLong(Quality.A), Target.PREVIOUS)
+    return Sets(SlotFact.NUCLEUS, Nucleus.pausal_long(Quality.A), Target.PREVIOUS)
 
 
 @register("shows_long")

@@ -14,7 +14,7 @@ from ..engine.plan import MergeInto, Phase, Plan, Realize, Verdict, mint
 from ..model.address import BoundaryPlan, SlotId
 from ..model.canon import ABJAD
 from ..model.canon import CanonLetter as L
-from ..model.canon import CanonLetter, NucleusKind, Onset, Quality, Rule
+from ..model.canon import CanonLetter, Onset, Quality, Rule
 from ..model.performance import Aspect, Consonant, Occurrence, Participants
 
 
@@ -54,7 +54,7 @@ class ArticleShape:
             # `ءَآلذَّكَرَيْنِ`: after an interrogative hamza the article's own
             # hamza is not written as one, it is the length that replaced it.
             return True
-        if before.letter is not L.LAM or before.nucleus.kind is NucleusKind.SILENT:
+        if before.letter is not L.LAM or before.nucleus.is_silent:
             return False
         # `لِلنَّاسِ` writes no hamza: the lam proclitic swallows the article's
         # alif. `يُضْلِلْ` is the same pair of lams inside a stem, so what
@@ -78,7 +78,7 @@ class ArticleLam:
     ) -> Verdict | None:
         del plan, boundaries
         slot = near.slot(at)
-        if slot is None or slot.nucleus.kind is not NucleusKind.SILENT:
+        if slot is None or not slot.nucleus.is_silent:
             return None
         if not self.article(near, at):
             return None
@@ -121,7 +121,7 @@ class ArticleLam:
 def _is_ibdal_alif(slot) -> bool:
     return (
         slot.letter is L.HAMZA
-        and slot.nucleus.kind is NucleusKind.LONG
+        and slot.nucleus.is_long
         and slot.nucleus.quality is Quality.A
     )
 

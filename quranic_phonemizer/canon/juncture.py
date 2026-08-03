@@ -7,11 +7,9 @@ from __future__ import annotations
 
 from ..model.canon import (
     CanonLetter,
-    NucleusKind,
+    Nucleus,
     Onset,
     Quality,
-    Short,
-    Silent,
     SlotOrigin,
 )
 from ..model.inscription import SlotFact
@@ -33,13 +31,13 @@ def apply_cross_word_noon(reading, drafts, right_context, scribe) -> None:
 
 
 def _restore_noon(reading, drafts, last, word_index: int, scribe) -> None:
-    if last.letter is CanonLetter.NOON and last.nucleus.kind is NucleusKind.SILENT:
+    if last.letter is CanonLetter.NOON and last.nucleus.is_silent:
         return   # already a tanween noon; nothing was split
-    last.nucleus = Short(getattr(last.nucleus, "quality", Quality.A))
+    last.nucleus = Nucleus.short(last.nucleus.quality or Quality.A)
     noon = _Draft(
         letter=CanonLetter.NOON,
         onset=Onset.PLAIN,
-        nucleus=Silent(),
+        nucleus=Nucleus.silent(),
         cluster=last.cluster,
         origin=SlotOrigin.NUNATION,
     )

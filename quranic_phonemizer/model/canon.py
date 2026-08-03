@@ -7,7 +7,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import TypeAlias
 
 from .address import Location, Riwayah, SlotId, VariantSelection
 
@@ -67,13 +66,13 @@ class Onset(StrEnum):
     """The closed set of mutually exclusive onset states.
 
     Boundary-conditional onset *presence* lives here; boundary-conditional
-    *length* lives on `Nucleus`. `WASL` and `SILAH` are exact mirrors.
+    *length* lives on `Nucleus`. `WASL` and `GLIDE` are exact mirrors.
     """
 
     PLAIN = "plain"
     GEMINATE = "geminate"
     WASL = "wasl"
-    SILAH = "silah"
+    GLIDE = "glide"
     TASHIL = "tashil"
 
 
@@ -109,55 +108,115 @@ class Annotation(StrEnum):
     IMALA = "imala"
 
 
-class NucleusKind(StrEnum):
-    """The union's discriminant, exposed so `Trigger` can index on it."""
+class VowelForm(StrEnum):
+    """A vowel's shape in one boundary reading, apart from its quality."""
 
-    SILENT = "silent"
+    ABSENT = "absent"
     SHORT = "short"
     LONG = "long"
-    SILAH = "silah"
-    PAUSAL_LONG = "pausal_long"
 
 
 @dataclass(frozen=True, slots=True)
-class Silent:
-    """No vowel at this position. Uthmani's absent harakah and IndoPak's
-    `ْ` are two spellings of this one value."""
+class VowelState:
+    """One boundary reading of a vowel: its form, and its quality if voiced."""
 
-    kind: NucleusKind = NucleusKind.SILENT
+    form: VowelForm
+    quality: Quality | None = None
 
 
-@dataclass(frozen=True, slots=True)
-class Short:
-    quality: Quality
-    kind: NucleusKind = NucleusKind.SHORT
+_ABSENT_STATE = VowelState(VowelForm.ABSENT)
 
 
 @dataclass(frozen=True, slots=True)
-class Long:
-    quality: Quality
-    kind: NucleusKind = NucleusKind.LONG
+class Nucleus:
+    """A vowel's two readings: joined to what follows, and stopped on.
 
+    An ordinary vowel reads the same both ways; the pronoun haa's vowel and
+    the seven alifs are the two ways the readings can differ.
+    """
 
-@dataclass(frozen=True, slots=True)
-class Silah:
-    """Long in wasl, absent at pause."""
+    joined: VowelState
+    stopped: VowelState
 
-    quality: Quality
-    kind: NucleusKind = NucleusKind.SILAH
+    @property
+    def quality(self) -> Quality | None:
+        return self.joined.quality
 
+    @property
+    def is_silent(self) -> bool:
+        return self.joined.form is VowelForm.ABSENT
 
-@dataclass(frozen=True, slots=True)
-class PausalLong:
-    """Short in wasl, long at pause. The seven alifs."""
+    @property
+    def is_short(self) -> bool:
+        return (
+            self.joined.form is VowelForm.SHORT
+            and self.stopped.form is VowelForm.SHORT
+        )
 
-    quality: Quality
-    kind: NucleusKind = NucleusKind.PAUSAL_LONG
+    @property
+    def is_long(self) -> bool:
+        return (
+            self.joined.form is VowelForm.LONG
+            and self.stopped.form is VowelForm.LONG
+        )
 
+    @property
+    def is_silah(self) -> bool:
+        return (
+            self.joined.form is VowelForm.LONG
+            and self.stopped.form is VowelForm.ABSENT
+        )
 
-Nucleus: TypeAlias = Silent | Short | Long | Silah | PausalLong
+    @property
+    def is_pausal_long(self) -> bool:
+        return (
+            self.joined.form is VowelForm.SHORT
+            and self.stopped.form is VowelForm.LONG
+        )
 
-SILENT = Silent()
+    @property
+    def sounds_long(self) -> bool:
+        """Long in either reading: an ordinary long vowel, a silah, or one
+        of the seven alifs."""
+        return (
+            self.joined.form is VowelForm.LONG
+            or self.stopped.form is VowelForm.LONG
+        )
+
+    def with_quality(self, quality: Quality) -> Nucleus:
+        """The same joined/stopped shape, holding a different quality --
+        a khilaf site disputes the vowel, never the shape it takes."""
+        return Nucleus(
+            VowelState(self.joined.form, quality)
+            if self.joined.form is not VowelForm.ABSENT else _ABSENT_STATE,
+            VowelState(self.stopped.form, quality)
+            if self.stopped.form is not VowelForm.ABSENT else _ABSENT_STATE,
+        )
+
+    @classmethod
+    def silent(cls) -> Nucleus:
+        return cls(_ABSENT_STATE, _ABSENT_STATE)
+
+    @classmethod
+    def short(cls, quality: Quality) -> Nucleus:
+        state = VowelState(VowelForm.SHORT, quality)
+        return cls(state, state)
+
+    @classmethod
+    def long(cls, quality: Quality) -> Nucleus:
+        state = VowelState(VowelForm.LONG, quality)
+        return cls(state, state)
+
+    @classmethod
+    def silah(cls, quality: Quality) -> Nucleus:
+        return cls(VowelState(VowelForm.LONG, quality), _ABSENT_STATE)
+
+    @classmethod
+    def pausal_long(cls, quality: Quality) -> Nucleus:
+        return cls(
+            VowelState(VowelForm.SHORT, quality),
+            VowelState(VowelForm.LONG, quality),
+        )
 
 
 class SlotOrigin(StrEnum):

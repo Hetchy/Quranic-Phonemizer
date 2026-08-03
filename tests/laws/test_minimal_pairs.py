@@ -10,7 +10,7 @@ import pytest
 from conftest import score_for
 from quranic_phonemizer.engine.run import perform
 from quranic_phonemizer.model.address import BoundaryPlan, Junction
-from quranic_phonemizer.model.canon import Onset, Quality, Rule, Short
+from quranic_phonemizer.model.canon import Nucleus, Onset, Quality, Rule
 from quranic_phonemizer.render.recite import phonemes_by_word
 from quranic_phonemizer.riwayat.hafs import HAFS
 
@@ -133,7 +133,7 @@ def test_the_plural_meem_is_voweled_before_a_prosthetic_hamza(
     """Two quiescent letters would meet otherwise, so `ـكُمْ` takes a damma
     that only the following word calls for."""
     score = score_for(packed, hafs, 6, 93)
-    assert score.words[33].slots[-1].nucleus == Short(Quality.U)
+    assert score.words[33].slots[-1].nucleus == Nucleus.short(Quality.U)
     assert _word(packed, hafs, alphabet, (6, 93, 34)) == "ʔaŋfusakum"
 
 

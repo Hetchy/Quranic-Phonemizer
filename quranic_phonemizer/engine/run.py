@@ -8,7 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from ..model.address import BoundaryPlan, SlotId, SoundId, VariantSelection
-from ..model.canon import NucleusKind, Onset, Score, Slot
+from ..model.canon import Onset, Score, Slot
 from ..model.performance import (
     Aspect,
     Attribution,
@@ -117,11 +117,13 @@ def _triggered(classifier, slot: Slot) -> bool:
     triggers = classifier.triggers
     if not triggers:
         return True
+    nucleus = slot.nucleus
     return (
         slot.letter in triggers
-        or slot.nucleus.kind in triggers
+        or nucleus.joined.form in triggers
+        or nucleus.stopped.form in triggers
         or slot.onset in triggers
-        or getattr(slot.nucleus, "quality", None) in triggers
+        or nucleus.quality in triggers
         or bool(slot.annotations & triggers)
     )
 
@@ -165,9 +167,7 @@ def _plain_sound(slot: Slot, aspect: Aspect, colours, lengths=None) -> Sound:
             geminate=slot.onset is Onset.GEMINATE,
             emphatic=emphatic,
         )
-    long = slot.nucleus.kind in (
-        NucleusKind.LONG, NucleusKind.SILAH, NucleusKind.PAUSAL_LONG
-    )
+    long = slot.nucleus.sounds_long
     override = (lengths or {}).get(slot.id)
     if override is not None:
         long = override is Length.LONG
@@ -260,7 +260,7 @@ def _apply_colours(effect: Realize, colours) -> Sound:
 
 def has_content(slot: Slot, aspect: Aspect) -> bool:
     """`CONSONANT` always has canonical content; `VOWEL` has it unless the
-    nucleus is `Silent`. A canonically absent nucleus needs no Silent edge."""
+    nucleus is silent. A canonically absent nucleus needs no Silent edge."""
     if aspect is Aspect.CONSONANT:
         return True
-    return slot.nucleus.kind is not NucleusKind.SILENT
+    return not slot.nucleus.is_silent

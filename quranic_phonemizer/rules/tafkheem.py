@@ -13,7 +13,6 @@ from ..model.canon import CanonLetter as L
 from ..model.canon import (
     Annotation,
     CanonLetter,
-    NucleusKind,
     Onset,
     Quality,
     Rule,
@@ -100,7 +99,7 @@ def _raa_is_heavy(near, slot, plan, always_heavy) -> bool:
     if (
         before is not None
         and before.letter is L.YA
-        and before.nucleus.kind is NucleusKind.SILENT
+        and before.nucleus.is_silent
     ):
         # A raa after a leen yaa follows the yaa and stays light.
         return False
@@ -157,7 +156,7 @@ def _governing(near: Neighbourhood, slot, plan):
     for _ in range(MAX_LOOKBACK):
         if before is None:
             return None
-        silent = before.nucleus.kind is NucleusKind.SILENT
+        silent = before.nucleus.is_silent
         if not (silent or _silenced(plan, before)):
             return before
         before = near.before(before.id)
@@ -165,4 +164,4 @@ def _governing(near: Neighbourhood, slot, plan):
 
 
 def _quality(slot):
-    return getattr(slot.nucleus, "quality", None)
+    return slot.nucleus.quality

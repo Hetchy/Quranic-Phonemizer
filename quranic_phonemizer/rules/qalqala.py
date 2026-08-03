@@ -10,7 +10,7 @@ from dataclasses import dataclass, field
 from ..engine.neighbourhood import Neighbourhood
 from ..engine.plan import Phase, Plan, Realize, Verdict, mint
 from ..model.address import BoundaryPlan, SlotId
-from ..model.canon import CanonLetter, NucleusKind, Onset, Rule
+from ..model.canon import CanonLetter, Onset, Rule
 from ..model.performance import (
     Aspect,
     Occurrence,
@@ -44,7 +44,7 @@ class Qalqala:
 
         # The echo needs a real closure: either canonically silent, or
         # silenced by a BOUNDARY rule. A long final vowel is neither.
-        canonically = slot.nucleus.kind is NucleusKind.SILENT
+        canonically = slot.nucleus.is_silent
         silenced = plan.merged_away(at, Aspect.VOWEL)
         if not (canonically or silenced):
             return None
@@ -66,7 +66,7 @@ class Qalqala:
     def _consumed(self, near: Neighbourhood, at: SlotId, slot) -> bool:
         """A closure the next consonant assimilates: identical, close or
         homorganic, and joined -- the same pair table `Idgham` reads."""
-        if slot.nucleus.kind is not NucleusKind.SILENT:
+        if not slot.nucleus.is_silent:
             return False
         following = near.after(at)
         if following is None:

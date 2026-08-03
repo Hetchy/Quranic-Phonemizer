@@ -4,7 +4,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from ..model.address import KhilafId, VariantSelection
-from ..model.canon import ABJAD, NucleusKind, Onset
+from ..model.canon import ABJAD, Onset
 from ..model.performance import NasalPlace
 
 #: Both readings of the two bilabial hidings are taught and both are correct.
@@ -106,9 +106,7 @@ def vocalised_word(word) -> str:
     from the Score, so a vowel a stop removes is still in the key."""
     out = []
     for slot in word.slots:
-        quality = getattr(slot.nucleus, "quality", None)
-        if slot.nucleus.kind is NucleusKind.SILENT:
-            quality = None
+        quality = slot.nucleus.quality
         out.append(
             ABJAD[slot.letter.value]
             + ("~" if slot.onset is Onset.GEMINATE else "")

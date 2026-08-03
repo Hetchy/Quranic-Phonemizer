@@ -21,11 +21,11 @@ from ..engine.plan import (
 from ..model.address import BoundaryPlan, KhilafId, SlotId
 from ..model.canon import (
     CanonLetter,
-    NucleusKind,
     Onset,
     Quality,
     Rule,
     SlotOrigin,
+    VowelForm,
 )
 from ..model.performance import (
     Aspect,
@@ -70,16 +70,16 @@ class WaqfEnding:
             return None
 
         effects = []
-        if slot.nucleus.kind is NucleusKind.SHORT:
+        if slot.nucleus.is_short:
             effects.append(Silence(at, Aspect.VOWEL))
-        elif slot.nucleus.kind is NucleusKind.SILAH:
+        elif slot.nucleus.is_silah:
             # Silah is long in wasl and absent at pause, mirroring `Onset.WASL`.
             effects.append(Silence(at, Aspect.VOWEL))
-        elif slot.nucleus.kind is NucleusKind.PAUSAL_LONG:
+        elif slot.nucleus.is_pausal_long:
             effects.append(
                 Realize(at, Aspect.VOWEL, Vowel(slot.nucleus.quality, True))
             )
-        if slot.onset is Onset.SILAH and not self._kept(near, word):
+        if slot.onset is Onset.GLIDE and not self._kept(near, word):
             # The pronoun yaa's onset must go too, or a stray glide remains,
             # and the stop then lands on the letter before it.
             effects.append(Silence(at, Aspect.CONSONANT))
@@ -156,7 +156,7 @@ class SoftenedHamza:
         if (
             following is None
             or following.letter is not CanonLetter.HAMZA
-            or following.nucleus.kind is not NucleusKind.SILENT
+            or not following.nucleus.is_silent
         ):
             return None
         return Verdict(
@@ -210,14 +210,14 @@ class TanweenBeforeWasl:
 class PausalAlif:
     """The seven alifs: long at a pause, short when the word is joined to.
 
-    The mirror of `Onset.SILAH`, which `WaqfEnding` removes at a stop.
+    The mirror of `Onset.GLIDE`, which `WaqfEnding` removes at a stop.
     """
     # Emits `Relength`, not a realization: the vowel is still plainly
     # produced, and only its length changes.
 
     rule: Rule = Rule.PAUSAL_ALIF
     phase: Phase = Phase.BOUNDARY
-    triggers: frozenset = frozenset({NucleusKind.PAUSAL_LONG})
+    triggers: frozenset = frozenset({VowelForm.LONG})
 
     def look(
         self, near: Neighbourhood, plan: Plan, at: SlotId,
@@ -227,7 +227,7 @@ class PausalAlif:
         slot, word = near.slot(at), near.word_of(at)
         if slot is None or word is None:
             return None
-        if slot.nucleus.kind is not NucleusKind.PAUSAL_LONG:
+        if not slot.nucleus.is_pausal_long:
             return None
         if boundaries.stopped_on(word):
             # Stopped on, the alif is said and `WaqfEnding` owns the slot.
@@ -266,7 +266,7 @@ class TanweenAtWaqf:
         if slot.origin is not SlotOrigin.NUNATION:
             return None
         base = near.before(at)
-        if base is None or base.nucleus.kind is not NucleusKind.SHORT:
+        if base is None or not base.nucleus.is_short:
             return None
         effects = [Silence(at, Aspect.CONSONANT)]
         rule = Rule.WAQF_ENDING
@@ -337,6 +337,6 @@ def _hands_the_stop_back(near: Neighbourhood, at: SlotId):
     if near.first_of_word(at):
         return ()
     before = near.before(at)
-    if before is None or before.nucleus.kind is not NucleusKind.SHORT:
+    if before is None or not before.nucleus.is_short:
         return ()
     return (Silence(before.id, Aspect.VOWEL),)

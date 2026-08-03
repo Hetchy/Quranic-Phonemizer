@@ -11,7 +11,7 @@ from ..engine.neighbourhood import Neighbourhood
 from ..engine.plan import MergeInto, Phase, Plan, Realize, Verdict, mint
 from ..model.address import BoundaryPlan, SlotId
 from ..model.canon import CanonLetter as L
-from ..model.canon import CanonLetter, NucleusKind, Rule
+from ..model.canon import CanonLetter, Rule
 from ..model.performance import Aspect, Consonant, Occurrence, Participants
 from .lam_shamsiyyah import ArticleShape
 from .meem_sakinah import NASAL_LETTERS
@@ -49,7 +49,7 @@ class Idgham:
     ) -> Verdict | None:
         del plan, boundaries
         here = near.slot(at)
-        if here is None or here.nucleus.kind is not NucleusKind.SILENT:
+        if here is None or not here.nucleus.is_silent:
             return None
         if self.article(near, at):
             return None  # lam shamsiyyah owns this slot

@@ -12,9 +12,9 @@ from ..model.address import BoundaryPlan, SlotId
 from ..model.canon import CanonLetter as L
 from ..model.canon import (
     Annotation,
-    NucleusKind,
     Onset,
     Rule,
+    VowelForm,
 )
 from ..model.performance import Occurrence, Participants
 from .tafkheem import Weight
@@ -62,7 +62,7 @@ class Silah:
 
     rule: Rule = Rule.SILAH
     phase: Phase = Phase.LENGTH
-    triggers: frozenset = frozenset({NucleusKind.SILAH})
+    triggers: frozenset = frozenset({VowelForm.LONG})
 
     def look(
         self, near: Neighbourhood, plan: Plan, at: SlotId,
@@ -72,7 +72,7 @@ class Silah:
         slot, word = near.slot(at), near.word_of(at)
         if slot is None or word is None:
             return None
-        if slot.nucleus.kind is not NucleusKind.SILAH:
+        if not slot.nucleus.is_silah:
             return None
         if boundaries.stopped_on(word):
             # At a pause the silah is absent; `WaqfEnding` accounts for the slot.

@@ -11,17 +11,7 @@ from typing import Any, TypeAlias
 
 from ..dataio import load_yaml, require_keys
 from ..model.address import Location, Riwayah, Script, SlotId, VerseRef
-from ..model.canon import (
-    CanonLetter,
-    Long,
-    Nucleus,
-    Onset,
-    PausalLong,
-    Quality,
-    Short,
-    Silah,
-    Silent,
-)
+from ..model.canon import CanonLetter, Nucleus, Onset, Quality
 from ..model.inscription import SlotFact
 
 SCHEMA_VERSION = 1
@@ -156,11 +146,11 @@ def _enum(enum: type, raw: object, *, where: str, what: str) -> object:
 
 
 _NUCLEUS_KINDS = {
-    "silent": Silent,
-    "short": Short,
-    "long": Long,
-    "silah": Silah,
-    "pausallong": PausalLong,
+    "silent": Nucleus.silent,
+    "short": Nucleus.short,
+    "long": Nucleus.long,
+    "silah": Nucleus.silah,
+    "pausallong": Nucleus.pausal_long,
 }
 
 
@@ -174,10 +164,10 @@ def _nucleus(raw: object, *, where: str) -> Nucleus:
             f"{where}: nucleus kind {raw['kind']!r} is outside the vocabulary "
             f"{sorted(_NUCLEUS_KINDS)}"
         )
-    if factory is Silent:
-        return Silent()
+    if kind == "silent":
+        return Nucleus.silent()
     quality = _enum(Quality, raw.get("quality"), where=where, what="Quality")
-    return factory(quality)  # type: ignore[operator]
+    return factory(quality)
 
 
 # ------------------------------------------------------------------- loading

@@ -5,7 +5,7 @@ it is `Onset.GEMINATE`. Decided by the sound, never by glyph position.
 """
 from __future__ import annotations
 
-from ...model.canon import NucleusKind, Onset
+from ...model.canon import Onset
 from ...model.inscription import SlotFact
 from .vocabulary import Attests, Context, Outcome, Sets, register
 
@@ -23,4 +23,4 @@ def _preceded_by_silence(context: Context) -> bool:
         # preceding sound is silent even though it is not canonically absent.
         return True
     previous = context.previous_nucleus
-    return previous is not None and previous.kind is NucleusKind.SILENT
+    return previous is not None and previous.is_silent

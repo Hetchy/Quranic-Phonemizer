@@ -82,8 +82,8 @@ def _every_aspect_with_content_is_accounted_for(
             if has_content(slot, aspect) and (slot.id, aspect) not in covered:
                 raise LawError(
                     f"P3: {slot.id} {aspect.value} has canonical content "
-                    f"({slot.letter.value}, {slot.nucleus.kind.value}) but no "
-                    f"attribution and no explicit Silent edge"
+                    f"({slot.letter.value}, {slot.nucleus.joined.form.value}) "
+                    f"but no attribution and no explicit Silent edge"
                 )
 
 

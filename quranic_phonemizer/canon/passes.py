@@ -12,11 +12,9 @@ from ..model.canon import (
     ABJAD,
     Annotation,
     CanonLetter,
-    NucleusKind,
+    Nucleus,
     Onset,
-    PausalLong,
     Quality,
-    Short,
 )
 from ..model.inscription import SlotFact
 from ..orthography.adapter import Reading
@@ -199,7 +197,7 @@ def connect_plural_meem(
         if not following or following[0].onset is not Onset.WASL:
             continue
         if _plural_meem(span):
-            span[-1].nucleus = Short(Quality.U)
+            span[-1].nucleus = Nucleus.short(Quality.U)
 
 
 def _plural_meem(span) -> bool:
@@ -207,7 +205,7 @@ def _plural_meem(span) -> bool:
     return (
         len(span) >= 2
         and span[-1].letter is CanonLetter.MEEM
-        and span[-1].nucleus.kind is NucleusKind.SILENT
+        and span[-1].nucleus.is_silent
         and span[-2].letter in PLURAL_HOSTS
     )
 
@@ -226,7 +224,7 @@ def _apply_pausal_lexemes(
         if not span:
             continue
         if lexicon.is_pausal(vocalised(span)):
-            span[-1].nucleus = PausalLong(Quality.A)
+            span[-1].nucleus = Nucleus.pausal_long(Quality.A)
 
 
 def vocalised(span) -> str:
@@ -237,7 +235,7 @@ def vocalised(span) -> str:
     """
     out = []
     for draft in span:
-        quality = getattr(draft.nucleus, "quality", None)
+        quality = draft.nucleus.quality
         out.append(
             ABJAD[draft.letter.value]
             + ("~" if draft.onset is Onset.GEMINATE else "")

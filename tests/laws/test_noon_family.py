@@ -13,7 +13,7 @@ from conftest import performance_for, score_for
 from quranic_phonemizer.engine.classifier import RuleSet
 from quranic_phonemizer.engine.plan import ConflictError, Phase, Plan, Realize
 from quranic_phonemizer.model.address import Script, SlotId, VerseRef
-from quranic_phonemizer.model.canon import CanonLetter, NucleusKind, Rule
+from quranic_phonemizer.model.canon import CanonLetter, Rule
 from quranic_phonemizer.model.performance import (
     Aspect,
     Consonant,
@@ -73,7 +73,7 @@ def test_tanween_and_noon_sakinah_are_one_rule(packed, hafs) -> None:
         slot.id
         for slot in score.slots()
         if slot.letter is CanonLetter.NOON
-        and slot.nucleus.kind is NucleusKind.SILENT
+        and slot.nucleus.is_silent
     }
     named = {
         slot

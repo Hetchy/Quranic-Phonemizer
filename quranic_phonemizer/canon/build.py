@@ -11,10 +11,9 @@ from ..model.address import VariantSelection
 from ..model.canon import (
     CARRIERS,
     CanonLetter,
-    NucleusKind,
+    Nucleus,
     Onset,
     Quality,
-    Short,
     SlotOrigin,
 )
 from ..model.inscription import Inscription, SlotFact
@@ -271,7 +270,7 @@ def _apply_tashil(draft: _Draft) -> None:
     """A facilitated hamza is voweled: the alif the mark is written on stands
     for a hamza with fatha, and the mark says how to say it, not whether."""
     if draft.onset is Onset.TASHIL and not draft.nucleus_declared:
-        draft.nucleus = Short(Quality.A)
+        draft.nucleus = Nucleus.short(Quality.A)
 
 
 def _rasm_outcome(context, cluster: Cluster, rows, track):
@@ -320,7 +319,7 @@ def _nucleus_destination(rows, context) -> tuple[bool, tuple | None]:
         if row.fact is not SlotFact.NUCLEUS:
             continue
         if row.value is not None:
-            if row.value.kind is not NucleusKind.SILENT:
+            if not row.value.is_silent:
                 return True, None
             continue
         outcome = derive.resolve(row.derivation, context)

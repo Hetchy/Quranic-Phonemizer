@@ -12,7 +12,6 @@ from ..model.canon import (
     CanonLetter,
     Nucleus,
     Onset,
-    Silent,
     SlotOrigin,
 )
 from ..model.inscription import SlotFact
@@ -29,7 +28,7 @@ class _Draft:
 
     letter: CanonLetter
     onset: Onset = Onset.PLAIN
-    nucleus: Nucleus = field(default_factory=Silent)
+    nucleus: Nucleus = field(default_factory=Nucleus.silent)
     origin: SlotOrigin = SlotOrigin.WRITTEN
     cluster: int = -1
     onset_declared: bool = False
