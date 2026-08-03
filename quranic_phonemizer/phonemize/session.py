@@ -14,6 +14,7 @@ from ..model.inscription import Inscription
 from ..model.performance import Performance
 from .boundaries import resolve_boundaries
 from .request import resolve_words
+from .span import assemble as assemble_span
 
 
 @dataclass(frozen=True, slots=True)
@@ -41,13 +42,11 @@ def phonemize_request(
     """A started-on word is simply the first one `locations` names: there is
     no separate `starts` input for `resolve_boundaries` to read."""
     locations = resolve_words(recitation.corpus, recitation.ledger, ref)
-    words = tuple(
-        (location, recitation.corpus.word(location)) for location in locations
+    built = assemble_span(
+        recitation, locations, script=script, selection=selection
     )
-    reading = recitation.read(script, locations[0].verse, words)
-    built = recitation.build(reading, selection=selection)
     boundaries = resolve_boundaries(
-        reading.advice,
+        built.inscription.advice,
         locations,
         built.score,
         stop_signs=stop_signs,

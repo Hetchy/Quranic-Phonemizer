@@ -82,3 +82,6 @@ def windows(
             locations[start:end], start - lead, built.score, performance
         )
         start = end
+
+
+__all__ = ["OVERLAP_WORDS", "Window", "assemble", "windows"]
