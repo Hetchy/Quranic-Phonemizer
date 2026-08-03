@@ -6,8 +6,8 @@ import unicodedata
 import pytest
 
 from quranic_phonemizer.model.address import Script
-from quranic_phonemizer.model.inscription import GraphemeClass
 from quranic_phonemizer.orthography.write import pen_for
+from quranic_phonemizer.phonemize.nodes import GlyphKind
 from quranic_phonemizer.phonemize.recited import text, write_recited
 from quranic_phonemizer.phonemize.session import phonemize_request
 
@@ -33,7 +33,7 @@ def _text(hafs, pen, ref, **boundary):
 def test_row_30_a_stop_sign_is_kept_and_takes_no_pairing(hafs, pen):
     # 83:14 كَلَّا ۖ -- the sign after the first word survives an all-join plan.
     glyphs = _write(hafs, pen, "83:14")
-    signs = [g for g in glyphs if g.kind is GraphemeClass.ADVICE]
+    signs = [g for g in glyphs if g.kind is GlyphKind.STOP_SIGN]
     assert signs and signs[0].char == "ۖ"
 
 
@@ -88,5 +88,5 @@ def test_a_merged_or_silenced_unit_writes_no_glyph_at_all(hafs, pen):
 
 def test_a_kept_letter_names_its_source_glyph(hafs, pen):
     glyphs = _write(hafs, pen, "1:1:1")
-    kept = [g for g in glyphs if g.kind is GraphemeClass.BASE]
+    kept = [g for g in glyphs if g.kind is GlyphKind.BASE]
     assert kept and all(g.from_glyphs for g in kept)

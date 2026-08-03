@@ -115,6 +115,51 @@ class RuleInstance:
     """Populated once `phonemize/labels.py` exists; empty is not yet derived."""
 
 
+class GlyphKind(StrEnum):
+    """01-contract 4.3's own `kind` vocabulary -- distinct from the model's
+    `GraphemeClass`, which folds a sukun into `haraka`, has no
+    `vowel_letter`, and calls a tajweed mark `annotation`."""
+
+    BASE = "base"
+    HARAKA = "haraka"
+    TANWEEN = "tanween"
+    SHADDA = "shadda"
+    VOWEL_LETTER = "vowel_letter"
+    SMALL_VOWEL = "small_vowel"
+    MADD_SIGN = "madd_sign"
+    SUKUN = "sukun"
+    SILENCE_SIGN = "silence_sign"
+    TAJWEED_MARK = "tajweed_mark"
+    STOP_SIGN = "stop_sign"
+    STRUCTURAL = "structural"
+
+
+#: `GraphemeClass` members with a single `GlyphKind` regardless of what fact
+#: the grapheme evidences. `HARAKA` is not here: a sukun and an ordinary
+#: haraka share a `GraphemeClass` and split only on `SlotFact.VOWEL_ABSENCE`
+#: -- `glyph_kind_of` below reads that separately.
+_KIND_OF_GRAPHEME_CLASS = {
+    GraphemeClass.BASE: GlyphKind.BASE,
+    GraphemeClass.TANWEEN: GlyphKind.TANWEEN,
+    GraphemeClass.SHADDA: GlyphKind.SHADDA,
+    GraphemeClass.SMALL_VOWEL: GlyphKind.SMALL_VOWEL,
+    GraphemeClass.MADD_SIGN: GlyphKind.MADD_SIGN,
+    GraphemeClass.SILENCE_SIGN: GlyphKind.SILENCE_SIGN,
+    GraphemeClass.ANNOTATION: GlyphKind.TAJWEED_MARK,
+    GraphemeClass.ADVICE: GlyphKind.STOP_SIGN,
+    GraphemeClass.STRUCTURAL: GlyphKind.STRUCTURAL,
+    GraphemeClass.LENGTH_CARRIER: GlyphKind.VOWEL_LETTER,
+}
+
+
+def glyph_kind_of(cls: GraphemeClass, *, vowel_absent: bool = False) -> GlyphKind:
+    """`vowel_absent` is `SlotFact.VOWEL_ABSENCE` evidenced at this
+    grapheme -- the one fact `GraphemeClass.HARAKA` does not already say."""
+    if cls is GraphemeClass.HARAKA:
+        return GlyphKind.SUKUN if vowel_absent else GlyphKind.HARAKA
+    return _KIND_OF_GRAPHEME_CLASS[cls]
+
+
 @dataclass(frozen=True, slots=True)
 class Glyph:
     """One source scalar -- 01-contract 4.3. `word`/`word_index` are absent
@@ -122,7 +167,7 @@ class Glyph:
 
     word: int | None
     char: str
-    kind: GraphemeClass
+    kind: GlyphKind
     word_index: int | None
     source_index: int
 
@@ -139,6 +184,7 @@ __all__ = [
     "ConsonantFact",
     "ConsonantSounds",
     "Glyph",
+    "GlyphKind",
     "RenderGlyph",
     "RuleInstance",
     "Sound",
@@ -146,5 +192,6 @@ __all__ = [
     "Unit",
     "UnitOrigin",
     "Word",
+    "glyph_kind_of",
     "unit_of",
 ]

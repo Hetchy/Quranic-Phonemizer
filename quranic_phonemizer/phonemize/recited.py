@@ -27,6 +27,7 @@ from ..model.performance import (
     Vowel,
 )
 from ..orthography.write import MADD, Pen, WriteError
+from . import nodes as nd
 
 #: Which role writes each short vowel quality. Kept local rather than
 #: imported: `orthography.write`'s own table is private to that module.
@@ -41,9 +42,11 @@ _BARE_TANWEEN_NOON = frozenset({Rule.IKHFAA_HAQIQI, Rule.IQLAB})
 #: calls for, never the bare letter or the seat the rasm wrote.
 _WASL_HAMZA_SHAPE = {"a": "أ", "u": "أ", "i": "إ"}
 
-#: Which `SlotFact` a source glyph supplies for the consonant part, as
-#: opposed to `VOWEL_FACTS` for the vowel part -- the split `from_glyphs`
-#: needs to tell a kept letter from a kept haraka.
+#: `SlotFact`s a source glyph may supply for the consonant part, as opposed
+#: to `VOWEL_FACTS` for the vowel part -- `_source_graphemes` keys on the
+#: fact itself so a base letter and a shadda mark, once split into their own
+#: render glyphs, each cite only the source glyph that actually evidences
+#: them rather than sharing one merged list.
 _CONSONANT_FACTS = frozenset({SlotFact.LETTER, SlotFact.ONSET})
 
 
@@ -54,7 +57,7 @@ class RenderGlyph:
     machinery, naming which unit and sound this glyph presents."""
 
     char: str
-    kind: GraphemeClass
+    kind: nd.GlyphKind
     from_glyphs: tuple = ()
     slot: SlotId | None = None
     sound: SoundId | None = None
@@ -82,31 +85,32 @@ def write_recited(
     out: list[RenderGlyph] = []
     for index, word in enumerate(score.words):
         if index:
-            out.append(RenderGlyph(" ", GraphemeClass.STRUCTURAL))
+            out.append(RenderGlyph(" ", nd.GlyphKind.STRUCTURAL))
         out.extend(
             _write_word(
                 word, attrs, releases, sounds, occurrences, started, sources, pen
             )
         )
         out.extend(
-            RenderGlyph(sign.char, GraphemeClass.ADVICE, (sign.id,))
+            RenderGlyph(sign.char, nd.GlyphKind.STOP_SIGN, (sign.id,))
             for sign in signs.get(index, ())
         )
     return tuple(out)
 
 
 def _write_word(word: ScoreWord, attrs, releases, sounds, occurrences, started,
-                sources, pen: Pen):
+                fact_glyphs, pen: Pen):
     for slot in word.slots:
         yield from _write_unit(
-            slot, attrs, releases, sounds, occurrences, started, sources, pen
+            slot, attrs, releases, sounds, occurrences, started, fact_glyphs, pen
         )
 
 
-def _write_unit(slot, attrs, releases, sounds, occurrences, started, sources,
-                pen: Pen):
+def _write_unit(slot, attrs, releases, sounds, occurrences, started,
+                fact_glyphs, pen: Pen):
     """A unit whose consonant is gone -- merged or silenced -- writes
-    nothing at all: 06-two-texts rows 6 and 7, "goes, with its sukun"."""
+    nothing at all: 06-two-texts rows 6 and 7, "goes, with its sukun". Each
+    scalar the unit spells is its own glyph -- 01-contract 4.3."""
     consonant = attrs.get((slot.id, Aspect.CONSONANT))
     if isinstance(consonant, (Silent, MergedInto)):
         return
@@ -115,34 +119,33 @@ def _write_unit(slot, attrs, releases, sounds, occurrences, started, sources,
 
     vowel = attrs.get((slot.id, Aspect.VOWEL))
     vowel_sound = sounds[vowel.sound] if isinstance(vowel, Hosts) else None
+    consonant_sound = sounds[consonant.sound]
     yield RenderGlyph(
-        _write_consonant(
-            sounds[consonant.sound], slot.id in started, vowel_sound, pen
-        ),
-        GraphemeClass.BASE,
-        sources.get((slot.id, Aspect.CONSONANT), ()),
+        _write_letter(consonant_sound, slot.id in started, vowel_sound, pen),
+        nd.GlyphKind.BASE,
+        _fact_glyphs(fact_glyphs, slot.id, SlotFact.LETTER),
         slot.id,
         consonant.sound,
         releases.get(slot.id),
     )
+    if consonant_sound.geminate:
+        yield RenderGlyph(
+            pen.role("shadda"), nd.GlyphKind.SHADDA,
+            _fact_glyphs(fact_glyphs, slot.id, SlotFact.ONSET),
+            slot.id, consonant.sound,
+        )
 
     if vowel_sound is not None:
-        glyph = _write_vowel(vowel_sound, pen)
-        if glyph:
-            yield RenderGlyph(
-                glyph, GraphemeClass.HARAKA,
-                sources.get((slot.id, Aspect.VOWEL), ()),
-                slot.id,
-                vowel.sound,
-            )
+        yield from _write_vowel(
+            vowel_sound, vowel.sound, slot.id, fact_glyphs, pen
+        )
     elif not (
         slot.origin is SlotOrigin.NUNATION
         and _by_rule(consonant, occurrences) in _BARE_TANWEEN_NOON
     ):
         yield RenderGlyph(
-            pen.role("sukun"), GraphemeClass.HARAKA,
-            sources.get((slot.id, Aspect.VOWEL), ()),
-            slot.id,
+            pen.role("sukun"), nd.GlyphKind.SUKUN,
+            _fact_glyphs(fact_glyphs, slot.id, SlotFact.VOWEL_ABSENCE), slot.id,
         )
 
 
@@ -176,45 +179,56 @@ def _by_rule(attribution, occurrences) -> Rule | None:
     return occurrence.rule if occurrence is not None else None
 
 
-def _write_consonant(sound: Consonant, started: bool, vowel_sound, pen: Pen) -> str:
+def _write_letter(sound: Consonant, started: bool, vowel_sound, pen: Pen) -> str:
     if sound.letter is CanonLetter.HAMZA and started and vowel_sound:
-        out = _WASL_HAMZA_SHAPE.get(vowel_sound.quality.value, pen.letter(sound.letter))
-    else:
-        out = pen.letter(sound.letter)
-    if sound.geminate:
-        out += pen.role("shadda")
-    return out
+        return _WASL_HAMZA_SHAPE.get(vowel_sound.quality.value, pen.letter(sound.letter))
+    return pen.letter(sound.letter)
 
 
-def _write_vowel(sound: Vowel, pen: Pen) -> str:
-    """Length is already resolved on the sound, so no boundary check here:
-    the writer only ever spells what the Performance already decided."""
+def _write_vowel(sound: Vowel, sound_id, slot_id, fact_glyphs, pen: Pen):
+    """Length is already resolved on the sound, so no boundary check here.
+    A long vowel is up to three glyphs: the haraka, the carrier, the madd
+    sign -- 01-contract 4.3's `haraka`/`vowel_letter`/`madd_sign`."""
     role = _SHORT_ROLE.get(sound.quality.value)
     if role is None:
         raise WriteError(f"no haraka writes quality {sound.quality}")
-    out = pen.role(role)
-    if sound.long:
-        carrier = CARRIER_OF[sound.quality]
-        out += pen.carriers.get(carrier) or pen.letter(carrier)
-        out += pen.roles.get(MADD, "")
-    return out
+    yield RenderGlyph(
+        pen.role(role), nd.GlyphKind.HARAKA,
+        _fact_glyphs(fact_glyphs, slot_id, SlotFact.VOWEL_QUALITY),
+        slot_id, sound_id,
+    )
+    if not sound.long:
+        return
+    carrier = CARRIER_OF[sound.quality]
+    yield RenderGlyph(
+        pen.carriers.get(carrier) or pen.letter(carrier), nd.GlyphKind.VOWEL_LETTER,
+        _fact_glyphs(fact_glyphs, slot_id, SlotFact.VOWEL_LENGTH),
+        slot_id, sound_id,
+    )
+    madd = pen.roles.get(MADD)
+    if madd:
+        yield RenderGlyph(
+            madd, nd.GlyphKind.MADD_SIGN,
+            _fact_glyphs(fact_glyphs, slot_id, SlotFact.VOWEL_LENGTH),
+            slot_id, sound_id,
+        )
 
 
 def _source_graphemes(inscription: Inscription) -> dict:
-    """Every `Evidences` edge, grouped by the (slot, aspect) it supplies --
-    a kept or substituted glyph's `from_glyphs`. A `Decorates`/`Attests`
-    edge names no fact and so no aspect; it is not part of this."""
+    """Every `Evidences` edge, keyed by (slot, fact): a base letter, a
+    shadda, a haraka and its carrier each cite only their own source glyph.
+    A `Decorates`/`Attests` edge names no fact; not part of this."""
     out: dict[tuple, list] = {}
     for spelling in inscription.spellings:
         fact = getattr(spelling, "fact", None)
-        if fact in _CONSONANT_FACTS:
-            aspect = Aspect.CONSONANT
-        elif fact in VOWEL_FACTS:
-            aspect = Aspect.VOWEL
-        else:
+        if fact not in _CONSONANT_FACTS and fact not in VOWEL_FACTS:
             continue
-        out.setdefault((spelling.slot, aspect), []).append(spelling.grapheme)
+        out.setdefault((spelling.slot, fact), []).append(spelling.grapheme)
     return {key: tuple(graphemes) for key, graphemes in out.items()}
+
+
+def _fact_glyphs(fact_glyphs: dict, slot_id, fact: SlotFact) -> tuple:
+    return fact_glyphs.get((slot_id, fact), ())
 
 
 def _by_slot_aspect(performance: Performance) -> dict:

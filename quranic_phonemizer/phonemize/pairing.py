@@ -7,10 +7,18 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from ..model.inscription import GraphemeClass
 from . import edges as ed
 from . import nodes as nd
 from .assemble import Assembled
+
+#: A recited glyph's reach: the (part, fact) pairing the consonant side and
+#: the vowel side of a unit render as. `GlyphKind`s absent here (`tanween`,
+#: `small_vowel`, `structural`, `stop_sign`) never occur in `rendered`.
+_CONSONANT_KINDS = frozenset({nd.GlyphKind.BASE, nd.GlyphKind.SHADDA})
+_VOWEL_KINDS = frozenset({
+    nd.GlyphKind.HARAKA, nd.GlyphKind.SUKUN, nd.GlyphKind.VOWEL_LETTER,
+    nd.GlyphKind.MADD_SIGN,
+})
 
 _VOWEL_FACT = {ed.Fact.VOWEL_QUALITY, ed.Fact.VOWEL_LENGTH, ed.Fact.VOWEL_ABSENCE}
 #: Lower sorts first: 01-contract 6.1's length-before-quality tiebreak. A
@@ -71,9 +79,9 @@ def _reach_recited(assembled: Assembled) -> dict[int, Reach]:
         unit = assembled.rendered_link[i].unit
         if unit is None:
             continue
-        if glyph.kind is GraphemeClass.BASE:
+        if glyph.kind in _CONSONANT_KINDS:
             out[i] = ((unit, ed.Part.CONSONANT, None),)
-        elif glyph.kind is GraphemeClass.HARAKA:
+        elif glyph.kind in _VOWEL_KINDS:
             out[i] = ((unit, ed.Part.VOWEL, None),)
     return out
 

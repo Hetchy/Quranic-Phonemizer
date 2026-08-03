@@ -12,7 +12,6 @@ from ..model.inscription import (
     Attests,
     Decorates as InscDecorates,
     Evidences,
-    GraphemeClass,
     Inscription,
     SlotFact,
     Structural as InscStructural,
@@ -152,13 +151,14 @@ def assemble(
 
 def _glyphs(inscription: Inscription, word_of_slot, unit_of_slot):
     """Sorted by offset; the position in this array is `source_index`."""
-    structural = {
-        s.grapheme for s in inscription.spellings
-        if isinstance(s, InscStructural)
-    }
+    structural, vowel_absent = set(), set()
     unit_of_grapheme = {}
     for spelling in inscription.spellings:
         grapheme = getattr(spelling, "grapheme", None)
+        if isinstance(spelling, InscStructural):
+            structural.add(grapheme)
+        elif isinstance(spelling, Evidences) and spelling.fact is SlotFact.VOWEL_ABSENCE:
+            vowel_absent.add(grapheme)
         slot = getattr(spelling, "slot", None) or getattr(spelling, "anchor", None)
         if grapheme is not None and slot is not None:
             unit_of_grapheme.setdefault(grapheme, slot)
@@ -174,7 +174,8 @@ def _glyphs(inscription: Inscription, word_of_slot, unit_of_slot):
             else None
         )
         glyphs.append(nd.Glyph(
-            word=word, char=grapheme.char, kind=grapheme.cls,
+            word=word, char=grapheme.char,
+            kind=nd.glyph_kind_of(grapheme.cls, vowel_absent=grapheme.id in vowel_absent),
             word_index=grapheme.index if word is not None else None,
             source_index=index,
         ))
@@ -373,8 +374,7 @@ def _rendered(score: Score, inscription, performance, pen: Pen, glyph_of,
         glyphs.append(nd.RenderGlyph(
             word=word, char=glyph.char, kind=glyph.kind, word_index=word_index,
             source_index=index,
-            from_glyphs=tuple(glyph_of[g] for g in glyph.from_glyphs),
-        ))
+            from_glyphs=tuple(glyph_of[g] for g in glyph.from_glyphs)))
         links.append(RenderedLink(
             unit=unit_of_slot.get(glyph.slot),
             sound=sound_of.get(glyph.sound),
@@ -387,10 +387,10 @@ def _rendered_words(written):
     out = []
     current = 0
     for glyph in written:
-        if glyph.kind is GraphemeClass.STRUCTURAL:
+        if glyph.kind is nd.GlyphKind.STRUCTURAL:
             out.append(None)
             current += 1
-        elif glyph.kind is GraphemeClass.ADVICE:
+        elif glyph.kind is nd.GlyphKind.STOP_SIGN:
             out.append(None)
         else:
             out.append(current)
