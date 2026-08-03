@@ -80,23 +80,6 @@ The other three toggles each have a field behind them. This one does not.
 **Settled by** either publishing manner on the hamza's sound, which is what the
 other three do, or dropping the toggle. The corpus has one site, `41:44:9`.
 
-## 5. Rule effects disagree between 07 and 01
-
-[07-rules](07-rules.md) section 1 maps "setting a length" onto the modifier
-family, then gives `madd_tabii`, wajib, jaiz, lazim and arid the effect "sets
-the length". [01-contract](01-contract.md) section 9 calls
-`madd_arid_lil_sukun` classification-only and requires `Classifies`, and
-reserves `SetsLength` for a real relength. The package agrees with the
-contract: `rules/madd.py` classifies these and only the iltiqa repair emits a
-relength.
-
-The same split reaches `imala`, which section 2.5 says "sets the vowel's
-quality" while section 5 publishes no modifier that can carry a quality change,
-and `khilaf.yaml` resolves the quality at build time as an annotation.
-
-**Settled by** one pass over section 2's effect column against the three
-modifier edges, once the producer exists to say which rules own which.
-
 ## 6. Laws that name a case they then exclude
 
 Three, all one sentence each, all pointing at a real graph the law rejects.

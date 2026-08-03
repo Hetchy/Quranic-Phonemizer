@@ -81,11 +81,19 @@ class Emphasis:
             return None
         if not self.weight.is_heavy(near, slot, plan, boundaries):
             return None
-        effects = [Recolour(at, Aspect.CONSONANT, SoundFeature.EMPHATIC, True)]
+        effects = []
+        if not plan.merged_away(at, Aspect.CONSONANT):
+            effects.append(
+                Recolour(at, Aspect.CONSONANT, SoundFeature.EMPHATIC, True)
+            )
         if _quality(slot) is Quality.A and not _silenced(plan, slot):
             effects.append(
                 Recolour(at, Aspect.VOWEL, SoundFeature.EMPHATIC, True)
             )
+        if not effects:
+            # A complete merger left this letter no sound of its own to be
+            # heavy; a partial one (idgham_mutajanisayn_naqis) still has one.
+            return None
         return Verdict(
             Occurrence(mint(Rule.TAFKHEEM, at), Rule.TAFKHEEM,
                        Participants(at)),

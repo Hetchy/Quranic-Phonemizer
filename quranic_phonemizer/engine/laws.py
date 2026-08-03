@@ -16,6 +16,8 @@ from ..model.performance import (
     Inserted,
     MergedInto,
     Performance,
+    Recolours,
+    SetsLength,
     Silent,
 )
 from .run import has_content
@@ -31,6 +33,7 @@ def check_performance(performance: Performance, score: Score) -> None:
     _every_aspect_with_content_is_accounted_for(performance, score)
     _every_merge_has_its_host(performance)
     _every_occurrence_produced_or_declared(performance)
+    _every_modifier_resolves(performance)
 
 
 def _every_sound_is_hosted_once(performance: Performance) -> None:
@@ -105,8 +108,11 @@ def _every_merge_has_its_host(performance: Performance) -> None:
 
 def _every_occurrence_produced_or_declared(performance: Performance) -> None:
     # A `Silent` edge counts as production: deleting a sound for a stated
-    # reason (waqf ending, wasl elision) is a legitimate output.
+    # reason (waqf ending, wasl elision) is a legitimate output. A modifier
+    # counts too: a `Recolours`/`SetsLength`/`Classifies` edge is the rule's
+    # own output just as much as a `Hosts` edge is.
     producing = {attribution.by for attribution in performance.attributions}
+    producing |= {modifier.by for modifier in performance.modifiers}
     for occurrence in performance.occurrences:
         if occurrence.id in producing:
             continue
@@ -116,6 +122,37 @@ def _every_occurrence_produced_or_declared(performance: Performance) -> None:
             f"E4: occurrence {occurrence.id} ({occurrence.rule.value}) left no "
             f"attribution at all and is not declared classification-only"
         )
+
+
+def _every_modifier_resolves(performance: Performance) -> None:
+    # `Classifies` is exempt from the one-edge-per-sound count below: unlike
+    # a `Recolour`/`Relength`, which the Plan's own conflict detection keeps
+    # to one per (slot, aspect), independent facts may classify one sound
+    # more than once -- an imala vowel that is also `madd_arid_lil_sukun`.
+    known_sounds = {sound_id for sound_id, _ in performance.sounds}
+    known_occurrences = {occurrence.id for occurrence in performance.occurrences}
+    seen: dict[tuple[type, object], int] = {}
+    for modifier in performance.modifiers:
+        if modifier.sound not in known_sounds:
+            raise LawError(
+                f"P5: modifier cites sound {modifier.sound}, which does not "
+                f"exist"
+            )
+        if modifier.by not in known_occurrences:
+            raise LawError(
+                f"P5: modifier cites occurrence {modifier.by}, which does "
+                f"not exist"
+            )
+        if isinstance(modifier, (Recolours, SetsLength)):
+            key = (type(modifier), modifier.sound)
+            seen[key] = seen.get(key, 0) + 1
+    for (kind, sound_id), count in seen.items():
+        if count != 1:
+            raise LawError(
+                f"P5: sound {sound_id} carries {count} {kind.__name__} "
+                f"edges; an applied recolour or length change retains "
+                f"exactly one"
+            )
 
 
 def check_inscription(inscription: Inscription, score: Score) -> None:

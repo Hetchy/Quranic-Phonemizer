@@ -107,6 +107,16 @@ def test_izhar_is_classification_only(packed, hafs) -> None:
     assert all(o.id not in owned for o in izhar)
 
 
+def test_izhar_still_names_the_sound_it_classifies(packed, hafs) -> None:
+    """No attribution, but a `Classifies` edge in the document names the
+    noon's own sound, so a projection can find that too."""
+    _, performance = performance_for(packed, hafs, 2, 6, RULES)
+    izhar = [o for o in performance.occurrences if o.rule is Rule.IZHAR]
+    assert izhar, "2:6 has a noon before a throat letter"
+    classified = {m.by for m in performance.modifiers}
+    assert all(o.id in classified for o in izhar)
+
+
 def test_no_cross_word_effect_crosses_a_stop(packed, hafs) -> None:
     """Under an all-stop plan the family may fire inside a word but never
     across one."""

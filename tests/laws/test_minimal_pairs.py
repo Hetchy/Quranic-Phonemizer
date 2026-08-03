@@ -10,7 +10,7 @@ import pytest
 from conftest import score_for
 from quranic_phonemizer.engine.run import perform
 from quranic_phonemizer.model.address import BoundaryPlan, Junction
-from quranic_phonemizer.model.canon import Nucleus, Onset, Quality, Rule
+from quranic_phonemizer.model.canon import CanonLetter, Nucleus, Onset, Quality, Rule
 from quranic_phonemizer.render.recite import phonemes_by_word
 from quranic_phonemizer.riwayat.hafs import HAFS
 
@@ -115,6 +115,21 @@ def test_an_assimilated_closure_has_no_qalqala(packed, hafs, alphabet) -> None:
     assert not fired & {
         Rule.QALQALA_SUGHRA, Rule.QALQALA_KUBRA, Rule.QALQALA_AKBAR
     }
+
+
+def test_a_complete_merger_has_no_tafkheem(packed, hafs, alphabet) -> None:
+    """`نَخْلُقكُّم` merges the qaf whole into the following kaf; an istilaa
+    letter with no sound of its own recolours nothing."""
+    score, performance = _performed(packed, hafs, 77, 20)
+    qaf = next(
+        slot for word in score.words for slot in word.slots
+        if slot.letter is CanonLetter.QAF
+    )
+    fired = {
+        o.rule for o in performance.occurrences if o.parts.source == qaf.id
+    }
+    assert Rule.IDGHAM_MUTAQARIBAYN in fired
+    assert Rule.TAFKHEEM not in fired
 
 
 @pytest.mark.parametrize(("site", "prosthetic", "why"), PROSTHETIC)

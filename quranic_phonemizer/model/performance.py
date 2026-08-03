@@ -45,6 +45,13 @@ class ReleaseKind(StrEnum):
     QALQALA = "qalqala"
 
 
+class Length(StrEnum):
+    """A relength's target, published so `SetsLength` can name one."""
+
+    SHORT = "short"
+    LONG = "long"
+
+
 @dataclass(frozen=True, slots=True)
 class Consonant:
     letter: CanonLetter
@@ -139,6 +146,37 @@ Attribution: TypeAlias = Hosts | Inserted | MergedInto | Silent
 
 
 @dataclass(frozen=True, slots=True)
+class Recolours:
+    """The edge a `Recolour` effect leaves once its feature is baked into
+    an already-hosted sound."""
+
+    sound: SoundId
+    by: OccurrenceId
+
+
+@dataclass(frozen=True, slots=True)
+class SetsLength:
+    """The edge a `Relength` effect leaves once its length is baked into
+    an already-hosted vowel."""
+
+    sound: SoundId
+    by: OccurrenceId
+    length: Length
+
+
+@dataclass(frozen=True, slots=True)
+class Classifies:
+    """A rule that names what a sound already is, producing and changing
+    nothing of its own."""
+
+    sound: SoundId
+    by: OccurrenceId
+
+
+Modifier: TypeAlias = Recolours | SetsLength | Classifies
+
+
+@dataclass(frozen=True, slots=True)
 class Performance:
     """One traversal. Carries the selection and plan that produced it, because
     a `SoundId` is meaningless without them."""
@@ -146,6 +184,7 @@ class Performance:
     riwayah: Riwayah
     sounds: tuple[tuple[SoundId, Sound], ...]
     attributions: tuple[Attribution, ...]
+    modifiers: tuple[Modifier, ...]
     occurrences: tuple[Occurrence, ...]
     selection: VariantSelection
     boundaries: BoundaryPlan

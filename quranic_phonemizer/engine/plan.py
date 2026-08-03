@@ -11,7 +11,7 @@ from typing import TypeAlias
 
 from ..model.address import OccurrenceId, SlotId
 from ..model.canon import Rule
-from ..model.performance import Aspect, Occurrence, Side, Sound
+from ..model.performance import Aspect, Length, Occurrence, Side, Sound
 
 
 class Phase(StrEnum):
@@ -23,11 +23,6 @@ class Phase(StrEnum):
     LENGTH = "length"
     COLOUR = "colour"
     RELEASE = "release"
-
-
-class Length(StrEnum):
-    SHORT = "short"
-    LONG = "long"
 
 
 class SoundFeature(StrEnum):

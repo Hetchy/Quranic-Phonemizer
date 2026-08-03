@@ -315,41 +315,25 @@ class Rule(StrEnum):
     SILAH = "silah"
 
 
-#: Rules that classify without producing a sound of their own.
+#: Rules whose occurrence produces no effect; `engine/run.py` mints each one
+#: a `Classifies` edge in place of an attribution. `ishmam` is here and gets
+#: neither, since it names no sound at all.
 CLASSIFICATION_ONLY: frozenset[Rule] = frozenset(
     {
         Rule.TARQEEQ,
-        Rule.TAFKHEEM,
-        # Both emit `Recolour`, which modifies a sound rather than
-        # producing one, so neither owns an attribution.
         Rule.WASL_START,
-        # The wasl hamza sounds by the plain default already; the
-        # occurrence only records that wasl was started, itself a
-        # classification.
         Rule.IDGHAM_MUTAJANISAYN_NAQIS,
-        # The first letter colours the second rather than merging into
-        # it, so there is no separate sound to attribute.
         Rule.IZHAR,
         Rule.IZHAR_SHAFAWI,
         Rule.LAM_QAMARIYYAH,
-        Rule.MADD_TABII,
         Rule.MADD_WAJIB_MUTTASIL,
         Rule.MADD_JAIZ_MUNFASIL,
         Rule.MADD_LAZIM,
         Rule.MADD_ARID_LIL_SUKUN,
         Rule.MADD_LEEN,
-        Rule.ILTIQA_REPAIR,
-        Rule.PAUSAL_ALIF,
-        # Both emit `Relength`, which modifies a sound rather than producing
-        # one - the same footing as TAFKHEEM/TARQEEQ. Listing a rule here
-        # permits an occurrence with no attribution; it does not forbid one,
-        # so the tanween half of ILTIQA_REPAIR may still realize its kasra.
         Rule.IMALA,
         Rule.TASHIL,
         Rule.ISHMAM,
         Rule.SILAH,
-        # Canonical Score facts, realized already coloured by the plain
-        # default; these rules exist only to give a projection a name for
-        # what it sees. See `rules/annotation.py`.
     }
 )

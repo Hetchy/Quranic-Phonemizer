@@ -8,17 +8,21 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from ..model.address import BoundaryPlan, SlotId, SoundId, VariantSelection
-from ..model.canon import Onset, Score, Slot
+from ..model.canon import CLASSIFICATION_ONLY, Onset, Rule, Score, Slot
 from ..model.performance import (
     Aspect,
     Attribution,
+    Classifies,
     Consonant,
     Hosts,
     Inserted,
     MergedInto,
+    Modifier,
     Nasal,
     Occurrence,
     Performance,
+    Recolours,
+    SetsLength,
     Silent,
     Sound,
     Vowel,
@@ -37,6 +41,25 @@ from .plan import (
     Silence,
     SoundFeature,
 )
+
+#: Which aspect a `CLASSIFICATION_ONLY` rule's `Classifies` edge names, for
+#: the rules that classify a sound at all -- `ishmam` classifies none.
+_CLASSIFIES_ASPECT: dict[Rule, Aspect] = {
+    Rule.TARQEEQ: Aspect.CONSONANT,
+    Rule.TASHIL: Aspect.CONSONANT,
+    Rule.WASL_START: Aspect.CONSONANT,
+    Rule.IDGHAM_MUTAJANISAYN_NAQIS: Aspect.CONSONANT,
+    Rule.IZHAR: Aspect.CONSONANT,
+    Rule.IZHAR_SHAFAWI: Aspect.CONSONANT,
+    Rule.LAM_QAMARIYYAH: Aspect.CONSONANT,
+    Rule.IMALA: Aspect.VOWEL,
+    Rule.SILAH: Aspect.VOWEL,
+    Rule.MADD_WAJIB_MUTTASIL: Aspect.VOWEL,
+    Rule.MADD_JAIZ_MUNFASIL: Aspect.VOWEL,
+    Rule.MADD_LAZIM: Aspect.VOWEL,
+    Rule.MADD_ARID_LIL_SUKUN: Aspect.VOWEL,
+    Rule.MADD_LEEN: Aspect.VOWEL,
+}
 
 class MaterialisationError(AssertionError):
     """A Plan that cannot become a Performance. Names both addresses."""
@@ -152,6 +175,7 @@ def _materialise(
         riwayah=score.riwayah,
         sounds=tuple(sounds),
         attributions=tuple(attributions),
+        modifiers=tuple(_modifiers(plan, hosted)),
         occurrences=tuple(occurrences),
         selection=selection,
         boundaries=boundaries,
@@ -228,6 +252,36 @@ def _resolve_merges(plan, hosted, attributions) -> None:
                 attributions.append(
                     Silent((effect.slot,), effect.aspect, verdict.occurrence.id)
                 )
+
+
+def _modifiers(plan: Plan, hosted) -> list[Modifier]:
+    """The edge each applied `Recolour`/`Relength` leaves, plus one
+    `Classifies` per classification-only occurrence naming a sound."""
+    out: list[Modifier] = []
+    for _, verdict in plan.entries:
+        out.extend(_modifiers_for(verdict.occurrence, verdict.effects, hosted))
+    return out
+
+
+def _modifiers_for(occurrence: Occurrence, effects, hosted) -> list[Modifier]:
+    out: list[Modifier] = []
+    for effect in effects:
+        if isinstance(effect, Recolour):
+            sound_id = hosted.get((effect.slot, effect.aspect))
+            if sound_id is not None:
+                out.append(Recolours(sound_id, occurrence.id))
+        elif isinstance(effect, Relength):
+            sound_id = hosted.get((effect.slot, Aspect.VOWEL))
+            if sound_id is not None:
+                out.append(SetsLength(sound_id, occurrence.id, effect.length))
+    if not effects and occurrence.rule in CLASSIFICATION_ONLY:
+        aspect = _CLASSIFIES_ASPECT.get(occurrence.rule)
+        source_sound = None if aspect is None else hosted.get(
+            (occurrence.parts.source, aspect)
+        )
+        if source_sound is not None:
+            out.append(Classifies(source_sound, occurrence.id))
+    return out
 
 
 def _colours(plan: Plan) -> dict[tuple[SlotId, Aspect], dict[SoundFeature, bool]]:
