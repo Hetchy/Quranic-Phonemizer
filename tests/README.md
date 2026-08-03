@@ -22,8 +22,9 @@ def test_a_prosthetic_hamza_drops_when_the_word_before_it_joins(r):
 
 - `"1:1"` is `surah:ayah`.
 - `(1, 2)` are the word numbers within that verse, counting from 1.
-- One keyword per riwayah (`hafs=`, `warsh=`), because the same words take
-  different word numbers under a different transmission.
+- One keyword per riwayah (`hafs=`, `warsh=`). The address is riwayah data:
+  transmissions divide verses differently, so the same words can take a
+  different ayah number as well as different word numbers.
 
 `r.phonemes(n)` and `r.silent(n)` take those same word numbers. When a plan
 reads past the end of a verse the next verse continues the numbering, so
@@ -53,7 +54,7 @@ Same case, same site, different expected reading — `r.pick` chooses by the
 riwayah the body is running under:
 
 ```python
-MALIK = Site(hafs=("1:4", (1,)), warsh=("1:4", (1,)))
+MALIK = Site(hafs=("1:4", (1,)), warsh=("1:3", (1,)))
 
 
 @for_each_riwayah(MALIK, isolated=1)
@@ -66,9 +67,12 @@ The keywords are riwayah names, matching the site's. A riwayah running but not
 named raises `KeyError`, so adding a transmission cannot silently reuse
 another's expectation, and the failure names the riwayah that has no answer.
 
-The two transmissions write the word differently as well as read it
-differently, which is why the site keys its address per riwayah rather than
-sharing one.
+Note the two addresses. Warsh does not count the basmala as a verse of
+al-Fatiha, so the same word sits at a different ayah number, and it is written
+differently as well as read differently. That is why a site keys its whole
+address per riwayah instead of sharing one and varying the expectation: by the
+time the readings disagree, the words they belong to may not even be in the
+same place.
 
 Fill each value by running that riwayah, never by reasoning about what it
 should be. A row written ahead of the build that can read it is a guess wearing
