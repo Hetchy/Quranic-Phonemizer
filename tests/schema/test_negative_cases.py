@@ -111,6 +111,13 @@ def test_an_attribution_without_a_part(data):
         validate(data)
 
 
+def test_a_modifier_without_a_sound(data):
+    modifier = data["modifiers"][0]
+    del modifier["sound"]
+    with pytest.raises(SchemaError):
+        validate(data)
+
+
 def test_a_merger_without_its_host(data):
     merger = next((e for e in data["attributions"] if e["kind"] == "mergedinto"), None)
     if merger is None:
@@ -121,9 +128,12 @@ def test_a_merger_without_its_host(data):
 
 
 def test_a_pairing_target_out_of_range(data):
+    """`match` pins this to `check_pairing`'s own message: without it,
+    `check_pairings_cover_glyphs`'s unrelated "in no pairing" error would
+    pass the same assertion and the check under test could be deleted."""
     pairing = {"glyphs": [10_000], "sounds": [], "shares": [], "silent": [],
                "rules": [], "after": None}
-    with pytest.raises(SchemaError):
+    with pytest.raises(SchemaError, match="glyph 10000 out of range"):
         validate_pairings([pairing], data["glyphs"], set(), n_sounds=0, n_rules=0)
 
 
@@ -140,9 +150,11 @@ def test_a_rendered_glyph_with_an_empty_character(data):
 
 
 def test_a_gap_row_with_glyphs(data):
+    """`match` pins this to `check_pairing`, not `check_pairings_cover_glyphs`
+    -- see `test_a_pairing_target_out_of_range`."""
     pairing = {"glyphs": [0], "sounds": [], "shares": [], "silent": [],
                "rules": [], "after": 0}
-    with pytest.raises(SchemaError):
+    with pytest.raises(SchemaError, match="a gap row carries glyphs"):
         validate_pairings(
             [pairing, pairing], data["glyphs"], set(),
             n_sounds=len(data["sounds"]), n_rules=len(data["rules"]),
