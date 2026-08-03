@@ -19,12 +19,19 @@ measured before choosing, and what would make the decision wrong.
 
 | | Question | Blocks |
 |---|---|---|
-| [03](03-canonical-vocabulary.md) | Do `Onset`, `SlotOrigin` and `Annotation` split? | projections |
+| [03](03-canonical-vocabulary.md) | Do `Onset`, `SlotOrigin` and `Annotation` split? **Resolved** -- census done, `SlotOrigin` splits, the other two do not. | projections |
 | [06](06-seen-sad-khilaf.md) | How is the seen/sad khilaf authored and selected? | correctness today |
 | [08](08-what-a-second-riwayah-decides.md) | Does a script fact attach to a scalar or to a match? | Warsh |
 
 Read 06 first if you only read one. It is the only item on this list that is
 wrong today rather than merely awkward.
+
+## Multi-document questions
+
+[projections/](projections/) is the public projection API that ADR-005 put out
+of scope: two projections over the layered model (`phonemes` and `Mappings`),
+the equivalence and completeness gate that replacement has to pass, and the
+worked examples.
 
 ## Closed
 

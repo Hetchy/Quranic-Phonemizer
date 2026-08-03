@@ -18,8 +18,9 @@ the reasoning, because the principle generalises: a design rule catching a
 modelling error is the healthy direction, and weakening an invariant to fit the
 model is not.
 
-Read in order. 001–006 are the design; 007 is how it is laid out in code;
-008 is the gate the implementation must pass.
+Read in order. 001-006 are the design; 007 is how it is laid out in code;
+008 is the gate the implementation must pass. The public projection boundary
+ADR-005 deferred is settled in `design/projections/`.
 
 | ADR | Decision |
 |---|---|
