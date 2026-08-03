@@ -19,14 +19,14 @@ def test_silah_labels_a_madd_on_the_pronoun_haas_vowel():
 
 def test_silah_kubra_labels_only_a_madd_jaiz_munfasil_silah():
     r = Phonemizer().phonemize("2:255")
-    instance = r.rules[50]
+    instance = r.rules[48]
     assert instance.rule is Rule.MADD_JAIZ_MUNFASIL
     assert instance.labels == ("silah", "silah_kubra")
 
 
 def test_madd_badal_labels_a_madd_on_a_hamza():
     r = Phonemizer().phonemize("2:255")
-    instance = r.rules[69]
+    instance = r.rules[64]
     assert instance.rule is Rule.MADD_TABII
     assert instance.labels == ("madd_badal",)
     assert r.units[instance.source].letter is CanonLetter.HAMZA

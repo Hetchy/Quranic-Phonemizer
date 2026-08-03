@@ -25,9 +25,9 @@ _SITED_POINTS = (KhilafId.RAA_TAFKHEEM, KhilafId.YAA_ITHBAT)
 _VOWEL_POINTS = (KhilafId.NUCLEUS_VOWEL, KhilafId.IMALA_QUALITY)
 
 #: `identifier` is the model's own `Rule.value`. Two boundary rules --
-#: `wasl_start`/`wasl_elision` -- and two rules `07-rules.md`'s catalogue
-#: does not list under these names -- `pausal_alif`, `silah` -- are real,
-#: minted rules and are included as the model spells them.
+#: `wasl_start`/`wasl_elision` -- and one rule `07-rules.md`'s catalogue
+#: does not list under this name -- `pausal_alif` -- are real, minted
+#: rules and are included as the model spells them.
 RULE_NAMES: dict[Rule, tuple[str, str]] = {
     Rule.IZHAR: ("Izhar", "إظهار"),
     Rule.IKHFAA_HAQIQI: ("Ikhfaa Haqiqi", "إخفاء حقيقي"),
@@ -67,7 +67,6 @@ RULE_NAMES: dict[Rule, tuple[str, str]] = {
     Rule.PAUSAL_SUKUN: ("Pausal Sukun", "سكون الوقف"),
     Rule.TAA_MARBUTA_PAUSAL: ("Taa Marbuta at a Pause", "تاء مربوطة عند الوقف"),
     Rule.PAUSAL_ALIF: ("Pausal Alif", "ألف الوقف"),
-    Rule.SILAH: ("Silah", "صلة"),
     Rule.FAKK_IDGHAM: ("Fakk Idgham", "فك الإدغام"),
     Rule.ORTHOGRAPHIC_SILENCE: ("Orthographic Silence", "حرف لا ينطق به"),
 }

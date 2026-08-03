@@ -8,7 +8,7 @@ from __future__ import annotations
 from ...engine.classifier import RuleSet
 from ...engine.plan import Phase
 from ...model.address import Riwayah
-from ...rules.annotation import CanonicalColour, Silah, Tarqeeq
+from ...rules.annotation import CanonicalColour, Tarqeeq
 from ...rules.boundary import (
     PausalAlif,
     SoftenedHamza,
@@ -60,7 +60,7 @@ def _build() -> RuleSet:
                 ),
             ),
             Phase.LENGTH: (
-                PausalGlide(), IltiqaShortening(), MaddClass(), MaddLeen(), Silah(),
+                PausalGlide(), IltiqaShortening(), MaddClass(), MaddLeen(),
             ),
             Phase.COLOUR: (
                 Emphasis(weight=weight),

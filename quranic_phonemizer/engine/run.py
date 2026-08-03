@@ -53,7 +53,6 @@ _CLASSIFIES_ASPECT: dict[Rule, Aspect] = {
     Rule.IZHAR_SHAFAWI: Aspect.CONSONANT,
     Rule.LAM_QAMARIYYAH: Aspect.CONSONANT,
     Rule.IMALA: Aspect.VOWEL,
-    Rule.SILAH: Aspect.VOWEL,
     Rule.MADD_WAJIB_MUTTASIL: Aspect.VOWEL,
     Rule.MADD_JAIZ_MUNFASIL: Aspect.VOWEL,
     Rule.MADD_LAZIM: Aspect.VOWEL,
