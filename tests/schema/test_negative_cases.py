@@ -9,7 +9,7 @@ import json
 import pytest
 
 from quranic_phonemizer import Phonemizer
-from quranic_phonemizer.phonemize.schema import to_canonical
+from quranic_phonemizer.phonemize.schema import to_canonical, to_pairing
 from quranic_phonemizer.phonemize.schema_checks import (
     SchemaError,
     check_rendered_glyph,
@@ -31,6 +31,27 @@ def data(base) -> dict:
 
 def test_valid_document_passes(data):
     validate(data)
+
+
+@pytest.mark.parametrize("ref", ["1:1", "2:255", "2:1-2:8", "18:1-18:6", "4:1-4:6"])
+def test_real_pairings_validate_under_both_texts_and_groupings(ref):
+    """A real document's own `alignment()`, which the synthetic rows below
+    never exercise, must validate as readily as they are rejected."""
+    r = Phonemizer().phonemize(ref)
+    canon = json.loads(json.dumps(to_canonical(r)))
+    structural = {
+        e["glyph"] for e in canon["spellings"] if e["kind"] == "structural"
+    }
+    for text, glyphs in (("source", canon["glyphs"]), ("recited", canon["rendered"])):
+        excluded = structural if text == "source" else {
+            i for i, g in enumerate(glyphs) if g["word"] is None
+        }
+        for grouping in ("glyph", "cell"):
+            pairings = [to_pairing(p) for p in r.alignment(text=text, grouping=grouping)]
+            validate_pairings(
+                pairings, glyphs, excluded,
+                n_sounds=len(canon["sounds"]), n_rules=len(canon["rules"]),
+            )
 
 
 def test_a_nullable_quality_on_an_incompatible_vowel_kind(data):
