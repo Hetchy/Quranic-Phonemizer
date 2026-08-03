@@ -23,12 +23,59 @@ def test_a_prosthetic_hamza_drops_when_the_word_before_it_joins(r):
 - `"1:1"` is `surah:ayah`.
 - `(1, 2)` are the word numbers within that verse, counting from 1.
 - One keyword per riwayah (`hafs=`, `warsh=`), because the same words take
-  different word numbers under a different transmission. A riwayah the build
-  does not ship is skipped, not failed.
+  different word numbers under a different transmission.
 
 `r.phonemes(n)` and `r.silent(n)` take those same word numbers. When a plan
 reads past the end of a verse the next verse continues the numbering, so
 `r.phonemes(n + 1)` is the word after the last one.
+
+### Which riwayat a case runs under
+
+`for_each_riwayah` runs the body once per riwayah the site declares **and** the
+build ships. So the site's keywords are the whole control:
+
+```python
+BOTH = Site(hafs=("2:5", (3, 4)), warsh=("2:5", (3, 4)))   # runs under each
+HAFS_ONLY = Site(hafs=("2:5", (3, 4)))                     # runs under Hafs
+```
+
+A declared riwayah the build does not package is dropped from the run, not
+failed. If that leaves nothing, the case is skipped with a reason rather than
+passing silently — so a Warsh-only case is honest on a Hafs-only build.
+
+Declare only the riwayat the case is actually about. A rule that exists in one
+transmission and not another belongs in a site naming just that one; do not
+declare a riwayah so a row looks complete.
+
+### When the riwayat disagree
+
+Same case, same site, different expected reading — `r.pick` chooses by the
+riwayah the body is running under:
+
+```python
+MALIK = Site(hafs=("1:4", (1,)), warsh=("1:4", (1,)))
+
+
+@for_each_riwayah(MALIK, isolated=1)
+def test_the_word_is_read_as_each_transmission_has_it(r):
+    # مَـٰلِكِ
+    assert r.phonemes(1) == r.pick(hafs="ma:lik", warsh=...)
+```
+
+The keywords are riwayah names, matching the site's. A riwayah running but not
+named raises `KeyError`, so adding a transmission cannot silently reuse
+another's expectation, and the failure names the riwayah that has no answer.
+
+Fill each value by running that riwayah, never by reasoning about what it
+should be. Until a transmission is packaged there is nothing to run, so the
+site does not declare it yet: a row written ahead of the build is a guess
+wearing an assertion.
+
+Reach for it only where the reading genuinely differs. Where it does not, one
+assertion covering every riwayah is the stronger statement, since it says the
+transmissions agree. And where the difference is the whole point of the case,
+prefer separate tests named for what each transmission does — `pick` is for a
+detail inside a shared case, not a way to fold two rules into one body.
 
 ### Junctions
 
