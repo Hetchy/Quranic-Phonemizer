@@ -39,6 +39,15 @@ def test_rule_host_is_published_only_for_a_merger():
     assert all(r.rules[i].host is None for i in non_mergers)
 
 
+def test_equality_and_repr_ignore_assembled_bookkeeping():
+    """`_assembled` is not one of 01-contract section 3's sixteen fields;
+    two documents over the same ref must compare and print alike."""
+    a = Phonemizer().phonemize("1:1")
+    b = Phonemizer().phonemize("1:1")
+    assert a == b
+    assert "_assembled" not in repr(a)
+
+
 def test_identity_fields_are_seven_and_flat():
     r = Phonemizer().phonemize("1:1")
     assert r.ref == "1:1"

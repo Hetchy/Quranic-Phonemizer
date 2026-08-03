@@ -5,7 +5,7 @@
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from . import edges as ed
 from . import nodes as nd
@@ -75,7 +75,10 @@ class PhonemizeResult:
     attributions: tuple[ed.AttributionEdge, ...]
     modifiers: tuple[ed.ModifierEdge, ...]
 
-    _assembled: Assembled
+    #: `Assembled`'s own bookkeeping, not one of the contract's sixteen
+    #: fields: excluded from `repr` and `==` so a document still compares
+    #: and prints by what it publishes.
+    _assembled: Assembled = field(repr=False, compare=False)
 
     def phonemes(
         self, by: str | None = None
