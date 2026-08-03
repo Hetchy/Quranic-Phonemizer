@@ -300,8 +300,9 @@ fires to say so.
 ### 4.2 `Unit`
 
 One letter with the vowel state that follows it: the thing a rule fires on. A
-unit is **not** a grapheme cluster - the tanween's noon is a unit no glyph
-writes, and one muqattaat glyph makes several.
+unit is **not** a grapheme cluster - the tanween mark writes the noon it
+introduces as well as its host's vowel, so one glyph answers for two units,
+and one muqattaat glyph makes several.
 
 | Name | Values |
 |---|---|

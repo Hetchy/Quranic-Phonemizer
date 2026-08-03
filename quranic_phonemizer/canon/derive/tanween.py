@@ -14,7 +14,7 @@ _QUALITY = {"fathatan": Quality.A, "dammatan": Quality.U, "kasratan": Quality.I}
 
 def _nunate(quality: Quality) -> AddsSlot:
     return AddsSlot(
-        fact=SlotFact.NUCLEUS,
+        fact=SlotFact.VOWEL_QUALITY,
         value=Nucleus.short(quality),
         letter=CanonLetter.NOON,
         onset=Onset.PLAIN,

@@ -80,23 +80,6 @@ The other three toggles each have a field behind them. This one does not.
 **Settled by** either publishing manner on the hamza's sound, which is what the
 other three do, or dropping the toggle. The corpus has one site, `41:44:9`.
 
-## 4. The cell partition and the tanween mark
-
-[02-gate](02-gate.md) section 4.6 says no pairing under `grouping="cell"` holds
-two glyphs supplying a consonant. Every cell table here folds a tanween mark
-into the preceding letter's cell. Whether that breaks the law depends on
-something the set does not state plainly: whether the tanween mark carries a
-`Supplies(consonant)` edge for the noon it writes.
-
-Section 4.2 says the tanween's noon is "a unit no glyph writes", which reads as
-no. [07-rules](07-rules.md) section 6 case 2 says "One scalar shows two units'
-facts", and [02-gate](02-gate.md) section 4.2 says the many-to-many edges for
-tanween "are present rather than collapsed", which read as yes.
-
-**Settled by** stating the tanween mark's spelling edges once. If it supplies
-no consonant, section 4.2's many-to-many claim and section 6 case 2 want
-rewording; if it does, the cell law wants an exception.
-
 ## 5. Rule effects disagree between 07 and 01
 
 [07-rules](07-rules.md) section 1 maps "setting a length" onto the modifier

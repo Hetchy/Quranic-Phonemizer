@@ -46,7 +46,7 @@ def test_parses_every_canonical_value_shape(tmp_path: Path) -> None:
             supplies:
               - {slot: "27:36:8#7", skeleton: "ءاتىن", fact: ONSET,
                  value: GLIDE, citation: "Hafs; pronoun ya dropped at waqf"}
-              - {slot: "2:2#1", skeleton: "ءلم", fact: NUCLEUS,
+              - {slot: "2:2#1", skeleton: "ءلم", fact: VOWEL_LENGTH,
                  value: {kind: PausalLong, quality: A}, citation: "seven alifs"}
               - {slot: "18:1#9", skeleton: "عوجا", fact: SAKT,
                  value: true, citation: "Hafs sakt"}
@@ -227,7 +227,7 @@ def test_an_entry_for_this_verse_that_does_not_resolve_is_an_error(
             Supply(
                 ref=WordSlot(Location(112, 2, 1), 99),
                 skeleton="ءلله",
-                fact=SlotFact.NUCLEUS,
+                fact=SlotFact.VOWEL_LENGTH,
                 value=Nucleus.long(Quality.A),
                 citation="deliberately out of range",
             ),
@@ -282,7 +282,7 @@ def test_an_entry_for_another_verse_is_not_an_error(packed, hafs) -> None:
             Supply(
                 ref=WordSlot(Location(2, 1, 1), 99),
                 skeleton="whatever",
-                fact=SlotFact.NUCLEUS,
+                fact=SlotFact.VOWEL_LENGTH,
                 value=Nucleus.long(Quality.A),
                 citation="a different verse entirely",
             ),

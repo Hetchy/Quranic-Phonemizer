@@ -203,7 +203,7 @@ def hamzat_wasl(context: Context) -> Outcome:
     "sukun", "dagger", "combining_hamza", "madd",
 ))
 def wasl_helping_vowel(context: Context) -> Outcome:
-    return Sets(SlotFact.NUCLEUS, Nucleus.short(_helping_vowel(context)))
+    return Sets(SlotFact.VOWEL_QUALITY, Nucleus.short(_helping_vowel(context)))
 
 
 def _after_proclitics(context: Context) -> bool:

@@ -15,7 +15,7 @@ from ..model.canon import (
 from ..model.inscription import SlotFact
 from ..orthography.adapter import Reading
 from .derive import tanween
-from .draft import _Draft
+from .draft import _Draft, nucleus_fact
 from .passes import word_of
 
 
@@ -47,7 +47,7 @@ def _restore_noon(reading, drafts, last, word_index: int, scribe) -> None:
     offset = _split_tanween_offset(reading, word_index)
     if offset >= 0:
         scribe.evidence(offset, noon, SlotFact.LETTER)
-        scribe.evidence(offset, noon, SlotFact.NUCLEUS)
+        scribe.evidence(offset, noon, nucleus_fact(noon.nucleus))
 
 
 def _split_tanween_words(reading: Reading) -> set[int]:

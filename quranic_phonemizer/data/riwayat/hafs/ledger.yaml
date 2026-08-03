@@ -14,17 +14,17 @@ supplies:
   # رَءَا — Uthmani writes the hamza with a following alif, IndoPak writes a
   # bare alif that carries nothing. The long a is the recitation fact both
   # are spelling.
-  - {slot: "6:77:2#1", skeleton: "رء", fact: NUCLEUS,
+  - {slot: "6:77:2#1", skeleton: "رء", fact: VOWEL_LENGTH,
      value: {kind: Long, quality: A}, citation: "Hafs; ra'aa"}
-  - {slot: "6:78:2#1", skeleton: "رء", fact: NUCLEUS,
+  - {slot: "6:78:2#1", skeleton: "رء", fact: VOWEL_LENGTH,
      value: {kind: Long, quality: A}, citation: "Hafs; ra'aa"}
-  - {slot: "16:85:2#1", skeleton: "رء", fact: NUCLEUS,
+  - {slot: "16:85:2#1", skeleton: "رء", fact: VOWEL_LENGTH,
      value: {kind: Long, quality: A}, citation: "Hafs; ra'aa"}
-  - {slot: "16:86:2#1", skeleton: "رء", fact: NUCLEUS,
+  - {slot: "16:86:2#1", skeleton: "رء", fact: VOWEL_LENGTH,
      value: {kind: Long, quality: A}, citation: "Hafs; ra'aa"}
-  - {slot: "33:22:2#1", skeleton: "رء", fact: NUCLEUS,
+  - {slot: "33:22:2#1", skeleton: "رء", fact: VOWEL_LENGTH,
      value: {kind: Long, quality: A}, citation: "Hafs; ra'aa"}
-  - {slot: "18:53:1#2", skeleton: "ورء", fact: NUCLEUS,
+  - {slot: "18:53:1#2", skeleton: "ورء", fact: VOWEL_LENGTH,
      value: {kind: Long, quality: A}, citation: "Hafs; wa-ra'aa"}
 
   # 18:38 `لَّـٰكِنَّا۠` — a pausal long that its own vocalised skeleton cannot
@@ -34,24 +34,24 @@ supplies:
   # same notation `canon.build` derives — so a prosthetic hamza is `ء`, not
   # the `ا` the script draws. All four entries below were wrong on one or
   # both counts and silently did nothing.
-  - {slot: "18:38:1#2", skeleton: "لكن", fact: NUCLEUS,
+  - {slot: "18:38:1#2", skeleton: "لكن", fact: VOWEL_LENGTH,
      value: {kind: PausalLong, quality: A},
      citation: "Hafs; one of the seven alifs"}
 
   # 33:66-67 — `ٱلرَّسُولَا۠`, `ٱلسَّبِيلَا۠`, `ٱلظُّنُونَا۠`. Each shares a vocalised
   # skeleton with its ordinary accusative, which occurs far more often, so a
   # lexeme entry would break 27 words to fix one.
-  - {slot: "33:66:11#4", skeleton: "ءلرسل", fact: NUCLEUS,
+  - {slot: "33:66:11#4", skeleton: "ءلرسل", fact: VOWEL_LENGTH,
      value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
-  - {slot: "33:67:8#4", skeleton: "ءلسبل", fact: NUCLEUS,
+  - {slot: "33:67:8#4", skeleton: "ءلسبل", fact: VOWEL_LENGTH,
      value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
-  - {slot: "33:10:16#4", skeleton: "ءلظنن", fact: NUCLEUS,
+  - {slot: "33:10:16#4", skeleton: "ءلظنن", fact: VOWEL_LENGTH,
      value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
 
   # 76:15 `قَوَارِيرَا۠` against 76:16 `قَوَارِيرَا۟` and 27:44 `قَوَارِيرَ`.
   # Uthmani's two marks separate the first from the second; IndoPak writes
   # the same string for both, so the site is what carries the fact.
-  - {slot: "76:15:8#3", skeleton: "قورر", fact: NUCLEUS,
+  - {slot: "76:15:8#3", skeleton: "قورر", fact: VOWEL_LENGTH,
      value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
 
   # 27:36 `ءَاتَىٰنَِۧ` — the yaa both scripts write small where 19:30 writes
@@ -85,7 +85,7 @@ supplies:
      citation: "Hafs; sakt on مَالِيَهْ, izhar of the two haas"}
 
 asserts:
-  - {script: uthmani, slot: "6:77:2#1", skeleton: "رء", fact: NUCLEUS,
+  - {script: uthmani, slot: "6:77:2#1", skeleton: "رء", fact: VOWEL_LENGTH,
      value: {kind: Long, quality: A}}
-  - {script: uthmani, slot: "6:78:2#1", skeleton: "رء", fact: NUCLEUS,
+  - {script: uthmani, slot: "6:78:2#1", skeleton: "رء", fact: VOWEL_LENGTH,
      value: {kind: Long, quality: A}}

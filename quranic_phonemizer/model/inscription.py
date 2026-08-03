@@ -43,9 +43,17 @@ class Grapheme:
 class SlotFact(StrEnum):
     LETTER = "letter"
     ONSET = "onset"
-    NUCLEUS = "nucleus"
+    VOWEL_QUALITY = "vowel_quality"
+    VOWEL_LENGTH = "vowel_length"
+    VOWEL_ABSENCE = "vowel_absence"
     SAKT = "sakt"
-    ANNOTATION = "annotation"
+    TAJWEED_MARK = "tajweed_mark"
+
+
+#: A haraka and its carrier can each name one of these for the same slot, so
+#: a lookup spanning the whole vowel needs the union rather than one member.
+VOWEL_FACTS = frozenset({SlotFact.VOWEL_QUALITY, SlotFact.VOWEL_LENGTH,
+                          SlotFact.VOWEL_ABSENCE})
 
 
 @dataclass(frozen=True, slots=True)

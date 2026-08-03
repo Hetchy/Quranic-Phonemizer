@@ -21,9 +21,10 @@ def silah_ya(context: Context) -> Outcome:
 
 
 def _silah_or_long(context: Context, quality: Quality) -> Outcome:
+    # One glyph supplies both quality and shape here, so it is a quality fact.
     if _is_pronoun_haa(context):
-        return Sets(SlotFact.NUCLEUS, Nucleus.silah(quality))
-    return Sets(SlotFact.NUCLEUS, Nucleus.long(quality))
+        return Sets(SlotFact.VOWEL_QUALITY, Nucleus.silah(quality))
+    return Sets(SlotFact.VOWEL_QUALITY, Nucleus.long(quality))
 
 
 def _is_pronoun_haa(context: Context) -> bool:

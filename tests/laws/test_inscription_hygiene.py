@@ -71,7 +71,7 @@ def test_a_dagger_evidences_its_own_glyph_not_the_carrier(packed, hafs):
         if isinstance(spelling, Decorates)
     }
     nucleus_edges = {
-        pair: fact for pair, fact in by_fact.items() if fact is SlotFact.NUCLEUS
+        pair: fact for pair, fact in by_fact.items() if fact is SlotFact.VOWEL_LENGTH
     }
     matches = [
         (mark, slot) for (mark, slot) in nucleus_edges
@@ -138,6 +138,6 @@ def test_a_marked_seat_still_reaches_a_slot():
     reading = _read("بَـٰ")
     tatweel = next(i for i, c in enumerate(reading.clusters) if c.base == "ـ")
     assert any(
-        row.cluster == tatweel and row.fact is SlotFact.NUCLEUS
+        row.cluster == tatweel and row.fact is SlotFact.VOWEL_LENGTH
         for row in reading.evidence
     )

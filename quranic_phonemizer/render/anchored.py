@@ -33,7 +33,7 @@ from .recite import sounds_in_order
 #: `Attests` don't name an aspect, so they satisfy either one.
 _FACT_OF_ASPECT = {
     Aspect.CONSONANT: (SlotFact.LETTER, SlotFact.ONSET),
-    Aspect.VOWEL: (SlotFact.NUCLEUS,),
+    Aspect.VOWEL: (SlotFact.VOWEL_QUALITY, SlotFact.VOWEL_LENGTH, SlotFact.VOWEL_ABSENCE),
 }
 
 

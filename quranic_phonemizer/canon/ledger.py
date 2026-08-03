@@ -12,7 +12,7 @@ from typing import Any, TypeAlias
 from ..dataio import load_yaml, require_keys
 from ..model.address import Location, Riwayah, Script, SlotId, VerseRef
 from ..model.canon import CanonLetter, Nucleus, Onset, Quality
-from ..model.inscription import SlotFact
+from ..model.inscription import VOWEL_FACTS, SlotFact
 
 SCHEMA_VERSION = 1
 
@@ -115,7 +115,7 @@ def parse_value(fact: SlotFact, raw: object, *, where: str) -> object:
             return _enum(CanonLetter, raw, where=where, what="CanonLetter")
         case SlotFact.ONSET:
             return _enum(Onset, raw, where=where, what="Onset")
-        case SlotFact.NUCLEUS:
+        case _ if fact in VOWEL_FACTS:
             return _nucleus(raw, where=where)
         case SlotFact.SAKT:
             if not isinstance(raw, bool):

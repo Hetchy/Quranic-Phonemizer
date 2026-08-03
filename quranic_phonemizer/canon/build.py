@@ -16,7 +16,7 @@ from ..model.canon import (
     Quality,
     SlotOrigin,
 )
-from ..model.inscription import Inscription, SlotFact
+from ..model.inscription import VOWEL_FACTS, Inscription, SlotFact
 from ..orthography.adapter import Cluster, Reading
 from . import derive
 from .derive import Absent, AddsSlot, Attests, Sets, Shows, Target
@@ -27,7 +27,7 @@ from .lexicon import Lexicon
 from .ledger import EMPTY as EMPTY_LEDGER
 from .ledger import Ledger
 from .assemble import assemble
-from .draft import _Draft, set_fact
+from .draft import _Draft, nucleus_fact, set_fact
 from .juncture import apply_cross_word_noon
 from .passes import LexemePass, apply_ledger
 from .scribe import Scribe
@@ -221,7 +221,7 @@ def _apply_rows(rows, draft, drafts, context, track, scribe, base_offset,
                 # the noon. Without this edge the noon would be a slot no
                 # grapheme reaches.
                 scribe.evidence(offset, extra, SlotFact.LETTER)
-                scribe.evidence(offset, extra, SlotFact.NUCLEUS)
+                scribe.evidence(offset, extra, nucleus_fact(extra.nucleus))
             case Attests():
                 scribe.attestation(offset, draft)
                 track.attested += 1
@@ -316,7 +316,7 @@ def _nucleus_destination(rows, context) -> tuple[bool, tuple | None]:
     """
     carried = None
     for row in rows:
-        if row.fact is not SlotFact.NUCLEUS:
+        if row.fact not in VOWEL_FACTS:
             continue
         if row.value is not None:
             if not row.value.is_silent:

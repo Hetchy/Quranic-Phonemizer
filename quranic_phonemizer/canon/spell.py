@@ -12,7 +12,7 @@ from ..dataio import load_yaml, require_keys
 from ..model.canon import ABJAD, CanonLetter, Nucleus, Quality, SlotOrigin
 from ..model.inscription import SlotFact
 from ..orthography.adapter import Reading
-from .draft import _Draft
+from .draft import _Draft, nucleus_fact
 from .passes import word_of
 
 SCHEMA_VERSION = 1
@@ -130,7 +130,7 @@ def spell_muqattaat(names: Muqattaat):
                 for draft in spelled:
                     offset = reading.clusters[draft.cluster].offset
                     scribe.evidence(offset, draft, SlotFact.LETTER)
-                    scribe.evidence(offset, draft, SlotFact.NUCLEUS)
+                    scribe.evidence(offset, draft, nucleus_fact(draft.nucleus))
 
     return apply
 

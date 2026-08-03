@@ -94,7 +94,7 @@ def _check_witnesses(reading: Reading, drafts, ledger: Ledger) -> None:
         # A draft holds the set of its annotations, so agreement is membership.
         agrees = (
             row.value in written
-            if row.fact is SlotFact.ANNOTATION
+            if row.fact is SlotFact.TAJWEED_MARK
             else written == row.value
         )
         if not agrees:

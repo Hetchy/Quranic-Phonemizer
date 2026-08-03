@@ -14,7 +14,7 @@ from ..model.canon import (
     Onset,
     SlotOrigin,
 )
-from ..model.inscription import SlotFact
+from ..model.inscription import VOWEL_FACTS, SlotFact
 from .derive import Target
 
 #: Never serialised and never compared across builds -- only a key while one
@@ -51,11 +51,11 @@ def fact_of(draft, fact: SlotFact):
             return draft.letter
         case SlotFact.ONSET:
             return draft.onset
-        case SlotFact.NUCLEUS:
+        case _ if fact in VOWEL_FACTS:
             return draft.nucleus
         case SlotFact.SAKT:
             return draft.sakt_after
-        case SlotFact.ANNOTATION:
+        case SlotFact.TAJWEED_MARK:
             return draft.annotations
     return None
 
@@ -72,9 +72,17 @@ def set_fact(draft, drafts, fact: SlotFact, value, target: Target,
             subject.letter = value
         case SlotFact.ONSET:
             subject.onset, subject.onset_declared = value, True
-        case SlotFact.NUCLEUS:
+        case _ if fact in VOWEL_FACTS:
             subject.nucleus, subject.nucleus_declared = value, True
         case SlotFact.SAKT:
             subject.sakt_after = bool(value)
-        case SlotFact.ANNOTATION:
+        case SlotFact.TAJWEED_MARK:
             subject.annotations = subject.annotations | {value}
+
+
+def nucleus_fact(nucleus: Nucleus) -> SlotFact:
+    """Which vowel fact a glyph asserting a whole nucleus supplies.
+
+    Absent when silent; otherwise quality, since stating shape and quality
+    together is not a length-only claim."""
+    return SlotFact.VOWEL_ABSENCE if nucleus.is_silent else SlotFact.VOWEL_QUALITY

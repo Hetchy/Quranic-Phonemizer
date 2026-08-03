@@ -12,7 +12,7 @@ from typing import Any
 from ..dataio import load_yaml, require_keys
 from ..model.address import Riwayah, Script
 from ..model.canon import Annotation, CanonLetter, Nucleus, Onset, Quality
-from ..model.inscription import GraphemeClass, SlotFact, StopAdvice
+from ..model.inscription import VOWEL_FACTS, GraphemeClass, SlotFact, StopAdvice
 
 SCHEMA_VERSION = 1
 
@@ -151,11 +151,11 @@ def _fact_value(fact: SlotFact, raw: Any, *, where: str) -> object:
             return _member(CanonLetter, raw, where=where)
         case SlotFact.ONSET:
             return _member(Onset, raw, where=where)
-        case SlotFact.NUCLEUS:
+        case _ if fact in VOWEL_FACTS:
             return _nucleus(raw, where=where)
         case SlotFact.SAKT:
             return bool(raw)
-        case SlotFact.ANNOTATION:
+        case SlotFact.TAJWEED_MARK:
             return _member(Annotation, raw, where=where)
     raise InventoryError(f"{where}: unhandled fact {fact!r}")
 
