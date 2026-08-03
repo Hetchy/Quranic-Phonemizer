@@ -134,10 +134,10 @@ def _opens_on_a_sakin(slot) -> bool:
 
 @dataclass(frozen=True, slots=True)
 class MaddClass:
-    """Which madd this long vowel is -- one classifier, five outcomes.
+    """Which madd this long vowel is -- six outcomes, one classifier.
 
-    `MADD_TABII` is deliberately not emitted here: it is the default that
-    holds wherever none of the five outcomes applies.
+    `MADD_TABII` holds wherever none of the other five applies: an
+    ordinary canonically long vowel, and the seven alifs at a stop.
     """
 
     rule: Rule = Rule.MADD_LAZIM
@@ -158,8 +158,12 @@ class MaddClass:
         final = bool(slots) and slots[-1].id == at
 
         if final and boundaries.stopped_on(word):
-            # Nothing follows inside the word and the stop ends it; `WaqfEnding` owns the letter.
-            return None
+            # Nothing follows inside the word and the stop ends it. A
+            # silah's stopped form is absent rather than long, and takes
+            # no instance here.
+            if slot.nucleus.is_silah:
+                return None
+            return _tabii(slot, at, None)
 
         following = near.after(at)
         if following is None:
@@ -180,7 +184,13 @@ class MaddClass:
         if after is None and boundaries.stopped_on(near.word_of(following.id)):
             # Voweled in the Score, sakin only because the stop lands here -- aridah lissukun, same shape as lazim.
             return _classify(Rule.MADD_ARID_LIL_SUKUN, at, following.id)
-        return None
+        if slot.nucleus.is_pausal_long:
+            # Joined, a pausal alif's own vowel is canonically short --
+            # `PausalAlif` owns the length here, and this is not one of
+            # the six outcomes at all.
+            return None
+        # None of the five special outcomes: an ordinary long vowel.
+        return _tabii(slot, at, following.id)
 
 
 @dataclass(frozen=True, slots=True)
@@ -222,7 +232,22 @@ class MaddLeen:
         return _classify(Rule.MADD_LEEN, at, following.id)
 
 
-def _classify(rule: Rule, at: SlotId, other: SlotId) -> Verdict:
+def _classify(rule: Rule, at: SlotId, other: SlotId | None) -> Verdict:
     return Verdict(
         Occurrence(mint(rule, at), rule, Participants(at, other)), ()
+    )
+
+
+def _tabii(slot, at: SlotId, other: SlotId | None) -> Verdict:
+    """`MADD_TABII` cannot be classification-only, so it realizes the sound
+    the plain fill would have given it -- except a pausal alif, whose own
+    rule realizes it already, and only takes a length here."""
+    occurrence = Occurrence(
+        mint(Rule.MADD_TABII, at), Rule.MADD_TABII, Participants(at, other)
+    )
+    if slot.nucleus.is_pausal_long:
+        return Verdict(occurrence, (Relength(at, Length.LONG),))
+    return Verdict(
+        occurrence,
+        (Realize(at, Aspect.VOWEL, Vowel(slot.nucleus.quality, long=True)),),
     )
