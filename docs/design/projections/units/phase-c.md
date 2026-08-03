@@ -31,22 +31,22 @@ are exclusive **per part**, not per unit, which is exactly what `variant=1` is
 papering over. `tests/laws/test_rule_coverage.py::test_no_two_rules_claim_the_same_slot_and_aspect`
 is the local gate. Correct the contract's wording here.
 
-## C2 - Madd for its ordinary cases; teaching labels derived
+## C2 - Madd for its ordinary cases
 
-**Items 23, 40. Medium.**
+**Item 23. Medium.**
 
 `rules/madd.py` `MaddClass` deliberately does not emit `madd_tabii`, so the only
 producer is the pausal glide. An ordinary long vowel, a silah vowel and a
 stopped seven-alif produce no instance at all, which is why the first three
 converse rows of `02-gate` section 4.8 fail today.
 
-Item 40's four teaching labels are computed nowhere. Each is a predicate over
-an instance and the unit it names, so they are derived where the instance is
-assembled and mint no instance of their own. That places them in the public
-package's assembly step, not in `rules/`.
+Item 40's four teaching labels move to phase D: each is a predicate over an
+instance and the unit it names, derived where the instance is assembled, so
+the module that holds them cannot exist before the `phonemize` package does.
+This unit cannot deliver it and D4 should claim it alongside `labels.py`.
 
-**Files:** `rules/madd.py` (**load-bearing**), `model/canon.py` `Rule`, the
-label derivation in `phonemize/labels.py`, `tests/laws/test_rule_coverage.py`.
+**Files:** `rules/madd.py` (**load-bearing**), `model/canon.py` `Rule`,
+`tests/laws/test_rule_coverage.py`.
 
 **Depends on** A4, C1. **Moves** `regression` in instance count only: a flood of
 new instances and no new sounds. No token may change, so
