@@ -8,6 +8,7 @@ from quranic_phonemizer.model.address import Location, Script, VerseRef
 from quranic_phonemizer.model.inscription import (
     Decorates,
     Evidences,
+    GraphemeClass,
     SlotFact,
     Structural,
 )
@@ -60,28 +61,29 @@ def test_a_dagger_evidences_its_own_glyph_not_the_carrier(packed, hafs):
     """2:5 `أُو۟لَـٰٓئِكَ`: the dagger on the maqsura used to spell its
     NUCLEUS from the carrier's own offset, indistinguishable from it."""
     built = built_for(packed, hafs, 2, 5)
-    by_fact = {
-        (spelling.grapheme, spelling.slot): spelling.fact
+    daggers = [
+        g for g in built.inscription.graphemes if g.cls is GraphemeClass.SMALL_VOWEL
+    ]
+    assert daggers, "2:5 carries a small-vowel dagger"
+    by_offset = {g.id.offset: g.id for g in built.inscription.graphemes}
+    nucleus_edges = {
+        spelling.grapheme: spelling.slot
         for spelling in built.inscription.spellings
-        if isinstance(spelling, Evidences)
+        if isinstance(spelling, Evidences) and spelling.fact is SlotFact.VOWEL_LENGTH
     }
     decorated = {
         (spelling.grapheme, spelling.slot)
         for spelling in built.inscription.spellings
         if isinstance(spelling, Decorates)
     }
-    nucleus_edges = {
-        pair: fact for pair, fact in by_fact.items() if fact is SlotFact.VOWEL_LENGTH
-    }
-    matches = [
-        (mark, slot) for (mark, slot) in nucleus_edges
-        for (carrier, same_slot) in decorated
-        if same_slot == slot and carrier.offset == mark.offset - 1
-    ]
-    assert matches, "expected a dagger glyph beside its decorated carrier"
-    for mark, slot in matches:
-        assert (mark, slot) not in decorated, (
-            "the mark's own offset must not also decorate its carrier's slot"
+    for dagger in daggers:
+        slot = nucleus_edges[dagger.id]
+        carrier = by_offset[dagger.id.offset - 1]
+        assert carrier not in nucleus_edges, (
+            "the carrier's own offset must not evidence the dagger's fact"
+        )
+        assert (carrier, slot) in decorated, (
+            "the carrier must still decorate the slot its dagger lengthens"
         )
 
 
