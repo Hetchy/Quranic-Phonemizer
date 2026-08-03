@@ -8,6 +8,7 @@ import pytest
 
 from quranic_phonemizer.model.address import Script
 from quranic_phonemizer.orthography.write import pen_for
+from quranic_phonemizer.phonemize import edges as ed
 from quranic_phonemizer.phonemize.assemble import assemble
 from quranic_phonemizer.phonemize.pairing import alignment
 from quranic_phonemizer.phonemize.session import phonemize_request
@@ -37,6 +38,14 @@ def _assembled(hafs, pen, alphabet, ref, **boundary):
     return assemble(session, pen, alphabet)
 
 
+def _structural(a, text: str, glyphs) -> set[int]:
+    """02-gate 4.6: the `Structural` edge decides this, never `kind` -- and
+    not `word` either. `rendered` carries no edges, so `word` is all it has."""
+    if text == "source":
+        return {s.glyph for s in a.spellings if isinstance(s, ed.Structural)}
+    return {i for i, g in enumerate(glyphs) if g.word is None}
+
+
 @pytest.mark.parametrize(("surah", "ayah"), SAMPLE)
 def test_every_glyph_is_in_exactly_one_pairing_or_none(hafs, pen, alphabet, surah, ayah):
     a = _assembled(hafs, pen, alphabet, f"{surah}:{ayah}")
@@ -47,7 +56,7 @@ def test_every_glyph_is_in_exactly_one_pairing_or_none(hafs, pen, alphabet, sura
                 for g in pairing.glyphs:
                     assert g not in seen, (surah, ayah, text, grouping, g)
                     seen.add(g)
-            included = {i for i, g in enumerate(glyphs) if g.word is not None}
+            included = set(range(len(glyphs))) - _structural(a, text, glyphs)
             assert seen == included, (surah, ayah, text, grouping)
 
 
@@ -94,8 +103,7 @@ def test_structural_glyphs_take_no_pairing(hafs, pen, alphabet, surah, ayah):
     for text, glyphs in (("source", a.glyphs), ("recited", a.rendered)):
         for grouping in ("glyph", "cell"):
             named = {g for p in alignment(a, text=text, grouping=grouping) for g in p.glyphs}
-            structural = {i for i, g in enumerate(glyphs) if g.word is None}
-            assert named.isdisjoint(structural)
+            assert named.isdisjoint(_structural(a, text, glyphs))
 
 
 @pytest.mark.parametrize(("surah", "ayah"), SAMPLE)

@@ -41,7 +41,12 @@ def alignment(
 
     glyphs = assembled.glyphs if text == "source" else assembled.rendered
     reach = _reach_recited(assembled) if text == "recited" else _reach_source(assembled)
-    included = [i for i, g in enumerate(glyphs) if g.word is not None]
+    included = (
+        _non_structural_source(assembled) if text == "source"
+        # `rendered` carries no spelling edges; its own `word` is exactly
+        # this, by construction of `assemble.py`'s `_rendered_words`.
+        else [i for i, g in enumerate(glyphs) if g.word is not None]
+    )
 
     groups = (
         _cells_source(assembled, included, reach) if text == "source"
@@ -49,6 +54,13 @@ def alignment(
     ) if grouping == "cell" else [(i,) for i in included]
 
     return _pairings(assembled, text, groups, reach)
+
+
+def _non_structural_source(assembled: Assembled) -> list[int]:
+    """01-contract section 8: a glyph takes no pairing only where it carries
+    the `Structural` edge. `word` is not this law, even where it agrees."""
+    structural = {s.glyph for s in assembled.spellings if isinstance(s, ed.Structural)}
+    return [i for i in range(len(assembled.glyphs)) if i not in structural]
 
 
 # --------------------------------------------------------------------- reach
