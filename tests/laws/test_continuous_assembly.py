@@ -4,7 +4,7 @@ from __future__ import annotations
 from quranic_phonemizer.model.address import Junction, Location
 from quranic_phonemizer.phonemize.session import phonemize_request
 from quranic_phonemizer.phonemize.span import windows
-from quranic_phonemizer.render.recite import phonemes_by_word
+from quranic_phonemizer.phonemize.legacy_views import phonemes_by_word
 
 
 def test_a_multi_verse_range_is_one_index_space(hafs, alphabet):

@@ -19,6 +19,19 @@ SCHEMA_VERSION = 2
 #: beside the tokens rather than inside the resolver's control flow.
 LENGTH = ":"
 
+#: 01-contract section 3.2's four names. Each gates one distinction that a
+#: `Sound` always carries; the alphabet spends a token on it only when named.
+EXTRA_PHONEMES = frozenset(
+    {"tashil", "emphatic_fatha", "emphatic_ikhfaa", "qalqala_degree"}
+)
+
+#: `token(sound)` with no `extra_phonemes` argument -- every caller that
+#: predates the toggle -- must keep reading exactly as it does today, which
+#: is `emphatic_fatha` spent and the other three withheld. A caller that
+#: passes an explicit set, even empty, gets the contract's own default: all
+#: four withheld unless named.
+_LEGACY_ACTIVE = frozenset({"emphatic_fatha"})
+
 
 class NotationError(KeyError):
     """A sound this notation cannot write. Never a silent gap."""
@@ -49,54 +62,73 @@ class Alphabet:
     vowels: dict[Quality, Entry]
     releases: dict[Degree, str]
 
-    def token(self, sound: Sound) -> str:
+    def token(
+        self, sound: Sound, *, extra_phonemes: frozenset[str] | None = None
+    ) -> str:
+        active = _LEGACY_ACTIVE if extra_phonemes is None else frozenset(extra_phonemes)
         match sound:
             case Consonant():
-                return self._consonant(sound)
+                return self._consonant(sound, active)
             case Vowel():
-                return self._vowel(sound)
+                return self._vowel(sound, active)
             case Release():
-                return self.releases[sound.degree]
+                return self._release(sound, active)
         raise NotationError(f"{type(sound).__name__} is not a Sound")
 
-    def tokens(self, sounds) -> tuple[str, ...]:
-        return tuple(self.token(sound) for sound in sounds)
+    def tokens(
+        self, sounds, *, extra_phonemes: frozenset[str] | None = None
+    ) -> tuple[str, ...]:
+        return tuple(
+            self.token(sound, extra_phonemes=extra_phonemes) for sound in sounds
+        )
 
     # -- composition -------------------------------------------------------
-    def _consonant(self, sound: Consonant) -> str:
+    def _consonant(self, sound: Consonant, active: frozenset[str]) -> str:
         entry = self.consonants[sound.letter]
-        # `eased` is validated but not yet composed: see `Entry.eased`.
+        # Validated regardless of the toggle: a sound this feature-less
+        # cannot come from the model, so a missing entry is a data bug.
         if sound.eased and entry.eased is None:
             raise self._absent("eased", sound)
         if sound.ghunnah:
-            return self._hum(entry, sound)
+            return self._hum(entry, sound, active)
         # Checked before composing the plain token, which would otherwise
         # answer for a letter that takes no emphasis and quietly drop the
         # feature -- the one way a wrong tuple could still come back with a
         # plausible token.
         if sound.emphatic and entry.emphatic is None:
             raise self._absent("emphatic", sound)
-        token = entry.emphatic if sound.emphatic else entry.plain
+        if sound.eased and "tashil" in active:
+            token = entry.eased
+        else:
+            token = entry.emphatic if sound.emphatic else entry.plain
         assert token is not None
         return token * 2 if sound.geminate else token
 
-    def _hum(self, entry: Entry, sound: Consonant) -> str:
-        # `heavy_hum` is validated but not yet composed: see `Entry.eased`.
+    def _hum(self, entry: Entry, sound: Consonant, active: frozenset[str]) -> str:
         if sound.emphatic and entry.heavy_hum is None:
             raise self._absent("heavy_hum", sound)
+        if sound.emphatic and "emphatic_ikhfaa" in active:
+            return entry.heavy_hum
         if not sound.geminate and entry.hum is not None:
             return entry.hum
         # A held ghunnah is already the sound of a doubled letter, so
         # gemination adds nothing further to write.
         return self._feature(entry.nasal, "nasal", sound)
 
-    def _vowel(self, sound: Vowel) -> str:
+    def _vowel(self, sound: Vowel, active: frozenset[str]) -> str:
         entry = self.vowels[sound.quality]
-        if sound.emphatic:
+        if sound.emphatic and "emphatic_fatha" in active:
             token = self._feature(entry.emphatic, "emphatic", sound)
         else:
             token = entry.plain
         return token + LENGTH if sound.long else token
+
+    def _release(self, sound: Release, active: frozenset[str]) -> str:
+        # Kubra and akbar share a token, so the extended form is the
+        # sughra token doubled rather than a third data row.
+        if "qalqala_degree" in active and sound.degree is not Degree.SUGHRA:
+            return self.releases[Degree.SUGHRA] * 2
+        return self.releases[sound.degree]
 
     def _feature(self, token: str | None, name: str, sound: Sound) -> str:
         if token is None:

@@ -33,9 +33,9 @@ from ..model.performance import (
 )
 from ..orthography.write import Pen
 from ..render.alphabet import Alphabet
-from ..render.recite import sounds_in_order
 from . import edges as ed
 from . import nodes as nd
+from .ordering import sounds_in_order
 from .recited import write_recited
 from .session import Session
 
@@ -86,8 +86,9 @@ class Assembled:
     unit -- such as a tanween's noon -- that never itself carries a vowel."""
 
 
-def assemble(session: Session, pen: Pen, alphabet: Alphabet) -> Assembled:
-    score = session.score
+def _unit_indices(score: Score):
+    """`unit_of_slot`, `word_of_slot` and the `Unit` array, all keyed the
+    same way: position in `score.slots()` is a unit's index everywhere."""
     unit_of_slot = {slot.id: i for i, slot in enumerate(score.slots())}
     word_of_slot = {
         slot.id: w for w, word in enumerate(score.words) for slot in word.slots
@@ -95,6 +96,18 @@ def assemble(session: Session, pen: Pen, alphabet: Alphabet) -> Assembled:
     units = tuple(
         nd.unit_of(word_of_slot[slot.id], slot) for slot in score.slots()
     )
+    return unit_of_slot, word_of_slot, units
+
+
+def assemble(
+    session: Session,
+    pen: Pen,
+    alphabet: Alphabet,
+    *,
+    extra_phonemes: frozenset[str] = frozenset(),
+) -> Assembled:
+    score = session.score
+    unit_of_slot, word_of_slot, units = _unit_indices(score)
 
     glyphs, glyph_of = _glyphs(session.inscription, word_of_slot, unit_of_slot)
     spellings = _spellings(session.inscription, glyph_of, unit_of_slot)
@@ -103,7 +116,9 @@ def assemble(session: Session, pen: Pen, alphabet: Alphabet) -> Assembled:
     sound_ids = sounds_in_order(performance)
     sound_of = {sound_id: i for i, sound_id in enumerate(sound_ids)}
     by_id = dict(performance.sounds)
-    sounds = tuple(_sound(by_id[sound_id], alphabet) for sound_id in sound_ids)
+    sounds = tuple(
+        _sound(by_id[sound_id], alphabet, extra_phonemes) for sound_id in sound_ids
+    )
 
     occurrence_of = {o.id: i for i, o in enumerate(performance.occurrences)}
     rules = [
@@ -184,8 +199,8 @@ def _spellings(inscription: Inscription, glyph_of, unit_of_slot):
     return tuple(out)
 
 
-def _sound(sound, alphabet: Alphabet) -> nd.Sound:
-    token = alphabet.token(sound)
+def _sound(sound, alphabet: Alphabet, extra_phonemes: frozenset[str]) -> nd.Sound:
+    token = alphabet.token(sound, extra_phonemes=extra_phonemes)
     match sound:
         case Consonant(letter=l, geminate=g, emphatic=e, ghunnah=gh, eased=ea):
             return nd.Sound(token, nd.SoundKind.CONSONANT, letter=l,

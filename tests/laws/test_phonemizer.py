@@ -1,0 +1,117 @@
+"""`Phonemizer`/`PhonemizeResult` -- 01-contract sections 1 and 3 through 5.
+
+The contract's own worked example anchors the first case; the module
+functions and the laws of section 8 are checked over a small sample.
+"""
+from __future__ import annotations
+
+import pytest
+
+from quranic_phonemizer import Phonemizer, PhonemizeResult, available_variants
+from quranic_phonemizer import supported_riwayat, tajweed_rules
+from quranic_phonemizer.phonemize import edges as ed
+
+
+def test_the_contracts_own_example_runs():
+    r = Phonemizer().phonemize("2:255")
+    assert r.phonemes()[:12] == (
+        "ʔ", "a", "lˤlˤ", "a:", "h", "u", "l", "a:", "ʔ", "i", "l", "a:",
+    )
+    assert (len(r.rules), len(r.spellings), len(r.attributions), len(r.modifiers)) == (
+        86, 473, 295, 43,
+    )
+
+
+def test_identity_fields_are_seven_and_flat():
+    r = Phonemizer().phonemize("1:1")
+    assert r.ref == "1:1"
+    assert r.riwayah == "hafs"
+    assert r.script == "uthmani"
+    assert isinstance(r.variant, dict)
+    assert isinstance(r.extra_phonemes, frozenset)
+    assert r.schema_version == "1"
+    assert len(r.canon_digest) > 0
+
+
+def test_a_different_ref_changes_the_digest_bearing_fields():
+    a = Phonemizer().phonemize("1:1")
+    b = Phonemizer().phonemize("1:2")
+    assert a.ref != b.ref
+    assert a.words[0].text != b.words[0].text
+
+
+def test_phonemes_by_word_nests_one_tuple_per_word():
+    r = Phonemizer().phonemize("1:1")
+    by_word = r.phonemes(by="word")
+    assert len(by_word) == len(r.words)
+    assert tuple(t for word in by_word for t in word) == r.phonemes()
+
+
+def test_phonemes_by_rejects_an_unknown_grouping():
+    r = Phonemizer().phonemize("1:1")
+    with pytest.raises(ValueError):
+        r.phonemes(by="verse")
+
+
+def test_source_text_concatenates_to_the_glyph_array():
+    """02-gate 4.2: concatenating `char` in `source_index` order reproduces
+    the source text."""
+    r = Phonemizer().phonemize("1:1")
+    assert r.text("source") == "".join(g.char for g in r.glyphs)
+
+
+def test_recited_text_concatenates_to_the_rendered_array():
+    r = Phonemizer().phonemize("1:1")
+    assert r.text("recited") == "".join(g.char for g in r.rendered)
+
+
+def test_text_rejects_an_unknown_side():
+    r = Phonemizer().phonemize("1:1")
+    with pytest.raises(ValueError):
+        r.text("target")
+
+
+def test_alignment_and_respelling_delegate_to_the_same_assembly():
+    r = Phonemizer().phonemize("1:1")
+    cells = r.alignment(text="source", grouping="cell")
+    glyphs = r.alignment(text="source", grouping="glyph")
+    assert len(cells) <= len(glyphs)
+    blocks = r.respelling()
+    assert blocks
+
+
+def test_every_glyph_names_a_word_or_carries_no_word_at_all():
+    """A structural glyph (a verse's own text has none) is absent here; the
+    field exists and is exercised by the multi-word case instead."""
+    r = Phonemizer().phonemize("2:255-2:256")
+    assert any(g.word is None for g in r.glyphs)
+
+
+def test_module_functions_answer_without_an_instance():
+    assert supported_riwayat() == ("hafs",)
+    variants = available_variants("hafs")
+    assert "raa_tafkheem" in variants and "seen_sad" in variants
+    rules = tajweed_rules("hafs")
+    identifiers = {row[0] for row in rules}
+    assert "ikhfaa_haqiqi" in identifiers
+    for identifier, english, arabic in rules:
+        assert identifier and english and arabic
+
+
+def test_a_bare_phonemizer_is_hafs_uthmani():
+    r = Phonemizer().phonemize("1:1")
+    assert (r.riwayah, r.script) == ("hafs", "uthmani")
+
+
+def test_the_retired_projections_are_gone():
+    with pytest.raises(ModuleNotFoundError):
+        __import__("quranic_phonemizer.render.anchored")
+    with pytest.raises(ModuleNotFoundError):
+        __import__("quranic_phonemizer.render.recite")
+
+
+def test_result_is_the_documented_dataclass_shape():
+    r = Phonemizer().phonemize("1:1")
+    assert isinstance(r, PhonemizeResult)
+    for edge in r.spellings:
+        assert isinstance(edge, ed.Supplies | ed.Witnesses | ed.Decorates | ed.Structural)

@@ -17,7 +17,7 @@ sys.path.insert(0, str(ROOT))
 from quranic_phonemizer.api import alphabet as load_alphabet  # noqa: E402
 from quranic_phonemizer.api import recitation  # noqa: E402
 from quranic_phonemizer.model.address import Riwayah, Script  # noqa: E402
-from quranic_phonemizer.render.recite import phonemes_by_word  # noqa: E402
+from quranic_phonemizer.phonemize.legacy_views import phonemes_by_word  # noqa: E402
 from tools.parity import MODES, plan_for, units  # noqa: E402
 
 

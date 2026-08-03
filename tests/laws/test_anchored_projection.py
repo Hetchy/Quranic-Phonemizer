@@ -12,7 +12,7 @@ from quranic_phonemizer.engine.laws import LawError, check_inscription
 from quranic_phonemizer.engine.run import perform
 from quranic_phonemizer.model.address import SlotId
 from quranic_phonemizer.model.inscription import Attests, Decorates, Evidences
-from quranic_phonemizer.render.anchored import anchored, graphemes_by_id
+from quranic_phonemizer.phonemize.legacy_views import anchored, graphemes_by_id
 from quranic_phonemizer.riwayat.hafs import HAFS
 
 from conftest import built_for

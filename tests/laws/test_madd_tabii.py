@@ -10,7 +10,7 @@ from quranic_phonemizer.engine.run import perform
 from quranic_phonemizer.model.address import BoundaryPlan, Junction
 from quranic_phonemizer.model.canon import Rule
 from quranic_phonemizer.model.performance import Aspect, Hosts, MergedInto
-from quranic_phonemizer.render.recite import phonemes_by_word
+from quranic_phonemizer.phonemize.legacy_views import phonemes_by_word
 from quranic_phonemizer.riwayat.hafs import HAFS
 
 
