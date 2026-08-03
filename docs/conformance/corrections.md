@@ -43,6 +43,40 @@ did not, for the reason above. This correction is recorded here as the unit
 requires regardless, because the underlying fact changed even though no
 token did.
 
+## Unit A8: the ikhfaa haqiqi hum before an istilaa letter
+
+Item 13 gives ikhfaa haqiqi's hum a `Recolours` edge before one of the five
+istilaa letters its own trigger can reach without going to `izhar`: seen,
+saad, dad, tah, zah and qaf minus kha and ghain, which `izhar` already claims
+as throat letters -- leaving saad, dad, tah, zah and qaf. Before A8 the
+package had no way to write this at all: `Nasal` carried no `emphatic` token
+and the alphabet's `case Nasal(): if sound.emphatic: raise` refused one
+outright. `rules/noon_sakinah.py::IkhfaaWeight` mints the edge; `ipa.yaml`'s
+`noon.heavy_hum` (`ŋˤ`) is the new token.
+
+**246 words move in word mode, 879 in verse mode** (the wider count is the
+same correction reaching further under `Junction.JOIN`). Every one is the
+single-token substitution `ŋ` -> `ŋˤ` on a written noon or tanween noon whose
+next letter is saad, dad, tah, zah or qaf; `python tools/snapshot.py diff`
+against the pre-A8 head snapshot reports no other shape. A representative
+spread:
+
+| Ref | Before | After |
+|---|---|---|
+| 2:27:2 | `jaŋquduːn` | `jaŋˤquduːn` |
+| 5:72:33 | `ʔaŋsˤaːr` | `ʔaŋˤsˤaːr` |
+| 10:39:15 | `faŋðˤur` | `faŋˤðˤur` |
+| 21:65:9 | `jaŋtˤiquːn` | `jaŋˤtˤiquːn` |
+| 35:11:24 | `juŋqaˤsˤ` | `juŋˤqaˤsˤ` |
+| 48:3:1 | `wajaŋsˤuraˤk` | `wajaŋˤsˤuraˤk` |
+
+The full 246-ref word-mode list is reproducible: it is exactly the refs
+`tools/snapshot.py diff` names against the pre-A8 `tests/snapshots/head/`
+commit. `tools/gates.py`'s `regression` floors move from `99.921`/`97.852` to
+`99.604`/`96.771` (word/verse); `cross-script` does not move, since both
+scripts build the same canonical letter for the hum and the alphabet is
+shared. `docs/conformance/gate-residues.md` records the new class.
+
 ## The dead `سلسبيلا` entry
 
 `lexicon.yaml`'s `pausal_lexemes` section carried a second entry,

@@ -1,7 +1,7 @@
 """Maps a sound-feature tuple to a notation token.
 
-One entry per letter, quality, nasal place and release kind, features composed
-over it. Total by coverage, so a feature no entry offers raises at lookup.
+One entry per letter, quality and qalqala degree, features composed over it.
+Total by coverage, so a feature no entry offers raises at lookup.
 """
 from __future__ import annotations
 
@@ -11,15 +11,7 @@ from typing import Any
 
 from ..dataio import load_yaml, require_keys
 from ..model.canon import CanonLetter, Quality
-from ..model.performance import (
-    Consonant,
-    Nasal,
-    NasalPlace,
-    Release,
-    ReleaseKind,
-    Sound,
-    Vowel,
-)
+from ..model.performance import Consonant, Degree, Release, Sound, Vowel
 
 SCHEMA_VERSION = 2
 
@@ -43,6 +35,11 @@ class Entry:
     plain: str
     emphatic: str | None = None
     nasal: str | None = None
+    hum: str | None = None
+    heavy_hum: str | None = None
+    eased: str | None = None
+    """Read from the data but not yet composed: gated at the notation once
+    an `extra_phonemes` toggle exists to ask for it."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -50,8 +47,7 @@ class Alphabet:
     notation: str
     consonants: dict[CanonLetter, Entry]
     vowels: dict[Quality, Entry]
-    nasals: dict[NasalPlace, str]
-    releases: dict[ReleaseKind, str]
+    releases: dict[Degree, str]
 
     def token(self, sound: Sound) -> str:
         match sound:
@@ -59,12 +55,8 @@ class Alphabet:
                 return self._consonant(sound)
             case Vowel():
                 return self._vowel(sound)
-            case Nasal():
-                if sound.emphatic:
-                    raise self._absent("emphatic", sound)
-                return self.nasals[sound.place]
             case Release():
-                return self.releases[sound.kind]
+                return self.releases[sound.degree]
         raise NotationError(f"{type(sound).__name__} is not a Sound")
 
     def tokens(self, sounds) -> tuple[str, ...]:
@@ -73,18 +65,29 @@ class Alphabet:
     # -- composition -------------------------------------------------------
     def _consonant(self, sound: Consonant) -> str:
         entry = self.consonants[sound.letter]
-        # Checked before the nasal branch, which would otherwise answer for a
-        # letter that takes no emphasis and quietly drop the feature -- the
-        # one way a wrong tuple could still come back with a plausible token.
+        # `eased` is validated but not yet composed: see `Entry.eased`.
+        if sound.eased and entry.eased is None:
+            raise self._absent("eased", sound)
+        if sound.ghunnah:
+            return self._hum(entry, sound)
+        # Checked before composing the plain token, which would otherwise
+        # answer for a letter that takes no emphasis and quietly drop the
+        # feature -- the one way a wrong tuple could still come back with a
+        # plausible token.
         if sound.emphatic and entry.emphatic is None:
             raise self._absent("emphatic", sound)
-        if sound.nasal:
-            # A held nasal is already the sound of a doubled letter, so
-            # gemination adds nothing to write.
-            return self._feature(entry.nasal, "nasal", sound)
         token = entry.emphatic if sound.emphatic else entry.plain
         assert token is not None
         return token * 2 if sound.geminate else token
+
+    def _hum(self, entry: Entry, sound: Consonant) -> str:
+        if sound.emphatic:
+            return self._feature(entry.heavy_hum, "heavy_hum", sound)
+        if not sound.geminate and entry.hum is not None:
+            return entry.hum
+        # A held ghunnah is already the sound of a doubled letter, so
+        # gemination adds nothing further to write.
+        return self._feature(entry.nasal, "nasal", sound)
 
     def _vowel(self, sound: Vowel) -> str:
         entry = self.vowels[sound.quality]
@@ -113,8 +116,7 @@ def load_alphabet(path: Path) -> Alphabet:
     data = load_yaml(path)
     require_keys(
         data,
-        {"schema_version", "notation", "consonants", "vowels", "nasals",
-         "releases"},
+        {"schema_version", "notation", "consonants", "vowels", "releases"},
         name=str(path),
     )
     if data["schema_version"] != SCHEMA_VERSION:
@@ -126,8 +128,7 @@ def load_alphabet(path: Path) -> Alphabet:
         notation=str(data["notation"]),
         consonants=_entries(CanonLetter, data["consonants"], "consonants", path),
         vowels=_entries(Quality, data["vowels"], "vowels", path),
-        nasals=_tokens(NasalPlace, data["nasals"], "nasals", path),
-        releases=_tokens(ReleaseKind, data["releases"], "releases", path),
+        releases=_tokens(Degree, data["releases"], "releases", path),
     )
 
 
@@ -168,11 +169,17 @@ def _covered(enum: type, raw: Any, section: str, path: Path) -> tuple:
 def _entry(raw: Any, where: str) -> Entry:
     if isinstance(raw, str):
         return Entry(plain=raw)
-    require_keys(raw, {"plain"}, name=where, optional={"emphatic", "nasal"})
+    require_keys(
+        raw, {"plain"}, name=where,
+        optional={"emphatic", "nasal", "hum", "heavy_hum", "eased"},
+    )
     return Entry(
         plain=str(raw["plain"]),
         emphatic=_optional(raw, "emphatic"),
         nasal=_optional(raw, "nasal"),
+        hum=_optional(raw, "hum"),
+        heavy_hum=_optional(raw, "heavy_hum"),
+        eased=_optional(raw, "eased"),
     )
 
 

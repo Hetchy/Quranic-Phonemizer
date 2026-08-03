@@ -82,10 +82,10 @@ class Idgham:
                         geminate=True,
                         # A doubled noon or meem is held on its ghunnah
                         # wherever it stands, and one the idgham doubled is
-                        # no different: the meem of `ٱرْكَب مَّعَنَا` is nasal,
+                        # no different: the meem of `ٱرْكَب مَّعَنَا` hums,
                         # exactly as `GhunnahMushaddadah` would have made it
                         # had the rasm written the shadda for itself.
-                        nasal=following.letter in NASAL_LETTERS,
+                        ghunnah=following.letter in NASAL_LETTERS,
                     ),
                 ),
                 MergeInto(at, Aspect.CONSONANT, following.id, Aspect.CONSONANT),

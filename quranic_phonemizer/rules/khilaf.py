@@ -4,17 +4,18 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from ..model.address import KhilafId, VariantSelection
-from ..model.canon import ABJAD, Onset
-from ..model.performance import NasalPlace
+from ..model.canon import ABJAD, CanonLetter, Onset
 
 #: Both readings of the two bilabial hidings are taught and both are correct.
 #: A hidden meem before the baa is the phonetic description; the generic nasal
-#: is what a reciter who does not close the lips produces.
+#: is what a reciter who does not close the lips produces. The reading rides
+#: on the letter the rule mints: a real meem sounds where the lips close, a
+#: noon-lettered hum where they do not.
 NASAL_PLACES = {
-    "bilabial": NasalPlace.BILABIAL,
-    "assimilated": NasalPlace.ASSIMILATED,
+    "bilabial": CanonLetter.MEEM,
+    "assimilated": CanonLetter.NOON,
 }
-DEFAULT_NASAL_PLACE = NasalPlace.ASSIMILATED
+DEFAULT_NASAL_PLACE = CanonLetter.NOON
 
 #: The two readings of a disputed raa, as a reader names them.
 HEAVY = {"heavy": True, "light": False}
@@ -33,17 +34,17 @@ class KhilafError(ValueError):
     """An option name no rule can act on."""
 
 
-def nasal_place(selection: VariantSelection, khilaf: KhilafId) -> NasalPlace:
+def nasal_place(selection: VariantSelection, khilaf: KhilafId) -> CanonLetter:
     name = selection.chosen(khilaf)
     if name is None:
         return DEFAULT_NASAL_PLACE
-    place = NASAL_PLACES.get(name)
-    if place is None:
+    letter = NASAL_PLACES.get(name)
+    if letter is None:
         raise KhilafError(
             f"{khilaf.value}: {name!r} is not an option; expected one of "
             f"{sorted(NASAL_PLACES)}"
         )
-    return place
+    return letter
 
 
 @dataclass(frozen=True, slots=True)

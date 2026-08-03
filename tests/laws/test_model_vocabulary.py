@@ -64,6 +64,21 @@ def test_classification_only_excludes_rules_with_a_real_effect() -> None:
     }
 
 
+def test_sound_union_has_the_three_variants() -> None:
+    """The standalone `Nasal` sound is gone: a hum is a `Consonant` with
+    `ghunnah`, riding the letter the rule mints rather than a place field."""
+    from typing import get_args
+
+    members = {cls.__name__ for cls in get_args(performance.Sound)}
+    assert members == {"Consonant", "Vowel", "Release"}
+    assert {f.name for f in dataclasses.fields(performance.Consonant)} == {
+        "letter", "geminate", "emphatic", "ghunnah", "eased",
+    }
+    assert {f.name for f in dataclasses.fields(performance.Release)} == {
+        "degree",
+    }
+
+
 def test_modifier_union_has_the_three_variants() -> None:
     from typing import get_args
 
@@ -111,6 +126,9 @@ def test_deleted_names_stay_deleted() -> None:
         (canon, "SILENT"),
         (performance, "Attach"),
         (performance, "SilenceReason"),
+        (performance, "Nasal"),
+        (performance, "NasalPlace"),
+        (performance, "ReleaseKind"),
         (inscription, "Inert"),
         (inscription, "SpellKind"),
         (inscription, "RuleTag"),

@@ -8,13 +8,7 @@ from ..engine.plan import MergeInto, Phase, Plan, Realize, Verdict, mint
 from ..model.address import BoundaryPlan, KhilafId, SlotId
 from ..model.canon import CanonLetter as L
 from ..model.canon import Onset, Rule
-from ..model.performance import (
-    Aspect,
-    Consonant,
-    Nasal,
-    Occurrence,
-    Participants,
-)
+from ..model.performance import Aspect, Consonant, Occurrence, Participants
 from .ownership import is_quiescent
 from .khilaf import nasal_place
 from .tables import Followers
@@ -51,7 +45,7 @@ class GhunnahMushaddadah:
                 Realize(
                     at,
                     Aspect.CONSONANT,
-                    Consonant(slot.letter, geminate=True, nasal=True),
+                    Consonant(slot.letter, geminate=True, ghunnah=True),
                 ),
             ),
         )
@@ -86,10 +80,13 @@ class MeemSakinah:
                         Realize(
                             at,
                             Aspect.CONSONANT,
-                            Nasal(nasal_place(
-                                near.score.selection,
-                                KhilafId.IKHFAA_SHAFAWI_NASAL,
-                            )),
+                            Consonant(
+                                nasal_place(
+                                    near.score.selection,
+                                    KhilafId.IKHFAA_SHAFAWI_NASAL,
+                                ),
+                                ghunnah=True,
+                            ),
                         ),
                     ),
                 )
@@ -100,7 +97,7 @@ class MeemSakinah:
                         Realize(
                             following.id,
                             Aspect.CONSONANT,
-                            Consonant(L.MEEM, geminate=True, nasal=True),
+                            Consonant(L.MEEM, geminate=True, ghunnah=True),
                         ),
                         MergeInto(at, Aspect.CONSONANT, following.id, Aspect.CONSONANT),
                     ),

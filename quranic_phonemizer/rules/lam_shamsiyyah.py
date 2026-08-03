@@ -110,7 +110,7 @@ class ArticleLam:
                     Consonant(
                         following.letter,
                         geminate=True,
-                        nasal=following.letter in (L.NOON, L.MEEM),
+                        ghunnah=following.letter in (L.NOON, L.MEEM),
                     ),
                 ),
                 MergeInto(at, Aspect.CONSONANT, following.id, Aspect.CONSONANT),

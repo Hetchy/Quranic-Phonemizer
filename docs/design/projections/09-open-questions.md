@@ -19,32 +19,6 @@ about where the set is soft, rather than as a complete inventory.
 
 ---
 
-## 1. The set deletes two working variant points
-
-[01-contract](01-contract.md) section 3.1 says "The two nasal placement points
-are not here: see section 4.4", and section 4.4 says the hum "needs no place of
-articulation" because "the shipped data does not site" the choice. Section 9
-item 10 removes the standalone nasal type that carries the place.
-
-The package answers otherwise. `KhilafId.IQLAB_NASAL` and
-`KhilafId.IKHFAA_SHAFAWI_NASAL` are live, and a selection naming one changes the
-token:
-
-```
-2:27:5  default   m i ŋ
-2:27:5  bilabial  m i m̃
-```
-
-The point has no per-site rows in `khilaf.yaml`, which is what "does not site"
-meant, but a whole-point selection needs none. Under this contract both
-readings would leave `available_variants`, `variants`, `r.variant`, the graph
-and `phonemes()` together, and the rule name cannot carry the difference
-because it is `iqlab` either way.
-
-**Settled by** deciding whether a hum has a published place. If it does, the
-`Sound` for a nasal consonant needs the field and section 3.1 needs the two
-points back.
-
 ## 2. `Block` is not total
 
 [01-contract](01-contract.md) section 6.3 says "No block has an empty
@@ -63,22 +37,6 @@ owns it. Three cases resist:
 
 **Settled by** implementing `respelling` over the corpus and seeing which shape
 the writer actually needs. E13's is the one this document believes.
-
-## 3. `tashil` has no producer path
-
-[01-contract](01-contract.md) section 3.2 offers `tashil` as an optional
-phoneme, and section 9 item 39 says the optional phonemes "reach no node and no
-edge, so the gate belongs beside the alphabet and nowhere in the producer". But
-section 4.4's consonant `Sound` publishes `letter`, `geminate`, `emphatic` and
-`ghunnah`, and section 9 item 1 says "Manner is not published at all". The
-notation is handed a `Sound` and nothing else, so with the toggle on it cannot
-tell an eased hamza from a plain one. E21 states the same thing from the other
-side: the ease "is a `Classifies` edge and no field of the sound".
-
-The other three toggles each have a field behind them. This one does not.
-
-**Settled by** either publishing manner on the hamza's sound, which is what the
-other three do, or dropping the toggle. The corpus has one site, `41:44:9`.
 
 ## 6. Laws that name a case they then exclude
 

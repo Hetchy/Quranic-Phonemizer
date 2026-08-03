@@ -11,14 +11,15 @@ from ..engine.neighbourhood import Neighbourhood
 from ..engine.plan import Phase, Plan, Realize, Verdict, mint
 from ..model.address import BoundaryPlan, SlotId
 from ..model.canon import CanonLetter, Onset, Rule
-from ..model.performance import (
-    Aspect,
-    Occurrence,
-    Participants,
-    Release,
-    ReleaseKind,
-)
+from ..model.performance import Aspect, Degree, Occurrence, Participants, Release
 from .tables import Pairs
+
+#: The rule each degree is minted under, keyed the other way for the sound.
+_DEGREE_OF_RULE = {
+    Rule.QALQALA_SUGHRA: Degree.SUGHRA,
+    Rule.QALQALA_KUBRA: Degree.KUBRA,
+    Rule.QALQALA_AKBAR: Degree.AKBAR,
+}
 
 
 @dataclass(frozen=True, slots=True)
@@ -60,7 +61,7 @@ class Qalqala:
 
         return Verdict(
             Occurrence(mint(degree, at), degree, Participants(at)),
-            (Realize(at, Aspect.VOWEL, Release(ReleaseKind.QALQALA)),),
+            (Realize(at, Aspect.VOWEL, Release(_DEGREE_OF_RULE[degree])),),
         )
 
     def _consumed(self, near: Neighbourhood, at: SlotId, slot) -> bool:

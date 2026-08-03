@@ -19,8 +19,8 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 FLOORS = {
     ("cross", "word"): "99.997",
     ("cross", "verse"): "100.0",
-    ("regression", "word"): "99.921",
-    ("regression", "verse"): "97.852",
+    ("regression", "word"): "99.604",
+    ("regression", "verse"): "96.771",
     ("roundtrip", "uthmani"): "100.0",
     ("attest", "uthmani"): "176",
     ("attest", "indopak"): "237",

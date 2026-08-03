@@ -33,16 +33,13 @@ class Side(StrEnum):
     AFTER = "after"
 
 
-class NasalPlace(StrEnum):
-    """A place of articulation, not a rule name. The realization khilaf is
-    resolved in `rules/`, never in `render/`."""
+class Degree(StrEnum):
+    """A qalqala's three degrees. The letter it names lives in the rule that
+    minted it; this is how hard the echo bounces."""
 
-    BILABIAL = "bilabial"
-    ASSIMILATED = "assimilated"
-
-
-class ReleaseKind(StrEnum):
-    QALQALA = "qalqala"
+    SUGHRA = "sughra"
+    KUBRA = "kubra"
+    AKBAR = "akbar"
 
 
 class Length(StrEnum):
@@ -57,7 +54,8 @@ class Consonant:
     letter: CanonLetter
     geminate: bool = False
     emphatic: bool = False
-    nasal: bool = False
+    ghunnah: bool = False
+    eased: bool = False
 
 
 @dataclass(frozen=True, slots=True)
@@ -68,17 +66,11 @@ class Vowel:
 
 
 @dataclass(frozen=True, slots=True)
-class Nasal:
-    place: NasalPlace
-    emphatic: bool = False
-
-
-@dataclass(frozen=True, slots=True)
 class Release:
-    kind: ReleaseKind
+    degree: Degree
 
 
-Sound: TypeAlias = Consonant | Vowel | Nasal | Release
+Sound: TypeAlias = Consonant | Vowel | Release
 
 
 @dataclass(frozen=True, slots=True)

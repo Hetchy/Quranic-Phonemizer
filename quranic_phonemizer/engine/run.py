@@ -18,7 +18,6 @@ from ..model.performance import (
     Inserted,
     MergedInto,
     Modifier,
-    Nasal,
     Occurrence,
     Performance,
     Recolours,
@@ -304,11 +303,11 @@ def _apply_colours(effect: Realize, colours) -> Sound:
         return sound
     match sound:
         case Consonant():
-            return Consonant(sound.letter, sound.geminate, emphatic, sound.nasal)
+            return Consonant(
+                sound.letter, sound.geminate, emphatic, sound.ghunnah, sound.eased
+            )
         case Vowel():
             return Vowel(sound.quality, sound.long, emphatic)
-        case Nasal():
-            return Nasal(sound.place, emphatic)
     return sound
 
 

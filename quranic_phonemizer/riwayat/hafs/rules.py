@@ -22,7 +22,7 @@ from ...rules.idgham import Idgham
 from ...rules.lam_shamsiyyah import ArticleLam, ArticleShape
 from ...rules.madd import IltiqaRepair, MaddClass, MaddLeen, PausalGlide
 from ...rules.meem_sakinah import GhunnahMushaddadah, MeemSakinah
-from ...rules.noon_sakinah import NoonSakinah
+from ...rules.noon_sakinah import IkhfaaWeight, NoonSakinah
 from ...rules.qalqala import Qalqala
 from ...rules.tafkheem import Emphasis, Weight
 from .resources import khilaf, lexicon, rule_tables
@@ -59,6 +59,10 @@ def _build() -> RuleSet:
                 Emphasis(weight=weight),
                 Tarqeeq(weight=weight),
                 CanonicalColour(),
+                IkhfaaWeight(
+                    followers=tables.followers_of_noon,
+                    always_heavy=tables.always_heavy,
+                ),
             ),
             Phase.RELEASE: (Qalqala(letters=tables.qalqala, pairs=tables.pairs),),
         }

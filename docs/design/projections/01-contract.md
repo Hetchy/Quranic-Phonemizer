@@ -222,13 +222,16 @@ rather than composing one.
 | `khilaf` | Disputes |
 |---|---|
 | `seen_sad` | which letter is read where the rasm allows both |
+| `iqlab_nasal` | whether an iqlab's hum closes the lips or stays a hum |
+| `ikhfaa_shafawi_nasal` | whether ikhfaa shafawi's hum closes the lips or stays a hum |
 | `raa_tafkheem` | whether a raa is heavy or light |
 | `imala_quality` | the vowel imala tilts toward |
 | `nucleus_vowel` | which vowel a position takes |
 | `yaa_ithbat` | whether a pronoun yaa is pronounced at a pause |
 
 `seen_sad` is published and has no sites in the shipped Hafs data, so nothing
-selects it yet. The two nasal placement points are not here: see section 4.4.
+selects it yet. Neither nasal point names a site: a selection carries the
+point alone, and it applies wherever the point's trigger occurs.
 
 **Every point in the shipped Hafs data is a set of sites, and one of them has
 sites whose defaults differ from each other.** So a whole-point choice is a
@@ -411,7 +414,7 @@ spelling policy to choose: the recited text is what recitation writes, once.
 
 | `kind` | Fields |
 |---|---|
-| `consonant` | `letter`, `geminate`, `emphatic`, `ghunnah` |
+| `consonant` | `letter`, `geminate`, `emphatic`, `ghunnah`, `eased` |
 | `vowel` | `quality`, `long`, `emphatic` |
 | `qalqala` | `degree` |
 
@@ -422,8 +425,10 @@ the sound is that letter. One field, one referent, and no sound that belongs
 to no letter.
 
 `geminate` tells the two apart. A hummed noon is not doubled and an idgham's
-host is, which is also why the hum needs no place of articulation: it is the
-noon, and where a reciter puts it is a khilaf the shipped data does not site.
+host is. The hum's place is not a separate field: `iqlab_nasal` and
+`ikhfaa_shafawi_nasal` are real khilaf points, and a reading rides on
+`letter` itself -- a noon-lettered hum for the default assimilated reading, a
+real meem where the lips close.
 
 `ghunnah` occurs on four letters, noon, meem, waw and yaa. With `emphatic` it
 is the heavy ghunnah of an ikhfaa before an istilaa letter, which the ikhfaa
@@ -752,8 +757,9 @@ changes.
 
 1. **The consonant's two facts are derived, not split.** The projection
    publishes `geminate` and `sounds`; the model keeps one enum, because it can
-   express every combination that exists. Manner is not published at all: an
-   eased hamza is a rule and already is one.
+   express every combination that exists. Manner is published as a boolean on
+   the sound, the same shape as `emphatic` and `ghunnah`: an eased hamza is
+   `eased`, not a rule read a second time.
 2. **The modifier edge survives into the document.** A recolour and a length
    change are engine effects today, applied to the sound and then dropped, so
    the rule that made them owns nothing. `tafkheem` is the largest instance
