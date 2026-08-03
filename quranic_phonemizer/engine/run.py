@@ -194,6 +194,7 @@ def _plain_sound(slot: Slot, aspect: Aspect, colours, lengths=None) -> Sound:
             slot.letter,
             geminate=slot.onset is Onset.GEMINATE,
             emphatic=emphatic,
+            eased=slot.onset is Onset.TASHIL,
         )
     long = slot.nucleus.sounds_long
     override = (lengths or {}).get(slot.id)

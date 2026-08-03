@@ -41,18 +41,13 @@ def test_the_toggle_changes_no_node_and_no_edge():
     assert off.phonemes() != on.phonemes()
 
 
-def test_tashil_gates_the_alphabet_directly():
-    """No corpus site reaches this today -- `Consonant.eased` is validated
-    by `Alphabet` but nothing in the engine's own default fill sets it, so
-    the toggle is exercised at the notation layer it belongs to."""
-    from quranic_phonemizer.api import alphabet
-    from quranic_phonemizer.model.canon import CanonLetter
-    from quranic_phonemizer.model.performance import Consonant
-
-    a = alphabet()
-    hamza = Consonant(letter=CanonLetter.HAMZA, eased=True)
-    assert a.token(hamza, extra_phonemes=frozenset()) == "ʔ"
-    assert a.token(hamza, extra_phonemes=frozenset({"tashil"})) == "ʔ̞"
+def test_tashil_defaults_off():
+    """41:44:9's eased hamza -- `Onset.TASHIL`'s one corpus site."""
+    off = Phonemizer().phonemize("41:44")
+    on = Phonemizer(extra_phonemes=("tashil",)).phonemize("41:44")
+    i = _sound_index(off, lambda s: s.kind.value == "consonant" and s.eased)
+    assert off.phonemes()[i] == "ʔ"
+    assert on.phonemes()[i] == "ʔ̞"
 
 
 def test_emphatic_ikhfaa_defaults_off():
