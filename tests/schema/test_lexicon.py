@@ -60,7 +60,7 @@ def test_every_section_declares_a_budget(lexicon):
     assert all(section.budget > 0 for section in lexicon.sections.values())
 
 
-# -- the four match modes -------------------------------------------------
+# -- the three match modes ------------------------------------------------
 def test_exact_takes_the_key_and_nothing_else(lexicon):
     assert lexicon.is_divine_name("له")
     assert not lexicon.is_divine_name("لهو")
@@ -85,23 +85,9 @@ def test_a_stem_under_three_letters_is_not_a_prefix(lexicon):
     assert not lexicon.is_wasl_exempt("ءلكتب")
 
 
-def test_proclitic_takes_the_key_after_exactly_one_proclitic(lexicon):
-    assert lexicon.is_pausal("ءaنa")
-    assert lexicon.is_pausal("وaءaنa")
-    assert not lexicon.is_pausal("وaلaءaنa")
-
-
-def test_a_two_character_prefix_that_is_not_a_proclitic_does_not_match(lexicon):
-    """`جَآءَنَا` ends in the letters and vowels of `أَنَا` behind two characters,
-    and the vocalised notation writes no length, so counting them is not
-    enough to tell it from `وَأَنَا`."""
-    assert not lexicon.is_pausal("جaءaنa")
-
-
 def test_a_lexicon_with_no_sections_answers_no_to_everything():
     assert not EMPTY.is_divine_name("له")
     assert not EMPTY.is_wasl_exempt("ءمن")
-    assert not EMPTY.pausal_lexemes
 
 
 # -- what the file must say about itself ----------------------------------

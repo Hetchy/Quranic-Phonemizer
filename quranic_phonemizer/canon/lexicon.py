@@ -23,15 +23,10 @@ class MatchMode(StrEnum):
     EXACT = "exact"
     CLITIC = "clitic"
     INFLECTED = "inflected"
-    PROCLITIC = "proclitic"
 
 
 #: Below this length a stem is not specific enough to match a prefix.
 _PREFIX_MIN = 3
-
-#: One letter and its vowel, in the vocalised notation `_vocalised` writes.
-#: `الآن` is three past `أنا` and is not it.
-_PROCLITIC = 2
 
 
 class LexiconError(ValueError):
@@ -59,7 +54,7 @@ class Affixes:
     inflectional family without enumerating it."""
     proclitics: frozenset[str] = frozenset()
     """The single letters that may stand before a word. Closed for the same
-    reason, and what keeps `جَآءَنَا` from reading as `أَنَا` behind a prefix."""
+    reason: a fact about Arabic, not about this riwayah's reading of it."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -80,10 +75,6 @@ class Lexicon:
     def is_wasl_exempt_doubled(self, skeleton: str) -> bool:
         return self._matches("wasl_exempt_doubled", skeleton)
 
-    def is_pausal(self, skeleton: str) -> bool:
-        """Matched exactly, or after a single proclitic: `وَأَنَا` is `أنا`."""
-        return self._matches("pausal_lexemes", skeleton)
-
     def takes_wasl_kasra(self, skeleton: str) -> bool:
         """Matched as it stands: `است` heads every form-X verb, whose helping
         vowel its own third letter decides."""
@@ -93,13 +84,6 @@ class Lexicon:
         """Matched as it stands: `ٱلتَّقْوَىٰ` and `ٱلتَّمَاثِيل` extend the
         stems of `ٱلْتَقَى` and `ٱلْتَمِسُوا` and are not them."""
         return self._matches("form_eight_lam", skeleton)
-
-    @property
-    def pausal_lexemes(self) -> frozenset[str]:
-        """The pass that applies them skips its whole loop when there are
-        none, so it asks for the entries rather than testing a skeleton."""
-        section = self.sections.get("pausal_lexemes")
-        return section.entries if section else frozenset()
 
     def _matches(self, name: str, key: str) -> bool:
         section = self.sections.get(name)
@@ -127,23 +111,10 @@ def _inflected(entries: frozenset[str], key: str, affixes: Affixes) -> bool:
     )
 
 
-def _proclitic(entries: frozenset[str], key: str, affixes: Affixes) -> bool:
-    """A lexeme, or one behind a single proclitic: `وَأَنَا` is `أنا`."""
-    # The prefix has to *be* a proclitic, not merely two characters long: the
-    # vocalised notation writes no length, so `جَآءَنَا` and `وَأَنَا` are one
-    # shape to a counting test and only the letter tells them apart.
-    return key in entries or (
-        len(key) > _PROCLITIC
-        and key[0] in affixes.proclitics
-        and key[_PROCLITIC:] in entries
-    )
-
-
 _MATCHERS = {
     MatchMode.EXACT: _exact,
     MatchMode.CLITIC: _clitic,
     MatchMode.INFLECTED: _inflected,
-    MatchMode.PROCLITIC: _proclitic,
 }
 
 EMPTY = Lexicon()

@@ -210,23 +210,6 @@ def _plural_meem(span) -> bool:
     )
 
 
-def _apply_pausal_lexemes(
-    reading: Reading, drafts, lexicon: Lexicon, scribe, selection
-) -> None:
-    """The seven alifs. Uthmani marks them `۠`; IndoPak writes a plain final
-    alif, indistinguishable from an ordinary length carrier - so the fact is
-    lexical, not orthographic."""
-    del scribe, selection
-    if not lexicon.pausal_lexemes:
-        return
-    for word_index in range(len(reading.words)):
-        span = [d for d in drafts if word_of(reading, d) == word_index]
-        if not span:
-            continue
-        if lexicon.is_pausal(vocalised(span)):
-            span[-1].nucleus = Nucleus.pausal_long(Quality.A)
-
-
 def vocalised(span) -> str:
     """A skeleton that also spells its vowels.
 
@@ -243,11 +226,10 @@ def vocalised(span) -> str:
         )
     return "".join(out)
 
-#: The passes every riwayah runs, in order: two lexemes and one juncture. A
+#: The passes every riwayah runs, in order: one lexeme and one juncture. A
 #: list rather than a hardcoded sequence in `build`, so a riwayah that reads
 #: a lexeme differently swaps the list instead of editing the builder.
 LEXEME_PASSES: tuple[LexemePass, ...] = (
     _apply_allah_lexeme,
-    _apply_pausal_lexemes,
     connect_plural_meem,
 )
