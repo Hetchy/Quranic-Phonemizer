@@ -129,6 +129,23 @@ def test_a_cell_holds_two_letter_glyphs_only_for_a_tanween_noon(hafs, pen, alpha
         assert len(tanween) == 1, (surah, ayah, pairing, units)
 
 
+def test_length_owns_before_quality(hafs, pen, alphabet):
+    """01-contract 6.1's tiebreak: `ٱلرَّحْمَـٰنِ`'s dagger vowel is owned by
+    the seat that carries its length, not the fatha that carries its
+    quality -- both present the same sound, but only one may own it."""
+    a = _assembled(hafs, pen, alphabet, "1:1")
+    source = alignment(a, text="source", grouping="glyph")
+    seat = next(
+        i for i, p in enumerate(source)
+        if a.glyphs[p.glyphs[0]].char == "ـ" and p.sounds
+    )
+    fatha = next(
+        i for i, p in enumerate(source[:seat])
+        if a.glyphs[p.glyphs[0]].char == "َ" and p.shares == source[seat].sounds
+    )
+    assert not source[fatha].sounds
+
+
 def test_the_divine_names_carrier_joins_its_owning_cell(hafs, pen, alphabet):
     # ٱللَّهِ, 2:27:4 -- E13's shape: one source cell, closed against it.
     a = _assembled(hafs, pen, alphabet, "2:27:2-2:27:8")
