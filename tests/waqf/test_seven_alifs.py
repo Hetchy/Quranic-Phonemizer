@@ -39,7 +39,6 @@ def test_each_pausal_alif_is_sounded_when_it_is_stopped_on(
 def test_each_pausal_alif_falls_silent_when_the_reading_carries_on(
     site, word, stopped, joined
 ):
-    # the engine sounds the alif at either junction, so it reads long here too
     assert reading(site, ibtidaa=word, wasl=word).phonemes(word) == joined
 
 
