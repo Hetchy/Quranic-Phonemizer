@@ -45,7 +45,7 @@ class GhunnahMushaddadah:
             Occurrence(
                 mint(Rule.GHUNNAH_MUSHADDADAH, at),
                 Rule.GHUNNAH_MUSHADDADAH,
-                Participants((at,)),
+                Participants(at),
             ),
             (
                 Realize(
@@ -112,5 +112,5 @@ class MeemSakinah:
 
 def _verdict(rule: Rule, at: SlotId, other: SlotId, effects: tuple) -> Verdict:
     return Verdict(
-        Occurrence(mint(rule, at), rule, Participants((at, other))), effects
+        Occurrence(mint(rule, at), rule, Participants(at, other)), effects
     )

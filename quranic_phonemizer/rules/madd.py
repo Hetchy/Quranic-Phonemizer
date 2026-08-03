@@ -67,7 +67,8 @@ class PausalGlide:
             Occurrence(
                 mint(Rule.MADD_TABII, at),
                 Rule.MADD_TABII,
-                Participants((before.id, at)),
+                # The glide is the source; the vowel it merges into is the host.
+                Participants(source=at, host=before.id),
             ),
             (
                 # Realizes the merged sound itself, so both halves share one occurrence.
@@ -124,7 +125,7 @@ class IltiqaRepair:
             Occurrence(
                 mint(Rule.ILTIQA_REPAIR, at),
                 Rule.ILTIQA_REPAIR,
-                Participants((at, following.id)),
+                Participants(at, following.id),
             ),
             (Relength(at, Length.SHORT),),
         )
@@ -233,5 +234,5 @@ class MaddLeen:
 
 def _classify(rule: Rule, at: SlotId, other: SlotId) -> Verdict:
     return Verdict(
-        Occurrence(mint(rule, at), rule, Participants((at, other))), ()
+        Occurrence(mint(rule, at), rule, Participants(at, other)), ()
     )

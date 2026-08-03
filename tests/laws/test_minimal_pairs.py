@@ -108,7 +108,8 @@ def test_an_assimilated_closure_has_no_qalqala(packed, hafs, alphabet) -> None:
     score, performance = _performed(packed, hafs, 5, 28)
     held = {slot.id for slot in score.words[1].slots}
     fired = {
-        o.rule for o in performance.occurrences if held & set(o.parts.slots)
+        o.rule for o in performance.occurrences
+        if held & {o.parts.source, o.parts.host}
     }
     assert Rule.IDGHAM_MUTAJANISAYN_NAQIS in fired
     assert not fired & {

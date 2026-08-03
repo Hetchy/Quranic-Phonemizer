@@ -65,7 +65,7 @@ class Idgham:
                 return None
 
         occurrence = Occurrence(
-            mint(rule, at), rule, Participants((at, following.id))
+            mint(rule, at), rule, Participants(at, following.id)
         )
         if rule is Rule.IDGHAM_MUTAJANISAYN_NAQIS:
             # The first letter survives as a colour on the second, so nothing

@@ -93,7 +93,7 @@ class ArticleLam:
                 Occurrence(
                     mint(Rule.LAM_QAMARIYYAH, at),
                     Rule.LAM_QAMARIYYAH,
-                    Participants((at, following.id)),
+                    Participants(at, following.id),
                 ),
                 (),
             )
@@ -101,7 +101,7 @@ class ArticleLam:
             Occurrence(
                 mint(Rule.LAM_SHAMSIYYAH, at),
                 Rule.LAM_SHAMSIYYAH,
-                Participants((at, following.id)),
+                Participants(at, following.id),
             ),
             (
                 Realize(

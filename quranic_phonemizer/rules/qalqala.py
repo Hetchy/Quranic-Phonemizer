@@ -59,7 +59,7 @@ class Qalqala:
             degree = Rule.QALQALA_SUGHRA
 
         return Verdict(
-            Occurrence(mint(degree, at), degree, Participants((at,))),
+            Occurrence(mint(degree, at), degree, Participants(at)),
             (Realize(at, Aspect.VOWEL, Release(ReleaseKind.QALQALA)),),
         )
 

@@ -85,7 +85,7 @@ def _between_names(slot, following) -> bool:
 def _classification(rule: Rule, at: SlotId, other: SlotId) -> Verdict:
     """Izhar produces no sound of its own; the occurrence exists so a
     projection can find it."""
-    return Verdict(Occurrence(mint(rule, at), rule, Participants((at, other))), ())
+    return Verdict(Occurrence(mint(rule, at), rule, Participants(at, other)), ())
 
 
 def _nasal(
@@ -93,7 +93,7 @@ def _nasal(
 ) -> Verdict:
     """Iqlab and ikhfaa replace the noon's onset with a nasal."""
     return Verdict(
-        Occurrence(mint(rule, at), rule, Participants((at, other))),
+        Occurrence(mint(rule, at), rule, Participants(at, other)),
         (Realize(at, Aspect.CONSONANT, Nasal(place)),),
     )
 
@@ -105,7 +105,7 @@ def _merge(rule: Rule, at: SlotId, host, *, nasal: bool) -> Verdict:
     idgham, so the merged sound belongs to it and not to plain realization.
     """
     return Verdict(
-        Occurrence(mint(rule, at), rule, Participants((at, host.id))),
+        Occurrence(mint(rule, at), rule, Participants(at, host.id)),
         (
             Realize(
                 host.id,

@@ -76,9 +76,10 @@ def test_tanween_and_noon_sakinah_are_one_rule(packed, hafs) -> None:
         and slot.nucleus.kind is NucleusKind.SILENT
     }
     named = {
-        parts
+        slot
         for o in performance.occurrences
-        for parts in o.parts.slots
+        for slot in (o.parts.source, o.parts.host)
+        if slot is not None
     }
     assert triggers & named, "no noon slot participated in any occurrence"
 
@@ -122,7 +123,8 @@ def test_no_cross_word_effect_crosses_a_stop(packed, hafs) -> None:
         for slot in word.slots
     }
     for occurrence in performance.occurrences:
-        words = {word_of[s] for s in occurrence.parts.slots if s in word_of}
+        parts = (occurrence.parts.source, occurrence.parts.host)
+        words = {word_of[s] for s in parts if s is not None and s in word_of}
         assert len(words) <= 1, f"{occurrence.rule.value} crossed a stop"
 
 
@@ -146,7 +148,7 @@ def _verdict(rule: Rule, slot: SlotId, sounds):
 
     return Verdict(
         Occurrence(OccurrenceId(slot.verse, hash(rule) % 1000), rule,
-                   Participants((slot,))),
+                   Participants(slot)),
         (Realize(slot, Aspect.CONSONANT, sounds),),
     )
 

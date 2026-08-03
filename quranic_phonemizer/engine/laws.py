@@ -170,7 +170,9 @@ def check_attestations(
     produced: set[SlotId] = set()
     for occurrence in performance.occurrences:
         if occurrence.rule in MERGER_RULES:
-            produced.update(occurrence.parts.slots)
+            produced.add(occurrence.parts.source)
+            if occurrence.parts.host is not None:
+                produced.add(occurrence.parts.host)
     return [
         f"A1: {slot} is attested but no merger occurrence names it"
         for slot in attested

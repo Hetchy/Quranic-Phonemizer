@@ -20,10 +20,8 @@ from ..model.performance import Occurrence, Participants
 from .tafkheem import Weight
 
 
-def _classification(rule: Rule, at: SlotId, *others: SlotId) -> Verdict:
-    return Verdict(
-        Occurrence(mint(rule, at), rule, Participants((at, *others))), ()
-    )
+def _classification(rule: Rule, at: SlotId) -> Verdict:
+    return Verdict(Occurrence(mint(rule, at), rule, Participants(at)), ())
 
 
 @dataclass(frozen=True, slots=True)

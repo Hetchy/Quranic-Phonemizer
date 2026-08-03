@@ -89,7 +89,7 @@ class Emphasis:
             )
         return Verdict(
             Occurrence(mint(Rule.TAFKHEEM, at), Rule.TAFKHEEM,
-                       Participants((at,))),
+                       Participants(at)),
             tuple(effects),
         )
 

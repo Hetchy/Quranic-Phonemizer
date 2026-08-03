@@ -87,7 +87,7 @@ class WaqfEnding:
         if not effects:
             return None
         return Verdict(
-            Occurrence(mint(Rule.WAQF_ENDING, at), Rule.WAQF_ENDING, Participants((at,))),
+            Occurrence(mint(Rule.WAQF_ENDING, at), Rule.WAQF_ENDING, Participants(at)),
             tuple(effects),
         )
 
@@ -125,10 +125,10 @@ class WaslHamza:
             return None
         if boundaries.started_on(word) and near.first_of_word(at):
             return Verdict(
-                Occurrence(mint(Rule.WASL_START, at), Rule.WASL_START, Participants((at,))), ()
+                Occurrence(mint(Rule.WASL_START, at), Rule.WASL_START, Participants(at)), ()
             )
         return Verdict(
-            Occurrence(mint(Rule.WASL_ELISION, at), Rule.WASL_ELISION, Participants((at,))),
+            Occurrence(mint(Rule.WASL_ELISION, at), Rule.WASL_ELISION, Participants(at)),
             (Silence(at, Aspect.CONSONANT), Silence(at, Aspect.VOWEL)),
         )
 
@@ -162,7 +162,7 @@ class SoftenedHamza:
         return Verdict(
             Occurrence(
                 mint(Rule.IBDAL_HAMZA, at), Rule.IBDAL_HAMZA,
-                Participants((at, following.id)),
+                Participants(at, following.id),
             ),
             (
                 Relength(at, Length.LONG),
@@ -200,7 +200,7 @@ class TanweenBeforeWasl:
         return Verdict(
             Occurrence(
                 mint(Rule.ILTIQA_REPAIR, at, variant=1), Rule.ILTIQA_REPAIR,
-                Participants((at, following.id)),
+                Participants(at, following.id),
             ),
             (Realize(at, Aspect.VOWEL, Vowel(Quality.I)),),
         )
@@ -235,7 +235,7 @@ class PausalAlif:
         return Verdict(
             Occurrence(
                 mint(Rule.PAUSAL_ALIF, at), Rule.PAUSAL_ALIF,
-                Participants((at,)),
+                Participants(at),
             ),
             (Relength(at, Length.SHORT),),
         )
@@ -273,7 +273,7 @@ class TanweenAtWaqf:
         if base.letter is CanonLetter.TAA_MARBUTA:
             # Taa marbuta stops as haa and takes no iwad, but the noon is still silent.
             return Verdict(
-                Occurrence(mint(rule, at), rule, Participants((at, base.id))),
+                Occurrence(mint(rule, at), rule, Participants(at, base.id)),
                 tuple(effects),
             )
         if base.nucleus.quality is Quality.A:
@@ -282,7 +282,7 @@ class TanweenAtWaqf:
         else:
             effects.append(Silence(base.id, Aspect.VOWEL))
         return Verdict(
-            Occurrence(mint(rule, at), rule, Participants((at, base.id))),
+            Occurrence(mint(rule, at), rule, Participants(at, base.id)),
             tuple(effects),
         )
 
@@ -311,7 +311,7 @@ class TaaMarbutaAtWaqf:
             # variant=1 distinguishes this from `WaqfEnding`, which also
             # fires on this slot, on a different aspect.
             Occurrence(mint(Rule.WAQF_ENDING, at, variant=1), Rule.WAQF_ENDING,
-                       Participants((at,))),
+                       Participants(at)),
             (Realize(at, Aspect.CONSONANT, Consonant(CanonLetter.HEH)),),
         )
 

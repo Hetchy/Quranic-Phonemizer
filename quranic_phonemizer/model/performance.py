@@ -76,9 +76,11 @@ Sound: TypeAlias = Consonant | Vowel | Nasal | Release
 
 @dataclass(frozen=True, slots=True)
 class Participants:
-    """Family-specific canonical participants. Never a free-form dict."""
+    """A rule's units. `host` is the slot that keeps a shared sound, present
+    only for a merger."""
 
-    slots: tuple[SlotId, ...] = ()
+    source: SlotId
+    host: SlotId | None = None
 
 
 @dataclass(frozen=True, slots=True)
