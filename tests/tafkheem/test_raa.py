@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import pytest
-
 from tests.support import Site, for_each_riwayah
 
 RABBI = Site(hafs=("1:2", (3,)))
@@ -96,7 +94,6 @@ def test_the_same_word_started_on_keeps_its_heavy_raa(r):
     assert r.phonemes(5) == "ʔirˤta:bu:"
 
 
-@pytest.mark.engine_bug
 @for_each_riwayah(AMI_IRTABU, ibtidaa=4, waqf=5)
 def test_an_incidental_kasra_before_it_leaves_the_raa_heavy(r):
     # أَمِ ٱرْتَابُوٓا۟

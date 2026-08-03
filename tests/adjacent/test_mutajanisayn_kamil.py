@@ -43,7 +43,6 @@ def test_a_stop_after_the_daal_undoes_the_merger_into_the_taa(r):
     assert r.phonemes(5) == "qaˤdQ"
 
 
-@pytest.mark.engine_bug
 @for_each_riwayah(ATHQALAT_DAAWA, ibtidaa=20, waqf=21)
 def test_a_quiescent_taa_merges_wholly_into_a_following_daal(r):
     # أَثْقَلَت دَّعَوَا
@@ -55,7 +54,6 @@ def test_a_quiescent_taa_merges_wholly_into_a_following_daal(r):
 IRKAB_MAANA = Site(hafs=("11:42", (14, 15)))
 
 
-@pytest.mark.engine_bug
 @for_each_riwayah(IRKAB_MAANA, ibtidaa=14, waqf=15)
 def test_a_baa_merged_into_a_meem_is_held_on_its_ghunnah(r):
     # ٱرْكَب مَّعَنَا

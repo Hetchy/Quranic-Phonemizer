@@ -69,8 +69,9 @@ python -m pytest -m engine_bug   # just the known-wrong readings
 python -m pytest --runslow       # plus the corpus-wide parity floors
 ```
 
-CI runs the whole suite and these fail it. That is intended while the engine
-catches up. Never change a correct expectation to match the engine.
+CI runs the whole suite and a marked test fails it. Never change a correct
+expectation to match the engine. The mark comes off when the engine agrees, not
+the expectation.
 
 ## Layout
 

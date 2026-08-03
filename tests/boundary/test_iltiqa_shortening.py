@@ -55,7 +55,6 @@ def test_a_vowel_is_put_on_the_first_word_when_it_cannot_shorten(
     assert _joined(ref, words) == expected
 
 
-@pytest.mark.engine_bug
 @pytest.mark.parametrize(
     ("ref", "words", "expected"), A_TANWEEN_MEETING_A_PROSTHETIC_HAMZA
 )

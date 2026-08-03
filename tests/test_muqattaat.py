@@ -53,7 +53,6 @@ def test_an_opening_reads_the_same_whether_it_is_joined_or_stopped_on(ref):
     assert joined.phonemes(1) == OPENINGS[ref]
 
 
-@pytest.mark.engine_bug
 @for_each_riwayah(TA_SEEN, ibtidaa=1, wasl=1)
 def test_the_noon_of_ta_seen_stays_clear_before_the_word_after_it(r):
     # طسٓ تِلْكَ
@@ -63,7 +62,6 @@ def test_the_noon_of_ta_seen_stays_clear_before_the_word_after_it(r):
     assert r.phonemes(2) == "tilka"
 
 
-@pytest.mark.engine_bug
 @for_each_riwayah(YA_SEEN, ibtidaa=1, wasl=1)
 def test_the_noon_of_ya_seen_stays_clear_across_the_verse_seam(r):
     # يسٓ وَٱلْقُرْءَانِ
@@ -73,7 +71,6 @@ def test_the_noon_of_ya_seen_stays_clear_across_the_verse_seam(r):
     assert r.phonemes(2) == "walqurˤʔa:ni"
 
 
-@pytest.mark.engine_bug
 @for_each_riwayah(NOON, ibtidaa=1, wasl=1)
 def test_the_noon_of_the_opening_noon_stays_clear_before_the_waw(r):
     # نٓ وَٱلْقَلَمِ

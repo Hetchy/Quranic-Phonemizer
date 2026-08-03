@@ -70,7 +70,6 @@ def test_the_helping_vowel_is_a_fatha_before_the_divine_name(r):
     assert r.phonemes(1) == "ʔalˤlˤaˤ:h"
 
 
-@pytest.mark.engine_bug
 @for_each_riwayah(ILTAQA, isolated=6)
 def test_a_form_eight_verb_takes_a_kasra_and_not_the_article_fatha(r):
     # ٱلْتَقَى

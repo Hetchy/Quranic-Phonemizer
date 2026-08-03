@@ -34,7 +34,6 @@ def test_each_pausal_alif_is_sounded_when_it_is_stopped_on(
     assert reading(site, isolated=word).phonemes(word) == stopped
 
 
-@pytest.mark.engine_bug
 @pytest.mark.parametrize(("site", "word", "stopped", "joined"),
                          SOUNDED_AT_A_STOP)
 def test_each_pausal_alif_falls_silent_when_the_reading_carries_on(
