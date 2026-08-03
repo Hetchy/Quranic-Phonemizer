@@ -64,7 +64,9 @@ Eight, all in `.github/workflows/gates.yml`. Floors may only rise; every row beh
 | `attestation` | A shadda a script writes is produced by some occurrence |
 | `l1` | The two scripts build the same Score |
 
-Run them all with `python tools/gates.py`. Never edit a floor without saying in the same commit which refs moved and why.
+`python tools/gates.py` runs them all, in parallel across gates. `--fast` runs only `suite`, `comments` and `structure`, which read no corpus and take seconds; the other five each walk 77,433 words. Work against `--fast`, and run the full set before handing anything on.
+
+Never edit a floor without saying in the same commit which refs moved and why.
 
 ## Tests
 
