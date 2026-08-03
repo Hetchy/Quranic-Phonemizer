@@ -50,11 +50,22 @@ class Section:
 
 
 @dataclass(frozen=True, slots=True)
+class Affixes:
+    """What may attach to a lexeme and leave it that lexeme. Arabic, so it
+    is shared data rather than a set per riwayah."""
+
+    clitics: frozenset[str] = frozenset()
+    """The attached pronouns. A closed set, so a stem entry covers its whole
+    inflectional family without enumerating it."""
+    proclitics: frozenset[str] = frozenset()
+    """The single letters that may stand before a word. Closed for the same
+    reason, and what keeps `جَآءَنَا` from reading as `أَنَا` behind a prefix."""
+
+
+@dataclass(frozen=True, slots=True)
 class Lexicon:
     sections: dict[str, Section] = field(default_factory=dict)
-    clitics: frozenset[str] = frozenset()
-    """Arabic's attached pronouns. A closed set, so a stem entry covers its
-    whole inflectional family without enumerating it."""
+    affixes: Affixes = field(default_factory=Affixes)
     source: Path | None = field(default=None, compare=False)
 
     def is_divine_name(self, tail: str) -> bool:
@@ -94,32 +105,37 @@ class Lexicon:
         section = self.sections.get(name)
         if section is None:
             return False
-        return _MATCHERS[section.match](section.entries, key, self.clitics)
+        return _MATCHERS[section.match](section.entries, key, self.affixes)
 
 
-def _exact(entries: frozenset[str], key: str, clitics: frozenset[str]) -> bool:
+def _exact(entries: frozenset[str], key: str, affixes: Affixes) -> bool:
     return key in entries
 
 
-def _clitic(entries: frozenset[str], key: str, clitics: frozenset[str]) -> bool:
+def _clitic(entries: frozenset[str], key: str, affixes: Affixes) -> bool:
     """A lexeme, with or without a clitic pronoun."""
     return key in entries or any(
-        key == stem + clitic for stem in entries for clitic in clitics
+        key == stem + clitic for stem in entries for clitic in affixes.clitics
     )
 
 
-def _inflected(entries: frozenset[str], key: str, clitics: frozenset[str]) -> bool:
+def _inflected(entries: frozenset[str], key: str, affixes: Affixes) -> bool:
     """That, or a stem long enough to be specific as a prefix -- `ألقى`,
     `ألقينا`, `ألقوا` are one entry."""
-    return _clitic(entries, key, clitics) or any(
+    return _clitic(entries, key, affixes) or any(
         len(stem) >= _PREFIX_MIN and key.startswith(stem) for stem in entries
     )
 
 
-def _proclitic(entries: frozenset[str], key: str, clitics: frozenset[str]) -> bool:
-    return key in entries or any(
-        len(key) - len(entry) == _PROCLITIC and key.endswith(entry)
-        for entry in entries
+def _proclitic(entries: frozenset[str], key: str, affixes: Affixes) -> bool:
+    """A lexeme, or one behind a single proclitic: `وَأَنَا` is `أنا`."""
+    # The prefix has to *be* a proclitic, not merely two characters long: the
+    # vocalised notation writes no length, so `جَآءَنَا` and `وَأَنَا` are one
+    # shape to a counting test and only the letter tells them apart.
+    return key in entries or (
+        len(key) > _PROCLITIC
+        and key[0] in affixes.proclitics
+        and key[_PROCLITIC:] in entries
     )
 
 
@@ -161,7 +177,7 @@ def _section(raw, name: str, path: Path) -> Section:
     )
 
 
-def load_lexicon(path: Path, *, clitics: frozenset[str] = frozenset()) -> Lexicon:
+def load_lexicon(path: Path, *, affixes: Affixes = Affixes()) -> Lexicon:
     data = load_yaml(path)
     require_keys(data, {"schema_version", "sections"}, name=str(path))
     if data["schema_version"] != SCHEMA_VERSION:
@@ -176,18 +192,25 @@ def load_lexicon(path: Path, *, clitics: frozenset[str] = frozenset()) -> Lexico
         sections={
             name: _section(raw, name, path) for name, raw in sections.items()
         },
-        clitics=clitics,
+        affixes=affixes,
         source=path,
     )
 
 
-def load_clitic_pronouns(path: Path) -> frozenset[str]:
+def load_affixes(path: Path) -> Affixes:
     """Arabic morphology, invariant across riwayat, so it is shared data."""
     data = load_yaml(path)
-    require_keys(data, {"schema_version", "clitic_pronouns"}, name=str(path))
+    require_keys(
+        data,
+        {"schema_version", "clitic_pronouns", "proclitics"},
+        name=str(path),
+    )
     if data["schema_version"] != MORPHOLOGY_SCHEMA_VERSION:
         raise LexiconError(
             f"{path}: schema_version {data['schema_version']!r}, expected "
             f"{MORPHOLOGY_SCHEMA_VERSION}"
         )
-    return _entries(data["clitic_pronouns"], "clitic_pronouns", path)
+    return Affixes(
+        clitics=_entries(data["clitic_pronouns"], "clitic_pronouns", path),
+        proclitics=_entries(data["proclitics"], "proclitics", path),
+    )

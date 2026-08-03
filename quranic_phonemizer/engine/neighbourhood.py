@@ -76,8 +76,25 @@ class Neighbourhood:
         left, right = self._word.get(here), self._word.get(following)
         if left is None or right is None or left == right:
             return False
+        if self._spelled_out(left):
+            # An opening of named letters ends as it would at a pause, however
+            # the reading runs on: `نٓ وَٱلْقَلَمِ` keeps a clear noon and a plain
+            # waw, and `طسٓ تِلْكَ` hides nothing. A name is spelled, not read,
+            # so it does not run into the word after it. Only forward: a word
+            # before an opening still meets it as an ordinary word.
+            return True
+        if self.score.words[left].sakt_after:
+            # A sakt is a silence, so nothing carries across it. It is a Score
+            # fact rather than a requested stop, and holds under any plan --
+            # a caller that asks to join everything still cannot join `مَنْ ۜ رَاقٍ`.
+            return True
         return self.boundaries.junctions[left] in (
             Junction.STOP,
             Junction.SAKT,
             Junction.EDGE,
         )
+
+    def _spelled_out(self, word: int) -> bool:
+        """A muqattaat opening: every slot of it is a letter's name."""
+        slots = self.score.words[word].slots
+        return bool(slots) and all(slot.spelled for slot in slots)

@@ -105,18 +105,27 @@ def _raa_is_heavy(near, slot, plan, always_heavy) -> bool:
     ):
         # A raa after a leen yaa follows the yaa and stays light.
         return False
+    if before is not None and before.onset is Onset.WASL:
+        # Only an original kasra lightens. A prosthetic hamza's is aridah --
+        # it exists to be started on and is gone the moment the word is
+        # joined to -- so `ٱرْتَبْتُمْ` is heavy started on and `أَمِ ٱرْتَابُوٓا۟`
+        # is heavy joined, where the kasra heard before the raa is the one
+        # the previous word grew to meet it.
+        return True
     following = near.after(slot.id)
-    if following is not None and following.letter in always_heavy:
+    if (
+        following is not None
+        and not near.crosses_word(slot.id)
+        and following.letter in always_heavy
+    ):
         # A letter of istilaa after a quiescent raa wins over whatever
-        # precedes it: `قِرْطَاسٍ` is heavy despite its kasra.
+        # precedes it: `قِرْطَاسٍ` is heavy despite its kasra. Only inside the
+        # word: `تُصَعِّرْ خَدَّكَ` and `فَٱصْبِرْ صَبْرًا` keep a light raa, because
+        # the letter that would weigh it belongs to the next word.
         return True
     governing = _governing(near, slot, plan)
     if governing is None:
         return False
-    if _quality(governing) is Quality.I and governing.onset is Onset.WASL:
-        # Only an original kasra lightens. The wasl hamza's is aridah -- it
-        # exists to be started on -- so `ٱرْتَبْتُمْ` is heavy.
-        return True
     return _quality(governing) in (Quality.A, Quality.U)
 
 

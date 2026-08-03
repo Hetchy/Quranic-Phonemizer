@@ -280,6 +280,7 @@ class Rule(StrEnum):
     WASL_START = "wasl_start"
     ILTIQA_REPAIR = "iltiqa_repair"
     WAQF_ENDING = "waqf_ending"
+    PAUSAL_ALIF = "pausal_alif"
     SILAH = "silah"
     SAKT = "sakt"
 
@@ -325,6 +326,7 @@ FAMILY_OF: dict[Rule, RuleFamily] = {
     Rule.WASL_START: RuleFamily.INSERTION,
     Rule.ILTIQA_REPAIR: RuleFamily.INSERTION,
     Rule.WAQF_ENDING: RuleFamily.ELISION,
+    Rule.PAUSAL_ALIF: RuleFamily.ELISION,
     Rule.SILAH: RuleFamily.LENGTHENING,
     Rule.SAKT: RuleFamily.RELEASE,
     Rule.PLAIN: RuleFamily.ELISION,
@@ -355,8 +357,11 @@ CLASSIFICATION_ONLY: frozenset[Rule] = frozenset(
         Rule.MADD_ARID_LIL_SUKUN,
         Rule.MADD_LEEN,
         Rule.ILTIQA_REPAIR,
-        # Emits `Relength`, which modifies a sound rather than producing
-        # one - the same footing as TAFKHEEM/TARQEEQ.
+        Rule.PAUSAL_ALIF,
+        # Both emit `Relength`, which modifies a sound rather than producing
+        # one - the same footing as TAFKHEEM/TARQEEQ. Listing a rule here
+        # permits an occurrence with no attribution; it does not forbid one,
+        # so the tanween half of ILTIQA_REPAIR may still realize its kasra.
         Rule.IMALA,
         Rule.TASHIL,
         Rule.ISHMAM,

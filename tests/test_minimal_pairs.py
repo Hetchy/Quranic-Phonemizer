@@ -49,7 +49,7 @@ PAIRS = [
         "third radical",
     ),
     (
-        ((3, 13, 7), "ʔaltaqaˤta:"),
+        ((3, 13, 7), "ʔiltaqaˤta:"),
         ((2, 197, 26), "ʔattaqQwa:"),
         "a form VIII lam inflected for agreement is still not the article",
     ),

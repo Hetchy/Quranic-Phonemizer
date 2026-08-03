@@ -9,10 +9,10 @@ can be checked rather than a number nobody looks at.
 | cross-script, word | 99.997% | 2 words |
 | cross-script, verse | **100.000%** | none |
 | round-trip, uthmani | **100.000%** | none |
-| regression, word | 99.928% | 56 words |
-| regression, verse | 97.674% | see below |
+| regression, word | 99.921% | 61 words |
+| regression, verse | 97.852% | see below |
 | L1 | 18 rows over 287,057 slots | |
-| attestations | 178 uthmani, 239 indopak | |
+| attestations | 176 uthmani, 237 indopak | |
 
 ## Cross-script — 2 words
 
@@ -25,7 +25,7 @@ forces separates them.
 | 26:61:2 | `تَرَآءَا` | `تَرَآءَ` | `tarˤaˤ:ʔa lʒamʕa:ni` both |
 | 59:9:2 | `تَبَوَّءُو` | `تَبَوَّءُ` | `tabawwaʔu dda:rˤaˤ` both |
 
-## Regression — 56 words
+## Regression — 61 words
 
 The oracle is the previous implementation with its own defects frozen in, so
 this gate is a change detector and not a target. Every row is one of five
@@ -58,6 +58,15 @@ quiescent after a damma, which is madd tabii by definition. The oracle
 answers this shape two ways: `هُوَ` gives `hu:` and `يَعْفُوَا۟` gives
 `jaʕfuw`, so it contradicts itself rather than us.
 
+**5 — form VIII with lam for its first radical** (`ٱلْتَقَى` ×3,
+`ٱلْتَقَتَا`, `ٱلْتَقَيْتُمْ`). Started on, the oracle gives `ʔaltaqaa`. Fatha is
+the article's helping vowel and the article makes nouns; these are verbs, and
+a verb takes a damma only when its third letter carries one. The third letter
+here carries a fatha, so the prosthetic hamza takes a kasra: `ʔiltaqaa`. What
+separates them from `ٱلتَّقْوَىٰ` is written in both scripts -- taa is a sun
+letter, so the article before one always spells the shadda of its
+assimilation, and these words have none.
+
 **5 — the dual construct** (`طَرَفَىِ`, `يَـٰصَـٰحِبَىِ` ×2, `يَدَىِ`,
 `ثُلُثَىِ`). The kasra on the yaa is there to meet the wasl hamza of the next
 word, which is what proves the yaa is a consonant. Stopping gives `-ay`; the
@@ -65,5 +74,7 @@ oracle's `-aa` is the nominative of a word standing in the genitive.
 
 ## Verse mode
 
-The same classes, plus the rows where a word-mode difference propagates into
-its neighbour once the words are joined.
+97.852% counts a word wrong when a sound merged across a boundary is credited
+to the neighbour; the harness prints the phoneme sequence separately, and
+that is 77,432 of 77,433. The one word left is `يَسْرِ` at 89:4, already
+listed above under the disputed raa.

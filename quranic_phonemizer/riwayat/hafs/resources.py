@@ -13,7 +13,7 @@ from ...canon import derive
 from ...canon.ledger import EMPTY as EMPTY_LEDGER
 from ...canon.ledger import Ledger, load_ledger
 from ...canon.lexicon import EMPTY as EMPTY_LEXICON
-from ...canon.lexicon import Lexicon, load_clitic_pronouns, load_lexicon
+from ...canon.lexicon import Lexicon, load_affixes, load_lexicon
 from ...canon.spell import Muqattaat, load_muqattaat
 from ...corpus import PackedCorpus, load_corpus
 from ...model.address import Location, Riwayah, Script, VerseRef
@@ -80,13 +80,14 @@ def ledger() -> Ledger:
 
 
 def lexicon() -> Lexicon:
-    """The clitic pronouns are shared: which pronouns attach to a word is a
-    fact about Arabic, not about how this riwayah recites it."""
+    """The affixes are shared: which pronouns attach to a word, and which
+    letters may stand before one, are facts about Arabic rather than about
+    how this riwayah recites it."""
     path = DATA / "lexicon.yaml"
     if not path.exists():
         return EMPTY_LEXICON
-    clitics = load_clitic_pronouns(DATA.parents[1] / "shared" / "morphology.yaml")
-    return load_lexicon(path, clitics=clitics)
+    affixes = load_affixes(DATA.parents[1] / "shared" / "morphology.yaml")
+    return load_lexicon(path, affixes=affixes)
 
 
 def rule_tables() -> RuleTables:

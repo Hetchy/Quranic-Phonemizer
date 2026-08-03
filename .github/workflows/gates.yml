@@ -62,7 +62,7 @@ jobs:
   regression:
     # Not a target. The oracle is the previous implementation with its defects
     # frozen in, so this is a change detector and its floor may fall when the
-    # oracle is the one that is wrong. All 56 rows are classified in
+    # oracle is the one that is wrong. All 61 rows are classified in
     # docs/conformance/gate-residues.md, with the evidence for each direction.
     runs-on: ubuntu-latest
     steps:
@@ -73,8 +73,8 @@ jobs:
       - run: pip install -e .
       - name: regression oracle, both modes
         run: |
-          python tools/floor.py regression word 99.928
-          python tools/floor.py regression verse 97.674
+          python tools/floor.py regression word 99.921
+          python tools/floor.py regression verse 97.852
 
   roundtrip:
     # Every Score can be spelled and spells back to itself. Closed: no Score
@@ -100,8 +100,8 @@ jobs:
       - run: pip install -e .
       - name: unmet attestations, both scripts
         run: |
-          python tools/floor.py attest uthmani 178
-          python tools/floor.py attest indopak 239
+          python tools/floor.py attest uthmani 176
+          python tools/floor.py attest indopak 237
 
   l1:
     # Score-level script equality. The ceiling stops the residue growing.
