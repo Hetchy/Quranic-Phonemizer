@@ -27,7 +27,10 @@ from .lexicon import Lexicon
 from .ledger import EMPTY as EMPTY_LEDGER
 from .ledger import Ledger
 from .assemble import assemble
-from .draft import _Draft, nucleus_fact, set_fact
+from .draft import (
+    _Draft, letter_of, letter_offsets_of, nucleus_fact, set_fact,
+    stray_letter_offsets,
+)
 from .juncture import apply_cross_word_noon
 from .passes import LexemePass, apply_ledger
 from .scribe import Scribe
@@ -123,7 +126,7 @@ def _drafts(
         bounds = reading.word_bounds(cluster.word)
         context = _context(reading, index, bounds, drafts, lexicon)
         rows = by_cluster.get(index, ())
-        letter = _letter_of(rows, cluster)
+        letter = letter_of(rows, cluster)
         if _not_a_slot(letter, index in silenced and cluster.letter is not None,
                        context, cluster, rows, drafts, track, scribe, pending):
             continue
@@ -138,6 +141,11 @@ def _drafts(
     return drafts
 
 
+def _decorate(scribe, offset: int, subject, track) -> None:
+    scribe.decoration(offset, subject)
+    track.decorated += 1
+
+
 def _flush_pending(pending: list[int], drafts, before: int, scribe,
                    track) -> None:
     """A hamza seat's grapheme decorates the hamza it seats, which has no
@@ -146,22 +154,19 @@ def _flush_pending(pending: list[int], drafts, before: int, scribe,
         return
     subject = drafts[before]
     for offset in pending:
-        scribe.decoration(offset, subject)
-        track.decorated += 1
+        _decorate(scribe, offset, subject, track)
     pending.clear()
 
 
 def _not_a_slot(letter, silenced: bool, context, cluster, rows, drafts, track,
                 scribe, pending: list[int]) -> bool:
-    """Written, but contributing only to another slot: the one before it, or
-    -- a hamza seat -- the one after. Still decorated so a projection can
-    point at it."""
+    """Written, but contributing only to another slot -- the one before it,
+    or, for a hamza seat, the one after -- and still decorated."""
     if letter is None or silenced:
         _apply_rows(rows, _Draft(letter=letter or CanonLetter.ALIF), drafts,
                     context, track, scribe, cluster.offset,
                     force=Target.PREVIOUS)
-        scribe.decoration(cluster.offset, drafts[-1] if drafts else None)
-        track.decorated += 1
+        _decorate(scribe, cluster.offset, drafts[-1] if drafts else None, track)
         return True
     rasm = _rasm_outcome(context, cluster, rows, track)
     if rasm is None:
@@ -177,20 +182,21 @@ def _not_a_slot(letter, silenced: bool, context, cluster, rows, drafts, track,
     if isinstance(outcome, Absent) and outcome.shows is Target.HERE:
         pending.append(cluster.offset)
     else:
-        scribe.decoration(cluster.offset, drafts[-1] if drafts else None)
-        track.decorated += 1
+        subject = drafts[-1] if drafts else None
+        _decorate(scribe, cluster.offset, subject, track)
+        for stray in stray_letter_offsets(rows, cluster.offset):
+            _decorate(scribe, stray, subject, track)
     return True
 
 
 def _slot_draft(index: int, cluster, letter, rows, context, drafts, track,
                 scribe) -> bool:
-    """Append this cluster's slot. True when it also added a second one.
-
-    A glyph-declared onset is already an ONSET row in `rows`, applied below;
-    setting it here too would spell the same offset twice.
-    """
+    """Append this cluster's slot. True when it also added a second one."""
     draft = _Draft(letter=letter, cluster=index)
-    scribe.evidence(cluster.offset, draft, SlotFact.LETTER)
+    letter_offset, extra_offsets = letter_offsets_of(rows, cluster)
+    scribe.evidence(letter_offset, draft, SlotFact.LETTER)
+    for offset in extra_offsets:
+        _decorate(scribe, offset, draft, track)
     extra = _apply_rows(rows, draft, drafts, context, track, scribe,
                         cluster.offset)
     _apply_wasl(context, cluster, draft, track)
@@ -242,8 +248,7 @@ def _apply_rows(rows, draft, drafts, context, track, scribe, base_offset,
                 scribe.attestation(offset, draft)
                 track.attested += 1
             case Shows() | Absent():
-                scribe.decoration(offset, draft)
-                track.decorated += 1
+                _decorate(scribe, offset, draft, track)
     return extra
 
 
@@ -364,8 +369,7 @@ def _skip_iwad_carrier(reading: Reading, index: int, bounds, drafts, track,
         # IndoPak draws its iqlab mark on this alif. An annotation does not
         # turn the iwad carrier into a slot.
         base = drafts[-2] if len(drafts) >= 2 else None
-        scribe.decoration(cluster.offset, base)
-        track.decorated += 1
+        _decorate(scribe, cluster.offset, base, track)
         return {nxt}
     return set()
 
@@ -376,13 +380,6 @@ def _evidence_by_cluster(reading: Reading) -> dict[int, tuple]:
     for row in reading.evidence:
         out.setdefault(row.cluster, []).append(row)
     return {index: tuple(rows) for index, rows in out.items()}
-
-
-def _letter_of(rows, cluster: Cluster) -> CanonLetter | None:
-    for row in rows:
-        if row.fact is SlotFact.LETTER and row.value is not None:
-            return row.value
-    return cluster.letter
 
 
 def _context(reading, index, bounds, drafts, lexicon) -> derive.Context:

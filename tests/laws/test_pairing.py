@@ -52,6 +52,16 @@ def test_every_glyph_is_in_exactly_one_pairing_or_none(hafs, pen, alphabet, sura
 
 
 @pytest.mark.parametrize(("surah", "ayah"), SAMPLE)
+def test_every_source_glyph_carries_a_spelling_edge(hafs, pen, alphabet, surah, ayah):
+    """02-gate 4.2: a glyph with no edge at all is unreachable from any
+    pairing, whatever `word` happens to say."""
+    a = _assembled(hafs, pen, alphabet, f"{surah}:{ayah}")
+    named = {s.glyph for s in a.spellings}
+    missing = [i for i in range(len(a.glyphs)) if i not in named]
+    assert not missing, (surah, ayah, missing)
+
+
+@pytest.mark.parametrize(("surah", "ayah"), SAMPLE)
 def test_every_sound_is_owned_exactly_once(hafs, pen, alphabet, surah, ayah):
     a = _assembled(hafs, pen, alphabet, f"{surah}:{ayah}")
     for text in ("source", "recited"):
