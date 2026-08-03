@@ -316,6 +316,8 @@ class Rule(StrEnum):
     PAUSAL_ALIF = "pausal_alif"
     SILAH = "silah"
 
+    ORTHOGRAPHIC_SILENCE = "orthographic_silence"
+
 
 #: Rules whose occurrence produces no effect; `engine/run.py` mints each one
 #: a `Classifies` edge in place of an attribution. `ishmam` is here and gets
