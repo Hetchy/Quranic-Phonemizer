@@ -65,10 +65,18 @@ reaches no spelling edge at all.
 It stays **one** rule: a letter never said and a seat silent only when joined
 are the same outcome, and the boundary tells them apart without a second name.
 
-Item 25's two rules are mandatory, corpus-wide, and have no name anywhere in the
-tree: dropping a word-initial shadda when a word is started on, and the role a
-word-final yaa, waw or alif maqsura takes at a pause. They are `06-two-texts`
-rows 9 and 29, which is where the transformation each performs is written down.
+Item 25's two rules are mandatory and corpus-wide: dropping a word-initial
+shadda when a word is started on, and the role a word-final yaa, waw or alif
+maqsura takes at a pause. They are `06-two-texts` rows 9 and 29.
+
+**Both behaviours already work.** 2:56:3 reads `min` started on and `miŋ`
+joined, so the shadda is already dropped; `tests/waqf/test_final_glides.py`
+already asserts the glide's two roles. What is missing is only the name and the
+attribution: neither rule exists in `Rule`, so neither owns the change it makes,
+and both are the converse triggers `02-gate` section 4.8 has no row for. This is
+a naming job, not model surgery.
+
+**Item 24 landed** in `8ee2e84`. Item 25 did not.
 
 **Files:** new rule modules under `rules/`, `canon/derive/lexeme.py`,
 `canon/build.py`, `model/canon.py` `Rule`, `riwayat/hafs/rules.py`,
