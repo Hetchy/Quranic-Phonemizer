@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 
-from ..model.address import BoundaryPlan, Junction
+from ..model.address import BoundaryPlan, Junction, Location
 from ..model.canon import Score
 from ..model.inscription import StopAdvice
 
@@ -18,25 +18,27 @@ class UnknownStopError(ValueError):
 
 def plan_from_request(
     advice: Sequence[StopAdvice | None],
-    stop_at: Sequence[StopAdvice] = (),
+    locations: Sequence[Location],
+    stop_signs: Sequence[str] = (),
+    stop_refs: Sequence[str] = (),
     *,
     score: Score | None = None,
 ) -> BoundaryPlan:
-    requested = set(stop_at)
-    unknown = requested - set(StopAdvice)
-    if unknown:
-        raise UnknownStopError(
-            f"unknown stop advice {sorted(unknown)}; expected some of "
-            f"{[m.value for m in StopAdvice]}"
-        )
+    """`locations` is `advice` and `score.words` in the same order, so a
+    caller's stop-sign class and a caller's word ref both index it."""
+    requested = _parse_stop_signs(stop_signs)
+    at_refs = frozenset(stop_refs)
 
     sakt = _sakt_flags(score, len(advice))
     junctions = []
     for index, word_advice in enumerate(advice):
         last = index == len(advice) - 1
+        asked = (word_advice is not None and word_advice in requested) or (
+            str(locations[index]) in at_refs
+        )
         if last:
             junctions.append(Junction.EDGE)
-        elif word_advice is not None and word_advice in requested:
+        elif asked:
             junctions.append(Junction.STOP)
         elif sakt[index]:
             # `sakt_after` forces SAKT even with no stop requested; never JOIN.
@@ -44,6 +46,22 @@ def plan_from_request(
         else:
             junctions.append(Junction.JOIN)
     return BoundaryPlan(tuple(junctions))
+
+
+def _parse_stop_signs(stop_signs: Sequence[str]) -> set[StopAdvice]:
+    requested: set[StopAdvice] = set()
+    unknown: list[str] = []
+    for sign in stop_signs:
+        try:
+            requested.add(StopAdvice(sign))
+        except ValueError:
+            unknown.append(sign)
+    if unknown:
+        raise UnknownStopError(
+            f"unknown stop sign {sorted(unknown)}; expected some of "
+            f"{[m.value for m in StopAdvice]}"
+        )
+    return requested
 
 
 def all_join(word_count: int) -> BoundaryPlan:

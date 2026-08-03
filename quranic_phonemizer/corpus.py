@@ -31,6 +31,11 @@ class PackedCorpus:
         else:
             start = end = _parse_endpoint(reference)
 
+        if _depth(start) != _depth(end):
+            raise ValueError(
+                f"Reference endpoints are at different depths: {reference}"
+            )
+
         low = _canonical_endpoint(start, end=False)
         high = _canonical_endpoint(end, end=True)
         if low > high:
@@ -75,6 +80,11 @@ def _parse_endpoint(value: str) -> tuple[int, int | None, int | None]:
         numbers[1] if len(numbers) > 1 else None,
         numbers[2] if len(numbers) > 2 else None,
     )
+
+
+def _depth(endpoint: tuple[int, int | None, int | None]) -> int:
+    """`surah` alone is depth 1; `surah:ayah:word` is depth 3."""
+    return 1 + (endpoint[1] is not None) + (endpoint[2] is not None)
 
 
 def _canonical_endpoint(
