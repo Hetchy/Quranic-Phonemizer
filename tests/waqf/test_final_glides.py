@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-from tests.support import Site, for_each_riwayah
+import pytest
+
+from tests.support import Site, for_each_riwayah, reading
 
 HUWA = Site(hafs=("2:29", (1,)))
 WA_HUWA = Site(hafs=("2:29", (16,)))
 HIYA = Site(hafs=("2:70", (8,)))
 RABBIYA = Site(hafs=("2:258", (16,)))
-AMILU_SSALIHAT = Site(hafs=("2:25", (4, 5)))
-KAFARU_SAWAAUN = Site(hafs=("2:6", (3, 4)))
 
 
 @for_each_riwayah(HUWA, ibtidaa=1, wasl=1)
@@ -66,21 +66,38 @@ def test_that_pronoun_yaa_becomes_pure_length_at_a_stop(r):
     assert r.silent(16) == {"َ"}
 
 
-@for_each_riwayah(AMILU_SSALIHAT, isolated=4)
-def test_a_plural_waw_is_length_already_and_the_alif_after_it_is_not_read(r):
-    # وَعَمِلُوا۟
-    assert r.phonemes(4) == "waʕamilu:"
+#: A waw carrying a fatha, written with the otiose alif behind it. Joined, the
+#: waw is a consonant; the stop drops the fatha and leaves it quiescent after
+#: a damma, which is length.
+FATHA_BEFORE_THE_OTIOSE_ALIF = [
+    ("2:237", 18, 19, "jaʕfuwa", "jaʕfu:", "llaði:"),          # يَعْفُوَا۟ ٱلَّذِى
+    ("13:30", 10, 11, "litatluwa", "litatlu:", "ʕalajhim"),    # لِّتَتْلُوَا۟ عَلَيْهِمُ
+    ("18:14", 12, 13, "nadQʕuwa", "nadQʕu:", "min"),           # نَّدْعُوَا۟ مِن
+    ("27:92", 2, 3, "ʔatluwa", "ʔatlu:", "lqurˤʔa:n"),         # أَتْلُوَا۟ ٱلْقُرْءَانَ
+    ("30:39", 5, 6, "lijarˤbuwa", "lijarˤbu:", "fi:"),         # لِّيَرْبُوَا۟ فِىٓ
+    ("47:4", 28, 29, "lijabQluwa", "lijabQlu:", "baʕdˤaˤkum"),  # لِّيَبْلُوَا۟ بَعْضَكُم
+    ("47:31", 7, 8, "wanabQluwa", "wanabQlu:", "ʔaxba:rˤaˤkum"),  # وَنَبْلُوَا۟ أَخْبَارَكُمْ
+]
 
 
-@for_each_riwayah(AMILU_SSALIHAT, ibtidaa=4, waqf=5)
-def test_that_length_shortens_onto_a_word_whose_hamza_has_elided(r):
-    # وَعَمِلُوا۟ ٱلصَّـٰلِحَـٰتِ
-    assert r.phonemes(4) == "waʕamilu"
-    assert r.phonemes(5) == "sˤsˤaˤ:liħa:t"
+@pytest.mark.parametrize(
+    ("ref", "word", "after", "joined", "stopped", "next_word"),
+    FATHA_BEFORE_THE_OTIOSE_ALIF,
+)
+def test_a_waw_holding_a_fatha_is_a_consonant_when_the_reading_carries_on(
+    ref, word, after, joined, stopped, next_word
+):
+    r = reading(Site(hafs=(ref, (word, after))), ibtidaa=word, waqf=after)
+    assert (r.phonemes(word), r.phonemes(after)) == (joined, next_word)
 
 
-@for_each_riwayah(KAFARU_SAWAAUN, ibtidaa=3, waqf=4)
-def test_the_same_waw_keeps_its_length_onto_a_word_that_opens_on_a_vowel(r):
-    # كَفَرُوا۟ سَوَآءٌ
-    assert r.phonemes(3) == "kafarˤu:"
-    assert r.phonemes(4) == "sawa:ʔ"
+@pytest.mark.parametrize(
+    ("ref", "word", "after", "joined", "stopped", "next_word"),
+    FATHA_BEFORE_THE_OTIOSE_ALIF,
+)
+def test_the_stop_drops_that_fatha_and_leaves_the_waw_as_length(
+    ref, word, after, joined, stopped, next_word
+):
+    r = reading(Site(hafs=(ref, (word,))), isolated=word)
+    assert r.phonemes(word) == stopped
+    assert r.silent(word) == {"ا", "َ", "۟"}
