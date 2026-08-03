@@ -10,6 +10,7 @@ from dataclasses import dataclass
 
 from ..model.address import BoundaryPlan, Location, Script, VariantSelection
 from ..model.canon import Score
+from ..model.inscription import Inscription
 from ..model.performance import Performance
 from .boundaries import resolve_boundaries
 from .request import resolve_words
@@ -17,11 +18,13 @@ from .request import resolve_words
 
 @dataclass(frozen=True, slots=True)
 class Session:
-    """One request, resolved: every word it addresses, its Score, the
-    boundary plan that read it, and what performing it produced."""
+    """One request, resolved: every word it addresses, its Score and
+    Inscription, the boundary plan that read it, and what performing it
+    produced."""
 
     locations: tuple[Location, ...]
     score: Score
+    inscription: Inscription
     boundaries: BoundaryPlan
     performance: Performance
 
@@ -53,4 +56,6 @@ def phonemize_request(
     performance = recitation.perform(
         built.score, boundaries, selection=selection
     )
-    return Session(locations, built.score, boundaries, performance)
+    return Session(
+        locations, built.score, built.inscription, boundaries, performance
+    )

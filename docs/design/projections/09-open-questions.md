@@ -85,15 +85,6 @@ silenced no part".
 **Settled by** deriving it from `respelling` instead, where the dropped carrier
 is visible, and rewriting section 3's row.
 
-## 9. `rendered` and the stop signs
-
-[06-two-texts](06-two-texts.md) section 1 says a thing recitation does not say
-is absent from the recited text. Row 30 keeps every stop sign and calls it
-"advice and not recitation". E14 relies on the sign being kept.
-
-**Settled by** saying which of the two `r.text("recited")` serializes, and
-whether the answer is the same as what `rendered` holds.
-
 ---
 
 ## What was checked and holds
