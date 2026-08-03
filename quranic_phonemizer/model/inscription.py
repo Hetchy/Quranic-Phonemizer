@@ -21,6 +21,8 @@ class GraphemeClass(StrEnum):
     TANWEEN = "tanween"
     SHADDA = "shadda"
     LENGTH_CARRIER = "length_carrier"
+    """No script yaml assigns this; it is for a grapheme the recited-text
+    writer mints, not one any inventory reads."""
     SMALL_VOWEL = "small_vowel"
     MADD_SIGN = "madd_sign"
     SILENCE_SIGN = "silence_sign"

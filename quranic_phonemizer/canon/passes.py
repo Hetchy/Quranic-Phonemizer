@@ -59,11 +59,13 @@ class LexemePass(Protocol):
     ) -> None: ...
 
 
-def apply_ledger(reading: Reading, drafts, ledger: Ledger, track) -> None:
+def apply_ledger(
+    reading: Reading, drafts, ledger: Ledger, track, scribe: Scribe | None = None
+) -> None:
     """Applies each Ledger entry for this verse; raises if one fails to resolve.
 
-    An entry that silently matches nothing is worse than no entry: it reads
-    as coverage that was never checked.
+    An entry that matches nothing is worse than no entry: it reads as
+    coverage that was never checked.
     """
     _check_witnesses(reading, drafts, ledger)
     for supply in ledger.supplies:
@@ -71,7 +73,12 @@ def apply_ledger(reading: Reading, drafts, ledger: Ledger, track) -> None:
             continue
         ordinal = _resolve(reading, drafts, supply.ref)
         _check_skeleton(reading, drafts, ordinal, supply.skeleton)
-        set_fact(drafts[ordinal], drafts, supply.fact, supply.value, Target.HERE)
+        draft = drafts[ordinal]
+        offset = reading.clusters[draft.cluster].offset if draft.cluster >= 0 else -1
+        # No scalar declares sakt; the letter it lands on evidences it instead.
+        witness = scribe if supply.fact is SlotFact.SAKT else None
+        set_fact(draft, drafts, supply.fact, supply.value, Target.HERE,
+                witness, offset)
         track.from_ledger += 1
 
 
