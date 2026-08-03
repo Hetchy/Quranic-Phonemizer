@@ -57,9 +57,7 @@ class LexemePass(Protocol):
     ) -> None: ...
 
 
-def apply_ledger(
-    reading: Reading, drafts, ledger: Ledger, track, scribe: Scribe | None = None
-) -> None:
+def apply_ledger(reading: Reading, drafts, ledger: Ledger, track) -> None:
     """Applies each Ledger entry for this verse; raises if one fails to resolve.
 
     An entry that matches nothing is worse than no entry: it reads as
@@ -71,12 +69,9 @@ def apply_ledger(
             continue
         ordinal = _resolve(reading, drafts, supply.ref)
         _check_skeleton(reading, drafts, ordinal, supply.skeleton)
-        draft = drafts[ordinal]
-        offset = reading.clusters[draft.cluster].offset if draft.cluster >= 0 else -1
-        # No scalar declares sakt; the letter it lands on evidences it instead.
-        witness = scribe if supply.fact is SlotFact.SAKT else None
-        set_fact(draft, drafts, supply.fact, supply.value, Target.HERE,
-                witness, offset)
+        # A Ledger supply is authored, not written by any script: it never
+        # evidences a glyph, so no scribe is passed.
+        set_fact(drafts[ordinal], drafts, supply.fact, supply.value, Target.HERE)
         track.from_ledger += 1
 
 

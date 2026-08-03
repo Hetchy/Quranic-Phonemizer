@@ -99,16 +99,16 @@ def test_an_iwad_carrier_is_reachable(packed, hafs):
     assert decorating_base, "the iwad alif must decorate the base slot"
 
 
-def test_sakt_is_evidenced_by_a_glyph(packed, hafs):
-    """83:14 `بَلْ`: SAKT used to be a ledger fact with no Spelling edge."""
+def test_sakt_is_evidenced_by_no_glyph(packed, hafs):
+    """83:14 `بَلْ`: sakt is a word fact the Ledger states; no glyph supplies
+    it, so it must never appear as an `Evidences` edge."""
     built = built_for(packed, hafs, 83, 14)
     sakt_edges = [
         spelling for spelling in built.inscription.spellings
         if isinstance(spelling, Evidences) and spelling.fact is SlotFact.SAKT
     ]
-    assert sakt_edges
-    word = next(w for w in built.score.words if w.sakt_after)
-    assert sakt_edges[0].slot == word.slots[-1].id
+    assert not sakt_edges
+    assert any(w.sakt_after for w in built.score.words)
 
 
 def test_the_inter_word_space_is_a_glyph(packed, hafs):

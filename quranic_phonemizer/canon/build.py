@@ -93,7 +93,7 @@ def build(
     track = provenance if provenance is not None else Provenance()
     scribe = Scribe(reading.verse)
     drafts = _drafts(reading, lexicon, track, right_context, scribe)
-    apply_ledger(reading, drafts, ledger, track, scribe)
+    apply_ledger(reading, drafts, ledger, track)
     for lexeme_pass in passes:
         lexeme_pass(reading, drafts, lexicon, scribe, selection)
     score, ordinals = assemble(reading, drafts, selection)
