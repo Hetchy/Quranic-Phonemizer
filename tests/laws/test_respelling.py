@@ -46,6 +46,28 @@ def test_blocks_partition_both_alignments(hafs, pen, alphabet, surah, ayah):
         assert seen_recited == set(range(len(recited)))
 
 
+def test_the_iwad_carrier_joins_the_block_its_sound_is_in(hafs, pen, alphabet):
+    """01-contract 6.3's sound-ownership closure: the silenced fathatan
+    reaches the recited madd through `from_glyphs` alone, but the alif that
+    owns the lengthened sound joins only because both sides present it."""
+    a = _assembled(hafs, pen, alphabet, "78:6")
+    source = alignment(a, text="source", grouping="glyph")
+    recited = alignment(a, text="recited", grouping="glyph")
+    alif = next(
+        i for i, p in enumerate(source)
+        if p.sounds and "".join(a.glyphs[g].char for g in p.glyphs) == "ا"
+    )
+    fathatan = next(
+        i for i, p in enumerate(source)
+        if "".join(a.glyphs[g].char for g in p.glyphs) == "ً"
+    )
+    block = next(b for b in respelling(a, grouping="glyph") if alif in b.source)
+    assert fathatan in block.source
+    assert block.recited and set(source[alif].sounds) & set(
+        recited[block.recited[0]].sounds
+    )
+
+
 def test_the_cross_word_merger_is_one_block(hafs, pen, alphabet):
     # هُدًى مِّن, 2:5:3-4 -- the seat the merger drops has an empty recited.
     a = _assembled(hafs, pen, alphabet, "2:5:3-2:5:4")
