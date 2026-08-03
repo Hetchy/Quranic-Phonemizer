@@ -2514,7 +2514,6 @@ thing, and section 4 says why.
 | `ibdal_hamza` | E18 |
 | `orthographic_silence` | E2, E3, E5, E8, E9, E16, E18 |
 | `fakk_idgham` | |
-| `madd_iwad` (label) | |
 | `madd_badal` (label) | E6, E17, E18, E21 |
 | `silah` (label) | E9, E10, E11, E12, E13, E14, E21 |
 | `silah_kubra` (label) | E14, E21 |

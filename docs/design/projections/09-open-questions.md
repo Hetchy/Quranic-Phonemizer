@@ -36,25 +36,6 @@ C1 reworded section 7.2 to say per part, not per unit.
 **Settled by** writing the completeness suite, which is where a law that cannot
 hold announces itself.
 
-## 7. The wire format is not specified
-
-[01-contract](01-contract.md) opens by promising a consumer never reads
-`model/`. Two things a consumer needs are not here.
-
-- **Discriminators.** `Witnesses(glyph, unit)` and `Decorates(glyph, unit)` have
-  identical payloads, and so do `Recolours(sound, by)` and
-  `Classifies(sound, by)`. [02-gate](02-gate.md) requires tagged unions and
-  canonical round trips; nothing names the tag or its literals.
-- **Letter literals.** `Unit.letter` is "the twenty-eight, plus `hamza` and
-  `taa_marbuta`". The prose says baa and yaa where the model says `ba` and
-  `ya`, and `heh` for one letter and `ha` for another.
-
-Also open: what `word_index` means on a structural glyph, which by section 4.3
-has no word.
-
-**Settled by** section 9 item 2's versioned schema, which is where these
-literals get chosen.
-
 ## 8. `08`'s `shortened` derivation
 
 [08-legacy-parity](08-legacy-parity.md) section 3 derives the shard's
@@ -82,5 +63,5 @@ exactly one site. Section 9's own claims check out where they are countable:
 the iltiqa repair owns nothing, and every release in the corpus sits on the
 vowel. The rule vocabulary in [01-contract](01-contract.md) section 7 matches
 [07-rules](07-rules.md) section 2 and [03-examples](03-examples.md) section 3.1
-exactly. `comment_lint` and `structure_lint` report no problems and the suite
-passes.
+exactly, including `fakk_idgham` and `pausal_alif`, which phase D minted.
+`comment_lint` and `structure_lint` report no problems and the suite passes.
