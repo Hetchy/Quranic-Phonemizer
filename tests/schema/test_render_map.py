@@ -150,8 +150,11 @@ def test_a_letter_with_one_ghunnah_token_reads_it_either_way(alphabet):
     assert hum == held == "m̃"
 
 
-def test_a_heavy_hum_is_its_own_token(alphabet):
-    assert alphabet.token(Consonant(L.NOON, ghunnah=True, emphatic=True)) == "ŋˤ"
+def test_a_heavy_hum_is_offered_but_not_yet_spent(alphabet):
+    """Composed only once `emphatic_ikhfaa` exists to ask for it; until then
+    the plain hum answers, same as `eased`."""
+    assert alphabet.consonants[L.NOON].heavy_hum == "ŋˤ"
+    assert alphabet.token(Consonant(L.NOON, ghunnah=True, emphatic=True)) == "ŋ"
 
 
 def test_an_inherently_emphatic_letter_reads_the_same_either_way(alphabet):

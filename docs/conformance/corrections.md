@@ -43,39 +43,35 @@ did not, for the reason above. This correction is recorded here as the unit
 requires regardless, because the underlying fact changed even though no
 token did.
 
-## Unit A8: the ikhfaa haqiqi hum before an istilaa letter
+## Unit A8, corrected: the heavy hum is not yet spent
 
 Item 13 gives ikhfaa haqiqi's hum a `Recolours` edge before one of the five
-istilaa letters its own trigger can reach without going to `izhar`: seen,
-saad, dad, tah, zah and qaf minus kha and ghain, which `izhar` already claims
-as throat letters -- leaving saad, dad, tah, zah and qaf. Before A8 the
-package had no way to write this at all: `Nasal` carried no `emphatic` token
-and the alphabet's `case Nasal(): if sound.emphatic: raise` refused one
-outright. `rules/noon_sakinah.py::IkhfaaWeight` mints the edge; `ipa.yaml`'s
-`noon.heavy_hum` (`ŋˤ`) is the new token.
+istilaa letters its own trigger can reach without going to `izhar`: saad,
+dad, tah, zah and qaf. That edge is a model fact and stands. A8 also made
+`render/alphabet.py::_hum` spend a token for it unconditionally, which
+`01-contract` section 3.2 and `decisions.md` section 7 both place among the
+three distinctions the notation carries but does not always spend a token
+on, `emphatic_ikhfaa` defaulting off same as `eased` and the qalqala degree.
+`_hum` now validates `heavy_hum` against the data without composing it,
+exactly as `_consonant` already treats `eased`.
 
-**246 words move in word mode, 879 in verse mode** (the wider count is the
-same correction reaching further under `Junction.JOIN`). Every one is the
-single-token substitution `ŋ` -> `ŋˤ` on a written noon or tanween noon whose
-next letter is saad, dad, tah, zah or qaf; `python tools/snapshot.py diff`
-against the pre-A8 head snapshot reports no other shape. A representative
-spread:
+**The 246 words A8 moved in word mode, 879 in verse mode, move back.** Every
+one reverts the single-token substitution `ŋˤ` -> `ŋ`; `python
+tools/snapshot.py diff` against the pre-fix head snapshot reports no other
+shape. A representative spread:
 
-| Ref | Before | After |
+| Ref | A8 | Corrected |
 |---|---|---|
-| 2:27:2 | `jaŋquduːn` | `jaŋˤquduːn` |
-| 5:72:33 | `ʔaŋsˤaːr` | `ʔaŋˤsˤaːr` |
-| 10:39:15 | `faŋðˤur` | `faŋˤðˤur` |
-| 21:65:9 | `jaŋtˤiquːn` | `jaŋˤtˤiquːn` |
-| 35:11:24 | `juŋqaˤsˤ` | `juŋˤqaˤsˤ` |
-| 48:3:1 | `wajaŋsˤuraˤk` | `wajaŋˤsˤuraˤk` |
+| 2:27:2 | `jaŋˤquduːn` | `jaŋquduːn` |
+| 5:72:33 | `ʔaŋˤsˤaːr` | `ʔaŋsˤaːr` |
+| 10:39:15 | `faŋˤðˤur` | `faŋðˤur` |
+| 21:65:9 | `jaŋˤtˤiquːn` | `jaŋtˤiquːn` |
+| 35:11:24 | `juŋˤqaˤsˤ` | `juŋqaˤsˤ` |
+| 48:3:1 | `wajaŋˤsˤuraˤk` | `wajaŋsˤuraˤk` |
 
-The full 246-ref word-mode list is reproducible: it is exactly the refs
-`tools/snapshot.py diff` names against the pre-A8 `tests/snapshots/head/`
-commit. `tools/gates.py`'s `regression` floors move from `99.921`/`97.852` to
-`99.604`/`96.771` (word/verse); `cross-script` does not move, since both
-scripts build the same canonical letter for the hum and the alphabet is
-shared. `docs/conformance/gate-residues.md` records the new class.
+`tools/gates.py`'s `regression` floors move from `99.604`/`96.771` back to
+`99.921`/`97.852` (word/verse), which is where A8 found them; `cross-script`
+does not move. `docs/conformance/gate-residues.md` drops the class.
 
 ## The dead `سلسبيلا` entry
 

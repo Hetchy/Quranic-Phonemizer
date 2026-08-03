@@ -13,8 +13,8 @@ the row here and the entry there agree on the count.
 | cross-script, word | 99.997% | 2 words |
 | cross-script, verse | **100.000%** | none |
 | round-trip, uthmani | **100.000%** | none |
-| regression, word | 99.604% | 307 words |
-| regression, verse | 96.771% | see below |
+| regression, word | 99.921% | 61 words |
+| regression, verse | 97.852% | see below |
 | L1 | 18 rows over 287,057 slots | |
 | attestations | 176 uthmani, 237 indopak | |
 
@@ -29,18 +29,12 @@ forces separates them.
 | 26:61:2 | `تَرَآءَا` | `تَرَآءَ` | `tarˤaˤ:ʔa lʒamʕa:ni` both |
 | 59:9:2 | `تَبَوَّءُو` | `تَبَوَّءُ` | `tabawwaʔu dda:rˤaˤ` both |
 
-## Regression — 307 words
+## Regression — 61 words
 
 The oracle is the previous implementation with its own defects frozen in, so
-this gate is a change detector and not a target. Six classes: the 246 below
-plus the five already established independently of the oracle.
-
-**246 — the ikhfaa haqiqi hum before an istilaa letter** (`يَنصُرُونَ`,
-`مَّنضُودٍ`, `تَنطِقُونَ`, `أَنظِرْنِى`, `وَٱنقَلَبُوا۟`, and 241 more). Unit
-A8 gives the hum a `Recolours` edge before saad, dad, tah, zah or qaf, which
-the oracle -- frozen before `ipa.yaml` had a heavy-hum token at all -- always
-read plain: `jaŋsˤurˤu:n` where the corrected reading is `jaŋˤsˤurˤu:n`. See
-[corrections.md](corrections.md) for the full derivation and a spread sample.
+this gate is a change detector and not a target. Every row is one of five
+classes, and each class is a disagreement whose direction is established
+independently of the oracle.
 
 **19 + 4 — the small yaa and the small waw** (`يُحْىِۦ`, `وَلِىِّۦ`,
 `تَلْوُۥٓا۟`, `فَأْوُۥٓا۟`, `لِتَسْتَوُۥا۟`). Uthmani writes the vowel with
@@ -84,13 +78,7 @@ oracle's `-aa` is the nominative of a word standing in the genitive.
 
 ## Verse mode
 
-96.771% counts a word wrong when a sound merged across a boundary is credited
+97.852% counts a word wrong when a sound merged across a boundary is credited
 to the neighbour; the harness prints the phoneme sequence separately, and
-that is 76,511 of 77,433. Joining a whole verse reaches every istilaa-follower
-site the 246-word class covers, plus some it does not: a few words whose
-`ŋ`/`ŋˤ` boundary crediting the oracle already read differently from us were
-silently absorbed into the boundary-crediting bucket before A8, since the
-flattened sequence matched either way; the heavy hum breaks that match, so
-those surface as ordinary mismatches now rather than staying bucketed. Every
-one is still the same single-letter correction, read from a different side of
-a word seam.
+that is 77,432 of 77,433. The one word left is `يَسْرِ` at 89:4, already
+listed above under the disputed raa.

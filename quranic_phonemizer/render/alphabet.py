@@ -81,8 +81,9 @@ class Alphabet:
         return token * 2 if sound.geminate else token
 
     def _hum(self, entry: Entry, sound: Consonant) -> str:
-        if sound.emphatic:
-            return self._feature(entry.heavy_hum, "heavy_hum", sound)
+        # `heavy_hum` is validated but not yet composed: see `Entry.eased`.
+        if sound.emphatic and entry.heavy_hum is None:
+            raise self._absent("heavy_hum", sound)
         if not sound.geminate and entry.hum is not None:
             return entry.hum
         # A held ghunnah is already the sound of a doubled letter, so
