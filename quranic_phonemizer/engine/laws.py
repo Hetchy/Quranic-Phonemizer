@@ -8,7 +8,7 @@ from __future__ import annotations
 from collections.abc import Iterable
 
 from ..model.address import SlotId
-from ..model.canon import CLASSIFICATION_ONLY, FAMILY_OF, RuleFamily, Score
+from ..model.canon import CLASSIFICATION_ONLY, Rule, Score
 from ..model.inscription import Attests, Decorates, Evidences, Inscription
 from ..model.performance import (
     Aspect,
@@ -142,23 +142,37 @@ def check_inscription(inscription: Inscription, score: Score) -> None:
                 )
 
 
+#: What a written shadda can witness: every merger the model recognises.
+#: `Attests` names no rule of its own, so the completeness law checks
+#: against this closed set instead of a model-level family.
+MERGER_RULES: frozenset[Rule] = frozenset({
+    Rule.IDGHAM_BI_GHUNNAH,
+    Rule.IDGHAM_BILA_GHUNNAH,
+    Rule.IDGHAM_SHAFAWI,
+    Rule.IDGHAM_MUTAMATHILAYN,
+    Rule.IDGHAM_MUTAQARIBAYN,
+    Rule.IDGHAM_MUTAJANISAYN_KAMIL,
+    Rule.IDGHAM_MUTAJANISAYN_NAQIS,
+    Rule.LAM_SHAMSIYYAH,
+    Rule.LAM_QAMARIYYAH,
+})
+
+
 def check_attestations(
-    attested: Iterable[tuple[SlotId, RuleFamily]],
+    attested: Iterable[SlotId],
     performance: Performance,
 ) -> list[str]:
-    """Every family a script attests must be produced by some occurrence.
+    """Every slot a script attests must be produced by some merger occurrence.
 
-    One-directional: an occurrence family with no matching attestation is
-    not an error. Returns disagreements instead of raising them individually.
+    One-directional: a merger with no matching attestation is not an error.
+    Returns disagreements instead of raising them individually.
     """
-    produced: dict[SlotId, set[RuleFamily]] = {}
+    produced: set[SlotId] = set()
     for occurrence in performance.occurrences:
-        family = FAMILY_OF[occurrence.rule]
-        for slot in occurrence.parts.slots:
-            produced.setdefault(slot, set()).add(family)
+        if occurrence.rule in MERGER_RULES:
+            produced.update(occurrence.parts.slots)
     return [
-        f"A1: {slot} attests {family.value} but no occurrence of that family "
-        f"names it (produced: {sorted(f.value for f in produced.get(slot, ()))})"
-        for slot, family in attested
-        if family not in produced.get(slot, set())
+        f"A1: {slot} is attested but no merger occurrence names it"
+        for slot in attested
+        if slot not in produced
     ]

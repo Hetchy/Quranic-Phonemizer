@@ -11,6 +11,7 @@ from ..engine.neighbourhood import Neighbourhood
 from ..engine.plan import (
     Length,
     MergeInto,
+    Phase,
     Plan,
     Realize,
     Relength,
@@ -19,7 +20,7 @@ from ..engine.plan import (
 )
 from ..model.address import BoundaryPlan, SlotId
 from ..model.canon import CanonLetter as L
-from ..model.canon import NucleusKind, Onset, Phase, Quality, Rule
+from ..model.canon import NucleusKind, Onset, Quality, Rule
 from ..model.performance import Aspect, Occurrence, Participants, Vowel
 
 #: Which glide lengthens which vowel.

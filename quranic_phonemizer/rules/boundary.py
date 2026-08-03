@@ -10,6 +10,7 @@ from dataclasses import dataclass, field
 from ..engine.neighbourhood import Neighbourhood
 from ..engine.plan import (
     Length,
+    Phase,
     Plan,
     Realize,
     Relength,
@@ -22,7 +23,6 @@ from ..model.canon import (
     CanonLetter,
     NucleusKind,
     Onset,
-    Phase,
     Quality,
     Rule,
     SlotOrigin,

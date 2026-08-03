@@ -8,7 +8,6 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from ..model.address import GraphemeId, SlotId, VerseRef
-from ..model.canon import RuleFamily
 from ..model.inscription import (
     Attests,
     Decorates,
@@ -35,7 +34,7 @@ class Scribe:
     verse: VerseRef
     evidences: list[tuple[int, int, SlotFact]] = field(default_factory=list)
     decorates: list[tuple[int, int]] = field(default_factory=list)
-    attests: list[tuple[int, RuleFamily, int]] = field(default_factory=list)
+    attests: list[tuple[int, int]] = field(default_factory=list)
 
     def evidence(self, offset: int, subject, fact: SlotFact) -> None:
         """`subject` is the draft the fact landed on, which is not always the
@@ -47,9 +46,9 @@ class Scribe:
         if offset >= 0 and subject is not None:
             self.decorates.append((offset, subject.uid))
 
-    def attestation(self, offset: int, family: RuleFamily, anchor) -> None:
+    def attestation(self, offset: int, anchor) -> None:
         if offset >= 0 and anchor is not None:
-            self.attests.append((offset, family, anchor.uid))
+            self.attests.append((offset, anchor.uid))
 
     def withdraw(self, drafts) -> None:
         """Every edge into these drafts, dropped. For a pass that replaces a
@@ -57,7 +56,7 @@ class Scribe:
         gone = {draft.uid for draft in drafts}
         self.evidences = [row for row in self.evidences if row[1] not in gone]
         self.decorates = [row for row in self.decorates if row[1] not in gone]
-        self.attests = [row for row in self.attests if row[2] not in gone]
+        self.attests = [row for row in self.attests if row[1] not in gone]
 
     def finish(self, reading, drafts, ordinals: dict[int, int]) -> Inscription:
         spellings: list[Spelling] = []
@@ -67,9 +66,9 @@ class Scribe:
         for offset, key in self.decorates:
             slot = _slot(self.verse, ordinals, key, offset)
             spellings.append(Decorates(_grapheme(self.verse, offset), slot))
-        for offset, family, key in self.attests:
+        for offset, key in self.attests:
             slot = _slot(self.verse, ordinals, key, offset)
-            spellings.append(Attests(_grapheme(self.verse, offset), family, slot))
+            spellings.append(Attests(_grapheme(self.verse, offset), slot))
         for offset in reading.structural:
             spellings.append(Structural(_grapheme(self.verse, offset)))
         spellings.extend(self._decorations(reading, drafts, ordinals))

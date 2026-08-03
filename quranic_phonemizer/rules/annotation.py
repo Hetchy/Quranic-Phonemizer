@@ -7,14 +7,13 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from ..engine.neighbourhood import Neighbourhood
-from ..engine.plan import Plan, Verdict, mint
+from ..engine.plan import Phase, Plan, Verdict, mint
 from ..model.address import BoundaryPlan, SlotId
 from ..model.canon import CanonLetter as L
 from ..model.canon import (
     Annotation,
     NucleusKind,
     Onset,
-    Phase,
     Rule,
 )
 from ..model.performance import Occurrence, Participants

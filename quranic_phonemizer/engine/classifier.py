@@ -14,11 +14,10 @@ from ..model.canon import (
     CanonLetter,
     NucleusKind,
     Onset,
-    Phase,
     Rule,
 )
 from .neighbourhood import Neighbourhood
-from .plan import Plan, Verdict
+from .plan import Phase, Plan, Verdict
 
 Trigger: TypeAlias = (
     frozenset[CanonLetter] | frozenset[NucleusKind] | frozenset[Onset]

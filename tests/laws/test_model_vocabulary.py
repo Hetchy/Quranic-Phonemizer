@@ -42,19 +42,10 @@ def test_canon_letter_has_thirty_members() -> None:
 
 def test_closed_sets_have_the_sizes_their_arguments_depend_on() -> None:
     assert len(canon.Onset) == 5
-    assert len(canon.Phase) == 5
     assert len(performance.Aspect) == 2, (
         "Aspect is the slot's own field partition; a third member would mean "
         "the slot gained a third field"
     )
-    assert len(canon.RuleFamily) == 7
-
-
-def test_every_rule_declares_a_family() -> None:
-    missing = sorted(r.value for r in canon.Rule if r not in canon.FAMILY_OF)
-    assert not missing, f"Rule members with no RuleFamily: {missing}"
-    extra = sorted(r for r in canon.FAMILY_OF if r not in set(canon.Rule))
-    assert not extra, f"FAMILY_OF names non-rules: {extra}"
 
 
 def test_classification_only_rules_are_rules() -> None:

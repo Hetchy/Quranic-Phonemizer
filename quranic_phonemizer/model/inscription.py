@@ -10,7 +10,6 @@ from enum import StrEnum
 from typing import TypeAlias
 
 from .address import GraphemeId, Location, Script, SlotId, VerseRef
-from .canon import RuleFamily
 
 
 class GraphemeClass(StrEnum):
@@ -58,14 +57,12 @@ class Evidences:
 
 @dataclass(frozen=True, slots=True)
 class Attests:
-    """This grapheme witnesses a *performance* outcome at an anchor slot.
-
-    Names a `RuleFamily`, never a `Rule`: choosing among idgham members is
-    tajweed classification, not a script adapter's job.
+    """This grapheme witnesses a *performance* outcome at an anchor slot,
+    naming no rule: choosing among idgham members is tajweed classification,
+    not a script adapter's job.
     """
 
     grapheme: GraphemeId
-    family: RuleFamily
     anchor: SlotId
 
 

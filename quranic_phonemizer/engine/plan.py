@@ -10,8 +10,19 @@ from enum import StrEnum
 from typing import TypeAlias
 
 from ..model.address import OccurrenceId, SlotId
-from ..model.canon import FAMILY_OF, Phase, Rule, RuleFamily
+from ..model.canon import Rule
 from ..model.performance import Aspect, Occurrence, Side, Sound
+
+
+class Phase(StrEnum):
+    """Closed and ordered. Within a phase, rules are unordered and
+    conflicts are errors."""
+
+    BOUNDARY = "boundary"
+    MERGE = "merge"
+    LENGTH = "length"
+    COLOUR = "colour"
+    RELEASE = "release"
 
 
 class Length(StrEnum):
@@ -152,16 +163,6 @@ class Plan:
         for recorded_phase, verdict in self.entries:
             if phase is None or recorded_phase is phase:
                 yield from verdict.effects
-
-    def assimilated_from(self, slot: SlotId) -> bool:
-        """Is this slot the source of an assimilation? Idgham naqis keeps the
-        first letter's sound and still holds its closure rather than
-        releasing it, so this is not the same question as `merged_away`."""
-        return any(
-            FAMILY_OF.get(verdict.occurrence.rule) is RuleFamily.ASSIMILATION
-            and verdict.occurrence.parts.slots[:1] == (slot,)
-            for _, verdict in self.entries
-        )
 
     def merged_away(self, slot: SlotId, aspect: Aspect) -> bool:
         return any(

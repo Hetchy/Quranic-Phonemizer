@@ -11,9 +11,9 @@ import pytest
 
 from conftest import performance_for, score_for
 from quranic_phonemizer.engine.classifier import RuleSet
-from quranic_phonemizer.engine.plan import ConflictError, Plan, Realize
+from quranic_phonemizer.engine.plan import ConflictError, Phase, Plan, Realize
 from quranic_phonemizer.model.address import Script, SlotId, VerseRef
-from quranic_phonemizer.model.canon import CanonLetter, NucleusKind, Phase, Rule
+from quranic_phonemizer.model.canon import CanonLetter, NucleusKind, Rule
 from quranic_phonemizer.model.performance import (
     Aspect,
     Consonant,

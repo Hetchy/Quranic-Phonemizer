@@ -216,8 +216,8 @@ def _apply_rows(rows, draft, drafts, context, track, scribe, base_offset,
                 # grapheme reaches.
                 scribe.evidence(offset, extra, SlotFact.LETTER)
                 scribe.evidence(offset, extra, SlotFact.NUCLEUS)
-            case Attests(family=family):
-                scribe.attestation(offset, family, draft)
+            case Attests():
+                scribe.attestation(offset, draft)
                 track.attested += 1
             case Shows() | Absent():
                 scribe.decoration(offset, draft)

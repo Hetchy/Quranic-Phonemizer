@@ -10,11 +10,11 @@ from dataclasses import dataclass, field
 from collections.abc import Callable
 
 from ..engine.neighbourhood import Neighbourhood
-from ..engine.plan import MergeInto, Plan, Realize, Verdict, mint
+from ..engine.plan import MergeInto, Phase, Plan, Realize, Verdict, mint
 from ..model.address import BoundaryPlan, SlotId
 from ..model.canon import ABJAD
 from ..model.canon import CanonLetter as L
-from ..model.canon import CanonLetter, NucleusKind, Onset, Phase, Quality, Rule
+from ..model.canon import CanonLetter, NucleusKind, Onset, Quality, Rule
 from ..model.performance import Aspect, Consonant, Occurrence, Participants
 
 

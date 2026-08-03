@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from enum import StrEnum
 from typing import Callable, TypeAlias
 
-from ...model.canon import CanonLetter, Nucleus, Onset, RuleFamily
+from ...model.canon import CanonLetter, Nucleus, Onset
 from ...model.inscription import SlotFact
 from ...orthography.adapter import Cluster
 
@@ -47,9 +47,8 @@ class AddsSlot:
 
 @dataclass(frozen=True, slots=True)
 class Attests:
-    """A performance outcome, not a canonical fact. Names a family."""
+    """A performance outcome, not a canonical fact. Names no rule."""
 
-    family: RuleFamily
     target: Target = Target.HERE
 
 

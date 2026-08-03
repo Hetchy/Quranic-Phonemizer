@@ -6,8 +6,8 @@ rules.yaml, rather than subclassing a profile or branching inside a rule.
 from __future__ import annotations
 
 from ...engine.classifier import RuleSet
+from ...engine.plan import Phase
 from ...model.address import Riwayah
-from ...model.canon import Phase
 from ...rules.annotation import CanonicalColour, Silah, Tarqeeq
 from ...rules.boundary import (
     PausalAlif,
@@ -60,7 +60,7 @@ def _build() -> RuleSet:
                 Tarqeeq(weight=weight),
                 CanonicalColour(),
             ),
-            Phase.RELEASE: (Qalqala(letters=tables.qalqala),),
+            Phase.RELEASE: (Qalqala(letters=tables.qalqala, pairs=tables.pairs),),
         }
     )
 

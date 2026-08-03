@@ -8,9 +8,9 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from ..engine.neighbourhood import Neighbourhood
-from ..engine.plan import Plan, Realize, Verdict, mint
+from ..engine.plan import Phase, Plan, Realize, Verdict, mint
 from ..model.address import BoundaryPlan, SlotId
-from ..model.canon import CanonLetter, NucleusKind, Onset, Phase, Rule
+from ..model.canon import CanonLetter, NucleusKind, Onset, Rule
 from ..model.performance import (
     Aspect,
     Occurrence,
@@ -18,11 +18,13 @@ from ..model.performance import (
     Release,
     ReleaseKind,
 )
+from .tables import Pairs
 
 
 @dataclass(frozen=True, slots=True)
 class Qalqala:
     letters: frozenset[CanonLetter]
+    pairs: Pairs
     rule: Rule = Rule.QALQALA_SUGHRA
     phase: Phase = Phase.RELEASE
     triggers: frozenset = field(default=frozenset())
@@ -37,7 +39,7 @@ class Qalqala:
         slot, word = near.slot(at), near.word_of(at)
         if slot is None or word is None:
             return None
-        if plan.merged_away(at, Aspect.CONSONANT) or plan.assimilated_from(at):
+        if plan.merged_away(at, Aspect.CONSONANT) or self._consumed(near, at, slot):
             return None  # an assimilated closure is held, never released
 
         # The echo needs a real closure: either canonically silent, or
@@ -60,6 +62,18 @@ class Qalqala:
             Occurrence(mint(degree, at), degree, Participants((at,))),
             (Realize(at, Aspect.VOWEL, Release(ReleaseKind.QALQALA)),),
         )
+
+    def _consumed(self, near: Neighbourhood, at: SlotId, slot) -> bool:
+        """A closure the next consonant assimilates: identical, close or
+        homorganic, and joined -- the same pair table `Idgham` reads."""
+        if slot.nucleus.kind is not NucleusKind.SILENT:
+            return False
+        following = near.after(at)
+        if following is None:
+            return False
+        if slot.letter is following.letter:
+            return True
+        return self.pairs.of(slot.letter, following.letter) is not None
 
 
 def _is_last(near: Neighbourhood, at: SlotId, word: int) -> bool:

@@ -8,7 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from ..model.address import BoundaryPlan, SlotId, SoundId, VariantSelection
-from ..model.canon import NucleusKind, Onset, Phase, Score, Slot
+from ..model.canon import NucleusKind, Onset, Score, Slot
 from ..model.performance import (
     Aspect,
     Attribution,
@@ -29,6 +29,7 @@ from .plan import (
     Insert,
     Length,
     MergeInto,
+    Phase,
     Plan,
     Realize,
     Recolour,

@@ -207,33 +207,6 @@ class Score:
         return tuple(slot for word in self.words for slot in word.slots)
 
 
-class RuleFamily(StrEnum):
-    """What a script adapter can genuinely see. Attestation names one of
-    these, never a `Rule`: choosing among idgham members needs the
-    previous word, the pair tables and the ghunnah split."""
-
-    ASSIMILATION = "assimilation"
-    NASALIZATION = "nasalization"
-    INSERTION = "insertion"
-    LENGTHENING = "lengthening"
-    EMPHASIS = "emphasis"
-    RELEASE = "release"
-    ELISION = "elision"
-    """A sound a boundary removes. No script attests one, so it appears in
-    `FAMILY_OF` and never in an inventory."""
-
-
-class Phase(StrEnum):
-    """Closed and ordered. Within a phase, rules are unordered and
-    conflicts are errors."""
-
-    BOUNDARY = "boundary"
-    MERGE = "merge"
-    LENGTH = "length"
-    COLOUR = "colour"
-    RELEASE = "release"
-
-
 class Rule(StrEnum):
     """The only rule vocabulary. One name, one place."""
 
@@ -282,48 +255,6 @@ class Rule(StrEnum):
     PAUSAL_ALIF = "pausal_alif"
     SILAH = "silah"
 
-
-#: Every `Rule` declares its family, which is what a script may attest
-#: and gives projections a coarse grouping for free.
-FAMILY_OF: dict[Rule, RuleFamily] = {
-    Rule.IZHAR: RuleFamily.NASALIZATION,
-    Rule.IKHFAA_HAQIQI: RuleFamily.NASALIZATION,
-    Rule.IQLAB: RuleFamily.NASALIZATION,
-    Rule.IDGHAM_BI_GHUNNAH: RuleFamily.ASSIMILATION,
-    Rule.IDGHAM_BILA_GHUNNAH: RuleFamily.ASSIMILATION,
-    Rule.GHUNNAH_MUSHADDADAH: RuleFamily.NASALIZATION,
-    Rule.IZHAR_SHAFAWI: RuleFamily.NASALIZATION,
-    Rule.IKHFAA_SHAFAWI: RuleFamily.NASALIZATION,
-    Rule.IDGHAM_SHAFAWI: RuleFamily.ASSIMILATION,
-    Rule.IDGHAM_MUTAMATHILAYN: RuleFamily.ASSIMILATION,
-    Rule.IDGHAM_MUTAQARIBAYN: RuleFamily.ASSIMILATION,
-    Rule.IDGHAM_MUTAJANISAYN_KAMIL: RuleFamily.ASSIMILATION,
-    Rule.IDGHAM_MUTAJANISAYN_NAQIS: RuleFamily.ASSIMILATION,
-    Rule.LAM_SHAMSIYYAH: RuleFamily.ASSIMILATION,
-    Rule.LAM_QAMARIYYAH: RuleFamily.ASSIMILATION,
-    Rule.QALQALA_SUGHRA: RuleFamily.RELEASE,
-    Rule.QALQALA_KUBRA: RuleFamily.RELEASE,
-    Rule.QALQALA_AKBAR: RuleFamily.RELEASE,
-    Rule.TAFKHEEM: RuleFamily.EMPHASIS,
-    Rule.TARQEEQ: RuleFamily.EMPHASIS,
-    Rule.IMALA: RuleFamily.EMPHASIS,
-    Rule.TASHIL: RuleFamily.EMPHASIS,
-    Rule.ISHMAM: RuleFamily.EMPHASIS,
-    Rule.MADD_TABII: RuleFamily.LENGTHENING,
-    Rule.MADD_WAJIB_MUTTASIL: RuleFamily.LENGTHENING,
-    Rule.MADD_JAIZ_MUNFASIL: RuleFamily.LENGTHENING,
-    Rule.MADD_LAZIM: RuleFamily.LENGTHENING,
-    Rule.MADD_ARID_LIL_SUKUN: RuleFamily.LENGTHENING,
-    Rule.MADD_LEEN: RuleFamily.LENGTHENING,
-    Rule.IWAD: RuleFamily.LENGTHENING,
-    Rule.IBDAL_HAMZA: RuleFamily.LENGTHENING,
-    Rule.WASL_ELISION: RuleFamily.ELISION,
-    Rule.WASL_START: RuleFamily.INSERTION,
-    Rule.ILTIQA_REPAIR: RuleFamily.INSERTION,
-    Rule.WAQF_ENDING: RuleFamily.ELISION,
-    Rule.PAUSAL_ALIF: RuleFamily.ELISION,
-    Rule.SILAH: RuleFamily.LENGTHENING,
-}
 
 #: Rules that classify without producing a sound of their own.
 CLASSIFICATION_ONLY: frozenset[Rule] = frozenset(

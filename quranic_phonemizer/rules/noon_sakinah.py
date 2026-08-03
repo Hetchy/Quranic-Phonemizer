@@ -8,10 +8,10 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from ..engine.neighbourhood import Neighbourhood
-from ..engine.plan import MergeInto, Plan, Realize, Verdict, mint
+from ..engine.plan import MergeInto, Phase, Plan, Realize, Verdict, mint
 from ..model.address import BoundaryPlan, KhilafId, SlotId
 from ..model.canon import CanonLetter as L
-from ..model.canon import Phase, Rule, SlotOrigin
+from ..model.canon import Rule, SlotOrigin
 from ..model.performance import (
     Aspect,
     Consonant,
