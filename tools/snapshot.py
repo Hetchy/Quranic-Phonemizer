@@ -1,7 +1,4 @@
-"""What this checkout reads, and what changed since the last one.
-
-A floor says how much moved. This says which words, which is what a commit
-that moves a floor has to name.
+"""Which words this checkout reads differently. A floor says only how many.
 
 Run: python tools/snapshot.py write PATH [--mode word|verse|continuous]
      python tools/snapshot.py diff OLD NEW [--show N]
