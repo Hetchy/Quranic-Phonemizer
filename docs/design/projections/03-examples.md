@@ -447,23 +447,28 @@ one on both sides.
 
 | source | recited |
 |---|---|
-| (gap, after ٱ) | ◌َ |
-| | ا |
+| ٱ, (gap, after ٱ) | أَ |
+| لَّ | لّ, َآ |
 
 The helping vowel takes a gap pairing because the rasm writes no haraka over
 the seat, not because of how it was attributed: it is a `Hosts` on the hamza
-unit like any other vowel. The divine name's `a:` has no length carrier in the
-rasm, so ownership falls through to the glyph supplying the quality, and the
-carrier recitation says is a block with an empty source. The release is the one
-sound with no glyph on either text, and the last pairing owns two sounds for one
-part while the kasra it renders as a sukun is `silent`.
+unit like any other vowel. That gap and the wasl seat's own cell fall in one
+block, because both close over the same recited pairing: the seat by
+`from_glyphs`, the gap by the sound it owns. The divine name's `a:` has no
+length carrier in the rasm, so ownership falls through to the glyph supplying
+the quality; recitation writes the carrier as a cell of its own (`open
+question 2`'s answer), and the closure over sounds puts it beside the source
+cell that already owns `a:` rather than leaving it in a block by itself. The
+release is the one sound with no glyph on either text, and the last pairing
+owns two sounds for one part while the kasra it renders as a sukun is
+`silent`.
 
 **Part 3, the walk.**
 
 | relationship | what a consumer must do | cost |
 |---|---|---|
 | source - sound | draw the source text in order | a gap pairing has no source index, so the consumer cannot sort the rows on one key: it walks the glyph rows and splices each gap row in at the pairing its `after` names |
-| source - recited | read the blocks | one call. A rendered glyph naming no source glyph is a block with an empty source, and its position in the block order is what says where it falls, so a two-line teleprompter drawing block by block loses no character. What the block order does not settle is which block a source gap pairing joins: the only stated link between the two sides is `from_glyphs`, and neither the gap pairing nor the helping fatha it answers to has one |
+| source - recited | read the blocks | one call. The block order is what says where each falls, so a two-line teleprompter drawing block by block loses no character. What the block order does not settle is which pairing within a block a source gap pairing corresponds to: the only stated link between the two sides is `from_glyphs`, and neither the gap pairing nor the helping fatha it answers to has one |
 | recited - sound | read the row | one call and one field read. The release has no rendered glyph and takes no gap pairing there, because it rides on the pairing of the consonant that makes it |
 | the other three | | one call and one field read |
 

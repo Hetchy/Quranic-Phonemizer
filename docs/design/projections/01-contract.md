@@ -605,10 +605,15 @@ pairing and the rendered glyph that writes it own one sound, so they fall in
 one block, and neither is left for the reader to place. Where the two texts run one to one a block
 holds one pairing on each side; where a source glyph renders as two, or a
 recited cell covers two source glyphs, it holds what it has to. A source
-glyph the recited text drops gives a block with an empty `recited`. No block
-has an empty `source`: a rendered glyph the source did not produce still writes
-a sound, and the closure over sounds puts it beside the pairing that owns it,
-which is a gap pairing where no glyph states it.
+glyph the recited text drops gives a block with an empty `recited`.
+
+**A block can have an empty `source`.** A rendered glyph that owns no sound
+and names no source glyph closes over nothing, so it stands alone: a stop's
+inserted sukun (06-two-texts row 12) is exactly this case under
+`grouping="glyph"`, since nothing in the source ever wrote a mark there and
+the glyph it becomes carries no sound of its own to be closed over. Under
+`grouping="cell"` the same glyph is absorbed into its consonant's cell, which
+does have a source, so the case is grouping-dependent rather than absent.
 
 It carries nothing the two alignments do not. The sounds, the rules and the
 silences stay on the pairings a block points at, so there is one place each

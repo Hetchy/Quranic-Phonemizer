@@ -19,25 +19,6 @@ about where the set is soft, rather than as a complete inventory.
 
 ---
 
-## 2. `Block` is not total
-
-[01-contract](01-contract.md) section 6.3 says "No block has an empty
-`source`", on the grounds that a rendered glyph the source did not produce still
-writes a sound and the closure over sounds places it beside the pairing that
-owns it. Three cases resist:
-
-- A soundless insertion. [06-two-texts](06-two-texts.md) row 12 writes a sukun
-  that owns nothing, so no sound closure reaches it.
-- A structural deletion. A tatweel and a verse marker take no pairing at all,
-  so no block can state that recitation drops them.
-- The divine name's carrier. E4 prints a block with an empty source and says so
-  in prose, while E13 draws the same word as one block holding the carrier
-  beside the cell whose length it carries. Two examples, one phenomenon, two
-  partitions.
-
-**Settled by** implementing `respelling` over the corpus and seeing which shape
-the writer actually needs. E13's is the one this document believes.
-
 ## 6. Laws that name a case they then exclude
 
 Two, all one sentence each, both pointing at a real graph the law rejects.

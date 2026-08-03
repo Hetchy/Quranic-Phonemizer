@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from ..model.address import SlotId, SoundId
 from ..model.canon import CARRIER_OF, CanonLetter, Rule, Score, ScoreWord, SlotOrigin
 from ..model.inscription import (
     VOWEL_FACTS,
@@ -21,6 +22,7 @@ from ..model.performance import (
     Hosts,
     MergedInto,
     Performance,
+    Release,
     Silent,
     Vowel,
 )
@@ -47,12 +49,16 @@ _CONSONANT_FACTS = frozenset({SlotFact.LETTER, SlotFact.ONSET})
 
 @dataclass(frozen=True, slots=True)
 class RenderGlyph:
-    """One scalar of the recited text. `from_glyphs` mirrors 01-contract
-    section 4.3: empty is an insertion, several is a merge."""
+    """One scalar of the recited text. `from_glyphs`: empty is an insertion,
+    several is a merge. `slot`/`sound`/`release` are `assemble.py`'s own
+    machinery, naming which unit and sound this glyph presents."""
 
     char: str
     kind: GraphemeClass
     from_glyphs: tuple = ()
+    slot: SlotId | None = None
+    sound: SoundId | None = None
+    release: SoundId | None = None
 
 
 def text(rendered: tuple[RenderGlyph, ...]) -> str:
@@ -66,6 +72,7 @@ def write_recited(
     """One word's worth of glyphs at a time, a space between words, and any
     stop sign the source carries after that word -- 06-two-texts row 31, 30."""
     attrs = _by_slot_aspect(performance)
+    releases = _releases_by_slot(performance)
     sounds = dict(performance.sounds)
     occurrences = {o.id: o for o in performance.occurrences}
     started = _slots_by_rule(performance, Rule.WASL_START)
@@ -77,7 +84,9 @@ def write_recited(
         if index:
             out.append(RenderGlyph(" ", GraphemeClass.STRUCTURAL))
         out.extend(
-            _write_word(word, attrs, sounds, occurrences, started, sources, pen)
+            _write_word(
+                word, attrs, releases, sounds, occurrences, started, sources, pen
+            )
         )
         out.extend(
             RenderGlyph(sign.char, GraphemeClass.ADVICE, (sign.id,))
@@ -86,15 +95,16 @@ def write_recited(
     return tuple(out)
 
 
-def _write_word(word: ScoreWord, attrs, sounds, occurrences, started, sources,
-                pen: Pen):
+def _write_word(word: ScoreWord, attrs, releases, sounds, occurrences, started,
+                sources, pen: Pen):
     for slot in word.slots:
         yield from _write_unit(
-            slot, attrs, sounds, occurrences, started, sources, pen
+            slot, attrs, releases, sounds, occurrences, started, sources, pen
         )
 
 
-def _write_unit(slot, attrs, sounds, occurrences, started, sources, pen: Pen):
+def _write_unit(slot, attrs, releases, sounds, occurrences, started, sources,
+                pen: Pen):
     """A unit whose consonant is gone -- merged or silenced -- writes
     nothing at all: 06-two-texts rows 6 and 7, "goes, with its sukun"."""
     consonant = attrs.get((slot.id, Aspect.CONSONANT))
@@ -111,6 +121,9 @@ def _write_unit(slot, attrs, sounds, occurrences, started, sources, pen: Pen):
         ),
         GraphemeClass.BASE,
         sources.get((slot.id, Aspect.CONSONANT), ()),
+        slot.id,
+        consonant.sound,
+        releases.get(slot.id),
     )
 
     if vowel_sound is not None:
@@ -119,6 +132,8 @@ def _write_unit(slot, attrs, sounds, occurrences, started, sources, pen: Pen):
             yield RenderGlyph(
                 glyph, GraphemeClass.HARAKA,
                 sources.get((slot.id, Aspect.VOWEL), ()),
+                slot.id,
+                vowel.sound,
             )
     elif not (
         slot.origin is SlotOrigin.NUNATION
@@ -127,7 +142,20 @@ def _write_unit(slot, attrs, sounds, occurrences, started, sources, pen: Pen):
         yield RenderGlyph(
             pen.role("sukun"), GraphemeClass.HARAKA,
             sources.get((slot.id, Aspect.VOWEL), ()),
+            slot.id,
         )
+
+
+def _releases_by_slot(performance: Performance) -> dict:
+    """The qalqala echo shares its slot with the plain consonant, so it
+    needs its own lookup rather than `_by_slot_aspect`'s single entry."""
+    sounds = dict(performance.sounds)
+    return {
+        attribution.slots[0]: attribution.sound
+        for attribution in performance.attributions
+        if isinstance(attribution, Hosts)
+        and isinstance(sounds[attribution.sound], Release)
+    }
 
 
 def _slots_by_rule(performance: Performance, rule: Rule) -> frozenset:
