@@ -78,14 +78,14 @@ class PausalGlide:
 
 
 @dataclass(frozen=True, slots=True)
-class IltiqaRepair:
+class IltiqaShortening:
     """Two sakins meet, so the madd letter shortens.
 
     Emits `Relength`, not a realization: the vowel is still plainly
     produced, only its length changes, so this rule owns no sound.
     """
 
-    rule: Rule = Rule.ILTIQA_REPAIR
+    rule: Rule = Rule.ILTIQA_SHORTENING
     phase: Phase = Phase.LENGTH
     triggers: frozenset = frozenset({VowelForm.LONG})
 
@@ -118,8 +118,8 @@ class IltiqaRepair:
             return None
         return Verdict(
             Occurrence(
-                mint(Rule.ILTIQA_REPAIR, at),
-                Rule.ILTIQA_REPAIR,
+                mint(Rule.ILTIQA_SHORTENING, at),
+                Rule.ILTIQA_SHORTENING,
                 Participants(at, following.id),
             ),
             (Relength(at, Length.SHORT),),

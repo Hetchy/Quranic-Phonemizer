@@ -60,7 +60,7 @@ def test_classification_only_excludes_rules_with_a_real_effect() -> None:
     `Recolours`/`SetsLength`/`Hosts` edge from that effect, not a
     `Classifies` one, so it does not need the exemption."""
     assert not canon.CLASSIFICATION_ONLY & {
-        Rule.TAFKHEEM, Rule.MADD_TABII, Rule.ILTIQA_REPAIR, Rule.PAUSAL_ALIF,
+        Rule.TAFKHEEM, Rule.MADD_TABII, Rule.ILTIQA_SHORTENING, Rule.PAUSAL_ALIF,
     }
 
 

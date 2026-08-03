@@ -715,7 +715,9 @@ means one thing to a letter and another to a sound are all in
 | a vowel lengthens | a madd rule |
 | a letter is realized differently | `taa_marbuta_pausal` |
 
-Mutually exclusive per unit and per part.
+Mutually exclusive per part, not per unit: a stopped taa marbuta gives one
+unit both `taa_marbuta_pausal` on its consonant and `pausal_sukun` on its
+vowel.
 
 ---
 

@@ -48,7 +48,7 @@ class WaqfEnding:
     yaa: SitedKhilaf = field(
         default_factory=lambda: SitedKhilaf(KhilafId.YAA_ITHBAT)
     )
-    rule: Rule = Rule.WAQF_ENDING
+    rule: Rule = Rule.PAUSAL_SUKUN
     phase: Phase = Phase.BOUNDARY
     triggers: frozenset = frozenset()
 
@@ -87,7 +87,7 @@ class WaqfEnding:
         if not effects:
             return None
         return Verdict(
-            Occurrence(mint(Rule.WAQF_ENDING, at), Rule.WAQF_ENDING, Participants(at)),
+            Occurrence(mint(Rule.PAUSAL_SUKUN, at), Rule.PAUSAL_SUKUN, Participants(at)),
             tuple(effects),
         )
 
@@ -177,9 +177,9 @@ class TanweenBeforeWasl:
     # `خَيْرٌ ٱهْبِطُوا۟` joins a quiescent noon to the quiescent letter the elided
     # prosthetic hamza leaves bare, and two of them cannot meet: the noon
     # takes the kasra that breaks them. The other half of the same repair
-    # shortens a madd instead -- see `rules/madd.py::IltiqaRepair`.
+    # shortens a madd instead -- see `rules/madd.py::IltiqaShortening`.
 
-    rule: Rule = Rule.ILTIQA_REPAIR
+    rule: Rule = Rule.ILTIQA_KASRA
     phase: Phase = Phase.BOUNDARY
     triggers: frozenset = frozenset({CanonLetter.NOON})
 
@@ -199,7 +199,7 @@ class TanweenBeforeWasl:
             return None
         return Verdict(
             Occurrence(
-                mint(Rule.ILTIQA_REPAIR, at, variant=1), Rule.ILTIQA_REPAIR,
+                mint(Rule.ILTIQA_KASRA, at), Rule.ILTIQA_KASRA,
                 Participants(at, following.id),
             ),
             (Realize(at, Aspect.VOWEL, Vowel(Quality.I)),),
@@ -269,7 +269,7 @@ class TanweenAtWaqf:
         if base is None or not base.nucleus.is_short:
             return None
         effects = [Silence(at, Aspect.CONSONANT)]
-        rule = Rule.WAQF_ENDING
+        rule = Rule.PAUSAL_SUKUN
         if base.letter is CanonLetter.TAA_MARBUTA:
             # Taa marbuta stops as haa and takes no iwad, but the noon is still silent.
             return Verdict(
@@ -292,7 +292,7 @@ class TaaMarbutaAtWaqf:
     """`ة` is a taa in connection and a haa at pause -- a canonical,
     rasm-conditioned alternation."""
 
-    rule: Rule = Rule.WAQF_ENDING
+    rule: Rule = Rule.TAA_MARBUTA_PAUSAL
     phase: Phase = Phase.BOUNDARY
     triggers: frozenset = frozenset({CanonLetter.TAA_MARBUTA})
 
@@ -308,9 +308,7 @@ class TaaMarbutaAtWaqf:
             return None
         # `بِسُورَةٍ` stops as haa with no iwad; "final" here excludes the tanween noon slot.
         return Verdict(
-            # variant=1 distinguishes this from `WaqfEnding`, which also
-            # fires on this slot, on a different aspect.
-            Occurrence(mint(Rule.WAQF_ENDING, at, variant=1), Rule.WAQF_ENDING,
+            Occurrence(mint(Rule.TAA_MARBUTA_PAUSAL, at), Rule.TAA_MARBUTA_PAUSAL,
                        Participants(at)),
             (Realize(at, Aspect.CONSONANT, Consonant(CanonLetter.HEH)),),
         )
