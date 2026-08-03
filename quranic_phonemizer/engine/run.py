@@ -21,6 +21,7 @@ from ..model.performance import (
     Occurrence,
     Performance,
     Recolours,
+    Release,
     SetsLength,
     Silent,
     Sound,
@@ -116,10 +117,13 @@ def _fill_plain(plan: Plan, score: Score) -> list[tuple]:
     """Every (slot, aspect) no verdict claimed, filled from the Score itself."""
     # Only effects that produce or remove a sound claim the slot; Recolour
     # and Relength modify an existing one and must not count as claiming it.
+    # A release is an addition beside the consonant, not a replacement of
+    # it, so it must not count as claiming the slot either.
     claimed = {
         (effect.slot, effect.aspect)
         for effect in plan.effects()
-        if isinstance(effect, (Realize, MergeInto, Silence))
+        if isinstance(effect, (MergeInto, Silence))
+        or (isinstance(effect, Realize) and not isinstance(effect.sound, Release))
     }
     filled = []
     for slot in score.slots():
@@ -205,8 +209,13 @@ def _realize(plan, mint, colours, sounds, attributions, hosted) -> None:
         for effect in verdict.effects:
             if isinstance(effect, Realize):
                 sound_id = mint.sound()
-                sounds.append((sound_id, _apply_colours(effect, colours)))
-                hosted[(effect.slot, effect.aspect)] = sound_id
+                sound = _apply_colours(effect, colours)
+                sounds.append((sound_id, sound))
+                # A release shares its slot and aspect with the consonant it
+                # echoes, so it must not be the one `hosted` remembers there:
+                # the plain fill still owns that key for its own sound.
+                if not isinstance(sound, Release):
+                    hosted[(effect.slot, effect.aspect)] = sound_id
                 attributions.append(
                     Hosts((effect.slot,), effect.aspect, sound_id,
                           verdict.occurrence.id)

@@ -11,6 +11,7 @@ from conftest import score_for
 from quranic_phonemizer.engine.run import perform
 from quranic_phonemizer.model.address import BoundaryPlan, Junction
 from quranic_phonemizer.model.canon import CanonLetter, Nucleus, Onset, Quality, Rule
+from quranic_phonemizer.model.performance import Aspect, Hosts, Release
 from quranic_phonemizer.render.recite import phonemes_by_word
 from quranic_phonemizer.riwayat.hafs import HAFS
 
@@ -130,6 +131,29 @@ def test_a_complete_merger_has_no_tafkheem(packed, hafs, alphabet) -> None:
     }
     assert Rule.IDGHAM_MUTAQARIBAYN in fired
     assert Rule.TAFKHEEM not in fired
+
+
+def test_a_release_sits_beside_the_consonant_not_instead_of_it(
+    packed, hafs, alphabet
+) -> None:
+    """The release is an addition on the qaf's own slot: the qaf must still
+    sound, and `q` must render before `Q`, not after it."""
+    assert _word(packed, hafs, alphabet, (2, 3, 7)) == "rˤaˤzaqQna:hum"
+    score, performance = _performed(packed, hafs, 2, 3)
+    qaf = next(
+        slot for slot in score.words[6].slots if slot.letter is CanonLetter.QAF
+    )
+    hosts = [
+        a for a in performance.attributions
+        if isinstance(a, Hosts) and qaf.id in a.slots
+    ]
+    by_id = dict(performance.sounds)
+    aspects = {a.aspect for a in hosts if isinstance(by_id[a.sound], Release)}
+    assert aspects == {Aspect.CONSONANT}
+    assert any(
+        a.aspect is Aspect.CONSONANT and not isinstance(by_id[a.sound], Release)
+        for a in hosts
+    ), "the qaf's own sound must survive the release beside it"
 
 
 @pytest.mark.parametrize(("site", "prosthetic", "why"), PROSTHETIC)

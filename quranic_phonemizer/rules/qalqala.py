@@ -61,7 +61,7 @@ class Qalqala:
 
         return Verdict(
             Occurrence(mint(degree, at), degree, Participants(at)),
-            (Realize(at, Aspect.VOWEL, Release(_DEGREE_OF_RULE[degree])),),
+            (Realize(at, Aspect.CONSONANT, Release(_DEGREE_OF_RULE[degree])),),
         )
 
     def _consumed(self, near: Neighbourhood, at: SlotId, slot) -> bool:
