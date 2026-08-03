@@ -84,4 +84,6 @@ def windows(
         start = end
 
 
-__all__ = ["OVERLAP_WORDS", "Window", "assemble", "windows"]
+#: `Window` and `OVERLAP_WORDS` are `windows()`'s own machinery -- no caller
+#: needs either name, only what `windows()` yields -- so neither is public.
+__all__ = ["assemble", "windows"]
