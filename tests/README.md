@@ -58,18 +58,21 @@ MALIK = Site(hafs=("1:4", (1,)), warsh=("1:4", (1,)))
 
 @for_each_riwayah(MALIK, isolated=1)
 def test_the_word_is_read_as_each_transmission_has_it(r):
-    # مَـٰلِكِ
-    assert r.phonemes(1) == r.pick(hafs="ma:lik", warsh=...)
+    # مَـٰلِكِ in Hafs, مَلِكِ in Warsh
+    assert r.phonemes(1) == r.pick(hafs="ma:lik", warsh="malik")
 ```
 
 The keywords are riwayah names, matching the site's. A riwayah running but not
 named raises `KeyError`, so adding a transmission cannot silently reuse
 another's expectation, and the failure names the riwayah that has no answer.
 
+The two transmissions write the word differently as well as read it
+differently, which is why the site keys its address per riwayah rather than
+sharing one.
+
 Fill each value by running that riwayah, never by reasoning about what it
-should be. Until a transmission is packaged there is nothing to run, so the
-site does not declare it yet: a row written ahead of the build is a guess
-wearing an assertion.
+should be. A row written ahead of the build that can read it is a guess wearing
+an assertion, and this suite is arranged to prevent exactly that.
 
 Reach for it only where the reading genuinely differs. Where it does not, one
 assertion covering every riwayah is the stronger statement, since it says the
