@@ -122,7 +122,7 @@ whose trigger is the next word goes as soon as the plan stops. Both are
 | 3 | a letter the rasm carries and recitation never says goes | the canonical no-sound verdict | orthographic | none | `orthographic_silence` |
 | 4 | the same letter goes when the plan joins, and stays when it stops | the verdict, on a unit whose vowel is short joined and long stopped | performance | joined | `orthographic_silence` |
 | 5 | the silence sign goes | a round or a rectangular zero | orthographic | none | **-** |
-| 6 | the hamza wasl seat goes | not started on, or not word-initial | performance | joined | `hamza_wasl_elision` |
+| 6 | the hamza wasl seat goes | not started on, or not word-initial | performance | joined | `wasl_elision` |
 | 7 | the merged-away consonant goes, with its sukun | joined, an idgham fires | performance | joined | the idgham rule |
 | 8 | the article lam goes, with its sukun | the article before a sun letter | performance | none | `lam_shamsiyyah` |
 | 9 | the word-initial shadda goes | started on a word whose first shadda is the previous word's idgham trace | performance | started | `fakk_idgham` |
@@ -159,7 +159,7 @@ already uses on a written noon.
 | | Transformation | Trigger | Kind | Boundary | Owner |
 |---|---|---|---|---|---|
 | 12 | a sukun is written on a letter the rasm left bare | a stopped word whose final consonant the rasm wrote bare | performance | stopped | **-** |
-| 13 | the helping haraka is written | started on, a consonant that sounds only when started on | performance | started | `hamza_wasl_start` |
+| 13 | the helping haraka is written | started on, a consonant that sounds only when started on | performance | started | `wasl_start` |
 | 14 | the helping kasra is written, and the noon it follows | joined, two sakins meet after a tanween | performance | joined | `iltiqa_kasra` |
 | 15 | an alif is written where the rasm has no seat for the fathatan to lengthen | a stopped word ending in a nunated hamza | performance | stopped | a madd rule |
 | 16 | the long a of the divine name is written | that lam, which no carrier follows | orthographic | none | a madd rule |
@@ -192,7 +192,7 @@ than under `spell out` because there is nothing in the rasm to spell out from.
 | 21 | a fathatan becomes a fatha | a stopped word whose fathatan lengthens, whether the seat is written or row 15 invents it | performance | stopped | a madd rule |
 | 22 | a taa marbuta becomes a haa | a stopped word ending in taa marbuta | performance | stopped | `taa_marbuta_pausal` |
 | 23 | a quiescent hamza becomes a vowel letter | the reading substitutes it | orthographic | none | `ibdal_hamza` |
-| 24 | the hamza wasl seat becomes the hamza its vowel calls for | started on | performance | started | `hamza_wasl_start` |
+| 24 | the hamza wasl seat becomes the hamza its vowel calls for | started on | performance | started | `wasl_start` |
 
 Row 22 changes the glyph. The pausal realization of a taa marbuta is a haa, and
 the recited text writes what is said, so it writes a haa. The taa marbuta in

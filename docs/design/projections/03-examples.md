@@ -121,8 +121,8 @@ tables are word 2.
 
 | unit | part | realization | on the sound |
 |---|---|---|---|
-| w2 hamza | consonant | silent, `hamza_wasl_elision` | |
-| w2 hamza | vowel | silent, `hamza_wasl_elision` | |
+| w2 hamza | consonant | silent, `wasl_elision` | |
+| w2 hamza | vowel | silent, `wasl_elision` | |
 | w2 lam | consonant | hosts `l` | named plain, `lam_qamariyyah` |
 | w2 lam | vowel | absent | |
 | w2 kaf | consonant | hosts `k` | |
@@ -136,7 +136,7 @@ tables are word 2.
 
 | source | owns | shares | silent | rules |
 |---|---|---|---|---|
-| ٱ | | | ٱ | `hamza_wasl_elision` |
+| ٱ | | | ٱ | `wasl_elision` |
 | لْ | `l` | | | `lam_qamariyyah` |
 | كِ | `k` `i` | | | |
 | ت | `t` | | | |
@@ -405,8 +405,8 @@ whose sound the source text does write; word 3 is row 19.
 
 | unit | part | realization | on the sound |
 |---|---|---|---|
-| w1 hamza | consonant | hosts `ʔ`, by `hamza_wasl_start` | |
-| w1 hamza | vowel | hosts `a`, by `hamza_wasl_start` | |
+| w1 hamza | consonant | hosts `ʔ`, by `wasl_start` | |
+| w1 hamza | vowel | hosts `a`, by `wasl_start` | |
 | w1 lam | consonant | hosts `l` | named plain, `lam_qamariyyah` |
 | w1 lam | vowel | absent | |
 | w1 ha | consonant | hosts `ħ` | |
@@ -430,8 +430,8 @@ whose sound the source text does write; word 3 is row 19.
 
 | source | owns | shares | silent | rules |
 |---|---|---|---|---|
-| ٱ | `ʔ` | | | `hamza_wasl_start` |
-| (gap, after ٱ) | `a` | | | `hamza_wasl_start` |
+| ٱ | `ʔ` | | | `wasl_start` |
+| (gap, after ٱ) | `a` | | | `wasl_start` |
 | لْ | `l` | | | `lam_qamariyyah` |
 | حَ | `ħ` `a` | | | |
 | مْ | `m` | | | `izhar_shafawi` |
@@ -555,8 +555,8 @@ go by row 7, and word 5 takes the shadda row 18 adds. Word 4's kasratan is
 
 | unit | part | realization | on the sound |
 |---|---|---|---|
-| w1 hamza | consonant | hosts `ʔ`, by `hamza_wasl_start` | |
-| w1 hamza | vowel | hosts `a`, by `hamza_wasl_start` | |
+| w1 hamza | consonant | hosts `ʔ`, by `wasl_start` | |
+| w1 hamza | vowel | hosts `a`, by `wasl_start` | |
 | w1 lam | consonant | hosts `ll` | |
 | w1 lam | vowel | hosts `a` | |
 | w1 thal | consonant | hosts `ð` | |
@@ -612,8 +612,8 @@ go by row 7, and word 5 takes the shadda row 18 adds. Word 4's kasratan is
 
 | source | owns | shares | silent | rules |
 |---|---|---|---|---|
-| ٱ | `ʔ` | | | `hamza_wasl_start` |
-| (gap, after ٱ) | `a` | | | `hamza_wasl_start` |
+| ٱ | `ʔ` | | | `wasl_start` |
+| (gap, after ٱ) | `a` | | | `wasl_start` |
 | لَّ | `ll` `a` | | | |
 | ذ | `ð` | | | |
 | ◌ِىٓ | `i:` | | | `madd_jaiz_munfasil` |
@@ -1222,8 +1222,8 @@ word 14 rows 6 and 7.
 | w8 ha | vowel | hosts `u` | |
 | w8 noon (tanween) | consonant | hosts `n` | |
 | w8 noon (tanween) | vowel | hosts the helping kasra, by `iltiqa_kasra` | |
-| w9 hamza | consonant | silent, `hamza_wasl_elision` | |
-| w9 hamza | vowel | silent, `hamza_wasl_elision` | |
+| w9 hamza | consonant | silent, `wasl_elision` | |
+| w9 hamza | vowel | silent, `wasl_elision` | |
 | w9 ba | consonant | hosts `b`, and the release `Q` beside it | the release is sughra, `qalqala_sughra` |
 | w9 ba | vowel | absent | |
 | w9 noon | consonant | hosts `n` | |
@@ -1256,8 +1256,8 @@ word 14 rows 6 and 7.
 | w13 noon | vowel | hosts `a` | |
 | w13 ya | consonant | hosts `jj` | doubled |
 | w13 ya | vowel | hosts `a` | |
-| w14 hamza | consonant | silent, `hamza_wasl_elision` | |
-| w14 hamza | vowel | silent, `hamza_wasl_elision` | |
+| w14 hamza | consonant | silent, `wasl_elision` | |
+| w14 hamza | vowel | silent, `wasl_elision` | |
 | w14 ra | consonant | hosts `rˤ` | heavy, `tafkheem` |
 | w14 ra | vowel | absent | |
 | w14 kaf | consonant | hosts `k` | |
@@ -1289,7 +1289,7 @@ hide or merge.
 | ◌ُو | `u:` | | | `madd_tabii` |
 | حٌ | `ħ` `u` `n` | | | `iltiqa_kasra` |
 | (gap, after حٌ) | the helping kasra | | | `iltiqa_kasra` |
-| ٱ | | | ٱ | `hamza_wasl_elision` |
+| ٱ | | | ٱ | `wasl_elision` |
 | بْ | `b` `Q` | | | `qalqala_sughra` |
 | نَ | `n` `a` | | | |
 | ه | `h` | | | |
@@ -1309,7 +1309,7 @@ hide or merge.
 | بُ | `b` `u` | | | |
 | نَ | `n` `a` | | | |
 | ىَّ | `jj` `a` | | | |
-| ٱ | | | ٱ | `hamza_wasl_elision` |
+| ٱ | | | ٱ | `wasl_elision` |
 | رْ | `rˤ` | | | `tafkheem` |
 | كَ | `k` `a` | | | |
 | ب | | `m̃` | | `idgham_mutajanisayn_kamil` |
@@ -1401,8 +1401,8 @@ that replaces its kasra. Word 8 is row 19 as well.
 | w3 heh | vowel | absent | |
 | w3 dal | consonant | hosts `d` | |
 | w3 dal | vowel | hosts `a` | |
-| w4 hamza | consonant | silent, `hamza_wasl_elision` | |
-| w4 hamza | vowel | silent, `hamza_wasl_elision` | |
+| w4 hamza | consonant | silent, `wasl_elision` | |
+| w4 hamza | vowel | silent, `wasl_elision` | |
 | w4 lam | consonant | merged into `lˤlˤ`, by `lam_shamsiyyah` | |
 | w4 lam | vowel | absent | |
 | w4 lam | consonant | hosts `lˤlˤ`, by `lam_shamsiyyah` | doubled; heavy, `tafkheem` |
@@ -1463,7 +1463,7 @@ units here whose vowel the colour reaches.
 | عَ | `ʕ` `a` | | | |
 | هْ | `h` | | | |
 | دَ | `d` `a` | | | |
-| ٱ | | | ٱ | `hamza_wasl_elision` |
+| ٱ | | | ٱ | `wasl_elision` |
 | ل | | `lˤlˤ` | | `lam_shamsiyyah` |
 | لَّ | `lˤlˤ` `a:` | | | `lam_shamsiyyah`, `tafkheem`, `madd_tabii` |
 | هِ | `h` `i` | | | |
@@ -1581,8 +1581,8 @@ word 14 takes the shadda row 18 adds. Word 16 loses its carrier to row 10, word
 | w15 noon | vowel | hosts `a` | |
 | w16 fa | consonant | hosts `f` | |
 | w16 fa | vowel | hosts `i` | short, `iltiqa_shortening` |
-| w17 hamza | consonant | silent, `hamza_wasl_elision` | |
-| w17 hamza | vowel | silent, `hamza_wasl_elision` | |
+| w17 hamza | consonant | silent, `wasl_elision` | |
+| w17 hamza | vowel | silent, `wasl_elision` | |
 | w17 lam | consonant | hosts `l` | named plain, `lam_qamariyyah` |
 | w17 lam | vowel | absent | |
 | w17 hamza | consonant | hosts `ʔ` | |
@@ -1619,7 +1619,7 @@ word 14 takes the shadda row 18 adds. Word 16 loses its carrier to row 10, word
 | ◌ُو | `u:` | | | `madd_tabii` |
 | نَ | `n` `a` | | | |
 | فِى | `f` `i` | | | `iltiqa_shortening` |
-| ٱ | | | ٱ | `hamza_wasl_elision` |
+| ٱ | | | ٱ | `wasl_elision` |
 | لْ | `l` | | | `lam_qamariyyah` |
 | أَ | `ʔ` `a` | | | |
 | رْ | `rˤ` | | | `tafkheem` |
@@ -1690,8 +1690,8 @@ for it to lengthen, which is row 15 beside row 21.
 
 | unit | part | realization | on the sound |
 |---|---|---|---|
-| w10 hamza | consonant | hosts `ʔ`, by `hamza_wasl_start` | |
-| w10 hamza | vowel | hosts `a`, by `hamza_wasl_start` | |
+| w10 hamza | consonant | hosts `ʔ`, by `wasl_start` | |
+| w10 hamza | vowel | hosts `a`, by `wasl_start` | |
 | w10 lam | consonant | merged into `ss`, by `lam_shamsiyyah` | |
 | w10 lam | vowel | absent | |
 | w10 seen | consonant | hosts `ss`, by `lam_shamsiyyah` | doubled |
@@ -1716,8 +1716,8 @@ have left it a bare consonant.
 
 | recited | owns | shares | silent | rules |
 |---|---|---|---|---|
-| أ | `ʔ` | | | `hamza_wasl_start` |
-| ◌َ | `a` | | | `hamza_wasl_start` |
+| أ | `ʔ` | | | `wasl_start` |
+| ◌َ | `a` | | | `wasl_start` |
 | س | `ss` | | | `lam_shamsiyyah` |
 | ◌ّ | | `ss` | | `lam_shamsiyyah` |
 | ◌َ | `a` | | | |
@@ -1925,8 +1925,8 @@ shadda the host needs, so row 18 adds nothing; word 6 is row 20.
 | w3 ya | vowel | hosts `a:` | long, `madd_tabii`; `madd_arid_lil_sukun` under B |
 | w3 ta | consonant | hosts `t` | |
 | w3 ta | vowel | hosts `u`; silent, `pausal_sukun`, under B | |
-| w4 hamza | consonant | silent, `hamza_wasl_elision`; hosts `ʔ`, by `hamza_wasl_start`, under B | |
-| w4 hamza | vowel | silent, `hamza_wasl_elision`; hosts `a`, by `hamza_wasl_start`, under B | |
+| w4 hamza | consonant | silent, `wasl_elision`; hosts `ʔ`, by `wasl_start`, under B | |
+| w4 hamza | vowel | silent, `wasl_elision`; hosts `a`, by `wasl_start`, under B | |
 | w4 lam | consonant | hosts `l` | named plain, `lam_qamariyyah` |
 | w4 lam | vowel | absent | |
 | w4 qaf | consonant | hosts `q` | heavy, `tafkheem` |
@@ -1970,7 +1970,7 @@ shadda the host needs, so row 18 adds nothing; word 6 is row 20.
 | ي | `j` | | | |
 | ◌َٰ | `a:` | | | `madd_tabii` |
 | تُ | `t` `u` | | | |
-| ٱ | | | ٱ | `hamza_wasl_elision` |
+| ٱ | | | ٱ | `wasl_elision` |
 | لْ | `l` | | | `lam_qamariyyah` |
 | قُ | `q` `u` | | | `tafkheem` |
 | رْ | `rˤ` | | | `tafkheem` |
@@ -1997,7 +1997,7 @@ shadda the host needs, so row 18 adds nothing; word 6 is row 20.
 The stop sign of word 1 carries the `Structural` edge and takes no pairing, so
 it has no row here, belongs to no block, and is present in both texts. Under
 plan B three rows change and one is added: ٱ owns `ʔ` and names
-`hamza_wasl_start`, the helping fatha takes a gap pairing after it and names
+`wasl_start`, the helping fatha takes a gap pairing after it and names
 the same rule, ◌َٰ names
 `madd_arid_lil_sukun` where it named `madd_tabii`, and تُ owns `t` alone with
 its damma `silent` and `pausal_sukun` in its rules.
@@ -2079,14 +2079,14 @@ row 23 for the quiescent hamza. Word 17 is rows 26, 1 and 19.
 | w14 hamza | vowel | hosts `a` | |
 | w14 dal | consonant | hosts `dd` | |
 | w14 dal | vowel | hosts `i` | |
-| w15 hamza | consonant | silent, `hamza_wasl_elision` | |
-| w15 hamza | vowel | silent, `hamza_wasl_elision` | |
+| w15 hamza | consonant | silent, `wasl_elision` | |
+| w15 hamza | vowel | silent, `wasl_elision` | |
 | w15 lam | consonant | hosts `ll` | |
 | w15 lam | vowel | hosts `a` | |
 | w15 thal | consonant | hosts `ð` | |
 | w15 thal | vowel | hosts `i`; hosts `i:` under B | long by `madd_jaiz_munfasil`, then short by `iltiqa_shortening`; long by `madd_tabii` under B |
-| w16 hamza (wasl) | consonant | silent, `hamza_wasl_elision`; hosts `ʔ`, by `hamza_wasl_start`, under B | |
-| w16 hamza (wasl) | vowel | silent, `hamza_wasl_elision`; hosts `u:` under B | long, `madd_tabii`; labelled `madd_badal`, under B |
+| w16 hamza (wasl) | consonant | silent, `wasl_elision`; hosts `ʔ`, by `wasl_start`, under B | |
+| w16 hamza (wasl) | vowel | silent, `wasl_elision`; hosts `u:` under B | long, `madd_tabii`; labelled `madd_badal`, under B |
 | w16 hamza | consonant | hosts `ʔ`; silent, `ibdal_hamza`, under B | |
 | w16 hamza | vowel | absent | |
 | w16 ta | consonant | hosts `t` | |
@@ -2127,11 +2127,11 @@ because the published sound carries no place of articulation.
 | يُ | `j` `u` | | | |
 | ؤَ | `ʔ` `a` | | | |
 | دِّ | `dd` `i` | | | |
-| ٱ | | | ٱ | `hamza_wasl_elision` |
+| ٱ | | | ٱ | `wasl_elision` |
 | لَّ | `ll` `a` | | | |
 | ذ | `ð` | | | |
 | ◌ِى | `i` | | | `madd_jaiz_munfasil`, `iltiqa_shortening` |
-| ٱ | | | ٱ | `hamza_wasl_elision` |
+| ٱ | | | ٱ | `wasl_elision` |
 | ؤْ | `ʔ` | | | |
 | تُ | `t` `u` | | | |
 | مِ | `m` `i` | | | |
@@ -2144,7 +2144,7 @@ because the published sound carries no place of articulation.
 | هُۥ | `h` | | ◌ُ, ۥ | `pausal_sukun` |
 
 Under plan B three rows change: ◌ِى owns `i:` and names `madd_jaiz_munfasil`
-alone; ٱ of word 16 owns `ʔ` and names `hamza_wasl_start`; ؤْ owns `u:` and
+alone; ٱ of word 16 owns `ʔ` and names `wasl_start`; ؤْ owns `u:` and
 names `ibdal_hamza` and `madd_tabii`. The ى of plan A is dropped and in no
 `silent` list, for the reason E14 gives.
 
@@ -2504,15 +2504,17 @@ thing, and section 4 says why.
 | `imala` | E19 |
 | `tashil` | E21 |
 | `ishmam` | E20 |
-| `hamza_wasl_start` | E4, E6, E15, E17, E18 |
-| `hamza_wasl_elision` | E1, E12, E13, E14, E17, E18 |
+| `wasl_start` | E4, E6, E15, E17, E18 |
+| `wasl_elision` | E1, E12, E13, E14, E17, E18 |
 | `iltiqa_kasra` | E12 |
 | `pausal_sukun` | E4, E6 to E9, E11, E13, E14, E16 to E21 |
 | `iwad` | E2, E3, E15 |
 | `taa_marbuta_pausal` | E8 |
+| `pausal_alif` | |
 | `ibdal_hamza` | E18 |
 | `orthographic_silence` | E2, E3, E5, E8, E9, E16, E18 |
-| `madd_iwad` (label) | E2, E3, E15 |
+| `fakk_idgham` | |
+| `madd_iwad` (label) | |
 | `madd_badal` (label) | E6, E17, E18, E21 |
 | `silah` (label) | E9, E10, E11, E12, E13, E14, E21 |
 | `silah_kubra` (label) | E14, E21 |
@@ -2641,8 +2643,8 @@ example does catch it failing, the cell says so.
 | a geminate noon or meem requires `ghunnah_mushaddadah` | 4.8 | E2, E19, E20 |
 | identical, close or homorganic consonants joined require an idgham | 4.8 | E7, E10, E11, E12 |
 | an article lam requires one of the two lam rules | 4.8 | E1, E4, E13, E14, E15, E17 |
-| a wasl consonant word-initial and started on requires `hamza_wasl_start` | 4.8 | E4, E15, E17 |
-| a wasl consonant otherwise requires `hamza_wasl_elision` | 4.8 | E1, E12 |
+| a wasl consonant word-initial and started on requires `wasl_start` | 4.8 | E4, E15, E17 |
+| a wasl consonant otherwise requires `wasl_elision` | 4.8 | E1, E12 |
 | two sakins meeting across a boundary, joined, require an iltiqa rule | 4.8 | E12, E14, E18 |
 | a qalqala letter with a silent vowel requires its degree | 4.8 | E4, E9, E10 |
 | the same, merged away, requires none | 4.8 | E12 |

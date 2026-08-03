@@ -303,8 +303,8 @@ guaranteed failure.
 | two identical, close or homorganic consonants, the first sakin and joined to the second | an idgham rule |
 | a word-initial letter the noon, meem or adjacent-consonant tables would geminate against the letter before it, started on and not joined to it | `fakk_idgham` |
 | a definite article lam before a letter | `lam_shamsiyyah` or `lam_qamariyyah` |
-| a consonant that sounds only when started on, word-initial and started on | `hamza_wasl_start` |
-| a consonant that sounds only when started on, not started on or not word-initial | `hamza_wasl_elision` |
+| a consonant that sounds only when started on, word-initial and started on | `wasl_start` |
+| a consonant that sounds only when started on, not started on or not word-initial | `wasl_elision` |
 | two sakins meeting across a word boundary and joined | `iltiqa_shortening` or `iltiqa_kasra` |
 | a qalqala letter whose vowel is absent, or one a stop silenced, and not merged away | a qalqala rule at the right degree |
 | an istilaa letter, or a raa in a colouring context | `tafkheem` or `tarqeeq` |

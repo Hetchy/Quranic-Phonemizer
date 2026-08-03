@@ -696,8 +696,8 @@ meem.
 
 **Colour and manner.** `tafkheem` · `tarqeeq` · `imala` · `tashil` · `ishmam`
 
-**Boundary.** `hamza_wasl_start` · `hamza_wasl_elision` · `iltiqa_kasra` ·
-`pausal_sukun` · `iwad` · `taa_marbuta_pausal` · `fakk_idgham`
+**Boundary.** `wasl_start` · `wasl_elision` · `iltiqa_kasra` ·
+`pausal_sukun` · `iwad` · `taa_marbuta_pausal` · `pausal_alif` · `fakk_idgham`
 
 Sakt is not here. It is a silence the reciter holds between two words, it
 produces no sound and reaches no unit, and `Word.sakt_after` already says
@@ -912,7 +912,7 @@ changes.
     names select tokens and reach no node and no edge, so the gate belongs
     beside the alphabet and nowhere in the producer.
 40. **The teaching labels are derived.** Section 4.5 publishes `labels` and
-    [07-rules](07-rules.md) section 4 defines four of them; nothing computes
+    [07-rules](07-rules.md) section 4 defines three of them; nothing computes
     any. Each is a predicate over an instance and the unit it names, so they
     are derived where the instance is assembled and mint no instance of their
     own.

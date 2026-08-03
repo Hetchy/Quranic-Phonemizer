@@ -150,13 +150,14 @@ is empty.
 
 | Rule | Source | Trigger | Crosses | On the sound | Recited |
 |---|---|---|---|---|---|
-| `hamza_wasl_start` | the word-initial unit whose consonant sounds only when started on | - | never | hosts the consonant and its vowel | rows 13 and 24 |
-| `hamza_wasl_elision` | the same unit, not started on or not word-initial | - | never | silences both parts | row 6 |
+| `wasl_start` | the word-initial unit whose consonant sounds only when started on | - | never | hosts the consonant and its vowel | rows 13 and 24 |
+| `wasl_elision` | the same unit, not started on or not word-initial | - | never | silences both parts | row 6 |
 | `iltiqa_kasra` | the unit the reading vowels | - | always | hosts a vowel on a part the canon leaves absent | row 14 |
 | `pausal_sukun` | the unit whose part the stop takes | - | never | silences the part | rows 1, 12, 19, 20 |
 | `iwad` | a tanween's noon whose fathatan lengthens at a stop | - | never | silences the consonant | rows 15, 21, 28 |
 | `taa_marbuta_pausal` | the taa marbuta unit | - | never | realizes the letter as a haa | row 22 |
 | `fakk_idgham` | the word-initial unit a cross-word merger would have geminated | the letter before it, unjoined because the reading starts here | always | names the unit's own plain sound | row 9 |
+| `pausal_alif` | the unit whose seven-alif vowel is short when joined | - | never | sets the length to short | writes the carrier only when stopped |
 
 `pausal_sukun` reaches the most catalogue rows of any rule, and the reason is
 that it is one event with several spellings: the haraka it takes may be a
@@ -230,7 +231,6 @@ happen.
 
 | Label | Holds when |
 |---|---|
-| `madd_iwad` | a madd on the unit before a noon that `iwad` silenced |
 | `madd_badal` | a madd on a unit whose letter is hamza, and whose length the canon states |
 | `silah` | a madd on a unit whose vowel is long joined and absent stopped |
 | `silah_kubra` | the same, where the rule is `madd_jaiz_munfasil` |
@@ -242,10 +242,10 @@ of a `madd_tabii`, so it names a configuration rather than setting one.
 `ibdal_hamza` is a rule and not on this list, because substituting a hamza for
 a vowel is an outcome. Madd badal is the length that follows it.
 
-`iwad` and `madd_iwad` are a rule and a label with nearly one name, and they
-are two things: the rule is what happened to the noon, the label is what to
-call the length beside it. The label is on the madd instance, the rule is on
-the noon, and neither claims the other's unit.
+`iwad`'s length is not a label. The engine folds it into the `iwad` occurrence
+itself -- its own `SetsLength` -- rather than minting a separate madd instance
+on the unit before the noon, so there is no madd instance to attach a label
+to. A consumer reads the length straight off `iwad`'s own edge.
 
 ---
 

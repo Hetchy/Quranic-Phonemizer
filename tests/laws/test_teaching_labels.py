@@ -43,6 +43,15 @@ def test_labels_mint_no_instance_of_their_own():
     assert any(instance.labels for instance in r.rules)
 
 
+def test_only_three_labels_are_ever_produced():
+    """`07-rules.md` section 4 defines three labels. `iwad`'s length is on
+    its own occurrence, so no madd instance is ever left to carry a fourth."""
+    r = Phonemizer().phonemize("2:255")
+    seen = {label for instance in r.rules for label in instance.labels}
+    assert seen <= {"madd_badal", "silah", "silah_kubra"}
+    assert "madd_iwad" not in seen
+
+
 def test_a_rule_outside_the_madd_family_never_takes_a_label():
     r = Phonemizer().phonemize("2:255")
     assert all(
