@@ -40,14 +40,20 @@ confirms and never gates, so the adapters are a later effort.
    `09-open-questions.md` deletes that entry in the same commit, and corrects
    whatever contract prose the answer contradicts. The register says so itself.
 
-## The lanes
+## The order
 
-Peak useful concurrency is two, and it is a property of the tree rather than a
-budget: `model/canon.py` is touched by 9 of the 21 units and `rules/madd.py` by
-3, so a third lane manufactures conflicts instead of throughput.
+One order, and every unit lands on `feat/public-projection` in turn.
 
-- **Lane 1** is the model spine, strictly serial: A1, A2, A3, A6, then A4, A5,
-  then A7, A8, A9.
-- **Lane 2** is inscription: B1 alongside A1 through A3, then B2 after A4.
-- **Phase C** runs C1 with C4, then C2 with C3.
-- **Phase D** is serial throughout.
+```
+A1  A2  A3  A6  B1  A4  B2  A5  A7  A8  A9        phases A and B
+C1  C4  C2  C3                                     phase C
+D1  D2  D3  D4  D5                                 phase D
+E1  E3                                             phase E
+```
+
+Concurrency was considered and is not worth having. `model/canon.py` is touched
+by 9 of the 21 units and `rules/madd.py` by 3, so the most that can ever run at
+once is two, and the one genuinely independent pairing (B1 beside A1 and A2)
+overlaps on `render/anchored.py`. Two lanes would buy wall-clock, which nothing
+here is short of, and pay for it in merge conflicts on the hottest files in the
+tree.
