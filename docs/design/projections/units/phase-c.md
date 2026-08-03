@@ -69,22 +69,31 @@ Item 25's two rules are mandatory and corpus-wide: dropping a word-initial
 shadda when a word is started on, and the role a word-final yaa, waw or alif
 maqsura takes at a pause. They are `06-two-texts` rows 9 and 29.
 
-**Both behaviours already work.** 2:56:3 reads `min` started on and `miŋ`
-joined, so the shadda is already dropped; `tests/waqf/test_final_glides.py`
-already asserts the glide's two roles. What is missing is only the name and the
-attribution: neither rule exists in `Rule`, so neither owns the change it makes,
-and both are the converse triggers `02-gate` section 4.8 has no row for. This is
-a naming job, not model surgery.
+**Both behaviours already worked.** 2:56:3 read `min` started on and `miŋ`
+joined, so the shadda was already dropped; `tests/waqf/test_final_glides.py`
+already asserted the glide's two roles. Only the started-on drop needed a new
+rule: `Rule.FAKK_IDGHAM`, minted in `rules/ibtidaa.py`, reads the same noon,
+meem and adjacent-consonant tables as the merger families it mirrors, backward
+from the word-initial letter to the one before it, and fires only where the
+reading starts instead of joining. The glide role flip at a pause needed none
+-- `rules/madd.py::PausalGlide` already mints `Rule.MADD_TABII` for it as a
+merger of the glide into the vowel before it, so that half was only a missing
+converse-law row and a missing recited-row cross-reference, not a missing
+rule. `01-contract` section 7, `06-two-texts` rows 9 and 29, and `07-rules`
+section 2.6 and 2.3 are corrected accordingly.
 
-**Item 24 landed** in `8ee2e84`. Item 25 did not.
+**Item 24 landed** in `8ee2e84`. **Item 25 landed** in the commit that closes
+this entry.
 
 **Files:** new rule modules under `rules/`, `canon/derive/lexeme.py`,
 `canon/build.py`, `model/canon.py` `Rule`, `riwayat/hafs/rules.py`,
 `tests/laws/test_rule_coverage.py`.
 
 **Depends on** A2, B1: the verdict must reach a spelling edge. **Moves**
-`regression`, `cross-script` and `l1`. Item 25's role flip is a real output
-change, so regenerate the head snapshots and record the refs.
+`regression`, `cross-script` and `l1` for item 24's `orthographic_silence`
+work. Item 25 attributes two behaviours that already produced the corpus's
+tokens, so it moves no gate: `tools/snapshot.py diff` over the whole corpus
+in word mode reports zero words read differently.
 
 ## C4 - Mergers keep the host's ghunnah; a spelled name is closed
 

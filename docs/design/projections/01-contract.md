@@ -692,7 +692,7 @@ meem.
 **Colour and manner.** `tafkheem` · `tarqeeq` · `imala` · `tashil` · `ishmam`
 
 **Boundary.** `hamza_wasl_start` · `hamza_wasl_elision` · `iltiqa_kasra` ·
-`pausal_sukun` · `iwad` · `taa_marbuta_pausal`
+`pausal_sukun` · `iwad` · `taa_marbuta_pausal` · `fakk_idgham`
 
 Sakt is not here. It is a silence the reciter holds between two words, it
 produces no sound and reaches no unit, and `Word.sakt_after` already says

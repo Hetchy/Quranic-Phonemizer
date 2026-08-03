@@ -103,7 +103,7 @@ caused it, and for two of them it is the boundary plan rather than a unit.
 
 | Rule | Source | Trigger | Crosses | On the sound | Recited |
 |---|---|---|---|---|---|
-| `madd_tabii` | the unit whose vowel is long | - | never | hosts the merged vowel | rows 16, 17, 26, 27 |
+| `madd_tabii` | the unit whose vowel is long | - | never | hosts the merged vowel | rows 16, 17, 26, 27, 29 |
 | `madd_wajib_muttasil` | the unit whose vowel is long | the hamza in the same word | never | names the length | as above |
 | `madd_jaiz_munfasil` | the unit whose vowel is long | the hamza that begins the next word | always | names the length | as above, and row 2 when the plan stops |
 | `madd_lazim` | the unit whose vowel is long | the unit whose permanent sukun or gemination follows | never | names the length | as above |
@@ -113,6 +113,11 @@ caused it, and for two of them it is the boundary plan rather than a unit.
 
 `madd_leen` names rather than lengthens, because a leen is not a long vowel:
 its waw or yaa is silent and the vowel before it stays short.
+
+Row 29's `madd_tabii` is a merger rather than a direct realization, so its
+source is the glide that disappears -- a stopped word-final waw or yaa after
+its matching short vowel -- and the host is the unit whose vowel it lengthens,
+the same convention every merger uses.
 
 ### 2.4 Release
 
@@ -151,6 +156,7 @@ is empty.
 | `pausal_sukun` | the unit whose part the stop takes | - | never | silences the part | rows 1, 12, 19, 20 |
 | `iwad` | a tanween's noon whose fathatan lengthens at a stop | - | never | silences the consonant | rows 15, 21, 28 |
 | `taa_marbuta_pausal` | the taa marbuta unit | - | never | realizes the letter as a haa | row 22 |
+| `fakk_idgham` | the word-initial unit a cross-word merger would have geminated | the letter before it, unjoined because the reading starts here | always | names the unit's own plain sound | row 9 |
 
 `pausal_sukun` reaches the most catalogue rows of any rule, and the reason is
 that it is one event with several spellings: the haraka it takes may be a
@@ -163,6 +169,13 @@ other three tanween at a stop lose their noon and write a sukun; a fathatan's
 noon becomes the length in front of it, so the unit before gains a long vowel
 where the others gain nothing. A rule named for what a stop takes may not be
 the rule for the one stop that takes nothing.
+
+`fakk_idgham` reads the same tables as the noon, meem and adjacent-consonant
+merge families, from the other side: a word-initial letter the merge would
+have geminated, checked against the letter before it regardless of whether
+this reading joins into it. It fires only where that check holds and the
+reading starts here instead, so it and the merger it mirrors never both fire
+on the same pair.
 
 `iltiqa_kasra` is the only rule that sounds a part the canon leaves absent, and
 the only one whose letter-level relation exists on one text and not the other.

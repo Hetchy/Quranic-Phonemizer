@@ -125,7 +125,7 @@ whose trigger is the next word goes as soon as the plan stops. Both are
 | 6 | the hamza wasl seat goes | not started on, or not word-initial | performance | joined | `hamza_wasl_elision` |
 | 7 | the merged-away consonant goes, with its sukun | joined, an idgham fires | performance | joined | the idgham rule |
 | 8 | the article lam goes, with its sukun | the article before a sun letter | performance | none | `lam_shamsiyyah` |
-| 9 | the word-initial shadda goes | started on a word whose first shadda is the previous word's idgham trace | performance | started | **-** |
+| 9 | the word-initial shadda goes | started on a word whose first shadda is the previous word's idgham trace | performance | started | `fakk_idgham` |
 | 10 | the carrier of a shortened long vowel goes | joined, two sakins meet | performance | joined | `iltiqa_shortening` |
 | 11 | the verse marker and the tatweel go | a structural glyph | orthographic | none | **-** |
 
@@ -228,7 +228,7 @@ phoneme-level relation to a rule diverge furthest, which
 | | Transformation | Trigger | Kind | Boundary | Owner |
 |---|---|---|---|---|---|
 | 28 | the seat of a fathatan stops being silent | a stopped word whose written seat follows a fathatan | performance | stopped | a madd rule |
-| 29 | a word-final yaa, waw or alif maqsura changes between consonant and vowel | a stopped word ending in one of them, voweled | performance | stopped | **-** |
+| 29 | a word-final yaa, waw or alif maqsura changes between consonant and vowel | a stopped word ending in one of them, voweled | performance | stopped | `madd_tabii` |
 
 Row 28 is why the catalogue cannot be a diff. Both arrays hold the same seat at
 the same place with the same character, and the fact that changed is that the
@@ -277,17 +277,16 @@ kind marked unchanged is not evidence that every case under it was examined.
 | kept against expectation | 2 |
 | **transformations** | **31** |
 | cases examined and unchanged | 9 |
-| transformations reachable through no rule instance | 10 |
+| transformations reachable through no rule instance | 8 |
 | orthographic | 8 |
 | performance | 22 |
 | advice | 1 |
 | boundary-dependent | 21 |
 
-The ten with no owner are rows 2, 5, 9, 11, 12, 25, 26, 29, 30 and 31. Two of
-them are missing rules rather than transformations no rule should own: dropping
-the word-initial shadda at ibtidaa (row 9) and the word-final role flip at a
-pause (row 29) are both mandatory and neither has a name in
-[01-contract](01-contract.md) section 7 or a converse trigger in
+The eight with no owner are rows 2, 5, 11, 12, 25, 26, 30 and 31. Dropping the
+word-initial shadda at ibtidaa (row 9) is `fakk_idgham`, and the word-final
+role flip at a pause (row 29) is `madd_tabii`'s merge of the glide into the
+vowel before it; both now have a converse trigger in
 [02-gate](02-gate.md) section 4.8. Row 12 has no owner for a different reason:
 a consonant the rasm leaves bare has a vowel that is absent joined and stopped
 alike, so no `pausal_sukun` instance exists to claim the sukun the recited text

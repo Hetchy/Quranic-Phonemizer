@@ -315,6 +315,7 @@ class Rule(StrEnum):
     TAA_MARBUTA_PAUSAL = "taa_marbuta_pausal"
     PAUSAL_ALIF = "pausal_alif"
     SILAH = "silah"
+    FAKK_IDGHAM = "fakk_idgham"
 
     ORTHOGRAPHIC_SILENCE = "orthographic_silence"
 
@@ -339,5 +340,6 @@ CLASSIFICATION_ONLY: frozenset[Rule] = frozenset(
         Rule.TASHIL,
         Rule.ISHMAM,
         Rule.SILAH,
+        Rule.FAKK_IDGHAM,
     }
 )
