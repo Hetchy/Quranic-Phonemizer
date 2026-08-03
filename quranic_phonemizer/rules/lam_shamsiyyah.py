@@ -106,14 +106,14 @@ class ArticleLam:
             (
                 Realize(
                     following.id,
-                    Aspect.ONSET,
+                    Aspect.CONSONANT,
                     Consonant(
                         following.letter,
                         geminate=True,
                         nasal=following.letter in (L.NOON, L.MEEM),
                     ),
                 ),
-                MergeInto(at, Aspect.ONSET, following.id, Aspect.ONSET),
+                MergeInto(at, Aspect.CONSONANT, following.id, Aspect.CONSONANT),
             ),
         )
 

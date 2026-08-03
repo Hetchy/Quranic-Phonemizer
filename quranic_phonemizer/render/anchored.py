@@ -32,8 +32,8 @@ from .recite import sounds_in_order
 #: Which `SlotFact`s count as writing each `Aspect`. `Decorates` and
 #: `Attests` don't name an aspect, so they satisfy either one.
 _FACT_OF_ASPECT = {
-    Aspect.ONSET: (SlotFact.LETTER, SlotFact.ONSET),
-    Aspect.NUCLEUS: (SlotFact.NUCLEUS,),
+    Aspect.CONSONANT: (SlotFact.LETTER, SlotFact.ONSET),
+    Aspect.VOWEL: (SlotFact.NUCLEUS,),
 }
 
 

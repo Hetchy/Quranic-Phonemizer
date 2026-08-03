@@ -47,7 +47,7 @@ class PausalGlide:
         slots = near.score.words[word].slots
         if not slots or slots[-1].id != at:
             return None
-        if plan.merged_away(at, Aspect.ONSET):
+        if plan.merged_away(at, Aspect.CONSONANT):
             # A glide the stop removed outright lengthens nothing.
             return None
         if slot.onset is Onset.GEMINATE:
@@ -72,10 +72,10 @@ class PausalGlide:
                 # Realizes the merged sound itself, so both halves share one occurrence.
                 Realize(
                     before.id,
-                    Aspect.NUCLEUS,
+                    Aspect.VOWEL,
                     Vowel(before.nucleus.quality, long=True),
                 ),
-                MergeInto(at, Aspect.ONSET, before.id, Aspect.NUCLEUS),
+                MergeInto(at, Aspect.CONSONANT, before.id, Aspect.VOWEL),
             ),
         )
 

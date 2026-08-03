@@ -50,7 +50,7 @@ class GhunnahMushaddadah:
             (
                 Realize(
                     at,
-                    Aspect.ONSET,
+                    Aspect.CONSONANT,
                     Consonant(slot.letter, geminate=True, nasal=True),
                 ),
             ),
@@ -85,7 +85,7 @@ class MeemSakinah:
                     (
                         Realize(
                             at,
-                            Aspect.ONSET,
+                            Aspect.CONSONANT,
                             Nasal(nasal_place(
                                 near.score.selection,
                                 KhilafId.IKHFAA_SHAFAWI_NASAL,
@@ -99,10 +99,10 @@ class MeemSakinah:
                     (
                         Realize(
                             following.id,
-                            Aspect.ONSET,
+                            Aspect.CONSONANT,
                             Consonant(L.MEEM, geminate=True, nasal=True),
                         ),
-                        MergeInto(at, Aspect.ONSET, following.id, Aspect.ONSET),
+                        MergeInto(at, Aspect.CONSONANT, following.id, Aspect.CONSONANT),
                     ),
                 )
         # Izhar shafawi produces no sound of its own; the occurrence exists so

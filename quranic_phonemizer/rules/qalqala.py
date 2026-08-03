@@ -37,13 +37,13 @@ class Qalqala:
         slot, word = near.slot(at), near.word_of(at)
         if slot is None or word is None:
             return None
-        if plan.merged_away(at, Aspect.ONSET) or plan.assimilated_from(at):
+        if plan.merged_away(at, Aspect.CONSONANT) or plan.assimilated_from(at):
             return None  # an assimilated closure is held, never released
 
         # The echo needs a real closure: either canonically silent, or
         # silenced by a BOUNDARY rule. A long final vowel is neither.
         canonically = slot.nucleus.kind is NucleusKind.SILENT
-        silenced = plan.merged_away(at, Aspect.NUCLEUS)
+        silenced = plan.merged_away(at, Aspect.VOWEL)
         if not (canonically or silenced):
             return None
 
@@ -58,7 +58,7 @@ class Qalqala:
 
         return Verdict(
             Occurrence(mint(degree, at), degree, Participants((at,))),
-            (Realize(at, Aspect.NUCLEUS, Release(ReleaseKind.QALQALA)),),
+            (Realize(at, Aspect.VOWEL, Release(ReleaseKind.QALQALA)),),
         )
 
 

@@ -90,7 +90,7 @@ def conflict_key(effect: Effect) -> tuple:
     """
     match effect:
         case Relength(slot=slot):
-            return (slot, Aspect.NUCLEUS)
+            return (slot, Aspect.VOWEL)
         case Insert(anchor=(slot, side)):
             return (slot, side)
         case _:

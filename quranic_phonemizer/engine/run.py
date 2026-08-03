@@ -171,7 +171,7 @@ def _materialise(
 def _plain_sound(slot: Slot, aspect: Aspect, colours, lengths=None) -> Sound:
     features = colours.get((slot.id, aspect), {})
     emphatic = bool(features.get(SoundFeature.EMPHATIC, False))
-    if aspect is Aspect.ONSET:
+    if aspect is Aspect.CONSONANT:
         return Consonant(
             slot.letter,
             geminate=slot.onset is Onset.GEMINATE,
@@ -271,8 +271,8 @@ def _apply_colours(effect: Realize, colours) -> Sound:
 
 
 def has_content(slot: Slot, aspect: Aspect) -> bool:
-    """`ONSET` always has canonical content; `NUCLEUS` has it unless the
+    """`CONSONANT` always has canonical content; `VOWEL` has it unless the
     nucleus is `Silent`. A canonically absent nucleus needs no Silent edge."""
-    if aspect is Aspect.ONSET:
+    if aspect is Aspect.CONSONANT:
         return True
     return slot.nucleus.kind is not NucleusKind.SILENT

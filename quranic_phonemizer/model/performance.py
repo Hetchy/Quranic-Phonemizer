@@ -24,8 +24,8 @@ class Aspect(StrEnum):
     """Exactly two members, because a `Slot` is definitionally an onset plus a
     nucleus. A third would mean the slot gained a third field."""
 
-    ONSET = "onset"
-    NUCLEUS = "nucleus"
+    CONSONANT = "consonant"
+    VOWEL = "vowel"
 
 
 class Side(StrEnum):

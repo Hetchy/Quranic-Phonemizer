@@ -94,7 +94,7 @@ def _nasal(
     """Iqlab and ikhfaa replace the noon's onset with a nasal."""
     return Verdict(
         Occurrence(mint(rule, at), rule, Participants((at, other))),
-        (Realize(at, Aspect.ONSET, Nasal(place)),),
+        (Realize(at, Aspect.CONSONANT, Nasal(place)),),
     )
 
 
@@ -109,9 +109,9 @@ def _merge(rule: Rule, at: SlotId, host, *, nasal: bool) -> Verdict:
         (
             Realize(
                 host.id,
-                Aspect.ONSET,
+                Aspect.CONSONANT,
                 Consonant(host.letter, geminate=True, nasal=nasal),
             ),
-            MergeInto(at, Aspect.ONSET, host.id, Aspect.ONSET),
+            MergeInto(at, Aspect.CONSONANT, host.id, Aspect.CONSONANT),
         ),
     )

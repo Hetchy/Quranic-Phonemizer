@@ -83,10 +83,10 @@ class Emphasis:
             return None
         if not self.weight.is_heavy(near, slot, plan, boundaries):
             return None
-        effects = [Recolour(at, Aspect.ONSET, SoundFeature.EMPHATIC, True)]
+        effects = [Recolour(at, Aspect.CONSONANT, SoundFeature.EMPHATIC, True)]
         if _quality(slot) is Quality.A and not _silenced(plan, slot):
             effects.append(
-                Recolour(at, Aspect.NUCLEUS, SoundFeature.EMPHATIC, True)
+                Recolour(at, Aspect.VOWEL, SoundFeature.EMPHATIC, True)
             )
         return Verdict(
             Occurrence(mint(Rule.TAFKHEEM, at), Rule.TAFKHEEM,
@@ -132,7 +132,7 @@ def _raa_is_heavy(near, slot, plan, always_heavy) -> bool:
 def _silenced(plan, slot) -> bool:
     """A nucleus a BOUNDARY rule removed. COLOUR runs after BOUNDARY, so a raa
     that lost its kasra at a stop is governed by the vowel before it."""
-    return plan.merged_away(slot.id, Aspect.NUCLEUS)
+    return plan.merged_away(slot.id, Aspect.VOWEL)
 
 
 def _is_divine_lam(near: Neighbourhood, slot, plan) -> bool:

@@ -148,7 +148,7 @@ def _verdict(rule: Rule, slot: SlotId, sounds):
     return Verdict(
         Occurrence(OccurrenceId(slot.verse, hash(rule) % 1000), rule,
                    Participants((slot,))),
-        (Realize(slot, Aspect.ONSET, sounds),),
+        (Realize(slot, Aspect.CONSONANT, sounds),),
     )
 
 

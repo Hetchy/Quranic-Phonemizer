@@ -18,7 +18,7 @@ from ..model.performance import (
 )
 from .alphabet import Alphabet
 
-_ASPECT_ORDER = {Aspect.ONSET: 0, Aspect.NUCLEUS: 1}
+_ASPECT_ORDER = {Aspect.CONSONANT: 0, Aspect.VOWEL: 1}
 
 
 def sounds_in_order(performance: Performance) -> tuple[SoundId, ...]:
