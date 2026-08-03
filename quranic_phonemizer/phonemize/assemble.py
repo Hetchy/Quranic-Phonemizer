@@ -121,8 +121,9 @@ def assemble(
     )
 
     occurrence_of = {o.id: i for i, o in enumerate(performance.occurrences)}
+    mergers = _merger_occurrences(performance)
     rules = [
-        _rule_instance(o, unit_of_slot) for o in performance.occurrences
+        _rule_instance(o, unit_of_slot, mergers) for o in performance.occurrences
     ]
     attributions = _attributions(performance, sound_of, unit_of_slot, occurrence_of)
     modifiers = _modifiers(performance, sound_of, occurrence_of)
@@ -213,9 +214,20 @@ def _sound(sound, alphabet: Alphabet, extra_phonemes: frozenset[str]) -> nd.Soun
     raise TypeError(f"{sound!r} is not a Sound")
 
 
-def _rule_instance(occurrence, unit_of_slot) -> nd.RuleInstance:
+def _merger_occurrences(performance: Performance) -> frozenset:
+    """Occurrence ids that genuinely merge two units into one sound."""
+    return frozenset(
+        a.by for a in performance.attributions
+        if isinstance(a, PerfMergedInto) and a.by is not None
+    )
+
+
+def _rule_instance(occurrence, unit_of_slot, mergers) -> nd.RuleInstance:
+    """`host` is published only for a merger -- 01-contract 4.5."""
     parts = occurrence.parts
-    host = unit_of_slot[parts.host] if parts.host is not None else None
+    host = None
+    if parts.host is not None and occurrence.id in mergers:
+        host = unit_of_slot[parts.host]
     return nd.RuleInstance(occurrence.rule, unit_of_slot[parts.source], host)
 
 

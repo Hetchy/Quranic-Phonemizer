@@ -22,6 +22,23 @@ def test_the_contracts_own_example_runs():
     )
 
 
+def test_rule_host_is_published_only_for_a_merger():
+    """01-contract 4.5: `host` is the second participant only where two
+    units share one sound. A trigger unit is not a host."""
+    r = Phonemizer().phonemize("2:255")
+    merger_by = {
+        a.by for a in r.attributions
+        if isinstance(a, ed.MergedInto) and a.by is not None
+    }
+    for i, rule in enumerate(r.rules):
+        if rule.host is not None:
+            assert i in merger_by
+    non_mergers = [i for i, rule in enumerate(r.rules)
+                   if rule.rule.value == "madd_tabii"]
+    assert non_mergers
+    assert all(r.rules[i].host is None for i in non_mergers)
+
+
 def test_identity_fields_are_seven_and_flat():
     r = Phonemizer().phonemize("1:1")
     assert r.ref == "1:1"
