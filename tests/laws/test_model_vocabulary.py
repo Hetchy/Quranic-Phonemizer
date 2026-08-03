@@ -13,7 +13,7 @@ import pytest
 from conftest import performance_for
 from quranic_phonemizer.model import address, canon, inscription, performance
 from quranic_phonemizer.model.canon import Rule
-from quranic_phonemizer.model.performance import Recolours, SetsLength
+from quranic_phonemizer.model.performance import Classifies, Recolours, SetsLength
 
 MODULES = (address, canon, inscription, performance)
 
@@ -108,6 +108,20 @@ def test_a_recolour_and_a_relength_each_retain_one_edge(packed, hafs) -> None:
         m.by for m in alif_performance.modifiers if isinstance(m, SetsLength)
     }
     assert all(o.id in lengthened for o in pausal)
+
+
+def test_madd_leen_classifies_the_consonant_it_names(packed, hafs) -> None:
+    """The waw or yaa `madd_leen` names has no vowel; the edge must land on
+    its consonant or the classification-only rule owns nothing at all."""
+    _, leen_performance = performance_for(packed, hafs, 20, 28)
+    leen = [
+        o for o in leen_performance.occurrences if o.rule is Rule.MADD_LEEN
+    ]
+    assert leen
+    classified = {
+        m.by for m in leen_performance.modifiers if isinstance(m, Classifies)
+    }
+    assert all(o.id in classified for o in leen)
 
 
 def test_deleted_names_stay_deleted() -> None:
