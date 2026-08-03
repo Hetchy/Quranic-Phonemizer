@@ -18,5 +18,7 @@ CLAUDE.md
 dist/
 build/
 *.egg
+.coverage
 
 docs/mualem_conversion.md
+.claude/worktrees/

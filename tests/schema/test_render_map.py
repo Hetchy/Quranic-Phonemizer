@@ -145,7 +145,7 @@ def test_length_follows_the_emphatic_colouring(alphabet):
 
 # -- coverage, checked at load --------------------------------------------
 def _text() -> str:
-    root = Path(__file__).resolve().parent.parent
+    root = Path(__file__).resolve().parents[2]
     return (
         root / "quranic_phonemizer" / "data" / "render" / "ipa.yaml"
     ).read_text(encoding="utf-8")
