@@ -1,4 +1,4 @@
-"""`phonemize/respell.py`: the block law of 02-gate section 4.6."""
+"""Respelling blocks partition both alignments."""
 from __future__ import annotations
 
 import pytest
@@ -47,9 +47,8 @@ def test_blocks_partition_both_alignments(hafs, pen, alphabet, surah, ayah):
 
 
 def test_the_iwad_carrier_joins_the_block_its_sound_is_in(hafs, pen, alphabet):
-    """01-contract 6.3's sound-ownership closure: the silenced fathatan
-    reaches the recited madd through `from_glyphs` alone, but the alif that
-    owns the lengthened sound joins only because both sides present it."""
+    """The alif that owns the lengthened sound joins a block only when both
+    source and recited present it."""
     a = _assembled(hafs, pen, alphabet, "78:6")
     source = alignment(a, text="source", grouping="glyph")
     recited = alignment(a, text="recited", grouping="glyph")

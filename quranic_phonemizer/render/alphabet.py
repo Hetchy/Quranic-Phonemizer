@@ -19,8 +19,8 @@ SCHEMA_VERSION = 2
 #: beside the tokens rather than inside the resolver's control flow.
 LENGTH = ":"
 
-#: 01-contract section 3.2's four names. Each gates one distinction that a
-#: `Sound` always carries; the alphabet spends a token on it only when named.
+#: Four names, each gating one distinction that a `Sound` always carries;
+#: the alphabet spends a token on it only when named.
 EXTRA_PHONEMES = frozenset(
     {"tashil", "emphatic_fatha", "emphatic_ikhfaa", "qalqala_degree"}
 )
@@ -182,8 +182,7 @@ def _tokens(enum: type, raw: Any, section: str, path: Path) -> dict:
 def _covered(enum: type, raw: Any, section: str, path: Path) -> tuple:
     """Every member has an entry, and every entry names a member.
 
-    A member with no entry is the gap that used to be a missing row; an entry
-    naming nothing is a letter the model has since dropped.
+    A missing member marks a gap; an unknown entry marks a dropped letter.
     """
     if not isinstance(raw, dict):
         raise NotationError(f"{path}: {section} must be a mapping, got {raw!r}")

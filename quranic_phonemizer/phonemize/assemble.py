@@ -1,4 +1,4 @@
-"""`Session` -> the node and edge arrays 01-contract sections 4 and 5 name.
+"""`Session` -> the public node and edge arrays.
 
 One index space per array; every edge below names an index into it, never a
 model-layer id. `pairing.py` and `respell.py` are the readers.
@@ -38,8 +38,7 @@ from .ordering import sounds_in_order
 from .recited import write_recited
 from .session import Session
 
-#: `Supplies.fact` per 01-contract section 5. `SlotFact.SAKT` has no member:
-#: nothing ever evidences it (01-contract item 22).
+#: SlotFact.SAKT is not mapped; nothing evidences it.
 _FACT_OF = {
     SlotFact.LETTER: ed.Fact.LETTER,
     SlotFact.ONSET: ed.Fact.CONSONANT,
@@ -76,11 +75,10 @@ class Assembled:
     orthographic_silence: dict[int, int]
     """Source glyph index -> the `rules` index of the instance it shows."""
     open_vowel_units: frozenset[int]
-    """Units whose vowel performs long in this reading -- 01-contract 6.4
-    clause 1's "long in this reading", read off the `Performance`."""
+    """Units whose vowel performs long, read off the `Performance`."""
     decoration_target: dict[int, int]
-    """A `Decorates`-only glyph's unit, for clause 1/3 purposes: its own
-    named unit, or the last unit a preceding glyph presented a vowel for
+    """A `Decorates`-only glyph's unit: its own named unit, or the last unit
+    a preceding glyph presented a vowel for
     when the mark's own attachment (`canon/build.py`'s bookkeeping) names a
     unit -- such as a tanween's noon -- that never itself carries a vowel."""
 
@@ -224,7 +222,7 @@ def _merger_occurrences(performance: Performance) -> frozenset:
 
 
 def _rule_instance(occurrence, unit_of_slot, mergers) -> nd.RuleInstance:
-    """`host` is published only for a merger -- 01-contract 4.5."""
+    """`host` is published only for a merger."""
     parts = occurrence.parts
     host = None
     if parts.host is not None and occurrence.id in mergers:
@@ -266,7 +264,7 @@ def _modifiers(performance: Performance, sound_of, occurrence_of):
 
 
 def _open_vowel_units(attributions, sounds) -> frozenset[int]:
-    """01-contract 6.4 clause 1: a unit whose vowel is long in this reading.
+    """A unit whose vowel is long in this reading.
 
     Read off the performed sound, never a canonical fact: the iwad and the
     seven alifs lengthen with no `Evidences(VOWEL_LENGTH)` edge at all.

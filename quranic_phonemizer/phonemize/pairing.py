@@ -1,4 +1,4 @@
-"""`alignment(text, grouping)` -- 01-contract sections 4.3 and 6.
+"""`alignment(text, grouping)` aligns glyphs and sounds with optional grouping.
 
 Two texts and two groupings meet in one function; the `_cells_*` functions
 are the only place grouping matters, and `_reach_*` the only place text does.
@@ -21,9 +21,9 @@ _VOWEL_KINDS = frozenset({
 })
 
 _VOWEL_FACT = {ed.Fact.VOWEL_QUALITY, ed.Fact.VOWEL_LENGTH, ed.Fact.VOWEL_ABSENCE}
-#: Lower sorts first: 01-contract 6.1's length-before-quality tiebreak. A
-#: `Decorates` reach (no fact) ranks with length: the iwad and the seven
-#: alifs carry a vowel's length with no canonical length fact to name it.
+#: Lower sorts first (length before quality). A `Decorates` reach (no fact)
+#: ranks with length: the iwad and the seven alifs carry a vowel's length
+#: with no canonical length fact to name it.
 _OWNER_RANK = {ed.Fact.VOWEL_QUALITY: 1}
 
 Reach = tuple[tuple[int, ed.Part, ed.Fact | None], ...]
@@ -65,8 +65,8 @@ def alignment(
 
 
 def _non_structural_source(assembled: Assembled) -> list[int]:
-    """01-contract section 8: a glyph takes no pairing only where it carries
-    the `Structural` edge. `word` is not this law, even where it agrees."""
+    """A glyph takes no pairing only where it carries the `Structural` edge.
+    `word` is not this law, even where it agrees."""
     structural = {s.glyph for s in assembled.spellings if isinstance(s, ed.Structural)}
     return [i for i in range(len(assembled.glyphs)) if i not in structural]
 
@@ -139,8 +139,7 @@ def _carrier_units(reach) -> frozenset[int]:
 
 
 def _cells_source(assembled: Assembled, included, reach) -> list[tuple[int, ...]]:
-    """Clauses 1 to 3 need `open_vowel_units` and `_carrier_units` both;
-    clause 4 is the `else`, keyed on the glyph's own primary unit."""
+    """Group glyphs by unit and vowel/consonant; chain decorations together."""
     carriers = _carrier_units(reach)
     groups: list[list[int]] = []
     vowel_cell: dict[int, int] = {}
@@ -220,7 +219,7 @@ def _presenting_glyphs(reach) -> dict[tuple[int, ed.Part], list]:
 
 
 def _owning_glyph(part: ed.Part, candidates: list) -> int | None:
-    """01-contract 6.1: length before quality, then reading order."""
+    """Pick owning glyph: length before quality, then reading order."""
     if not candidates:
         return None
     if part is ed.Part.VOWEL:

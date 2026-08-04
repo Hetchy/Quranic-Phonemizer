@@ -1,7 +1,4 @@
-"""`phonemize/pairing.py`: 02-gate sections 4.5 and 4.6 over real sites.
-
-`tests/laws/test_anchored_projection.py` is the seed this suite grew from.
-"""
+"""Tests for phonemize/pairing.py over real sites."""
 from __future__ import annotations
 
 import pytest
@@ -13,7 +10,7 @@ from quranic_phonemizer.phonemize.assemble import assemble
 from quranic_phonemizer.phonemize.pairing import alignment
 from quranic_phonemizer.phonemize.session import phonemize_request
 
-#: Chosen for the fact-vocabulary and rule families 02-gate 4.5/4.6 name:
+#: Chosen for the fact-vocabulary and rule families they exercise:
 #: mergers, tanween's three outcomes, tafkheem, madd, qalqala, waqf, wasl,
 #: muqattaat and a broad sweep of the noon/meem families.
 SAMPLE = (
@@ -39,8 +36,8 @@ def _assembled(hafs, pen, alphabet, ref, **boundary):
 
 
 def _structural(a, text: str, glyphs) -> set[int]:
-    """02-gate 4.6: the `Structural` edge decides this, never `kind` -- and
-    not `word` either. `rendered` carries no edges, so `word` is all it has."""
+    """The `Structural` edge decides this, never `kind` and not `word`
+    either. `rendered` carries no edges, so `word` is all it has."""
     if text == "source":
         return {s.glyph for s in a.spellings if isinstance(s, ed.Structural)}
     return {i for i, g in enumerate(glyphs) if g.word is None}
@@ -62,8 +59,8 @@ def test_every_glyph_is_in_exactly_one_pairing_or_none(hafs, pen, alphabet, sura
 
 @pytest.mark.parametrize(("surah", "ayah"), SAMPLE)
 def test_every_source_glyph_carries_a_spelling_edge(hafs, pen, alphabet, surah, ayah):
-    """02-gate 4.2: a glyph with no edge at all is unreachable from any
-    pairing, whatever `word` happens to say."""
+    """A glyph with no edge at all is unreachable from any pairing, whatever
+    `word` happens to say."""
     a = _assembled(hafs, pen, alphabet, f"{surah}:{ayah}")
     named = {s.glyph for s in a.spellings}
     missing = [i for i in range(len(a.glyphs)) if i not in named]
@@ -84,7 +81,7 @@ def test_every_sound_is_owned_exactly_once(hafs, pen, alphabet, surah, ayah):
                     assert s not in pairing.sounds
             assert owned <= set(range(len(a.sounds)))
             if text == "recited":
-                # 02-gate 4.5: under text="recited" no sound takes a gap.
+                # Under text="recited" no sound takes a gap.
                 assert owned == set(range(len(a.sounds))), (surah, ayah)
 
 
@@ -108,8 +105,7 @@ def test_structural_glyphs_take_no_pairing(hafs, pen, alphabet, surah, ayah):
 
 @pytest.mark.parametrize(("surah", "ayah"), SAMPLE)
 def test_a_cell_holds_two_letter_glyphs_only_for_a_tanween_noon(hafs, pen, alphabet, surah, ayah):
-    """02-gate 4.6, reworded: decisions.md section 3's exception. A
-    muqattaat glyph names several units' letters through one glyph and is
+    """A muqattaat glyph names several units' letters through one glyph and is
     not this case at all -- no clause can split a single glyph."""
     from quranic_phonemizer.phonemize import edges as ed
     from quranic_phonemizer.phonemize.nodes import UnitOrigin
@@ -130,8 +126,8 @@ def test_a_cell_holds_two_letter_glyphs_only_for_a_tanween_noon(hafs, pen, alpha
 
 
 def test_length_owns_before_quality(hafs, pen, alphabet):
-    """01-contract 6.1's tiebreak: `ٱلرَّحْمَـٰنِ`'s dagger vowel is owned by
-    the seat that carries its length, not the fatha that carries its
+    """`ٱلرَّحْمَـٰنِ`'s dagger vowel is owned by the seat that carries its
+    length, not the fatha that carries its
     quality -- both present the same sound, but only one may own it."""
     a = _assembled(hafs, pen, alphabet, "1:1")
     source = alignment(a, text="source", grouping="glyph")
@@ -147,7 +143,7 @@ def test_length_owns_before_quality(hafs, pen, alphabet):
 
 
 def test_the_divine_names_carrier_joins_its_owning_cell(hafs, pen, alphabet):
-    # ٱللَّهِ, 2:27:4 -- E13's shape: one source cell, closed against it.
+    # ٱللَّهِ at 2:27:4 -- one source cell, closed against it.
     a = _assembled(hafs, pen, alphabet, "2:27:2-2:27:8")
     source = alignment(a, text="source", grouping="cell")
     recited = alignment(a, text="recited", grouping="cell")
@@ -172,8 +168,7 @@ def test_the_divine_names_carrier_joins_its_owning_cell(hafs, pen, alphabet):
 
 
 def test_a_soundless_insertion_takes_an_empty_source_block(hafs, pen, alphabet):
-    # مِّن رَّبِّهِمْ style: a stop's inserted sukun owns no sound at all --
-    # 06-two-texts row 12, settling open question 2 under grouping="glyph".
+    # مِّن رَّبِّهِمْ style: a stop's inserted sukun owns no sound at all.
     from quranic_phonemizer.phonemize.respell import respelling
 
     a = _assembled(hafs, pen, alphabet, "2:5:3-2:5:4")

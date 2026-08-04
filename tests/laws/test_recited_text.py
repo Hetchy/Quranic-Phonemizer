@@ -1,4 +1,4 @@
-"""D2's writer: 06-two-texts's catalogue, over real sites."""
+"""The recited-text writer, over real sites."""
 from __future__ import annotations
 
 import unicodedata
@@ -38,7 +38,6 @@ def test_row_30_a_stop_sign_is_kept_and_takes_no_pairing(hafs, pen):
 
 
 def test_text_serializes_exactly_what_rendered_holds(hafs, pen):
-    # Settles open question 9.
     glyphs = _write(hafs, pen, "1:1")
     assert text(glyphs) == "".join(g.char for g in glyphs)
 

@@ -1,8 +1,5 @@
-"""Item 40's four teaching labels -- `07-rules.md` section 4.
-
-Each predicate is checked against a specific instance of Ayat al-Kursi so
-reverting `phonemize/labels.py` fails these rather than emptying a set.
-"""
+"""Each predicate is checked against a specific instance of Ayat al-Kursi so
+reverting `phonemize/labels.py` fails these rather than emptying a set."""
 from __future__ import annotations
 
 from quranic_phonemizer import Phonemizer
@@ -44,8 +41,8 @@ def test_labels_mint_no_instance_of_their_own():
 
 
 def test_only_three_labels_are_ever_produced():
-    """`07-rules.md` section 4 defines three labels. `iwad`'s length is on
-    its own occurrence, so no madd instance is ever left to carry a fourth."""
+    """Only three labels exist. `iwad`'s length is on its own occurrence, so
+    no madd instance is ever left to carry a fourth."""
     r = Phonemizer().phonemize("2:255")
     seen = {label for instance in r.rules for label in instance.labels}
     assert seen <= {"madd_badal", "silah", "silah_kubra"}

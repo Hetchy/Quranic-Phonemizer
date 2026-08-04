@@ -1,6 +1,4 @@
-"""02-gate 4.1's byte-stability, and the schema-version guard section 5 asks
-for: a version bump must be a clear rejection, never a misread.
-"""
+"""A version bump must be a clear rejection, never a misread."""
 from __future__ import annotations
 
 import json

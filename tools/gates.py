@@ -14,8 +14,7 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 
 #: A floor may only rise, a ceiling may only fall. Moving one is a claim about
-#: which refs changed, so the commit that moves it says which and why. Every
-#: row behind a floor short of total is in docs/conformance/gate-residues.md.
+#: which refs changed, so the commit that moves it says which and why.
 FLOORS = {
     ("cross", "word"): "99.997",
     ("cross", "verse"): "100.0",

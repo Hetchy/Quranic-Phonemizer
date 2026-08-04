@@ -1,7 +1,7 @@
 """The output alphabet: total by coverage, and closed against wrong tuples.
 
-Totality used to be the row count. It is now these two claims: every tuple
-the model can produce resolves, and every tuple it cannot raises.
+Totality means every tuple the model can produce resolves, and every tuple it
+cannot raises.
 """
 from __future__ import annotations
 
@@ -68,7 +68,7 @@ def _legal(sound) -> bool:
 
 # -- totality and its complement ------------------------------------------
 def test_every_producible_tuple_resolves(alphabet):
-    """The claim the row count used to make."""
+    """Every producible tuple resolves to a token."""
     unresolved = []
     for sound in [*_consonants(), *_vowels(), *[Release(d) for d in Degree]]:
         if not _legal(sound):

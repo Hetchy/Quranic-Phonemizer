@@ -1,7 +1,6 @@
-"""02-gate section 5: canonical JSON, and the shape it must reject.
+"""Canonical JSON serialization and deserialization.
 
-Every tagged union carries `kind`, the producing type's name lowercased.
-Holds no phoneme string: a token is an opaque string here, never composed.
+Tagged unions use `kind` field; tokens are opaque strings, never composed.
 """
 from __future__ import annotations
 

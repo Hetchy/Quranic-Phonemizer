@@ -1,4 +1,4 @@
-"""Item 40: the teaching labels of `07-rules.md` section 4.
+"""The teaching labels.
 
 Each is a predicate over an already-assembled `RuleInstance` and the unit it
 names; none mints an instance of its own.

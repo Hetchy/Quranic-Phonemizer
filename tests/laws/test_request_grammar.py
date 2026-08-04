@@ -1,4 +1,4 @@
-"""The ref grammar and the two things a ref may not do (01-contract sec 1.1)."""
+"""Ref grammar: endpoints must have the same depth, and refs must stay in the corpus."""
 from __future__ import annotations
 
 import pytest

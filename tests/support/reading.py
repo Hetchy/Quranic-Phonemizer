@@ -185,7 +185,7 @@ class Reading:
         return instances
 
     def source_of(self, rule: str) -> str:
-        """The character supplying `rule`'s source unit -- 07-rules section 6."""
+        """The character supplying `rule`'s source unit."""
         return self._char_of_unit(self._instances_of(rule)[0].source)
 
     def host_of(self, rule: str) -> str | None:

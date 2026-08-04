@@ -10,9 +10,8 @@ import pytest
 from conftest import score_for, sources  # noqa: F401  (fixture)
 from quranic_phonemizer.model.address import Script, VerseRef
 
-#: Every `أَنَا` / `وَأَنَا` / `فَأَنَا` site a vocalised-skeleton lexicon used to
-#: mark pausal, where Uthmani in fact draws no `۠`. A skeleton cannot see
-#: the mark; the word location can.
+#: Every `أَنَا` / `وَأَنَا` / `فَأَنَا` site where Uthmani draws no `۠`. A
+#: vocalised skeleton cannot tell these from the seven; the location can.
 NOT_ONE_OF_THE_SEVEN = [
     (2, 160, 9), (15, 49, 4), (15, 89, 3), (20, 13, 1), (20, 14, 2),
     (27, 9, 3), (28, 30, 16),

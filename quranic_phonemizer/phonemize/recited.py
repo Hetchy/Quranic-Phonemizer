@@ -35,11 +35,11 @@ _SHORT_ROLE = {"a": "fatha", "u": "damma", "i": "kasra"}
 
 #: A tanween noon these rules realize is left bare -- no sukun mark -- because
 #: bareness is what signals the assimilation; every other realization keeps
-#: the mark. 06-two-texts.md section 4.1a.
+#: the mark.
 _BARE_TANWEEN_NOON = frozenset({Rule.IKHFAA_HAQIQI, Rule.IQLAB})
 
-#: 01-contract section 1.1: a hamza wasl started on is the hamza its vowel
-#: calls for, never the bare letter or the seat the rasm wrote.
+#: A hamza wasl started on is the hamza its vowel calls for, never the bare
+#: letter or the seat the rasm wrote.
 _WASL_HAMZA_SHAPE = {"a": "أ", "u": "أ", "i": "إ"}
 
 #: `SlotFact`s a source glyph may supply for the consonant part, as opposed
@@ -73,7 +73,7 @@ def write_recited(
     score: Score, inscription: Inscription, performance: Performance, pen: Pen
 ) -> tuple[RenderGlyph, ...]:
     """One word's worth of glyphs at a time, a space between words, and any
-    stop sign the source carries after that word -- 06-two-texts row 31, 30."""
+    stop sign the source carries after that word."""
     attrs = _by_slot_aspect(performance)
     releases = _releases_by_slot(performance)
     sounds = dict(performance.sounds)
@@ -108,9 +108,8 @@ def _write_word(word: ScoreWord, attrs, releases, sounds, occurrences, started,
 
 def _write_unit(slot, attrs, releases, sounds, occurrences, started,
                 fact_glyphs, pen: Pen):
-    """A unit whose consonant is gone -- merged or silenced -- writes
-    nothing at all: 06-two-texts rows 6 and 7, "goes, with its sukun". Each
-    scalar the unit spells is its own glyph -- 01-contract 4.3."""
+    """A unit whose consonant is gone -- merged or silenced -- writes nothing
+    at all. Each scalar the unit spells is its own glyph."""
     consonant = attrs.get((slot.id, Aspect.CONSONANT))
     if isinstance(consonant, (Silent, MergedInto)):
         return
@@ -187,8 +186,8 @@ def _write_letter(sound: Consonant, started: bool, vowel_sound, pen: Pen) -> str
 
 def _write_vowel(sound: Vowel, sound_id, slot_id, fact_glyphs, pen: Pen):
     """Length is already resolved on the sound, so no boundary check here.
-    A long vowel is up to three glyphs: the haraka, the carrier, the madd
-    sign -- 01-contract 4.3's `haraka`/`vowel_letter`/`madd_sign`."""
+    A long vowel is up to three glyphs: the haraka, the vowel letter, and the
+    madd sign."""
     role = _SHORT_ROLE.get(sound.quality.value)
     if role is None:
         raise WriteError(f"no haraka writes quality {sound.quality}")

@@ -1,4 +1,4 @@
-"""D1's request path: 02-gate sec 2's fixture matrix, over the real corpus."""
+"""Request window assembly and multi-verse phonemization."""
 from __future__ import annotations
 
 from quranic_phonemizer.model.address import Junction, Location

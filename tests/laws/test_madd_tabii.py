@@ -1,8 +1,4 @@
-"""`madd_tabii` for its ordinary cases: an instance, never a new sound.
-
-`MaddClass` used to emit nothing outside its four special outcomes; these
-sites cover the three converse rows that gap left unmet.
-"""
+"""`madd_tabii` applies to ordinary cases: an instance, never a new sound."""
 from __future__ import annotations
 
 from conftest import score_for

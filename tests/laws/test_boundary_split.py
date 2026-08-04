@@ -14,7 +14,7 @@ from quranic_phonemizer.riwayat.hafs import HAFS
 
 
 def _stopped_on(score, word_number: int) -> BoundaryPlan:
-    """`word_number` counts from 1, matching `tests/README.md`."""
+    """`word_number` counts from one, as a test case names a word."""
     return BoundaryPlan(
         tuple(
             Junction.STOP if word == word_number - 1 else Junction.JOIN

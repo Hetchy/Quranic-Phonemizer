@@ -1,7 +1,7 @@
-"""`Phonemizer`/`PhonemizeResult` -- 01-contract sections 1 and 3 through 5.
+"""`Phonemizer`/`PhonemizeResult` API tests.
 
-The contract's own worked example anchors the first case; the module
-functions and the laws of section 8 are checked over a small sample.
+The contract's worked example anchors the first case; module
+functions are checked over a small sample.
 """
 from __future__ import annotations
 
@@ -25,8 +25,8 @@ def test_the_contracts_own_example_runs():
 
 
 def test_rule_host_is_published_only_for_a_merger():
-    """01-contract 4.5: `host` is the second participant only where two
-    units share one sound. A trigger unit is not a host."""
+    """`host` is the second participant only where two units share one
+    sound. A trigger unit is not a host."""
     r = Phonemizer().phonemize("2:255")
     merger_by = {
         a.by for a in r.attributions
@@ -42,8 +42,8 @@ def test_rule_host_is_published_only_for_a_merger():
 
 
 def test_equality_and_repr_ignore_assembled_bookkeeping():
-    """`_assembled` is not one of 01-contract section 3's sixteen fields;
-    two documents over the same ref must compare and print alike."""
+    """`_assembled` is internal bookkeeping, not part of the public fields;
+    two instances over the same ref must compare and print alike."""
     a = Phonemizer().phonemize("1:1")
     b = Phonemizer().phonemize("1:1")
     assert a == b
@@ -85,8 +85,8 @@ def test_phonemes_by_rejects_an_unknown_grouping():
 
 
 def test_source_text_concatenates_to_the_glyph_array():
-    """02-gate 4.2: concatenating `char` in `source_index` order reproduces
-    the source text."""
+    """Concatenating `char` in `source_index` order reproduces the source
+    text."""
     r = Phonemizer().phonemize("1:1")
     assert r.text("source") == "".join(g.char for g in r.glyphs)
 

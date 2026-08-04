@@ -1,4 +1,4 @@
-"""`PhonemizeResult` -- 01-contract sections 1 and 3 through 5 in full.
+"""`PhonemizeResult`: the public result object.
 
 `phonemes()` and `text()` read straight off `Assembled`'s node arrays;
 `alignment()`/`respelling()` delegate to `pairing.py`/`respell.py`.
@@ -39,7 +39,7 @@ def _by_word(
 
 
 def _sound_words(assembled: Assembled) -> dict[int, int]:
-    """A sound's word is its primary origin's -- 01-contract section 4.4."""
+    """Map each sound to its primary origin's word."""
     return {
         a.sound: assembled.units[a.unit].word
         for a in assembled.attributions
@@ -57,8 +57,7 @@ def text(assembled: Assembled, which: str = "source") -> str:
 @dataclass(frozen=True)
 class PhonemizeResult:
     """`slots=True` is off: `_assembled` below is set post-construction via
-    `object.__setattr__`, which a slotted frozen dataclass has no room for
-    unless the field list grows past 01-contract section 3's sixteen."""
+    `object.__setattr__`, which a slotted frozen dataclass has no room for."""
 
     ref: str
     riwayah: str

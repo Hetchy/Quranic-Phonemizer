@@ -1,5 +1,5 @@
-"""02-gate section 5's fourteen negative cases, over a real canonical
-document. Every mutation is minimal; a schema that accepts it is too loose.
+"""Fourteen negative cases over a real canonical document. Every mutation is
+minimal; a schema that accepts any is too loose.
 """
 from __future__ import annotations
 

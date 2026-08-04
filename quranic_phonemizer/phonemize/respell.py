@@ -1,7 +1,6 @@
-"""`r.respelling(grouping)` -- 01-contract section 6.3.
+"""Blocks: union-find closures of source/recited pairings.
 
-A block is the union-find closure of source and recited pairings under
-`from_glyphs` and under the sounds each side owns.
+A block is the closure under `from_glyphs` and under the sounds each side owns.
 """
 from __future__ import annotations
 
@@ -69,8 +68,8 @@ def _blocks(source, recited, parent: list[int]) -> tuple[Block, ...]:
     for nodes in members.values():
         src = tuple(sorted(n for n in nodes if n < offset))
         rec = tuple(sorted(n - offset for n in nodes if n >= offset))
-        # A block with no source pairing sorts after every real one, in its
-        # own recited order -- 01-contract 6.3's one case with no source.
+        # A block with no source pairing sorts after every real one, in
+        # its own recited order.
         key = min(src) if src else offset + min(rec)
         keyed.append((key, Block(src, rec)))
     keyed.sort(key=lambda item: item[0])

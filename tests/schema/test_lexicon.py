@@ -1,7 +1,6 @@
 """The lexicon: its sections are data, and its budgets are this gate.
 
-The ceiling used to be raised from `load_lexicon`, so a breach was a package
-that would not import. Here it is a red test with the numbers in the message.
+A breach in a section budget is a red test with numbers in the message.
 """
 from __future__ import annotations
 
@@ -43,8 +42,7 @@ def _load(tmp_path: Path, text: str):
 
 # -- the budget -----------------------------------------------------------
 def test_no_section_is_over_its_budget(lexicon):
-    """A rise past a ceiling means a rule is missing, not that the corpus is
-    irregular. Reviewable here; it used to break the import instead."""
+    """A rise past a ceiling means a rule is missing, not a corpus irregularity."""
     over = {
         name: (len(section.entries), section.budget)
         for name, section in lexicon.sections.items()

@@ -1,7 +1,6 @@
-"""What `schema.py`'s canonical shape must reject -- 02-gate section 5.
+"""Schema validation: check function per tagged union type.
 
-One check function per tagged union, plus the document- and pairing-array
-passes; raises `SchemaError` and never repairs a document.
+Raises `SchemaError` on constraint violation; never repairs a document.
 """
 from __future__ import annotations
 

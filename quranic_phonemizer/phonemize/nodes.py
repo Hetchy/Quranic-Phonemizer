@@ -1,4 +1,4 @@
-"""The six public node arrays of 01-contract section 4.
+"""The six public node arrays.
 
 Each node is a plain record over an index space `assemble.py` assigns.
 Model enums are reused directly where the value space already matches.
@@ -51,7 +51,7 @@ class ConsonantFact:
 
 @dataclass(frozen=True, slots=True)
 class Unit:
-    """One letter with the vowel state that follows it -- 01-contract 4.2."""
+    """A letter with its vowel state, origin, and consonant properties."""
 
     word: int
     letter: CanonLetter
@@ -91,8 +91,7 @@ class SoundKind(StrEnum):
 
 @dataclass(frozen=True, slots=True)
 class Sound:
-    """`kind` decides which of the fields below are meaningful -- 01-contract
-    4.4."""
+    """A phoneme; `kind` determines which other fields are meaningful."""
 
     token: str
     kind: SoundKind
@@ -116,9 +115,9 @@ class RuleInstance:
 
 
 class GlyphKind(StrEnum):
-    """01-contract 4.3's own `kind` vocabulary -- distinct from the model's
-    `GraphemeClass`, which folds a sukun into `haraka`, has no
-    `vowel_letter`, and calls a tajweed mark `annotation`."""
+    """This `kind` vocabulary, distinct from the model's `GraphemeClass`,
+    which folds a sukun into `haraka`, has no `vowel_letter`, and calls a
+    tajweed mark `annotation`."""
 
     BASE = "base"
     HARAKA = "haraka"
@@ -162,8 +161,8 @@ def glyph_kind_of(cls: GraphemeClass, *, vowel_absent: bool = False) -> GlyphKin
 
 @dataclass(frozen=True, slots=True)
 class Glyph:
-    """One source scalar -- 01-contract 4.3. `word`/`word_index` are absent
-    for a glyph carrying the `Structural` spelling edge."""
+    """One source scalar. `word`/`word_index` are absent for a glyph
+    carrying the `Structural` spelling edge."""
 
     word: int | None
     char: str

@@ -90,7 +90,7 @@ def _first_letter(inventory, text: str) -> CanonLetter | None:
 
 
 def test_a_hamza_written_on_a_seat_becomes_the_hamza(tmp_path):
-    """The behaviour `SEATABLE` used to carry, now read off the script."""
+    """A hamza written on a seat is the hamza, per the script's own row."""
     inventory = _load(tmp_path, _inventory_text(Script.INDOPAK), Script.INDOPAK)
     assert _first_letter(inventory, SEATED_HAMZA) is CanonLetter.HAMZA
 

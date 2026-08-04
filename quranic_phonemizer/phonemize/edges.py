@@ -1,4 +1,4 @@
-"""The nine public edge types of 01-contract section 5.
+"""The nine public edge types.
 
 Every field is an index into `assemble.Assembled`'s node arrays, never a
 model-layer id: an edge here outlives the `Session` that produced it.
@@ -13,8 +13,8 @@ from ..model.performance import Length
 
 
 class Fact(StrEnum):
-    """What a spelling glyph supplies. Sakt has no member: nothing evidences
-    it, per 01-contract item 22."""
+    """What a spelling glyph supplies. Sakt has no member: nothing
+    evidences it."""
 
     LETTER = "letter"
     CONSONANT = "consonant"

@@ -1,4 +1,4 @@
-"""Seven glyph/Spelling defects B1 closed: each test fails on the old code."""
+"""Each test pins a specific glyph or spelling invariant."""
 from __future__ import annotations
 
 import pytest
@@ -38,15 +38,14 @@ def _read(text: str):
 
 def test_no_grapheme_offset_is_spelled_twice(packed, hafs):
     """2:72 `فَٱدَّٰرَٰٔتُمْ`: a combining hamza that falls off a released
-    dagger seat used to record its own grapheme twice."""
+    dagger seat records its own grapheme once."""
     built = built_for(packed, hafs, 2, 72)
     offsets = [g.id for g in built.inscription.graphemes]
     assert len(offsets) == len(set(offsets))
 
 
 def test_a_glyph_declared_onset_is_evidenced_once(packed, hafs):
-    """`ٱ` (WASL) used to be evidenced by the cluster and again by the
-    builder, at the same offset."""
+    """`ٱ` (WASL) is evidenced once, not by both the cluster and the builder."""
     built = built_for(packed, hafs, 96, 1)
     onsets = [
         spelling for spelling in built.inscription.spellings
@@ -58,8 +57,8 @@ def test_a_glyph_declared_onset_is_evidenced_once(packed, hafs):
 
 
 def test_a_dagger_evidences_its_own_glyph_not_the_carrier(packed, hafs):
-    """2:5 `أُو۟لَـٰٓئِكَ`: the dagger on the maqsura used to spell its
-    NUCLEUS from the carrier's own offset, indistinguishable from it."""
+    """2:5 `أُو۟لَـٰٓئِكَ`: the dagger on the maqsura evidences its own
+    NUCLEUS, not the carrier's offset."""
     built = built_for(packed, hafs, 2, 5)
     daggers = [
         g for g in built.inscription.graphemes if g.cls is GraphemeClass.SMALL_VOWEL
@@ -88,9 +87,8 @@ def test_a_dagger_evidences_its_own_glyph_not_the_carrier(packed, hafs):
 
 
 def test_an_iwad_carrier_is_reachable(packed, hafs):
-    """4:48 `إِثْمًا`: the alif that lengthens at a stop used to be skipped
-    with no Spelling edge at all -- it decorates the base slot it lengthens,
-    not the tanween noon it silences."""
+    """4:48 `إِثْمًا`: the alif that lengthens at a stop decorates the base
+    slot it lengthens, not the tanween noon it silences."""
     built = built_for(packed, hafs, 4, 48)
     word = built.score.words[18]  # 0-based; corpus word 19
     base = word.slots[-2].id
@@ -114,8 +112,8 @@ def test_sakt_is_evidenced_by_no_glyph(packed, hafs):
 
 
 def test_the_inter_word_space_is_a_glyph(packed, hafs):
-    """A space inside a word's own text was always a `Structural` glyph; the
-    one between two words used to advance the offset counter and vanish."""
+    """A space inside a word's own text is a `Structural` glyph; so is the
+    one between two words."""
     built = built_for(packed, hafs, 1, 1)
     spaces = [g for g in built.inscription.graphemes if g.char == " "]
     assert len(spaces) == 3, "three inter-word gaps across four words"

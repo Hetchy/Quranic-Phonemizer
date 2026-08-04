@@ -1,5 +1,5 @@
-"""01-contract section 1.2: the three module functions, and the vocabulary
-`Phonemizer` reads a `variants` argument against and reports one back with.
+"""The three module functions, and the vocabulary `Phonemizer` reads a
+`variants` argument against and reports one back with.
 """
 from __future__ import annotations
 
@@ -13,20 +13,19 @@ DEFAULT_SCRIPT: dict[Riwayah, Script] = {Riwayah.HAFS: Script.UTHMANI}
 #: The two points a selection names without a site: `chosen()` reads the
 #: point alone. `rules.khilaf.NASAL_PLACES` is the engine's own copy of this
 #: vocabulary; `phonemize` may not import `rules`, so this is the API-facing
-#: restatement of the same two names decisions.md section 1 documents.
+#: restatement of the same two names.
 _NASAL_POINTS = (KhilafId.IQLAB_NASAL, KhilafId.IKHFAA_SHAFAWI_NASAL)
 _NASAL_OPTIONS = ("assimilated", "bilabial")
 _NASAL_DEFAULT = "assimilated"
 
 #: The two points `rules/khilaf.py` settles word by word, and the two
 #: `canon/khilaf.py` settles at build. `seen_sad` has neither: it is
-#: published and unwired, per `01-contract` section 3.1.
+#: published and unwired.
 _SITED_POINTS = (KhilafId.RAA_TAFKHEEM, KhilafId.YAA_ITHBAT)
 _VOWEL_POINTS = (KhilafId.NUCLEUS_VOWEL, KhilafId.IMALA_QUALITY)
 
 #: `identifier` is the model's own `Rule.value`. Two boundary rules --
-#: `wasl_start`/`wasl_elision` -- and one rule `07-rules.md`'s catalogue
-#: does not list under this name -- `pausal_alif` -- are real, minted
+#: `wasl_start`/`wasl_elision`, and `pausal_alif`, are real, minted
 #: rules and are included as the model spells them.
 RULE_NAMES: dict[Rule, tuple[str, str]] = {
     Rule.IZHAR: ("Izhar", "إظهار"),
@@ -123,7 +122,7 @@ def resolved_variant(khilaf, selection: VariantSelection) -> dict[str, object]:
 
 def to_selection(variants: dict | None) -> VariantSelection:
     """`variants={"point": "name"}` broadcasts; `{"point": {"site": "name"}}`
-    names one -- 01-contract section 3.1."""
+    names one."""
     if not variants:
         return VariantSelection()
     options = []

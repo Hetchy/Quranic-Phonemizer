@@ -1,6 +1,6 @@
-"""Item 39: the public `Phonemizer()` default for each toggle -- distinct
-from the harness's `reading(extra_phonemes=())` gate that the per-rule files
-assert. Toggling changes no node and no edge, only the token."""
+"""The public `Phonemizer()` default for each toggle, distinct from the
+harness gate the per-rule files assert. Toggling changes no node and no
+edge, only the token."""
 from __future__ import annotations
 
 import dataclasses
