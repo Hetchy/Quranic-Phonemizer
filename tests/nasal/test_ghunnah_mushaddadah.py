@@ -9,3 +9,5 @@ WAMIMMA = Site(hafs=("2:3", (6,)))
 def test_a_doubled_meem_is_held_through_the_nose(r):
     # وَمِمَّا
     assert r.phonemes(6) == "wamim̃a:"
+    assert "ghunnah_mushaddadah" in r.rules_on_char(6, "م")
+    assert r.rules_on_sound(6, "m̃") == {"ghunnah_mushaddadah"}

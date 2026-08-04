@@ -31,7 +31,11 @@ SOUNDED_AT_A_STOP = [
 def test_each_pausal_alif_is_sounded_when_it_is_stopped_on(
     site, word, stopped, joined
 ):
-    assert reading(site, isolated=word).phonemes(word) == stopped
+    r = reading(site, isolated=word)
+    assert r.phonemes(word) == stopped
+    # stopped on, the alif is said in full and the waqf ending owns the slot
+    assert "pausal_alif" not in r.rules_on_char(word, "۠")
+    assert "pausal_sukun" in r.rules_on_char(word, "۠")
 
 
 @pytest.mark.parametrize(("site", "word", "stopped", "joined"),
@@ -40,7 +44,9 @@ def test_each_pausal_alif_falls_silent_when_the_reading_carries_on(
     site, word, stopped, joined
 ):
     # the engine sounds the alif at either junction, so it reads long here too
-    assert reading(site, ibtidaa=word, wasl=word).phonemes(word) == joined
+    r = reading(site, ibtidaa=word, wasl=word)
+    assert r.phonemes(word) == joined
+    assert "pausal_alif" in r.rules_on_char(word, "۠")
 
 
 @for_each_riwayah(QAWARIRA_SECOND, ibtidaa=1, wasl=1)
@@ -48,6 +54,8 @@ def test_the_round_zero_keeps_a_short_fatha_when_joined_forward(r):
     # قَوَارِيرَا۟
     assert r.phonemes(1) == "qaˤwa:ri:rˤaˤ"
     assert r.silent(1) == frozenset()
+    # the round zero is not one of the seven; the rule never reaches it
+    assert "pausal_alif" not in r.rules_on_char(1, "۟")
 
 
 @for_each_riwayah(QAWARIRA_SECOND, isolated=1)

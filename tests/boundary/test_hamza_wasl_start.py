@@ -40,34 +40,42 @@ def _started_on(ref, word):
     return reading(Site(hafs=(ref, (word,))), isolated=word)
 
 
+def _check(ref, word, expected):
+    r = _started_on(ref, word)
+    assert r.phonemes(word) == expected
+    assert "wasl_start" in r.rules_on_char(word, "ٱ")
+    assert "wasl_start" in r.rules_on_sound(word, "ʔ")
+
+
 @pytest.mark.parametrize(("ref", "word", "expected"), AFTER_THE_ARTICLE)
 def test_the_article_gives_the_prosthetic_hamza_a_fatha(ref, word, expected):
-    assert _started_on(ref, word).phonemes(word) == expected
+    _check(ref, word, expected)
 
 
 @pytest.mark.parametrize(("ref", "word", "expected"), VERB_WITH_A_DAMMA)
 def test_a_verb_whose_third_letter_carries_a_damma_takes_a_damma(
     ref, word, expected
 ):
-    assert _started_on(ref, word).phonemes(word) == expected
+    _check(ref, word, expected)
 
 
 @pytest.mark.parametrize(("ref", "word", "expected"), VERB_WITHOUT_A_DAMMA)
 def test_a_verb_whose_third_letter_carries_no_damma_takes_a_kasra(
     ref, word, expected
 ):
-    assert _started_on(ref, word).phonemes(word) == expected
+    _check(ref, word, expected)
 
 
 @pytest.mark.parametrize(("ref", "word", "expected"), IRREGULAR_NOUN)
 def test_the_seven_nouns_that_take_a_kasra_of_their_own(ref, word, expected):
-    assert _started_on(ref, word).phonemes(word) == expected
+    _check(ref, word, expected)
 
 
 @for_each_riwayah(ALLAHU, isolated=1)
 def test_the_helping_vowel_is_a_fatha_before_the_divine_name(r):
     # ٱللَّهُ
     assert r.phonemes(1) == "ʔalˤlˤaˤ:h"
+    assert "wasl_start" in r.rules_on_char(1, "ٱ")
 
 
 @for_each_riwayah(ILTAQA, isolated=6)

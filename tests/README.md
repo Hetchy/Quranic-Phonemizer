@@ -93,12 +93,34 @@ A folder exists only when it holds more than one file.
 
 ### Rule assertions
 
+Every case in a rule file says three things: what the word reads, that the
+rule is read off the right character, and that it is read onto the right
+sound.
+
+```python
+assert r.phonemes(3) == "miŋ"
+assert "iqlab" in r.rules_on_char(3, "ن")
+assert r.rules_on_sound(3, "ŋ") == {"iqlab"}
+```
+
+`rules_on_char` takes `in`, because one character carries several rules at
+once -- a qaf is both a qalqalah letter and an istilaa one. `rules_on_sound`
+takes `==` where the sound is the rule's own product, and `in` where another
+rule colours it. Where a rule does not apply, say so: a stop that undoes a
+merger asserts the merger's name is **not** on the character.
+
+Neither reading follows from the phoneme string. `iqlab` is the same name
+whether the hum takes a place or not; a letter that merges away carries the
+merger's rule and nothing else; `madd_tabii` and `orthographic_silence` name
+an outcome and add no sound at all.
+
 `source_of(rule)` and `host_of(rule)` name the character supplying a rule's
 source and host unit -- `None` from `host_of` where the rule is not a merger.
-`rules_on_char(word, char)` and `rules_on_sound(word, token)` name every rule
-reached from a written letter or a produced sound. Read a rule's identity off
-these rather than inferring it from the phoneme string: `iqlab` is the same
-name whether the hum takes a place or not, and a letter that merges away
-carries the merger's rule and nothing else.
+Both read the first instance in the whole reading, so prefer
+`rules_on_char` when the site is one word of several.
+
+A tanween's rule is read off the mark, not off the letter under it. A table
+that sweeps letters asserts the sound; one site per mark asserts the
+character.
 
 `laws/` still imports helpers from `conftest.py` and predates `Site`.

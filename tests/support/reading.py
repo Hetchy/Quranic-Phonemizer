@@ -195,7 +195,11 @@ class Reading:
         return None if host is None else self._char_of_unit(host)
 
     def rules_on_char(self, word: int, char: str) -> frozenset[str]:
-        """Every rule read against a unit `char` (in `word`) spells."""
+        """Every rule read against `char` (in `word`).
+
+        A rule anchored on the glyph rather than on a unit counts too: a
+        letter the reading never says has no unit to reach it by.
+        """
         idx = word - 1
         glyphs = {
             i for i, g in enumerate(self._assembled.glyphs)
@@ -206,10 +210,15 @@ class Reading:
             if getattr(spelling, "unit", None) is not None
             and getattr(spelling, "glyph", None) in glyphs
         }
-        return frozenset(
-            ri.rule.value for ri in self._assembled.rules
+        reached = {
+            i for i, ri in enumerate(self._assembled.rules)
             if ri.source in units or ri.host in units
-        )
+        }
+        reached |= {
+            rule for glyph, rule in self._assembled.orthographic_silence.items()
+            if glyph in glyphs
+        }
+        return frozenset(self._assembled.rules[i].rule.value for i in reached)
 
     def rules_on_sound(self, word: int, token: str) -> frozenset[str]:
         """Every rule reaching a sound `token` produced, in `word`."""

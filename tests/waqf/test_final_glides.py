@@ -13,6 +13,7 @@ def test_a_final_waw_is_a_consonant_when_the_reading_carries_on(r):
     # هُوَ
     assert r.phonemes(1) == "huwa"
     assert r.silent(1) == frozenset()
+    assert r.rules_on_char(1, "و") == frozenset()
 
 
 @for_each_riwayah(HUWA, isolated=1)
@@ -20,6 +21,8 @@ def test_that_waw_becomes_pure_length_at_a_stop(r):
     # هُوَ
     assert r.phonemes(1) == "hu:"
     assert r.silent(1) == {"َ"}
+    assert "madd_tabii" in r.rules_on_char(1, "و")
+    assert r.rules_on_sound(1, "u:") == {"madd_tabii"}
 
 
 @for_each_riwayah(WA_HUWA, ibtidaa=16, wasl=16)
@@ -34,6 +37,7 @@ def test_that_prefixed_waw_becomes_pure_length_at_a_stop(r):
     # وَهُوَ
     assert r.phonemes(16) == "wahu:"
     assert r.silent(16) == {"َ"}
+    assert r.rules_on_sound(16, "u:") == {"madd_tabii"}
 
 
 @for_each_riwayah(HIYA, ibtidaa=8, wasl=8)
@@ -41,6 +45,7 @@ def test_a_final_yaa_is_a_consonant_when_the_reading_carries_on(r):
     # هِىَ
     assert r.phonemes(8) == "hija"
     assert r.silent(8) == frozenset()
+    assert r.rules_on_char(8, "ى") == frozenset()
 
 
 @for_each_riwayah(HIYA, isolated=8)
@@ -48,6 +53,8 @@ def test_that_yaa_becomes_pure_length_at_a_stop(r):
     # هِىَ
     assert r.phonemes(8) == "hi:"
     assert r.silent(8) == {"َ"}
+    assert "madd_tabii" in r.rules_on_char(8, "ى")
+    assert r.rules_on_sound(8, "i:") == {"madd_tabii"}
 
 
 @for_each_riwayah(RABBIYA, ibtidaa=16, wasl=16)
@@ -62,3 +69,4 @@ def test_that_pronoun_yaa_becomes_pure_length_at_a_stop(r):
     # رَبِّىَ
     assert r.phonemes(16) == "rˤaˤbbi:"
     assert r.silent(16) == {"َ"}
+    assert r.rules_on_sound(16, "i:") == {"madd_tabii"}
