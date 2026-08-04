@@ -30,12 +30,23 @@ TANWEEN_ACROSS_A_BOUNDARY = [
 ]
 
 
+#: One site per tanween mark this file's table reaches, to say which
+#: character the rule is read off.
+EACH_TANWEEN_MARK = [
+    ("2:18", (1, 2), "ٌ"),   # صُمٌّ بُكْمٌ
+    ("3:34", (1, 2), "ً"),   # ذُرِّيَّةً بَعْضُهَا
+]
+
+
 @pytest.mark.parametrize(("ref", "word", "expected"), INSIDE_ONE_WORD)
 def test_a_written_noon_before_a_baa_turns_inside_one_word(
     ref, word, expected
 ):
     site = Site(hafs=(ref, (word,)))
-    assert reading(site, isolated=word).phonemes(word) == expected
+    r = reading(site, isolated=word)
+    assert r.phonemes(word) == expected
+    assert "iqlab" in r.rules_on_char(word, "ن")
+    assert r.rules_on_sound(word, "ŋ") == {"iqlab"}
 
 
 @pytest.mark.parametrize(
@@ -47,6 +58,14 @@ def test_a_tanween_turns_when_a_baa_starts_the_next_word(
     first, last = words
     r = reading(Site(hafs=(ref, words)), ibtidaa=first, waqf=last)
     assert (r.phonemes(first), r.phonemes(last)) == expected
+    assert r.rules_on_sound(first, "ŋ") == {"iqlab"}
+
+
+@pytest.mark.parametrize(("ref", "words", "mark"), EACH_TANWEEN_MARK)
+def test_the_rule_is_read_off_the_tanween_mark(ref, words, mark):
+    first, last = words
+    r = reading(Site(hafs=(ref, words)), ibtidaa=first, waqf=last)
+    assert "iqlab" in r.rules_on_char(first, mark)
 
 
 @for_each_riwayah(MIN_BADI, ibtidaa=3, waqf=4)
@@ -54,6 +73,8 @@ def test_a_quiescent_noon_turns_across_a_word_seam(r):
     # مِّن بَعْدِ
     assert r.phonemes(3) == "miŋ"
     assert r.phonemes(4) == "baʕdQ"
+    assert "iqlab" in r.rules_on_char(3, "ن")
+    assert r.rules_on_sound(3, "ŋ") == {"iqlab"}
 
 
 @for_each_riwayah(QUSURAN, ibtidaa=17, wasl=17)
@@ -61,6 +82,8 @@ def test_a_tanween_at_a_verse_end_turns_across_the_seam(r):
     # قُصُورًا بَلْ
     assert r.phonemes(17) == "qusˤu:rˤaˤŋ"
     assert r.phonemes(18) == "bal"
+    assert "iqlab" in r.rules_on_char(17, "ً")
+    assert r.rules_on_sound(17, "ŋ") == {"iqlab"}
 
 
 def test_the_rule_is_iqlab_under_either_reading_of_the_nasal_place():

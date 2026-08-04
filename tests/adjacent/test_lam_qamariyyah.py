@@ -28,6 +28,8 @@ MOON_LETTERS = [
 def test_the_article_lam_is_said_before_each_moon_letter(ref, word, expected):
     r = reading(Site(hafs=(ref, (word,))), isolated=word)
     assert r.phonemes(word) == expected
+    assert "lam_qamariyyah" in r.rules_on_char(word, "ل")
+    assert r.rules_on_sound(word, "l") == {"lam_qamariyyah"}
 
 
 @for_each_riwayah(ALHAMDU, ibtidaa=1, waqf=2)
@@ -35,3 +37,4 @@ def test_the_said_lam_stays_when_the_word_is_joined_forward(r):
     # ٱلْحَمْدُ لِلَّهِ
     assert r.phonemes(1) == "ʔalħamdu"
     assert r.phonemes(2) == "lilla:h"
+    assert "lam_qamariyyah" in r.rules_on_char(1, "ل")

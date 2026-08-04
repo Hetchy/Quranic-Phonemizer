@@ -15,4 +15,8 @@ MUTLAQ = [
 @pytest.mark.parametrize(("ref", "word", "expected"), MUTLAQ)
 def test_the_four_words_hold_their_noon_against_a_glide(ref, word, expected):
     site = Site(hafs=(ref, (word,)))
-    assert reading(site, isolated=word).phonemes(word) == expected
+    r = reading(site, isolated=word)
+    assert r.phonemes(word) == expected
+    # the outcome is `izhar`, the same one the throat letters give
+    assert "izhar" in r.rules_on_char(word, "ن")
+    assert r.rules_on_sound(word, "n") == {"izhar"}

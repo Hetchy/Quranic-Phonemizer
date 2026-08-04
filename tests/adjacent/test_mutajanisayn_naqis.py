@@ -18,3 +18,5 @@ def test_a_taa_takes_the_place_of_the_tah_but_not_its_heaviness(
 ):
     r = reading(Site(hafs=(ref, (word,))), isolated=word)
     assert r.phonemes(word) == expected
+    assert "idgham_mutajanisayn_naqis" in r.rules_on_char(word, "ط")
+    assert "idgham_mutajanisayn_naqis" in r.rules_on_sound(word, "tˤ")

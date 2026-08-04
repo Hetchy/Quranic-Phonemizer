@@ -30,6 +30,15 @@ TANWEEN_ACROSS_A_BOUNDARY = [
 ]
 
 
+#: One site per tanween mark this file's table reaches, to say which
+#: character the rule is read off.
+EACH_TANWEEN_MARK = [
+    ("2:179", (4, 5), "ٌ"),   # حَيَوٰةٌ يَـٰٓأُو۟لِى
+    ("2:5", (3, 4), "ً"),     # هُدًى مِّن
+    ("6:105", (7, 8), "ٍ"),   # لِقَوْمٍ يَعْلَمُونَ
+]
+
+
 @pytest.mark.parametrize(("ref", "words", "expected"), NOON_ACROSS_A_BOUNDARY)
 def test_a_quiescent_noon_merges_with_a_hum_into_each_letter(
     ref, words, expected
@@ -37,6 +46,8 @@ def test_a_quiescent_noon_merges_with_a_hum_into_each_letter(
     first, last = words
     r = reading(Site(hafs=(ref, words)), ibtidaa=first, waqf=last)
     assert (r.phonemes(first), r.phonemes(last)) == expected
+    assert "idgham_bi_ghunnah" in r.rules_on_char(first, "ن")
+    assert r.rules_on_sound(last, r.sounds(last)[0]) == {"idgham_bi_ghunnah"}
 
 
 @pytest.mark.parametrize(
@@ -46,12 +57,22 @@ def test_a_tanween_merges_with_a_hum_into_each_letter(ref, words, expected):
     first, last = words
     r = reading(Site(hafs=(ref, words)), ibtidaa=first, waqf=last)
     assert (r.phonemes(first), r.phonemes(last)) == expected
+    assert r.rules_on_sound(last, r.sounds(last)[0]) == {"idgham_bi_ghunnah"}
+
+
+@pytest.mark.parametrize(("ref", "words", "mark"), EACH_TANWEEN_MARK)
+def test_the_rule_is_read_off_the_tanween_mark(ref, words, mark):
+    first, last = words
+    r = reading(Site(hafs=(ref, words)), ibtidaa=first, waqf=last)
+    assert "idgham_bi_ghunnah" in r.rules_on_char(first, mark)
 
 
 @for_each_riwayah(TA_SEEN_MEEM, isolated=1)
 def test_the_noon_of_a_letter_name_merges_into_the_next_name(r):
     # طسٓمٓ
     assert r.phonemes(1) == "tˤaˤ:si:m̃i:m"
+    # the noon is spelled by the name of the seen, so no written ن carries it
+    assert r.rules_on_sound(1, "m̃") == {"idgham_bi_ghunnah"}
 
 
 @for_each_riwayah(AZEEMUN, ibtidaa=12, wasl=12)
@@ -59,3 +80,5 @@ def test_a_tanween_at_a_verse_end_merges_into_the_next_verse(r):
     # عَظِيمٌ وَمِنَ
     assert r.phonemes(12) == "ʕaðˤi:mu"
     assert r.phonemes(13) == "w̃amina"
+    assert "idgham_bi_ghunnah" in r.rules_on_char(12, "ٌ")
+    assert r.rules_on_sound(13, "w̃") == {"idgham_bi_ghunnah"}

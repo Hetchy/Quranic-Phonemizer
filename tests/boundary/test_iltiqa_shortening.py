@@ -5,13 +5,13 @@ import pytest
 from tests.support import Site, reading
 
 A_LONG_VOWEL_GIVING_WAY = [
-    ("1:7", (8, 9), ("wala", "dˤdˤaˤ:lli:n")),      # وَلَا ٱلضَّآلِّينَ
-    ("2:11", (6, 7), ("fi", "lʔarˤdˤ")),            # فِى ٱلْأَرْضِ
-    ("2:68", (1, 2), ("qaˤ:lu", "dQʕ")),            # قَالُوا۟ ٱدْعُ
-    ("2:87", (10, 11), ("ʕi:sa", "bQn")),           # عِيسَى ٱبْنَ
-    ("1:6", (1, 2),
-     ("ʔihdina", "sˤsˤirˤaˤ:tˤQ")),                 # ٱهْدِنَا ٱلصِّرَٰطَ
-    ("2:53", (3, 4), ("mu:sa", "lkita:bQ")),        # مُوسَى ٱلْكِتَـٰبَ
+    ("1:7", (8, 9), "ا", ("wala", "dˤdˤaˤ:lli:n")),   # وَلَا ٱلضَّآلِّينَ
+    ("2:11", (6, 7), "ى", ("fi", "lʔarˤdˤ")),         # فِى ٱلْأَرْضِ
+    ("2:68", (1, 2), "و", ("qaˤ:lu", "dQʕ")),         # قَالُوا۟ ٱدْعُ
+    ("2:87", (10, 11), "ى", ("ʕi:sa", "bQn")),        # عِيسَى ٱبْنَ
+    ("1:6", (1, 2), "ا",
+     ("ʔihdina", "sˤsˤirˤaˤ:tˤQ")),                   # ٱهْدِنَا ٱلصِّرَٰطَ
+    ("2:53", (3, 4), "ى", ("mu:sa", "lkita:bQ")),     # مُوسَى ٱلْكِتَـٰبَ
 ]
 
 A_VOWEL_PUT_IN_TO_REPAIR_THE_MEETING = [
@@ -27,23 +27,29 @@ A_VOWEL_PUT_IN_TO_REPAIR_THE_MEETING = [
 ]
 
 A_TANWEEN_MEETING_A_PROSTHETIC_HAMZA = [
-    ("2:61", (30, 31), ("xaˤjrˤuni", "hbitˤu:")),        # خَيْرٌ ٱهْبِطُوا۟
-    ("11:42", (8, 9), ("nu:ħuni", "bQnah")),             # نُوحٌ ٱبْنَهُۥ
-    ("9:30", (3, 4), ("ʕuzajrˤuni", "bQn")),             # عُزَيْرٌ ٱبْنُ
-    ("4:171", (31, 32), ("θala:θatuni", "ŋtahu:")),      # ثَلَـٰثَةٌ ٱنتَهُوا۟
-    ("7:8", (2, 3), ("jawmaʔiðini", "lħaqqQ")),          # يَوْمَئِذٍ ٱلْحَقُّ
+    ("2:61", (30, 31), "ٌ", ("xaˤjrˤuni", "hbitˤu:")),    # خَيْرٌ ٱهْبِطُوا۟
+    ("11:42", (8, 9), "ٌ", ("nu:ħuni", "bQnah")),         # نُوحٌ ٱبْنَهُۥ
+    ("9:30", (3, 4), "ٌ", ("ʕuzajrˤuni", "bQn")),         # عُزَيْرٌ ٱبْنُ
+    ("4:171", (31, 32), "ٌ", ("θala:θatuni", "ŋtahu:")),  # ثَلَـٰثَةٌ ٱنتَهُوا۟
+    ("7:8", (2, 3), "ٍ", ("jawmaʔiðini", "lħaqqQ")),      # يَوْمَئِذٍ ٱلْحَقُّ
 ]
 
 
 def _joined(ref, words):
     first, last = words
-    r = reading(Site(hafs=(ref, words)), ibtidaa=first, waqf=last)
-    return r.phonemes(first), r.phonemes(last)
+    return reading(Site(hafs=(ref, words)), ibtidaa=first, waqf=last)
 
 
-@pytest.mark.parametrize(("ref", "words", "expected"), A_LONG_VOWEL_GIVING_WAY)
-def test_a_long_vowel_shortens_before_a_quiescent_letter(ref, words, expected):
-    assert _joined(ref, words) == expected
+@pytest.mark.parametrize(
+    ("ref", "words", "letter", "expected"), A_LONG_VOWEL_GIVING_WAY
+)
+def test_a_long_vowel_shortens_before_a_quiescent_letter(
+    ref, words, letter, expected
+):
+    first, last = words
+    r = _joined(ref, words)
+    assert (r.phonemes(first), r.phonemes(last)) == expected
+    assert "iltiqa_shortening" in r.rules_on_char(first, letter)
 
 
 @pytest.mark.parametrize(
@@ -52,14 +58,20 @@ def test_a_long_vowel_shortens_before_a_quiescent_letter(ref, words, expected):
 def test_a_vowel_is_put_on_the_first_word_when_it_cannot_shorten(
     ref, words, expected
 ):
-    assert _joined(ref, words) == expected
+    first, last = words
+    r = _joined(ref, words)
+    assert (r.phonemes(first), r.phonemes(last)) == expected
+    # the script writes the linking vowel here, so only the elision is read
+    assert "wasl_elision" in r.rules_on_char(last, "ٱ")
 
 
 @pytest.mark.parametrize(
-    ("ref", "words", "expected"), A_TANWEEN_MEETING_A_PROSTHETIC_HAMZA
+    ("ref", "words", "mark", "expected"), A_TANWEEN_MEETING_A_PROSTHETIC_HAMZA
 )
 def test_a_tanween_takes_a_linking_kasra_before_a_prosthetic_hamza(
-    ref, words, expected
+    ref, words, mark, expected
 ):
-    # the engine leaves the tanween bare and joins on no vowel at all
-    assert _joined(ref, words) == expected
+    first, last = words
+    r = _joined(ref, words)
+    assert (r.phonemes(first), r.phonemes(last)) == expected
+    assert "iltiqa_kasra" in r.rules_on_char(first, mark)
