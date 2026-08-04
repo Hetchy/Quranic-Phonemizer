@@ -1,115 +1,30 @@
-# Thresholds are floors that may only rise. Every row behind every floor short
-# of 100% is named in docs/conformance/gate-residues.md, so requiring zero would mean a
-# red build with nothing to do about it, and requiring nothing would let a
-# regression land silently.
+# The ratchet numbers live in tools/gates.py, so a job here names a gate and
+# nothing else. Every row behind a floor short of 100% is named in
+# docs/conformance/gate-residues.md, so requiring zero would mean a red build
+# with nothing to do about it, and requiring nothing would let a regression
+# land silently.
 name: gates
 
 on:
   push:
-    branches: [main, "riwayah/**"]
+    branches: [main, "riwayah/**", "feat/**"]
   pull_request:
 
 jobs:
-  suite:
+  gate:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        name: [suite, comments, structure, cross-script, regression,
+               roundtrip, attestation, l1]
+    name: ${{ matrix.name }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.13"
+      # structure's tool-import-smoke executes each tool rather than parsing
+      # it, so every gate needs the package and its YAML dependency present.
       - run: pip install -e ".[dev]"
-      - run: python -m pytest tests/ -q
-
-  comments:
-    # The comment rules in CLAUDE.md, checked rather than remembered.
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
-      - run: python tools/comment_lint.py
-
-  structure:
-    # The package shape: the import graph and its acyclicity, dead imports and
-    # exports, file and function size, and whether every committed tool still
-    # imports. Conventions with no checker are conventions that drift.
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
-      # tool-import-smoke executes each tool rather than parsing it, so the
-      # tools that read YAML need their dependencies present.
-      - run: pip install -e .
-      - run: python tools/structure_lint.py
-
-  cross-script:
-    # The claim the design is named for: two scripts, same phonemes.
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
-      - run: pip install -e .
-      - name: cross-script parity, both modes
-        run: |
-          python tools/floor.py cross word 99.997
-          python tools/floor.py cross verse 100.0
-
-  regression:
-    # Not a target. The oracle is the previous implementation with its defects
-    # frozen in, so this is a change detector and its floor may fall when the
-    # oracle is the one that is wrong. All 61 rows are classified in
-    # docs/conformance/gate-residues.md, with the evidence for each direction.
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
-      - run: pip install -e .
-      - name: regression oracle, both modes
-        run: |
-          python tools/floor.py regression word 99.921
-          python tools/floor.py regression verse 97.852
-
-  roundtrip:
-    # Every Score can be spelled and spells back to itself. Closed: no Score
-    # holds a fact no orthography can express, and none loses one on the way.
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
-      - run: pip install -e .
-      - run: python tools/floor.py roundtrip uthmani 100.0
-
-  attestation:
-    # A shadda a script writes must be produced by some occurrence. One
-    # directional: an occurrence with no attestation behind it is not an error.
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
-      - run: pip install -e .
-      - name: unmet attestations, both scripts
-        run: |
-          python tools/floor.py attest uthmani 176
-          python tools/floor.py attest indopak 237
-
-  l1:
-    # Score-level script equality. The ceiling stops the residue growing.
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
-      - run: pip install -e .
-      - run: python tools/floor.py l1 - 18
+      - run: python tools/gates.py ${{ matrix.name }}
