@@ -15,6 +15,8 @@ def test_a_quiescent_noon_merges_into_a_raa_without_a_hum(r):
     assert r.phonemes(3) == "huda"
     assert r.phonemes(4) == "m̃i"
     assert r.phonemes(5) == "rˤrˤaˤbbihim"
+    assert r.source_of("idgham_bila_ghunnah") == "ن"
+    assert r.host_of("idgham_bila_ghunnah") == "ر"
 
 
 @for_each_riwayah(FAIN_LAM, ibtidaa=1, waqf=2)

@@ -76,3 +76,14 @@ def test_a_ghayn_over_a_damma_leaves_its_own_vowel_alone(r):
 def test_a_sad_over_a_damma_leaves_the_vowel_alone(r):
     # صُدُورُهُمْ
     assert r.phonemes(22) == "sˤudu:rˤuhum"
+
+
+KHALAQA = Site(hafs=("2:29", (3,)))
+
+
+def test_the_heavy_fatha_toggle_defaults_off():
+    # خَلَقَ -- the khaa's heaviness spreads onto its own fatha.
+    off = reading(KHALAQA, extra_phonemes=(), isolated=3)
+    on = reading(KHALAQA, extra_phonemes=("emphatic_fatha",), isolated=3)
+    assert off.phonemes(3) == "xalaqQ"
+    assert on.phonemes(3) == "xaˤlaqQ"

@@ -1,9 +1,9 @@
-"""Item 39: the four optional phonemes, gated at the notation.
-
-`01-contract` section 3.2 -- switching one on changes no node and no edge,
-only the token `phonemes()` reads off the same `Sound`.
-"""
+"""Item 39: the public `Phonemizer()` default for each toggle -- distinct
+from the harness's `reading(extra_phonemes=())` gate that the per-rule files
+assert. Toggling changes no node and no edge, only the token."""
 from __future__ import annotations
+
+import dataclasses
 
 import pytest
 
@@ -18,20 +18,9 @@ def _sound_index(r, predicate) -> int:
     raise AssertionError("no sound in this ref matches")
 
 
-def test_emphatic_fatha_defaults_off():
-    """41:44:9's raa/lam heaviness spreads onto its following fatha."""
-    off = Phonemizer().phonemize("41:44")
-    on = Phonemizer(extra_phonemes=("emphatic_fatha",)).phonemize("41:44")
-    i = _sound_index(off, lambda s: s.kind.value == "vowel" and s.emphatic)
-    assert off.phonemes()[i] == "a:"
-    assert on.phonemes()[i] == "aˤ:"
-
-
 def test_the_toggle_changes_no_node_and_no_edge():
     """`token` is the one field a toggle may move; every other field of
     every sound, and every edge, stays identical between the two documents."""
-    import dataclasses
-
     off = Phonemizer().phonemize("41:44")
     on = Phonemizer(extra_phonemes=("emphatic_fatha",)).phonemize("41:44")
     bare = lambda sounds: [dataclasses.replace(s, token="") for s in sounds]
@@ -42,12 +31,19 @@ def test_the_toggle_changes_no_node_and_no_edge():
 
 
 def test_tashil_defaults_off():
-    """41:44:9's eased hamza -- `Onset.TASHIL`'s one corpus site."""
     off = Phonemizer().phonemize("41:44")
     on = Phonemizer(extra_phonemes=("tashil",)).phonemize("41:44")
     i = _sound_index(off, lambda s: s.kind.value == "consonant" and s.eased)
     assert off.phonemes()[i] == "ʔ"
     assert on.phonemes()[i] == "ʔ̞"
+
+
+def test_emphatic_fatha_defaults_off():
+    off = Phonemizer().phonemize("41:44")
+    on = Phonemizer(extra_phonemes=("emphatic_fatha",)).phonemize("41:44")
+    i = _sound_index(off, lambda s: s.kind.value == "vowel" and s.emphatic)
+    assert off.phonemes()[i] == "a:"
+    assert on.phonemes()[i] == "aˤ:"
 
 
 def test_emphatic_ikhfaa_defaults_off():
@@ -59,8 +55,6 @@ def test_emphatic_ikhfaa_defaults_off():
 
 
 def test_qalqala_degree_defaults_to_one_token():
-    """96:1 carries both a sughra and a kubra site; the toggle doubles only
-    the kubra one, since sughra and its extended form share a token."""
     off = Phonemizer().phonemize("96:1")
     on = Phonemizer(extra_phonemes=("qalqala_degree",)).phonemize("96:1")
     sughra = _sound_index(off, lambda s: s.degree and s.degree.value == "sughra")

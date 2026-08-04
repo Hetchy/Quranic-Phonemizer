@@ -82,3 +82,15 @@ def test_a_qalqala_letter_carrying_a_vowel_is_not_echoed(r):
 def test_the_echo_inside_a_word_does_not_depend_on_the_junction(r):
     # قَبْلِكَ
     assert r.phonemes(9) == "qaˤbQlika"
+
+
+IQRA_KHALAQA = Site(hafs=("96:1", (1, 2, 3, 4, 5)))
+
+
+def test_the_degree_toggle_defaults_to_one_token():
+    # ٱقْرَأْ .. خَلَقَ -- the toggle doubles only the kubra echo; sughra and
+    # its extended form already share a token.
+    off = reading(IQRA_KHALAQA, extra_phonemes=(), waqf=5)
+    on = reading(IQRA_KHALAQA, extra_phonemes=("qalqala_degree",), waqf=5)
+    assert (off.phonemes(1), on.phonemes(1)) == ("ʔiqQrˤaʔ", "ʔiqQrˤaʔ")
+    assert (off.phonemes(5), on.phonemes(5)) == ("xalaqQ", "xalaqQQ")
