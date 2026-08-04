@@ -14,7 +14,7 @@ import pytest
 from quranic_phonemizer.api import alphabet as load_alphabet
 from quranic_phonemizer.api import recitation
 from quranic_phonemizer.model.address import Riwayah, Script, VerseRef
-from quranic_phonemizer.render.recite import phonemes_by_word
+from quranic_phonemizer.phonemize.legacy_views import phonemes_by_word
 from tools.parity import (
     _moved_across_a_seam,
     _same_sequence,

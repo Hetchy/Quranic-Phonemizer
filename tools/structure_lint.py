@@ -18,7 +18,7 @@ TOOLS = ROOT / "tools"
 #: so a new package must declare itself before anything may reach it. `""`
 #: is the package root; `dataio` and `model` are leaves by construction.
 ALLOWED: dict[str, set[str]] = {
-    "": {"model"},
+    "": {"model", "phonemize"},
     "dataio": set(),
     "model": set(),
     "corpus": {"model"},
@@ -36,6 +36,12 @@ ALLOWED: dict[str, set[str]] = {
         "canon", "corpus", "engine", "model", "orthography", "render",
         "riwayat",
     },
+    # Above `api`: it imports the assembled bundle rather than re-deriving
+    # it. No `rules` edge -- rules arrive inside `Recitation.rules`, and a
+    # declared edge nothing exercises fails `_unused_permissions`.
+    "phonemize": {
+        "api", "canon", "corpus", "engine", "model", "orthography", "render",
+    },
 }
 
 #: The output alphabet is data and lives in one place. A phoneme string
@@ -49,7 +55,11 @@ MODULE_ALLOWED: dict[tuple[str, str], set[str]] = {
 
 #: Names a consumer outside this repository may import. Everything else that
 #: nothing here calls is dead.
-PUBLIC_API = frozenset({"Option", "VariantSelection", "KhilafId"})
+PUBLIC_API = frozenset({
+    "Option", "VariantSelection", "KhilafId",
+    "Phonemizer", "PhonemizeResult", "UnknownExtraPhoneme", "UnknownRiwayah",
+    "available_variants", "supported_riwayat", "tajweed_rules",
+})
 
 #: Imports whose only purpose is the side effect of importing them.
 SIDE_EFFECT = frozenset({"annotations"})

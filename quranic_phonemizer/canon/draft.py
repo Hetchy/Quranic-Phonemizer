@@ -80,6 +80,36 @@ def set_fact(draft, drafts, fact: SlotFact, value, target: Target,
             subject.annotations = subject.annotations | {value}
 
 
+def letter_of(rows, cluster) -> CanonLetter | None:
+    for row in rows:
+        if row.fact is SlotFact.LETTER and row.value is not None:
+            return row.value
+    return cluster.letter
+
+
+def stray_letter_offsets(rows, used_offset: int) -> frozenset[int]:
+    """Letter-fact rows on this cluster whose offset went unused: a second
+    mark riding the same letter, like the sakt sites' small seen."""
+    return frozenset(
+        row.offset for row in rows
+        if row.fact is SlotFact.LETTER and row.value is not None
+        and row.offset != used_offset
+    )
+
+
+def letter_offsets_of(rows, cluster) -> tuple[int, frozenset[int]]:
+    """The offset that carries the cluster's letter, and every other offset
+    also written as part of it -- a seat's own bare position, or a stray
+    mark -- neither reached by any other pass."""
+    letter_rows = [
+        row for row in rows
+        if row.fact is SlotFact.LETTER and row.value is not None
+    ]
+    winner = letter_rows[0].offset if letter_rows else cluster.offset
+    extra = stray_letter_offsets(rows, winner) | ({cluster.offset} - {winner})
+    return winner, extra
+
+
 def nucleus_fact(nucleus: Nucleus) -> SlotFact:
     """Which vowel fact a glyph asserting a whole nucleus supplies.
 

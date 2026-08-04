@@ -16,7 +16,7 @@ from quranic_phonemizer.model.address import (
     Script,
     VerseRef,
 )
-from quranic_phonemizer.render.recite import phonemes_by_word
+from quranic_phonemizer.phonemize.legacy_views import phonemes_by_word
 from quranic_phonemizer.riwayat.hafs import HAFS, script_adapter
 
 #: (surah, ayah, word), the reading, and what the two scripts disagree about.

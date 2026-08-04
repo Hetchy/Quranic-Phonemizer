@@ -53,13 +53,13 @@ _CLASSIFIES_ASPECT: dict[Rule, Aspect] = {
     Rule.IZHAR_SHAFAWI: Aspect.CONSONANT,
     Rule.LAM_QAMARIYYAH: Aspect.CONSONANT,
     Rule.IMALA: Aspect.VOWEL,
-    Rule.SILAH: Aspect.VOWEL,
     Rule.MADD_WAJIB_MUTTASIL: Aspect.VOWEL,
     Rule.MADD_JAIZ_MUNFASIL: Aspect.VOWEL,
     Rule.MADD_LAZIM: Aspect.VOWEL,
     Rule.MADD_ARID_LIL_SUKUN: Aspect.VOWEL,
     #: The waw or yaa this rule names has no vowel; it classifies the consonant.
     Rule.MADD_LEEN: Aspect.CONSONANT,
+    Rule.FAKK_IDGHAM: Aspect.CONSONANT,
 }
 
 class MaterialisationError(AssertionError):
@@ -194,6 +194,7 @@ def _plain_sound(slot: Slot, aspect: Aspect, colours, lengths=None) -> Sound:
             slot.letter,
             geminate=slot.onset is Onset.GEMINATE,
             emphatic=emphatic,
+            eased=slot.onset is Onset.TASHIL,
         )
     long = slot.nucleus.sounds_long
     override = (lengths or {}).get(slot.id)

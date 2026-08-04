@@ -28,7 +28,7 @@ from quranic_phonemizer.model.address import (  # noqa: E402
     Script,
     VerseRef,
 )
-from quranic_phonemizer.render.recite import phonemes_by_word  # noqa: E402
+from quranic_phonemizer.phonemize.legacy_views import phonemes_by_word  # noqa: E402
 
 #: Which script's residue rows are shown, and which side of a pair is "got".
 LEFT, RIGHT = Script.UTHMANI, Script.INDOPAK

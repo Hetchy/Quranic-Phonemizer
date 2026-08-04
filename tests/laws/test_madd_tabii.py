@@ -9,8 +9,8 @@ from conftest import score_for
 from quranic_phonemizer.engine.run import perform
 from quranic_phonemizer.model.address import BoundaryPlan, Junction
 from quranic_phonemizer.model.canon import Rule
-from quranic_phonemizer.model.performance import Aspect, Hosts
-from quranic_phonemizer.render.recite import phonemes_by_word
+from quranic_phonemizer.model.performance import Aspect, Hosts, MergedInto
+from quranic_phonemizer.phonemize.legacy_views import phonemes_by_word
 from quranic_phonemizer.riwayat.hafs import HAFS
 
 
@@ -58,3 +58,27 @@ def test_a_stopped_pausal_alif_takes_madd_tabii_over_its_own_realization(
 
     word = "".join(phonemes_by_word(performance, score, alphabet)[20])
     assert word == "ʔana:"
+
+
+def test_a_stopped_final_glide_takes_madd_tabii_over_its_own_consonant(
+    packed, hafs
+) -> None:
+    """2:29:1, `هُوَ`: stopped, the waw merges into the damma before it
+    rather than being said as its own consonant."""
+    score = score_for(packed, hafs, 2, 29)
+    heh, waw = score.words[0].slots
+    plan = _stopped_on(score, 1)
+    performance = perform(score, HAFS, plan)
+
+    rules = {o.rule for o in performance.occurrences if o.parts.source == waw.id}
+    assert Rule.MADD_TABII in rules
+
+    merge = next(
+        a for a in performance.attributions
+        if isinstance(a, MergedInto) and waw.id in a.slots
+    )
+    host = next(
+        a for a in performance.attributions
+        if isinstance(a, Hosts) and heh.id in a.slots and a.aspect is Aspect.VOWEL
+    )
+    assert merge.sound == host.sound

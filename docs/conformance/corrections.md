@@ -73,6 +73,27 @@ shape. A representative spread:
 `99.921`/`97.852` (word/verse), which is where A8 found them; `cross-script`
 does not move. `docs/conformance/gate-residues.md` drops the class.
 
+## d890419, corrected: the provenance claim
+
+The commit's own body says "no phoneme, floor or provenance-gated count
+moves." Phonemes and floors did not; the `l1` gate's `Decorates` count did,
+by construction -- `letter_offsets_of`/`stray_letter_offsets` decorate
+offsets `_slot_draft` previously left with no spelling edge at all, and
+`Decorates` is exactly what a decoration adds. Against the pre-fix baseline:
+
+| Script | Decorates before | Decorates after | Delta |
+|---|---|---|---|
+| uthmani | 56245 | 57065 | +820 |
+| indopak | 47928 | 49840 | +1912 |
+
+`Decorates` is not a ceiling `l1` gates on -- residue (18, unchanged) is --
+so neither number failed anything. But the `l1` harness prints its own
+warning directly above these two rows: a zero residue reached by a rising
+`Decorates` count is not a proof of script-independence, which is the
+condition this delta is. The commit body's "no ... count moves" undersells
+that by two classes' worth: it is true of the counts the gate ceilings, not
+of every count the gate prints.
+
 ## The dead `سلسبيلا` entry
 
 `lexicon.yaml`'s `pausal_lexemes` section carried a second entry,

@@ -14,8 +14,11 @@ from quranic_phonemizer.model.address import (
     VariantSelection,
     VerseRef,
 )
-from quranic_phonemizer.render.anchored import anchored, graphemes_by_id
-from quranic_phonemizer.render.recite import phonemes_by_word
+from quranic_phonemizer.phonemize.legacy_views import (
+    anchored,
+    graphemes_by_id,
+    phonemes_by_word,
+)
 
 from .boundary import UnreachableWasl, plan_for, reaches_past
 from .site import Site

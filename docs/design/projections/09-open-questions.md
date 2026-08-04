@@ -19,25 +19,6 @@ about where the set is soft, rather than as a complete inventory.
 
 ---
 
-## 2. `Block` is not total
-
-[01-contract](01-contract.md) section 6.3 says "No block has an empty
-`source`", on the grounds that a rendered glyph the source did not produce still
-writes a sound and the closure over sounds places it beside the pairing that
-owns it. Three cases resist:
-
-- A soundless insertion. [06-two-texts](06-two-texts.md) row 12 writes a sukun
-  that owns nothing, so no sound closure reaches it.
-- A structural deletion. A tatweel and a verse marker take no pairing at all,
-  so no block can state that recitation drops them.
-- The divine name's carrier. E4 prints a block with an empty source and says so
-  in prose, while E13 draws the same word as one block holding the carrier
-  beside the cell whose length it carries. Two examples, one phenomenon, two
-  partitions.
-
-**Settled by** implementing `respelling` over the corpus and seeing which shape
-the writer actually needs. E13's is the one this document believes.
-
 ## 6. Laws that name a case they then exclude
 
 Two, all one sentence each, both pointing at a real graph the law rejects.
@@ -55,25 +36,6 @@ C1 reworded section 7.2 to say per part, not per unit.
 **Settled by** writing the completeness suite, which is where a law that cannot
 hold announces itself.
 
-## 7. The wire format is not specified
-
-[01-contract](01-contract.md) opens by promising a consumer never reads
-`model/`. Two things a consumer needs are not here.
-
-- **Discriminators.** `Witnesses(glyph, unit)` and `Decorates(glyph, unit)` have
-  identical payloads, and so do `Recolours(sound, by)` and
-  `Classifies(sound, by)`. [02-gate](02-gate.md) requires tagged unions and
-  canonical round trips; nothing names the tag or its literals.
-- **Letter literals.** `Unit.letter` is "the twenty-eight, plus `hamza` and
-  `taa_marbuta`". The prose says baa and yaa where the model says `ba` and
-  `ya`, and `heh` for one letter and `ha` for another.
-
-Also open: what `word_index` means on a structural glyph, which by section 4.3
-has no word.
-
-**Settled by** section 9 item 2's versioned schema, which is where these
-literals get chosen.
-
 ## 8. `08`'s `shortened` derivation
 
 [08-legacy-parity](08-legacy-parity.md) section 3 derives the shard's
@@ -85,16 +47,50 @@ silenced no part".
 **Settled by** deriving it from `respelling` instead, where the dropped carrier
 is visible, and rewriting section 3's row.
 
-## 9. `rendered` and the stop signs
+---
 
-[06-two-texts](06-two-texts.md) section 1 says a thing recitation does not say
-is absent from the recited text. Row 30 keeps every stop sign and calls it
-"advice and not recitation". E14 relies on the sign being kept.
+## 10. A tatweel seating a dagger is structural by class and not by edge
 
-**Settled by** saying which of the two `r.text("recited")` serializes, and
-whether the answer is the same as what `rendered` holds.
+Item 19 says there is one notion of structural and it is the `Structural` edge,
+and B1 moved the stop sign and the bare tatweel onto it. One case did not move:
+a tatweel that seats a dagger is `kind="structural"` and carries no `Structural`
+edge, so it takes a pairing. `2:255` has four, which makes this visible on the
+contract's own headline example:
+
+```
+glyph 17, 117, 345, 375   char U+0640   kind structural   Structural edge absent
+```
+
+`02-gate` section 4.5 says a non-structural glyph is in some pairing and a
+structural one is in none. A glyph that answers "structural" to one question and
+"not structural" to the other satisfies neither reading.
+
+**Settled by** deciding what a seat is when the thing it seats is the sounding
+glyph. The dagger sounds and the tatweel under it does not, so the seat is
+structural and the edge is what is missing; but B1 deliberately gave a seat a
+`Decorates` edge, and those two answers are not compatible.
+
+## 11. `replace()` on a `PhonemizeResult` returns a broken object
+
+`PhonemizeResult` holds its assembled graph in `_assembled`, set after
+construction because the projections need more than the published arrays.
+Section 3 names sixteen members and not that one, so it was taken off the
+dataclass field list. The consequence is that `dataclasses.replace()` succeeds
+and returns an object on which every method raises `AttributeError`.
+
+Both available fixes trade one wrong behaviour for another: putting the field
+back publishes a seventeenth member the contract does not name, and leaving it
+off keeps a public frozen dataclass that fails the one operation frozen
+dataclasses exist for.
+
+**Settled by** deciding whether the projections derive from the published arrays
+alone. If they can, `_assembled` goes and the question with it. If they cannot,
+the contract should say that a result is built and not copied.
 
 ---
+
+Entries 10 and 11 came from implementation contact rather than from the four
+document reviews, which is what the register said would happen.
 
 ## What was checked and holds
 
@@ -110,5 +106,5 @@ exactly one site. Section 9's own claims check out where they are countable:
 the iltiqa repair owns nothing, and every release in the corpus sits on the
 vowel. The rule vocabulary in [01-contract](01-contract.md) section 7 matches
 [07-rules](07-rules.md) section 2 and [03-examples](03-examples.md) section 3.1
-exactly. `comment_lint` and `structure_lint` report no problems and the suite
-passes.
+exactly, including `fakk_idgham` and `pausal_alif`, which phase D minted.
+`comment_lint` and `structure_lint` report no problems and the suite passes.

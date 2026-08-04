@@ -1,6 +1,6 @@
-"""Classifiers for facts already decided on the Slot: imala, tashil,
-ishmam and silah. Each gets a named occurrence so a projection can find
-it; none of them emits an effect on the sound.
+"""Classifiers for facts already decided on the Slot: imala, tashil and
+ishmam. Each gets a named occurrence so a projection can find it; none of
+them emits an effect on the sound.
 """
 from __future__ import annotations
 
@@ -10,12 +10,7 @@ from ..engine.neighbourhood import Neighbourhood
 from ..engine.plan import Phase, Plan, Verdict, mint
 from ..model.address import BoundaryPlan, SlotId
 from ..model.canon import CanonLetter as L
-from ..model.canon import (
-    Annotation,
-    Onset,
-    Rule,
-    VowelForm,
-)
+from ..model.canon import Annotation, Onset, Rule
 from ..model.performance import Occurrence, Participants
 from .tafkheem import Weight
 
@@ -51,33 +46,6 @@ class CanonicalColour:
         if Annotation.ISHMAM in slot.annotations:
             return _classification(Rule.ISHMAM, at)
         return None
-
-
-@dataclass(frozen=True, slots=True)
-class Silah:
-    """The pronoun haa's vowel: long in wasl, absent at pause.
-
-    Records that this is silah rather than an ordinary long vowel.
-    """
-
-    rule: Rule = Rule.SILAH
-    phase: Phase = Phase.LENGTH
-    triggers: frozenset = frozenset({VowelForm.LONG})
-
-    def look(
-        self, near: Neighbourhood, plan: Plan, at: SlotId,
-        boundaries: BoundaryPlan,
-    ) -> Verdict | None:
-        del plan
-        slot, word = near.slot(at), near.word_of(at)
-        if slot is None or word is None:
-            return None
-        if not slot.nucleus.is_silah:
-            return None
-        if boundaries.stopped_on(word):
-            # At a pause the silah is absent; `WaqfEnding` accounts for the slot.
-            return None
-        return _classification(Rule.SILAH, at)
 
 
 @dataclass(frozen=True, slots=True)

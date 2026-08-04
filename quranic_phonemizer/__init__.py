@@ -1,6 +1,22 @@
-"""Quranic phonemizer. `api.recitation(riwayah)` is the entry point; what is
-re-exported here is the vocabulary for stating a khilaf choice, which
-`Recitation.khilaf.points()` lists."""
+"""Quranic phonemizer. `Phonemizer(...).phonemize(ref)` is the entry point;
+`KhilafId`/`Option`/`VariantSelection` are the vocabulary for stating a
+khilaf choice, which `available_variants()` lists."""
 from .model.address import KhilafId, Option, VariantSelection
+from .phonemize import (
+    Phonemizer,
+    PhonemizeResult,
+    available_variants,
+    supported_riwayat,
+    tajweed_rules,
+)
 
-__all__: list[str] = ["KhilafId", "Option", "VariantSelection"]
+__all__: list[str] = [
+    "KhilafId",
+    "Option",
+    "Phonemizer",
+    "PhonemizeResult",
+    "VariantSelection",
+    "available_variants",
+    "supported_riwayat",
+    "tajweed_rules",
+]
