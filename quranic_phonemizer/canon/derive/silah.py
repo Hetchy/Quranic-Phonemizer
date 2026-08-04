@@ -5,7 +5,7 @@ pronoun haa; anywhere else the mark is an ordinary long vowel.
 """
 from __future__ import annotations
 
-from ...model.canon import CanonLetter, Long, Quality, Silah
+from ...model.canon import CanonLetter, Nucleus, Quality
 from ...model.inscription import SlotFact
 from .vocabulary import Context, Outcome, Sets, register
 
@@ -21,9 +21,10 @@ def silah_ya(context: Context) -> Outcome:
 
 
 def _silah_or_long(context: Context, quality: Quality) -> Outcome:
+    # One glyph supplies both quality and shape here, so it is a quality fact.
     if _is_pronoun_haa(context):
-        return Sets(SlotFact.NUCLEUS, Silah(quality))
-    return Sets(SlotFact.NUCLEUS, Long(quality))
+        return Sets(SlotFact.VOWEL_QUALITY, Nucleus.silah(quality))
+    return Sets(SlotFact.VOWEL_QUALITY, Nucleus.long(quality))
 
 
 def _is_pronoun_haa(context: Context) -> bool:

@@ -9,7 +9,7 @@ schema_version: 1
 # The letter after a quiescent noon or tanween noon decides the outcome. The
 # four sets are disjoint; ikhfaa haqiqi is everything they leave.
 followers_of_noon:
-  izhar_halqi: [ء, ه, ع, ح, غ, خ]     # حروف الحلق
+  izhar: [ء, ه, ع, ح, غ, خ]     # حروف الحلق
   idgham_bi_ghunnah: [ي, ن, م, و]      # ينمو
   idgham_bila_ghunnah: [ل, ر]
   iqlab: [ب]

@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 from typing import Protocol
 
 from ..model.address import Location, Riwayah, Script, VerseRef
-from ..model.canon import CanonLetter, Onset, RuleFamily
+from ..model.canon import CanonLetter, Onset
 from ..model.inscription import Grapheme, SlotFact, StopAdvice
 from .inventory import Inventory
 
@@ -89,12 +89,11 @@ class Evidence:
 
 @dataclass(frozen=True, slots=True)
 class Attestation:
-    """A grapheme witnessing a performance outcome. Names a rule family,
-    never a specific rule -- choosing among idgham variants is tajweed
-    classification and belongs elsewhere."""
+    """A grapheme witnessing a performance outcome, naming no rule --
+    choosing among idgham variants is tajweed classification and belongs
+    elsewhere."""
 
     cluster: int
-    family: RuleFamily
     offset: int
 
 

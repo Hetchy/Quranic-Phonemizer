@@ -8,18 +8,21 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from ..model.address import BoundaryPlan, SlotId, SoundId, VariantSelection
-from ..model.canon import NucleusKind, Onset, Phase, Rule, Score, Slot
+from ..model.canon import CLASSIFICATION_ONLY, Onset, Rule, Score, Slot
 from ..model.performance import (
     Aspect,
     Attribution,
+    Classifies,
     Consonant,
     Hosts,
     Inserted,
     MergedInto,
-    Nasal,
+    Modifier,
     Occurrence,
-    Participants,
     Performance,
+    Recolours,
+    Release,
+    SetsLength,
     Silent,
     Sound,
     Vowel,
@@ -30,6 +33,7 @@ from .plan import (
     Insert,
     Length,
     MergeInto,
+    Phase,
     Plan,
     Realize,
     Recolour,
@@ -37,7 +41,26 @@ from .plan import (
     Silence,
     SoundFeature,
 )
-from .plan import mint as plan_mint
+
+#: Which aspect a `CLASSIFICATION_ONLY` rule's `Classifies` edge names, for
+#: the rules that classify a sound at all -- `ishmam` classifies none.
+_CLASSIFIES_ASPECT: dict[Rule, Aspect] = {
+    Rule.TARQEEQ: Aspect.CONSONANT,
+    Rule.TASHIL: Aspect.CONSONANT,
+    Rule.WASL_START: Aspect.CONSONANT,
+    Rule.IDGHAM_MUTAJANISAYN_NAQIS: Aspect.CONSONANT,
+    Rule.IZHAR: Aspect.CONSONANT,
+    Rule.IZHAR_SHAFAWI: Aspect.CONSONANT,
+    Rule.LAM_QAMARIYYAH: Aspect.CONSONANT,
+    Rule.IMALA: Aspect.VOWEL,
+    Rule.SILAH: Aspect.VOWEL,
+    Rule.MADD_WAJIB_MUTTASIL: Aspect.VOWEL,
+    Rule.MADD_JAIZ_MUNFASIL: Aspect.VOWEL,
+    Rule.MADD_LAZIM: Aspect.VOWEL,
+    Rule.MADD_ARID_LIL_SUKUN: Aspect.VOWEL,
+    #: The waw or yaa this rule names has no vowel; it classifies the consonant.
+    Rule.MADD_LEEN: Aspect.CONSONANT,
+}
 
 class MaterialisationError(AssertionError):
     """A Plan that cannot become a Performance. Names both addresses."""
@@ -92,16 +115,16 @@ def perform(
 
 
 def _fill_plain(plan: Plan, score: Score) -> list[tuple]:
-    """Realize every (slot, aspect) no verdict claimed, tagged `Rule.PLAIN`.
-
-    `PLAIN` can't be a classifier: it would conflict with every claiming rule.
-    """
+    """Every (slot, aspect) no verdict claimed, filled from the Score itself."""
     # Only effects that produce or remove a sound claim the slot; Recolour
     # and Relength modify an existing one and must not count as claiming it.
+    # A release is an addition beside the consonant, not a replacement of
+    # it, so it must not count as claiming the slot either.
     claimed = {
         (effect.slot, effect.aspect)
         for effect in plan.effects()
-        if isinstance(effect, (Realize, MergeInto, Silence))
+        if isinstance(effect, (MergeInto, Silence))
+        or (isinstance(effect, Realize) and not isinstance(effect.sound, Release))
     }
     filled = []
     for slot in score.slots():
@@ -121,11 +144,13 @@ def _triggered(classifier, slot: Slot) -> bool:
     triggers = classifier.triggers
     if not triggers:
         return True
+    nucleus = slot.nucleus
     return (
         slot.letter in triggers
-        or slot.nucleus.kind in triggers
+        or nucleus.joined.form in triggers
+        or nucleus.stopped.form in triggers
         or slot.onset in triggers
-        or getattr(slot.nucleus, "quality", None) in triggers
+        or nucleus.quality in triggers
         or bool(slot.annotations & triggers)
     )
 
@@ -137,13 +162,6 @@ def _materialise(
     selection: VariantSelection,
 ) -> Performance:
     mint = _Mint(score.words[0].location.verse if score.words else None)
-    # Minted through the same `plan_mint` scheme as every other occurrence,
-    # so its id cannot collide with one a rule mints independently.
-    plain = Occurrence(
-        plan_mint(Rule.PLAIN, SlotId(score.words[0].location.verse, 0)),
-        Rule.PLAIN,
-        Participants(),
-    )
     sounds: list[tuple[SoundId, Sound]] = []
     attributions: list[Attribution] = []
     occurrences: list[Occurrence] = []
@@ -152,16 +170,16 @@ def _materialise(
 
     for _, verdict in plan.entries:
         occurrences.append(verdict.occurrence)
-    occurrences.append(plain)
 
     _realize(plan, mint, colours, sounds, attributions, hosted)
-    _fill(plan, score, mint, colours, sounds, attributions, hosted, plain)
+    _fill(plan, score, mint, colours, sounds, attributions, hosted)
     _resolve_merges(plan, hosted, attributions)
 
     return Performance(
         riwayah=score.riwayah,
         sounds=tuple(sounds),
         attributions=tuple(attributions),
+        modifiers=tuple(_modifiers(plan, hosted)),
         occurrences=tuple(occurrences),
         selection=selection,
         boundaries=boundaries,
@@ -171,15 +189,13 @@ def _materialise(
 def _plain_sound(slot: Slot, aspect: Aspect, colours, lengths=None) -> Sound:
     features = colours.get((slot.id, aspect), {})
     emphatic = bool(features.get(SoundFeature.EMPHATIC, False))
-    if aspect is Aspect.ONSET:
+    if aspect is Aspect.CONSONANT:
         return Consonant(
             slot.letter,
             geminate=slot.onset is Onset.GEMINATE,
             emphatic=emphatic,
         )
-    long = slot.nucleus.kind in (
-        NucleusKind.LONG, NucleusKind.SILAH, NucleusKind.PAUSAL_LONG
-    )
+    long = slot.nucleus.sounds_long
     override = (lengths or {}).get(slot.id)
     if override is not None:
         long = override is Length.LONG
@@ -194,8 +210,13 @@ def _realize(plan, mint, colours, sounds, attributions, hosted) -> None:
         for effect in verdict.effects:
             if isinstance(effect, Realize):
                 sound_id = mint.sound()
-                sounds.append((sound_id, _apply_colours(effect, colours)))
-                hosted[(effect.slot, effect.aspect)] = sound_id
+                sound = _apply_colours(effect, colours)
+                sounds.append((sound_id, sound))
+                # A release shares its slot and aspect with the consonant it
+                # echoes, so it must not be the one `hosted` remembers there:
+                # the plain fill still owns that key for its own sound.
+                if not isinstance(sound, Release):
+                    hosted[(effect.slot, effect.aspect)] = sound_id
                 attributions.append(
                     Hosts((effect.slot,), effect.aspect, sound_id,
                           verdict.occurrence.id)
@@ -209,7 +230,7 @@ def _realize(plan, mint, colours, sounds, attributions, hosted) -> None:
                 )
 
 
-def _fill(plan, score, mint, colours, sounds, attributions, hosted, plain) -> None:
+def _fill(plan, score, mint, colours, sounds, attributions, hosted) -> None:
     """Every aspect no rule spoke for, said as the Score writes it."""
     lengths = {
         e.slot: e.length for e in plan.effects() if isinstance(e, Relength)
@@ -218,7 +239,7 @@ def _fill(plan, score, mint, colours, sounds, attributions, hosted, plain) -> No
         sound_id = mint.sound()
         sounds.append((sound_id, _plain_sound(slot, aspect, colours, lengths)))
         hosted[(slot.id, aspect)] = sound_id
-        attributions.append(Hosts((slot.id,), aspect, sound_id, plain.id))
+        attributions.append(Hosts((slot.id,), aspect, sound_id, None))
 
 
 def _resolve_merges(plan, hosted, attributions) -> None:
@@ -242,6 +263,36 @@ def _resolve_merges(plan, hosted, attributions) -> None:
                 )
 
 
+def _modifiers(plan: Plan, hosted) -> list[Modifier]:
+    """The edge each applied `Recolour`/`Relength` leaves, plus one
+    `Classifies` per classification-only occurrence naming a sound."""
+    out: list[Modifier] = []
+    for _, verdict in plan.entries:
+        out.extend(_modifiers_for(verdict.occurrence, verdict.effects, hosted))
+    return out
+
+
+def _modifiers_for(occurrence: Occurrence, effects, hosted) -> list[Modifier]:
+    out: list[Modifier] = []
+    for effect in effects:
+        if isinstance(effect, Recolour):
+            sound_id = hosted.get((effect.slot, effect.aspect))
+            if sound_id is not None:
+                out.append(Recolours(sound_id, occurrence.id))
+        elif isinstance(effect, Relength):
+            sound_id = hosted.get((effect.slot, Aspect.VOWEL))
+            if sound_id is not None:
+                out.append(SetsLength(sound_id, occurrence.id, effect.length))
+    if not effects and occurrence.rule in CLASSIFICATION_ONLY:
+        aspect = _CLASSIFIES_ASPECT.get(occurrence.rule)
+        source_sound = None if aspect is None else hosted.get(
+            (occurrence.parts.source, aspect)
+        )
+        if source_sound is not None:
+            out.append(Classifies(source_sound, occurrence.id))
+    return out
+
+
 def _colours(plan: Plan) -> dict[tuple[SlotId, Aspect], dict[SoundFeature, bool]]:
     out: dict[tuple[SlotId, Aspect], dict[SoundFeature, bool]] = {}
     for effect in plan.effects():
@@ -262,17 +313,17 @@ def _apply_colours(effect: Realize, colours) -> Sound:
         return sound
     match sound:
         case Consonant():
-            return Consonant(sound.letter, sound.geminate, emphatic, sound.nasal)
+            return Consonant(
+                sound.letter, sound.geminate, emphatic, sound.ghunnah, sound.eased
+            )
         case Vowel():
             return Vowel(sound.quality, sound.long, emphatic)
-        case Nasal():
-            return Nasal(sound.place, emphatic)
     return sound
 
 
 def has_content(slot: Slot, aspect: Aspect) -> bool:
-    """`ONSET` always has canonical content; `NUCLEUS` has it unless the
-    nucleus is `Silent`. A canonically absent nucleus needs no Silent edge."""
-    if aspect is Aspect.ONSET:
+    """`CONSONANT` always has canonical content; `VOWEL` has it unless the
+    nucleus is silent. A canonically absent nucleus needs no Silent edge."""
+    if aspect is Aspect.CONSONANT:
         return True
-    return slot.nucleus.kind is not NucleusKind.SILENT
+    return not slot.nucleus.is_silent

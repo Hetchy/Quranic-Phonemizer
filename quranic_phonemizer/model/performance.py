@@ -24,8 +24,8 @@ class Aspect(StrEnum):
     """Exactly two members, because a `Slot` is definitionally an onset plus a
     nucleus. A third would mean the slot gained a third field."""
 
-    ONSET = "onset"
-    NUCLEUS = "nucleus"
+    CONSONANT = "consonant"
+    VOWEL = "vowel"
 
 
 class Side(StrEnum):
@@ -33,16 +33,20 @@ class Side(StrEnum):
     AFTER = "after"
 
 
-class NasalPlace(StrEnum):
-    """A place of articulation, not a rule name. The realization khilaf is
-    resolved in `rules/`, never in `render/`."""
+class Degree(StrEnum):
+    """A qalqala's three degrees. The letter it names lives in the rule that
+    minted it; this is how hard the echo bounces."""
 
-    BILABIAL = "bilabial"
-    ASSIMILATED = "assimilated"
+    SUGHRA = "sughra"
+    KUBRA = "kubra"
+    AKBAR = "akbar"
 
 
-class ReleaseKind(StrEnum):
-    QALQALA = "qalqala"
+class Length(StrEnum):
+    """A relength's target, published so `SetsLength` can name one."""
+
+    SHORT = "short"
+    LONG = "long"
 
 
 @dataclass(frozen=True, slots=True)
@@ -50,7 +54,8 @@ class Consonant:
     letter: CanonLetter
     geminate: bool = False
     emphatic: bool = False
-    nasal: bool = False
+    ghunnah: bool = False
+    eased: bool = False
 
 
 @dataclass(frozen=True, slots=True)
@@ -61,24 +66,20 @@ class Vowel:
 
 
 @dataclass(frozen=True, slots=True)
-class Nasal:
-    place: NasalPlace
-    emphatic: bool = False
-
-
-@dataclass(frozen=True, slots=True)
 class Release:
-    kind: ReleaseKind
+    degree: Degree
 
 
-Sound: TypeAlias = Consonant | Vowel | Nasal | Release
+Sound: TypeAlias = Consonant | Vowel | Release
 
 
 @dataclass(frozen=True, slots=True)
 class Participants:
-    """Family-specific canonical participants. Never a free-form dict."""
+    """A rule's units. `host` is the slot that keeps a shared sound, present
+    only for a merger."""
 
-    slots: tuple[SlotId, ...] = ()
+    source: SlotId
+    host: SlotId | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -90,12 +91,16 @@ class Occurrence:
 
 @dataclass(frozen=True, slots=True)
 class Hosts:
-    """Ordinary realization. `len(slots) > 1` is joint ownership."""
+    """Ordinary realization. `len(slots) > 1` is joint ownership.
+
+    `by` is `None` where the Score's own default fills the sound: no rule
+    claimed it, so there is nothing to cite.
+    """
 
     slots: tuple[SlotId, ...]
     aspect: Aspect
     sound: SoundId
-    by: OccurrenceId
+    by: OccurrenceId | None
 
 
 @dataclass(frozen=True, slots=True)
@@ -106,7 +111,7 @@ class Inserted:
     anchor: tuple[SlotId, Side]
     aspect: Aspect
     sound: SoundId
-    by: OccurrenceId
+    by: OccurrenceId | None
 
 
 @dataclass(frozen=True, slots=True)
@@ -117,7 +122,7 @@ class MergedInto:
     slots: tuple[SlotId, ...]
     aspect: Aspect
     sound: SoundId
-    by: OccurrenceId
+    by: OccurrenceId | None
 
 
 @dataclass(frozen=True, slots=True)
@@ -126,10 +131,41 @@ class Silent:
 
     slots: tuple[SlotId, ...]
     aspect: Aspect
-    by: OccurrenceId
+    by: OccurrenceId | None
 
 
 Attribution: TypeAlias = Hosts | Inserted | MergedInto | Silent
+
+
+@dataclass(frozen=True, slots=True)
+class Recolours:
+    """The edge a `Recolour` effect leaves once its feature is baked into
+    an already-hosted sound."""
+
+    sound: SoundId
+    by: OccurrenceId
+
+
+@dataclass(frozen=True, slots=True)
+class SetsLength:
+    """The edge a `Relength` effect leaves once its length is baked into
+    an already-hosted vowel."""
+
+    sound: SoundId
+    by: OccurrenceId
+    length: Length
+
+
+@dataclass(frozen=True, slots=True)
+class Classifies:
+    """A rule that names what a sound already is, producing and changing
+    nothing of its own."""
+
+    sound: SoundId
+    by: OccurrenceId
+
+
+Modifier: TypeAlias = Recolours | SetsLength | Classifies
 
 
 @dataclass(frozen=True, slots=True)
@@ -140,6 +176,7 @@ class Performance:
     riwayah: Riwayah
     sounds: tuple[tuple[SoundId, Sound], ...]
     attributions: tuple[Attribution, ...]
+    modifiers: tuple[Modifier, ...]
     occurrences: tuple[Occurrence, ...]
     selection: VariantSelection
     boundaries: BoundaryPlan

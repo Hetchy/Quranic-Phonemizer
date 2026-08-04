@@ -26,10 +26,15 @@ confirms and never gates, so the adapters are a later effort.
    the specification. Where this ledger and the contract disagree, say so
    rather than choosing silently.
 2. **Commit once per unit**, so a regression can be bisected to one.
-3. **Run `python tools/gates.py` and account for every number that moved.**
-   The entry says which gates this unit is allowed to move. A gate that moves
-   and is not named in the entry is the failure this whole arrangement exists
-   to catch.
+3. **Run the gates and account for every number that moved.** The entry says
+   which gates this unit is allowed to move. A gate that moves and is not named
+   in the entry is the failure this whole arrangement exists to catch.
+
+   Three gates read no corpus and take seconds; the other five each walk 77,433
+   words. So the cadence is `python tools/gates.py --fast` while working and
+   after each unit, and the full `python tools/gates.py` once before handing the
+   batch on. The full run is parallel across gates, which is why it is minutes
+   rather than tens of minutes.
 4. **When output moves, say which words.** Regenerate
    `tests/snapshots/head/{word,verse}.jsonl.gz` in the same commit and put the
    corrected refs in `docs/conformance/corrections.md`. `02-gate` section 1

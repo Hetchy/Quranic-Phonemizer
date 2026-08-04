@@ -10,7 +10,8 @@ import pytest
 from conftest import score_for
 from quranic_phonemizer.engine.run import perform
 from quranic_phonemizer.model.address import BoundaryPlan, Junction
-from quranic_phonemizer.model.canon import Onset, Quality, Rule, Short
+from quranic_phonemizer.model.canon import CanonLetter, Nucleus, Onset, Quality, Rule
+from quranic_phonemizer.model.performance import Aspect, Hosts, Release
 from quranic_phonemizer.render.recite import phonemes_by_word
 from quranic_phonemizer.riwayat.hafs import HAFS
 
@@ -108,12 +109,51 @@ def test_an_assimilated_closure_has_no_qalqala(packed, hafs, alphabet) -> None:
     score, performance = _performed(packed, hafs, 5, 28)
     held = {slot.id for slot in score.words[1].slots}
     fired = {
-        o.rule for o in performance.occurrences if held & set(o.parts.slots)
+        o.rule for o in performance.occurrences
+        if held & {o.parts.source, o.parts.host}
     }
     assert Rule.IDGHAM_MUTAJANISAYN_NAQIS in fired
     assert not fired & {
         Rule.QALQALA_SUGHRA, Rule.QALQALA_KUBRA, Rule.QALQALA_AKBAR
     }
+
+
+def test_a_complete_merger_has_no_tafkheem(packed, hafs, alphabet) -> None:
+    """`نَخْلُقكُّم` merges the qaf whole into the following kaf; an istilaa
+    letter with no sound of its own recolours nothing."""
+    score, performance = _performed(packed, hafs, 77, 20)
+    qaf = next(
+        slot for word in score.words for slot in word.slots
+        if slot.letter is CanonLetter.QAF
+    )
+    fired = {
+        o.rule for o in performance.occurrences if o.parts.source == qaf.id
+    }
+    assert Rule.IDGHAM_MUTAQARIBAYN in fired
+    assert Rule.TAFKHEEM not in fired
+
+
+def test_a_release_sits_beside_the_consonant_not_instead_of_it(
+    packed, hafs, alphabet
+) -> None:
+    """The release is an addition on the qaf's own slot: the qaf must still
+    sound, and `q` must render before `Q`, not after it."""
+    assert _word(packed, hafs, alphabet, (2, 3, 7)) == "rˤaˤzaqQna:hum"
+    score, performance = _performed(packed, hafs, 2, 3)
+    qaf = next(
+        slot for slot in score.words[6].slots if slot.letter is CanonLetter.QAF
+    )
+    hosts = [
+        a for a in performance.attributions
+        if isinstance(a, Hosts) and qaf.id in a.slots
+    ]
+    by_id = dict(performance.sounds)
+    aspects = {a.aspect for a in hosts if isinstance(by_id[a.sound], Release)}
+    assert aspects == {Aspect.CONSONANT}
+    assert any(
+        a.aspect is Aspect.CONSONANT and not isinstance(by_id[a.sound], Release)
+        for a in hosts
+    ), "the qaf's own sound must survive the release beside it"
 
 
 @pytest.mark.parametrize(("site", "prosthetic", "why"), PROSTHETIC)
@@ -132,7 +172,7 @@ def test_the_plural_meem_is_voweled_before_a_prosthetic_hamza(
     """Two quiescent letters would meet otherwise, so `ـكُمْ` takes a damma
     that only the following word calls for."""
     score = score_for(packed, hafs, 6, 93)
-    assert score.words[33].slots[-1].nucleus == Short(Quality.U)
+    assert score.words[33].slots[-1].nucleus == Nucleus.short(Quality.U)
     assert _word(packed, hafs, alphabet, (6, 93, 34)) == "ʔaŋfusakum"
 
 

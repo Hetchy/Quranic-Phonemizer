@@ -57,8 +57,16 @@ def digest(words: tuple[ScoreWord, ...]) -> str:
 
 def _line(word: ScoreWord) -> str:
     return f"{word.location}/{int(word.sakt_after)}/" + "|".join(
-        f"{slot.letter.value}:{slot.onset.value}:{slot.nucleus.kind.value}:"
-        f"{getattr(slot.nucleus, 'quality', '')}:{slot.origin.value}:"
+        f"{slot.letter.value}:{slot.onset.value}:{_nucleus(slot.nucleus)}:"
+        f"{slot.origin.value}:"
         f"{','.join(sorted(a.value for a in slot.annotations))}"
         for slot in word.slots
+    )
+
+
+def _nucleus(nucleus) -> str:
+    joined, stopped = nucleus.joined, nucleus.stopped
+    return (
+        f"{joined.form.value}{joined.quality.value if joined.quality else ''}"
+        f">{stopped.form.value}{stopped.quality.value if stopped.quality else ''}"
     )

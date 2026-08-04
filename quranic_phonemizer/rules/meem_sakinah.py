@@ -4,17 +4,11 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from ..engine.neighbourhood import Neighbourhood
-from ..engine.plan import MergeInto, Plan, Realize, Verdict, mint
+from ..engine.plan import MergeInto, Phase, Plan, Realize, Verdict, mint
 from ..model.address import BoundaryPlan, KhilafId, SlotId
 from ..model.canon import CanonLetter as L
-from ..model.canon import Onset, Phase, Rule
-from ..model.performance import (
-    Aspect,
-    Consonant,
-    Nasal,
-    Occurrence,
-    Participants,
-)
+from ..model.canon import Onset, Rule
+from ..model.performance import Aspect, Consonant, Occurrence, Participants
 from .ownership import is_quiescent
 from .khilaf import nasal_place
 from .tables import Followers
@@ -45,13 +39,13 @@ class GhunnahMushaddadah:
             Occurrence(
                 mint(Rule.GHUNNAH_MUSHADDADAH, at),
                 Rule.GHUNNAH_MUSHADDADAH,
-                Participants((at,)),
+                Participants(at),
             ),
             (
                 Realize(
                     at,
-                    Aspect.ONSET,
-                    Consonant(slot.letter, geminate=True, nasal=True),
+                    Aspect.CONSONANT,
+                    Consonant(slot.letter, geminate=True, ghunnah=True),
                 ),
             ),
         )
@@ -85,11 +79,14 @@ class MeemSakinah:
                     (
                         Realize(
                             at,
-                            Aspect.ONSET,
-                            Nasal(nasal_place(
-                                near.score.selection,
-                                KhilafId.IKHFAA_SHAFAWI_NASAL,
-                            )),
+                            Aspect.CONSONANT,
+                            Consonant(
+                                nasal_place(
+                                    near.score.selection,
+                                    KhilafId.IKHFAA_SHAFAWI_NASAL,
+                                ),
+                                ghunnah=True,
+                            ),
                         ),
                     ),
                 )
@@ -99,10 +96,10 @@ class MeemSakinah:
                     (
                         Realize(
                             following.id,
-                            Aspect.ONSET,
-                            Consonant(L.MEEM, geminate=True, nasal=True),
+                            Aspect.CONSONANT,
+                            Consonant(L.MEEM, geminate=True, ghunnah=True),
                         ),
-                        MergeInto(at, Aspect.ONSET, following.id, Aspect.ONSET),
+                        MergeInto(at, Aspect.CONSONANT, following.id, Aspect.CONSONANT),
                     ),
                 )
         # Izhar shafawi produces no sound of its own; the occurrence exists so
@@ -112,5 +109,5 @@ class MeemSakinah:
 
 def _verdict(rule: Rule, at: SlotId, other: SlotId, effects: tuple) -> Verdict:
     return Verdict(
-        Occurrence(mint(rule, at), rule, Participants((at, other))), effects
+        Occurrence(mint(rule, at), rule, Participants(at, other)), effects
     )

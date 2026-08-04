@@ -8,18 +8,20 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from ..engine.neighbourhood import Neighbourhood
-from ..engine.plan import MergeInto, Plan, Realize, Verdict, mint
+from ..engine.plan import (
+    MergeInto,
+    Phase,
+    Plan,
+    Realize,
+    Recolour,
+    SoundFeature,
+    Verdict,
+    mint,
+)
 from ..model.address import BoundaryPlan, KhilafId, SlotId
 from ..model.canon import CanonLetter as L
-from ..model.canon import Phase, Rule, SlotOrigin
-from ..model.performance import (
-    Aspect,
-    Consonant,
-    Nasal,
-    NasalPlace,
-    Occurrence,
-    Participants,
-)
+from ..model.canon import Rule, SlotOrigin
+from ..model.performance import Aspect, Consonant, Occurrence, Participants
 from .ownership import is_quiescent
 from .khilaf import DEFAULT_NASAL_PLACE, nasal_place
 from .tables import Followers
@@ -46,8 +48,8 @@ class NoonSakinah:
             return None
 
         match self.followers.of(following.letter):
-            case Rule.IZHAR_HALQI:
-                return _classification(Rule.IZHAR_HALQI, at, following.id)
+            case Rule.IZHAR:
+                return _classification(Rule.IZHAR, at, following.id)
             case Rule.IQLAB:
                 return _nasal(
                     Rule.IQLAB, at, following.id,
@@ -59,11 +61,11 @@ class NoonSakinah:
                 ):
                     # Izhar mutlaq: inside one word the noon keeps itself.
                     # دنيا، بنيان، قنوان، صنوان are the only sites.
-                    return _classification(Rule.IZHAR_MUTLAQ, at, following.id)
-                return _merge(Rule.IDGHAM_BI_GHUNNAH, at, following, nasal=True)
+                    return _classification(Rule.IZHAR, at, following.id)
+                return _merge(Rule.IDGHAM_BI_GHUNNAH, at, following, ghunnah=True)
             case Rule.IDGHAM_BILA_GHUNNAH:
                 return _merge(
-                    Rule.IDGHAM_BILA_GHUNNAH, at, following, nasal=False
+                    Rule.IDGHAM_BILA_GHUNNAH, at, following, ghunnah=False
                 )
         # Ikhfaa haqiqi has no khilaf: it is not a bilabial hiding.
         return _nasal(
@@ -85,33 +87,63 @@ def _between_names(slot, following) -> bool:
 def _classification(rule: Rule, at: SlotId, other: SlotId) -> Verdict:
     """Izhar produces no sound of its own; the occurrence exists so a
     projection can find it."""
-    return Verdict(Occurrence(mint(rule, at), rule, Participants((at, other))), ())
+    return Verdict(Occurrence(mint(rule, at), rule, Participants(at, other)), ())
 
 
-def _nasal(
-    rule: Rule, at: SlotId, other: SlotId, place: NasalPlace
-) -> Verdict:
-    """Iqlab and ikhfaa replace the noon's onset with a nasal."""
+def _nasal(rule: Rule, at: SlotId, other: SlotId, letter: L) -> Verdict:
+    """Iqlab and ikhfaa realize the noon as a hum on the letter it rides."""
     return Verdict(
-        Occurrence(mint(rule, at), rule, Participants((at, other))),
-        (Realize(at, Aspect.ONSET, Nasal(place)),),
+        Occurrence(mint(rule, at), rule, Participants(at, other)),
+        (Realize(at, Aspect.CONSONANT, Consonant(letter, ghunnah=True)),),
     )
 
 
-def _merge(rule: Rule, at: SlotId, host, *, nasal: bool) -> Verdict:
+def _merge(rule: Rule, at: SlotId, host, *, ghunnah: bool) -> Verdict:
     """Idgham: the noon's onset is the following onset, geminated.
 
     Both halves are realized here. The gemination exists because of the
     idgham, so the merged sound belongs to it and not to plain realization.
     """
     return Verdict(
-        Occurrence(mint(rule, at), rule, Participants((at, host.id))),
+        Occurrence(mint(rule, at), rule, Participants(at, host.id)),
         (
             Realize(
                 host.id,
-                Aspect.ONSET,
-                Consonant(host.letter, geminate=True, nasal=nasal),
+                Aspect.CONSONANT,
+                Consonant(host.letter, geminate=True, ghunnah=ghunnah),
             ),
-            MergeInto(at, Aspect.ONSET, host.id, Aspect.ONSET),
+            MergeInto(at, Aspect.CONSONANT, host.id, Aspect.CONSONANT),
         ),
     )
+
+
+@dataclass(frozen=True, slots=True)
+class IkhfaaWeight:
+    """Ikhfaa haqiqi's hum is heavy before an istilaa letter, the same set
+    `Weight` reads for tafkheem -- its own edge, not a `TAFKHEEM` one."""
+
+    followers: Followers
+    always_heavy: frozenset[L] = frozenset()
+    rule: Rule = Rule.IKHFAA_HAQIQI
+    phase: Phase = Phase.COLOUR
+    triggers: frozenset = field(default=frozenset({L.NOON}))
+
+    def look(
+        self, near: Neighbourhood, plan: Plan, at: SlotId,
+        boundaries: BoundaryPlan,
+    ) -> Verdict | None:
+        del plan, boundaries
+        if not is_quiescent(near.slot(at)):
+            return None
+        following = near.after(at)
+        if following is None or following.letter not in self.always_heavy:
+            return None
+        if self.followers.of(following.letter) is not None:
+            return None  # izhar, iqlab or idgham owns this pair instead
+        return Verdict(
+            Occurrence(
+                mint(Rule.IKHFAA_HAQIQI, at, variant=1), Rule.IKHFAA_HAQIQI,
+                Participants(at, following.id),
+            ),
+            (Recolour(at, Aspect.CONSONANT, SoundFeature.EMPHATIC, True),),
+        )

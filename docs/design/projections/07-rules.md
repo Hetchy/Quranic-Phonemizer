@@ -103,11 +103,11 @@ caused it, and for two of them it is the boundary plan rather than a unit.
 
 | Rule | Source | Trigger | Crosses | On the sound | Recited |
 |---|---|---|---|---|---|
-| `madd_tabii` | the unit whose vowel is long | - | never | sets the length | rows 16, 17, 26, 27 |
-| `madd_wajib_muttasil` | the unit whose vowel is long | the hamza in the same word | never | sets the length | as above |
-| `madd_jaiz_munfasil` | the unit whose vowel is long | the hamza that begins the next word | always | sets the length | as above, and row 2 when the plan stops |
-| `madd_lazim` | the unit whose vowel is long | the unit whose permanent sukun or gemination follows | never | sets the length | as above |
-| `madd_arid_lil_sukun` | the unit whose vowel is long | the unit the stop silenced | never | sets the length | as above |
+| `madd_tabii` | the unit whose vowel is long | - | never | hosts the merged vowel | rows 16, 17, 26, 27 |
+| `madd_wajib_muttasil` | the unit whose vowel is long | the hamza in the same word | never | names the length | as above |
+| `madd_jaiz_munfasil` | the unit whose vowel is long | the hamza that begins the next word | always | names the length | as above, and row 2 when the plan stops |
+| `madd_lazim` | the unit whose vowel is long | the unit whose permanent sukun or gemination follows | never | names the length | as above |
+| `madd_arid_lil_sukun` | the unit whose vowel is long | the unit the stop silenced | never | names the length | as above |
 | `madd_leen` | the unit whose waw or yaa has no vowel and follows a short a | the unit the stop silenced | never | names the sound | unchanged |
 | `iltiqa_shortening` | the unit whose long vowel shortens | the sakin it met | always | sets the length to short | row 10 |
 
@@ -132,7 +132,7 @@ still states its own realization beside it.
 |---|---|---|---|---|---|
 | `tafkheem` | the unit whose sound is heavy | - | never | makes the sound heavy, and the vowel of the same unit with it | unchanged |
 | `tarqeeq` | the unit whose raa is light | - | never | names the sound | unchanged |
-| `imala` | the unit whose vowel tilts | - | never | sets the vowel's quality | unchanged |
+| `imala` | the unit whose vowel tilts | - | never | names the vowel's quality | unchanged |
 | `tashil` | the unit whose hamza is eased | - | never | names the sound | unchanged |
 | `ishmam` | the unit the reciter rounds his lips on | - | never | produces nothing | unchanged |
 

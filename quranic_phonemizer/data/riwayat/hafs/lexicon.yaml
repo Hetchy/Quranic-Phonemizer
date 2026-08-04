@@ -100,18 +100,6 @@ sections:
     entries: ["ءسم", "ءبن", "ءبنة", "ءمرء", "ءمرءة", "ءثنن", "ءثنتن", "ءست",
               "ءمش", "ءقض", "ءءت", "ءءتن"]
 
-  # The seven alifs: short in wasl, long at pause. Alone in being keyed on
-  # the vocalised notation rather than the bare skeleton, because the vowels
-  # are what tell them apart -- which is why one proclitic is two characters.
-  # `لَٰكِنَّ` and `لَّـٰكِنَّا۠` share a key even with the vowels and the
-  # gemination spelled, so the second is a Ledger entry rather than a
-  # lexeme: one site, and no rule can reach it. `قَوَارِيرَا۠` is the same:
-  # only the first of its three sites is pausal.
-  pausal_lexemes:
-    match: proclitic
-    budget: 10
-    entries: ["ءaنa", "سaلسaبiلa"]
-
   # Form VIII with lam as the first radical. After a wasl hamza these are
   # shaped exactly like the article before a sun letter -- ءلت... either way
   # -- and the article's gemination is an attestation rather than a canonical

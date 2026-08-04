@@ -69,9 +69,8 @@ def apply_vowel_khilaf(khilaf: VowelKhilaf):
             name, site = found
             chosen = selection.chosen(site.khilaf, site=name)
             quality = site.options[chosen or site.default]
-            # The kind is the script's; only the vowel is under dispute.
-            held = span[site.index].nucleus
-            span[site.index].nucleus = type(held)(quality)
+            # The shape is the script's; only the vowel is under dispute.
+            span[site.index].nucleus = span[site.index].nucleus.with_quality(quality)
             if site.annotation is not None:
                 span[site.index].annotations |= {site.annotation}
 

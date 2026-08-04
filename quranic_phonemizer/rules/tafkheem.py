@@ -7,15 +7,13 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from ..engine.neighbourhood import Neighbourhood
-from ..engine.plan import Plan, Recolour, SoundFeature, Verdict, mint
+from ..engine.plan import Phase, Plan, Recolour, SoundFeature, Verdict, mint
 from ..model.address import BoundaryPlan, SlotId
 from ..model.canon import CanonLetter as L
 from ..model.canon import (
     Annotation,
     CanonLetter,
-    NucleusKind,
     Onset,
-    Phase,
     Quality,
     Rule,
 )
@@ -83,14 +81,22 @@ class Emphasis:
             return None
         if not self.weight.is_heavy(near, slot, plan, boundaries):
             return None
-        effects = [Recolour(at, Aspect.ONSET, SoundFeature.EMPHATIC, True)]
+        effects = []
+        if not plan.merged_away(at, Aspect.CONSONANT):
+            effects.append(
+                Recolour(at, Aspect.CONSONANT, SoundFeature.EMPHATIC, True)
+            )
         if _quality(slot) is Quality.A and not _silenced(plan, slot):
             effects.append(
-                Recolour(at, Aspect.NUCLEUS, SoundFeature.EMPHATIC, True)
+                Recolour(at, Aspect.VOWEL, SoundFeature.EMPHATIC, True)
             )
+        if not effects:
+            # A complete merger left this letter no sound of its own to be
+            # heavy; a partial one (idgham_mutajanisayn_naqis) still has one.
+            return None
         return Verdict(
             Occurrence(mint(Rule.TAFKHEEM, at), Rule.TAFKHEEM,
-                       Participants((at,))),
+                       Participants(at)),
             tuple(effects),
         )
 
@@ -101,7 +107,7 @@ def _raa_is_heavy(near, slot, plan, always_heavy) -> bool:
     if (
         before is not None
         and before.letter is L.YA
-        and before.nucleus.kind is NucleusKind.SILENT
+        and before.nucleus.is_silent
     ):
         # A raa after a leen yaa follows the yaa and stays light.
         return False
@@ -132,7 +138,7 @@ def _raa_is_heavy(near, slot, plan, always_heavy) -> bool:
 def _silenced(plan, slot) -> bool:
     """A nucleus a BOUNDARY rule removed. COLOUR runs after BOUNDARY, so a raa
     that lost its kasra at a stop is governed by the vowel before it."""
-    return plan.merged_away(slot.id, Aspect.NUCLEUS)
+    return plan.merged_away(slot.id, Aspect.VOWEL)
 
 
 def _is_divine_lam(near: Neighbourhood, slot, plan) -> bool:
@@ -158,7 +164,7 @@ def _governing(near: Neighbourhood, slot, plan):
     for _ in range(MAX_LOOKBACK):
         if before is None:
             return None
-        silent = before.nucleus.kind is NucleusKind.SILENT
+        silent = before.nucleus.is_silent
         if not (silent or _silenced(plan, before)):
             return before
         before = near.before(before.id)
@@ -166,4 +172,4 @@ def _governing(near: Neighbourhood, slot, plan):
 
 
 def _quality(slot):
-    return getattr(slot.nucleus, "quality", None)
+    return slot.nucleus.quality

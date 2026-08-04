@@ -11,19 +11,8 @@ from typing import Any
 
 from ..dataio import load_yaml, require_keys
 from ..model.address import Riwayah, Script
-from ..model.canon import (
-    Annotation,
-    CanonLetter,
-    Long,
-    Nucleus,
-    Onset,
-    PausalLong,
-    Quality,
-    Short,
-    Silah,
-    Silent,
-)
-from ..model.inscription import GraphemeClass, SlotFact, StopAdvice
+from ..model.canon import Annotation, CanonLetter, Nucleus, Onset, Quality
+from ..model.inscription import VOWEL_FACTS, GraphemeClass, SlotFact, StopAdvice
 
 SCHEMA_VERSION = 1
 
@@ -126,23 +115,24 @@ class Inventory:
 
 # ---------------------------------------------------------------- value parsing
 _NUCLEUS_KINDS = {
-    "silent": Silent,
-    "short": Short,
-    "long": Long,
-    "silah": Silah,
-    "pausallong": PausalLong,
+    "silent": Nucleus.silent,
+    "short": Nucleus.short,
+    "long": Nucleus.long,
+    "silah": Nucleus.silah,
+    "pausallong": Nucleus.pausal_long,
 }
 
 
 def _nucleus(raw: Any, *, where: str) -> Nucleus:
     if not isinstance(raw, dict) or "kind" not in raw:
         raise InventoryError(f"{where}: a nucleus needs a `kind`, got {raw!r}")
-    factory = _NUCLEUS_KINDS.get(str(raw["kind"]).replace("_", "").lower())
+    kind = str(raw["kind"]).replace("_", "").lower()
+    factory = _NUCLEUS_KINDS.get(kind)
     if factory is None:
         raise InventoryError(f"{where}: unknown nucleus kind {raw['kind']!r}")
-    if factory is Silent:
-        return Silent()
-    return factory(_member(Quality, raw.get("quality"), where=where))  # type: ignore[operator]
+    if kind == "silent":
+        return Nucleus.silent()
+    return factory(_member(Quality, raw.get("quality"), where=where))
 
 
 def _member(enum: type, raw: Any, *, where: str):
@@ -161,11 +151,11 @@ def _fact_value(fact: SlotFact, raw: Any, *, where: str) -> object:
             return _member(CanonLetter, raw, where=where)
         case SlotFact.ONSET:
             return _member(Onset, raw, where=where)
-        case SlotFact.NUCLEUS:
+        case _ if fact in VOWEL_FACTS:
             return _nucleus(raw, where=where)
         case SlotFact.SAKT:
             return bool(raw)
-        case SlotFact.ANNOTATION:
+        case SlotFact.TAJWEED_MARK:
             return _member(Annotation, raw, where=where)
     raise InventoryError(f"{where}: unhandled fact {fact!r}")
 

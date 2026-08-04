@@ -11,7 +11,6 @@ from ..model.canon import (
     CARRIER_OF,
     Annotation,
     CanonLetter,
-    NucleusKind,
     Onset,
     Quality,
     Score,
@@ -146,9 +145,9 @@ def _nunated(slots, index: int) -> bool:
     if index + 1 >= len(slots) or slots[index + 1].origin is not SlotOrigin.NUNATION:
         return False
     return (
-        slots[index].nucleus.kind is NucleusKind.SHORT
+        slots[index].nucleus.is_short
         and slots[index].origin is not SlotOrigin.NUNATION
-        and getattr(slots[index].nucleus, "quality", None) in _TANWEEN_ROLE
+        and slots[index].nucleus.quality in _TANWEEN_ROLE
     )
 
 
@@ -167,7 +166,7 @@ def _spelled_name(slots, index: int, pen: Pen):
 
 
 def _spelt(slot) -> tuple:
-    return (slot.letter, slot.nucleus.kind, getattr(slot.nucleus, "quality", None))
+    return (slot.letter, slot.nucleus)
 
 
 def _slot(slot, pen: Pen, nucleus: str | None = None) -> str:
@@ -198,34 +197,33 @@ def _nucleus(slot, pen: Pen) -> str:
         # The mark stands for the whole vowel, carrier and all, whichever
         # of the two the khilaf selected.
         return pen.role(IMALA)
-    quality = _BASE.get(getattr(nucleus, "quality", None), None) or getattr(
-        nucleus, "quality", None
+    quality = _BASE.get(nucleus.quality, None) or nucleus.quality
+    if nucleus.is_silent:
+        return pen.role("sukun")
+    if nucleus.is_short:
+        return pen.role(_short_role(quality))
+    if nucleus.is_long or nucleus.is_pausal_long:
+        # Always write the full haraka plus carrier rather than the dagger
+        # abbreviation; both read back to the same slot. The madd sign says
+        # the carrier lengthens rather than standing for a letter, which is
+        # what keeps a bare alif from reading back as a prosthetic hamza.
+        carrier = CARRIER_OF[quality]
+        return (
+            pen.role(_short_role(quality))
+            + (pen.carriers.get(carrier) or pen.letter(carrier))
+            + pen.roles.get(MADD, "")
+        )
+    if nucleus.is_silah:
+        # One script spells the pronoun's vowel and its carrier in a
+        # single mark; the other writes the vowel and then the carrier.
+        composite, carrier = _SILAH_ROLES[quality]
+        if composite in pen.roles:
+            return pen.role(composite)
+        return pen.role(_short_role(quality)) + pen.role(carrier)
+    raise WriteError(
+        f"no spelling for nucleus {nucleus.joined.form.value}/"
+        f"{nucleus.stopped.form.value}"
     )
-    match nucleus.kind:
-        case NucleusKind.SILENT:
-            return pen.role("sukun")
-        case NucleusKind.SHORT:
-            return pen.role(_short_role(quality))
-        case NucleusKind.LONG | NucleusKind.PAUSAL_LONG:
-            # Always write the full haraka plus carrier rather than the
-            # dagger abbreviation; both read back to the same slot. The madd
-            # sign says the carrier lengthens rather than standing for a
-            # letter, which is what keeps a bare alif from reading back as a
-            # prosthetic hamza.
-            carrier = CARRIER_OF[quality]
-            return (
-                pen.role(_short_role(quality))
-                + (pen.carriers.get(carrier) or pen.letter(carrier))
-                + pen.roles.get(MADD, "")
-            )
-        case NucleusKind.SILAH:
-            # One script spells the pronoun's vowel and its carrier in a
-            # single mark; the other writes the vowel and then the carrier.
-            composite, carrier = _SILAH_ROLES[quality]
-            if composite in pen.roles:
-                return pen.role(composite)
-            return pen.role(_short_role(quality)) + pen.role(carrier)
-    raise WriteError(f"no spelling for nucleus kind {nucleus.kind.value}")
 
 
 def _short_role(quality) -> str:

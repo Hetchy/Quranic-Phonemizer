@@ -48,29 +48,29 @@ seats: ["ـ"]
 combining_hamza: ["ٔ", "ٕ"]
 
 evidences:
-  "َ": {fact: NUCLEUS, cls: haraka, role: fatha,
+  "َ": {fact: VOWEL_QUALITY, cls: haraka, role: fatha,
        value: {kind: Short, quality: A}}
-  "ُ": {fact: NUCLEUS, cls: haraka, role: damma,
+  "ُ": {fact: VOWEL_QUALITY, cls: haraka, role: damma,
        value: {kind: Short, quality: U}}
-  "ِ": {fact: NUCLEUS, cls: haraka, role: kasra,
+  "ِ": {fact: VOWEL_QUALITY, cls: haraka, role: kasra,
        value: {kind: Short, quality: I}}
-  "ً": {fact: NUCLEUS, cls: tanween, role: fathatan,
+  "ً": {fact: VOWEL_QUALITY, cls: tanween, role: fathatan,
        derivation: tanween}
-  "ٌ": {fact: NUCLEUS, cls: tanween, role: dammatan,
+  "ٌ": {fact: VOWEL_QUALITY, cls: tanween, role: dammatan,
        derivation: tanween}
-  "ٍ": {fact: NUCLEUS, cls: tanween, role: kasratan,
+  "ٍ": {fact: VOWEL_QUALITY, cls: tanween, role: kasratan,
        derivation: tanween}
-  "ْ": {fact: NUCLEUS, cls: haraka, role: sukun,
+  "ْ": {fact: VOWEL_ABSENCE, cls: haraka, role: sukun,
        value: {kind: Silent}}
   "ّ": {fact: ONSET, cls: shadda, role: shadda,
        derivation: gemination}
-  "ٰ": {fact: NUCLEUS, cls: small_vowel, role: dagger,
+  "ٰ": {fact: VOWEL_LENGTH, cls: small_vowel, role: dagger,
        derivation: length_a}
   "ٔ": {fact: LETTER, cls: base, role: combining_hamza, value: HAMZA}
   "ٕ": {fact: LETTER, cls: base, role: combining_hamza, value: HAMZA}
-  "ٗ": {fact: NUCLEUS, cls: small_vowel, role: silah_waw,
+  "ٗ": {fact: VOWEL_QUALITY, cls: small_vowel, role: silah_waw,
        derivation: silah_waw}
-  "ٖ": {fact: NUCLEUS, cls: small_vowel, role: silah_ya,
+  "ٖ": {fact: VOWEL_QUALITY, cls: small_vowel, role: silah_ya,
        derivation: silah_ya}
   # A yaa the rasm leaves out, written small. `ٖ` above is not the same mark:
   # it spells the kasra and its yaa together, so it stays a nucleus.

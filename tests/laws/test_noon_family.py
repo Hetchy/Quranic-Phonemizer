@@ -11,9 +11,9 @@ import pytest
 
 from conftest import performance_for, score_for
 from quranic_phonemizer.engine.classifier import RuleSet
-from quranic_phonemizer.engine.plan import ConflictError, Plan, Realize
+from quranic_phonemizer.engine.plan import ConflictError, Phase, Plan, Realize
 from quranic_phonemizer.model.address import Script, SlotId, VerseRef
-from quranic_phonemizer.model.canon import CanonLetter, NucleusKind, Phase, Rule
+from quranic_phonemizer.model.canon import CanonLetter, Rule
 from quranic_phonemizer.model.performance import (
     Aspect,
     Consonant,
@@ -44,7 +44,7 @@ def test_the_outcome_sets_have_the_counts_the_domain_gives_them() -> None:
     """Ikhfaa is the remainder, so a union check alone cannot catch a
     miscounted member."""
     by_rule = FOLLOWERS.by_rule
-    assert len(by_rule[Rule.IZHAR_HALQI]) == 6, "the six throat letters"
+    assert len(by_rule[Rule.IZHAR]) == 6, "the six throat letters"
     assert len(by_rule[Rule.IQLAB]) == 1, "only the baa"
     assert len(by_rule[Rule.IDGHAM_BI_GHUNNAH]) == 4, "يرملون minus two"
     assert len(by_rule[Rule.IDGHAM_BILA_GHUNNAH]) == 2, "lam and raa"
@@ -73,13 +73,13 @@ def test_tanween_and_noon_sakinah_are_one_rule(packed, hafs) -> None:
         slot.id
         for slot in score.slots()
         if slot.letter is CanonLetter.NOON
-        and slot.nucleus.kind is NucleusKind.SILENT
+        and slot.nucleus.is_silent
     }
     named = {
-        parts
+        slot
         for o in performance.occurrences
-        if o.rule is not Rule.PLAIN
-        for parts in o.parts.slots
+        for slot in (o.parts.source, o.parts.host)
+        if slot is not None
     }
     assert triggers & named, "no noon slot participated in any occurrence"
 
@@ -101,10 +101,20 @@ def test_izhar_is_classification_only(packed, hafs) -> None:
     """It produces no sound of its own and still exists, so a projection can
     find it."""
     _, performance = performance_for(packed, hafs, 2, 6, RULES)
-    izhar = [o for o in performance.occurrences if o.rule is Rule.IZHAR_HALQI]
+    izhar = [o for o in performance.occurrences if o.rule is Rule.IZHAR]
     assert izhar, "2:6 has a noon before a throat letter"
     owned = {a.by for a in performance.attributions}
     assert all(o.id not in owned for o in izhar)
+
+
+def test_izhar_still_names_the_sound_it_classifies(packed, hafs) -> None:
+    """No attribution, but a `Classifies` edge in the document names the
+    noon's own sound, so a projection can find that too."""
+    _, performance = performance_for(packed, hafs, 2, 6, RULES)
+    izhar = [o for o in performance.occurrences if o.rule is Rule.IZHAR]
+    assert izhar, "2:6 has a noon before a throat letter"
+    classified = {m.by for m in performance.modifiers}
+    assert all(o.id in classified for o in izhar)
 
 
 def test_no_cross_word_effect_crosses_a_stop(packed, hafs) -> None:
@@ -123,7 +133,8 @@ def test_no_cross_word_effect_crosses_a_stop(packed, hafs) -> None:
         for slot in word.slots
     }
     for occurrence in performance.occurrences:
-        words = {word_of[s] for s in occurrence.parts.slots if s in word_of}
+        parts = (occurrence.parts.source, occurrence.parts.host)
+        words = {word_of[s] for s in parts if s is not None and s in word_of}
         assert len(words) <= 1, f"{occurrence.rule.value} crossed a stop"
 
 
@@ -147,8 +158,8 @@ def _verdict(rule: Rule, slot: SlotId, sounds):
 
     return Verdict(
         Occurrence(OccurrenceId(slot.verse, hash(rule) % 1000), rule,
-                   Participants((slot,))),
-        (Realize(slot, Aspect.ONSET, sounds),),
+                   Participants(slot)),
+        (Realize(slot, Aspect.CONSONANT, sounds),),
     )
 
 
@@ -156,7 +167,7 @@ def test_every_sound_has_a_named_occurrence(packed, hafs) -> None:
     """Every attribution must name an occurrence that actually exists."""
     _, performance = performance_for(packed, hafs, 2, 2, RULES)
     known = {o.id for o in performance.occurrences}
-    assert all(a.by in known for a in performance.attributions)
+    assert all(a.by is None or a.by in known for a in performance.attributions)
     counts = collections.Counter(
         a.by for a in performance.attributions if isinstance(a, Hosts)
     )

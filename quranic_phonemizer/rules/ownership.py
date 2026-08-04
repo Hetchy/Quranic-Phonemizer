@@ -5,7 +5,7 @@ letters -- lam, meem and noon each trigger more than one family.
 """
 from __future__ import annotations
 
-from ..model.canon import NucleusKind, Onset, Slot
+from ..model.canon import Onset, Slot
 
 
 def is_quiescent(slot: Slot | None) -> bool:
@@ -13,6 +13,6 @@ def is_quiescent(slot: Slot | None) -> bool:
     the ghunnah rule instead."""
     return (
         slot is not None
-        and slot.nucleus.kind is NucleusKind.SILENT
+        and slot.nucleus.is_silent
         and slot.onset is not Onset.GEMINATE
     )

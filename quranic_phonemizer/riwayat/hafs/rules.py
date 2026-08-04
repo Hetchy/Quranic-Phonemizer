@@ -6,9 +6,9 @@ rules.yaml, rather than subclassing a profile or branching inside a rule.
 from __future__ import annotations
 
 from ...engine.classifier import RuleSet
+from ...engine.plan import Phase
 from ...model.address import Riwayah
-from ...model.canon import Phase
-from ...rules.annotation import CanonicalColour, Sakt, Silah, Tarqeeq
+from ...rules.annotation import CanonicalColour, Silah, Tarqeeq
 from ...rules.boundary import (
     PausalAlif,
     SoftenedHamza,
@@ -22,7 +22,7 @@ from ...rules.idgham import Idgham
 from ...rules.lam_shamsiyyah import ArticleLam, ArticleShape
 from ...rules.madd import IltiqaRepair, MaddClass, MaddLeen, PausalGlide
 from ...rules.meem_sakinah import GhunnahMushaddadah, MeemSakinah
-from ...rules.noon_sakinah import NoonSakinah
+from ...rules.noon_sakinah import IkhfaaWeight, NoonSakinah
 from ...rules.qalqala import Qalqala
 from ...rules.tafkheem import Emphasis, Weight
 from .resources import khilaf, lexicon, rule_tables
@@ -41,7 +41,7 @@ def _build() -> RuleSet:
                 WaslHamza(), SoftenedHamza(), TanweenAtWaqf(), PausalAlif(),
                 TanweenBeforeWasl(),
                 WaqfEnding(yaa=khilaf().yaa),
-                TaaMarbutaAtWaqf(), Sakt(),
+                TaaMarbutaAtWaqf(),
             ),
             Phase.MERGE: (
                 NoonSakinah(followers=tables.followers_of_noon),
@@ -59,8 +59,12 @@ def _build() -> RuleSet:
                 Emphasis(weight=weight),
                 Tarqeeq(weight=weight),
                 CanonicalColour(),
+                IkhfaaWeight(
+                    followers=tables.followers_of_noon,
+                    always_heavy=tables.always_heavy,
+                ),
             ),
-            Phase.RELEASE: (Qalqala(letters=tables.qalqala),),
+            Phase.RELEASE: (Qalqala(letters=tables.qalqala, pairs=tables.pairs),),
         }
     )
 

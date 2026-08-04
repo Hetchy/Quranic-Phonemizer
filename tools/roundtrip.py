@@ -42,7 +42,7 @@ def _shape(before, after) -> str:
         if a.onset is not b.onset:
             return f"onset {a.onset.value}->{b.onset.value}"
         if a.nucleus != b.nucleus:
-            return f"nucleus {a.nucleus.kind.value}->{b.nucleus.kind.value}"
+            return f"nucleus {a.nucleus}->{b.nucleus}"
         if a.origin is not b.origin:
             return f"origin {a.origin.value}->{b.origin.value}"
         if a.annotations != b.annotations:

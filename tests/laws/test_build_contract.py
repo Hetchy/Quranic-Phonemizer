@@ -70,16 +70,14 @@ def test_an_edge_into_a_dropped_draft_raises(hafs) -> None:
 
 
 def test_withdrawing_a_draft_takes_all_three_kinds_of_edge(hafs) -> None:
-    from quranic_phonemizer.model.canon import RuleFamily
-
     verse = VerseRef(112, 2)
     draft, kept = _Draft(letter=CanonLetter.ALIF), _Draft(letter=CanonLetter.MEEM)
     scribe = Scribe(verse)
     for subject in (draft, kept):
         scribe.evidence(0, subject, SlotFact.LETTER)
         scribe.decoration(1, subject)
-        scribe.attestation(2, RuleFamily.LENGTHENING, subject)
+        scribe.attestation(2, subject)
     scribe.withdraw([draft])
     assert [row[1] for row in scribe.evidences] == [kept.uid]
     assert [row[1] for row in scribe.decorates] == [kept.uid]
-    assert [row[2] for row in scribe.attests] == [kept.uid]
+    assert [row[1] for row in scribe.attests] == [kept.uid]

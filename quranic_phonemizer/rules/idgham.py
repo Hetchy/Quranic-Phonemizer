@@ -8,10 +8,10 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from ..engine.neighbourhood import Neighbourhood
-from ..engine.plan import MergeInto, Plan, Realize, Verdict, mint
+from ..engine.plan import MergeInto, Phase, Plan, Realize, Verdict, mint
 from ..model.address import BoundaryPlan, SlotId
 from ..model.canon import CanonLetter as L
-from ..model.canon import CanonLetter, NucleusKind, Phase, Rule
+from ..model.canon import CanonLetter, Rule
 from ..model.performance import Aspect, Consonant, Occurrence, Participants
 from .lam_shamsiyyah import ArticleShape
 from .meem_sakinah import NASAL_LETTERS
@@ -49,7 +49,7 @@ class Idgham:
     ) -> Verdict | None:
         del plan, boundaries
         here = near.slot(at)
-        if here is None or here.nucleus.kind is not NucleusKind.SILENT:
+        if here is None or not here.nucleus.is_silent:
             return None
         if self.article(near, at):
             return None  # lam shamsiyyah owns this slot
@@ -65,7 +65,7 @@ class Idgham:
                 return None
 
         occurrence = Occurrence(
-            mint(rule, at), rule, Participants((at, following.id))
+            mint(rule, at), rule, Participants(at, following.id)
         )
         if rule is Rule.IDGHAM_MUTAJANISAYN_NAQIS:
             # The first letter survives as a colour on the second, so nothing
@@ -76,18 +76,18 @@ class Idgham:
             (
                 Realize(
                     following.id,
-                    Aspect.ONSET,
+                    Aspect.CONSONANT,
                     Consonant(
                         following.letter,
                         geminate=True,
                         # A doubled noon or meem is held on its ghunnah
                         # wherever it stands, and one the idgham doubled is
-                        # no different: the meem of `ٱرْكَب مَّعَنَا` is nasal,
+                        # no different: the meem of `ٱرْكَب مَّعَنَا` hums,
                         # exactly as `GhunnahMushaddadah` would have made it
                         # had the rasm written the shadda for itself.
-                        nasal=following.letter in NASAL_LETTERS,
+                        ghunnah=following.letter in NASAL_LETTERS,
                     ),
                 ),
-                MergeInto(at, Aspect.ONSET, following.id, Aspect.ONSET),
+                MergeInto(at, Aspect.CONSONANT, following.id, Aspect.CONSONANT),
             ),
         )

@@ -140,9 +140,14 @@ harakat with opposite behaviour, told apart by a silence sign no skeleton keeps.
   `docs/conformance/corrections.md` with one exact old and new case per ref
 - `tests/schema/test_lexicon.py` (budgets), one regression test per corrected ref
 
-**Depends on** A4. **Moves** `regression`, and `cross-script` must move with it
-in both scripts, because the fact is lexical and not orthographic. Regenerate
-both head snapshots.
+**Depends on** A4. **Moved nothing**, and the prediction above that it would was
+wrong. This entry was written against a tree that predated the merge of the
+joined-reading fixes, which had already made a seven-alif short when joined. So
+what was left for A5 was moving the fact from a vocalised skeleton to 66
+word-located ledger entries, and correcting 7 words the skeleton matched that
+carry no `۠` at all. All 7 read the same either way today, at the seams they sit
+on, so the correction is right and currently invisible. It stops being invisible
+at D2, where the written alif's fate is what `respelling` has to spell.
 
 ## A6 - `Participants` are labelled
 

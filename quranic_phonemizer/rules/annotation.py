@@ -1,30 +1,27 @@
 """Classifiers for facts already decided on the Slot: imala, tashil,
-ishmam, silah and sakt. Each gets a named occurrence so a projection can
-find it; none of them emits an effect on the sound.
+ishmam and silah. Each gets a named occurrence so a projection can find
+it; none of them emits an effect on the sound.
 """
 from __future__ import annotations
 
 from dataclasses import dataclass, field
 
 from ..engine.neighbourhood import Neighbourhood
-from ..engine.plan import Plan, Verdict, mint
+from ..engine.plan import Phase, Plan, Verdict, mint
 from ..model.address import BoundaryPlan, SlotId
 from ..model.canon import CanonLetter as L
 from ..model.canon import (
     Annotation,
-    NucleusKind,
     Onset,
-    Phase,
     Rule,
+    VowelForm,
 )
 from ..model.performance import Occurrence, Participants
 from .tafkheem import Weight
 
 
-def _classification(rule: Rule, at: SlotId, *others: SlotId) -> Verdict:
-    return Verdict(
-        Occurrence(mint(rule, at), rule, Participants((at, *others))), ()
-    )
+def _classification(rule: Rule, at: SlotId) -> Verdict:
+    return Verdict(Occurrence(mint(rule, at), rule, Participants(at)), ())
 
 
 @dataclass(frozen=True, slots=True)
@@ -65,7 +62,7 @@ class Silah:
 
     rule: Rule = Rule.SILAH
     phase: Phase = Phase.LENGTH
-    triggers: frozenset = frozenset({NucleusKind.SILAH})
+    triggers: frozenset = frozenset({VowelForm.LONG})
 
     def look(
         self, near: Neighbourhood, plan: Plan, at: SlotId,
@@ -75,34 +72,12 @@ class Silah:
         slot, word = near.slot(at), near.word_of(at)
         if slot is None or word is None:
             return None
-        if slot.nucleus.kind is not NucleusKind.SILAH:
+        if not slot.nucleus.is_silah:
             return None
         if boundaries.stopped_on(word):
             # At a pause the silah is absent; `WaqfEnding` accounts for the slot.
             return None
         return _classification(Rule.SILAH, at)
-
-
-@dataclass(frozen=True, slots=True)
-class Sakt:
-    """The brief pause without a breath, at Hafs' four sites."""
-
-    rule: Rule = Rule.SAKT
-    phase: Phase = Phase.BOUNDARY
-    triggers: frozenset = frozenset()
-
-    def look(
-        self, near: Neighbourhood, plan: Plan, at: SlotId,
-        boundaries: BoundaryPlan,
-    ) -> Verdict | None:
-        del plan, boundaries
-        word = near.word_of(at)
-        if word is None or not near.score.words[word].sakt_after:
-            return None
-        slots = near.score.words[word].slots
-        if not slots or slots[-1].id != at:
-            return None
-        return _classification(Rule.SAKT, at)
 
 
 @dataclass(frozen=True, slots=True)
