@@ -1,6 +1,6 @@
-"""Check source comments against the rules in CLAUDE.md.
+"""Check source comments against the project's comment rules.
 
-Run:  python tools/comment_lint.py [--fix-report] [paths...]
+Run:  python tools/comment_lint.py [--summary] [paths...]
 """
 from __future__ import annotations
 
@@ -21,10 +21,22 @@ SYMBOLS = "§×²·–—‘’“”…"
 
 BANNED = [
     (re.compile(r"\bADR-\d"), "design-document reference"),
+    (re.compile(r"\b\d\d-[a-z][a-z-]*\b"), "design-document reference"),
+    (re.compile(r"\b[\w-]+\.md\b"), "design-document reference"),
+    (re.compile(r"\bdocs/"), "design-document reference"),
     (re.compile(r"§"), "section reference"),
-    (re.compile(r"\b[RLSIPEA]\d\b(?!\w)"), "law or ruling reference"),
-    (re.compile(r"\bphase[- ]\d", re.I), "phase reference"),
-    (re.compile(r"\brefactor|\brebuild\b|\bthe old implementation\b", re.I),
+    (re.compile(
+        r"\b(sections?|secs?|clauses?|items?|rows?|questions?|steps?|parts?"
+        r"|tables?|figures?|appendices|appendix)\s+\d", re.I),
+     "numbered cross-reference"),
+    (re.compile(r"(?<![\w.:])\d{1,2}\.\d{1,2}(?![\d\w])"),
+     "numbered cross-reference"),
+    (re.compile(r"\bopen question\b", re.I), "numbered cross-reference"),
+    (re.compile(r"\b[A-Z]\d{1,2}\b(?!\w)"), "codename"),
+    (re.compile(r"\bphase[- ]\d|\bphase [A-E]\b", re.I), "phase reference"),
+    (re.compile(r"\brefactor|\brebuild\b|\bthe old implementation\b"
+                r"|\bused to\b|\bpreviously\b|\bformerly\b"
+                r"|\bhas been (moved|renamed|removed|replaced)\b", re.I),
      "history"),
     (re.compile(r"which is why|the whole argument|did its job|reads as done",
                 re.I), "narration"),

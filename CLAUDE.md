@@ -8,8 +8,10 @@ A comment explains **why the code is not the obvious thing**. A docstring says *
 
 Banned outright:
 
-- **Design-document references.** No `ADR-nnn`, no section signs, no `R9`, no phase or report names. Rationale lives in `docs/adr/`; source links to nothing.
-- **History and process.** Not what the old implementation did, not what a review found, not what changed, not what a law "caught". Source describes the code as it is. Changelog goes in the commit.
+- **Design-document references.** Source links to nothing. No document name (`01-contract`, `07-rules.md`, `README.md`), no path under `docs/`, no `ADR-nnn`, no section sign.
+- **Numbered cross-references.** No `section 4`, `clause 1`, `item 22`, `row 12`, `open question 9`, no bare `4.5`. A number that means something only next to a document is noise to a reader of the code. Say the rule, not its address.
+- **Codenames.** No `B2`, `D1`, `E13`, `R9`, no phase letters or numbers. A unit of work is not a thing in the code.
+- **History and process.** Not what the old implementation did, not what "used to" happen, not what a review found, not what changed, not what a law "caught". Source describes the code as it is. Changelog goes in the commit.
 - **Narration.** No "which is why", "the whole argument for", "did its job". If a paragraph is needed to justify the code, the code is wrong. Fix the code.
 - **Measurements and counts.** No corpus statistics, residue counts, or percentages. They rot. Put them in `docs/`.
 - **Non-ASCII prose.** See `.claude/rules/transliteration.md`. ASCII transliteration, no diacritics; Arabic script allowed when quoting a word or mark; no section sign, em dash, curly quotes, or multiplication sign.
