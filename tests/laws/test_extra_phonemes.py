@@ -1,6 +1,6 @@
-"""Item 39: switching a toggle on changes no node and no edge, only the
-token `phonemes()` reads off the same `Sound`. Each toggle's own off/on
-site lives in the file that owns its rule."""
+"""Item 39: the public `Phonemizer()` default for each toggle -- distinct
+from the harness's `reading(extra_phonemes=())` gate that the per-rule files
+assert. Toggling changes no node and no edge, only the token."""
 from __future__ import annotations
 
 import dataclasses
@@ -9,6 +9,13 @@ import pytest
 
 from quranic_phonemizer import Phonemizer
 from quranic_phonemizer.phonemize import UnknownExtraPhoneme
+
+
+def _sound_index(r, predicate) -> int:
+    for i, sound in enumerate(r.sounds):
+        if predicate(sound):
+            return i
+    raise AssertionError("no sound in this ref matches")
 
 
 def test_the_toggle_changes_no_node_and_no_edge():
@@ -21,6 +28,39 @@ def test_the_toggle_changes_no_node_and_no_edge():
     assert off.attributions == on.attributions
     assert off.modifiers == on.modifiers
     assert off.phonemes() != on.phonemes()
+
+
+def test_tashil_defaults_off():
+    off = Phonemizer().phonemize("41:44")
+    on = Phonemizer(extra_phonemes=("tashil",)).phonemize("41:44")
+    i = _sound_index(off, lambda s: s.kind.value == "consonant" and s.eased)
+    assert off.phonemes()[i] == "ʔ"
+    assert on.phonemes()[i] == "ʔ̞"
+
+
+def test_emphatic_fatha_defaults_off():
+    off = Phonemizer().phonemize("41:44")
+    on = Phonemizer(extra_phonemes=("emphatic_fatha",)).phonemize("41:44")
+    i = _sound_index(off, lambda s: s.kind.value == "vowel" and s.emphatic)
+    assert off.phonemes()[i] == "a:"
+    assert on.phonemes()[i] == "aˤ:"
+
+
+def test_emphatic_ikhfaa_defaults_off():
+    off = Phonemizer().phonemize("2:4")
+    on = Phonemizer(extra_phonemes=("emphatic_ikhfaa",)).phonemize("2:4")
+    i = _sound_index(off, lambda s: s.ghunnah and s.emphatic)
+    assert off.phonemes()[i] == "ŋ"
+    assert on.phonemes()[i] == "ŋˤ"
+
+
+def test_qalqala_degree_defaults_to_one_token():
+    off = Phonemizer().phonemize("96:1")
+    on = Phonemizer(extra_phonemes=("qalqala_degree",)).phonemize("96:1")
+    sughra = _sound_index(off, lambda s: s.degree and s.degree.value == "sughra")
+    kubra = _sound_index(off, lambda s: s.degree and s.degree.value == "kubra")
+    assert (off.phonemes()[sughra], on.phonemes()[sughra]) == ("Q", "Q")
+    assert (off.phonemes()[kubra], on.phonemes()[kubra]) == ("Q", "QQ")
 
 
 def test_an_unknown_extra_phoneme_is_rejected():
