@@ -92,7 +92,7 @@ the data to it.
 
 ## D4 - The public package
 
-**Items 1, 5, 38, 39, and `01-contract` sections 3 through 5 in full. Large.**
+**Items 1, 5, 38, 39, 40, and `01-contract` sections 3 through 5 in full. Large.**
 
 Item 5 needs no work: `SlotOrigin` already has exactly the three members and
 `tests/laws/test_model_vocabulary.py` already pins them. Confirm and move on.
@@ -121,7 +121,11 @@ outside `render/`.
 **Item 39, the optional phonemes.** All four gate **at the notation** and reach
 no node and no edge. See [decisions.md](decisions.md) section 7 for the tokens.
 
-**Files:** new `phonemize/{__init__,session,document,names}.py`; `api.py`;
+**Item 40, the four teaching labels.** C2 built the madd rules the labels
+predicate over but could not place the module: `phonemize/labels.py` did not
+exist yet. It does now.
+
+**Files:** new `phonemize/{__init__,session,document,names,labels}.py`; `api.py`;
 `__init__.py`; `tools/structure_lint.py` `ALLOWED` and `PUBLIC_API`;
 `render/alphabet.py` and `data/render/ipa.yaml` for the toggles. Retire
 `render/anchored.py` and `render/recite.py`; keep `api.recitation()`.

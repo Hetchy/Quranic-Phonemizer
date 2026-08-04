@@ -115,6 +115,7 @@ def _drafts(
     bare_seats = frozenset(reading.structural)
     drafts: list[_Draft] = []
     consumed: set[int] = set()
+    pending: list[int] = []
 
     for index, cluster in enumerate(reading.clusters):
         if index in consumed or cluster.offset in bare_seats:
@@ -124,25 +125,37 @@ def _drafts(
         rows = by_cluster.get(index, ())
         letter = _letter_of(rows, cluster)
         if _not_a_slot(letter, index in silenced and cluster.letter is not None,
-                       context, cluster, rows, drafts, track, scribe):
+                       context, cluster, rows, drafts, track, scribe, pending):
             continue
+        before = len(drafts)
         if _slot_draft(index, cluster, letter, rows, context, drafts, track,
                        scribe):
             consumed |= _skip_iwad_carrier(reading, index, bounds, drafts,
                                            track, scribe)
+        _flush_pending(pending, drafts, before, scribe, track)
 
     apply_cross_word_noon(reading, drafts, right_context, scribe)
     return drafts
 
 
+def _flush_pending(pending: list[int], drafts, before: int, scribe,
+                   track) -> None:
+    """A hamza seat's grapheme decorates the hamza it seats, which has no
+    draft yet when the seat is visited, so its edge waits for one."""
+    if not pending or len(drafts) <= before:
+        return
+    subject = drafts[before]
+    for offset in pending:
+        scribe.decoration(offset, subject)
+        track.decorated += 1
+    pending.clear()
+
 
 def _not_a_slot(letter, silenced: bool, context, cluster, rows, drafts, track,
-                scribe) -> bool:
-    """Written, but contributing only to the slot before it.
-
-    A bare seat, a silence sign, or a length carrier: skipped, but still
-    decorated so a projection can point at it.
-    """
+                scribe, pending: list[int]) -> bool:
+    """Written, but contributing only to another slot: the one before it, or
+    -- a hamza seat -- the one after. Still decorated so a projection can
+    point at it."""
     if letter is None or silenced:
         _apply_rows(rows, _Draft(letter=letter or CanonLetter.ALIF), drafts,
                     context, track, scribe, cluster.offset,
@@ -161,8 +174,11 @@ def _not_a_slot(letter, silenced: bool, context, cluster, rows, drafts, track,
         set_fact(None, drafts, outcome.fact, outcome.value, Target.PREVIOUS,
                  scribe, offset)
         track.from_derivation += 1
-    scribe.decoration(cluster.offset, drafts[-1] if drafts else None)
-    track.decorated += 1
+    if isinstance(outcome, Absent) and outcome.shows is Target.HERE:
+        pending.append(cluster.offset)
+    else:
+        scribe.decoration(cluster.offset, drafts[-1] if drafts else None)
+        track.decorated += 1
     return True
 
 
@@ -291,11 +307,11 @@ def _rasm_outcome(context, cluster: Cluster, rows, track):
         return carried
     if cluster.has(*_VOWEL_ROLES):
         return None
-    if (
-        lexeme.hamza_seat(context)
-        or lexeme.otiose_waw(context)
-        or lexeme.otiose_alif(context)
-    ):
+    if lexeme.hamza_seat(context):
+        # The seat spells no sound of its own; what it spells is the hamza
+        # after it, which has no draft yet at this point in the pass.
+        return Absent(shows=Target.HERE), cluster.offset
+    if lexeme.otiose_waw(context) or lexeme.otiose_alif(context):
         return Absent(), cluster.offset
     if cluster.letter not in CARRIERS:
         return None

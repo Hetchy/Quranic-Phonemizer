@@ -309,10 +309,14 @@ class Rule(StrEnum):
     IBDAL_HAMZA = "ibdal_hamza"
     WASL_ELISION = "wasl_elision"
     WASL_START = "wasl_start"
-    ILTIQA_REPAIR = "iltiqa_repair"
-    WAQF_ENDING = "waqf_ending"
+    ILTIQA_KASRA = "iltiqa_kasra"
+    ILTIQA_SHORTENING = "iltiqa_shortening"
+    PAUSAL_SUKUN = "pausal_sukun"
+    TAA_MARBUTA_PAUSAL = "taa_marbuta_pausal"
     PAUSAL_ALIF = "pausal_alif"
     SILAH = "silah"
+
+    ORTHOGRAPHIC_SILENCE = "orthographic_silence"
 
 
 #: Rules whose occurrence produces no effect; `engine/run.py` mints each one

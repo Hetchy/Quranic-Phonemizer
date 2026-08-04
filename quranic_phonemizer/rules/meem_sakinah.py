@@ -7,7 +7,7 @@ from ..engine.neighbourhood import Neighbourhood
 from ..engine.plan import MergeInto, Phase, Plan, Realize, Verdict, mint
 from ..model.address import BoundaryPlan, KhilafId, SlotId
 from ..model.canon import CanonLetter as L
-from ..model.canon import Onset, Rule
+from ..model.canon import Onset, Rule, SlotOrigin
 from ..model.performance import Aspect, Consonant, Occurrence, Participants
 from .ownership import is_quiescent
 from .khilaf import nasal_place
@@ -65,10 +65,15 @@ class MeemSakinah:
         boundaries: BoundaryPlan,
     ) -> Verdict | None:
         del plan, boundaries  # `near` already refuses to look across a junction
-        if not is_quiescent(near.slot(at)):
+        slot = near.slot(at)
+        if not is_quiescent(slot):
             return None
         following = near.after(at)
         if following is None:
+            if slot.origin is SlotOrigin.SPELLED and near.last_of_word(at):
+                # The meem closing a disjoined-letter opening takes its own
+                # plain articulation rather than reaching into the next word.
+                return _verdict(Rule.IZHAR_SHAFAWI, at, None, ())
             return None
 
         match self.followers.of(following.letter):
@@ -107,7 +112,7 @@ class MeemSakinah:
         return _verdict(Rule.IZHAR_SHAFAWI, at, following.id, ())
 
 
-def _verdict(rule: Rule, at: SlotId, other: SlotId, effects: tuple) -> Verdict:
+def _verdict(rule: Rule, at: SlotId, other: SlotId | None, effects: tuple) -> Verdict:
     return Verdict(
         Occurrence(mint(rule, at), rule, Participants(at, other)), effects
     )

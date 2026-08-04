@@ -31,22 +31,22 @@ are exclusive **per part**, not per unit, which is exactly what `variant=1` is
 papering over. `tests/laws/test_rule_coverage.py::test_no_two_rules_claim_the_same_slot_and_aspect`
 is the local gate. Correct the contract's wording here.
 
-## C2 - Madd for its ordinary cases; teaching labels derived
+## C2 - Madd for its ordinary cases
 
-**Items 23, 40. Medium.**
+**Item 23. Medium.**
 
 `rules/madd.py` `MaddClass` deliberately does not emit `madd_tabii`, so the only
 producer is the pausal glide. An ordinary long vowel, a silah vowel and a
 stopped seven-alif produce no instance at all, which is why the first three
 converse rows of `02-gate` section 4.8 fail today.
 
-Item 40's four teaching labels are computed nowhere. Each is a predicate over
-an instance and the unit it names, so they are derived where the instance is
-assembled and mint no instance of their own. That places them in the public
-package's assembly step, not in `rules/`.
+Item 40's four teaching labels move to phase D: each is a predicate over an
+instance and the unit it names, derived where the instance is assembled, so
+the module that holds them cannot exist before the `phonemize` package does.
+This unit cannot deliver it and D4 should claim it alongside `labels.py`.
 
-**Files:** `rules/madd.py` (**load-bearing**), `model/canon.py` `Rule`, the
-label derivation in `phonemize/labels.py`, `tests/laws/test_rule_coverage.py`.
+**Files:** `rules/madd.py` (**load-bearing**), `model/canon.py` `Rule`,
+`tests/laws/test_rule_coverage.py`.
 
 **Depends on** A4, C1. **Moves** `regression` in instance count only: a flood of
 new instances and no new sounds. No token may change, so
@@ -65,10 +65,18 @@ reaches no spelling edge at all.
 It stays **one** rule: a letter never said and a seat silent only when joined
 are the same outcome, and the boundary tells them apart without a second name.
 
-Item 25's two rules are mandatory, corpus-wide, and have no name anywhere in the
-tree: dropping a word-initial shadda when a word is started on, and the role a
-word-final yaa, waw or alif maqsura takes at a pause. They are `06-two-texts`
-rows 9 and 29, which is where the transformation each performs is written down.
+Item 25's two rules are mandatory and corpus-wide: dropping a word-initial
+shadda when a word is started on, and the role a word-final yaa, waw or alif
+maqsura takes at a pause. They are `06-two-texts` rows 9 and 29.
+
+**Both behaviours already work.** 2:56:3 reads `min` started on and `miŋ`
+joined, so the shadda is already dropped; `tests/waqf/test_final_glides.py`
+already asserts the glide's two roles. What is missing is only the name and the
+attribution: neither rule exists in `Rule`, so neither owns the change it makes,
+and both are the converse triggers `02-gate` section 4.8 has no row for. This is
+a naming job, not model surgery.
+
+**Item 24 landed** in `8ee2e84`. Item 25 did not.
 
 **Files:** new rule modules under `rules/`, `canon/derive/lexeme.py`,
 `canon/build.py`, `model/canon.py` `Rule`, `riwayat/hafs/rules.py`,

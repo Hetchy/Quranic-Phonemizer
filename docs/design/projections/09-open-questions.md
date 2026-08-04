@@ -40,12 +40,11 @@ the writer actually needs. E13's is the one this document believes.
 
 ## 6. Laws that name a case they then exclude
 
-Three, all one sentence each, all pointing at a real graph the law rejects.
+Two, all one sentence each, both pointing at a real graph the law rejects.
 
-- **Stop effects.** [01-contract](01-contract.md) section 7.2 calls them
-  "Mutually exclusive per unit and per part". E8 gives one taa marbuta unit
-  `taa_marbuta_pausal` on its consonant and `pausal_sukun` on its vowel. They
-  are exclusive per part and not per unit.
+**Stop effects** is closed: [decisions](units/decisions.md) settles it and unit
+C1 reworded section 7.2 to say per part, not per unit.
+
 - **`tafkheem`'s trigger.** [07-rules](07-rules.md) gives it trigger `-` and
   crosses `never`, while the divine name's lam reads a vowel that can be in the
   previous word, which E13 prints.

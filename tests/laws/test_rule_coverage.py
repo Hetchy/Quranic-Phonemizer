@@ -53,7 +53,12 @@ SAMPLE = (
 #: produced by some classifier in the corpus; a member here needs a reason,
 #: and `test_the_deferred_list_does_not_rot` fails once the reason no longer
 #: holds.
-DEFERRED: set[Rule] = set()
+DEFERRED: set[Rule] = {
+    #: Owns no attribution: there is no slot to attach an `Occurrence` to, so
+    #: it is never in `perform().occurrences`. Reachable only through a
+    #: pairing's `silent`/`rules`, which `phonemize/pairing.py` builds.
+    Rule.ORTHOGRAPHIC_SILENCE,
+}
 
 
 def _fired(packed, hafs, surah, ayah):
