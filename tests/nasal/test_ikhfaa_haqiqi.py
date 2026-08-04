@@ -71,3 +71,14 @@ def test_a_tanween_at_a_verse_end_is_hidden_across_the_seam(r):
     # حِينٍ فَتَلَقَّىٰٓ
     assert r.phonemes(19) == "ħi:niŋ"
     assert r.phonemes(20) == "fatalaqqaˤ:"
+
+
+MANDUD = Site(hafs=("56:29", (2,)))
+
+
+def test_the_heavy_hiding_toggle_defaults_off():
+    # مَّنضُودٍ -- the hiding noon before a dad, an istilaa letter.
+    off = reading(MANDUD, extra_phonemes=(), isolated=2)
+    on = reading(MANDUD, extra_phonemes=("emphatic_ikhfaa",), isolated=2)
+    assert off.phonemes(2) == "maŋdˤu:dQ"
+    assert on.phonemes(2) == "maŋˤdˤu:dQ"

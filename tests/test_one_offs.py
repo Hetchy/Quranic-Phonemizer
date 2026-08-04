@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from tests.support import Site, for_each_riwayah
+from tests.support import Site, for_each_riwayah, reading
 
 MAJRAHA = Site(hafs=("11:41", (6,)))
 TAMANNA = Site(hafs=("12:11", (6,)))
@@ -27,6 +27,13 @@ def test_the_one_ishmam_in_the_corpus(r):
 def test_the_one_tashil_in_the_corpus(r):
     # ءَا۬عْجَمِىٌّ
     assert r.phonemes(9) == "ʔaʔaʕʒamijj"
+
+
+def test_the_easing_toggle_defaults_off():
+    off = reading(AAJAMIYY, extra_phonemes=(), isolated=9)
+    on = reading(AAJAMIYY, extra_phonemes=("tashil",), isolated=9)
+    assert off.phonemes(9) == "ʔaʔaʕʒamijj"
+    assert on.phonemes(9) == "ʔaʔ̞aʕʒamijj"
 
 
 @for_each_riwayah(MAN_RAQIN, ibtidaa=2, waqf=3)
