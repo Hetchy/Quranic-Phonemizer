@@ -91,10 +91,14 @@ the expectation.
 
 A folder exists only when it holds more than one file.
 
-## Still to do
+### Rule assertions
 
-Rules are not asserted yet: `source_of`, `host_of`, `rules_on_char` and
-`rules_on_sound` raise until the projection settles which unit a rule is read
-against. Sites are already chosen to carry those assertions.
+`source_of(rule)` and `host_of(rule)` name the character supplying a rule's
+source and host unit -- `None` from `host_of` where the rule is not a merger.
+`rules_on_char(word, char)` and `rules_on_sound(word, token)` name every rule
+reached from a written letter or a produced sound. Read a rule's identity off
+these rather than inferring it from the phoneme string: `iqlab` is the same
+name whether the hum takes a place or not, and a letter that merges away
+carries the merger's rule and nothing else.
 
 `laws/` still imports helpers from `conftest.py` and predates `Site`.

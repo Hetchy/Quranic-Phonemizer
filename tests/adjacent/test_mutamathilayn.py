@@ -40,3 +40,14 @@ def test_the_same_merger_inside_one_word(r):
 def test_a_stop_after_the_first_lam_undoes_the_merger(r):
     # أَقُل
     assert r.phonemes(10) == "ʔaqul"
+
+
+WAQAD_DAKHALU = Site(hafs=("5:61", (5, 6)))
+
+
+@for_each_riwayah(WAQAD_DAKHALU, ibtidaa=5, waqf=6)
+def test_a_qalqala_letter_that_merges_away_is_not_echoed(r):
+    # وَقَد دَّخَلُوا۟ -- the sakin dal is a qalqala letter, but it never
+    # sounds its own place: only the merger reaches it.
+    assert r.phonemes(5) == "waqaˤ"
+    assert r.rules_on_char(5, "د") == frozenset({"idgham_mutamathilayn"})
