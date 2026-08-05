@@ -54,6 +54,14 @@ def test_emphatic_ikhfaa_defaults_off():
     assert on.phonemes()[i] == "ŋˤ"
 
 
+def test_imala_defaults_off():
+    off = Phonemizer().phonemize("11:41:6")
+    on = Phonemizer(extra_phonemes=("imala",)).phonemize("11:41:6")
+    i = _sound_index(off, lambda s: s.quality and s.quality.value == "e")
+    assert off.phonemes()[i] == "i:"
+    assert on.phonemes()[i] == "e:"
+
+
 def test_qalqala_degree_defaults_to_one_token():
     off = Phonemizer().phonemize("96:1")
     on = Phonemizer(extra_phonemes=("qalqala_degree",)).phonemize("96:1")

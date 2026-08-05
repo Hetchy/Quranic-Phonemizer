@@ -19,17 +19,17 @@ SCHEMA_VERSION = 2
 #: beside the tokens rather than inside the resolver's control flow.
 LENGTH = ":"
 
-#: Four names, each gating one distinction that a `Sound` always carries;
-#: the alphabet spends a token on it only when named.
+#: Each gates one distinction that a `Sound` always carries; the alphabet
+#: spends a token on it only when named.
 EXTRA_PHONEMES = frozenset(
-    {"tashil", "emphatic_fatha", "emphatic_ikhfaa", "qalqala_degree"}
+    {"tashil", "emphatic_fatha", "emphatic_ikhfaa", "qalqala_degree", "imala"}
 )
 
 #: `token(sound)` with no `extra_phonemes` argument -- every caller that
 #: predates the toggle -- must keep reading exactly as it does today, which
-#: is `emphatic_fatha` spent and the other three withheld. A caller that
-#: passes an explicit set, even empty, gets the contract's own default: all
-#: four withheld unless named.
+#: is `emphatic_fatha` spent and the rest withheld. A caller that passes an
+#: explicit set, even empty, gets the contract's own default: every name
+#: withheld unless asked for.
 _LEGACY_ACTIVE = frozenset({"emphatic_fatha"})
 
 
@@ -53,6 +53,9 @@ class Entry:
     eased: str | None = None
     """Read from the data but not yet composed: gated at the notation once
     an `extra_phonemes` toggle exists to ask for it."""
+    imala: str | None = None
+    """The inclined form of a vowel. `plain` is the reading of the same vowel
+    for a caller who has not asked for the distinction."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -117,7 +120,9 @@ class Alphabet:
 
     def _vowel(self, sound: Vowel, active: frozenset[str]) -> str:
         entry = self.vowels[sound.quality]
-        if sound.emphatic and "emphatic_fatha" in active:
+        if entry.imala is not None and "imala" in active:
+            token = entry.imala
+        elif sound.emphatic and "emphatic_fatha" in active:
             token = self._feature(entry.emphatic, "emphatic", sound)
         else:
             token = entry.plain
@@ -203,7 +208,7 @@ def _entry(raw: Any, where: str) -> Entry:
         return Entry(plain=raw)
     require_keys(
         raw, {"plain"}, name=where,
-        optional={"emphatic", "nasal", "hum", "heavy_hum", "eased"},
+        optional={"emphatic", "nasal", "hum", "heavy_hum", "eased", "imala"},
     )
     return Entry(
         plain=str(raw["plain"]),
@@ -212,6 +217,7 @@ def _entry(raw: Any, where: str) -> Entry:
         hum=_optional(raw, "hum"),
         heavy_hum=_optional(raw, "heavy_hum"),
         eased=_optional(raw, "eased"),
+        imala=_optional(raw, "imala"),
     )
 
 

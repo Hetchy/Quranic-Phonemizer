@@ -225,7 +225,6 @@ rather than composing one.
 | `iqlab_nasal` | whether an iqlab's hum closes the lips or stays a hum |
 | `ikhfaa_shafawi_nasal` | whether ikhfaa shafawi's hum closes the lips or stays a hum |
 | `raa_tafkheem` | whether a raa is heavy or light |
-| `imala_quality` | the vowel imala tilts toward |
 | `nucleus_vowel` | which vowel a position takes |
 | `yaa_ithbat` | whether a pronoun yaa is pronounced at a pause |
 
@@ -247,8 +246,8 @@ stores a version with it.
 
 ### 3.2 Optional phonemes
 
-Three distinctions the model always carries and the notation does not always
-spend a token on. All default off.
+Distinctions the model always carries and the notation does not always spend a
+token on. All default off.
 
 | Name | Off | On |
 |---|---|---|
@@ -256,6 +255,7 @@ spend a token on. All default off.
 | `emphatic_fatha` | `a` | `a` and its emphatic form apart |
 | `emphatic_ikhfaa` | one ghunnah token | the emphatic form |
 | `qalqala_degree` | one release token | sughra apart from kubra and akbar |
+| `imala` | the `i` token | the inclined vowel apart from `i` |
 
 `qalqala_degree` is a two-way split: kubra and akbar share a token and akbar
 takes no third. Emphasis spreads onto an `a` and onto no other vowel, so
@@ -263,8 +263,9 @@ takes no third. Emphasis spreads onto an `a` and onto no other vowel, so
 
 **Switching one on changes no node and no edge.** `Sound.emphatic` is true on a
 ghunnah and on a spread-to vowel whether or not the token shows it, a qalqala's
-degree is on the sound either way, and the `Recolours` edge that made a sound
-heavy is in `modifiers` regardless. So nothing is lost by leaving a toggle off,
+degree is on the sound either way, `Sound.quality` is `e` at the one imala
+whichever token is written, and the `Recolours` edge that made a sound heavy is
+in `modifiers` regardless. So nothing is lost by leaving a toggle off,
 and a consumer can always read the distinction from the graph. That is what
 separates these from `variants`, which changes what is read.
 
@@ -367,9 +368,9 @@ Two fields instead of five named variants; the names become rows. A final
 short vowel dropping at a pause is not here because it is a rule: the position
 has a vowel and the stop takes it.
 
-`quality`: `a` · `u` · `i` · `e`. The last is what imala tilts toward, and it
-reaches a document only when the request selects it at `imala_quality`; under
-the default reading no vowel in the corpus takes it.
+`quality`: `a` · `u` · `i` · `e`. The last is what imala tilts toward. One
+word in the corpus takes it, and every document carries it there; the token
+is `i:` until the request names the `imala` extra phoneme.
 
 ### 4.3 `Glyph` and `RenderGlyph`
 

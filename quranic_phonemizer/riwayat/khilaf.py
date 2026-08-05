@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from ..canon.khilaf import VowelKhilaf, VowelSite
 from ..dataio import load_yaml, require_keys
 from ..model.address import KhilafId
-from ..model.canon import ABJAD, Annotation, Quality
+from ..model.canon import ABJAD, Quality
 from ..rules.khilaf import OPTIONS, KhilafError, Site, SitedKhilaf
 
 SCHEMA_VERSION = 1
@@ -17,7 +17,6 @@ SCHEMA_VERSION = 1
 SITED = {
     KhilafId.RAA_TAFKHEEM: "raa_tafkheem",
     KhilafId.NUCLEUS_VOWEL: "nucleus_vowel",
-    KhilafId.IMALA_QUALITY: "imala_quality",
     KhilafId.YAA_ITHBAT: "yaa_ithbat",
 }
 
@@ -25,7 +24,7 @@ SITED = {
 SITED_POINTS = (KhilafId.RAA_TAFKHEEM, KhilafId.YAA_ITHBAT)
 
 #: The points whose sites the Score carries, so the choice is made at build.
-VOWEL_POINTS = (KhilafId.NUCLEUS_VOWEL, KhilafId.IMALA_QUALITY)
+VOWEL_POINTS = (KhilafId.NUCLEUS_VOWEL,)
 
 JUNCTIONS = {"stop": True, "join": False}
 
@@ -97,10 +96,7 @@ def load_khilaf(path: Path) -> Khilaf:
 
 def _vowel(point: KhilafId, name: str, spec: dict, path: Path) -> VowelSite:
     where = f"{path} {SITED[point]}[{name!r}]"
-    require_keys(
-        spec, {"slot", "default", "options", "forms"}, name=where,
-        optional={"annotate"},
-    )
+    require_keys(spec, {"slot", "default", "options", "forms"}, name=where)
     options = {
         option: _quality(option, raw, where)
         for option, raw in spec["options"].items()
@@ -116,20 +112,7 @@ def _vowel(point: KhilafId, name: str, spec: dict, path: Path) -> VowelSite:
         options=options,
         default=str(spec["default"]),
         forms=frozenset(spec["forms"]),
-        annotation=_annotation(spec.get("annotate"), where),
     )
-
-
-def _annotation(raw: object, where: str) -> Annotation | None:
-    if raw is None:
-        return None
-    try:
-        return Annotation(str(raw))
-    except ValueError:
-        raise KhilafError(
-            f"{where}: annotate {raw!r}, expected one of "
-            f"{sorted(a.value for a in Annotation)}"
-        ) from None
 
 
 def _quality(option: str, raw: object, where: str) -> Quality:
