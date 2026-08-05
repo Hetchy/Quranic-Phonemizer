@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from tests.support import Site, reading
+from tests.support import Site, for_each_riwayah, reading
 
 A_LONG_VOWEL_GIVING_WAY = [
     ("1:7", (8, 9), "ا", ("wala", "dˤdˤaˤ:lli:n")),   # وَلَا ٱلضَّآلِّينَ
@@ -75,3 +75,27 @@ def test_a_tanween_takes_a_linking_kasra_before_a_prosthetic_hamza(
     r = _joined(ref, words)
     assert (r.phonemes(first), r.phonemes(last)) == expected
     assert "iltiqa_kasra" in r.rules_on_char(first, mark)
+
+
+AMILU_SSALIHAT = Site(hafs=("2:25", (4, 5)))
+KAFARU_SAWAAUN = Site(hafs=("2:6", (3, 4)))
+
+
+@for_each_riwayah(AMILU_SSALIHAT, ibtidaa=4, waqf=5)
+def test_a_plural_waw_shortens_onto_a_word_whose_hamza_has_elided(r):
+    # وَعَمِلُوا۟ ٱلصَّـٰلِحَـٰتِ
+    assert r.phonemes(4) == "waʕamilu"
+    assert r.phonemes(5) == "sˤsˤaˤ:liħa:t"
+
+
+@for_each_riwayah(AMILU_SSALIHAT, isolated=4)
+def test_that_same_plural_waw_is_long_when_it_is_stopped_on(r):
+    # وَعَمِلُوا۟
+    assert r.phonemes(4) == "waʕamilu:"
+
+
+@for_each_riwayah(KAFARU_SAWAAUN, ibtidaa=3, waqf=4)
+def test_it_keeps_its_length_onto_a_word_that_opens_on_a_vowel(r):
+    # كَفَرُوا۟ سَوَآءٌ
+    assert r.phonemes(3) == "kafarˤu:"
+    assert r.phonemes(4) == "sawa:ʔ"

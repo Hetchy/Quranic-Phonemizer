@@ -22,13 +22,67 @@ def test_a_prosthetic_hamza_drops_when_the_word_before_it_joins(r):
 
 - `"1:1"` is `surah:ayah`.
 - `(1, 2)` are the word numbers within that verse, counting from 1.
-- One keyword per riwayah (`hafs=`, `warsh=`), because the same words take
-  different word numbers under a different transmission. A riwayah the build
-  does not ship is skipped, not failed.
+- One keyword per riwayah (`hafs=`, `warsh=`). The address is riwayah data:
+  transmissions divide verses differently, so the same words can take a
+  different ayah number as well as different word numbers.
 
 `r.phonemes(n)` and `r.silent(n)` take those same word numbers. When a plan
 reads past the end of a verse the next verse continues the numbering, so
 `r.phonemes(n + 1)` is the word after the last one.
+
+### Which riwayat a case runs under
+
+`for_each_riwayah` runs the body once per riwayah the site declares **and** the
+build ships. So the site's keywords are the whole control:
+
+```python
+BOTH = Site(hafs=("2:5", (3, 4)), warsh=("2:5", (3, 4)))   # runs under each
+HAFS_ONLY = Site(hafs=("2:5", (3, 4)))                     # runs under Hafs
+```
+
+A declared riwayah the build does not package is dropped from the run, not
+failed. If that leaves nothing, the case is skipped with a reason rather than
+passing silently — so a Warsh-only case is honest on a Hafs-only build.
+
+Declare only the riwayat the case is actually about. A rule that exists in one
+transmission and not another belongs in a site naming just that one; do not
+declare a riwayah so a row looks complete.
+
+### When the riwayat disagree
+
+Same case, same site, different expected reading — `r.pick` chooses by the
+riwayah the body is running under:
+
+```python
+MALIK = Site(hafs=("1:4", (1,)), warsh=("1:3", (1,)))
+
+
+@for_each_riwayah(MALIK, isolated=1)
+def test_the_word_is_read_as_each_transmission_has_it(r):
+    # مَـٰلِكِ in Hafs, مَلِكِ in Warsh
+    assert r.phonemes(1) == r.pick(hafs="ma:lik", warsh="malik")
+```
+
+The keywords are riwayah names, matching the site's. A riwayah running but not
+named raises `KeyError`, so adding a transmission cannot silently reuse
+another's expectation, and the failure names the riwayah that has no answer.
+
+Note the two addresses. Warsh does not count the basmala as a verse of
+al-Fatiha, so the same word sits at a different ayah number, and it is written
+differently as well as read differently. That is why a site keys its whole
+address per riwayah instead of sharing one and varying the expectation: by the
+time the readings disagree, the words they belong to may not even be in the
+same place.
+
+Fill each value by running that riwayah, never by reasoning about what it
+should be. A row written ahead of the build that can read it is a guess wearing
+an assertion, and this suite is arranged to prevent exactly that.
+
+Reach for it only where the reading genuinely differs. Where it does not, one
+assertion covering every riwayah is the stronger statement, since it says the
+transmissions agree. And where the difference is the whole point of the case,
+prefer separate tests named for what each transmission does — `pick` is for a
+detail inside a shared case, not a way to fold two rules into one body.
 
 ### Junctions
 
