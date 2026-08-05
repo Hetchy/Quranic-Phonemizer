@@ -67,22 +67,25 @@ def _word_of(glyphs, indices, fallback: int) -> int:
 
 
 def _digests(result, lines: dict[tuple[int, str], list[str]]) -> None:
-    """One line per row, bucketed by the word it falls in."""
+    """One line per row of all six published views, bucketed by word."""
     word = 0
     for text in ("source", "recited"):
         glyphs = result.glyphs if text == "source" else result.rendered
-        for pairing in result.alignment(text=text, grouping="glyph"):
-            word = _word_of(glyphs, pairing.glyphs, word)
-            lines.setdefault((word, text), []).extend(_pairing(result, pairing))
-    # A block names source and recited *pairings*, so its glyphs come through
-    # the cell alignment it was built from.
-    cells = result.alignment(text="source", grouping="cell")
-    for block in result.respelling(grouping="cell"):
-        written = [g for cell in block.source for g in cells[cell].glyphs]
-        word = _word_of(result.glyphs, written, word)
-        lines.setdefault((word, "respell"), []).append(
-            f"{_join(block.source)}>{_join(block.recited)}"
-        )
+        for grouping in ("glyph", "cell"):
+            view = f"{text}-{grouping}"
+            for pairing in result.alignment(text=text, grouping=grouping):
+                word = _word_of(glyphs, pairing.glyphs, word)
+                lines.setdefault((word, view), []).extend(_pairing(result, pairing))
+    for grouping in ("glyph", "cell"):
+        # A block names source and recited *pairings*, so its glyphs come
+        # through the alignment it was built from.
+        cells = result.alignment(text="source", grouping=grouping)
+        for block in result.respelling(grouping=grouping):
+            written = [g for cell in block.source for g in cells[cell].glyphs]
+            word = _word_of(result.glyphs, written, word)
+            lines.setdefault((word, f"respell-{grouping}"), []).append(
+                f"{_join(block.source)}>{_join(block.recited)}"
+            )
 
 
 def _views(ref: str, result):

@@ -252,8 +252,9 @@ For every combination of `text` and `grouping`:
 - **The pairings partition the selected text's glyph array.** Every glyph
   appears in exactly one pairing, except those carrying the `Structural`
   spelling edge, which have none. The edge decides this, never `kind`, and
-  `01-contract` item 19 is what makes the two agree: a tatweel and a stop sign
-  both carry the edge and both take no pairing.
+  `01-contract` item 19 is what makes the two agree: a stop sign carries the
+  edge and takes no pairing, while a tatweel carries `Decorates`, takes a
+  pairing, and owns nothing because it supplies nothing.
 - **The pairings and their gap pairings cover every sound exactly once in
   `sounds`.** A sound may appear in any number of `shares` lists.
 - A gap pairing has no glyphs of the selected text, exactly one owned sound,

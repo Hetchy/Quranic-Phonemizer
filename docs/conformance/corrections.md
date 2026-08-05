@@ -106,34 +106,39 @@ unit removes the section rather than repairing the entry.
 ## The alignment the register's last four entries moved
 
 No phoneme moves: `regression`, `cross-script`, `roundtrip`, `attestation` and
-`l1` all report the numbers they reported before. What moves is who owns a
-sound in `alignment(text="source", grouping="glyph")`, and the blocks
-`respelling` derives from it.
+`l1` all report the numbers they reported before, and the recited text is
+unchanged. What moves is who owns a sound.
 
-`tests/snapshots/head/alignment.jsonl.gz` is the new baseline. Against the
-same file built before these changes, of 232,299 rows (77,433 words, three
-views each):
+`tests/snapshots/head/alignment.jsonl.gz` is the new baseline: a digest per
+word for each of the six published views. Against the same file built before
+these changes, of 464,598 rows (77,433 words, six views each):
 
 | View | Rows moved |
 |---|---|
-| `source` | 8,678 |
-| `respell` | 20,491 |
-| `recited` | 0 |
+| `source` by glyph | 8,678 |
+| `source` by cell | 2,732 |
+| `respell` by glyph | 8,678 |
+| `respell` by cell | 0 |
+| `recited` by either | 0 |
 
-Every source row is accounted for by one of two corrections:
+Every moved word is accounted for, and 232 of them moved for two reasons at
+once rather than one:
 
 | Cause | Words |
 |---|---|
-| a seat stopped owning what it never supplied | 5,947 |
-| a carrier whose length `iltiqa_shortening` took back | 2,670 |
+| a seat stopped owning what it never supplied | 5,946 |
+| a carrier whose length `iltiqa_shortening` took back | 2,439 |
+| both of those in one word | 231 |
 | a carrier whose length `pausal_alif` took back | 61 |
+| that and a seat in one word | 1 |
 
-The seven alifs are in that last row: `أَنَا۠` joined reads `ʔana`, so the `۠`
-supplying a length nobody says now shows `pausal_alif` and presents nothing,
+The seven alifs are the `pausal_alif` rows: `أَنَا۠` joined reads `ʔana`, so the
+`۠` supplying a length nobody says now shows the rule and presents nothing,
 and the fatha owns the vowel.
 
-Every moved `respell` row is in a verse holding a moved `source` row. A block
-names pairings rather than glyphs, so one carrier that stops presenting
-re-indexes every block after it in its verse, which is why the count is larger
-than the number of sites. `recited` moving nothing is the check that publishing
+The cell view moves for exactly the 2,732 words holding a silenced carrier,
+and for none of the 6,177 holding only a seat: a seat shares its letter's cell
+with the dagger either way, so only the per-glyph attribution changes there.
+Silencing a glyph does not move it out of its cell, which is why `respell` by
+cell holds still. `recited` moving nothing is the check that publishing
 `RenderGlyph.unit` replaced the internal link exactly.

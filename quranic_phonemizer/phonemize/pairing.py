@@ -89,8 +89,6 @@ def _reach_recited(assembled: Assembled) -> dict[int, Reach]:
 def _reach_source(assembled: Assembled) -> dict[int, Reach]:
     out: dict[int, list] = {}
     for s in assembled.spellings:
-        if getattr(s, "glyph", None) in assembled.orthographic_silence:
-            continue
         match s:
             case ed.Supplies(glyph=g, unit=u, fact=f) if f in _VOWEL_FACT:
                 out.setdefault(g, []).append((u, ed.Part.VOWEL, f))
@@ -211,13 +209,27 @@ def _rule_of_part(assembled: Assembled) -> dict[tuple[int, ed.Part], frozenset]:
     return {key: frozenset(rules) for key, rules in out.items()}
 
 
-def _presenting_glyphs(reach) -> dict[tuple[int, ed.Part], list]:
-    """`(unit, part) -> [(glyph, fact)]`, in this text's own reading order."""
+def _presenting_glyphs(reach, mute: frozenset[int]) -> dict[tuple[int, ed.Part], list]:
+    """`(unit, part) -> [(glyph, fact)]`, in this text's own reading order.
+
+    A muted glyph keeps its reach, which is what seats it in a cell, and is
+    left out here, which is what stops it presenting.
+    """
     out: dict[tuple[int, ed.Part], list] = {}
     for glyph in sorted(reach):
+        if glyph in mute:
+            continue
         for unit, part, fact in reach[glyph]:
             out.setdefault((unit, part), []).append((glyph, fact))
     return out
+
+
+def _mute(assembled: Assembled, text: str) -> frozenset[int]:
+    """Glyphs a rule silenced. They keep their reach, which is what seats
+    them in their letter's cell, and present nothing."""
+    if text != "source":
+        return frozenset()
+    return frozenset(assembled.orthographic_silence)
 
 
 def _seats(assembled: Assembled, text: str) -> frozenset[int]:
@@ -243,14 +255,15 @@ def _owning_glyph(part: ed.Part, candidates: list, seats: frozenset[int]) -> int
     return min(candidates, key=lambda c: (c[0] in seats, c[0]))[0]
 
 
-def _owners(assembled: Assembled, reach, seats: frozenset[int]) -> list[int | None]:
+def _owners(assembled: Assembled, reach, seats: frozenset[int],
+            mute: frozenset[int]) -> list[int | None]:
     """The owning glyph of every sound, `None` where no glyph of this text
     presents it -- a gap."""
     primary = {
         a.sound: (a.unit, a.part) for a in assembled.attributions
         if isinstance(a, ed.Hosts)
     }
-    by_part = _presenting_glyphs(reach)
+    by_part = _presenting_glyphs(reach, mute)
     out = []
     for index in range(len(assembled.sounds)):
         part_key = primary.get(index)
@@ -332,7 +345,8 @@ def _pairings(assembled: Assembled, text, groups, reach) -> tuple[Pairing, ...]:
         if isinstance(a, ed.Hosts)
     }
 
-    owners = _owners(assembled, reach, _seats(assembled, text))
+    mute = _mute(assembled, text)
+    owners = _owners(assembled, reach, _seats(assembled, text), mute)
     group_of_glyph = {g: i for i, group in enumerate(groups) for g in group}
     owner_group = [group_of_glyph.get(g) if g is not None else None for g in owners]
     owned: list[list[int]] = [[] for _ in groups]
@@ -345,7 +359,7 @@ def _pairings(assembled: Assembled, text, groups, reach) -> tuple[Pairing, ...]:
         if kind == "real":
             out.append(_real_pairing(
                 assembled, text, groups[ref], owned[ref], reach, sound_of_part,
-                release_of_unit, rule_of_part, silent,
+                release_of_unit, rule_of_part, silent, mute,
             ))
         else:
             rules = rule_of_part.get(primary.get(ref), frozenset())
@@ -355,9 +369,11 @@ def _pairings(assembled: Assembled, text, groups, reach) -> tuple[Pairing, ...]:
 
 
 def _real_pairing(assembled, text, group, owned, reach, sound_of_part,
-                  release_of_unit, rule_of_part, silent) -> Pairing:
+                  release_of_unit, rule_of_part, silent, mute) -> Pairing:
     presented: set[int] = set()
     for glyph in group:
+        if glyph in mute:
+            continue
         presented |= _presented_sounds(reach, glyph, sound_of_part, release_of_unit)
     return Pairing(
         glyphs=group, sounds=tuple(sorted(owned)),

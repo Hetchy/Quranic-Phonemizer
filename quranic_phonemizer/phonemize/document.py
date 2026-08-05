@@ -78,7 +78,7 @@ class PhonemizeResult:
     attributions: tuple[ed.AttributionEdge, ...]
     modifiers: tuple[ed.ModifierEdge, ...]
 
-    def assembled(self) -> Assembled:
+    def _assembled(self) -> Assembled:
         """The nine arrays this document is, ready for a projection."""
         return Assembled(
             words=self.words, glyphs=self.glyphs, rendered=self.rendered,
@@ -90,18 +90,18 @@ class PhonemizeResult:
     def phonemes(
         self, by: str | None = None
     ) -> tuple[str, ...] | tuple[tuple[str, ...], ...]:
-        return phonemes(self.assembled(), by)
+        return phonemes(self._assembled(), by)
 
     def text(self, which: str = "source") -> str:
-        return text(self.assembled(), which)
+        return text(self._assembled(), which)
 
     def alignment(
         self, *, text: str = "source", grouping: str = "glyph"
     ) -> tuple[Pairing, ...]:
-        return _alignment(self.assembled(), text=text, grouping=grouping)
+        return _alignment(self._assembled(), text=text, grouping=grouping)
 
     def respelling(self, *, grouping: str = "cell") -> tuple[Block, ...]:
-        return _respelling(self.assembled(), grouping=grouping)
+        return _respelling(self._assembled(), grouping=grouping)
 
 
 def build_result(

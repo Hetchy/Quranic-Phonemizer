@@ -61,7 +61,10 @@ def test_a_copied_result_projects_the_same():
     assert copy.ref == "elsewhere"
     assert copy.phonemes() == r.phonemes()
     assert copy.text("recited") == r.text("recited")
-    assert copy.alignment(text="recited") == r.alignment(text="recited")
+    for text in ("source", "recited"):
+        for grouping in ("glyph", "cell"):
+            got = copy.alignment(text=text, grouping=grouping)
+            assert got == r.alignment(text=text, grouping=grouping)
     assert copy.respelling() == r.respelling()
 
 

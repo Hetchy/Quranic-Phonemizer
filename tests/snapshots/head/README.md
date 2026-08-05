@@ -19,9 +19,11 @@ and takes far longer than the two gated modes, and no gate floors it.
 
 `alignment.jsonl.gz` is the third file and answers a different question: which
 words the projections read differently. Its rows are a digest per word per
-view, because the views themselves are megabytes and what a diff needs is
-where they moved, not what they hold. Regenerate it whenever `alignment` or
-`respelling` is meant to move:
+view, over all six published views -- both texts by both groupings, and
+`respelling` by both -- because the views themselves are megabytes and what a
+diff needs is where they moved, not what they hold. It is one configuration:
+`Phonemizer()` with its defaults, so uthmani, no variant and no extra
+phonemes. Regenerate it whenever `alignment` or `respelling` is meant to move:
 
 ```
 python tools/snapshot.py write tests/snapshots/head/alignment.jsonl.gz --mode alignment

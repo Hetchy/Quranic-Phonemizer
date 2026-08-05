@@ -8,7 +8,7 @@ from quranic_phonemizer.model.canon import Rule
 from quranic_phonemizer.orthography.write import pen_for
 from quranic_phonemizer.phonemize import edges as ed
 from quranic_phonemizer.phonemize import nodes as nd
-from quranic_phonemizer.phonemize.assemble import assemble
+from quranic_phonemizer.phonemize.assemble import Assembled, assemble
 from quranic_phonemizer.phonemize.pairing import alignment
 from quranic_phonemizer.phonemize.session import phonemize_request
 
@@ -158,6 +158,18 @@ def test_the_silence_instances_are_the_tail_of_the_rules(hafs, pen, alphabet,
     ]
     assert at == list(range(len(a.rules) - len(at), len(a.rules)))
 
+    # What the derivation gambles on is not contiguity but that a document
+    # rebuilt from the published arrays lands every glyph on the same rule.
+    copy = Assembled(
+        words=a.words, glyphs=a.glyphs, rendered=a.rendered, units=a.units,
+        sounds=a.sounds, rules=a.rules, spellings=a.spellings,
+        attributions=a.attributions, modifiers=a.modifiers,
+    )
+    assert copy.orthographic_silence == a.orthographic_silence
+    named = {i for i in a.orthographic_silence.values()}
+    assert all(0 <= i < len(a.rules) for i in named)
+    assert named >= set(at)
+
 
 def test_a_seat_is_its_own_kind_and_not_structural(hafs, pen, alphabet):
     """Every tatweel in the corpus seats a mark, so none belongs to no word."""
@@ -176,10 +188,18 @@ def test_a_carrier_whose_length_was_taken_back_sounds_nothing(hafs, pen, alphabe
     yaa = next(p for p in source if a.glyphs[p.glyphs[0]].char == "ى")
     assert not yaa.sounds and not yaa.shares
     assert yaa.silent == yaa.glyphs
-    assert {a.rules[r].rule for r in yaa.rules} == {Rule.ILTIQA_SHORTENING}
+    assert Rule.ILTIQA_SHORTENING in {a.rules[r].rule for r in yaa.rules}
 
     kasra = next(p for p in source if a.glyphs[p.glyphs[0]].char == "ِ")
     assert kasra.sounds and not a.sounds[kasra.sounds[0]].long
+
+    # Presenting nothing must not part it from the letter it was written on.
+    cell = next(
+        c for c in alignment(a, text="source", grouping="cell")
+        if yaa.glyphs[0] in c.glyphs
+    )
+    assert len(cell.glyphs) > 1
+    assert a.glyphs[cell.glyphs[0]].char == "ف"
 
 
 def test_the_divine_names_carrier_joins_its_owning_cell(hafs, pen, alphabet):

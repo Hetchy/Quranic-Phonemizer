@@ -565,9 +565,12 @@ mapping between them is many-to-many in both directions and a column on one row
 cannot carry that.
 
 `silent` holds a glyph whose silence a rule names, and nothing else - a glyph
-with a `Silent` attribution, or one carrying an `orthographic_silence`. A mark
+with a `Silent` attribution, one carrying an `orthographic_silence`, or a
+length carrier whose length a rule took back, which shows that rule. A mark
 that states a fact and makes no sound is not silent: a sukun, a shadda and a
-carrier under a dagger stay out. Under `text="recited"` the list is always
+carrier under a dagger stay out. A silent glyph keeps its place in its
+letter's cell; it presents nothing, which is a different thing from being
+somewhere else. Under `text="recited"` the list is always
 empty, because no rule silences a glyph recitation itself wrote.
 
 `sounds` and `shares` make co-highlighting a field. A sound is timed once and
