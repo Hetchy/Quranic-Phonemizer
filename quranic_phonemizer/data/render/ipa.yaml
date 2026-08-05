@@ -13,7 +13,7 @@
 #   long        ":" after the vowel
 #
 # An entry is a bare token, or a map with `plain` and whichever of `emphatic`,
-# `nasal`, `hum`, `heavy_hum` and `eased` the letter admits. Nine letters
+# `nasal`, `hum`, `heavy_hum`, `eased` and `imala` the letter admits. Nine letters
 # admit emphasis -- the seven of istilaa, plus the raa and the divine lam --
 # which is exactly what `rules/tafkheem.py` can recolour.
 #
@@ -69,7 +69,9 @@ vowels:
   a: {plain: "a", emphatic: "aˤ"}
   u: "u"
   i: "i"
-  e: "e"
+  # The inclined vowel. `plain` is the reading for a caller who has not asked
+  # for the distinction, so one site does not enlarge the inventory.
+  e: {plain: "i", imala: "e"}
 
 releases:
   # All three read "Q" until a toggle asks for the degree; see

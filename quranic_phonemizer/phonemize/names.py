@@ -18,11 +18,11 @@ _NASAL_POINTS = (KhilafId.IQLAB_NASAL, KhilafId.IKHFAA_SHAFAWI_NASAL)
 _NASAL_OPTIONS = ("assimilated", "bilabial")
 _NASAL_DEFAULT = "assimilated"
 
-#: The two points `rules/khilaf.py` settles word by word, and the two
+#: The two points `rules/khilaf.py` settles word by word, and the one
 #: `canon/khilaf.py` settles at build. `seen_sad` has neither: it is
 #: published and unwired, per `01-contract` section 3.1.
 _SITED_POINTS = (KhilafId.RAA_TAFKHEEM, KhilafId.YAA_ITHBAT)
-_VOWEL_POINTS = (KhilafId.NUCLEUS_VOWEL, KhilafId.IMALA_QUALITY)
+_VOWEL_POINTS = (KhilafId.NUCLEUS_VOWEL,)
 
 #: `identifier` is the model's own `Rule.value`. Two boundary rules --
 #: `wasl_start`/`wasl_elision` -- and one rule `07-rules.md`'s catalogue

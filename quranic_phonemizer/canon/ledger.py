@@ -11,7 +11,7 @@ from typing import Any, TypeAlias
 
 from ..dataio import load_yaml, require_keys
 from ..model.address import Location, Riwayah, Script, SlotId, VerseRef
-from ..model.canon import CanonLetter, Nucleus, Onset, Quality
+from ..model.canon import Annotation, CanonLetter, Nucleus, Onset, Quality
 from ..model.inscription import VOWEL_FACTS, SlotFact
 
 SCHEMA_VERSION = 1
@@ -117,6 +117,8 @@ def parse_value(fact: SlotFact, raw: object, *, where: str) -> object:
             return _enum(Onset, raw, where=where, what="Onset")
         case _ if fact in VOWEL_FACTS:
             return _nucleus(raw, where=where)
+        case SlotFact.TAJWEED_MARK:
+            return _enum(Annotation, raw, where=where, what="Annotation")
         case SlotFact.SAKT:
             if not isinstance(raw, bool):
                 raise LedgerError(f"{where}: SAKT takes a boolean, got {raw!r}")

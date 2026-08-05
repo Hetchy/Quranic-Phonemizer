@@ -8,7 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from ..model.address import KhilafId
-from ..model.canon import Annotation, Quality
+from ..model.canon import Quality
 from ..orthography.adapter import Reading
 from .passes import vocalised, word_of
 
@@ -24,9 +24,6 @@ class VowelSite:
     forms: frozenset[str]
     """Every vocalised spelling either wajh writes, so the word is recognised
     whichever one its script chose."""
-    annotation: Annotation | None = None
-    """A fact of the site rather than of the option chosen: an imala site is
-    imala whichever of its two vowels is read for it."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -48,7 +45,6 @@ class VowelKhilaf:
                 "khilaf": site.khilaf.value,
                 "options": sorted(site.options),
                 "default": site.default,
-                "annotation": site.annotation.value if site.annotation else None,
             }
             for name, site in self.sites.items()
         }
@@ -71,7 +67,5 @@ def apply_vowel_khilaf(khilaf: VowelKhilaf):
             quality = site.options[chosen or site.default]
             # The shape is the script's; only the vowel is under dispute.
             span[site.index].nucleus = span[site.index].nucleus.with_quality(quality)
-            if site.annotation is not None:
-                span[site.index].annotations |= {site.annotation}
 
     return apply

@@ -33,6 +33,10 @@ from . import nodes as nd
 #: imported: `orthography.write`'s own table is private to that module.
 _SHORT_ROLE = {"a": "fatha", "u": "damma", "i": "kasra"}
 
+#: The inclined vowel has no haraka, so it is written as the vowel it is
+#: read as. `render/ipa.yaml`'s `e` entry says the same.
+_BASE_QUALITY = {"e": "i"}
+
 #: A tanween noon these rules realize is left bare -- no sukun mark -- because
 #: bareness is what signals the assimilation; every other realization keeps
 #: the mark. 06-two-texts.md section 4.1a.
@@ -189,7 +193,8 @@ def _write_vowel(sound: Vowel, sound_id, slot_id, fact_glyphs, pen: Pen):
     """Length is already resolved on the sound, so no boundary check here.
     A long vowel is up to three glyphs: the haraka, the carrier, the madd
     sign -- 01-contract 4.3's `haraka`/`vowel_letter`/`madd_sign`."""
-    role = _SHORT_ROLE.get(sound.quality.value)
+    quality = _BASE_QUALITY.get(sound.quality.value, sound.quality.value)
+    role = _SHORT_ROLE.get(quality)
     if role is None:
         raise WriteError(f"no haraka writes quality {sound.quality}")
     yield RenderGlyph(
@@ -199,7 +204,7 @@ def _write_vowel(sound: Vowel, sound_id, slot_id, fact_glyphs, pen: Pen):
     )
     if not sound.long:
         return
-    carrier = CARRIER_OF[sound.quality]
+    carrier = CARRIER_OF[quality]
     yield RenderGlyph(
         pen.carriers.get(carrier) or pen.letter(carrier), nd.GlyphKind.VOWEL_LETTER,
         _fact_glyphs(fact_glyphs, slot_id, SlotFact.VOWEL_LENGTH),

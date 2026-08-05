@@ -20,6 +20,13 @@ def test_the_one_imala_in_the_corpus(r):
     assert "imala" in r.rules_on_sound(6, "i:")
 
 
+def test_the_inclining_toggle_defaults_off():
+    off = reading(MAJRAHA, extra_phonemes=(), isolated=6)
+    on = reading(MAJRAHA, extra_phonemes=("imala",), isolated=6)
+    assert off.phonemes(6) == "maʒQri:ha:"
+    assert on.phonemes(6) == "maʒQre:ha:"
+
+
 @for_each_riwayah(TAMANNA, isolated=6)
 def test_the_one_ishmam_in_the_corpus(r):
     # تَأْمَ۫نَّا

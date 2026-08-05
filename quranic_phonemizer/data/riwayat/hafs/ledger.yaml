@@ -211,8 +211,19 @@ supplies:
   - {slot: "69:28:4#3", skeleton: "مليه", fact: SAKT, value: true,
      citation: "Hafs; sakt on مَالِيَهْ, izhar of the two haas"}
 
+  # 11:41 `مَجْر۪ىٰهَا` — the one imala in the Quran. Only Uthmani marks it, so
+  # the site is what carries the vowel and both scripts build the same Score.
+  # The mark is the vowel and the naming of it at once, so it is two facts.
+  - {slot: "11:41:6#2", skeleton: "مجره", fact: VOWEL_QUALITY,
+     value: {kind: Long, quality: e}, citation: "Hafs; the one imala"}
+  - {slot: "11:41:6#2", skeleton: "مجره", fact: TAJWEED_MARK, value: imala,
+     citation: "Hafs; the one imala"}
+
 asserts:
   - {script: uthmani, slot: "6:77:2#1", skeleton: "رء", fact: VOWEL_LENGTH,
      value: {kind: Long, quality: A}}
   - {script: uthmani, slot: "6:78:2#1", skeleton: "رء", fact: VOWEL_LENGTH,
      value: {kind: Long, quality: A}}
+  # Uthmani draws `۪`; IndoPak writes the word with no mark of its own.
+  - {script: uthmani, slot: "11:41:6#2", skeleton: "مجره",
+     fact: VOWEL_QUALITY, value: {kind: Long, quality: e}}
