@@ -160,6 +160,9 @@ class _ReadState:
             e for e in self.evidence
             if not (e.cluster == index and e.offset == seat.offset)
         ]
+        # It still shows the slot it rests on, so the reading can say it was
+        # written; without this the alif reaches no slot and no rule at all.
+        self.decorations.append(Decoration(index, seat.offset))
 
     def _omitted_letter(
         self, char: str, offset: int, entry: MarkEntry, *,
