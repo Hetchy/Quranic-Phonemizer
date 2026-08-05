@@ -54,10 +54,10 @@ def text(assembled: Assembled, which: str = "source") -> str:
     return "".join(glyph.char for glyph in glyphs)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class PhonemizeResult:
-    """`slots=True` is off: `_assembled` below is set post-construction via
-    `object.__setattr__`, which a slotted frozen dataclass has no room for."""
+    """The whole document. Every projection derives from these members, so a
+    result copied member by member projects the same as the one built."""
 
     ref: str
     riwayah: str
@@ -78,21 +78,30 @@ class PhonemizeResult:
     attributions: tuple[ed.AttributionEdge, ...]
     modifiers: tuple[ed.ModifierEdge, ...]
 
+    def assembled(self) -> Assembled:
+        """The nine arrays this document is, ready for a projection."""
+        return Assembled(
+            words=self.words, glyphs=self.glyphs, rendered=self.rendered,
+            units=self.units, sounds=self.sounds, rules=self.rules,
+            spellings=self.spellings, attributions=self.attributions,
+            modifiers=self.modifiers,
+        )
+
     def phonemes(
         self, by: str | None = None
     ) -> tuple[str, ...] | tuple[tuple[str, ...], ...]:
-        return phonemes(self._assembled, by)
+        return phonemes(self.assembled(), by)
 
     def text(self, which: str = "source") -> str:
-        return text(self._assembled, which)
+        return text(self.assembled(), which)
 
     def alignment(
         self, *, text: str = "source", grouping: str = "glyph"
     ) -> tuple[Pairing, ...]:
-        return _alignment(self._assembled, text=text, grouping=grouping)
+        return _alignment(self.assembled(), text=text, grouping=grouping)
 
     def respelling(self, *, grouping: str = "cell") -> tuple[Block, ...]:
-        return _respelling(self._assembled, grouping=grouping)
+        return _respelling(self.assembled(), grouping=grouping)
 
 
 def build_result(
@@ -105,7 +114,7 @@ def build_result(
     canon_digest: str,
     assembled: Assembled,
 ) -> PhonemizeResult:
-    result = PhonemizeResult(
+    return PhonemizeResult(
         ref=ref, riwayah=riwayah, script=script, variant=variant,
         extra_phonemes=extra_phonemes, schema_version=SCHEMA_VERSION,
         canon_digest=canon_digest,
@@ -115,10 +124,6 @@ def build_result(
         spellings=assembled.spellings, attributions=assembled.attributions,
         modifiers=assembled.modifiers,
     )
-    # Not a dataclass field: kept off `repr`/`==`/`dataclasses.fields` by
-    # construction rather than by opting out field-by-field.
-    object.__setattr__(result, "_assembled", assembled)
-    return result
 
 
 __all__ = ["PhonemizeResult", "SCHEMA_VERSION", "build_result", "phonemes", "text"]

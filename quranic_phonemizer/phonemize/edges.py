@@ -66,10 +66,12 @@ class Hosts:
 
 @dataclass(frozen=True, slots=True)
 class MergedInto:
+    """`by` is mandatory: the pair sharing a sound and a rule is the merger."""
+
     unit: int
     part: Part
     sound: int
-    by: int | None
+    by: int
 
 
 @dataclass(frozen=True, slots=True)

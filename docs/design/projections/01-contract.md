@@ -384,7 +384,9 @@ the default reading no vowel in the corpus takes it.
 `RenderGlyph` adds `from_glyphs`: the source glyphs it renders, empty when the
 source has none. It is a tuple because the mapping is many-to-many in both
 directions, which is what section 2's last row is about, and a recited row
-needs no second list of source glyphs: it reads them through here.
+needs no second list of source glyphs: it reads them through here. It also
+adds `unit`, the unit it presents, because an inserted glyph has one and
+`from_glyphs` cannot reach it.
 
 | `kind` | Is |
 |---|---|
@@ -399,7 +401,8 @@ needs no second list of source glyphs: it reads them through here.
 | `silence_sign` | the round and rectangular zeros |
 | `tajweed_mark` | the imala, ishmam and tashil marks |
 | `stop_sign` | the mushaf's advice |
-| `structural` | space, tatweel, the hizb and sajdah marks, the right-to-left mark |
+| `tatweel` | a seat a mark was written on; it belongs to a word and supplies nothing |
+| `structural` | space, the hizb and sajdah marks, the right-to-left mark |
 
 What each becomes in `rendered` is not a property of its kind, and there is no
 spelling policy to choose: the recited text is what recitation writes, once.
@@ -479,7 +482,7 @@ a colouring scheme is a convention a consumer picks.
 | `Structural(glyph)` | the glyph | belongs to no word |
 | **attributions** | | |
 | `Hosts(unit, part, sound, by?)` | the unit | this unit produces this sound |
-| `MergedInto(unit, part, sound, by?)` | the unit | this unit disappeared into that sound |
+| `MergedInto(unit, part, sound, by)` | the unit | this unit disappeared into that sound |
 | `Silent(unit, part, by)` | the unit | this unit lost its sound |
 | **modifiers** | | |
 | `Recolours(sound, by)` | the rule | tafkheem made this sound heavy |
@@ -522,7 +525,9 @@ A merger **is** a `Hosts` and `MergedInto` pair sharing a sound and a rule. A
 release is hosted on the consonant that makes it, and is an **addition**: the
 part still states one realization and carries the echo beside it.
 
-`by` is absent when no rule claimed the sound. There is no `plain` rule.
+`by` is absent when no rule claimed the sound. There is no `plain` rule. It is
+not absent on `MergedInto`: the pair sharing a sound and a rule is the merger,
+so an unclaimed half of one is not a thing the engine can build.
 
 ---
 
@@ -578,6 +583,11 @@ Several glyphs can present one sound; exactly one pairing owns it.
 2. otherwise the glyph supplying its **quality**;
 3. for a merged sound, the first presenting glyph of the **host** unit;
 4. otherwise the first presenting glyph in source order.
+
+A seat supplies nothing, so it sorts after every glyph that does and owns only
+where nothing else presents the sound. A glyph whose supplied length a rule
+took back supplies nothing either: it presents no sound at all, and shows the
+rule that silenced it.
 
 ### 6.2 Gap pairings
 
@@ -835,7 +845,10 @@ changes.
     and the edge disagree in both directions: a tatweel is classed structural
     and carries no edge, a stop sign carries the edge and is classed as
     advice. Both move to the edge, and section 4.3 follows: `stop_sign` keeps
-    its own `kind` and takes no pairing, and a tatweel takes none either.
+    its own `kind` and takes no pairing. A tatweel is not structural at all,
+    because every one in the corpus seats a mark and so belongs to a word: it
+    takes `kind = "tatweel"`, a `Decorates` edge and a pairing, and section
+    6.1 keeps it from owning what it does not supply.
 20. **The dagger and its carrier are reversed.**
 21. **`length_carrier` is a class nothing assigns.** No scalar classifies as
     one, and the recited spelling is where a length carrier is added.

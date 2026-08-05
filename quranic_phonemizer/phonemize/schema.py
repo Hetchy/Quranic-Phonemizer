@@ -83,7 +83,7 @@ def _glyph(g) -> dict:
 
 
 def _render_glyph(g) -> dict:
-    return {**_glyph(g), "from_glyphs": list(g.from_glyphs)}
+    return {**_glyph(g), "from_glyphs": list(g.from_glyphs), "unit": g.unit}
 
 
 def _sound(s) -> dict:

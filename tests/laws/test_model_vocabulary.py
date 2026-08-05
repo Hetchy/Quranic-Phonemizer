@@ -207,3 +207,16 @@ def test_decorates_requires_a_slot() -> None:
     assert fields == {"grapheme", "slot"}
     with pytest.raises(TypeError):
         inscription.Decorates(grapheme=None)  # type: ignore[call-arg]
+
+
+def test_a_merger_names_the_rule_that_made_it() -> None:
+    """A merger is the pair sharing a sound and a rule, so its `by` is not
+    optional. A hosted or silenced part may have had no rule at all."""
+    from typing import get_type_hints
+
+    from quranic_phonemizer.phonemize import edges as ed
+
+    assert get_type_hints(performance.MergedInto)["by"] is address.OccurrenceId
+    assert get_type_hints(performance.Hosts)["by"] == address.OccurrenceId | None
+    assert get_type_hints(ed.MergedInto)["by"] is int
+    assert get_type_hints(ed.Hosts)["by"] == int | None

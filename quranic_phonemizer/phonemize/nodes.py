@@ -130,6 +130,7 @@ class GlyphKind(StrEnum):
     SILENCE_SIGN = "silence_sign"
     TAJWEED_MARK = "tajweed_mark"
     STOP_SIGN = "stop_sign"
+    TATWEEL = "tatweel"
     STRUCTURAL = "structural"
 
 
@@ -151,11 +152,16 @@ _KIND_OF_GRAPHEME_CLASS = {
 }
 
 
-def glyph_kind_of(cls: GraphemeClass, *, vowel_absent: bool = False) -> GlyphKind:
-    """`vowel_absent` is `SlotFact.VOWEL_ABSENCE` evidenced at this
-    grapheme -- the one fact `GraphemeClass.HARAKA` does not already say."""
+def glyph_kind_of(
+    cls: GraphemeClass, *, vowel_absent: bool = False, structural: bool = True
+) -> GlyphKind:
+    """`vowel_absent` is `SlotFact.VOWEL_ABSENCE` evidenced at this grapheme.
+    `structural` says it carries the `Structural` edge; one of this class
+    without that edge is a seat a mark was written on, inside a word."""
     if cls is GraphemeClass.HARAKA:
         return GlyphKind.SUKUN if vowel_absent else GlyphKind.HARAKA
+    if cls is GraphemeClass.STRUCTURAL and not structural:
+        return GlyphKind.TATWEEL
     return _KIND_OF_GRAPHEME_CLASS[cls]
 
 
@@ -174,9 +180,11 @@ class Glyph:
 @dataclass(frozen=True, slots=True)
 class RenderGlyph(Glyph):
     """`from_glyphs` names the source `Glyph` indices it renders; empty is an
-    insertion, more than one is a merge."""
+    insertion, more than one is a merge. `unit` is what it presents, which an
+    inserted glyph has and `from_glyphs` cannot reach."""
 
     from_glyphs: tuple[int, ...] = ()
+    unit: int | None = None
 
 
 __all__ = [

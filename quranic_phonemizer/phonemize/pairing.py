@@ -76,7 +76,7 @@ def _non_structural_source(assembled: Assembled) -> list[int]:
 def _reach_recited(assembled: Assembled) -> dict[int, Reach]:
     out: dict[int, Reach] = {}
     for i, glyph in enumerate(assembled.rendered):
-        unit = assembled.rendered_link[i].unit
+        unit = glyph.unit
         if unit is None:
             continue
         if glyph.kind in _CONSONANT_KINDS:
@@ -89,6 +89,8 @@ def _reach_recited(assembled: Assembled) -> dict[int, Reach]:
 def _reach_source(assembled: Assembled) -> dict[int, Reach]:
     out: dict[int, list] = {}
     for s in assembled.spellings:
+        if getattr(s, "glyph", None) in assembled.orthographic_silence:
+            continue
         match s:
             case ed.Supplies(glyph=g, unit=u, fact=f) if f in _VOWEL_FACT:
                 out.setdefault(g, []).append((u, ed.Part.VOWEL, f))
@@ -218,16 +220,30 @@ def _presenting_glyphs(reach) -> dict[tuple[int, ed.Part], list]:
     return out
 
 
-def _owning_glyph(part: ed.Part, candidates: list) -> int | None:
-    """Pick owning glyph: length before quality, then reading order."""
+def _seats(assembled: Assembled, text: str) -> frozenset[int]:
+    """Recitation writes no seat, so the recited text has none."""
+    if text != "source":
+        return frozenset()
+    return frozenset(
+        i for i, glyph in enumerate(assembled.glyphs)
+        if glyph.kind is nd.GlyphKind.TATWEEL
+    )
+
+
+def _owning_glyph(part: ed.Part, candidates: list, seats: frozenset[int]) -> int | None:
+    """Pick owning glyph: length before quality, then reading order. A seat
+    supplies nothing, so it sorts after every glyph that does."""
     if not candidates:
         return None
     if part is ed.Part.VOWEL:
-        return min(candidates, key=lambda c: (_OWNER_RANK.get(c[1], 0), c[0]))[0]
-    return candidates[0][0]
+        return min(
+            candidates,
+            key=lambda c: (c[0] in seats, _OWNER_RANK.get(c[1], 0), c[0]),
+        )[0]
+    return min(candidates, key=lambda c: (c[0] in seats, c[0]))[0]
 
 
-def _owners(assembled: Assembled, reach) -> list[int | None]:
+def _owners(assembled: Assembled, reach, seats: frozenset[int]) -> list[int | None]:
     """The owning glyph of every sound, `None` where no glyph of this text
     presents it -- a gap."""
     primary = {
@@ -239,7 +255,9 @@ def _owners(assembled: Assembled, reach) -> list[int | None]:
     for index in range(len(assembled.sounds)):
         part_key = primary.get(index)
         candidates = by_part.get(part_key, []) if part_key else []
-        out.append(_owning_glyph(part_key[1], candidates) if part_key else None)
+        out.append(
+            _owning_glyph(part_key[1], candidates, seats) if part_key else None
+        )
     return out
 
 
@@ -314,7 +332,7 @@ def _pairings(assembled: Assembled, text, groups, reach) -> tuple[Pairing, ...]:
         if isinstance(a, ed.Hosts)
     }
 
-    owners = _owners(assembled, reach)
+    owners = _owners(assembled, reach, _seats(assembled, text))
     group_of_glyph = {g: i for i, group in enumerate(groups) for g in group}
     owner_group = [group_of_glyph.get(g) if g is not None else None for g in owners]
     owned: list[list[int]] = [[] for _ in groups]

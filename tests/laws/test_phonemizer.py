@@ -41,9 +41,9 @@ def test_rule_host_is_published_only_for_a_merger():
     assert all(r.rules[i].host is None for i in non_mergers)
 
 
-def test_equality_and_repr_ignore_assembled_bookkeeping():
-    """`_assembled` is internal bookkeeping, not part of the public fields;
-    two instances over the same ref must compare and print alike."""
+def test_the_document_is_its_sixteen_members_and_nothing_else():
+    """Two instances over the same ref compare and print alike, and the
+    document carries no hidden member beside the published ones."""
     a = Phonemizer().phonemize("1:1")
     b = Phonemizer().phonemize("1:1")
     assert a == b
@@ -51,6 +51,18 @@ def test_equality_and_repr_ignore_assembled_bookkeeping():
     field_names = {f.name for f in dataclasses.fields(PhonemizeResult)}
     assert "_assembled" not in field_names
     assert len(field_names) == 16
+
+
+def test_a_copied_result_projects_the_same():
+    """Every projection reads the published members, so `replace` returns a
+    document that works rather than one whose every method raises."""
+    r = Phonemizer().phonemize("2:255")
+    copy = dataclasses.replace(r, ref="elsewhere")
+    assert copy.ref == "elsewhere"
+    assert copy.phonemes() == r.phonemes()
+    assert copy.text("recited") == r.text("recited")
+    assert copy.alignment(text="recited") == r.alignment(text="recited")
+    assert copy.respelling() == r.respelling()
 
 
 def test_identity_fields_are_seven_and_flat():

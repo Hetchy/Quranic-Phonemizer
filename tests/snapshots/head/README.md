@@ -16,3 +16,16 @@ zero.
 
 `word` and `verse` only. `continuous` is quadratic in the length of a reading
 and takes far longer than the two gated modes, and no gate floors it.
+
+`alignment.jsonl.gz` is the third file and answers a different question: which
+words the projections read differently. Its rows are a digest per word per
+view, because the views themselves are megabytes and what a diff needs is
+where they moved, not what they hold. Regenerate it whenever `alignment` or
+`respelling` is meant to move:
+
+```
+python tools/snapshot.py write tests/snapshots/head/alignment.jsonl.gz --mode alignment
+```
+
+No gate floors it. The token snapshots say nothing about the graph, so a
+change that moves a pairing and no phoneme is invisible everywhere else.

@@ -135,7 +135,7 @@ still states its own realization beside it.
 
 | Rule | Source | Trigger | Crosses | On the sound | Recited |
 |---|---|---|---|---|---|
-| `tafkheem` | the unit whose sound is heavy | - | never | makes the sound heavy, and the vowel of the same unit with it | unchanged |
+| `tafkheem` | the unit whose sound is heavy | inside the unit, except a divine name's lam, whose trigger is the vowel before it | may | makes the sound heavy, and the vowel of the same unit with it | unchanged |
 | `tarqeeq` | the unit whose raa is light | - | never | names the sound | unchanged |
 | `imala` | the unit whose vowel tilts | - | never | names the vowel's quality | unchanged |
 | `tashil` | the unit whose hamza is eased | - | never | names the sound | unchanged |
@@ -143,8 +143,11 @@ still states its own realization beside it.
 
 `tafkheem` is the only rule that names more than one sound of its own unit: the
 consonant is heavy and the vowel it governs is heavy with it, and both are
-sounds of the source. Its trigger is inside the unit, which is why the column
-is empty.
+sounds of the source. Its trigger is inside the unit for every letter but one.
+A divine name's lam is heavy unless a kasra precedes it, and that vowel can be
+in the previous word: عَهْدَ ٱللَّهِ reads `ʕ a h d a` then `lˤlˤ a: h i`, and the
+fatha deciding it belongs to the word before. The instance still names one
+unit; the trigger it does not publish is what crosses.
 
 ### 2.6 Boundary
 

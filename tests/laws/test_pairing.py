@@ -4,8 +4,10 @@ from __future__ import annotations
 import pytest
 
 from quranic_phonemizer.model.address import Script
+from quranic_phonemizer.model.canon import Rule
 from quranic_phonemizer.orthography.write import pen_for
 from quranic_phonemizer.phonemize import edges as ed
+from quranic_phonemizer.phonemize import nodes as nd
 from quranic_phonemizer.phonemize.assemble import assemble
 from quranic_phonemizer.phonemize.pairing import alignment
 from quranic_phonemizer.phonemize.session import phonemize_request
@@ -125,21 +127,59 @@ def test_a_cell_holds_two_letter_glyphs_only_for_a_tanween_noon(hafs, pen, alpha
         assert len(tanween) == 1, (surah, ayah, pairing, units)
 
 
-def test_length_owns_before_quality(hafs, pen, alphabet):
-    """`ٱلرَّحْمَـٰنِ`'s dagger vowel is owned by the seat that carries its
-    length, not the fatha that carries its
-    quality -- both present the same sound, but only one may own it."""
+def test_length_owns_before_quality_and_a_seat_owns_nothing(hafs, pen, alphabet):
+    """`ٱلرَّحْمَـٰنِ`'s dagger vowel is owned by the dagger supplying its
+    length. The fatha supplies only quality and the seat supplies nothing,
+    so both present it and neither owns it."""
     a = _assembled(hafs, pen, alphabet, "1:1")
     source = alignment(a, text="source", grouping="glyph")
-    seat = next(
-        i for i, p in enumerate(source)
-        if a.glyphs[p.glyphs[0]].char == "ـ" and p.sounds
+    dagger = next(
+        p for p in source
+        if a.glyphs[p.glyphs[0]].char == "ٰ" and p.sounds
     )
-    fatha = next(
-        i for i, p in enumerate(source[:seat])
-        if a.glyphs[p.glyphs[0]].char == "َ" and p.shares == source[seat].sounds
-    )
-    assert not source[fatha].sounds
+    for char in ("ـ", "َ"):
+        presenting = [
+            p for p in source
+            if a.glyphs[p.glyphs[0]].char == char and p.shares == dagger.sounds
+        ]
+        assert presenting, char
+        assert not any(p.sounds for p in presenting), char
+
+
+@pytest.mark.parametrize(("surah", "ayah"), SAMPLE)
+def test_the_silence_instances_are_the_tail_of_the_rules(hafs, pen, alphabet,
+                                                         surah, ayah):
+    """Assembly appends them last and nothing else mints one, which is how a
+    copied document finds them again without being told where they start."""
+    a = _assembled(hafs, pen, alphabet, f"{surah}:{ayah}")
+    at = [
+        i for i, r in enumerate(a.rules)
+        if r.rule is Rule.ORTHOGRAPHIC_SILENCE
+    ]
+    assert at == list(range(len(a.rules) - len(at), len(a.rules)))
+
+
+def test_a_seat_is_its_own_kind_and_not_structural(hafs, pen, alphabet):
+    """Every tatweel in the corpus seats a mark, so none belongs to no word."""
+    a = _assembled(hafs, pen, alphabet, "1:1")
+    seats = [g for g in a.glyphs if g.char == "ـ"]
+    assert seats
+    assert all(g.kind is nd.GlyphKind.TATWEEL for g in seats)
+    assert all(g.word is not None for g in seats)
+
+
+def test_a_carrier_whose_length_was_taken_back_sounds_nothing(hafs, pen, alphabet):
+    """فِى before a sakin: the reading keeps a short kasra, so the yaa that
+    was written for the length shows the rule and presents no sound."""
+    a = _assembled(hafs, pen, alphabet, "2:27:16-2:27:17")
+    source = alignment(a, text="source", grouping="glyph")
+    yaa = next(p for p in source if a.glyphs[p.glyphs[0]].char == "ى")
+    assert not yaa.sounds and not yaa.shares
+    assert yaa.silent == yaa.glyphs
+    assert {a.rules[r].rule for r in yaa.rules} == {Rule.ILTIQA_SHORTENING}
+
+    kasra = next(p for p in source if a.glyphs[p.glyphs[0]].char == "ِ")
+    assert kasra.sounds and not a.sounds[kasra.sounds[0]].long
 
 
 def test_the_divine_names_carrier_joins_its_owning_cell(hafs, pen, alphabet):

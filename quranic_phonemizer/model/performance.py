@@ -117,12 +117,13 @@ class Inserted:
 @dataclass(frozen=True, slots=True)
 class MergedInto:
     """The source half of a merger. The pair sharing a `SoundId` and an
-    `OccurrenceId` *is* the merger; there is no `assimilated` flag."""
+    `OccurrenceId` *is* the merger, so `by` is mandatory here and optional
+    on the edges a rule need not have caused."""
 
     slots: tuple[SlotId, ...]
     aspect: Aspect
     sound: SoundId
-    by: OccurrenceId | None
+    by: OccurrenceId
 
 
 @dataclass(frozen=True, slots=True)

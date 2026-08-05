@@ -102,3 +102,38 @@ that word -- the tanween noon the word ends in adds a final unvoweled
 letter the key did not account for -- so the entry never fired and 76:18 has
 always read as an ordinary tanween. Uthmani draws no `۠` there either. This
 unit removes the section rather than repairing the entry.
+
+## The alignment the register's last four entries moved
+
+No phoneme moves: `regression`, `cross-script`, `roundtrip`, `attestation` and
+`l1` all report the numbers they reported before. What moves is who owns a
+sound in `alignment(text="source", grouping="glyph")`, and the blocks
+`respelling` derives from it.
+
+`tests/snapshots/head/alignment.jsonl.gz` is the new baseline. Against the
+same file built before these changes, of 232,299 rows (77,433 words, three
+views each):
+
+| View | Rows moved |
+|---|---|
+| `source` | 8,678 |
+| `respell` | 20,491 |
+| `recited` | 0 |
+
+Every source row is accounted for by one of two corrections:
+
+| Cause | Words |
+|---|---|
+| a seat stopped owning what it never supplied | 5,947 |
+| a carrier whose length `iltiqa_shortening` took back | 2,670 |
+| a carrier whose length `pausal_alif` took back | 61 |
+
+The seven alifs are in that last row: `أَنَا۠` joined reads `ʔana`, so the `۠`
+supplying a length nobody says now shows `pausal_alif` and presents nothing,
+and the fatha owns the vowel.
+
+Every moved `respell` row is in a verse holding a moved `source` row. A block
+names pairings rather than glyphs, so one carrier that stops presenting
+re-indexes every block after it in its verse, which is why the count is larger
+than the number of sites. `recited` moving nothing is the check that publishing
+`RenderGlyph.unit` replaced the internal link exactly.

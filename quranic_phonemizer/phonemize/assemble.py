@@ -6,6 +6,7 @@ model-layer id. `pairing.py` and `respell.py` are the readers.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from functools import cached_property
 
 from ..model.canon import Rule, Score
 from ..model.inscription import (
@@ -34,6 +35,12 @@ from ..orthography.write import Pen
 from ..render.alphabet import Alphabet
 from . import edges as ed
 from . import nodes as nd
+from .derived import (
+    decoration_targets,
+    open_vowel_units,
+    shortened_carriers,
+    silent_groups,
+)
 from .ordering import sounds_in_order
 from .recited import write_recited
 from .session import Session
@@ -50,18 +57,12 @@ _FACT_OF = {
 _PART_OF = {Aspect.CONSONANT: ed.Part.CONSONANT, Aspect.VOWEL: ed.Part.VOWEL}
 
 
-@dataclass(frozen=True, slots=True)
-class RenderedLink:
-    """Which unit and sounds a `RenderGlyph` presents. Not part of the
-    public contract: `pairing.py`'s own machinery."""
-
-    unit: int | None
-    sound: int | None
-    release: int | None
-
-
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class Assembled:
+    """The nine published arrays and nothing else. What the projections need
+    beyond them is derived here, so a document copied field by field
+    projects the same as the one assembly built."""
+
     words: tuple[nd.Word, ...]
     glyphs: tuple[nd.Glyph, ...]
     rendered: tuple[nd.RenderGlyph, ...]
@@ -71,16 +72,39 @@ class Assembled:
     spellings: tuple[ed.SpellingEdge, ...]
     attributions: tuple[ed.AttributionEdge, ...]
     modifiers: tuple[ed.ModifierEdge, ...]
-    rendered_link: tuple[RenderedLink, ...]
-    orthographic_silence: dict[int, int]
-    """Source glyph index -> the `rules` index of the instance it shows."""
-    open_vowel_units: frozenset[int]
-    """Units whose vowel performs long, read off the `Performance`."""
-    decoration_target: dict[int, int]
-    """A `Decorates`-only glyph's unit: its own named unit, or the last unit
-    a preceding glyph presented a vowel for
-    when the mark's own attachment (`canon/build.py`'s bookkeeping) names a
-    unit -- such as a tanween's noon -- that never itself carries a vowel."""
+
+    @cached_property
+    def open_vowel_units(self) -> frozenset[int]:
+        """Units whose vowel performs long."""
+        return open_vowel_units(self.attributions, self.sounds)
+
+    @cached_property
+    def decoration_target(self) -> dict[int, int]:
+        """A `Decorates`-only glyph's unit: its own named unit, or the last
+        unit a preceding glyph presented a vowel for when the mark's own
+        attachment names one that never itself carries a vowel."""
+        return decoration_targets(self.glyphs, self.spellings)
+
+    @cached_property
+    def orthographic_silence(self) -> dict[int, int]:
+        """Source glyph index -> the `rules` index of the instance it shows."""
+        groups = silent_groups(
+            self.glyphs, self.spellings, self.open_vowel_units,
+            self.decoration_target,
+        )
+        offset = next(
+            (i for i, r in enumerate(self.rules)
+             if r.rule is Rule.ORTHOGRAPHIC_SILENCE),
+            len(self.rules),
+        )
+        out = {
+            glyph: offset + rule
+            for rule, group in enumerate(groups) for glyph in group
+        }
+        out.update(
+            shortened_carriers(self.spellings, self.attributions, self.modifiers)
+        )
+        return out
 
 
 def _unit_indices(score: Score):
@@ -125,16 +149,17 @@ def assemble(
     attributions = _attributions(performance, sound_of, unit_of_slot, occurrence_of)
     modifiers = _modifiers(performance, sound_of, occurrence_of)
 
-    open_vowel = _open_vowel_units(attributions, sounds)
-    decoration_target = _decoration_targets(glyphs, spellings)
-    silence_rules, orthographic_silence = _orthographic_silence(
-        glyphs, spellings, open_vowel, decoration_target, len(rules)
+    open_vowel = open_vowel_units(attributions, sounds)
+    groups = silent_groups(
+        glyphs, spellings, open_vowel, decoration_targets(glyphs, spellings)
     )
-    rules.extend(silence_rules)
+    rules.extend(
+        nd.RuleInstance(Rule.ORTHOGRAPHIC_SILENCE, None, None) for _ in groups
+    )
 
-    rendered, links = _rendered(
+    rendered = _rendered(
         session.score, session.inscription, performance, pen, glyph_of,
-        unit_of_slot, sound_of,
+        unit_of_slot,
     )
     words = _words(session, glyphs)
 
@@ -142,8 +167,6 @@ def assemble(
         words=words, glyphs=glyphs, rendered=rendered, units=units,
         sounds=sounds, rules=tuple(rules), spellings=spellings,
         attributions=attributions, modifiers=modifiers,
-        rendered_link=links, orthographic_silence=orthographic_silence,
-        open_vowel_units=open_vowel, decoration_target=decoration_target,
     )
 
 
@@ -173,7 +196,11 @@ def _glyphs(inscription: Inscription, word_of_slot, unit_of_slot):
         )
         glyphs.append(nd.Glyph(
             word=word, char=grapheme.char,
-            kind=nd.glyph_kind_of(grapheme.cls, vowel_absent=grapheme.id in vowel_absent),
+            kind=nd.glyph_kind_of(
+                grapheme.cls,
+                vowel_absent=grapheme.id in vowel_absent,
+                structural=grapheme.id in structural,
+            ),
             word_index=grapheme.index if word is not None else None,
             source_index=index,
         ))
@@ -217,7 +244,7 @@ def _merger_occurrences(performance: Performance) -> frozenset:
     """Occurrence ids that genuinely merge two units into one sound."""
     return frozenset(
         a.by for a in performance.attributions
-        if isinstance(a, PerfMergedInto) and a.by is not None
+        if isinstance(a, PerfMergedInto)
     )
 
 
@@ -263,80 +290,6 @@ def _modifiers(performance: Performance, sound_of, occurrence_of):
     return tuple(out)
 
 
-def _open_vowel_units(attributions, sounds) -> frozenset[int]:
-    """A unit whose vowel is long in this reading.
-
-    Read off the performed sound, never a canonical fact: the iwad and the
-    seven alifs lengthen with no `Evidences(VOWEL_LENGTH)` edge at all.
-    """
-    return frozenset(
-        a.unit for a in attributions
-        if isinstance(a, ed.Hosts) and a.part is ed.Part.VOWEL
-        and sounds[a.sound].kind is nd.SoundKind.VOWEL and sounds[a.sound].long
-    )
-
-
-_VOWEL_FACTS = (ed.Fact.VOWEL_QUALITY, ed.Fact.VOWEL_LENGTH)
-
-
-def _decoration_targets(glyphs, spellings) -> dict[int, int]:
-    """A `Decorates` glyph's own unit, or -- when that unit never itself
-    hosts a vowel, as a tanween's noon does not -- the last unit some fact
-    glyph presented a vowel for."""
-    vowel_fact_unit = {
-        s.glyph: s.unit for s in spellings
-        if isinstance(s, ed.Supplies) and s.fact in _VOWEL_FACTS
-    }
-    vowel_bearing_units = frozenset(vowel_fact_unit.values())
-    decorated_unit = {
-        s.glyph: s.unit for s in spellings if isinstance(s, ed.Decorates)
-    }
-
-    out: dict[int, int] = {}
-    last_vowel_unit: int | None = None
-    for index in range(len(glyphs)):
-        if index in vowel_fact_unit:
-            last_vowel_unit = vowel_fact_unit[index]
-        if index not in decorated_unit:
-            continue
-        nominal = decorated_unit[index]
-        if nominal in vowel_bearing_units or last_vowel_unit is None:
-            out[index] = nominal
-        else:
-            out[index] = last_vowel_unit
-    return out
-
-
-def _orthographic_silence(glyphs, spellings, open_vowel_units, targets,
-                          rule_offset):
-    """A `Decorates` glyph whose target has no open vowel to seat answers to
-    no unit. `Witnesses` always sounds and is never a candidate; consecutive
-    silent glyphs are one instance."""
-    evidenced = {s.glyph for s in spellings if isinstance(s, ed.Supplies)}
-
-    groups: list[list[int]] = []
-    for index, glyph in enumerate(glyphs):
-        silent = (
-            glyph.word is not None
-            and index not in evidenced
-            and index in targets
-            and targets[index] not in open_vowel_units
-        )
-        if not silent:
-            continue
-        if groups and groups[-1][-1] == index - 1:
-            groups[-1].append(index)
-        else:
-            groups.append([index])
-
-    rules = [nd.RuleInstance(Rule.ORTHOGRAPHIC_SILENCE, None, None) for _ in groups]
-    lookup = {
-        glyph: rule_offset + rule
-        for rule, group in enumerate(groups) for glyph in group
-    }
-    return rules, lookup
-
-
 def _words(session: Session, glyphs):
     score, boundaries, inscription = (
         session.score, session.boundaries, session.inscription
@@ -357,12 +310,11 @@ def _words(session: Session, glyphs):
 
 
 def _rendered(score: Score, inscription, performance, pen: Pen, glyph_of,
-             unit_of_slot, sound_of):
+             unit_of_slot):
     written = write_recited(score, inscription, performance, pen)
     word_of = _rendered_words(written)
     counters: dict[int, int] = {}
     glyphs = []
-    links = []
     for index, glyph in enumerate(written):
         word = word_of[index]
         word_index = None
@@ -372,13 +324,9 @@ def _rendered(score: Score, inscription, performance, pen: Pen, glyph_of,
         glyphs.append(nd.RenderGlyph(
             word=word, char=glyph.char, kind=glyph.kind, word_index=word_index,
             source_index=index,
-            from_glyphs=tuple(glyph_of[g] for g in glyph.from_glyphs)))
-        links.append(RenderedLink(
-            unit=unit_of_slot.get(glyph.slot),
-            sound=sound_of.get(glyph.sound),
-            release=sound_of.get(glyph.release),
-        ))
-    return tuple(glyphs), tuple(links)
+            from_glyphs=tuple(glyph_of[g] for g in glyph.from_glyphs),
+            unit=unit_of_slot.get(glyph.slot)))
+    return tuple(glyphs)
 
 
 def _rendered_words(written):
@@ -395,4 +343,4 @@ def _rendered_words(written):
     return out
 
 
-__all__ = ["Assembled", "RenderedLink", "assemble"]
+__all__ = ["Assembled", "assemble"]
