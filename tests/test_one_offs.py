@@ -9,6 +9,7 @@ MAN_RAQIN = Site(hafs=("75:27", (2, 3)))
 BAL_RANA = Site(hafs=("83:14", (2, 3)))
 NUNJI = Site(hafs=("21:88", (7,)))
 MALIYAH = Site(hafs=("69:28", (4,)))
+IDDARATUM = Site(hafs=("2:72", (4,)))
 
 
 @for_each_riwayah(MAJRAHA, isolated=6)
@@ -71,3 +72,15 @@ def test_a_sakt_keeps_the_haa_clear_of_the_haa_after_it(r):
     assert r.phonemes(4) == "ma:lijah"
     assert r.phonemes(5) == "halaka"
     assert "idgham_mutamathilayn" not in r.rules_on_char(4, "ه")
+
+
+@for_each_riwayah(IDDARATUM, isolated=4)
+def test_one_word_holds_a_dagger_alif_that_is_said_and_one_that_is_not(r):
+    # فَٱدَّٰرَٰٔتُمْ
+    assert r.phonemes(4) == "fadda:rˤaˤʔtum"
+    # the first is the length after the daal; the second is the hamza's rest,
+    # so it lengthens nothing and the raa keeps a short vowel
+    assert r.sounds(4) == (
+        "f", "a", "dd", "a:", "rˤ", "aˤ", "ʔ", "t", "u", "m",
+    )
+    assert r.rules_on_char(4, "ٰ") >= {"madd_tabii", "orthographic_silence"}
