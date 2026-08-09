@@ -18,6 +18,7 @@ from ..engine.plan import (
     mint,
 )
 from ..model.address import BoundaryPlan, SlotId
+from ..model.canon import Annotation
 from ..model.canon import CanonLetter as L
 from ..model.canon import NucleusKind, Onset, Phase, Quality, Rule
 from ..model.performance import Aspect, Occurrence, Participants, Vowel
@@ -173,10 +174,17 @@ class MaddClass:
         if following is None:
             return None
 
+        if following.onset is Onset.WASL:
+            # A joined wasl hamza is not there to lengthen for: the two sakins
+            # that meet behind it are `IltiqaRepair`'s, and it shortens.
+            return None
+
         if following.letter is L.HAMZA:
-            # Muttasil in the same word, munfasil across a boundary -- joined-ness only, so one rule serves both names.
+            # Muttasil in the same word, munfasil across a boundary -- and a particle the rasm joined is a boundary the writing does not show.
             rule = (
-                Rule.MADD_JAIZ_MUNFASIL if final else Rule.MADD_WAJIB_MUTTASIL
+                Rule.MADD_JAIZ_MUNFASIL
+                if final or Annotation.JOINED_PARTICLE in slot.annotations
+                else Rule.MADD_WAJIB_MUTTASIL
             )
             return _classify(rule, at, following.id)
 

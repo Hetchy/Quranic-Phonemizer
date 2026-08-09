@@ -269,6 +269,12 @@ phonemizer model.
 
 - Graphically-joined particles (vocative يَـٰٓ, demonstrative هَـٰٓ) look like
   muttasil but are linguistically munfasil (separate words joined in rasm).
+  240 sites, 22 written forms. A proclitic or the interrogative hamza may
+  stand before the particle without changing this — أَهَـٰٓؤُلَآءِ (5:53,
+  6:53, 7:49, 34:40) and وَهَـٰٓؤُلَآءِ (17:20) separate where هَـٰٓؤُلَآءِ
+  does, since neither touches the ها|أولاء seam. هَآؤُمُ (69:19) is the same
+  shape and is **not** one of them: its hamza is a radical of هاء, so it is
+  muttasil. Only a lexicon separates the two.
 - Madd lazim kalimi mukhaffaf exists in exactly one Hafs word (ءَآلۡـَٰٔنَ,
   10:51 & 10:91).
 - At waqf, a munfasil reverts to tabii' (the next word never arrives) ⏸.

@@ -67,6 +67,47 @@ def allah_long_a(
 RELENGTHENED_A = Long(Quality.A)
 
 
+#: The two particles the rasm joins to the word behind them: the vocative
+#: `يا` and `ها` التنبيه. Both end in the long `a` that carries the join.
+JOINING_PARTICLES = (CanonLetter.YA, CanonLetter.HEH)
+
+
+def joined_particle(
+    letters: list[CanonLetter], nuclei: list, onsets: list, lexicon
+) -> list[int]:
+    """Index of a particle the rasm joined to a word that follows it.
+
+    `يَـٰٓأَيُّهَا`, `هَـٰٓؤُلَآءِ` -- one word written and two spoken, so the
+    hamza behind the long `a` opens a word rather than standing inside one.
+    """
+    del onsets
+    for i in (0, 1):
+        if i >= len(letters) or letters[i] not in JOINING_PARTICLES:
+            continue
+        if i and not _heads_the_word(letters[0], lexicon):
+            continue
+        if i + 1 >= len(letters) or letters[i + 1] is not CanonLetter.HAMZA:
+            continue
+        if nuclei[i].kind is not NucleusKind.LONG:
+            continue
+        if getattr(nuclei[i], "quality", None) is not Quality.A:
+            continue
+        if not lexicon.joins_a_particle(_tail(letters, i)):
+            continue
+        return [i]
+    return []
+
+
+def _heads_the_word(letter: CanonLetter, lexicon) -> bool:
+    """One proclitic (`وَهَـٰٓؤُلَآءِ`) or the interrogative hamza
+    (`أَهَـٰٓؤُلَآءِ`) leaves the particle word-initial. Anything else and the
+    shape is a root: the yaa of `ضِيَآءً` has the same `a` before a hamza."""
+    return (
+        letter is CanonLetter.HAMZA
+        or ABJAD[letter.value] in lexicon.affixes.proclitics
+    )
+
+
 def otiose_waw(context: Context) -> bool:
     """`أُو۟لَـٰٓئِكَ`, `أُو۟لِى` - a waw in the rasm that never sounds.
 

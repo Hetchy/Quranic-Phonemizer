@@ -89,6 +89,14 @@ class Lexicon:
         vowel its own third letter decides."""
         return self._matches("wasl_kasra", skeleton)
 
+    def joins_a_particle(self, skeleton: str) -> bool:
+        """Is a word of this shape `ها`/`يا` plus a word, or one lexeme?
+
+        `هَآؤُمُ` is shaped exactly like `هَـٰٓؤُلَآءِ` and its hamza is a
+        radical of `هاء`, so only a dictionary separates them.
+        """
+        return not self._matches("joined_particle_exempt", skeleton)
+
     def is_form_eight_lam(self, skeleton: str) -> bool:
         """Matched as it stands: `ٱلتَّقْوَىٰ` and `ٱلتَّمَاثِيل` extend the
         stems of `ٱلْتَقَى` and `ٱلْتَمِسُوا` and are not them."""

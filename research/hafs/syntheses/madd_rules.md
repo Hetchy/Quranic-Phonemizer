@@ -93,9 +93,27 @@ Length in Hafs: 4–5 harakat
 ## Special Case in Madd Munfasil (Within the Same Word)
 Although the hamzah is not in a separate written word, scholars classify this word under the ruling of Madd Munfasil.
 
-| Word       | Analysis                     | Type                                        | Ruling in Ḥafṣ |
-| ---------- | ---------------------------- | ------------------------------------------- | -------------- |
-| هَٰؤُلَاءِ | هـ + long vowel (ا) + hamzah | Madd Munfasil (Constructive / Ruling-based) | 4 or 5 counts  |
+| Word         | Analysis                          | Type                                        | Ruling in Ḥafṣ |
+| ------------ | --------------------------------- | ------------------------------------------- | -------------- |
+| هَٰؤُلَاءِ   | ها التنبيه + أولاء                | Madd Munfasil (Constructive / Ruling-based) | 4 or 5 counts  |
+| أَهَٰؤُلَاءِ | همزة الاستفهام + ها التنبيه + أولاء | Madd Munfasil (Constructive / Ruling-based) | 4 or 5 counts  |
+| وَهَٰؤُلَاءِ | واو + ها التنبيه + أولاء          | Madd Munfasil (Constructive / Ruling-based) | 4 or 5 counts  |
+| يَٰأَيُّهَا  | يا النداء + أيها                  | Madd Munfasil (Constructive / Ruling-based) | 4 or 5 counts  |
+| هَٰأَنتُمْ   | ها التنبيه + أنتم                 | Madd Munfasil (Constructive / Ruling-based) | 4 or 5 counts  |
+
+The prefix does not move the seam. أهؤلاء occurs 4 times — 5:53, 6:53, 7:49,
+34:40 — and the interrogative hamza stands *before* ها, never between ها and
+أولاء, so the first madd is separated there exactly as it is without it. The
+prefixed forms are the whole of the disagreement between annotators: cpfair's
+`quran-tajweed` data, for instance, splits هَٰٓأَنتُمْ (munfasil) from
+هَٰٓؤُلَآءِ (muttasil) in one and the same ayah, 3:66, which tracks whether the
+following hamza is written standalone أ or carried ؤ and is not a tajweed
+distinction. quran.com's tajweed edition does not separate munfasil from
+muttasil at all: بِمَآ أُنزِلَ and هَٰٓؤُلَآءِ are both `madda_obligatory`.
+
+The counter-example is هَآؤُمُ (69:19), same shape and **not** a joined
+particle: its hamza is the third radical of the imperative noun هاء, so it is
+wajib muttasil. Only a lexicon separates the two.
 
 ## For this reason, it takes the ruling of: Madd Munfasil (4–5 counts in Ḥafṣ).
 

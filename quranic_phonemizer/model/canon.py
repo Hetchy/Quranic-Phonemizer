@@ -107,6 +107,9 @@ class Annotation(StrEnum):
     ISHMAM = "ishmam"
     DIVINE_NAME = "divine_name"
     IMALA = "imala"
+    JOINED_PARTICLE = "joined_particle"
+    """This slot ends a particle the rasm joined to the word after it, so
+    what follows opens a word: `هَـٰٓؤُلَآءِ` is `ها` + `أولاء`."""
 
 
 class NucleusKind(StrEnum):

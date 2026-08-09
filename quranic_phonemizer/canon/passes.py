@@ -170,6 +170,26 @@ def _apply_allah_lexeme(
             span[index].nucleus = lexeme.RELENGTHENED_A
 
 
+def _apply_joined_particles(
+    reading: Reading, drafts, lexicon: Lexicon, scribe, selection
+) -> None:
+    """`يَـٰٓأَيُّهَا`, `هَـٰٓؤُلَآءِ`: a particle the rasm joined to a word.
+
+    Lexical, not orthographic, for the reason the pausal alifs are: Uthmani's
+    dagger alif sits over these joins and over roots alike.
+    """
+    del scribe, selection
+    for word_index in range(len(reading.words)):
+        span = [d for d in drafts if word_of(reading, d) == word_index]
+        if not span:
+            continue
+        letters = [d.letter for d in span]
+        nuclei = [d.nucleus for d in span]
+        onsets = [d.onset for d in span]
+        for index in lexeme.joined_particle(letters, nuclei, onsets, lexicon):
+            span[index].annotations |= {Annotation.JOINED_PARTICLE}
+
+
 #: What the plural meem attaches to. `ـكُمْ` and `ـهُمْ`, in either person.
 PLURAL_HOSTS = frozenset({CanonLetter.KAF, CanonLetter.HEH})
 
@@ -238,11 +258,12 @@ def vocalised(span) -> str:
         )
     return "".join(out)
 
-#: The passes every riwayah runs, in order: two lexemes and one juncture. A
+#: The passes every riwayah runs, in order: three lexemes and one juncture. A
 #: list rather than a hardcoded sequence in `build`, so a riwayah that reads
 #: a lexeme differently swaps the list instead of editing the builder.
 LEXEME_PASSES: tuple[LexemePass, ...] = (
     _apply_allah_lexeme,
     _apply_pausal_lexemes,
+    _apply_joined_particles,
     connect_plural_meem,
 )

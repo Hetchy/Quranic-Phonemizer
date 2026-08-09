@@ -112,6 +112,16 @@ sections:
     budget: 10
     entries: ["ءaنa", "سaلسaبiلa"]
 
+  # Words that open on `ها` or `يا` and are one lexeme all the same, so the
+  # hamza behind the long `a` does not open a word. `هَآؤُمُ` is the imperative
+  # noun `هاء` -- take -- whose hamza is a radical, not a demonstrative behind
+  # `ها` التنبيه. Everything else of that shape is the particle: `هَـٰٓؤُلَآءِ`,
+  # `هَـٰٓأَنتُمْ`, `يَـٰٓأَيُّهَا`, `يَـٰٓـَٔادَمُ`.
+  joined_particle_exempt:
+    match: clitic
+    budget: 5
+    entries: ["هءم"]      # هاؤم
+
   # Form VIII with lam as the first radical. After a wasl hamza these are
   # shaped exactly like the article before a sun letter -- ءلت... either way
   # -- and the article's gemination is an attestation rather than a canonical

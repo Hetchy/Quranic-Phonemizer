@@ -14,6 +14,7 @@ from quranic_phonemizer.model.address import (
     VariantSelection,
     VerseRef,
 )
+from quranic_phonemizer.model.inscription import Attests, Decorates, Evidences
 from quranic_phonemizer.render.anchored import anchored, graphemes_by_id
 from quranic_phonemizer.render.recite import phonemes_by_word
 
@@ -87,6 +88,23 @@ def _through(recitation_, riwayah, script, verse):
             + _words(recitation_, riwayah, script, following))
 
 
+def _written_by(inscription) -> tuple[tuple, ...]:
+    """Every (grapheme, slot) pair the inscription records, whatever the fact.
+
+    Which fact a grapheme wrote does not matter to a caller asking which
+    rules name the letter it can see on the page.
+    """
+    return tuple(
+        (spelling.grapheme, _anchor(spelling))
+        for spelling in inscription.spellings
+        if isinstance(spelling, (Evidences, Decorates, Attests))
+    )
+
+
+def _anchor(spelling):
+    return spelling.anchor if isinstance(spelling, Attests) else spelling.slot
+
+
 class Reading:
     """What one call produced, addressed by the word numbers of the verse."""
 
@@ -97,6 +115,7 @@ class Reading:
         self.performance = performance
         self._text = dict(enumerate((t for _, t in words), start=1))
         self._chars = graphemes_by_id(built.inscription)
+        self._written_by = _written_by(built.inscription)
         self._view = anchored(performance, built.inscription, _alphabet())
         self._phonemes = phonemes_by_word(
             performance, built.score, _alphabet()
@@ -130,8 +149,23 @@ class Reading:
     def host_of(self, rule: str):
         raise RulesPending(rule)
 
-    def rules_on_char(self, word: int, char: str):
-        raise RulesPending(char)
+    def rules_on_char(self, word: int, char: str) -> frozenset[str]:
+        """Every rule naming a slot this character writes, in this word.
+
+        Read off the occurrences, so a rule that classifies and produces
+        nothing is visible: `هَـٰٓؤُلَآءِ` holds two madds of two names.
+        """
+        wanted = self._slots(word)
+        slots = {
+            slot
+            for grapheme, slot in self._written_by
+            if slot in wanted and self._chars[grapheme].char == char
+        }
+        return frozenset(
+            occurrence.rule.value
+            for occurrence in self.performance.occurrences
+            if slots & set(occurrence.parts.slots)
+        )
 
     def rules_on_sound(self, word: int, token: str):
         raise RulesPending(token)
