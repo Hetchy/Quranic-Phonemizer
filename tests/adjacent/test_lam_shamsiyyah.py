@@ -19,9 +19,6 @@ SUN_LETTERS = [
     ("2:16", 4, "ʔadˤdˤaˤla:lah"),    # ٱلضَّلَـٰلَةَ
     ("2:63", 6, "ʔatˤtˤu:rˤ"),        # ٱلطُّورَ
     ("2:35", 18, "ʔaðˤðˤaˤ:limi:n"),  # ٱلظَّـٰلِمِينَ
-    # ٱلَّيْلِ -- the article's lam and the sun lam are one letter, so the
-    # score holds a single geminate slot and the engine names no rule on it
-    pytest.param("2:164", 7, "ʔallajl", marks=pytest.mark.engine_bug),
     ("2:24", 7, "ʔaña:rˤ"),           # ٱلنَّارَ
 ]
 
@@ -34,6 +31,19 @@ def test_the_article_lam_merges_into_each_sun_letter(ref, word, expected):
     # the prosthetic hamza and its fatha come first, then the doubled letter
     merged = r.sounds(word)[2]
     assert "lam_shamsiyyah" in r.rules_on_sound(word, merged)
+
+
+LAYL = Site(hafs=("2:164", (7,)))
+
+
+@for_each_riwayah(LAYL, isolated=7)
+def test_the_rasm_writes_one_lam_where_the_article_meets_a_lam(r):
+    """ٱلَّيْلِ. Both scripts draw the article's lam and the sun lam as one
+    lam under a shadda, so there is none to merge and none to colour: the
+    doubling is canonical and no rule names it. ٱللَّغْوِ draws both."""
+    assert r.phonemes(7) == "ʔallajl"
+    assert r.rules_on_char(7, "ل") == {"pausal_sukun"}
+    assert r.rules_on_sound(7, "ll") == frozenset()
 
 
 @for_each_riwayah(ARRAHMAN, ibtidaa=2, waqf=3)
