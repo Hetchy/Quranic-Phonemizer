@@ -142,3 +142,25 @@ with the dagger either way, so only the per-glyph attribution changes there.
 Silencing a glyph does not move it out of its cell, which is why `respell` by
 cell holds still. `recited` moving nothing is the check that publishing
 `RenderGlyph.unit` replaced the internal link exactly.
+
+## The degree a tanween hid
+
+Stopping on a word whose last letter carries a tanween, the echo on that
+letter was filed as the light degree. `qalqala.py` chose the degree by asking
+whether the letter is the word's last slot, and a tanween's noon is a slot
+after it. The stop silences that noon, so the letter is the last one still
+sounding and never the last one written. The question is now asked of the
+slots the stop leaves sounding.
+
+No phoneme moves: the alphabet gives one token to all three degrees, so this
+is what a consumer reads and not what a reciter says. Corpus-wide, at verse
+joining:
+
+| Degree | Before | After |
+|---|---|---|
+| `qalqala_sughra` | 3,604 | 3,414 |
+| `qalqala_kubra` | 232 | 422 |
+| `qalqala_akbar` | 1 | 1 |
+
+190 words move, and they move in all four alignment views because a pairing
+names its rules; `respelling` holds still, its blocks naming no rule.

@@ -62,14 +62,12 @@ def test_every_qalqala_letter_echoes_when_the_stop_silences_it(
     _check(ref, word, letter, expected, "qalqala_kubra")
 
 
-@pytest.mark.engine_bug
 @pytest.mark.parametrize(
     ("ref", "word", "letter", "expected"), TANWEEN_AT_A_STOP
 )
 def test_a_qalqala_letter_under_a_tanween_echoes_when_stopped_on(
     ref, word, letter, expected
 ):
-    # the engine files these as the lighter degree
     _check(ref, word, letter, expected, "qalqala_kubra")
 
 

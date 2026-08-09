@@ -50,7 +50,7 @@ class Qalqala:
         if not (canonically or silenced):
             return None
 
-        if boundaries.stopped_on(word) and _is_last(near, at, word):
+        if boundaries.stopped_on(word) and _is_last(near, plan, at, word):
             degree = (
                 Rule.QALQALA_AKBAR
                 if slot.onset is Onset.GEMINATE
@@ -77,6 +77,12 @@ class Qalqala:
         return self.pairs.of(slot.letter, following.letter) is not None
 
 
-def _is_last(near: Neighbourhood, at: SlotId, word: int) -> bool:
-    slots = near.score.words[word].slots
-    return bool(slots) and slots[-1].id == at
+def _is_last(near: Neighbourhood, plan: Plan, at: SlotId, word: int) -> bool:
+    """The last slot the stop leaves sounding. A tanween's noon is written
+    after its letter and the stop silences it, so the letter is the one the
+    stop makes final."""
+    for slot in reversed(near.score.words[word].slots):
+        if plan.merged_away(slot.id, Aspect.CONSONANT):
+            continue
+        return slot.id == at
+    return False
