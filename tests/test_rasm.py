@@ -32,12 +32,14 @@ YAYASI = Site(hafs=("13:31", (20,)))
 def test_a_waw_the_rasm_writes_and_recitation_never_says(r):
     # أُو۟لَـٰٓئِكَ
     assert r.phonemes(1) == "ʔula:ʔik"
+    assert "orthographic_silence" in r.rules_on_char(1, "و")
 
 
 @for_each_riwayah(WAULAIKA, isolated=6)
 def test_the_same_silent_waw_behind_a_conjunction(r):
     # وَأُو۟لَـٰٓئِكَ
     assert r.phonemes(6) == "waʔula:ʔik"
+    assert "orthographic_silence" in r.rules_on_char(6, "و")
 
 
 @for_each_riwayah(ASSALAH, isolated=5)
@@ -88,6 +90,7 @@ def test_the_same_alif_behind_a_plural_waw_that_carries_a_madd(r):
 def test_the_same_alif_behind_a_plural_waw_read_as_a_leen(r):
     # خَلَوْا۟
     assert r.phonemes(8) == "xaˤlaw"
+    assert "orthographic_silence" in r.rules_on_char(8, "ا")
 
 
 @for_each_riwayah(ISHTARAWU, isolated=3)
@@ -95,12 +98,14 @@ def test_the_same_alif_behind_a_plural_waw_given_a_damma(r):
     # ٱشْتَرَوُا۟
     assert r.phonemes(3) == "ʔiʃtarˤaˤw"
     assert r.silent(3) == {"ا", "ُ", "۟"}
+    assert "orthographic_silence" in r.rules_on_char(3, "ا")
 
 
 @for_each_riwayah(MIATA, isolated=19)
 def test_an_alif_written_inside_a_word_and_never_said(r):
     # مِا۟ئَةَ
     assert r.phonemes(19) == "miʔah"
+    assert "orthographic_silence" in r.rules_on_char(19, "ا")
 
 
 @for_each_riwayah(ARRIBA, isolated=20)
@@ -113,18 +118,21 @@ def test_a_final_alif_that_adds_nothing_to_a_length_already_written(r):
 def test_a_second_yaa_the_rasm_writes_and_recitation_never_says(r):
     # بِأَيْي۟دٍ
     assert r.phonemes(3) == "biʔajdQ"
+    assert "orthographic_silence" in r.rules_on_char(3, "ي")
 
 
 @for_each_riwayah(AFAIN, isolated=10)
 def test_a_yaa_written_after_a_hamza_and_left_unsaid(r):
     # أَفَإِي۟ن
     assert r.phonemes(10) == "ʔafaʔin"
+    assert "orthographic_silence" in r.rules_on_char(10, "ي")
 
 
 @for_each_riwayah(WAMALAIHI, isolated=9)
 def test_the_same_silent_yaa_before_a_joined_pronoun(r):
     # وَمَلَإِي۟هِۦ
     assert r.phonemes(9) == "wamalaʔih"
+    assert "orthographic_silence" in r.rules_on_char(9, "ي")
 
 
 @for_each_riwayah(NABAI, isolated=21)
@@ -132,6 +140,7 @@ def test_a_silent_yaa_at_the_end_of_a_word(r):
     # نَّبَإِى۟
     assert r.phonemes(21) == "nabaʔ"
     assert r.silent(21) == {"ى", "ِ", "۟"}
+    assert "orthographic_silence" in r.rules_on_char(21, "ى")
 
 
 @for_each_riwayah(WALULUAN, isolated=19)
@@ -168,6 +177,7 @@ def test_a_yaa_seat_after_a_length_adds_no_second_length(r):
 def test_a_bare_alif_inside_a_leen_needs_neither_carrier_nor_hamza(r):
     # تَا۟يْـَٔسُوا۟
     assert r.phonemes(8) == "tajʔasu:"
+    assert "orthographic_silence" in r.rules_on_char(8, "ا")
 
 
 @for_each_riwayah(YAYASU, ibtidaa=13, waqf=14)
@@ -181,3 +191,4 @@ def test_the_same_alif_in_the_third_person_of_that_verb(r):
 def test_the_same_alif_where_the_verb_ends_in_a_kasra(r):
     # يَا۟يْـَٔسِ
     assert r.phonemes(20) == "jajʔas"
+    assert "orthographic_silence" in r.rules_on_char(20, "ا")

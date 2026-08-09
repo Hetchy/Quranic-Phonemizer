@@ -1,11 +1,10 @@
-"""Every family a script attests must be produced by some occurrence.
+"""A shadda a script writes must be produced by some occurrence.
 
 Run: python tools/attest.py [--script uthmani|indopak] [--limit N]
 """
 from __future__ import annotations
 
 import argparse
-import collections
 import pathlib
 import sys
 
@@ -35,9 +34,7 @@ def unmet(hafs, script: Script, ref: VerseRef, words) -> tuple[list[str], int]:
     )
     performance = hafs.perform(score, plan)
     attested = [
-        (s.anchor, s.family)
-        for s in built.inscription.spellings
-        if isinstance(s, Attests)
+        s.anchor for s in built.inscription.spellings if isinstance(s, Attests)
     ]
     return check_attestations(attested, performance), len(attested)
 
@@ -54,23 +51,20 @@ def main() -> int:
     hafs = recitation(Riwayah.HAFS)
     verses = load_verses(script.value)
 
-    families: collections.Counter[str] = collections.Counter()
     examples: list[str] = []
     total = 0
+    count = 0
     for index, key in enumerate(sorted(verses)):
         if args.limit and index >= args.limit:
             break
         problems, attested = unmet(hafs, script, VerseRef(*key), verses[key])
         total += attested
+        count += len(problems)
         for problem in problems:
-            families[problem.split("attests ")[1].split(" but")[0]] += 1
             if len(examples) < args.show:
                 examples.append(problem)
 
-    count = sum(families.values())
     print(f"{script.value}: unmet attestations: {count} of {total}")
-    for family, number in families.most_common():
-        print(f"   {number:6d}  {family}")
     if examples:
         print("\nexamples:")
         for problem in examples:

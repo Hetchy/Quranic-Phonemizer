@@ -1,7 +1,7 @@
 """The output alphabet: total by coverage, and closed against wrong tuples.
 
-Totality used to be the row count. It is now these two claims: every tuple
-the model can produce resolves, and every tuple it cannot raises.
+Totality means every tuple the model can produce resolves, and every tuple it
+cannot raises.
 """
 from __future__ import annotations
 
@@ -12,14 +12,7 @@ import pytest
 
 from quranic_phonemizer.model.canon import CanonLetter as L
 from quranic_phonemizer.model.canon import Quality
-from quranic_phonemizer.model.performance import (
-    Consonant,
-    Nasal,
-    NasalPlace,
-    Release,
-    ReleaseKind,
-    Vowel,
-)
+from quranic_phonemizer.model.performance import Consonant, Degree, Release, Vowel
 from quranic_phonemizer.render.alphabet import NotationError, load_alphabet
 from quranic_phonemizer.riwayat.hafs.resources import rule_tables
 from quranic_phonemizer.rules.tafkheem import CONDITIONAL
@@ -33,12 +26,15 @@ HEAVY_CAPABLE = frozenset(rule_tables().always_heavy | CONDITIONAL)
 #: into. Nothing else is ever written nasalized.
 NASALIZED = frozenset({L.NOON, L.MEEM, L.WAW, L.YA})
 
+#: The one letter `eased` reaches, the corpus site `41:44:9`.
+EASED = frozenset({L.HAMZA})
+
 
 def _consonants():
     return [
-        Consonant(letter, geminate=g, emphatic=e, nasal=n)
+        Consonant(letter, geminate=g, emphatic=e, ghunnah=n, eased=z)
         for letter in L
-        for g, e, n in itertools.product((False, True), repeat=3)
+        for g, e, n, z in itertools.product((False, True), repeat=4)
     ]
 
 
@@ -54,26 +50,27 @@ def _legal(sound) -> bool:
     """What the model can actually produce, stated independently of the data."""
     match sound:
         case Consonant():
-            return not (sound.emphatic and sound.letter not in HEAVY_CAPABLE) and (
-                not sound.nasal or sound.letter in NASALIZED
+            if sound.ghunnah and sound.letter not in NASALIZED:
+                return False
+            if sound.eased and sound.letter not in EASED:
+                return False
+            if not sound.emphatic:
+                return True
+            # A heavy hum only ever rides the noon; a plain heavy consonant
+            # only ever one of tafkheem's own nine.
+            return sound.letter is L.NOON if sound.ghunnah else (
+                sound.letter in HEAVY_CAPABLE
             )
         case Vowel():
             return not sound.emphatic or sound.quality is Quality.A
-        case Nasal():
-            return not sound.emphatic
     return True
 
 
 # -- totality and its complement ------------------------------------------
 def test_every_producible_tuple_resolves(alphabet):
-    """The claim the row count used to make."""
+    """Every producible tuple resolves to a token."""
     unresolved = []
-    for sound in [
-        *_consonants(),
-        *_vowels(),
-        *[Nasal(p, emphatic=e) for p in NasalPlace for e in (False, True)],
-        *[Release(k) for k in ReleaseKind],
-    ]:
+    for sound in [*_consonants(), *_vowels(), *[Release(d) for d in Degree]]:
         if not _legal(sound):
             continue
         try:
@@ -88,11 +85,7 @@ def test_every_impossible_tuple_raises(alphabet):
     `NotationError` would be unreachable -- which is what makes a wrong sound
     loud instead of plausible."""
     answered = []
-    for sound in [
-        *_consonants(),
-        *_vowels(),
-        *[Nasal(p, emphatic=True) for p in NasalPlace],
-    ]:
+    for sound in [*_consonants(), *_vowels()]:
         if _legal(sound):
             continue
         try:
@@ -117,6 +110,23 @@ def test_nasal_is_offered_exactly_where_a_ghunnah_can_be_held(alphabet):
     assert offered == NASALIZED
 
 
+def test_the_hum_and_heavy_hum_are_offered_on_the_noon_alone(alphabet):
+    """The noon is the one letter a ghunnah holds with no letter under it,
+    so it is the one letter that needs a token distinct from `nasal`."""
+    hum = {letter for letter, entry in alphabet.consonants.items() if entry.hum}
+    heavy = {
+        letter for letter, entry in alphabet.consonants.items() if entry.heavy_hum
+    }
+    assert hum == heavy == {L.NOON}
+
+
+def test_eased_is_offered_exactly_on_the_hamza(alphabet):
+    offered = {
+        letter for letter, entry in alphabet.consonants.items() if entry.eased
+    }
+    assert offered == EASED
+
+
 # -- the composition rules ------------------------------------------------
 def test_gemination_says_the_consonant_twice(alphabet):
     assert alphabet.token(Consonant(L.BA)) == "b"
@@ -124,10 +134,27 @@ def test_gemination_says_the_consonant_twice(alphabet):
     assert alphabet.token(Consonant(L.RA, geminate=True, emphatic=True)) == "rˤrˤ"
 
 
-def test_a_held_nasal_is_not_doubled(alphabet):
-    """It is already the sound of a held letter, so gemination adds nothing."""
-    plain = alphabet.token(Consonant(L.NOON, nasal=True))
-    assert plain == alphabet.token(Consonant(L.NOON, geminate=True, nasal=True))
+def test_gemination_separates_the_two_noon_hums(alphabet):
+    """A held ghunnah and the hum with no letter to hold it are different
+    sounds, told apart only by gemination."""
+    hum = alphabet.token(Consonant(L.NOON, ghunnah=True))
+    held = alphabet.token(Consonant(L.NOON, ghunnah=True, geminate=True))
+    assert (hum, held) == ("ŋ", "ñ")
+
+
+def test_a_letter_with_one_ghunnah_token_reads_it_either_way(alphabet):
+    """Meem, waw and yaa never need the noon's split: the same held sound
+    is what an un-geminated ghunnah on them writes too."""
+    hum = alphabet.token(Consonant(L.MEEM, ghunnah=True))
+    held = alphabet.token(Consonant(L.MEEM, ghunnah=True, geminate=True))
+    assert hum == held == "m̃"
+
+
+def test_a_heavy_hum_is_offered_but_not_yet_spent(alphabet):
+    """Composed only once `emphatic_ikhfaa` exists to ask for it; until then
+    the plain hum answers, same as `eased`."""
+    assert alphabet.consonants[L.NOON].heavy_hum == "ŋˤ"
+    assert alphabet.token(Consonant(L.NOON, ghunnah=True, emphatic=True)) == "ŋ"
 
 
 def test_an_inherently_emphatic_letter_reads_the_same_either_way(alphabet):

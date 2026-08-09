@@ -39,11 +39,15 @@ COLUMNS = ("ref", "word", "key", "disputed", "joined", "stopped",
            "heavy", "light")
 
 
-def _read(ref, word, selection, stopped):
+def _reading(ref, word, selection, stopped):
     site = Site(hafs=(ref, (word,)))
     plan = ({"isolated": word} if stopped
             else {"ibtidaa": word, "wasl": word})
-    return reading(site, selection=selection, **plan).phonemes(word)
+    return reading(site, selection=selection, **plan)
+
+
+def _read(ref, word, selection, stopped):
+    return _reading(ref, word, selection, stopped).phonemes(word)
 
 
 @pytest.mark.parametrize(COLUMNS, SITES)
@@ -66,6 +70,19 @@ def test_both_wajh_are_reachable(
     assert _read(ref, word, picked, at_stop) == light
 
 
+@pytest.mark.parametrize(COLUMNS, SITES)
+def test_each_wajh_is_named_by_the_rule_it_reads(
+    ref, word, key, disputed, joined, stopped, heavy, light
+):
+    at_stop = disputed == "stop"
+    picked = VariantSelection((Option(RAA, "heavy", key),))
+    r = _reading(ref, word, picked, at_stop)
+    assert "tafkheem" in r.rules_on_char(word, "ر")
+    picked = VariantSelection((Option(RAA, "light", key),))
+    r = _reading(ref, word, picked, at_stop)
+    assert "tarqeeq" in r.rules_on_char(word, "ر")
+
+
 DUF = Site(hafs=("30:54", (5,)))
 
 
@@ -73,6 +90,7 @@ DUF = Site(hafs=("30:54", (5,)))
 def test_a_vowel_khilaf_is_settled_before_there_is_a_performance(r):
     # ضَعْفٍ
     assert r.phonemes(5) == "dˤaˤʕf"
+    assert "tafkheem" in r.rules_on_char(5, "ض")
 
 
 def test_the_other_vowel_wajh_gives_the_other_word():

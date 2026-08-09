@@ -5,7 +5,7 @@ so both are derivations, never a `Script` consulted directly.
 """
 from __future__ import annotations
 
-from ...model.canon import ABJAD, CanonLetter, Long, NucleusKind, Onset, Quality
+from ...model.canon import ABJAD, CanonLetter, Nucleus, Onset, Quality
 from .vocabulary import Context
 
 #: The name is a lam before a haa, and the lam before it or the wasl hamza.
@@ -29,11 +29,11 @@ def divine_name(
             continue
         if letters[i - 1] not in ALLAH_HEAD:
             continue
-        if getattr(nuclei[i], "quality", None) is not Quality.A:
+        if nuclei[i].quality is not Quality.A:
             continue
         doubled = onsets[i] is Onset.GEMINATE or (
             letters[i - 1] is CanonLetter.LAM
-            and nuclei[i - 1].kind is NucleusKind.SILENT
+            and nuclei[i - 1].is_silent
         )
         if not doubled:
             continue
@@ -50,21 +50,21 @@ def _tail(letters: list[CanonLetter], start: int) -> str:
 def allah_long_a(
     letters: list[CanonLetter], nuclei: list, onsets: list, lexicon
 ) -> list[int]:
-    """Of those, the ones whose nucleus must still become `Long(A)`.
+    """Of those, the ones whose nucleus must still become a long `a`.
 
     Uthmani writes `ٱللَّهِ` with no alif at all; IndoPak writes the dagger.
     """
     return [
         i
         for i in divine_name(letters, nuclei, onsets, lexicon)
-        if nuclei[i].kind is NucleusKind.SHORT
+        if nuclei[i].is_short
         and nuclei[i].quality is Quality.A
     ]
 
 
 #: What the divine name's short `a` becomes. A value, not a transform: the
-#: only relengthening there is has one answer, and `Long` is frozen.
-RELENGTHENED_A = Long(Quality.A)
+#: only relengthening there is has one answer, and `Nucleus` is frozen.
+RELENGTHENED_A = Nucleus.long(Quality.A)
 
 
 #: The two particles the rasm joins to the word behind them: the vocative
@@ -88,9 +88,7 @@ def joined_particle(
             continue
         if i + 1 >= len(letters) or letters[i + 1] is not CanonLetter.HAMZA:
             continue
-        if nuclei[i].kind is not NucleusKind.LONG:
-            continue
-        if getattr(nuclei[i], "quality", None) is not Quality.A:
+        if not nuclei[i].is_long or nuclei[i].quality is not Quality.A:
             continue
         if not lexicon.joins_a_particle(_tail(letters, i)):
             continue
@@ -174,7 +172,7 @@ def _alif_al_fasila(context: Context, previous) -> bool:
     tells them apart is the vowel before the waw."""
     if context.previous_letter is not CanonLetter.WAW:
         return False
-    if previous.kind is not NucleusKind.SHORT:
+    if not previous.is_short:
         return True   # the quiescent plural waw
     # `يَعْفُوَا۟` carries the stem's damma; `ذَوَا` and `دَعَوَا` a fatha.
     before = context.index - 2
@@ -199,9 +197,7 @@ def otiose_alif(context: Context) -> bool:
         return False
     if context.word_final and (
         _alif_al_fasila(context, previous)
-        or (previous.kind is NucleusKind.SHORT and previous.quality is Quality.U)
+        or (previous.is_short and previous.quality is Quality.U)
     ):
         return True
-    return (
-        previous.kind is NucleusKind.SHORT and previous.quality is not Quality.A
-    )
+    return previous.is_short and previous.quality is not Quality.A

@@ -14,7 +14,7 @@ BEFORE_THE_ARTICLE = [
 ]
 
 BEFORE_A_VERB = [
-    ("6:11", (5, 6), ("θum̃a", "ŋðˤurˤu:")),        # ثُمَّ ٱنظُرُوا۟
+    ("6:11", (5, 6), ("θum̃a", "ŋðˤurˤu:")),       # ثُمَّ ٱنظُرُوا۟
     ("7:38", (1, 2), ("qaˤ:la", "dQxulu:")),        # قَالَ ٱدْخُلُوا۟
     ("17:63", (1, 2), ("qaˤ:la", "ðhabQ")),         # قَالَ ٱذْهَبْ
     ("12:50", (8, 9), ("qaˤ:la", "rˤʒiʕ")),         # قَالَ ٱرْجِعْ
@@ -34,22 +34,28 @@ BEFORE_AN_IRREGULAR_NOUN = [
 
 def _joined(ref, words):
     first, last = words
-    r = reading(Site(hafs=(ref, words)), ibtidaa=first, waqf=last)
-    return r.phonemes(first), r.phonemes(last)
+    return reading(Site(hafs=(ref, words)), ibtidaa=first, waqf=last)
+
+
+def _check(ref, words, expected):
+    first, last = words
+    r = _joined(ref, words)
+    assert (r.phonemes(first), r.phonemes(last)) == expected
+    assert "wasl_elision" in r.rules_on_char(last, "ٱ")
 
 
 @pytest.mark.parametrize(("ref", "words", "expected"), BEFORE_THE_ARTICLE)
 def test_the_article_hamza_drops_when_the_word_before_it_joins(
     ref, words, expected
 ):
-    assert _joined(ref, words) == expected
+    _check(ref, words, expected)
 
 
 @pytest.mark.parametrize(("ref", "words", "expected"), BEFORE_A_VERB)
 def test_a_verb_hamza_drops_when_the_word_before_it_joins(
     ref, words, expected
 ):
-    assert _joined(ref, words) == expected
+    _check(ref, words, expected)
 
 
 @pytest.mark.parametrize(
@@ -58,7 +64,7 @@ def test_a_verb_hamza_drops_when_the_word_before_it_joins(
 def test_an_irregular_noun_hamza_drops_when_the_word_before_it_joins(
     ref, words, expected
 ):
-    assert _joined(ref, words) == expected
+    _check(ref, words, expected)
 
 
 @for_each_riwayah(BISMI_ALLAHI, ibtidaa=1, waqf=2)
@@ -67,3 +73,4 @@ def test_the_divine_name_loses_its_hamza_when_the_word_before_it_joins(r):
     assert r.phonemes(1) == "bismi"
     assert r.phonemes(2) == "lla:h"
     assert r.silent(2) == {"ِ", "ٱ"}
+    assert "wasl_elision" in r.rules_on_char(2, "ٱ")

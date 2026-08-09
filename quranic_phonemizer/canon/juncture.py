@@ -7,17 +7,15 @@ from __future__ import annotations
 
 from ..model.canon import (
     CanonLetter,
-    NucleusKind,
+    Nucleus,
     Onset,
     Quality,
-    Short,
-    Silent,
     SlotOrigin,
 )
 from ..model.inscription import SlotFact
 from ..orthography.adapter import Reading
 from .derive import tanween
-from .draft import _Draft
+from .draft import _Draft, nucleus_fact
 from .passes import word_of
 
 
@@ -33,13 +31,13 @@ def apply_cross_word_noon(reading, drafts, right_context, scribe) -> None:
 
 
 def _restore_noon(reading, drafts, last, word_index: int, scribe) -> None:
-    if last.letter is CanonLetter.NOON and last.nucleus.kind is NucleusKind.SILENT:
+    if last.letter is CanonLetter.NOON and last.nucleus.is_silent:
         return   # already a tanween noon; nothing was split
-    last.nucleus = Short(getattr(last.nucleus, "quality", Quality.A))
+    last.nucleus = Nucleus.short(last.nucleus.quality or Quality.A)
     noon = _Draft(
         letter=CanonLetter.NOON,
         onset=Onset.PLAIN,
-        nucleus=Silent(),
+        nucleus=Nucleus.silent(),
         cluster=last.cluster,
         origin=SlotOrigin.NUNATION,
     )
@@ -49,7 +47,7 @@ def _restore_noon(reading, drafts, last, word_index: int, scribe) -> None:
     offset = _split_tanween_offset(reading, word_index)
     if offset >= 0:
         scribe.evidence(offset, noon, SlotFact.LETTER)
-        scribe.evidence(offset, noon, SlotFact.NUCLEUS)
+        scribe.evidence(offset, noon, nucleus_fact(noon.nucleus))
 
 
 def _split_tanween_words(reading: Reading) -> set[int]:

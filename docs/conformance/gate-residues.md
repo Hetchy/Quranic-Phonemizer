@@ -4,6 +4,10 @@ The floors in `.github/workflows/gates.yml` are not all 1.000. This file names
 every row behind every one of them, so a floor short of 100% is a claim that
 can be checked rather than a number nobody looks at.
 
+[corrections.md](corrections.md) names refs a unit corrected against the
+frozen legacy snapshot. Most leave every row below unmoved; where one does not,
+the row here and the entry there agree on the count.
+
 | Gate | Now | Residue |
 |---|---|---|
 | cross-script, word | 99.997% | 2 words |

@@ -9,10 +9,10 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from ..dataio import load_yaml, require_keys
-from ..model.canon import ABJAD, CanonLetter, Long, Quality, Short, Silent, SlotOrigin
+from ..model.canon import ABJAD, CanonLetter, Nucleus, Quality, SlotOrigin
 from ..model.inscription import SlotFact
 from ..orthography.adapter import Reading
-from .draft import _Draft
+from .draft import _Draft, nucleus_fact
 from .passes import word_of
 
 SCHEMA_VERSION = 1
@@ -53,13 +53,7 @@ class Muqattaat:
     def named_by(self) -> dict[tuple, CanonLetter]:
         """The same table read backwards, so a writer can compact a run of
         spelled slots into the letter whose name they are."""
-        return {
-            tuple(
-                (letter, nucleus.kind, getattr(nucleus, "quality", None))
-                for letter, nucleus in spelt
-            ): named
-            for named, spelt in self.by_letter.items()
-        }
+        return {spelt: named for named, spelt in self.by_letter.items()}
 
 
 def load_muqattaat(path: Path) -> Muqattaat:
@@ -97,13 +91,13 @@ def _parse(spelled: str, path: Path):
         letter = _canon(spelled[index], path)
         index += 1
         if index < len(spelled) and spelled[index] in _QUALITY:
-            yield letter, Short(_QUALITY[spelled[index]])
+            yield letter, Nucleus.short(_QUALITY[spelled[index]])
             index += 1
         elif index < len(spelled) and spelled[index].lower() in _QUALITY:
-            yield letter, Long(_QUALITY[spelled[index].lower()])
+            yield letter, Nucleus.long(_QUALITY[spelled[index].lower()])
             index += 1
         else:
-            yield letter, Silent()
+            yield letter, Nucleus.silent()
 
 
 def spell_muqattaat(names: Muqattaat):
@@ -136,7 +130,7 @@ def spell_muqattaat(names: Muqattaat):
                 for draft in spelled:
                     offset = reading.clusters[draft.cluster].offset
                     scribe.evidence(offset, draft, SlotFact.LETTER)
-                    scribe.evidence(offset, draft, SlotFact.NUCLEUS)
+                    scribe.evidence(offset, draft, nucleus_fact(draft.nucleus))
 
     return apply
 

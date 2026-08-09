@@ -128,7 +128,6 @@ class KhilafId(StrEnum):
     IKHFAA_SHAFAWI_NASAL = "ikhfaa_shafawi_nasal"
     RAA_TAFKHEEM = "raa_tafkheem"
     NUCLEUS_VOWEL = "nucleus_vowel"
-    IMALA_QUALITY = "imala_quality"
     YAA_ITHBAT = "yaa_ithbat"
 
 

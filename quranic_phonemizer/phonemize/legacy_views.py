@@ -1,7 +1,6 @@
-"""Anchors performed sounds and silent letters back onto the written text.
-
-A lookup only, traversing `sound -> attribution -> (slot, aspect) ->
-Spelling`: every edge here was recorded by the layer that decided it.
+"""Pre-`Session` views over a raw `Performance`, kept for callers that build
+a `Score` directly rather than through a corpus `ref`. `document.py` and
+`pairing.py` are the request-shaped replacements this module does not attempt.
 """
 from __future__ import annotations
 
@@ -9,7 +8,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 
 from ..model.address import GraphemeId, SlotId, SoundId
-from ..model.canon import Rule
+from ..model.canon import Rule, Score
 from ..model.inscription import (
     Attests,
     Decorates,
@@ -24,16 +23,50 @@ from ..model.performance import (
     Inserted,
     MergedInto,
     Performance,
+    Side,
     Silent,
 )
-from .alphabet import Alphabet
-from .recite import sounds_in_order
+from ..render.alphabet import Alphabet
+from .ordering import _hosts_key, _ASPECT_ORDER, sounds_in_order
+
+
+def phonemes_by_word(
+    performance: Performance, score: Score, alphabet: Alphabet
+) -> tuple[tuple[str, ...], ...]:
+    """The reading sequence, split at word boundaries.
+
+    A sound merged across a boundary belongs to the word that hosts it: in
+    `مِّن رَّبِّهِمْ` the noon's sound lands on the second word.
+    """
+    by_id = dict(performance.sounds)
+    owner: dict[int, int] = {}
+    for index, word in enumerate(score.words):
+        for slot in word.slots:
+            owner[slot.id.ordinal] = index
+
+    buckets: list[list[str]] = [[] for _ in score.words]
+    for attribution in performance.attributions:
+        match attribution:
+            case Hosts(slots=slots, aspect=aspect, sound=sound) if slots:
+                key = _hosts_key(slots, aspect, sound, by_id)
+            case Inserted(anchor=(slot, side), aspect=aspect, sound=sound):
+                key = (slot.ordinal, _ASPECT_ORDER[aspect],
+                       -1 if side is Side.BEFORE else 1)
+            case _:
+                continue
+        buckets[owner[key[0]]].append((key, alphabet.token(by_id[sound])))
+
+    return tuple(
+        tuple(token for _, token in sorted(bucket, key=lambda e: e[0]))
+        for bucket in buckets
+    )
+
 
 #: Which `SlotFact`s count as writing each `Aspect`. `Decorates` and
 #: `Attests` don't name an aspect, so they satisfy either one.
 _FACT_OF_ASPECT = {
-    Aspect.ONSET: (SlotFact.LETTER, SlotFact.ONSET),
-    Aspect.NUCLEUS: (SlotFact.NUCLEUS,),
+    Aspect.CONSONANT: (SlotFact.LETTER, SlotFact.ONSET),
+    Aspect.VOWEL: (SlotFact.VOWEL_QUALITY, SlotFact.VOWEL_LENGTH, SlotFact.VOWEL_ABSENCE),
 }
 
 
@@ -46,7 +79,9 @@ class AnchoredSound:
     slots: tuple[SlotId, ...]
     """Every slot that produced it. More than one is a merger."""
     graphemes: tuple[GraphemeId, ...]
-    rule: Rule
+    rule: Rule | None
+    """`None` where the Score's own default filled the sound: no rule
+    claimed it."""
     merged_from: tuple[SlotId, ...] = ()
     """Slots whose own sound was folded into this one."""
 
@@ -57,7 +92,7 @@ class SilentLetter:
 
     slot: SlotId
     graphemes: tuple[GraphemeId, ...]
-    rule: Rule
+    rule: Rule | None
 
 
 @dataclass(frozen=True, slots=True)
@@ -102,7 +137,7 @@ def anchored(
         SilentLetter(
             slot=slot,
             graphemes=_graphemes_for(writes, (slot,), attribution.aspect),
-            rule=rule_of[attribution.by],
+            rule=rule_of.get(attribution.by),
         )
         for attribution in performance.attributions
         if isinstance(attribution, Silent)
@@ -113,13 +148,13 @@ def anchored(
 
 def _owners(performance: Performance, rule_of) -> dict:
     """Which slots each sound is attributed to, and by which rule."""
-    out: dict[SoundId, tuple[tuple[SlotId, ...], Aspect, Rule]] = {}
+    out: dict[SoundId, tuple[tuple[SlotId, ...], Aspect, Rule | None]] = {}
     for attribution in performance.attributions:
         match attribution:
             case Hosts(slots=slots, aspect=aspect, sound=sound):
-                out[sound] = (slots, aspect, rule_of[attribution.by])
+                out[sound] = (slots, aspect, rule_of.get(attribution.by))
             case Inserted(anchor=(slot, _), aspect=aspect, sound=sound):
-                out[sound] = ((slot,), aspect, rule_of[attribution.by])
+                out[sound] = ((slot,), aspect, rule_of.get(attribution.by))
     return out
 
 
@@ -182,3 +217,13 @@ def _dedupe(ids: tuple[GraphemeId, ...]) -> tuple[GraphemeId, ...]:
     for identifier in ids:
         seen[identifier] = None
     return tuple(seen)
+
+
+__all__ = [
+    "AnchoredSound",
+    "AnchoredView",
+    "SilentLetter",
+    "anchored",
+    "graphemes_by_id",
+    "phonemes_by_word",
+]

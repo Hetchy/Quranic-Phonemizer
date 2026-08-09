@@ -50,7 +50,11 @@ class _ReadState:
     # -- word framing ------------------------------------------------------
     def begin_word(self, word_index: int) -> None:
         if self.offset:
-            self.offset += 1  # the space that separates two words in the verse
+            # The space between two words, on a par with one inside a word's
+            # own text: both are structural glyphs, not silent bookkeeping.
+            self._grapheme(" ", self.offset, GraphemeClass.STRUCTURAL)
+            self.structural.append(self.offset)
+            self.offset += 1
         self.word_index = word_index
         self.letter_index = 0
         self._word_advice = None
@@ -126,7 +130,8 @@ class _ReadState:
             else:
                 self.clusters[index].marks.pop()
                 self._release_dagger_seat(index)
-                self._omitted_letter(char, offset, entry)
+                # The `_grapheme` above already recorded this offset.
+                self._omitted_letter(char, offset, entry, already_written=True)
             return
         if entry.decorates is not None:
             self.decorations.append(
@@ -155,14 +160,21 @@ class _ReadState:
             e for e in self.evidence
             if not (e.cluster == index and e.offset == seat.offset)
         ]
+        # It still shows the slot it rests on, so the reading can say it was
+        # written; without this the alif reaches no slot and no rule at all.
+        self.decorations.append(Decoration(index, seat.offset))
 
-    def _omitted_letter(self, char: str, offset: int, entry: MarkEntry) -> None:
+    def _omitted_letter(
+        self, char: str, offset: int, entry: MarkEntry, *,
+        already_written: bool = False,
+    ) -> None:
         """A letter of the reading the rasm leaves out, written small.
 
-        It takes the position before it if that one has no letter of its own
-        -- Uthmani draws `ۧ` on a seat -- and a position of its own otherwise.
+        Takes the position before it if that one has no letter of its own,
+        and a position of its own otherwise.
         """
-        self._grapheme(char, offset, entry.cls)
+        if not already_written:
+            self._grapheme(char, offset, entry.cls)
         held = self.clusters[-1] if self.clusters else None
         if (
             held is None
@@ -191,7 +203,9 @@ class _ReadState:
 
     def _seat(self, char: str, offset: int) -> None:
         """A base position with no letter identity: it can host a hamza or a
-        lengthening dagger, and shows nothing on its own."""
+        lengthening dagger. `finish` decides whether it ends up structural or
+        decorating a slot, once anything written on it is known.
+        """
         self._grapheme(char, offset, GraphemeClass.STRUCTURAL)
         self.clusters.append(
             Cluster(
@@ -203,8 +217,6 @@ class _ReadState:
                 seat=True,
             )
         )
-        index = len(self.clusters) - 1
-        self.decorations.append(Decoration(index, offset, "host"))
 
     def _fold_to_hamza(self, index: int, offset: int) -> None:
         """A seat bearing a combining hamza is a hamza: fold the seat into
@@ -234,6 +246,10 @@ class _ReadState:
         )
 
     def finish(self, locations: tuple[Location, ...]) -> Reading:
+        bare_seats = [
+            cluster.offset for cluster in self.clusters
+            if cluster.seat and cluster.letter is None and not cluster.marks
+        ]
         return Reading(
             verse=self.verse,
             riwayah=self.inventory.riwayah,
@@ -245,7 +261,7 @@ class _ReadState:
             decorations=tuple(self.decorations),
             graphemes=tuple(self.graphemes),
             advice=tuple(self.advice),
-            structural=tuple(self.structural),
+            structural=tuple(self.structural) + tuple(bare_seats),
         )
 
 

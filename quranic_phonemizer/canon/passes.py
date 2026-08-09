@@ -12,11 +12,9 @@ from ..model.canon import (
     ABJAD,
     Annotation,
     CanonLetter,
-    NucleusKind,
+    Nucleus,
     Onset,
-    PausalLong,
     Quality,
-    Short,
 )
 from ..model.inscription import SlotFact
 from ..orthography.adapter import Reading
@@ -62,8 +60,8 @@ class LexemePass(Protocol):
 def apply_ledger(reading: Reading, drafts, ledger: Ledger, track) -> None:
     """Applies each Ledger entry for this verse; raises if one fails to resolve.
 
-    An entry that silently matches nothing is worse than no entry: it reads
-    as coverage that was never checked.
+    An entry that matches nothing is worse than no entry: it reads as
+    coverage that was never checked.
     """
     _check_witnesses(reading, drafts, ledger)
     for supply in ledger.supplies:
@@ -71,6 +69,8 @@ def apply_ledger(reading: Reading, drafts, ledger: Ledger, track) -> None:
             continue
         ordinal = _resolve(reading, drafts, supply.ref)
         _check_skeleton(reading, drafts, ordinal, supply.skeleton)
+        # A Ledger supply is authored, not written by any script: it never
+        # evidences a glyph, so no scribe is passed.
         set_fact(drafts[ordinal], drafts, supply.fact, supply.value, Target.HERE)
         track.from_ledger += 1
 
@@ -89,7 +89,7 @@ def _check_witnesses(reading: Reading, drafts, ledger: Ledger) -> None:
         # A draft holds the set of its annotations, so agreement is membership.
         agrees = (
             row.value in written
-            if row.fact is SlotFact.ANNOTATION
+            if row.fact is SlotFact.TAJWEED_MARK
             else written == row.value
         )
         if not agrees:
@@ -175,8 +175,8 @@ def _apply_joined_particles(
 ) -> None:
     """`يَـٰٓأَيُّهَا`, `هَـٰٓؤُلَآءِ`: a particle the rasm joined to a word.
 
-    Lexical, not orthographic, for the reason the pausal alifs are: Uthmani's
-    dagger alif sits over these joins and over roots alike.
+    Lexical rather than orthographic: Uthmani's dagger alif sits over these
+    joins and over roots alike, so no script writes which one this is.
     """
     del scribe, selection
     for word_index in range(len(reading.words)):
@@ -212,7 +212,7 @@ def connect_plural_meem(
         if not following or following[0].onset is not Onset.WASL:
             continue
         if _plural_meem(span):
-            span[-1].nucleus = Short(Quality.U)
+            span[-1].nucleus = Nucleus.short(Quality.U)
 
 
 def _plural_meem(span) -> bool:
@@ -220,26 +220,9 @@ def _plural_meem(span) -> bool:
     return (
         len(span) >= 2
         and span[-1].letter is CanonLetter.MEEM
-        and span[-1].nucleus.kind is NucleusKind.SILENT
+        and span[-1].nucleus.is_silent
         and span[-2].letter in PLURAL_HOSTS
     )
-
-
-def _apply_pausal_lexemes(
-    reading: Reading, drafts, lexicon: Lexicon, scribe, selection
-) -> None:
-    """The seven alifs. Uthmani marks them `۠`; IndoPak writes a plain final
-    alif, indistinguishable from an ordinary length carrier - so the fact is
-    lexical, not orthographic."""
-    del scribe, selection
-    if not lexicon.pausal_lexemes:
-        return
-    for word_index in range(len(reading.words)):
-        span = [d for d in drafts if word_of(reading, d) == word_index]
-        if not span:
-            continue
-        if lexicon.is_pausal(vocalised(span)):
-            span[-1].nucleus = PausalLong(Quality.A)
 
 
 def vocalised(span) -> str:
@@ -250,7 +233,7 @@ def vocalised(span) -> str:
     """
     out = []
     for draft in span:
-        quality = getattr(draft.nucleus, "quality", None)
+        quality = draft.nucleus.quality
         out.append(
             ABJAD[draft.letter.value]
             + ("~" if draft.onset is Onset.GEMINATE else "")
@@ -258,12 +241,11 @@ def vocalised(span) -> str:
         )
     return "".join(out)
 
-#: The passes every riwayah runs, in order: three lexemes and one juncture. A
+#: The passes every riwayah runs, in order: two lexemes and one juncture. A
 #: list rather than a hardcoded sequence in `build`, so a riwayah that reads
 #: a lexeme differently swaps the list instead of editing the builder.
 LEXEME_PASSES: tuple[LexemePass, ...] = (
     _apply_allah_lexeme,
-    _apply_pausal_lexemes,
     _apply_joined_particles,
     connect_plural_meem,
 )

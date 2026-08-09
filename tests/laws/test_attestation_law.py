@@ -24,9 +24,7 @@ def _performed(packed, hafs, surah: int, ayah: int):
     score = built.score
     plan = all_join(len(score.words))
     attested = [
-        (s.anchor, s.family)
-        for s in built.inscription.spellings
-        if isinstance(s, Attests)
+        s.anchor for s in built.inscription.spellings if isinstance(s, Attests)
     ]
     return attested, perform(score, HAFS, plan), plan
 

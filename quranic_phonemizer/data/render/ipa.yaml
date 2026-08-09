@@ -1,22 +1,24 @@
 # The output alphabet: the only file in the package holding a phoneme string.
 #
-# One entry per letter, quality, nasal place and release kind -- not one row
-# per feature tuple. `render/alphabet.py` composes the rest:
+# One entry per letter, quality and qalqala degree -- not one row per feature
+# tuple. `render/alphabet.py` composes the rest:
 #
-#   geminate  the token twice; a nasalized consonant is already the sound of
-#             a held letter, so it is not doubled again
-#   emphatic  the entry's `emphatic` token. There is no suffix rule: a letter
-#             with no `emphatic` cannot be one, and asking for it raises
-#             rather than inventing a plausible `bˤ`
-#   long      ":" after the vowel
+#   geminate    the token twice; a held ghunnah is already the sound of a
+#               doubled letter, so it is not doubled again
+#   emphatic    the entry's `emphatic` token. There is no suffix rule: a
+#               letter with no `emphatic` cannot be one, and asking for it
+#               raises rather than inventing a plausible `bˤ`
+#   ghunnah     `hum` when not geminate and the entry has one, else `nasal`;
+#               `heavy_hum` instead of either when also emphatic
+#   long        ":" after the vowel
 #
-# An entry is a bare token, or a map with `plain` and whichever of `emphatic`
-# and `nasal` the letter admits. Nine letters admit emphasis -- the seven of
-# istilaa, plus the raa and the divine lam -- which is exactly what
-# `rules/tafkheem.py` can recolour.
+# An entry is a bare token, or a map with `plain` and whichever of `emphatic`,
+# `nasal`, `hum`, `heavy_hum`, `eased` and `imala` the letter admits. Nine letters
+# admit emphasis -- the seven of istilaa, plus the raa and the divine lam --
+# which is exactly what `rules/tafkheem.py` can recolour.
 #
-# The four tables are total over `CanonLetter`, `Quality`, `NasalPlace` and
-# `ReleaseKind`, checked at load. Adding a letter to the model is one entry.
+# The three tables are total over `CanonLetter`, `Quality` and `Degree`,
+# checked at load. Adding a letter to the model is one entry.
 schema_version: 2
 notation: ipa
 
@@ -50,12 +52,16 @@ consonants:
   kaf: "k"
   lam: {plain: "l", emphatic: "lˤ"}
   # The four a ghunnah can be held on, when a noon or a meem merges into them.
+  # `nasal` is the held (geminate) hum on all four; `noon` alone also takes
+  # `hum`, the un-held hum an ikhfaa or iqlab leaves with no letter to merge
+  # into, and `heavy_hum`, the same hum before an istilaa letter.
   meem: {plain: "m", nasal: "m̃"}
-  noon: {plain: "n", nasal: "ñ"}
+  noon: {plain: "n", nasal: "ñ", hum: "ŋ", heavy_hum: "ŋˤ"}
   heh: "h"
   waw: {plain: "w", nasal: "w̃"}
   ya: {plain: "j", nasal: "j̃"}
-  hamza: "ʔ"
+  # `eased` is read but not yet composed: see `render/alphabet.py::Entry`.
+  hamza: {plain: "ʔ", eased: "ʔ̞"}
   taa_marbuta: "t"
 
 vowels:
@@ -63,13 +69,13 @@ vowels:
   a: {plain: "a", emphatic: "aˤ"}
   u: "u"
   i: "i"
-  e: "e"
-
-nasals:
-  # The ghunnah where no letter hosts it. No emphatic form: no rule recolours
-  # a nasal.
-  bilabial: "m̃"
-  assimilated: "ŋ"
+  # The inclined vowel. `plain` is the reading for a caller who has not asked
+  # for the distinction, so one site does not enlarge the inventory.
+  e: {plain: "i", imala: "e"}
 
 releases:
-  qalqala: "Q"
+  # All three read "Q" until a toggle asks for the degree; see
+  # `render/alphabet.py::Entry.eased` for the same deferral on `hamza`.
+  sughra: "Q"
+  kubra: "Q"
+  akbar: "Q"

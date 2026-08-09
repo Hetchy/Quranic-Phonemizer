@@ -11,13 +11,12 @@ from ..model.address import VariantSelection
 from ..model.canon import (
     CARRIERS,
     CanonLetter,
-    NucleusKind,
+    Nucleus,
     Onset,
     Quality,
-    Short,
     SlotOrigin,
 )
-from ..model.inscription import Inscription, SlotFact
+from ..model.inscription import VOWEL_FACTS, Inscription, SlotFact
 from ..orthography.adapter import Cluster, Reading
 from . import derive
 from .derive import Absent, AddsSlot, Attests, Sets, Shows, Target
@@ -28,7 +27,10 @@ from .lexicon import Lexicon
 from .ledger import EMPTY as EMPTY_LEDGER
 from .ledger import Ledger
 from .assemble import assemble
-from .draft import _Draft, set_fact
+from .draft import (
+    _Draft, letter_of, letter_offsets_of, nucleus_fact, set_fact,
+    stray_letter_offsets,
+)
 from .juncture import apply_cross_word_noon
 from .passes import LexemePass, apply_ledger
 from .scribe import Scribe
@@ -111,52 +113,79 @@ def _drafts(
 ) -> list[_Draft]:
     by_cluster = _evidence_by_cluster(reading)
     silenced = {d.cluster for d in reading.decorations if d.silences}
+    #: A seat nothing was ever written on is a Structural edge, not a slot --
+    #: `orthography.cluster` already routed its offset there.
+    bare_seats = frozenset(reading.structural)
     drafts: list[_Draft] = []
     consumed: set[int] = set()
+    pending: list[int] = []
 
     for index, cluster in enumerate(reading.clusters):
-        if index in consumed:
+        if index in consumed or cluster.offset in bare_seats:
             continue
         bounds = reading.word_bounds(cluster.word)
         context = _context(reading, index, bounds, drafts, lexicon)
         rows = by_cluster.get(index, ())
-        letter = _letter_of(rows, cluster)
+        letter = letter_of(rows, cluster)
         if _not_a_slot(letter, index in silenced and cluster.letter is not None,
-                       context, cluster, rows, drafts, track, scribe):
+                       context, cluster, rows, drafts, track, scribe, pending):
             continue
+        before = len(drafts)
         if _slot_draft(index, cluster, letter, rows, context, drafts, track,
                        scribe):
-            consumed |= _skip_iwad_carrier(reading, index, bounds)
+            consumed |= _skip_iwad_carrier(reading, index, bounds, drafts,
+                                           track, scribe)
+        _flush_pending(pending, drafts, before, scribe, track)
 
     apply_cross_word_noon(reading, drafts, right_context, scribe)
     return drafts
 
 
+def _decorate(scribe, offset: int, subject, track) -> None:
+    scribe.decoration(offset, subject)
+    track.decorated += 1
+
+
+def _flush_pending(pending: list[int], drafts, before: int, scribe,
+                   track) -> None:
+    """A hamza seat's grapheme decorates the hamza it seats, which has no
+    draft yet when the seat is visited, so its edge waits for one."""
+    if not pending or len(drafts) <= before:
+        return
+    subject = drafts[before]
+    for offset in pending:
+        _decorate(scribe, offset, subject, track)
+    pending.clear()
+
 
 def _not_a_slot(letter, silenced: bool, context, cluster, rows, drafts, track,
-                scribe) -> bool:
-    """Written, but contributing only to the slot before it.
-
-    A bare seat, a silence sign, or a length carrier. Skipping the cluster
-    must not skip its evidence.
-    """
+                scribe, pending: list[int]) -> bool:
+    """Written, but contributing only to another slot -- the one before it,
+    or, for a hamza seat, the one after -- and still decorated."""
     if letter is None or silenced:
         _apply_rows(rows, _Draft(letter=letter or CanonLetter.ALIF), drafts,
                     context, track, scribe, cluster.offset,
                     force=Target.PREVIOUS)
-        scribe.decoration(cluster.offset, drafts[-1] if drafts else None)
-        track.decorated += 1
+        _decorate(scribe, cluster.offset, drafts[-1] if drafts else None, track)
         return True
     rasm = _rasm_outcome(context, cluster, rows, track)
     if rasm is None:
         return False
-    if isinstance(rasm, Sets):
-        set_fact(None, drafts, rasm.fact, rasm.value, Target.PREVIOUS, scribe,
-                 cluster.offset)
+    outcome, offset = rasm
+    if isinstance(outcome, Sets):
+        # `offset` is the mark that carries the fact (a dagger, a pausal
+        # sign), not the carrier's own base offset, so the two glyphs stay
+        # distinguishable in the Inscription.
+        set_fact(None, drafts, outcome.fact, outcome.value, Target.PREVIOUS,
+                 scribe, offset)
         track.from_derivation += 1
+    if isinstance(outcome, Absent) and outcome.shows is Target.HERE:
+        pending.append(cluster.offset)
     else:
-        scribe.decoration(cluster.offset, drafts[-1] if drafts else None)
-    track.decorated += 1
+        subject = drafts[-1] if drafts else None
+        _decorate(scribe, cluster.offset, subject, track)
+        for stray in stray_letter_offsets(rows, cluster.offset):
+            _decorate(scribe, stray, subject, track)
     return True
 
 
@@ -164,11 +193,10 @@ def _slot_draft(index: int, cluster, letter, rows, context, drafts, track,
                 scribe) -> bool:
     """Append this cluster's slot. True when it also added a second one."""
     draft = _Draft(letter=letter, cluster=index)
-    if cluster.onset is not None:
-        draft.onset, draft.onset_declared = cluster.onset, True
-        track.from_evidence += 1
-        scribe.evidence(cluster.offset, draft, SlotFact.ONSET)
-    scribe.evidence(cluster.offset, draft, SlotFact.LETTER)
+    letter_offset, extra_offsets = letter_offsets_of(rows, cluster)
+    scribe.evidence(letter_offset, draft, SlotFact.LETTER)
+    for offset in extra_offsets:
+        _decorate(scribe, offset, draft, track)
     extra = _apply_rows(rows, draft, drafts, context, track, scribe,
                         cluster.offset)
     _apply_wasl(context, cluster, draft, track)
@@ -215,13 +243,12 @@ def _apply_rows(rows, draft, drafts, context, track, scribe, base_offset,
                 # the noon. Without this edge the noon would be a slot no
                 # grapheme reaches.
                 scribe.evidence(offset, extra, SlotFact.LETTER)
-                scribe.evidence(offset, extra, SlotFact.NUCLEUS)
-            case Attests(family=family):
-                scribe.attestation(offset, family, draft)
+                scribe.evidence(offset, extra, nucleus_fact(extra.nucleus))
+            case Attests():
+                scribe.attestation(offset, draft)
                 track.attested += 1
             case Shows() | Absent():
-                scribe.decoration(offset, draft)
-                track.decorated += 1
+                _decorate(scribe, offset, draft, track)
     return extra
 
 
@@ -264,12 +291,12 @@ def _apply_tashil(draft: _Draft) -> None:
     """A facilitated hamza is voweled: the alif the mark is written on stands
     for a hamza with fatha, and the mark says how to say it, not whether."""
     if draft.onset is Onset.TASHIL and not draft.nucleus_declared:
-        draft.nucleus = Short(Quality.A)
+        draft.nucleus = Nucleus.short(Quality.A)
 
 
 def _rasm_outcome(context, cluster: Cluster, rows, track):
     """Is this cluster written but not a slot, and if so what fact does it
-    still contribute to the previous slot?
+    still contribute to the previous slot, and from which offset?
 
     Returns `None` when the cluster is a slot.
     """
@@ -285,35 +312,35 @@ def _rasm_outcome(context, cluster: Cluster, rows, track):
         return carried
     if cluster.has(*_VOWEL_ROLES):
         return None
-    if (
-        lexeme.hamza_seat(context)
-        or lexeme.otiose_waw(context)
-        or lexeme.otiose_alif(context)
-    ):
-        return Absent()
+    if lexeme.hamza_seat(context):
+        # The seat spells no sound of its own; what it spells is the hamza
+        # after it, which has no draft yet at this point in the pass.
+        return Absent(shows=Target.HERE), cluster.offset
+    if lexeme.otiose_waw(context) or lexeme.otiose_alif(context):
+        return Absent(), cluster.offset
     if cluster.letter not in CARRIERS:
         return None
     outcome = derive.resolve(CARRIER, context)
     track.used(CARRIER)
     if isinstance(outcome, Absent):
-        return outcome
+        return outcome, cluster.offset
     if isinstance(outcome, Sets) and outcome.target is Target.PREVIOUS:
-        return outcome
+        return outcome, cluster.offset
     return None
 
 
-def _nucleus_destination(rows, context) -> tuple[bool, object | None]:
+def _nucleus_destination(rows, context) -> tuple[bool, tuple | None]:
     """Where do this cluster's nucleus rows land: here, or on the slot before?
 
-    A sukun counts as neither - IndoPak writes one on length carriers like
-    `يْ`, and absence of a vowel cannot be what makes a cluster a slot.
+    A carried outcome pairs with the mark's own offset, not the carrier's,
+    so a dagger's glyph is what the fact is spelled from.
     """
     carried = None
     for row in rows:
-        if row.fact is not SlotFact.NUCLEUS:
+        if row.fact not in VOWEL_FACTS:
             continue
         if row.value is not None:
-            if row.value.kind is not NucleusKind.SILENT:
+            if not row.value.is_silent:
                 return True, None
             continue
         outcome = derive.resolve(row.derivation, context)
@@ -322,12 +349,18 @@ def _nucleus_destination(rows, context) -> tuple[bool, object | None]:
         if isinstance(outcome, Sets):
             if outcome.target is Target.HERE:
                 return True, None
-            carried = outcome
+            offset = row.offset if row.offset >= 0 else context.cluster.offset
+            carried = (outcome, offset)
     return False, carried
 
 
-def _skip_iwad_carrier(reading: Reading, index: int, bounds) -> set[int]:
-    """The alif written after a fathatan is the iwad, not a fourth slot."""
+def _skip_iwad_carrier(reading: Reading, index: int, bounds, drafts, track,
+                       scribe) -> set[int]:
+    """The alif written after a fathatan is the iwad, not a fourth slot.
+
+    At a stop it lengthens the base vowel, not the noon it silences, so its
+    glyph decorates the base slot `_slot_draft` appended, before the noon.
+    """
     nxt = index + 1
     if nxt >= bounds[1]:
         return set()
@@ -335,6 +368,8 @@ def _skip_iwad_carrier(reading: Reading, index: int, bounds) -> set[int]:
     if cluster.letter is CanonLetter.ALIF and not cluster.has(*_VOWEL_ROLES):
         # IndoPak draws its iqlab mark on this alif. An annotation does not
         # turn the iwad carrier into a slot.
+        base = drafts[-2] if len(drafts) >= 2 else None
+        _decorate(scribe, cluster.offset, base, track)
         return {nxt}
     return set()
 
@@ -345,13 +380,6 @@ def _evidence_by_cluster(reading: Reading) -> dict[int, tuple]:
     for row in reading.evidence:
         out.setdefault(row.cluster, []).append(row)
     return {index: tuple(rows) for index, rows in out.items()}
-
-
-def _letter_of(rows, cluster: Cluster) -> CanonLetter | None:
-    for row in rows:
-        if row.fact is SlotFact.LETTER and row.value is not None:
-            return row.value
-    return cluster.letter
 
 
 def _context(reading, index, bounds, drafts, lexicon) -> derive.Context:

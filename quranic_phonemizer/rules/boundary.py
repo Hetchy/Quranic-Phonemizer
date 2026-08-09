@@ -10,6 +10,7 @@ from dataclasses import dataclass, field
 from ..engine.neighbourhood import Neighbourhood
 from ..engine.plan import (
     Length,
+    Phase,
     Plan,
     Realize,
     Relength,
@@ -20,12 +21,11 @@ from ..engine.plan import (
 from ..model.address import BoundaryPlan, KhilafId, SlotId
 from ..model.canon import (
     CanonLetter,
-    NucleusKind,
     Onset,
-    Phase,
     Quality,
     Rule,
     SlotOrigin,
+    VowelForm,
 )
 from ..model.performance import (
     Aspect,
@@ -48,7 +48,7 @@ class WaqfEnding:
     yaa: SitedKhilaf = field(
         default_factory=lambda: SitedKhilaf(KhilafId.YAA_ITHBAT)
     )
-    rule: Rule = Rule.WAQF_ENDING
+    rule: Rule = Rule.PAUSAL_SUKUN
     phase: Phase = Phase.BOUNDARY
     triggers: frozenset = frozenset()
 
@@ -70,24 +70,24 @@ class WaqfEnding:
             return None
 
         effects = []
-        if slot.nucleus.kind is NucleusKind.SHORT:
-            effects.append(Silence(at, Aspect.NUCLEUS))
-        elif slot.nucleus.kind is NucleusKind.SILAH:
+        if slot.nucleus.is_short:
+            effects.append(Silence(at, Aspect.VOWEL))
+        elif slot.nucleus.is_silah:
             # Silah is long in wasl and absent at pause, mirroring `Onset.WASL`.
-            effects.append(Silence(at, Aspect.NUCLEUS))
-        elif slot.nucleus.kind is NucleusKind.PAUSAL_LONG:
+            effects.append(Silence(at, Aspect.VOWEL))
+        elif slot.nucleus.is_pausal_long:
             effects.append(
-                Realize(at, Aspect.NUCLEUS, Vowel(slot.nucleus.quality, True))
+                Realize(at, Aspect.VOWEL, Vowel(slot.nucleus.quality, True))
             )
-        if slot.onset is Onset.SILAH and not self._kept(near, word):
+        if slot.onset is Onset.GLIDE and not self._kept(near, word):
             # The pronoun yaa's onset must go too, or a stray glide remains,
             # and the stop then lands on the letter before it.
-            effects.append(Silence(at, Aspect.ONSET))
+            effects.append(Silence(at, Aspect.CONSONANT))
             effects.extend(_hands_the_stop_back(near, at))
         if not effects:
             return None
         return Verdict(
-            Occurrence(mint(Rule.WAQF_ENDING, at), Rule.WAQF_ENDING, Participants((at,))),
+            Occurrence(mint(Rule.PAUSAL_SUKUN, at), Rule.PAUSAL_SUKUN, Participants(at)),
             tuple(effects),
         )
 
@@ -125,11 +125,11 @@ class WaslHamza:
             return None
         if boundaries.started_on(word) and near.first_of_word(at):
             return Verdict(
-                Occurrence(mint(Rule.WASL_START, at), Rule.WASL_START, Participants((at,))), ()
+                Occurrence(mint(Rule.WASL_START, at), Rule.WASL_START, Participants(at)), ()
             )
         return Verdict(
-            Occurrence(mint(Rule.WASL_ELISION, at), Rule.WASL_ELISION, Participants((at,))),
-            (Silence(at, Aspect.ONSET), Silence(at, Aspect.NUCLEUS)),
+            Occurrence(mint(Rule.WASL_ELISION, at), Rule.WASL_ELISION, Participants(at)),
+            (Silence(at, Aspect.CONSONANT), Silence(at, Aspect.VOWEL)),
         )
 
 
@@ -156,17 +156,17 @@ class SoftenedHamza:
         if (
             following is None
             or following.letter is not CanonLetter.HAMZA
-            or following.nucleus.kind is not NucleusKind.SILENT
+            or not following.nucleus.is_silent
         ):
             return None
         return Verdict(
             Occurrence(
                 mint(Rule.IBDAL_HAMZA, at), Rule.IBDAL_HAMZA,
-                Participants((at, following.id)),
+                Participants(at, following.id),
             ),
             (
                 Relength(at, Length.LONG),
-                Silence(following.id, Aspect.ONSET),
+                Silence(following.id, Aspect.CONSONANT),
             ),
         )
 
@@ -177,9 +177,9 @@ class TanweenBeforeWasl:
     # `خَيْرٌ ٱهْبِطُوا۟` joins a quiescent noon to the quiescent letter the elided
     # prosthetic hamza leaves bare, and two of them cannot meet: the noon
     # takes the kasra that breaks them. The other half of the same repair
-    # shortens a madd instead -- see `rules/madd.py::IltiqaRepair`.
+    # shortens a madd instead -- see `rules/madd.py::IltiqaShortening`.
 
-    rule: Rule = Rule.ILTIQA_REPAIR
+    rule: Rule = Rule.ILTIQA_KASRA
     phase: Phase = Phase.BOUNDARY
     triggers: frozenset = frozenset({CanonLetter.NOON})
 
@@ -199,10 +199,10 @@ class TanweenBeforeWasl:
             return None
         return Verdict(
             Occurrence(
-                mint(Rule.ILTIQA_REPAIR, at, variant=1), Rule.ILTIQA_REPAIR,
-                Participants((at, following.id)),
+                mint(Rule.ILTIQA_KASRA, at), Rule.ILTIQA_KASRA,
+                Participants(at, following.id),
             ),
-            (Realize(at, Aspect.NUCLEUS, Vowel(Quality.I)),),
+            (Realize(at, Aspect.VOWEL, Vowel(Quality.I)),),
         )
 
 
@@ -210,14 +210,14 @@ class TanweenBeforeWasl:
 class PausalAlif:
     """The seven alifs: long at a pause, short when the word is joined to.
 
-    The mirror of `Onset.SILAH`, which `WaqfEnding` removes at a stop.
+    The mirror of `Onset.GLIDE`, which `WaqfEnding` removes at a stop.
     """
     # Emits `Relength`, not a realization: the vowel is still plainly
     # produced, and only its length changes.
 
     rule: Rule = Rule.PAUSAL_ALIF
     phase: Phase = Phase.BOUNDARY
-    triggers: frozenset = frozenset({NucleusKind.PAUSAL_LONG})
+    triggers: frozenset = frozenset({VowelForm.LONG})
 
     def look(
         self, near: Neighbourhood, plan: Plan, at: SlotId,
@@ -227,7 +227,7 @@ class PausalAlif:
         slot, word = near.slot(at), near.word_of(at)
         if slot is None or word is None:
             return None
-        if slot.nucleus.kind is not NucleusKind.PAUSAL_LONG:
+        if not slot.nucleus.is_pausal_long:
             return None
         if boundaries.stopped_on(word):
             # Stopped on, the alif is said and `WaqfEnding` owns the slot.
@@ -235,7 +235,7 @@ class PausalAlif:
         return Verdict(
             Occurrence(
                 mint(Rule.PAUSAL_ALIF, at), Rule.PAUSAL_ALIF,
-                Participants((at,)),
+                Participants(at),
             ),
             (Relength(at, Length.SHORT),),
         )
@@ -266,23 +266,23 @@ class TanweenAtWaqf:
         if slot.origin is not SlotOrigin.NUNATION:
             return None
         base = near.before(at)
-        if base is None or base.nucleus.kind is not NucleusKind.SHORT:
+        if base is None or not base.nucleus.is_short:
             return None
-        effects = [Silence(at, Aspect.ONSET)]
-        rule = Rule.WAQF_ENDING
+        effects = [Silence(at, Aspect.CONSONANT)]
+        rule = Rule.PAUSAL_SUKUN
         if base.letter is CanonLetter.TAA_MARBUTA:
             # Taa marbuta stops as haa and takes no iwad, but the noon is still silent.
             return Verdict(
-                Occurrence(mint(rule, at), rule, Participants((at, base.id))),
+                Occurrence(mint(rule, at), rule, Participants(at, base.id)),
                 tuple(effects),
             )
         if base.nucleus.quality is Quality.A:
             rule = Rule.IWAD
             effects.append(Relength(base.id, Length.LONG))
         else:
-            effects.append(Silence(base.id, Aspect.NUCLEUS))
+            effects.append(Silence(base.id, Aspect.VOWEL))
         return Verdict(
-            Occurrence(mint(rule, at), rule, Participants((at, base.id))),
+            Occurrence(mint(rule, at), rule, Participants(at, base.id)),
             tuple(effects),
         )
 
@@ -292,7 +292,7 @@ class TaaMarbutaAtWaqf:
     """`ة` is a taa in connection and a haa at pause -- a canonical,
     rasm-conditioned alternation."""
 
-    rule: Rule = Rule.WAQF_ENDING
+    rule: Rule = Rule.TAA_MARBUTA_PAUSAL
     phase: Phase = Phase.BOUNDARY
     triggers: frozenset = frozenset({CanonLetter.TAA_MARBUTA})
 
@@ -308,11 +308,9 @@ class TaaMarbutaAtWaqf:
             return None
         # `بِسُورَةٍ` stops as haa with no iwad; "final" here excludes the tanween noon slot.
         return Verdict(
-            # variant=1 distinguishes this from `WaqfEnding`, which also
-            # fires on this slot, on a different aspect.
-            Occurrence(mint(Rule.WAQF_ENDING, at, variant=1), Rule.WAQF_ENDING,
-                       Participants((at,))),
-            (Realize(at, Aspect.ONSET, Consonant(CanonLetter.HEH)),),
+            Occurrence(mint(Rule.TAA_MARBUTA_PAUSAL, at), Rule.TAA_MARBUTA_PAUSAL,
+                       Participants(at)),
+            (Realize(at, Aspect.CONSONANT, Consonant(CanonLetter.HEH)),),
         )
 
 
@@ -337,6 +335,6 @@ def _hands_the_stop_back(near: Neighbourhood, at: SlotId):
     if near.first_of_word(at):
         return ()
     before = near.before(at)
-    if before is None or before.nucleus.kind is not NucleusKind.SHORT:
+    if before is None or not before.nucleus.is_short:
         return ()
-    return (Silence(before.id, Aspect.NUCLEUS),)
+    return (Silence(before.id, Aspect.VOWEL),)

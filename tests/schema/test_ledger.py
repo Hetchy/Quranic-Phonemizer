@@ -45,8 +45,8 @@ def test_parses_every_canonical_value_shape(tmp_path: Path) -> None:
             """
             supplies:
               - {slot: "27:36:8#7", skeleton: "ءاتىن", fact: ONSET,
-                 value: SILAH, citation: "Hafs; pronoun ya dropped at waqf"}
-              - {slot: "2:2#1", skeleton: "ءلم", fact: NUCLEUS,
+                 value: GLIDE, citation: "Hafs; pronoun ya dropped at waqf"}
+              - {slot: "2:2#1", skeleton: "ءلم", fact: VOWEL_LENGTH,
                  value: {kind: PausalLong, quality: A}, citation: "seven alifs"}
               - {slot: "18:1#9", skeleton: "عوجا", fact: SAKT,
                  value: true, citation: "Hafs sakt"}
@@ -55,7 +55,7 @@ def test_parses_every_canonical_value_shape(tmp_path: Path) -> None:
         riwayah=Riwayah.HAFS,
     )
     onset, nucleus, sakt = ledger.supplies
-    assert onset.value is Onset.SILAH
+    assert onset.value is Onset.GLIDE
     assert nucleus.value.quality is Quality.A
     assert sakt.value is True
 
@@ -216,7 +216,7 @@ def test_an_entry_for_this_verse_that_does_not_resolve_is_an_error(
     from quranic_phonemizer.canon.passes import LedgerAddressError
     from quranic_phonemizer.canon.ledger import Ledger, Supply, WordSlot
     from quranic_phonemizer.model.address import Location, Script, VerseRef
-    from quranic_phonemizer.model.canon import Long
+    from quranic_phonemizer.model.canon import Nucleus
     from quranic_phonemizer.riwayat.hafs import script_adapter
 
     reading = script_adapter(Script.UTHMANI).read(
@@ -227,8 +227,8 @@ def test_an_entry_for_this_verse_that_does_not_resolve_is_an_error(
             Supply(
                 ref=WordSlot(Location(112, 2, 1), 99),
                 skeleton="ءلله",
-                fact=SlotFact.NUCLEUS,
-                value=Long(Quality.A),
+                fact=SlotFact.VOWEL_LENGTH,
+                value=Nucleus.long(Quality.A),
                 citation="deliberately out of range",
             ),
         ),
@@ -249,7 +249,7 @@ def test_an_assert_the_script_does_not_write_is_an_error(hafs) -> None:
     from quranic_phonemizer.canon.ledger import Ledger
     from quranic_phonemizer.canon.passes import LedgerWitnessError
     from quranic_phonemizer.model.address import Script, VerseRef
-    from quranic_phonemizer.model.canon import Long
+    from quranic_phonemizer.model.canon import Nucleus
 
     verse = VerseRef(6, 77)
     reading = hafs.read(Script.UTHMANI, verse, hafs.words(verse))
@@ -257,7 +257,7 @@ def test_an_assert_the_script_does_not_write_is_an_error(hafs) -> None:
 
     wrong = Ledger(
         hafs.ledger.supplies,
-        tuple(replace(row, value=Long(Quality.I)) for row in hafs.ledger.asserts),
+        tuple(replace(row, value=Nucleus.long(Quality.I)) for row in hafs.ledger.asserts),
     )
     with pytest.raises(LedgerWitnessError, match="uthmani is said to write"):
         build(reading, lexicon=hafs.lexicon, ledger=wrong, passes=hafs.passes)
@@ -271,7 +271,7 @@ def test_an_entry_for_another_verse_is_not_an_error(packed, hafs) -> None:
     from quranic_phonemizer.canon.build import build
     from quranic_phonemizer.canon.ledger import Ledger, Supply, WordSlot
     from quranic_phonemizer.model.address import Location, Script, VerseRef
-    from quranic_phonemizer.model.canon import Long
+    from quranic_phonemizer.model.canon import Nucleus
     from quranic_phonemizer.riwayat.hafs import script_adapter
 
     reading = script_adapter(Script.UTHMANI).read(
@@ -282,8 +282,8 @@ def test_an_entry_for_another_verse_is_not_an_error(packed, hafs) -> None:
             Supply(
                 ref=WordSlot(Location(2, 1, 1), 99),
                 skeleton="whatever",
-                fact=SlotFact.NUCLEUS,
-                value=Long(Quality.A),
+                fact=SlotFact.VOWEL_LENGTH,
+                value=Nucleus.long(Quality.A),
                 citation="a different verse entirely",
             ),
         ),

@@ -4,17 +4,12 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from ..engine.neighbourhood import Neighbourhood
-from ..engine.plan import MergeInto, Plan, Realize, Verdict, mint
+from ..engine.plan import MergeInto, Phase, Plan, Realize, Verdict, mint
 from ..model.address import BoundaryPlan, KhilafId, SlotId
 from ..model.canon import CanonLetter as L
-from ..model.canon import Onset, Phase, Rule
-from ..model.performance import (
-    Aspect,
-    Consonant,
-    Nasal,
-    Occurrence,
-    Participants,
-)
+from ..model.canon import Onset, Rule, SlotOrigin
+from ..model.performance import Aspect, Consonant, Occurrence, Participants
+from .lam_shamsiyyah import ArticleShape
 from .ownership import is_quiescent
 from .khilaf import nasal_place
 from .tables import Followers
@@ -26,6 +21,14 @@ NASAL_LETTERS = frozenset({L.NOON, L.MEEM})
 class GhunnahMushaddadah:
     """A doubled noon or meem is nasalized wherever it stands. Nothing merges,
     so this is not an idgham."""
+
+    sun: frozenset = frozenset()
+    """The letters the article assimilates into. `ٱلْمَغْضُوبِ` has a meem
+    behind a silent lam and is not doubled, so the set is asked, not the shape."""
+
+    article: ArticleShape = field(default_factory=ArticleShape)
+    """`ٱلنَّاسِ` is doubled by the article, not in the Score, and is a ghunnah
+    all the same. `ArticleLam` realizes that one, so this only names it."""
 
     rule: Rule = Rule.GHUNNAH_MUSHADDADAH
     phase: Phase = Phase.MERGE
@@ -39,21 +42,35 @@ class GhunnahMushaddadah:
         slot = near.slot(at)
         if slot is None or slot.letter not in NASAL_LETTERS:
             return None
+        occurrence = Occurrence(
+            mint(Rule.GHUNNAH_MUSHADDADAH, at),
+            Rule.GHUNNAH_MUSHADDADAH,
+            Participants(at),
+        )
         if slot.onset is not Onset.GEMINATE:
-            return None
+            if not self._doubled_by_the_article(near, at):
+                return None
+            return Verdict(occurrence, ())
         return Verdict(
-            Occurrence(
-                mint(Rule.GHUNNAH_MUSHADDADAH, at),
-                Rule.GHUNNAH_MUSHADDADAH,
-                Participants((at,)),
-            ),
+            occurrence,
             (
                 Realize(
                     at,
-                    Aspect.ONSET,
-                    Consonant(slot.letter, geminate=True, nasal=True),
+                    Aspect.CONSONANT,
+                    Consonant(slot.letter, geminate=True, ghunnah=True),
                 ),
             ),
+        )
+
+    def _doubled_by_the_article(self, near: Neighbourhood, at: SlotId) -> bool:
+        """A nasal sun letter the article's lam has assimilated into."""
+        slot, before = near.slot(at), near.before(at)
+        return (
+            slot is not None
+            and slot.letter in self.sun
+            and before is not None
+            and before.nucleus.is_silent
+            and self.article(near, before.id)
         )
 
 
@@ -71,10 +88,15 @@ class MeemSakinah:
         boundaries: BoundaryPlan,
     ) -> Verdict | None:
         del plan, boundaries  # `near` already refuses to look across a junction
-        if not is_quiescent(near.slot(at)):
+        slot = near.slot(at)
+        if not is_quiescent(slot):
             return None
         following = near.after(at)
         if following is None:
+            if slot.origin is SlotOrigin.SPELLED and near.last_of_word(at):
+                # The meem closing a disjoined-letter opening takes its own
+                # plain articulation rather than reaching into the next word.
+                return _verdict(Rule.IZHAR_SHAFAWI, at, None, ())
             return None
 
         match self.followers.of(following.letter):
@@ -85,11 +107,14 @@ class MeemSakinah:
                     (
                         Realize(
                             at,
-                            Aspect.ONSET,
-                            Nasal(nasal_place(
-                                near.score.selection,
-                                KhilafId.IKHFAA_SHAFAWI_NASAL,
-                            )),
+                            Aspect.CONSONANT,
+                            Consonant(
+                                nasal_place(
+                                    near.score.selection,
+                                    KhilafId.IKHFAA_SHAFAWI_NASAL,
+                                ),
+                                ghunnah=True,
+                            ),
                         ),
                     ),
                 )
@@ -99,10 +124,10 @@ class MeemSakinah:
                     (
                         Realize(
                             following.id,
-                            Aspect.ONSET,
-                            Consonant(L.MEEM, geminate=True, nasal=True),
+                            Aspect.CONSONANT,
+                            Consonant(L.MEEM, geminate=True, ghunnah=True),
                         ),
-                        MergeInto(at, Aspect.ONSET, following.id, Aspect.ONSET),
+                        MergeInto(at, Aspect.CONSONANT, following.id, Aspect.CONSONANT),
                     ),
                 )
         # Izhar shafawi produces no sound of its own; the occurrence exists so
@@ -110,7 +135,7 @@ class MeemSakinah:
         return _verdict(Rule.IZHAR_SHAFAWI, at, following.id, ())
 
 
-def _verdict(rule: Rule, at: SlotId, other: SlotId, effects: tuple) -> Verdict:
+def _verdict(rule: Rule, at: SlotId, other: SlotId | None, effects: tuple) -> Verdict:
     return Verdict(
-        Occurrence(mint(rule, at), rule, Participants((at, other))), effects
+        Occurrence(mint(rule, at), rule, Participants(at, other)), effects
     )

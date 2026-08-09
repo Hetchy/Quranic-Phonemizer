@@ -44,10 +44,21 @@ TANWEEN_ACROSS_A_BOUNDARY = [
 ]
 
 
+#: One site per tanween mark, to say which character the rule is read off.
+EACH_TANWEEN_MARK = [
+    ("20:20", (4, 5), "ٌ"),   # حَيَّةٌ تَسْعَىٰ
+    ("18:8", (5, 6), "ً"),    # صَعِيدًا جُرُزًا
+    ("29:57", (2, 3), "ٍ"),   # نَفْسٍ ذَآئِقَةُ
+]
+
+
 @pytest.mark.parametrize(("ref", "word", "expected"), INSIDE_ONE_WORD)
 def test_every_hiding_letter_hides_a_written_noon(ref, word, expected):
     site = Site(hafs=(ref, (word,)))
-    assert reading(site, isolated=word).phonemes(word) == expected
+    r = reading(site, isolated=word)
+    assert r.phonemes(word) == expected
+    assert "ikhfaa_haqiqi" in r.rules_on_char(word, "ن")
+    assert r.rules_on_sound(word, "ŋ") == {"ikhfaa_haqiqi"}
 
 
 @pytest.mark.parametrize(
@@ -57,6 +68,14 @@ def test_every_hiding_letter_hides_a_tanween_noon(ref, words, expected):
     first, last = words
     r = reading(Site(hafs=(ref, words)), ibtidaa=first, waqf=last)
     assert (r.phonemes(first), r.phonemes(last)) == expected
+    assert r.rules_on_sound(first, "ŋ") == {"ikhfaa_haqiqi"}
+
+
+@pytest.mark.parametrize(("ref", "words", "mark"), EACH_TANWEEN_MARK)
+def test_the_rule_is_read_off_the_tanween_mark(ref, words, mark):
+    first, last = words
+    r = reading(Site(hafs=(ref, words)), ibtidaa=first, waqf=last)
+    assert "ikhfaa_haqiqi" in r.rules_on_char(first, mark)
 
 
 @for_each_riwayah(MIN_ZULUMAT, ibtidaa=4, waqf=5)
@@ -64,6 +83,8 @@ def test_a_noon_is_hidden_when_the_hiding_letter_starts_a_word(r):
     # مِّن ظُلُمَـٰتِ
     assert r.phonemes(4) == "miŋ"
     assert r.phonemes(5) == "ðˤuluma:t"
+    assert "ikhfaa_haqiqi" in r.rules_on_char(4, "ن")
+    assert r.rules_on_sound(4, "ŋ") == {"ikhfaa_haqiqi"}
 
 
 @for_each_riwayah(HEENIN, ibtidaa=19, wasl=19)
@@ -71,3 +92,17 @@ def test_a_tanween_at_a_verse_end_is_hidden_across_the_seam(r):
     # حِينٍ فَتَلَقَّىٰٓ
     assert r.phonemes(19) == "ħi:niŋ"
     assert r.phonemes(20) == "fatalaqqaˤ:"
+    assert "ikhfaa_haqiqi" in r.rules_on_char(19, "ٍ")
+    assert r.rules_on_sound(19, "ŋ") == {"ikhfaa_haqiqi"}
+
+
+MANDUD = Site(hafs=("56:29", (2,)))
+
+
+def test_the_heavy_hiding_toggle_defaults_off():
+    # مَّنضُودٍ -- the hiding noon before a dad, an istilaa letter.
+    off = reading(MANDUD, extra_phonemes=(), isolated=2)
+    on = reading(MANDUD, extra_phonemes=("emphatic_ikhfaa",), isolated=2)
+    assert off.phonemes(2) == "maŋdˤu:dQ"
+    assert on.phonemes(2) == "maŋˤdˤu:dQ"
+    assert on.rules_on_sound(2, "ŋˤ") == {"ikhfaa_haqiqi"}

@@ -12,16 +12,15 @@ from ..model.address import BoundaryPlan, SlotId
 from ..model.canon import (
     Annotation,
     CanonLetter,
-    NucleusKind,
     Onset,
-    Phase,
     Rule,
+    VowelForm,
 )
 from .neighbourhood import Neighbourhood
-from .plan import Plan, Verdict
+from .plan import Phase, Plan, Verdict
 
 Trigger: TypeAlias = (
-    frozenset[CanonLetter] | frozenset[NucleusKind] | frozenset[Onset]
+    frozenset[CanonLetter] | frozenset[VowelForm] | frozenset[Onset]
     | frozenset[Annotation]
 )
 

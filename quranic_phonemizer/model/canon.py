@@ -7,7 +7,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import TypeAlias
 
 from .address import Location, Riwayah, SlotId, VariantSelection
 
@@ -67,13 +66,13 @@ class Onset(StrEnum):
     """The closed set of mutually exclusive onset states.
 
     Boundary-conditional onset *presence* lives here; boundary-conditional
-    *length* lives on `Nucleus`. `WASL` and `SILAH` are exact mirrors.
+    *length* lives on `Nucleus`. `WASL` and `GLIDE` are exact mirrors.
     """
 
     PLAIN = "plain"
     GEMINATE = "geminate"
     WASL = "wasl"
-    SILAH = "silah"
+    GLIDE = "glide"
     TASHIL = "tashil"
 
 
@@ -112,55 +111,115 @@ class Annotation(StrEnum):
     what follows opens a word: `هَـٰٓؤُلَآءِ` is `ها` + `أولاء`."""
 
 
-class NucleusKind(StrEnum):
-    """The union's discriminant, exposed so `Trigger` can index on it."""
+class VowelForm(StrEnum):
+    """A vowel's shape in one boundary reading, apart from its quality."""
 
-    SILENT = "silent"
+    ABSENT = "absent"
     SHORT = "short"
     LONG = "long"
-    SILAH = "silah"
-    PAUSAL_LONG = "pausal_long"
 
 
 @dataclass(frozen=True, slots=True)
-class Silent:
-    """No vowel at this position. Uthmani's absent harakah and IndoPak's
-    `ْ` are two spellings of this one value."""
+class VowelState:
+    """One boundary reading of a vowel: its form, and its quality if voiced."""
 
-    kind: NucleusKind = NucleusKind.SILENT
+    form: VowelForm
+    quality: Quality | None = None
 
 
-@dataclass(frozen=True, slots=True)
-class Short:
-    quality: Quality
-    kind: NucleusKind = NucleusKind.SHORT
+_ABSENT_STATE = VowelState(VowelForm.ABSENT)
 
 
 @dataclass(frozen=True, slots=True)
-class Long:
-    quality: Quality
-    kind: NucleusKind = NucleusKind.LONG
+class Nucleus:
+    """A vowel's two readings: joined to what follows, and stopped on.
 
+    An ordinary vowel reads the same both ways; the pronoun haa's vowel and
+    the seven alifs are the two ways the readings can differ.
+    """
 
-@dataclass(frozen=True, slots=True)
-class Silah:
-    """Long in wasl, absent at pause."""
+    joined: VowelState
+    stopped: VowelState
 
-    quality: Quality
-    kind: NucleusKind = NucleusKind.SILAH
+    @property
+    def quality(self) -> Quality | None:
+        return self.joined.quality
 
+    @property
+    def is_silent(self) -> bool:
+        return self.joined.form is VowelForm.ABSENT
 
-@dataclass(frozen=True, slots=True)
-class PausalLong:
-    """Short in wasl, long at pause. The seven alifs."""
+    @property
+    def is_short(self) -> bool:
+        return (
+            self.joined.form is VowelForm.SHORT
+            and self.stopped.form is VowelForm.SHORT
+        )
 
-    quality: Quality
-    kind: NucleusKind = NucleusKind.PAUSAL_LONG
+    @property
+    def is_long(self) -> bool:
+        return (
+            self.joined.form is VowelForm.LONG
+            and self.stopped.form is VowelForm.LONG
+        )
 
+    @property
+    def is_silah(self) -> bool:
+        return (
+            self.joined.form is VowelForm.LONG
+            and self.stopped.form is VowelForm.ABSENT
+        )
 
-Nucleus: TypeAlias = Silent | Short | Long | Silah | PausalLong
+    @property
+    def is_pausal_long(self) -> bool:
+        return (
+            self.joined.form is VowelForm.SHORT
+            and self.stopped.form is VowelForm.LONG
+        )
 
-SILENT = Silent()
+    @property
+    def sounds_long(self) -> bool:
+        """Long in either reading: an ordinary long vowel, a silah, or one
+        of the seven alifs."""
+        return (
+            self.joined.form is VowelForm.LONG
+            or self.stopped.form is VowelForm.LONG
+        )
+
+    def with_quality(self, quality: Quality) -> Nucleus:
+        """The same joined/stopped shape, holding a different quality --
+        a khilaf site disputes the vowel, never the shape it takes."""
+        return Nucleus(
+            VowelState(self.joined.form, quality)
+            if self.joined.form is not VowelForm.ABSENT else _ABSENT_STATE,
+            VowelState(self.stopped.form, quality)
+            if self.stopped.form is not VowelForm.ABSENT else _ABSENT_STATE,
+        )
+
+    @classmethod
+    def silent(cls) -> Nucleus:
+        return cls(_ABSENT_STATE, _ABSENT_STATE)
+
+    @classmethod
+    def short(cls, quality: Quality) -> Nucleus:
+        state = VowelState(VowelForm.SHORT, quality)
+        return cls(state, state)
+
+    @classmethod
+    def long(cls, quality: Quality) -> Nucleus:
+        state = VowelState(VowelForm.LONG, quality)
+        return cls(state, state)
+
+    @classmethod
+    def silah(cls, quality: Quality) -> Nucleus:
+        return cls(VowelState(VowelForm.LONG, quality), _ABSENT_STATE)
+
+    @classmethod
+    def pausal_long(cls, quality: Quality) -> Nucleus:
+        return cls(
+            VowelState(VowelForm.SHORT, quality),
+            VowelState(VowelForm.LONG, quality),
+        )
 
 
 class SlotOrigin(StrEnum):
@@ -210,38 +269,10 @@ class Score:
         return tuple(slot for word in self.words for slot in word.slots)
 
 
-class RuleFamily(StrEnum):
-    """What a script adapter can genuinely see. Attestation names one of
-    these, never a `Rule`: choosing among idgham members needs the
-    previous word, the pair tables and the ghunnah split."""
-
-    ASSIMILATION = "assimilation"
-    NASALIZATION = "nasalization"
-    INSERTION = "insertion"
-    LENGTHENING = "lengthening"
-    EMPHASIS = "emphasis"
-    RELEASE = "release"
-    ELISION = "elision"
-    """A sound a boundary removes. No script attests one, so it appears in
-    `FAMILY_OF` and never in an inventory."""
-
-
-class Phase(StrEnum):
-    """Closed and ordered. Within a phase, rules are unordered and
-    conflicts are errors."""
-
-    BOUNDARY = "boundary"
-    MERGE = "merge"
-    LENGTH = "length"
-    COLOUR = "colour"
-    RELEASE = "release"
-
-
 class Rule(StrEnum):
     """The only rule vocabulary. One name, one place."""
 
-    IZHAR_HALQI = "izhar_halqi"
-    IZHAR_MUTLAQ = "izhar_mutlaq"
+    IZHAR = "izhar"
     IKHFAA_HAQIQI = "ikhfaa_haqiqi"
     IQLAB = "iqlab"
     IDGHAM_BI_GHUNNAH = "idgham_bi_ghunnah"
@@ -281,97 +312,39 @@ class Rule(StrEnum):
     IBDAL_HAMZA = "ibdal_hamza"
     WASL_ELISION = "wasl_elision"
     WASL_START = "wasl_start"
-    ILTIQA_REPAIR = "iltiqa_repair"
-    WAQF_ENDING = "waqf_ending"
+    ILTIQA_KASRA = "iltiqa_kasra"
+    ILTIQA_SHORTENING = "iltiqa_shortening"
+    PAUSAL_SUKUN = "pausal_sukun"
+    TAA_MARBUTA_PAUSAL = "taa_marbuta_pausal"
     PAUSAL_ALIF = "pausal_alif"
-    SILAH = "silah"
-    SAKT = "sakt"
+    FAKK_IDGHAM = "fakk_idgham"
 
-    PLAIN = "plain"
+    ORTHOGRAPHIC_SILENCE = "orthographic_silence"
 
 
-#: Every `Rule` declares its family, which is what a script may attest
-#: and gives projections a coarse grouping for free.
-FAMILY_OF: dict[Rule, RuleFamily] = {
-    Rule.IZHAR_HALQI: RuleFamily.NASALIZATION,
-    Rule.IZHAR_MUTLAQ: RuleFamily.NASALIZATION,
-    Rule.IKHFAA_HAQIQI: RuleFamily.NASALIZATION,
-    Rule.IQLAB: RuleFamily.NASALIZATION,
-    Rule.IDGHAM_BI_GHUNNAH: RuleFamily.ASSIMILATION,
-    Rule.IDGHAM_BILA_GHUNNAH: RuleFamily.ASSIMILATION,
-    Rule.GHUNNAH_MUSHADDADAH: RuleFamily.NASALIZATION,
-    Rule.IZHAR_SHAFAWI: RuleFamily.NASALIZATION,
-    Rule.IKHFAA_SHAFAWI: RuleFamily.NASALIZATION,
-    Rule.IDGHAM_SHAFAWI: RuleFamily.ASSIMILATION,
-    Rule.IDGHAM_MUTAMATHILAYN: RuleFamily.ASSIMILATION,
-    Rule.IDGHAM_MUTAQARIBAYN: RuleFamily.ASSIMILATION,
-    Rule.IDGHAM_MUTAJANISAYN_KAMIL: RuleFamily.ASSIMILATION,
-    Rule.IDGHAM_MUTAJANISAYN_NAQIS: RuleFamily.ASSIMILATION,
-    Rule.LAM_SHAMSIYYAH: RuleFamily.ASSIMILATION,
-    Rule.LAM_QAMARIYYAH: RuleFamily.ASSIMILATION,
-    Rule.QALQALA_SUGHRA: RuleFamily.RELEASE,
-    Rule.QALQALA_KUBRA: RuleFamily.RELEASE,
-    Rule.QALQALA_AKBAR: RuleFamily.RELEASE,
-    Rule.TAFKHEEM: RuleFamily.EMPHASIS,
-    Rule.TARQEEQ: RuleFamily.EMPHASIS,
-    Rule.IMALA: RuleFamily.EMPHASIS,
-    Rule.TASHIL: RuleFamily.EMPHASIS,
-    Rule.ISHMAM: RuleFamily.EMPHASIS,
-    Rule.MADD_TABII: RuleFamily.LENGTHENING,
-    Rule.MADD_WAJIB_MUTTASIL: RuleFamily.LENGTHENING,
-    Rule.MADD_JAIZ_MUNFASIL: RuleFamily.LENGTHENING,
-    Rule.MADD_LAZIM: RuleFamily.LENGTHENING,
-    Rule.MADD_ARID_LIL_SUKUN: RuleFamily.LENGTHENING,
-    Rule.MADD_LEEN: RuleFamily.LENGTHENING,
-    Rule.IWAD: RuleFamily.LENGTHENING,
-    Rule.IBDAL_HAMZA: RuleFamily.LENGTHENING,
-    Rule.WASL_ELISION: RuleFamily.ELISION,
-    Rule.WASL_START: RuleFamily.INSERTION,
-    Rule.ILTIQA_REPAIR: RuleFamily.INSERTION,
-    Rule.WAQF_ENDING: RuleFamily.ELISION,
-    Rule.PAUSAL_ALIF: RuleFamily.ELISION,
-    Rule.SILAH: RuleFamily.LENGTHENING,
-    Rule.SAKT: RuleFamily.RELEASE,
-    Rule.PLAIN: RuleFamily.ELISION,
-}
-
-#: Rules that classify without producing a sound of their own.
+#: Rules whose occurrence may produce no effect; `engine/run.py` mints each
+#: one a `Classifies` edge in place of an attribution, and only where it
+#: produced nothing. `ghunnah_mushaddadah` is here for the article's noon
+#: alone: `ٱلنَّاسِ` is doubled by a merger `lam_shamsiyyah` owns, and
+#: a merger's two edges belong to one occurrence. `ishmam` is here and gets
+#: neither edge, since it names no sound at all.
 CLASSIFICATION_ONLY: frozenset[Rule] = frozenset(
     {
         Rule.TARQEEQ,
-        Rule.TAFKHEEM,
-        # Both emit `Recolour`, which modifies a sound rather than
-        # producing one, so neither owns an attribution.
+        Rule.GHUNNAH_MUSHADDADAH,
         Rule.WASL_START,
-        # The wasl hamza sounds by the plain default already; the
-        # occurrence only records that wasl was started, itself a
-        # classification.
         Rule.IDGHAM_MUTAJANISAYN_NAQIS,
-        # The first letter colours the second rather than merging into
-        # it, so there is no separate sound to attribute.
-        Rule.IZHAR_HALQI,
-        Rule.IZHAR_MUTLAQ,
+        Rule.IZHAR,
         Rule.IZHAR_SHAFAWI,
         Rule.LAM_QAMARIYYAH,
-        Rule.MADD_TABII,
         Rule.MADD_WAJIB_MUTTASIL,
         Rule.MADD_JAIZ_MUNFASIL,
         Rule.MADD_LAZIM,
         Rule.MADD_ARID_LIL_SUKUN,
         Rule.MADD_LEEN,
-        Rule.ILTIQA_REPAIR,
-        Rule.PAUSAL_ALIF,
-        # Both emit `Relength`, which modifies a sound rather than producing
-        # one - the same footing as TAFKHEEM/TARQEEQ. Listing a rule here
-        # permits an occurrence with no attribution; it does not forbid one,
-        # so the tanween half of ILTIQA_REPAIR may still realize its kasra.
         Rule.IMALA,
         Rule.TASHIL,
         Rule.ISHMAM,
-        Rule.SILAH,
-        Rule.SAKT,
-        # Canonical Score facts, realized already coloured by the plain
-        # default; these rules exist only to give a projection a name for
-        # what it sees. See `rules/annotation.py`.
+        Rule.FAKK_IDGHAM,
     }
 )

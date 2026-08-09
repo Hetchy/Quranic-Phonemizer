@@ -10,7 +10,6 @@ from enum import StrEnum
 from typing import TypeAlias
 
 from .address import GraphemeId, Location, Script, SlotId, VerseRef
-from .canon import RuleFamily
 
 
 class GraphemeClass(StrEnum):
@@ -22,6 +21,8 @@ class GraphemeClass(StrEnum):
     TANWEEN = "tanween"
     SHADDA = "shadda"
     LENGTH_CARRIER = "length_carrier"
+    """No script yaml assigns this; it is for a grapheme the recited-text
+    writer mints, not one any inventory reads."""
     SMALL_VOWEL = "small_vowel"
     MADD_SIGN = "madd_sign"
     SILENCE_SIGN = "silence_sign"
@@ -42,9 +43,17 @@ class Grapheme:
 class SlotFact(StrEnum):
     LETTER = "letter"
     ONSET = "onset"
-    NUCLEUS = "nucleus"
+    VOWEL_QUALITY = "vowel_quality"
+    VOWEL_LENGTH = "vowel_length"
+    VOWEL_ABSENCE = "vowel_absence"
     SAKT = "sakt"
-    ANNOTATION = "annotation"
+    TAJWEED_MARK = "tajweed_mark"
+
+
+#: A haraka and its carrier can each name one of these for the same slot, so
+#: a lookup spanning the whole vowel needs the union rather than one member.
+VOWEL_FACTS = frozenset({SlotFact.VOWEL_QUALITY, SlotFact.VOWEL_LENGTH,
+                          SlotFact.VOWEL_ABSENCE})
 
 
 @dataclass(frozen=True, slots=True)
@@ -58,14 +67,12 @@ class Evidences:
 
 @dataclass(frozen=True, slots=True)
 class Attests:
-    """This grapheme witnesses a *performance* outcome at an anchor slot.
-
-    Names a `RuleFamily`, never a `Rule`: choosing among idgham members is
-    tajweed classification, not a script adapter's job.
+    """This grapheme witnesses a *performance* outcome at an anchor slot,
+    naming no rule: choosing among idgham members is tajweed classification,
+    not a script adapter's job.
     """
 
     grapheme: GraphemeId
-    family: RuleFamily
     anchor: SlotId
 
 

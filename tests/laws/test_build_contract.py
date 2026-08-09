@@ -22,8 +22,7 @@ def _reading(hafs, surah: int = 112, ayah: int = 2):
 
 
 def test_a_pass_list_never_arrives_by_default(hafs) -> None:
-    """A riwayah that forgot its own passes used to get the shared two and a
-    working pipeline that was not its own."""
+    """A riwayah must explicitly supply its passes; they are not inferred."""
     assert inspect.signature(build).parameters["passes"].default is inspect.Parameter.empty
     with pytest.raises(TypeError, match="passes"):
         build(_reading(hafs), lexicon=hafs.lexicon, ledger=hafs.ledger)
@@ -45,8 +44,7 @@ def test_two_drafts_alike_in_every_field_are_still_two_drafts() -> None:
 @pytest.mark.parametrize("surah,ayah", COMPACT)
 def test_a_replaced_span_leaves_no_edge_behind(hafs, surah, ayah) -> None:
     """The muqattaat pass drops a word's drafts and spells the letter names
-    in their place. Building at all is the assertion: an edge into a dropped
-    draft now raises where it used to vanish."""
+    in their place. Every spelled slot is reached by an edge."""
     verse = VerseRef(surah, ayah)
     built = hafs.build(hafs.read(Script.UTHMANI, verse, hafs.words(verse)))
     reached = {
@@ -59,8 +57,7 @@ def test_a_replaced_span_leaves_no_edge_behind(hafs, surah, ayah) -> None:
 
 
 def test_an_edge_into_a_dropped_draft_raises(hafs) -> None:
-    """Falsifier: dropping `Scribe.withdraw` from the muqattaat pass sends
-    every opening's edges down this path, and each used to vanish in silence."""
+    """An edge into a dropped draft raises OrphanedEdgeError."""
     verse = VerseRef(112, 2)
     reading = hafs.read(Script.UTHMANI, verse, hafs.words(verse))
     scribe = Scribe(verse)
@@ -70,16 +67,14 @@ def test_an_edge_into_a_dropped_draft_raises(hafs) -> None:
 
 
 def test_withdrawing_a_draft_takes_all_three_kinds_of_edge(hafs) -> None:
-    from quranic_phonemizer.model.canon import RuleFamily
-
     verse = VerseRef(112, 2)
     draft, kept = _Draft(letter=CanonLetter.ALIF), _Draft(letter=CanonLetter.MEEM)
     scribe = Scribe(verse)
     for subject in (draft, kept):
         scribe.evidence(0, subject, SlotFact.LETTER)
         scribe.decoration(1, subject)
-        scribe.attestation(2, RuleFamily.LENGTHENING, subject)
+        scribe.attestation(2, subject)
     scribe.withdraw([draft])
     assert [row[1] for row in scribe.evidences] == [kept.uid]
     assert [row[1] for row in scribe.decorates] == [kept.uid]
-    assert [row[2] for row in scribe.attests] == [kept.uid]
+    assert [row[1] for row in scribe.attests] == [kept.uid]

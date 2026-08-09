@@ -1,11 +1,11 @@
 """Tanween is two slots: one grapheme evidences facts on both.
 
-A `Short(q)` nucleus lands on the base slot; `NOON` plus a silent nucleus
-lands on a new slot, so tanween and noon-sakinah share one rule.
+A short nucleus lands on the base slot; `NOON` plus a silent nucleus lands
+on a new slot, so tanween and noon-sakinah share one rule.
 """
 from __future__ import annotations
 
-from ...model.canon import CanonLetter, Onset, Quality, Short, Silent
+from ...model.canon import CanonLetter, Nucleus, Onset, Quality
 from ...model.inscription import SlotFact
 from .vocabulary import Absent, AddsSlot, Context, Outcome, Target, register
 
@@ -14,11 +14,11 @@ _QUALITY = {"fathatan": Quality.A, "dammatan": Quality.U, "kasratan": Quality.I}
 
 def _nunate(quality: Quality) -> AddsSlot:
     return AddsSlot(
-        fact=SlotFact.NUCLEUS,
-        value=Short(quality),
+        fact=SlotFact.VOWEL_QUALITY,
+        value=Nucleus.short(quality),
         letter=CanonLetter.NOON,
         onset=Onset.PLAIN,
-        nucleus=Silent(),
+        nucleus=Nucleus.silent(),
     )
 
 

@@ -43,18 +43,6 @@ nucleus_vowel:
     options: {fatha: a, damma: u}
     forms: [ضaعفiن, ضuعفiن, ضaعفaن, ضuعفaن]
 
-# The one imala in the Quran. The letter is articulated between the two, an
-# `e` that occurs nowhere else in Hafs; the plain `i` is the default so that
-# a single site does not enlarge the vowel inventory. The rule is tagged
-# either way.
-imala_quality:
-  مجرىها:
-    slot: 2
-    default: i
-    annotate: imala
-    options: {e: e, i: i}
-    forms: [مaجرeهa, مaجرiهa]
-
 # The one word whose final yaa a reader may keep or drop at a pause. Both
 # scripts write it small where 19:30 writes the same word's yaa full, which
 # is the mark saying the letter is optional. Joined, it is always said.

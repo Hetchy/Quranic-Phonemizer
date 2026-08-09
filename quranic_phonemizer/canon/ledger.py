@@ -11,18 +11,8 @@ from typing import Any, TypeAlias
 
 from ..dataio import load_yaml, require_keys
 from ..model.address import Location, Riwayah, Script, SlotId, VerseRef
-from ..model.canon import (
-    CanonLetter,
-    Long,
-    Nucleus,
-    Onset,
-    PausalLong,
-    Quality,
-    Short,
-    Silah,
-    Silent,
-)
-from ..model.inscription import SlotFact
+from ..model.canon import Annotation, CanonLetter, Nucleus, Onset, Quality
+from ..model.inscription import VOWEL_FACTS, SlotFact
 
 SCHEMA_VERSION = 1
 
@@ -125,8 +115,10 @@ def parse_value(fact: SlotFact, raw: object, *, where: str) -> object:
             return _enum(CanonLetter, raw, where=where, what="CanonLetter")
         case SlotFact.ONSET:
             return _enum(Onset, raw, where=where, what="Onset")
-        case SlotFact.NUCLEUS:
+        case _ if fact in VOWEL_FACTS:
             return _nucleus(raw, where=where)
+        case SlotFact.TAJWEED_MARK:
+            return _enum(Annotation, raw, where=where, what="Annotation")
         case SlotFact.SAKT:
             if not isinstance(raw, bool):
                 raise LedgerError(f"{where}: SAKT takes a boolean, got {raw!r}")
@@ -156,11 +148,11 @@ def _enum(enum: type, raw: object, *, where: str, what: str) -> object:
 
 
 _NUCLEUS_KINDS = {
-    "silent": Silent,
-    "short": Short,
-    "long": Long,
-    "silah": Silah,
-    "pausallong": PausalLong,
+    "silent": Nucleus.silent,
+    "short": Nucleus.short,
+    "long": Nucleus.long,
+    "silah": Nucleus.silah,
+    "pausallong": Nucleus.pausal_long,
 }
 
 
@@ -174,10 +166,10 @@ def _nucleus(raw: object, *, where: str) -> Nucleus:
             f"{where}: nucleus kind {raw['kind']!r} is outside the vocabulary "
             f"{sorted(_NUCLEUS_KINDS)}"
         )
-    if factory is Silent:
-        return Silent()
+    if kind == "silent":
+        return Nucleus.silent()
     quality = _enum(Quality, raw.get("quality"), where=where, what="Quality")
-    return factory(quality)  # type: ignore[operator]
+    return factory(quality)
 
 
 # ------------------------------------------------------------------- loading

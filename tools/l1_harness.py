@@ -41,10 +41,12 @@ def load_verses(script: str) -> dict[tuple[int, int], list[tuple[Location, str]]
 
 
 def describe(slot) -> str:
-    quality = getattr(slot.nucleus, "quality", None)
-    nucleus = slot.nucleus.kind.value + (f":{quality.value}" if quality else "")
+    nucleus = slot.nucleus
+    quality = nucleus.quality
+    shape = f"{nucleus.joined.form.value}>{nucleus.stopped.form.value}"
+    shape += f":{quality.value}" if quality else ""
     onset = "" if slot.onset.value == "plain" else f"/{slot.onset.value}"
-    return f"[{slot.letter.value}{onset} {nucleus}]"
+    return f"[{slot.letter.value}{onset} {shape}]"
 
 
 def compare(a, b) -> list[tuple[int, str, str, str]]:

@@ -246,12 +246,15 @@ For every combination of `text` and `grouping`:
 
 - **Under `grouping="cell"` no pairing splits a glyph**, every glyph supplying
   a realized long vowel's length and not its quality opens one, and no pairing
-  holds two glyphs supplying a consonant.
+  holds two glyphs each supplying a `letter` fact -- except a tanween's noon,
+  whose `letter` fact rides on the same glyph that supplies its host's vowel
+  (decisions.md section 3).
 - **The pairings partition the selected text's glyph array.** Every glyph
   appears in exactly one pairing, except those carrying the `Structural`
   spelling edge, which have none. The edge decides this, never `kind`, and
-  `01-contract` item 19 is what makes the two agree: a tatweel and a stop sign
-  both carry the edge and both take no pairing.
+  `01-contract` item 19 is what makes the two agree: a stop sign carries the
+  edge and takes no pairing, while a tatweel carries `Decorates`, takes a
+  pairing, and owns nothing because it supplies nothing.
 - **The pairings and their gap pairings cover every sound exactly once in
   `sounds`.** A sound may appear in any number of `shares` lists.
 - A gap pairing has no glyphs of the selected text, exactly one owned sound,
@@ -293,14 +296,16 @@ guaranteed failure.
 | a vowel canonically long | a madd rule instance |
 | a vowel long in its stopped form, on a stopped word | a madd rule instance |
 | a vowel long in its joined form, on a joined word | a madd rule instance |
+| a word-final waw or yaa canonically short, immediately after the matching short damma or kasra, on a stopped word | `madd_tabii` |
 | a waw or yaa whose vowel is absent, after a short a, whose following letter the stop silences | `madd_leen` |
 | a sakin noon or a tanween, joined to a following consonant, and not itself vowelled by an iltiqa | one of the noon rules |
 | a sakin meem, joined to a following consonant | one of the meem rules |
 | a geminate noon or meem | `ghunnah_mushaddadah` |
 | two identical, close or homorganic consonants, the first sakin and joined to the second | an idgham rule |
+| a word-initial letter the noon, meem or adjacent-consonant tables would geminate against the letter before it, started on and not joined to it | `fakk_idgham` |
 | a definite article lam before a letter | `lam_shamsiyyah` or `lam_qamariyyah` |
-| a consonant that sounds only when started on, word-initial and started on | `hamza_wasl_start` |
-| a consonant that sounds only when started on, not started on or not word-initial | `hamza_wasl_elision` |
+| a consonant that sounds only when started on, word-initial and started on | `wasl_start` |
+| a consonant that sounds only when started on, not started on or not word-initial | `wasl_elision` |
 | two sakins meeting across a word boundary and joined | `iltiqa_shortening` or `iltiqa_kasra` |
 | a qalqala letter whose vowel is absent, or one a stop silenced, and not merged away | a qalqala rule at the right degree |
 | an istilaa letter, or a raa in a colouring context | `tafkheem` or `tarqeeq` |
@@ -315,6 +320,18 @@ guaranteed failure.
 The heavy ghunnah row is the ikhfaa's own: the rule already reads the letter
 that follows in order to fire, so it is the rule that sets the colour, and the
 row needs no second rule.
+
+The `fakk_idgham` row is the converse of the three rows above it, read
+backward: the same tables, checked against the letter before a word-initial
+position instead of the letter after a word-final one. "Started on and not
+joined to it" is load-bearing in both directions -- joined, the merger itself
+satisfies its own row and `fakk_idgham` does not fire, so the two rows are
+never both open on the same pair.
+
+The `madd_tabii` row for a word-final glide is a merger, not a direct
+realization: the glide is the source and the vowel it lengthens is the host,
+so the row is satisfied by the same occurrence a `MergedInto`/`Hosts` pair
+already carries and mints no second one.
 
 Sakt has no row, because it is not a rule. It is a fact of the word and its
 converse belongs with the boundary plan, which is where its data is short: the

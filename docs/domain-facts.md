@@ -276,7 +276,19 @@ phonemizer model.
   shape and is **not** one of them: its hamza is a radical of هاء, so it is
   muttasil. Only a lexicon separates the two.
 - Madd lazim kalimi mukhaffaf exists in exactly one Hafs word (ءَآلۡـَٰٔنَ,
-  10:51 & 10:91).
+  10:51 & 10:91). Madd lazim kalimi **muthaqqal** is the far commoner half —
+  a long vowel before a shadda in the same word, ٱلضَّآلِّينَ, دَآبَّةٍ,
+  ٱلْحَآقَّةُ. A geminate is a sakin plus a voweled letter, so it meets a madd
+  exactly as a written sukun does.
+- Which letter a stop lands on is not the last slot of the word. A tanween
+  noon is written after its letter and the stop drops it, so عَظِيمٌ stops on
+  the meem — that is what makes the ī before it 'arid, and the yaa of
+  قُرَيْشٍ a leen. And a stop silences only a **short** vowel: مُوسَىٰ and
+  قَوْلِى end long, nothing goes quiescent, and neither 'arid nor leen
+  applies ⏸.
+- The article doubles a sun noon (ٱلنَّاسِ), so that noon is a ghunnah
+  mushaddadah as much as the canonical one in ءَامَنَّا — 618 sites. A sun
+  **meem** does not exist; ٱلْمَغْضُوبِ keeps its lam.
 - At waqf, a munfasil reverts to tabii' (the next word never arrives) ⏸.
 - The dagger alef is an unconditional madd (always sounds). The maddah mark
   carries **no information of its own** — it is written over madds that the
@@ -344,6 +356,9 @@ phonemizer model.
   م = *miim* …): one written grapheme → a whole syllable of phonemes.
 - Within the spelled names, the ordinary rules apply *between* names: madd
   lazim (6) on the ل م س ك ع ص ن ق names, natural madd (2) on ح ي ط ه ر,
+  and ع alone reaches its lazim through a **leen** — *ʿayn* is fatha, sakin
+  yaa, sakin noon — so it is classified there rather than by the long-vowel
+  classifier (19:1 and 42:2),
   idgham/ikhfaa between a name's final noon/meem and the next name's first
   letter, boundary-dependent qalqala on صٓ's *d* (kubrā when stopped),
   tafkheem on the heavy names — plus two

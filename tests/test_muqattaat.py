@@ -13,14 +13,14 @@ OPENINGS = {
     "7:1": "ʔalifla:m̃i:msˤaˤ:dQ",       # الٓمٓصٓ
     "10:1": "ʔalifla:mrˤaˤ:",            # الٓر
     "13:1": "ʔalifla:m̃i:mrˤaˤ:",        # الٓمٓر
-    "19:1": "ka:fha:ja:ʕajŋsˤaˤ:dQ",     # كٓهيعٓصٓ
+    "19:1": "ka:fha:ja:ʕajŋsˤaˤ:dQ",    # كٓهيعٓصٓ
     "20:1": "tˤaˤ:ha:",                  # طه
     "26:1": "tˤaˤ:si:m̃i:m",             # طسٓمٓ
     "27:1": "tˤaˤ:si:n",                 # طسٓ
     "36:1": "ja:si:n",                   # يسٓ
     "38:1": "sˤaˤ:dQ",                   # صٓ
     "40:1": "ħa:mi:m",                   # حمٓ
-    "42:2": "ʕajŋsi:ŋqaˤ:f",             # عٓسٓقٓ
+    "42:2": "ʕajŋsi:ŋqaˤ:f",            # عٓسٓقٓ
     "50:1": "qaˤ:f",                     # قٓ
     "68:1": "nu:n",                      # نٓ
 }
@@ -78,3 +78,23 @@ def test_the_noon_of_the_opening_noon_stays_clear_before_the_waw(r):
     # a second reading merges it; supporting both is later work
     assert r.phonemes(1) == "nu:n"
     assert r.phonemes(2) == "walqaˤlami"
+
+
+@for_each_riwayah(NOON, ibtidaa=1, wasl=1)
+def test_the_opening_noon_takes_its_own_izhar_rather_than_none(r):
+    # نٓ closes on its own plain articulation; it neither merges into
+    # `وَٱلْقَلَمِ` nor takes a rule from it.
+    assert r.rules_on_sound(1, "n") == {"izhar"}
+    assert "madd_lazim" in r.rules_on_char(1, "ن")
+
+
+@for_each_riwayah(TA_SEEN, ibtidaa=1, wasl=1)
+def test_the_opening_noon_of_ta_seen_takes_its_own_izhar(r):
+    assert r.rules_on_sound(1, "n") == {"izhar"}
+
+
+@pytest.mark.parametrize("ref", ["2:1", "40:1"])
+def test_a_meem_final_opening_takes_its_own_izhar_shafawi(ref):
+    r = reading(Site(hafs=(ref, (1,))), ibtidaa=1, wasl=1)
+    assert r.rules_on_sound(1, "m") == {"izhar_shafawi"}
+    assert "madd_lazim" in r.rules_on_char(1, "م")

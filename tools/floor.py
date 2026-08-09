@@ -1,6 +1,6 @@
 """Run a gate harness and check its number against a ratchet floor/ceiling.
 
-Floors live in `.github/workflows/gates.yml` next to the job that checks them.
+Floors live in `tools/gates.py`, which is what CI runs.
 
 Run: python tools/floor.py cross|regression|l1 word|verse|- FLOOR
 """

@@ -15,6 +15,9 @@ def test_the_pronoun_haa_is_long_when_the_reading_carries_on(r):
     # لَّهُۥ
     assert r.phonemes(3) == "lahu:"
     assert r.silent(3) == frozenset()
+    # the drawn-out haa is named by its length, not by a rule of its own
+    assert "madd_tabii" in r.rules_on_char(3, "ۥ")
+    assert r.rules_on_sound(3, "u:") == {"madd_tabii"}
 
 
 @for_each_riwayah(LAHU, isolated=3)
@@ -22,6 +25,7 @@ def test_the_same_haa_loses_its_length_at_a_stop(r):
     # لَّهُۥ
     assert r.phonemes(3) == "lah"
     assert r.silent(3) == {"ُ", "ۥ"}
+    assert "madd_tabii" not in r.rules_on_char(3, "ۥ")
 
 
 @for_each_riwayah(HAWLAHU, ibtidaa=9, wasl=9)
@@ -43,6 +47,8 @@ def test_a_haa_with_kasra_is_drawn_out_when_joined_forward(r):
     # بِهِۦ
     assert r.phonemes(30) == "bihi:"
     assert r.silent(30) == frozenset()
+    assert "madd_tabii" in r.rules_on_char(30, "ۦ")
+    assert r.rules_on_sound(30, "i:") == {"madd_tabii"}
 
 
 @for_each_riwayah(BIHI, isolated=30)
@@ -71,6 +77,7 @@ def test_a_haa_after_a_quiescent_letter_gets_no_length(r):
     # فِيهِ
     assert r.phonemes(9) == "fi:hi"
     assert r.silent(9) == frozenset()
+    assert r.rules_on_char(9, "ه") == frozenset()
 
 
 @for_each_riwayah(FIHI, isolated=9)
@@ -85,6 +92,7 @@ def test_a_haa_before_a_quiescent_letter_gets_no_length(r):
     # أَنَّهُ
     assert r.phonemes(16) == "ʔañahu"
     assert r.silent(16) == frozenset()
+    assert r.rules_on_char(16, "ه") == frozenset()
 
 
 @for_each_riwayah(ANNAHU, isolated=16)

@@ -13,6 +13,7 @@ public projection API out of scope. This is that API.
 | [07](07-rules.md) | Rules | Every rule with its source, trigger and host, the teaching labels, and where a letter and a sound relate to a rule differently |
 | [08](08-legacy-parity.md) | Legacy parity | The shipped per-character cell schema read column by column against the contract |
 | [09](09-open-questions.md) | Open questions | What four adversarial reviews found that this set has not settled, and what would settle each |
+| [units](units/README.md) | The work | The 40 items batched into 22 units in dependency order, what each may move, and the decisions taken before any of them started |
 
 Scope: Uthmani, Hafs. IndoPak is deferred and nothing here depends on it.
 

@@ -8,7 +8,7 @@ from __future__ import annotations
 from collections.abc import Iterable
 
 from ..model.address import SlotId
-from ..model.canon import CLASSIFICATION_ONLY, FAMILY_OF, RuleFamily, Score
+from ..model.canon import CLASSIFICATION_ONLY, Rule, Score
 from ..model.inscription import Attests, Decorates, Evidences, Inscription
 from ..model.performance import (
     Aspect,
@@ -16,6 +16,8 @@ from ..model.performance import (
     Inserted,
     MergedInto,
     Performance,
+    Recolours,
+    SetsLength,
     Silent,
 )
 from .run import has_content
@@ -31,6 +33,7 @@ def check_performance(performance: Performance, score: Score) -> None:
     _every_aspect_with_content_is_accounted_for(performance, score)
     _every_merge_has_its_host(performance)
     _every_occurrence_produced_or_declared(performance)
+    _every_modifier_resolves(performance)
 
 
 def _every_sound_is_hosted_once(performance: Performance) -> None:
@@ -61,11 +64,11 @@ def _every_attribution_resolves(performance: Performance) -> None:
             f"produced it."
         )
     for attribution in performance.attributions:
-        if attribution.by not in known:
+        if attribution.by is not None and attribution.by not in known:
             raise LawError(
                 f"P2: attribution cites occurrence {attribution.by}, which "
                 f"does not exist. No sound exists except as the output of a "
-                f"named occurrence."
+                f"named occurrence, or as the Score's own unclaimed default."
             )
 
 
@@ -82,8 +85,8 @@ def _every_aspect_with_content_is_accounted_for(
             if has_content(slot, aspect) and (slot.id, aspect) not in covered:
                 raise LawError(
                     f"P3: {slot.id} {aspect.value} has canonical content "
-                    f"({slot.letter.value}, {slot.nucleus.kind.value}) but no "
-                    f"attribution and no explicit Silent edge"
+                    f"({slot.letter.value}, {slot.nucleus.joined.form.value}) "
+                    f"but no attribution and no explicit Silent edge"
                 )
 
 
@@ -105,8 +108,11 @@ def _every_merge_has_its_host(performance: Performance) -> None:
 
 def _every_occurrence_produced_or_declared(performance: Performance) -> None:
     # A `Silent` edge counts as production: deleting a sound for a stated
-    # reason (waqf ending, wasl elision) is a legitimate output.
+    # reason (waqf ending, wasl elision) is a legitimate output. A modifier
+    # counts too: a `Recolours`/`SetsLength`/`Classifies` edge is the rule's
+    # own output just as much as a `Hosts` edge is.
     producing = {attribution.by for attribution in performance.attributions}
+    producing |= {modifier.by for modifier in performance.modifiers}
     for occurrence in performance.occurrences:
         if occurrence.id in producing:
             continue
@@ -116,6 +122,37 @@ def _every_occurrence_produced_or_declared(performance: Performance) -> None:
             f"E4: occurrence {occurrence.id} ({occurrence.rule.value}) left no "
             f"attribution at all and is not declared classification-only"
         )
+
+
+def _every_modifier_resolves(performance: Performance) -> None:
+    # `Classifies` is exempt from the one-edge-per-sound count below: unlike
+    # a `Recolour`/`Relength`, which the Plan's own conflict detection keeps
+    # to one per (slot, aspect), independent facts may classify one sound
+    # more than once -- an imala vowel that is also `madd_arid_lil_sukun`.
+    known_sounds = {sound_id for sound_id, _ in performance.sounds}
+    known_occurrences = {occurrence.id for occurrence in performance.occurrences}
+    seen: dict[tuple[type, object], int] = {}
+    for modifier in performance.modifiers:
+        if modifier.sound not in known_sounds:
+            raise LawError(
+                f"P5: modifier cites sound {modifier.sound}, which does not "
+                f"exist"
+            )
+        if modifier.by not in known_occurrences:
+            raise LawError(
+                f"P5: modifier cites occurrence {modifier.by}, which does "
+                f"not exist"
+            )
+        if isinstance(modifier, (Recolours, SetsLength)):
+            key = (type(modifier), modifier.sound)
+            seen[key] = seen.get(key, 0) + 1
+    for (kind, sound_id), count in seen.items():
+        if count != 1:
+            raise LawError(
+                f"P5: sound {sound_id} carries {count} {kind.__name__} "
+                f"edges; an applied recolour or length change retains "
+                f"exactly one"
+            )
 
 
 def check_inscription(inscription: Inscription, score: Score) -> None:
@@ -142,23 +179,39 @@ def check_inscription(inscription: Inscription, score: Score) -> None:
                 )
 
 
+#: What a written shadda can witness: every merger the model recognises.
+#: `Attests` names no rule of its own, so the completeness law checks
+#: against this closed set instead of a model-level family.
+MERGER_RULES: frozenset[Rule] = frozenset({
+    Rule.IDGHAM_BI_GHUNNAH,
+    Rule.IDGHAM_BILA_GHUNNAH,
+    Rule.IDGHAM_SHAFAWI,
+    Rule.IDGHAM_MUTAMATHILAYN,
+    Rule.IDGHAM_MUTAQARIBAYN,
+    Rule.IDGHAM_MUTAJANISAYN_KAMIL,
+    Rule.IDGHAM_MUTAJANISAYN_NAQIS,
+    Rule.LAM_SHAMSIYYAH,
+    Rule.LAM_QAMARIYYAH,
+})
+
+
 def check_attestations(
-    attested: Iterable[tuple[SlotId, RuleFamily]],
+    attested: Iterable[SlotId],
     performance: Performance,
 ) -> list[str]:
-    """Every family a script attests must be produced by some occurrence.
+    """Every slot a script attests must be produced by some merger occurrence.
 
-    One-directional: an occurrence family with no matching attestation is
-    not an error. Returns disagreements instead of raising them individually.
+    One-directional: a merger with no matching attestation is not an error.
+    Returns disagreements instead of raising them individually.
     """
-    produced: dict[SlotId, set[RuleFamily]] = {}
+    produced: set[SlotId] = set()
     for occurrence in performance.occurrences:
-        family = FAMILY_OF[occurrence.rule]
-        for slot in occurrence.parts.slots:
-            produced.setdefault(slot, set()).add(family)
+        if occurrence.rule in MERGER_RULES:
+            produced.add(occurrence.parts.source)
+            if occurrence.parts.host is not None:
+                produced.add(occurrence.parts.host)
     return [
-        f"A1: {slot} attests {family.value} but no occurrence of that family "
-        f"names it (produced: {sorted(f.value for f in produced.get(slot, ()))})"
-        for slot, family in attested
-        if family not in produced.get(slot, set())
+        f"A1: {slot} is attested but no merger occurrence names it"
+        for slot in attested
+        if slot not in produced
     ]

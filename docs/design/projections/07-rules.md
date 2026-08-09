@@ -103,16 +103,21 @@ caused it, and for two of them it is the boundary plan rather than a unit.
 
 | Rule | Source | Trigger | Crosses | On the sound | Recited |
 |---|---|---|---|---|---|
-| `madd_tabii` | the unit whose vowel is long | - | never | sets the length | rows 16, 17, 26, 27 |
-| `madd_wajib_muttasil` | the unit whose vowel is long | the hamza in the same word | never | sets the length | as above |
-| `madd_jaiz_munfasil` | the unit whose vowel is long | the hamza that begins the next word | always | sets the length | as above, and row 2 when the plan stops |
-| `madd_lazim` | the unit whose vowel is long | the unit whose permanent sukun or gemination follows | never | sets the length | as above |
-| `madd_arid_lil_sukun` | the unit whose vowel is long | the unit the stop silenced | never | sets the length | as above |
+| `madd_tabii` | the unit whose vowel is long | - | never | hosts the merged vowel | rows 16, 17, 26, 27, 29 |
+| `madd_wajib_muttasil` | the unit whose vowel is long | the hamza in the same word | never | names the length | as above |
+| `madd_jaiz_munfasil` | the unit whose vowel is long | the hamza that begins the next word | always | names the length | as above, and row 2 when the plan stops |
+| `madd_lazim` | the unit whose vowel is long | the unit whose permanent sukun or gemination follows | never | names the length | as above |
+| `madd_arid_lil_sukun` | the unit whose vowel is long | the unit the stop silenced | never | names the length | as above |
 | `madd_leen` | the unit whose waw or yaa has no vowel and follows a short a | the unit the stop silenced | never | names the sound | unchanged |
 | `iltiqa_shortening` | the unit whose long vowel shortens | the sakin it met | always | sets the length to short | row 10 |
 
 `madd_leen` names rather than lengthens, because a leen is not a long vowel:
 its waw or yaa is silent and the vowel before it stays short.
+
+Row 29's `madd_tabii` is a merger rather than a direct realization, so its
+source is the glide that disappears -- a stopped word-final waw or yaa after
+its matching short vowel -- and the host is the unit whose vowel it lengthens,
+the same convention every merger uses.
 
 ### 2.4 Release
 
@@ -130,27 +135,32 @@ still states its own realization beside it.
 
 | Rule | Source | Trigger | Crosses | On the sound | Recited |
 |---|---|---|---|---|---|
-| `tafkheem` | the unit whose sound is heavy | - | never | makes the sound heavy, and the vowel of the same unit with it | unchanged |
+| `tafkheem` | the unit whose sound is heavy | inside the unit, except a divine name's lam, whose trigger is the vowel before it | may | makes the sound heavy, and the vowel of the same unit with it | unchanged |
 | `tarqeeq` | the unit whose raa is light | - | never | names the sound | unchanged |
-| `imala` | the unit whose vowel tilts | - | never | sets the vowel's quality | unchanged |
+| `imala` | the unit whose vowel tilts | - | never | names the vowel's quality | unchanged |
 | `tashil` | the unit whose hamza is eased | - | never | names the sound | unchanged |
 | `ishmam` | the unit the reciter rounds his lips on | - | never | produces nothing | unchanged |
 
 `tafkheem` is the only rule that names more than one sound of its own unit: the
 consonant is heavy and the vowel it governs is heavy with it, and both are
-sounds of the source. Its trigger is inside the unit, which is why the column
-is empty.
+sounds of the source. Its trigger is inside the unit for every letter but one.
+A divine name's lam is heavy unless a kasra precedes it, and that vowel can be
+in the previous word: عَهْدَ ٱللَّهِ reads `ʕ a h d a` then `lˤlˤ a: h i`, and the
+fatha deciding it belongs to the word before. The instance still names one
+unit; the trigger it does not publish is what crosses.
 
 ### 2.6 Boundary
 
 | Rule | Source | Trigger | Crosses | On the sound | Recited |
 |---|---|---|---|---|---|
-| `hamza_wasl_start` | the word-initial unit whose consonant sounds only when started on | - | never | hosts the consonant and its vowel | rows 13 and 24 |
-| `hamza_wasl_elision` | the same unit, not started on or not word-initial | - | never | silences both parts | row 6 |
+| `wasl_start` | the word-initial unit whose consonant sounds only when started on | - | never | hosts the consonant and its vowel | rows 13 and 24 |
+| `wasl_elision` | the same unit, not started on or not word-initial | - | never | silences both parts | row 6 |
 | `iltiqa_kasra` | the unit the reading vowels | - | always | hosts a vowel on a part the canon leaves absent | row 14 |
 | `pausal_sukun` | the unit whose part the stop takes | - | never | silences the part | rows 1, 12, 19, 20 |
 | `iwad` | a tanween's noon whose fathatan lengthens at a stop | - | never | silences the consonant | rows 15, 21, 28 |
 | `taa_marbuta_pausal` | the taa marbuta unit | - | never | realizes the letter as a haa | row 22 |
+| `fakk_idgham` | the word-initial unit a cross-word merger would have geminated | the letter before it, unjoined because the reading starts here | always | names the unit's own plain sound | row 9 |
+| `pausal_alif` | the unit whose seven-alif vowel is short when joined | - | never | sets the length to short | writes the carrier only when stopped |
 
 `pausal_sukun` reaches the most catalogue rows of any rule, and the reason is
 that it is one event with several spellings: the haraka it takes may be a
@@ -163,6 +173,13 @@ other three tanween at a stop lose their noon and write a sukun; a fathatan's
 noon becomes the length in front of it, so the unit before gains a long vowel
 where the others gain nothing. A rule named for what a stop takes may not be
 the rule for the one stop that takes nothing.
+
+`fakk_idgham` reads the same tables as the noon, meem and adjacent-consonant
+merge families, from the other side: a word-initial letter the merge would
+have geminated, checked against the letter before it regardless of whether
+this reading joins into it. It fires only where that check holds and the
+reading starts here instead, so it and the merger it mirrors never both fire
+on the same pair.
 
 `iltiqa_kasra` is the only rule that sounds a part the canon leaves absent, and
 the only one whose letter-level relation exists on one text and not the other.
@@ -217,7 +234,6 @@ happen.
 
 | Label | Holds when |
 |---|---|
-| `madd_iwad` | a madd on the unit before a noon that `iwad` silenced |
 | `madd_badal` | a madd on a unit whose letter is hamza, and whose length the canon states |
 | `silah` | a madd on a unit whose vowel is long joined and absent stopped |
 | `silah_kubra` | the same, where the rule is `madd_jaiz_munfasil` |
@@ -229,10 +245,10 @@ of a `madd_tabii`, so it names a configuration rather than setting one.
 `ibdal_hamza` is a rule and not on this list, because substituting a hamza for
 a vowel is an outcome. Madd badal is the length that follows it.
 
-`iwad` and `madd_iwad` are a rule and a label with nearly one name, and they
-are two things: the rule is what happened to the noon, the label is what to
-call the length beside it. The label is on the madd instance, the rule is on
-the noon, and neither claims the other's unit.
+`iwad`'s length is not a label. The engine folds it into the `iwad` occurrence
+itself -- its own `SetsLength` -- rather than minting a separate madd instance
+on the unit before the noon, so there is no madd instance to attach a label
+to. A consumer reads the length straight off `iwad`'s own edge.
 
 ---
 

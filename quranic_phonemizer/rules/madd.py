@@ -11,6 +11,7 @@ from ..engine.neighbourhood import Neighbourhood
 from ..engine.plan import (
     Length,
     MergeInto,
+    Phase,
     Plan,
     Realize,
     Relength,
@@ -20,16 +21,11 @@ from ..engine.plan import (
 from ..model.address import BoundaryPlan, SlotId
 from ..model.canon import Annotation
 from ..model.canon import CanonLetter as L
-from ..model.canon import NucleusKind, Onset, Phase, Quality, Rule
+from ..model.canon import Onset, Quality, Rule, SlotOrigin, VowelForm
 from ..model.performance import Aspect, Occurrence, Participants, Vowel
 
 #: Which glide lengthens which vowel.
 GLIDE_OF = {Quality.U: L.WAW, Quality.I: L.YA}
-
-#: Nuclei a stop leaves standing. Only a final short vowel drops.
-KEPT_AT_A_STOP = frozenset(
-    {NucleusKind.LONG, NucleusKind.SILAH, NucleusKind.PAUSAL_LONG}
-)
 
 
 @dataclass(frozen=True, slots=True)
@@ -48,18 +44,18 @@ class PausalGlide:
         slots = near.score.words[word].slots
         if not slots or slots[-1].id != at:
             return None
-        if plan.merged_away(at, Aspect.ONSET):
+        if plan.merged_away(at, Aspect.CONSONANT):
             # A glide the stop removed outright lengthens nothing.
             return None
         if slot.onset is Onset.GEMINATE:
             # A doubled glide is a consonant -- `ٱلْعَلِىُّ` ends `-iyy`, not `-ii`.
             return None
-        if slot.nucleus.kind in KEPT_AT_A_STOP:
+        if slot.nucleus.sounds_long:
             # A glide the stop cannot strip still carries its own vowel, so it
             # is a consonant: `نَسِيَا` ends `-iyaa`, not `-iiaa`.
             return None
         before = near.before(at)
-        if before is None or before.nucleus.kind is not NucleusKind.SHORT:
+        if before is None or not before.nucleus.is_short:
             return None
         if GLIDE_OF.get(before.nucleus.quality) is not slot.letter:
             return None
@@ -67,31 +63,32 @@ class PausalGlide:
             Occurrence(
                 mint(Rule.MADD_TABII, at),
                 Rule.MADD_TABII,
-                Participants((before.id, at)),
+                # The glide is the source; the vowel it merges into is the host.
+                Participants(source=at, host=before.id),
             ),
             (
                 # Realizes the merged sound itself, so both halves share one occurrence.
                 Realize(
                     before.id,
-                    Aspect.NUCLEUS,
+                    Aspect.VOWEL,
                     Vowel(before.nucleus.quality, long=True),
                 ),
-                MergeInto(at, Aspect.ONSET, before.id, Aspect.NUCLEUS),
+                MergeInto(at, Aspect.CONSONANT, before.id, Aspect.VOWEL),
             ),
         )
 
 
 @dataclass(frozen=True, slots=True)
-class IltiqaRepair:
+class IltiqaShortening:
     """Two sakins meet, so the madd letter shortens.
 
     Emits `Relength`, not a realization: the vowel is still plainly
     produced, only its length changes, so this rule owns no sound.
     """
 
-    rule: Rule = Rule.ILTIQA_REPAIR
+    rule: Rule = Rule.ILTIQA_SHORTENING
     phase: Phase = Phase.LENGTH
-    triggers: frozenset = frozenset({NucleusKind.LONG, NucleusKind.SILAH})
+    triggers: frozenset = frozenset({VowelForm.LONG})
 
     def look(
         self, near: Neighbourhood, plan: Plan, at: SlotId,
@@ -101,7 +98,7 @@ class IltiqaRepair:
         slot, word = near.slot(at), near.word_of(at)
         if slot is None or word is None:
             return None
-        if slot.nucleus.kind not in (NucleusKind.LONG, NucleusKind.SILAH):
+        if not (slot.nucleus.is_long or slot.nucleus.is_silah):
             return None
         slots = near.score.words[word].slots
         if not slots or slots[-1].id != at:
@@ -122,9 +119,9 @@ class IltiqaRepair:
             return None
         return Verdict(
             Occurrence(
-                mint(Rule.ILTIQA_REPAIR, at),
-                Rule.ILTIQA_REPAIR,
-                Participants((at, following.id)),
+                mint(Rule.ILTIQA_SHORTENING, at),
+                Rule.ILTIQA_SHORTENING,
+                Participants(at, following.id),
             ),
             (Relength(at, Length.SHORT),),
         )
@@ -133,25 +130,20 @@ class IltiqaRepair:
 def _opens_on_a_sakin(slot) -> bool:
     """A geminate consonant is a sakin plus a voweled one, so `ٱلَّذِى` meets a
     preceding madd with a sakin exactly as a written sukun would."""
-    return (
-        slot.nucleus.kind is NucleusKind.SILENT
-        or slot.onset is Onset.GEMINATE
-    )
+    return slot.nucleus.is_silent or slot.onset is Onset.GEMINATE
 
 
 @dataclass(frozen=True, slots=True)
 class MaddClass:
-    """Which madd this long vowel is -- one classifier, five outcomes.
+    """Which madd this long vowel is -- six outcomes, one classifier.
 
-    `MADD_TABII` is deliberately not emitted here: it is the default that
-    holds wherever none of the five outcomes applies.
+    `MADD_TABII` holds wherever none of the other five applies: an
+    ordinary canonically long vowel, and the seven alifs at a stop.
     """
 
     rule: Rule = Rule.MADD_LAZIM
     phase: Phase = Phase.LENGTH
-    triggers: frozenset = frozenset(
-        {NucleusKind.LONG, NucleusKind.PAUSAL_LONG, NucleusKind.SILAH}
-    )
+    triggers: frozenset = frozenset({VowelForm.LONG})
 
     def look(
         self, near: Neighbourhood, plan: Plan, at: SlotId,
@@ -161,14 +153,14 @@ class MaddClass:
         slot, word = near.slot(at), near.word_of(at)
         if slot is None or word is None:
             return None
-        if slot.nucleus.kind not in self.triggers:
+        if not slot.nucleus.sounds_long:
             return None
         slots = near.score.words[word].slots
         final = bool(slots) and slots[-1].id == at
 
         if final and boundaries.stopped_on(word):
-            # Nothing follows inside the word and the stop ends it; `WaqfEnding` owns the letter.
-            return None
+            # Nothing follows inside the word and the stop ends it; a silah's stopped form is absent rather than long, and takes no instance.
+            return None if slot.nucleus.is_silah else _tabii(slot, at, None)
 
         following = near.after(at)
         if following is None:
@@ -176,7 +168,7 @@ class MaddClass:
 
         if following.onset is Onset.WASL:
             # A joined wasl hamza is not there to lengthen for: the two sakins
-            # that meet behind it are `IltiqaRepair`'s, and it shortens.
+            # that meet behind it are `IltiqaShortening`'s, and it shortens.
             return None
 
         if following.letter is L.HAMZA:
@@ -188,15 +180,20 @@ class MaddClass:
             )
             return _classify(rule, at, following.id)
 
-        if following.nucleus.kind is NucleusKind.SILENT:
-            # A sakin already in the Score is permanent -- `ٱلضَّآلِّينَ` and any muqattaat letter ending in one. Lazim.
+        if _opens_on_a_sakin(following):
+            # A sakin already in the Score is permanent -- a written sukun in `الٓمٓ`, the first half of the shadda in `ٱلضَّآلِّينَ`. Lazim.
             return _classify(Rule.MADD_LAZIM, at, following.id)
 
-        after = near.after(following.id)
-        if after is None and boundaries.stopped_on(near.word_of(following.id)):
+        if _stop_makes_quiescent(near, following, boundaries):
             # Voweled in the Score, sakin only because the stop lands here -- aridah lissukun, same shape as lazim.
             return _classify(Rule.MADD_ARID_LIL_SUKUN, at, following.id)
-        return None
+        if slot.nucleus.is_pausal_long:
+            # Joined, a pausal alif's own vowel is canonically short --
+            # `PausalAlif` owns the length here, and this is not one of
+            # the six outcomes at all.
+            return None
+        # None of the five special outcomes: an ordinary long vowel.
+        return _tabii(slot, at, following.id)
 
 
 @dataclass(frozen=True, slots=True)
@@ -219,26 +216,60 @@ class MaddLeen:
         slot, word = near.slot(at), near.word_of(at)
         if slot is None or word is None:
             return None
-        if slot.nucleus.kind is not NucleusKind.SILENT:
+        if not slot.nucleus.is_silent:
             return None
         if slot.onset is Onset.GEMINATE:
             return None
         before = near.before(at)
-        if before is None or before.nucleus.kind is not NucleusKind.SHORT:
+        if before is None or not before.nucleus.is_short:
             return None
         if before.nucleus.quality is not Quality.A:
             return None
         following = near.after(at)
-        if following is None or not boundaries.stopped_on(word):
+        if following is None:
             return None
-        slots = near.score.words[word].slots
-        if not slots or slots[-1].id != following.id:
+        if following.nucleus.is_silent:
+            # `عٓ` spells out as a leen before a sakin the Score holds for
+            # good, so the length is obligatory rather than the stop's.
+            return _classify(Rule.MADD_LAZIM, at, following.id)
+        if not _stop_makes_quiescent(near, following, boundaries):
             # Only the letter the stop actually silences counts.
             return None
         return _classify(Rule.MADD_LEEN, at, following.id)
 
 
-def _classify(rule: Rule, at: SlotId, other: SlotId) -> Verdict:
+def _stop_makes_quiescent(near: Neighbourhood, slot, boundaries) -> bool:
+    """Is this the letter the stop silences? Last in its word but for a
+    tanween noon -- `عَظِيمٌ` stops on the meem -- and holding a short vowel
+    to lose: `مُوسَىٰ` ends long and the stop silences nothing."""
+    word = near.word_of(slot.id)
+    if word is None or not boundaries.stopped_on(word):
+        return False
+    if not slot.nucleus.is_short:
+        return False
+    letters = [
+        s for s in near.score.words[word].slots
+        if s.origin is not SlotOrigin.NUNATION
+    ]
+    return bool(letters) and letters[-1].id == slot.id
+
+
+def _classify(rule: Rule, at: SlotId, other: SlotId | None) -> Verdict:
     return Verdict(
-        Occurrence(mint(rule, at), rule, Participants((at, other))), ()
+        Occurrence(mint(rule, at), rule, Participants(at, other)), ()
+    )
+
+
+def _tabii(slot, at: SlotId, other: SlotId | None) -> Verdict:
+    """`MADD_TABII` cannot be classification-only, so it realizes the sound
+    the plain fill would have given it -- except a pausal alif, whose own
+    rule realizes it already, and only takes a length here."""
+    occurrence = Occurrence(
+        mint(Rule.MADD_TABII, at), Rule.MADD_TABII, Participants(at, other)
+    )
+    if slot.nucleus.is_pausal_long:
+        return Verdict(occurrence, (Relength(at, Length.LONG),))
+    return Verdict(
+        occurrence,
+        (Realize(at, Aspect.VOWEL, Vowel(slot.nucleus.quality, long=True)),),
     )

@@ -19,7 +19,6 @@ SUN_LETTERS = [
     ("2:16", 4, "ʔadˤdˤaˤla:lah"),    # ٱلضَّلَـٰلَةَ
     ("2:63", 6, "ʔatˤtˤu:rˤ"),        # ٱلطُّورَ
     ("2:35", 18, "ʔaðˤðˤaˤ:limi:n"),  # ٱلظَّـٰلِمِينَ
-    ("2:164", 7, "ʔallajl"),          # ٱلَّيْلِ
     ("2:24", 7, "ʔaña:rˤ"),           # ٱلنَّارَ
 ]
 
@@ -28,6 +27,23 @@ SUN_LETTERS = [
 def test_the_article_lam_merges_into_each_sun_letter(ref, word, expected):
     r = reading(Site(hafs=(ref, (word,))), isolated=word)
     assert r.phonemes(word) == expected
+    assert "lam_shamsiyyah" in r.rules_on_char(word, "ل")
+    # the prosthetic hamza and its fatha come first, then the doubled letter
+    merged = r.sounds(word)[2]
+    assert "lam_shamsiyyah" in r.rules_on_sound(word, merged)
+
+
+LAYL = Site(hafs=("2:164", (7,)))
+
+
+@for_each_riwayah(LAYL, isolated=7)
+def test_the_rasm_writes_one_lam_where_the_article_meets_a_lam(r):
+    """ٱلَّيْلِ. Both scripts draw the article's lam and the sun lam as one
+    lam under a shadda, so there is none to merge and none to colour: the
+    doubling is canonical and no rule names it. ٱللَّغْوِ draws both."""
+    assert r.phonemes(7) == "ʔallajl"
+    assert r.rules_on_char(7, "ل") == {"pausal_sukun"}
+    assert r.rules_on_sound(7, "ll") == frozenset()
 
 
 @for_each_riwayah(ARRAHMAN, ibtidaa=2, waqf=3)
@@ -36,3 +52,5 @@ def test_the_merged_lam_writes_nothing_when_the_word_before_joins(r):
     assert r.phonemes(2) == "ʔalˤlˤaˤ:hi"
     assert r.phonemes(3) == "rˤrˤaˤħma:n"
     assert r.silent(3) == {"ِ", "ٱ"}
+    assert "lam_shamsiyyah" in r.rules_on_char(3, "ل")
+    assert "lam_shamsiyyah" in r.rules_on_sound(3, "rˤrˤ")
