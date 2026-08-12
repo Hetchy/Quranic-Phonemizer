@@ -6,6 +6,8 @@ from .phonemize import (
     Phonemizer,
     PhonemizeResult,
     available_variants,
+    edges,
+    nodes,
     supported_riwayat,
     tajweed_rules,
 )
@@ -17,6 +19,8 @@ __all__: list[str] = [
     "PhonemizeResult",
     "VariantSelection",
     "available_variants",
+    "edges",
+    "nodes",
     "supported_riwayat",
     "tajweed_rules",
 ]

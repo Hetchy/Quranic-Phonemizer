@@ -12,7 +12,7 @@ from ..api import UnknownRiwayah, alphabet as load_alphabet, recitation
 from ..model.address import Script
 from ..orthography.write import pen_for
 from ..render.alphabet import EXTRA_PHONEMES
-from . import names
+from . import edges, names, nodes
 from .assemble import assemble
 from .document import PhonemizeResult, build_result
 from .labels import with_labels
@@ -82,6 +82,8 @@ __all__ = [
     "UnknownExtraPhoneme",
     "UnknownRiwayah",
     "available_variants",
+    "edges",
+    "nodes",
     "supported_riwayat",
     "tajweed_rules",
 ]

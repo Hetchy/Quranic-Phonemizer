@@ -60,12 +60,16 @@ def decoration_targets(glyphs, spellings) -> dict[int, int]:
 _RASM_KINDS = frozenset({nd.GlyphKind.BASE, nd.GlyphKind.SILENCE_SIGN})
 
 
-def _spelt_lengths(spellings) -> dict[int, int]:
-    """Unit -> the earliest glyph that writes its vowel length outright."""
+def _spelt_lengths(glyphs, spellings) -> dict[int, int]:
+    """Unit -> the earliest letter that writes its vowel length outright. A
+    seat draws no letter, so the yaa of `إِبْرَٰهِـۧمَ` is not rasm behind it."""
     out: dict[int, int] = {}
     for s in spellings:
-        if isinstance(s, ed.Supplies) and s.fact is ed.Fact.VOWEL_LENGTH:
-            out[s.unit] = min(out.get(s.unit, s.glyph), s.glyph)
+        if not isinstance(s, ed.Supplies) or s.fact is not ed.Fact.VOWEL_LENGTH:
+            continue
+        if glyphs[s.glyph].kind is nd.GlyphKind.TATWEEL:
+            continue
+        out[s.unit] = min(out.get(s.unit, s.glyph), s.glyph)
     return out
 
 
@@ -83,7 +87,7 @@ def silent_groups(glyphs, spellings, open_vowels, targets) -> list[list[int]]:
     `Witnesses` always sounds and is never a candidate; consecutive silent
     glyphs are one instance."""
     evidenced = {s.glyph for s in spellings if isinstance(s, ed.Supplies)}
-    spelt = _spelt_lengths(spellings)
+    spelt = _spelt_lengths(glyphs, spellings)
 
     groups: list[list[int]] = []
     for index, glyph in enumerate(glyphs):

@@ -59,6 +59,7 @@ PUBLIC_API = frozenset({
     "Option", "VariantSelection", "KhilafId",
     "Phonemizer", "PhonemizeResult", "UnknownExtraPhoneme", "UnknownRiwayah",
     "available_variants", "supported_riwayat", "tajweed_rules",
+    "edges", "nodes",
 })
 
 #: Imports whose only purpose is the side effect of importing them.
