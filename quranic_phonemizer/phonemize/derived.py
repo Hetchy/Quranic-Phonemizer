@@ -53,21 +53,45 @@ def decoration_targets(glyphs, spellings) -> dict[int, int]:
     return out
 
 
+#: Glyphs that write a letter or a silence rather than seating a vowel mark.
+#: One of these decorating a length some earlier glyph already wrote is rasm
+#: the reading spells without it -- the alif of `كَفَرُوا۟` beside its waw. A
+#: tatweel or a madd sign is not: it is part of how the vowel is written.
+_RASM_KINDS = frozenset({nd.GlyphKind.BASE, nd.GlyphKind.SILENCE_SIGN})
+
+
+def _spelt_lengths(spellings) -> dict[int, int]:
+    """Unit -> the earliest glyph that writes its vowel length outright."""
+    out: dict[int, int] = {}
+    for s in spellings:
+        if isinstance(s, ed.Supplies) and s.fact is ed.Fact.VOWEL_LENGTH:
+            out[s.unit] = min(out.get(s.unit, s.glyph), s.glyph)
+    return out
+
+
+def _writes_nothing(glyph, index, target, open_vowels, spelt) -> bool:
+    """Either the target seats no long vowel, or a glyph before this one
+    already wrote that length and this is the rasm beside it."""
+    if target not in open_vowels:
+        return True
+    written = spelt.get(target)
+    return written is not None and written < index and glyph.kind in _RASM_KINDS
+
+
 def silent_groups(glyphs, spellings, open_vowels, targets) -> list[list[int]]:
-    """A `Decorates` glyph whose target has no open vowel to seat answers to
-    no unit. `Witnesses` always sounds and is never a candidate; consecutive
-    silent glyphs are one instance."""
+    """A `Decorates` glyph that writes nothing answers to no unit.
+    `Witnesses` always sounds and is never a candidate; consecutive silent
+    glyphs are one instance."""
     evidenced = {s.glyph for s in spellings if isinstance(s, ed.Supplies)}
+    spelt = _spelt_lengths(spellings)
 
     groups: list[list[int]] = []
     for index, glyph in enumerate(glyphs):
-        silent = (
-            glyph.word is not None
-            and index not in evidenced
-            and index in targets
-            and targets[index] not in open_vowels
-        )
-        if not silent:
+        if glyph.word is None or index in evidenced or index not in targets:
+            continue
+        if not _writes_nothing(
+            glyph, index, targets[index], open_vowels, spelt
+        ):
             continue
         if groups and groups[-1][-1] == index - 1:
             groups[-1].append(index)

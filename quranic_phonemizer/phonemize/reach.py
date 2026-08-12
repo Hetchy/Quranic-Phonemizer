@@ -125,39 +125,10 @@ def cells_source(assembled: Assembled, included, reach) -> list[tuple[int, ...]]
     return [tuple(g) for g in groups]
 
 
-
-def supplied_lengths(assembled: Assembled) -> frozenset[int]:
-    """Units whose vowel length a glyph writes outright. A `Decorates` glyph
-    onto one of these is rasm the reading already spells: the alif of
-    `كَفَرُوا۟` beside the waw that carries the `u:`."""
-    return frozenset(
-        s.unit for s in assembled.spellings
-        if isinstance(s, ed.Supplies) and s.fact is ed.Fact.VOWEL_LENGTH
-    )
-
-
-#: Glyphs that write a letter or a silence rather than seating a vowel mark.
-#: One of these decorating a unit whose length is already supplied is rasm --
-#: the alif of `كَفَرُوا۟` beside its waw. A tatweel or a madd sign is not:
-#: it is part of how the vowel is written, and presents it.
-_RASM_KINDS = frozenset({nd.GlyphKind.BASE, nd.GlyphKind.SILENCE_SIGN})
-
-
-def presents(assembled: Assembled, glyph: int, entry,
-              supplied: frozenset[int]) -> bool:
-    """Does this reach entry present its part's sound, or only decorate it?"""
-    unit, part, fact = entry
-    if fact is not None or part is not ed.Part.VOWEL or unit not in supplied:
-        return True
-    return assembled.glyphs[glyph].kind not in _RASM_KINDS
-
-
 __all__ = [
     "Reach",
     "cells_recited",
     "cells_source",
-    "presents",
     "reach_recited",
     "reach_source",
-    "supplied_lengths",
 ]

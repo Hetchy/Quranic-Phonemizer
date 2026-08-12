@@ -150,13 +150,21 @@ class Reading:
         return tuple(self._phonemes[word - 1])
 
     def silent(self, word: int) -> frozenset[str]:
-        """The characters this reading writes and does not say."""
+        """The characters whose slot this reading silences."""
         slots = self._slots(word)
         return frozenset(
             self._chars[grapheme].char
             for letter in self._view.silent
             if letter.slot in slots
             for grapheme in letter.graphemes
+        )
+
+    def rasm_silent(self, word: int) -> frozenset[str]:
+        """The characters silent as rasm, spelling no slot to be silenced."""
+        return frozenset(
+            self._assembled.glyphs[glyph].char
+            for glyph in self._assembled.orthographic_silence
+            if self._assembled.glyphs[glyph].word == word - 1
         )
 
     def _char_of_unit(self, unit: int) -> str:

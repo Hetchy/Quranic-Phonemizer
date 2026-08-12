@@ -82,8 +82,11 @@ def test_the_alif_after_a_plural_waw_is_never_said(r):
 
 @for_each_riwayah(QALU, isolated=8)
 def test_the_same_alif_behind_a_plural_waw_that_carries_a_madd(r):
-    # قَالُوٓا۟
+    # قَالُوٓا۟ -- the madd sign is how the waw's length is written and says
+    # it with the waw; the alif behind them says nothing.
     assert r.phonemes(8) == "qaˤ:lu:"
+    assert r.rasm_silent(8) == {"ا", "۟"}
+    assert "madd_tabii" in r.rules_on_char(8, "ٓ")
 
 
 @for_each_riwayah(KHALAW, isolated=8)
@@ -110,8 +113,11 @@ def test_an_alif_written_inside_a_word_and_never_said(r):
 
 @for_each_riwayah(ARRIBA, isolated=20)
 def test_a_final_alif_that_adds_nothing_to_a_length_already_written(r):
-    # ٱلرِّبَوٰا۟
+    # ٱلرِّبَوٰا۟ -- the waw is the letter the length is written on, so the
+    # alif behind it is rasm the reading already spells.
     assert r.phonemes(20) == "ʔarriba:"
+    assert r.rasm_silent(20) == {"ا", "۟"}
+    assert "madd_tabii" in r.rules_on_char(20, "و")
 
 
 @for_each_riwayah(BIAYDIN, isolated=3)

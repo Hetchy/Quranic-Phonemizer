@@ -161,13 +161,9 @@ def _owners(assembled: Assembled, reach, seats: frozenset[int],
     return out
 
 
-def _presented_sounds(assembled, reach, glyph, sound_of_part, release_of_unit,
-                      supplied: frozenset[int]) -> set[int]:
+def _presented_sounds(reach, glyph, sound_of_part, release_of_unit) -> set[int]:
     out: set[int] = set()
-    for entry in reach.get(glyph, ()):
-        unit, part, _ = entry
-        if not rh.presents(assembled, glyph, entry, supplied):
-            continue
+    for unit, part, _ in reach.get(glyph, ()):
         sound = sound_of_part.get((unit, part))
         if sound is not None:
             out.add(sound)
@@ -193,14 +189,13 @@ def _silent_glyphs(assembled: Assembled, text: str, reach) -> set[int]:
     return out
 
 
-def _group_rules(assembled: Assembled, text, group, reach, rule_of_part,
-                 supplied: frozenset[int]) -> tuple[int, ...]:
+def _group_rules(assembled: Assembled, text, group, reach,
+                 rule_of_part, mute: frozenset[int]) -> tuple[int, ...]:
     rules: set[int] = set()
     for glyph in group:
-        for entry in reach.get(glyph, ()):
-            if not rh.presents(assembled, glyph, entry, supplied):
-                continue
-            rules |= rule_of_part.get((entry[0], entry[1]), frozenset())
+        if glyph not in mute:
+            for unit, part, _ in reach.get(glyph, ()):
+                rules |= rule_of_part.get((unit, part), frozenset())
         if text == "source" and glyph in assembled.orthographic_silence:
             rules.add(assembled.orthographic_silence[glyph])
     return tuple(sorted(rules))
@@ -240,7 +235,6 @@ def _pairings(assembled: Assembled, text, groups, reach) -> tuple[Pairing, ...]:
     }
 
     mute = _mute(assembled, text)
-    supplied = rh.supplied_lengths(assembled) if text == "source" else frozenset()
     owners = _owners(assembled, reach, _seats(assembled, text), mute)
     group_of_glyph = {g: i for i, group in enumerate(groups) for g in group}
     owner_group = [group_of_glyph.get(g) if g is not None else None for g in owners]
@@ -254,7 +248,7 @@ def _pairings(assembled: Assembled, text, groups, reach) -> tuple[Pairing, ...]:
         if kind == "real":
             out.append(_real_pairing(
                 assembled, text, groups[ref], owned[ref], reach, sound_of_part,
-                release_of_unit, rule_of_part, silent, mute, supplied,
+                release_of_unit, rule_of_part, silent, mute,
             ))
         else:
             rules = rule_of_part.get(primary.get(ref), frozenset())
@@ -264,19 +258,19 @@ def _pairings(assembled: Assembled, text, groups, reach) -> tuple[Pairing, ...]:
 
 
 def _real_pairing(assembled, text, group, owned, reach, sound_of_part,
-                  release_of_unit, rule_of_part, silent, mute, supplied) -> Pairing:
+                  release_of_unit, rule_of_part, silent, mute) -> Pairing:
     presented: set[int] = set()
     for glyph in group:
         if glyph in mute:
             continue
         presented |= _presented_sounds(
-            assembled, reach, glyph, sound_of_part, release_of_unit, supplied
+            reach, glyph, sound_of_part, release_of_unit
         )
     return Pairing(
         glyphs=group, sounds=tuple(sorted(owned)),
         shares=tuple(sorted(presented - set(owned))),
         silent=tuple(g for g in group if g in silent),
-        rules=_group_rules(assembled, text, group, reach, rule_of_part, supplied),
+        rules=_group_rules(assembled, text, group, reach, rule_of_part, mute),
     )
 
 
