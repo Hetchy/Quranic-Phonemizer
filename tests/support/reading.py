@@ -22,6 +22,7 @@ from quranic_phonemizer.phonemize import nodes as nd
 from quranic_phonemizer.phonemize.assemble import assemble
 from quranic_phonemizer.phonemize.document import phonemes as assembled_phonemes
 from quranic_phonemizer.phonemize.labels import with_labels
+from quranic_phonemizer.phonemize.pairing import alignment
 from quranic_phonemizer.phonemize.legacy_views import (
     anchored,
     graphemes_by_id,
@@ -159,11 +160,13 @@ class Reading:
             for grapheme in letter.graphemes
         )
 
-    def rasm_silent(self, word: int) -> frozenset[str]:
-        """The characters silent as rasm, spelling no slot to be silenced."""
+    def unsaid(self, word: int) -> frozenset[str]:
+        """The characters this reading writes and does not say."""
+        pairings = alignment(self._assembled, text="source", grouping="glyph")
         return frozenset(
             self._assembled.glyphs[glyph].char
-            for glyph in self._assembled.orthographic_silence
+            for pairing in pairings
+            for glyph in pairing.silent
             if self._assembled.glyphs[glyph].word == word - 1
         )
 

@@ -85,7 +85,7 @@ def test_the_same_alif_behind_a_plural_waw_that_carries_a_madd(r):
     # قَالُوٓا۟ -- the madd sign is how the waw's length is written and says
     # it with the waw; the alif behind them says nothing.
     assert r.phonemes(8) == "qaˤ:lu:"
-    assert r.rasm_silent(8) == {"ا", "۟"}
+    assert r.unsaid(8) == {"ا", "۟"}
     assert "madd_tabii" in r.rules_on_char(8, "ٓ")
 
 
@@ -116,7 +116,7 @@ def test_a_final_alif_that_adds_nothing_to_a_length_already_written(r):
     # ٱلرِّبَوٰا۟ -- the waw is the letter the length is written on, so the
     # alif behind it is rasm the reading already spells.
     assert r.phonemes(20) == "ʔarriba:"
-    assert r.rasm_silent(20) == {"ا", "۟"}
+    assert r.unsaid(20) == {"ل", "ا", "۟"}
     assert "madd_tabii" in r.rules_on_char(20, "و")
 
 

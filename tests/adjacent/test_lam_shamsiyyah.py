@@ -31,6 +31,8 @@ def test_the_article_lam_merges_into_each_sun_letter(ref, word, expected):
     # the prosthetic hamza and its fatha come first, then the doubled letter
     merged = r.sounds(word)[2]
     assert "lam_shamsiyyah" in r.rules_on_sound(word, merged)
+    # the lam is written and never said: the sun letter says it
+    assert "ل" in r.unsaid(word)
 
 
 LAYL = Site(hafs=("2:164", (7,)))

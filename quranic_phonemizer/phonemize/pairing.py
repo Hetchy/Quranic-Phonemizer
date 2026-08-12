@@ -119,31 +119,33 @@ def _mute(assembled: Assembled, text: str) -> frozenset[int]:
     return frozenset(assembled.orthographic_silence)
 
 
-def _seats(assembled: Assembled, text: str) -> frozenset[int]:
-    """Recitation writes no seat, so the recited text has none."""
+def _by_kind(assembled: Assembled, text: str, kind) -> frozenset[int]:
+    """Glyphs of one kind. Recitation writes no seat and no dagger alif, so
+    the recited text has neither."""
     if text != "source":
         return frozenset()
     return frozenset(
-        i for i, glyph in enumerate(assembled.glyphs)
-        if glyph.kind is nd.GlyphKind.TATWEEL
+        i for i, glyph in enumerate(assembled.glyphs) if glyph.kind is kind
     )
 
 
-def _owning_glyph(part: ed.Part, candidates: list, seats: frozenset[int]) -> int | None:
-    """Pick owning glyph: length before quality, then reading order. A seat
-    supplies nothing, so it sorts after every glyph that does."""
+def _owning_glyph(part: ed.Part, candidates: list, seats, harakas) -> int | None:
+    """Pick owning glyph: a carrier before a haraka, length before quality,
+    then reading order. A seat supplies nothing and sorts after all of them."""
     if not candidates:
         return None
     if part is ed.Part.VOWEL:
+        # A haraka writes the quality; when a carrier writes the vowel beside it -- the dagger alif of `ذَٰلِكَ` -- the carrier is the letter.
         return min(
             candidates,
-            key=lambda c: (c[0] in seats, _OWNER_RANK.get(c[1], 0), c[0]),
+            key=lambda c: (
+                c[0] in seats, c[0] in harakas, _OWNER_RANK.get(c[1], 0), c[0]
+            ),
         )[0]
     return min(candidates, key=lambda c: (c[0] in seats, c[0]))[0]
 
 
-def _owners(assembled: Assembled, reach, seats: frozenset[int],
-            mute: frozenset[int]) -> list[int | None]:
+def _owners(assembled: Assembled, reach, seats, harakas, mute) -> list[int | None]:
     """The owning glyph of every sound, `None` where no glyph of this text
     presents it -- a gap."""
     primary = {
@@ -156,7 +158,8 @@ def _owners(assembled: Assembled, reach, seats: frozenset[int],
         part_key = primary.get(index)
         candidates = by_part.get(part_key, []) if part_key else []
         out.append(
-            _owning_glyph(part_key[1], candidates, seats) if part_key else None
+            _owning_glyph(part_key[1], candidates, seats, harakas)
+            if part_key else None
         )
     return out
 
@@ -173,16 +176,18 @@ def _presented_sounds(reach, glyph, sound_of_part, release_of_unit) -> set[int]:
 
 
 def _silent_glyphs(assembled: Assembled, text: str, reach) -> set[int]:
+    """Glyphs the reading does not say: rasm it never spells, a part a rule
+    silenced, and a letter a merger absorbed into the one beside it."""
     if text == "recited":
         return set()
-    silent_parts = {
+    unsaid = {
         (a.unit, a.part) for a in assembled.attributions
-        if isinstance(a, ed.Silent)
+        if isinstance(a, (ed.Silent, ed.MergedInto))
     }
     out = set(assembled.orthographic_silence)
     for glyph, pairs in reach.items():
         if any(
-            (u, p) in silent_parts for u, p, fact in pairs
+            (u, p) in unsaid for u, p, fact in pairs
             if fact is not ed.Fact.CONSONANT
         ):
             out.add(glyph)
@@ -235,7 +240,12 @@ def _pairings(assembled: Assembled, text, groups, reach) -> tuple[Pairing, ...]:
     }
 
     mute = _mute(assembled, text)
-    owners = _owners(assembled, reach, _seats(assembled, text), mute)
+    owners = _owners(
+        assembled, reach,
+        _by_kind(assembled, text, nd.GlyphKind.TATWEEL),
+        _by_kind(assembled, text, nd.GlyphKind.HARAKA),
+        mute,
+    )
     group_of_glyph = {g: i for i, group in enumerate(groups) for g in group}
     owner_group = [group_of_glyph.get(g) if g is not None else None for g in owners]
     owned: list[list[int]] = [[] for _ in groups]
