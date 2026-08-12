@@ -326,8 +326,7 @@ class Rule(StrEnum):
 #: one a `Classifies` edge in place of an attribution, and only where it
 #: produced nothing. `ghunnah_mushaddadah` is here for the article's noon
 #: alone: `ٱلنَّاسِ` is doubled by a merger `lam_shamsiyyah` owns, and
-#: a merger's two edges belong to one occurrence. `ishmam` is here and gets
-#: neither edge, since it names no sound at all.
+#: a merger's two edges belong to one occurrence.
 CLASSIFICATION_ONLY: frozenset[Rule] = frozenset(
     {
         Rule.TARQEEQ,

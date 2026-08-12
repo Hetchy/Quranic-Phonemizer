@@ -21,6 +21,9 @@ MUSAA = Site(hafs=("20:9", (4,)))
 QAWLI = Site(hafs=("20:28", (2,)))
 ADDAALLEEN = Site(hafs=("1:7", (9,)))
 KAAHAYAAAINSAAD = Site(hafs=("19:1", (1,)))
+MIHAADAN = Site(hafs=("78:6", (4,)))
+AYNAN = Site(hafs=("2:60", (13,)))
+WAANA = Site(hafs=("6:163", (6,)))
 
 
 @for_each_riwayah(BIMA, isolated=10)
@@ -173,3 +176,26 @@ def test_a_leen_before_a_permanent_sakin_is_lazim_and_not_leen(r):
     assert r.phonemes(1) == "ka:fha:ja:ʕajŋsˤaˤ:dQ"
     assert "madd_lazim" in r.rules_on_char(1, "ع")
     assert "madd_leen" not in r.rules_on_char(1, "ع")
+
+
+@for_each_riwayah(MIHAADAN, isolated=4)
+def test_a_tanween_fath_lengthens_at_the_stop_and_silences_nothing(r):
+    """مِهَـٰدًا. The stop turns the tanween into the iwad alif, so the letter
+    it lands on is never quiescent and the madd before it stays plain."""
+    assert r.phonemes(4) == "miha:da:"
+    assert "madd_tabii" in r.rules_on_char(4, "ٰ")
+    assert "madd_arid_lil_sukun" not in r.rules_on_char(4, "ٰ")
+
+
+@for_each_riwayah(AYNAN, isolated=13)
+def test_a_leen_before_a_tanween_fath_is_no_leen_either(r):
+    # عَيْنًا -- the noon carries the iwad, so the yaa meets no sukun.
+    assert r.rules_on_char(13, "ي") == frozenset()
+
+
+@for_each_riwayah(WAANA, wasl=6)
+def test_a_pausal_alif_joined_is_short_and_separates_nothing(r):
+    """وَأَنَا۠ أَوَّلُ. Joined, the alif's own vowel is canonically short, so
+    the hamza opening the next word has no length to separate."""
+    assert r.phonemes(6) == "waʔana"
+    assert "madd_jaiz_munfasil" not in r.rules_on_char(6, "ا")

@@ -42,10 +42,12 @@ from .plan import (
     SoundFeature,
 )
 
-#: Which aspect a `CLASSIFICATION_ONLY` rule's `Classifies` edge names, for
-#: the rules that classify a sound at all -- `ishmam` classifies none.
+#: Which aspect a `CLASSIFICATION_ONLY` rule's `Classifies` edge names.
+#: `ishmam` names the letter it rides, not the vowel it rounds for -- that
+#: vowel is the one thing it does not sound.
 _CLASSIFIES_ASPECT: dict[Rule, Aspect] = {
     Rule.TARQEEQ: Aspect.CONSONANT,
+    Rule.ISHMAM: Aspect.CONSONANT,
     Rule.GHUNNAH_MUSHADDADAH: Aspect.CONSONANT,
     Rule.TASHIL: Aspect.CONSONANT,
     Rule.WASL_START: Aspect.CONSONANT,

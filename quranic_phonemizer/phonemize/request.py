@@ -1,17 +1,17 @@
 """A public `ref` to the words it addresses.
 
 `corpus.locations` rejects a ref outside the corpus or of mixed depth; this
-adds the one guard that needs the ledger: no clipping a whole word of it.
+adds the one guard that needs the ledger: no clipping a verse it counts into.
 """
 from __future__ import annotations
 
-from ..canon.ledger import Ledger, WordSlot
+from ..canon.ledger import Ledger, VerseSlot
 from ..corpus import PackedCorpus
-from ..model.address import Location
+from ..model.address import Location, VerseRef
 
 
-class ClippedLedgerWordError(ValueError):
-    """A sub-verse range would drop a word the ledger authors a fact for."""
+class ClippedLedgerVerseError(ValueError):
+    """A sub-verse range would break a verse-scoped ledger ordinal."""
 
 
 def resolve_words(
@@ -19,34 +19,36 @@ def resolve_words(
 ) -> tuple[Location, ...]:
     """The words `ref` addresses, in reading order."""
     locations = corpus.locations(ref)
-    _guard_ledger_words(locations, ledger)
+    _guard_clipped_verses(corpus, ledger, locations)
     return locations
 
 
-def _guard_ledger_words(
-    locations: tuple[Location, ...], ledger: Ledger
+def _guard_clipped_verses(
+    corpus: PackedCorpus, ledger: Ledger, locations: tuple[Location, ...]
 ) -> None:
-    """A sub-verse range that touches a verse must not drop one of its
-    ledger-addressed words: the ledger's fact is authored for that whole
-    word, not for whichever part of the verse a range happens to keep."""
-    selected = frozenset(locations)
-    verses = frozenset(location.verse for location in locations)
-    dropped = sorted(
-        word
-        for word in _word_slot_locations(ledger)
-        if word.verse in verses and word not in selected
-    )
-    if dropped:
-        raise ClippedLedgerWordError(
-            f"the range excludes {dropped[0]}, which the riwayah's ledger "
-            f"addresses as a whole word; request all of {dropped[0].verse} "
-            f"or none of it"
-        )
+    """A verse-scoped ordinal counts slots from the verse's first word, so a
+    range keeping only part of that verse resolves it against the wrong slot.
+    A word-scoped entry clips freely: a word the range drops is never built.
+    """
+    addressed = _verse_slot_verses(ledger)
+    if not addressed:
+        return
+    kept: dict[VerseRef, int] = {}
+    for location in locations:
+        kept[location.verse] = kept.get(location.verse, 0) + 1
+    for verse in sorted(addressed & kept.keys()):
+        whole = corpus.surah_info[str(verse.surah)][verse.ayah - 1]
+        if kept[verse] != whole:
+            raise ClippedLedgerVerseError(
+                f"the range keeps {kept[verse]} of {verse}'s {whole} words, "
+                f"and the riwayah's ledger counts slots from that verse's "
+                f"first word; request all of {verse} or none of it"
+            )
 
 
-def _word_slot_locations(ledger: Ledger) -> frozenset[Location]:
+def _verse_slot_verses(ledger: Ledger) -> frozenset[VerseRef]:
     return frozenset(
-        entry.ref.location
+        entry.ref.verse
         for entry in (*ledger.supplies, *ledger.asserts)
-        if isinstance(entry.ref, WordSlot)
+        if isinstance(entry.ref, VerseSlot)
     )

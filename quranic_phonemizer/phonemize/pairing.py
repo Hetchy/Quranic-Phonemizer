@@ -1,7 +1,7 @@
 """`alignment(text, grouping)` aligns glyphs and sounds with optional grouping.
 
-Two texts and two groupings meet in one function; the `_cells_*` functions
-are the only place grouping matters, and `_reach_*` the only place text does.
+Two texts and two groupings meet in one function; `reach.py` owns both the
+reaching and the grouping, and everything here reads a reach.
 """
 from __future__ import annotations
 
@@ -9,24 +9,14 @@ from dataclasses import dataclass
 
 from . import edges as ed
 from . import nodes as nd
+from . import reach as rh
 from .assemble import Assembled
 
-#: A recited glyph's reach: the (part, fact) pairing the consonant side and
-#: the vowel side of a unit render as. `GlyphKind`s absent here (`tanween`,
-#: `small_vowel`, `structural`, `stop_sign`) never occur in `rendered`.
-_CONSONANT_KINDS = frozenset({nd.GlyphKind.BASE, nd.GlyphKind.SHADDA})
-_VOWEL_KINDS = frozenset({
-    nd.GlyphKind.HARAKA, nd.GlyphKind.SUKUN, nd.GlyphKind.VOWEL_LETTER,
-    nd.GlyphKind.MADD_SIGN,
-})
-
-_VOWEL_FACT = {ed.Fact.VOWEL_QUALITY, ed.Fact.VOWEL_LENGTH, ed.Fact.VOWEL_ABSENCE}
 #: Lower sorts first (length before quality). A `Decorates` reach (no fact)
 #: ranks with length: the iwad and the seven alifs carry a vowel's length
 #: with no canonical length fact to name it.
 _OWNER_RANK = {ed.Fact.VOWEL_QUALITY: 1}
 
-Reach = tuple[tuple[int, ed.Part, ed.Fact | None], ...]
 
 
 @dataclass(frozen=True, slots=True)
@@ -48,7 +38,7 @@ def alignment(
         raise ValueError(f"grouping must be 'glyph' or 'cell', got {grouping!r}")
 
     glyphs = assembled.glyphs if text == "source" else assembled.rendered
-    reach = _reach_recited(assembled) if text == "recited" else _reach_source(assembled)
+    reach = rh.reach_recited(assembled) if text == "recited" else rh.reach_source(assembled)
     included = (
         _non_structural_source(assembled) if text == "source"
         # `rendered` carries no spelling edges; its own `word` is exactly
@@ -57,8 +47,8 @@ def alignment(
     )
 
     groups = (
-        _cells_source(assembled, included, reach) if text == "source"
-        else _cells_recited(assembled, included, reach)
+        rh.cells_source(assembled, included, reach) if text == "source"
+        else rh.cells_recited(assembled, included, reach)
     ) if grouping == "cell" else [(i,) for i in included]
 
     return _pairings(assembled, text, groups, reach)
@@ -69,109 +59,6 @@ def _non_structural_source(assembled: Assembled) -> list[int]:
     `word` is not this law, even where it agrees."""
     structural = {s.glyph for s in assembled.spellings if isinstance(s, ed.Structural)}
     return [i for i in range(len(assembled.glyphs)) if i not in structural]
-
-
-# --------------------------------------------------------------------- reach
-
-def _reach_recited(assembled: Assembled) -> dict[int, Reach]:
-    out: dict[int, Reach] = {}
-    for i, glyph in enumerate(assembled.rendered):
-        unit = glyph.unit
-        if unit is None:
-            continue
-        if glyph.kind in _CONSONANT_KINDS:
-            out[i] = ((unit, ed.Part.CONSONANT, None),)
-        elif glyph.kind in _VOWEL_KINDS:
-            out[i] = ((unit, ed.Part.VOWEL, None),)
-    return out
-
-
-def _reach_source(assembled: Assembled) -> dict[int, Reach]:
-    out: dict[int, list] = {}
-    for s in assembled.spellings:
-        match s:
-            case ed.Supplies(glyph=g, unit=u, fact=f) if f in _VOWEL_FACT:
-                out.setdefault(g, []).append((u, ed.Part.VOWEL, f))
-            case ed.Supplies(glyph=g, unit=u, fact=f):
-                out.setdefault(g, []).append((u, ed.Part.CONSONANT, f))
-            case ed.Witnesses(glyph=g, unit=u):
-                out.setdefault(g, []).append((u, ed.Part.CONSONANT, None))
-            case ed.Decorates(glyph=g):
-                target = assembled.decoration_target.get(g)
-                if target is not None and target in assembled.open_vowel_units:
-                    out.setdefault(g, []).append((target, ed.Part.VOWEL, None))
-    return {g: tuple(pairs) for g, pairs in out.items()}
-
-
-# -------------------------------------------------------------------- cells
-
-def _cells_recited(assembled: Assembled, included, reach) -> list[tuple[int, ...]]:
-    """A recited haraka is always its unit's whole carrier when the vowel
-    is long, so an open unit's own vowel glyph never joins the consonant."""
-    groups: list[list[int]] = []
-    vowel_cell: dict[int, int] = {}
-    consonant_cell: dict[int, int] = {}
-    for i in included:
-        unit, part, _ = reach[i][0]
-        cells = (
-            vowel_cell if part is ed.Part.VOWEL and unit in assembled.open_vowel_units
-            else consonant_cell
-        )
-        group = cells.get(unit)
-        if group is None:
-            group = len(groups)
-            groups.append([])
-            cells[unit] = group
-        groups[group].append(i)
-        if part is ed.Part.CONSONANT:
-            consonant_cell.setdefault(unit, group)
-    return [tuple(g) for g in groups]
-
-
-def _carrier_units(reach) -> frozenset[int]:
-    """Units some glyph presents a vowel for otherwise than by quality: a
-    dedicated length mark, or a `Decorates` glyph. A bare quality fact never
-    qualifies alone -- there is no carrier to part it from."""
-    return frozenset(
-        unit for pairs in reach.values() for unit, part, fact in pairs
-        if part is ed.Part.VOWEL and fact is not ed.Fact.VOWEL_QUALITY
-    )
-
-
-def _cells_source(assembled: Assembled, included, reach) -> list[tuple[int, ...]]:
-    """Group glyphs by unit and vowel/consonant; chain decorations together."""
-    carriers = _carrier_units(reach)
-    groups: list[list[int]] = []
-    vowel_cell: dict[int, int] = {}
-    consonant_cell: dict[int, int] = {}
-    chain_target = None
-    for i in included:
-        pairs = reach.get(i, ())
-        if not pairs:
-            target = assembled.decoration_target.get(i)
-            if groups and chain_target is not None and chain_target == target:
-                groups[-1].append(i)
-            else:
-                groups.append([i])
-            chain_target = target
-            continue
-        chain_target = None
-        unit, part, _ = pairs[0]
-        open_vowel = (
-            part is ed.Part.VOWEL and unit in assembled.open_vowel_units
-            and unit in carriers
-        )
-        cells = vowel_cell if open_vowel else consonant_cell
-        group = cells.get(unit)
-        if group is None:
-            group = len(groups)
-            groups.append([])
-            cells[unit] = group
-        groups[group].append(i)
-        for u, p, _ in pairs:
-            if p is ed.Part.CONSONANT:
-                consonant_cell.setdefault(u, group)
-    return [tuple(g) for g in groups]
 
 
 # ----------------------------------------------------------------- pairings
@@ -274,9 +161,13 @@ def _owners(assembled: Assembled, reach, seats: frozenset[int],
     return out
 
 
-def _presented_sounds(reach, glyph, sound_of_part, release_of_unit) -> set[int]:
+def _presented_sounds(assembled, reach, glyph, sound_of_part, release_of_unit,
+                      supplied: frozenset[int]) -> set[int]:
     out: set[int] = set()
-    for unit, part, _ in reach.get(glyph, ()):
+    for entry in reach.get(glyph, ()):
+        unit, part, _ = entry
+        if not rh.presents(assembled, glyph, entry, supplied):
+            continue
         sound = sound_of_part.get((unit, part))
         if sound is not None:
             out.add(sound)
@@ -302,11 +193,14 @@ def _silent_glyphs(assembled: Assembled, text: str, reach) -> set[int]:
     return out
 
 
-def _group_rules(assembled: Assembled, text, group, reach, rule_of_part) -> tuple[int, ...]:
+def _group_rules(assembled: Assembled, text, group, reach, rule_of_part,
+                 supplied: frozenset[int]) -> tuple[int, ...]:
     rules: set[int] = set()
     for glyph in group:
-        for unit, part, _ in reach.get(glyph, ()):
-            rules |= rule_of_part.get((unit, part), frozenset())
+        for entry in reach.get(glyph, ()):
+            if not rh.presents(assembled, glyph, entry, supplied):
+                continue
+            rules |= rule_of_part.get((entry[0], entry[1]), frozenset())
         if text == "source" and glyph in assembled.orthographic_silence:
             rules.add(assembled.orthographic_silence[glyph])
     return tuple(sorted(rules))
@@ -346,6 +240,7 @@ def _pairings(assembled: Assembled, text, groups, reach) -> tuple[Pairing, ...]:
     }
 
     mute = _mute(assembled, text)
+    supplied = rh.supplied_lengths(assembled) if text == "source" else frozenset()
     owners = _owners(assembled, reach, _seats(assembled, text), mute)
     group_of_glyph = {g: i for i, group in enumerate(groups) for g in group}
     owner_group = [group_of_glyph.get(g) if g is not None else None for g in owners]
@@ -359,7 +254,7 @@ def _pairings(assembled: Assembled, text, groups, reach) -> tuple[Pairing, ...]:
         if kind == "real":
             out.append(_real_pairing(
                 assembled, text, groups[ref], owned[ref], reach, sound_of_part,
-                release_of_unit, rule_of_part, silent, mute,
+                release_of_unit, rule_of_part, silent, mute, supplied,
             ))
         else:
             rules = rule_of_part.get(primary.get(ref), frozenset())
@@ -369,17 +264,19 @@ def _pairings(assembled: Assembled, text, groups, reach) -> tuple[Pairing, ...]:
 
 
 def _real_pairing(assembled, text, group, owned, reach, sound_of_part,
-                  release_of_unit, rule_of_part, silent, mute) -> Pairing:
+                  release_of_unit, rule_of_part, silent, mute, supplied) -> Pairing:
     presented: set[int] = set()
     for glyph in group:
         if glyph in mute:
             continue
-        presented |= _presented_sounds(reach, glyph, sound_of_part, release_of_unit)
+        presented |= _presented_sounds(
+            assembled, reach, glyph, sound_of_part, release_of_unit, supplied
+        )
     return Pairing(
         glyphs=group, sounds=tuple(sorted(owned)),
         shares=tuple(sorted(presented - set(owned))),
         silent=tuple(g for g in group if g in silent),
-        rules=_group_rules(assembled, text, group, reach, rule_of_part),
+        rules=_group_rules(assembled, text, group, reach, rule_of_part, supplied),
     )
 
 

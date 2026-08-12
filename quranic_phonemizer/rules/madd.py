@@ -171,6 +171,12 @@ class MaddClass:
             # that meet behind it are `IltiqaShortening`'s, and it shortens.
             return None
 
+        if slot.nucleus.is_pausal_long:
+            # Joined, a pausal alif's own vowel is canonically short, so there
+            # is no length here to classify -- `وَأَنَا۠ أَوَّلُ` separates
+            # nothing. `PausalAlif` owns the stopped reading.
+            return None
+
         if following.letter is L.HAMZA:
             # Muttasil in the same word, munfasil across a boundary -- and a particle the rasm joined is a boundary the writing does not show.
             rule = (
@@ -187,11 +193,6 @@ class MaddClass:
         if _stop_makes_quiescent(near, following, boundaries):
             # Voweled in the Score, sakin only because the stop lands here -- aridah lissukun, same shape as lazim.
             return _classify(Rule.MADD_ARID_LIL_SUKUN, at, following.id)
-        if slot.nucleus.is_pausal_long:
-            # Joined, a pausal alif's own vowel is canonically short --
-            # `PausalAlif` owns the length here, and this is not one of
-            # the six outcomes at all.
-            return None
         # None of the five special outcomes: an ordinary long vowel.
         return _tabii(slot, at, following.id)
 
@@ -241,17 +242,20 @@ class MaddLeen:
 def _stop_makes_quiescent(near: Neighbourhood, slot, boundaries) -> bool:
     """Is this the letter the stop silences? Last in its word but for a
     tanween noon -- `عَظِيمٌ` stops on the meem -- and holding a short vowel
-    to lose: `مُوسَىٰ` ends long and the stop silences nothing."""
+    the stop takes rather than lengthens."""
     word = near.word_of(slot.id)
     if word is None or not boundaries.stopped_on(word):
         return False
     if not slot.nucleus.is_short:
         return False
-    letters = [
-        s for s in near.score.words[word].slots
-        if s.origin is not SlotOrigin.NUNATION
-    ]
-    return bool(letters) and letters[-1].id == slot.id
+    slots = near.score.words[word].slots
+    letters = [s for s in slots if s.origin is not SlotOrigin.NUNATION]
+    if not letters or letters[-1].id != slot.id:
+        return False
+    if slots[-1].origin is SlotOrigin.NUNATION:
+        # A tanween fath lengthens into the iwad alif rather than dropping, so `مِهَـٰدًا` silences nothing behind it. Damm and kasr simply go.
+        return slot.nucleus.quality is not Quality.A
+    return True
 
 
 def _classify(rule: Rule, at: SlotId, other: SlotId | None) -> Verdict:

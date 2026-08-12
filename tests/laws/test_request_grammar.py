@@ -4,10 +4,7 @@ from __future__ import annotations
 import pytest
 
 from quranic_phonemizer.model.address import Location
-from quranic_phonemizer.phonemize.request import (
-    ClippedLedgerWordError,
-    resolve_words,
-)
+from quranic_phonemizer.phonemize.request import resolve_words
 
 
 @pytest.mark.parametrize(
@@ -31,15 +28,17 @@ def test_a_ref_outside_the_corpus_raises(hafs):
         resolve_words(hafs.corpus, hafs.ledger, "999:1")
 
 
-def test_a_range_clipping_a_ledger_addressed_word_raises(hafs):
-    # 18:38 لَّـٰكِنَّا۠ -- the ledger addresses word 1 as a whole (seven alifs).
-    with pytest.raises(ClippedLedgerWordError):
-        resolve_words(hafs.corpus, hafs.ledger, "18:38:2-18:38:8")
-
-
 @pytest.mark.parametrize("ref", ["18:38", "18:38:1-18:38:8", "18:38:1"])
-def test_a_range_keeping_the_ledger_word_does_not_raise(hafs, ref):
+def test_a_range_keeping_the_ledger_word_resolves(hafs, ref):
+    # 18:38 لَّـٰكِنَّا۠ -- the ledger addresses word 1 as a whole (seven alifs).
     assert resolve_words(hafs.corpus, hafs.ledger, ref)[0] == Location(18, 38, 1)
+
+
+@pytest.mark.parametrize("ref", ["18:38:2-18:38:8", "3:81:1-3:81:13"])
+def test_a_range_clipping_a_ledger_word_resolves(hafs, ref):
+    """A word-scoped fact is authored for a word the clipped reading never
+    builds, so dropping it changes nothing about the words that remain."""
+    assert resolve_words(hafs.corpus, hafs.ledger, ref)
 
 
 def test_a_sub_verse_range_untouched_by_the_ledger_does_not_raise(hafs):
