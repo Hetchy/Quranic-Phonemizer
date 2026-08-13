@@ -89,6 +89,8 @@ Everything the riwayah knows is data under `quranic_phonemizer/data/`, not code:
 
 Adding a letter to the model is one entry per table. The four alphabet tables are total over their enums, checked at load.
 
-## In flight
+## The public surface
 
-`docs/design/projections/` specifies a public API that does not exist yet: `Phonemizer(...).phonemize(ref) -> PhonemizeResult`. `01-contract.md` section 9 is the work list, `02-gate.md` is the acceptance criterion, and `docs/design/projections/units/` batches the work and records the decisions already taken. Read `units/decisions.md` before touching anything the contract names.
+`Phonemizer(...).phonemize(ref) -> PhonemizeResult` is the whole entry point, and `tools/structure_lint.py`'s `PUBLIC_API` is the list. A result is nine index-addressed arrays — six of nodes (`words`, `glyphs`, `rendered`, `units`, `sounds`, `rules`) and three of edges (`spellings`, `attributions`, `modifiers`) — plus four projections over them: `phonemes`, `text`, `alignment(text=, grouping=)` and `respelling(grouping=)`. Every edge field is an integer index into one of those arrays, so a result is self-contained and copyable member by member. `edges` and `nodes` are exported so a consumer holding them can name what it is looking at.
+
+`docs/design/projections/` is the specification the surface was built to; `01-contract.md` is the contract and `02-gate.md` the acceptance criterion.
