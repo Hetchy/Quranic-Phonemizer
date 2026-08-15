@@ -145,12 +145,12 @@ def _merge(rule: Rule, at: SlotId, host, *, ghunnah: bool) -> Verdict:
 
 @dataclass(frozen=True, slots=True)
 class IkhfaaWeight:
-    """Ikhfaa haqiqi's hum is heavy before an istilaa letter, the same set
-    `Weight` reads for tafkheem -- its own edge, not a `TAFKHEEM` one."""
+    """Ikhfaa haqiqi's hum is heavy before an istilaa letter: the same set
+    `Weight` reads, naming the same rule it names."""
 
     followers: Followers
     always_heavy: frozenset[L] = frozenset()
-    rule: Rule = Rule.IKHFAA_HAQIQI
+    rule: Rule = Rule.TAFKHEEM
     phase: Phase = Phase.COLOUR
     triggers: frozenset = field(default=frozenset({L.NOON}))
 
@@ -168,8 +168,7 @@ class IkhfaaWeight:
             return None  # izhar, iqlab or idgham owns this pair instead
         return Verdict(
             Occurrence(
-                mint(Rule.IKHFAA_HAQIQI, at, variant=1), Rule.IKHFAA_HAQIQI,
-                Participants(at, following.id),
+                mint(Rule.TAFKHEEM, at), Rule.TAFKHEEM, Participants(at)
             ),
             (Recolour(at, Aspect.CONSONANT, SoundFeature.EMPHATIC, True),),
         )
