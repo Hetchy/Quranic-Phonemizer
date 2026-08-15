@@ -164,3 +164,15 @@ joining:
 
 190 words move, and they move in all four alignment views because a pairing
 names its rules; `respelling` holds still, its blocks naming no rule.
+
+## The two seen-default Seen/Saad words
+
+The granular Hafs khilaf catalogue makes `seen_sad_yabsut` and
+`seen_sad_bastah` default to `seen`, matching the small seen written above the
+saad. The `saad` reading remains selectable. This moves exactly 2:245:14 and
+7:69:22 from emphatic s in the frozen oracle to plain s by default.
+
+The regression word residue therefore moves from 61 to 63 words (99.921% to
+99.919%). In verse mode, the three sequence differences are these two words
+and the existing raa at 89:4, so the floor moves from 97.852% to 97.850%.
+Cross-script, roundtrip, attestation, and L1 do not move.

@@ -9,7 +9,7 @@ import dataclasses
 
 import pytest
 
-from quranic_phonemizer import Phonemizer, PhonemizeResult, available_variants
+from quranic_phonemizer import Phonemizer, PhonemizeResult
 from quranic_phonemizer import supported_riwayat, tajweed_rules
 from quranic_phonemizer.phonemize import edges as ed
 
@@ -68,12 +68,11 @@ def test_a_copied_result_projects_the_same():
     assert copy.respelling() == r.respelling()
 
 
-def test_identity_fields_are_seven_and_flat():
+def test_non_variant_identity_fields_are_flat():
     r = Phonemizer().phonemize("1:1")
     assert r.ref == "1:1"
     assert r.riwayah == "hafs"
     assert r.script == "uthmani"
-    assert isinstance(r.variant, dict)
     assert isinstance(r.extra_phonemes, frozenset)
     assert r.schema_version == "1"
     assert len(r.canon_digest) > 0
@@ -135,8 +134,6 @@ def test_every_glyph_names_a_word_or_carries_no_word_at_all():
 
 def test_module_functions_answer_without_an_instance():
     assert supported_riwayat() == ("hafs",)
-    variants = available_variants("hafs")
-    assert "raa_tafkheem" in variants and "seen_sad" in variants
     rules = tajweed_rules("hafs")
     identifiers = {row[0] for row in rules}
     assert "ikhfaa_haqiqi" in identifiers

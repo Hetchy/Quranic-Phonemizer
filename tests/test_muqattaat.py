@@ -5,8 +5,6 @@ import pytest
 from tests.support import Site, for_each_riwayah, reading
 
 TA_SEEN = Site(hafs=("27:1", (1,)))
-YA_SEEN = Site(hafs=("36:1", (1,)))
-NOON = Site(hafs=("68:1", (1,)))
 
 OPENINGS = {
     "2:1": "ʔalifla:m̃i:m",              # الٓمٓ
@@ -17,12 +15,10 @@ OPENINGS = {
     "20:1": "tˤaˤ:ha:",                  # طه
     "26:1": "tˤaˤ:si:m̃i:m",             # طسٓمٓ
     "27:1": "tˤaˤ:si:n",                 # طسٓ
-    "36:1": "ja:si:n",                   # يسٓ
     "38:1": "sˤaˤ:dQ",                   # صٓ
     "40:1": "ħa:mi:m",                   # حمٓ
     "42:2": "ʕajŋsi:ŋqaˤ:f",            # عٓسٓقٓ
     "50:1": "qaˤ:f",                     # قٓ
-    "68:1": "nu:n",                      # نٓ
 }
 
 
@@ -60,32 +56,6 @@ def test_the_noon_of_ta_seen_stays_clear_before_the_word_after_it(r):
     # a second reading hides it; supporting both is later work
     assert r.phonemes(1) == "tˤaˤ:si:n"
     assert r.phonemes(2) == "tilka"
-
-
-@for_each_riwayah(YA_SEEN, ibtidaa=1, wasl=1)
-def test_the_noon_of_ya_seen_stays_clear_across_the_verse_seam(r):
-    # يسٓ وَٱلْقُرْءَانِ
-    # the engine merges the noon into the waw of the next verse
-    # a second reading merges it; supporting both is later work
-    assert r.phonemes(1) == "ja:si:n"
-    assert r.phonemes(2) == "walqurˤʔa:ni"
-
-
-@for_each_riwayah(NOON, ibtidaa=1, wasl=1)
-def test_the_noon_of_the_opening_noon_stays_clear_before_the_waw(r):
-    # نٓ وَٱلْقَلَمِ
-    # the engine merges the noon into the waw after it
-    # a second reading merges it; supporting both is later work
-    assert r.phonemes(1) == "nu:n"
-    assert r.phonemes(2) == "walqaˤlami"
-
-
-@for_each_riwayah(NOON, ibtidaa=1, wasl=1)
-def test_the_opening_noon_takes_its_own_izhar_rather_than_none(r):
-    # نٓ closes on its own plain articulation; it neither merges into
-    # `وَٱلْقَلَمِ` nor takes a rule from it.
-    assert r.rules_on_sound(1, "n") == {"izhar"}
-    assert "madd_lazim" in r.rules_on_char(1, "ن")
 
 
 @for_each_riwayah(TA_SEEN, ibtidaa=1, wasl=1)

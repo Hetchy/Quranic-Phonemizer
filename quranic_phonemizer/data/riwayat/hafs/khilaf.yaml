@@ -1,52 +1,133 @@
-# Points of legitimate disagreement inside Hafs. A riwayah's khilaf is its
-# own: nothing here is shared, and another riwayah inherits none of it.
-#
-# Sites are keyed in the vocalised canonical notation `canon/passes.py`
-# already uses -- `ABJAD` letters, `~` for a geminate, a vowel letter for the
-# nucleus -- so one entry serves every script. Letters alone are not enough:
-# `فِرْقٍ` and `فَرِيقًا` spell the same five. Read from the Score, so a
-# vowel a stop removes is still in the key.
-#
-# `disputed_at` names the junction the dispute lives in. In the other one the
-# reading is settled and rules/tafkheem.py gives it.
-schema_version: 1
+# Scalar Hafs choices. Each ID applies to every form or location it covers.
+schema_version: 2
 
-# Five words whose quiescent raa is read both ways. Every other raa in the
-# Quran is settled by rule; these are the residue no rule reaches.
-#
-#   فِرْقٍ      the following qaaf is istilaa but carries a kasra of its own
-#   ٱلْقِطْرِ    the sakin taah before it is istilaa, the kasra before that is not
-#   مِصْرَ       the sakin saad before it is istilaa, the kasra before that is not
-#   نُذُرِ       a damma governs it once its own kasra is dropped
-#   يَسْرِ       a sakin seen before it, and a fatha before that
-raa_tafkheem:
-  فiرقiن:       {disputed_at: join, default: heavy}
-  ءaلقiطرi:     {disputed_at: stop, default: light}
-  مiصرa:        {disputed_at: stop, default: heavy}
-  بiمiصرa:      {disputed_at: stop, default: heavy}
-  وaنuذuرi:     {disputed_at: stop, default: heavy}
-  بiءaلنuذuرi:  {disputed_at: stop, default: heavy}
-  يaسرi:        {disputed_at: stop, default: light}
-  ءaسرi:        {disputed_at: stop, default: light}
-  فaءaسرi:      {disputed_at: stop, default: light}
+variants:
+  raa_firq_wasl:
+    kind: raa_weight
+    options: [heavy, light]
+    default: heavy
+    junction: wasl
+    forms: ["\u0641i\u0631\u0642i\u0646"]
+    source: research/hafs/syntheses/tafkheem_tarqeeq.md
 
-# Words the two readings vowel differently, so the Score itself differs and
-# the choice is made at build. `forms` lists every vocalised spelling either
-# wajh writes -- Uthmani prints one and IndoPak the other -- and `slot` is
-# which of the word's slots carries the vowel under dispute.
-#
-#   ضَعْف   30:54, three times. Both are narrated from Hafs.
-nucleus_vowel:
-  ضعف:
-    slot: 0
+  raa_alqitr_waqf:
+    kind: raa_weight
+    options: [light, heavy]
+    default: light
+    junction: waqf
+    forms: ["\u0621a\u0644\u0642i\u0637\u0631i"]
+    source: research/hafs/syntheses/tafkheem_tarqeeq.md
+
+  raa_misr_waqf:
+    kind: raa_weight
+    options: [heavy, light]
+    default: heavy
+    junction: waqf
+    forms: ["\u0645i\u0635\u0631a", "\u0628i\u0645i\u0635\u0631a"]
+    source: research/hafs/syntheses/tafkheem_tarqeeq.md
+
+  raa_nuthur_waqf:
+    kind: raa_weight
+    options: [heavy, light]
+    default: heavy
+    junction: waqf
+    forms: ["\u0648a\u0646u\u0630u\u0631i", "\u0628i\u0621a\u0644\u0646u\u0630u\u0631i"]
+    source: research/hafs/syntheses/tafkheem_tarqeeq.md
+
+  raa_yasr_waqf:
+    kind: raa_weight
+    options: [light, heavy]
+    default: light
+    junction: waqf
+    forms: ["\u064aa\u0633\u0631i"]
+    source: research/hafs/syntheses/tafkheem_tarqeeq.md
+
+  raa_asr_waqf:
+    kind: raa_weight
+    options: [light, heavy]
+    default: light
+    junction: waqf
+    forms: ["\u0621a\u0633\u0631i", "\u0641a\u0621a\u0633\u0631i"]
+    source: research/hafs/syntheses/tafkheem_tarqeeq.md
+
+  yaa_aatani_waqf:
+    kind: final_yaa
+    options: [hadhf, ithbat]
+    default: hadhf
+    junction: waqf
+    forms: ["\u0621a\u062aa\u0646i\u064aa"]
+    source: research/hafs/syntheses/waqf_ibtidaa.md
+
+  daaf_haraka:
+    kind: vowel
+    options: [fatha, damma]
     default: fatha
-    options: {fatha: a, damma: u}
-    forms: [ضaعفiن, ضuعفiن, ضaعفaن, ضuعفaن]
+    slot: 0
+    values: {fatha: a, damma: u}
+    forms: ["\u0636a\u0639\u0641i\u0646", "\u0636u\u0639\u0641i\u0646", "\u0636a\u0639\u0641a\u0646", "\u0636u\u0639\u0641a\u0646"]
+    source: research/hafs/syntheses/special_rules.md
 
-# The one word whose final yaa a reader may keep or drop at a pause. Both
-# scripts write it small where 19:30 writes the same word's yaa full, which
-# is the mark saying the letter is optional. Joined, it is always said.
-#
-#   ءَاتَىٰنَِۧ  27:36. hadhf gives aataan, ithbat aataanii.
-yaa_ithbat:
-  ءaتaنiيa: {disputed_at: stop, default: hadhf}
+  seen_sad_yabsut:
+    kind: letter
+    options: [seen, saad]
+    default: seen
+    slot: 3
+    values: {seen: seen, saad: sad}
+    locations: ["2:245:14"]
+    source: research/hafs/syntheses/special_rules.md
+
+  seen_sad_bastah:
+    kind: letter
+    options: [seen, saad]
+    default: seen
+    slot: 1
+    values: {seen: seen, saad: sad}
+    locations: ["7:69:22"]
+    source: research/hafs/syntheses/special_rules.md
+
+  seen_sad_al_musaytirun:
+    kind: letter
+    options: [saad, seen]
+    default: saad
+    slot: 3
+    values: {saad: sad, seen: seen}
+    locations: ["52:37:7"]
+    source: research/hafs/syntheses/special_rules.md
+
+  seen_sad_bimusaytir:
+    kind: letter
+    options: [saad, seen]
+    default: saad
+    slot: 2
+    values: {saad: sad, seen: seen}
+    locations: ["88:22:3"]
+    source: research/hafs/syntheses/special_rules.md
+
+  noon_yaseen_wasl:
+    kind: rule
+    options: [izhar, idgham]
+    default: izhar
+    junction: wasl
+    locations: ["36:1:1", "68:1:1"]
+    source: research/hafs/syntheses/noon_meem_rules.md
+
+  madd_lazim_tasheel:
+    kind: madd_tasheel
+    options: [madd_lazim, tasheel]
+    default: madd_lazim
+    locations: ["6:143:10", "6:144:8", "10:51:7", "10:91:1", "10:59:14", "27:59:9"]
+    source: research/hafs/syntheses/madd_rules.md
+
+  iqlab_nasal:
+    kind: nasal_place
+    options: [assimilated, bilabial]
+    default: assimilated
+    locations: [all_iqlab]
+    source: research/hafs/syntheses/noon_meem_rules.md
+
+  ikhfaa_shafawi_nasal:
+    kind: nasal_place
+    options: [assimilated, bilabial]
+    default: assimilated
+    locations: [all_ikhfaa_shafawi]
+    source: research/hafs/syntheses/noon_meem_rules.md

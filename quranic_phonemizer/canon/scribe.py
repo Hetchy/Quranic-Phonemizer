@@ -42,6 +42,13 @@ class Scribe:
         if offset >= 0 and subject is not None:
             self.evidences.append((offset, subject.uid, fact))
 
+    def withdraw_evidence(self, offset: int, subject, fact: SlotFact) -> None:
+        """Remove one interpretation of a glyph before replacing it."""
+        self.evidences = [
+            row for row in self.evidences
+            if row != (offset, subject.uid, fact)
+        ]
+
     def decoration(self, offset: int, subject) -> None:
         if offset >= 0 and subject is not None:
             self.decorates.append((offset, subject.uid))

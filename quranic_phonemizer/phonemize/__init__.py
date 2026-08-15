@@ -43,11 +43,13 @@ class Phonemizer:
             )
         script = Script(self.script) if self.script else names.DEFAULT_SCRIPT[riwayah]
         loaded = recitation(riwayah)
+        selection = names.to_selection(self.variants)
+        loaded.khilaf.validate(selection)
         object.__setattr__(self, "_recitation", loaded)
         object.__setattr__(self, "_script", script)
         object.__setattr__(self, "_alphabet", load_alphabet())
         object.__setattr__(self, "_pen", pen_for(loaded.inventory(script)))
-        object.__setattr__(self, "_selection", names.to_selection(self.variants))
+        object.__setattr__(self, "_selection", selection)
         object.__setattr__(self, "_extra", frozenset(self.extra_phonemes))
 
     def phonemize(

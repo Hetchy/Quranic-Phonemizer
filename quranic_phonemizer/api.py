@@ -81,6 +81,7 @@ class Recitation:
         right_context: Reading | None = None,
         provenance: Provenance | None = None,
     ) -> Built:
+        self.khilaf.validate(selection)
         return build(
             reading,
             lexicon=self.lexicon,

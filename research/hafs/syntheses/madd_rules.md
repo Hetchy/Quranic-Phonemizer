@@ -141,13 +141,19 @@ Madd letter + shaddah
 | الحَاقَّةُ   | 69:1  |
 ## B) Kalimi Mukhaffaf (كلمي مخفف)
 
-Madd letter + permanent sukoon (no shaddah)
+Hafs allows two ways at six locations in three word forms:
 
-| Word  | Ref   |
-| ----- | ----- |
-| آلآنَ | 10:51 |
+| Form       | References       | First option | Second option |
+| ---------- | ---------------- | ------------ | ------------- |
+| al-dhakrayn | 6:143, 6:144    | madd lazim   | tasheel       |
+| al-aan      | 10:51, 10:91    | madd lazim   | tasheel       |
+| al-lah      | 10:59, 27:59    | madd lazim   | tasheel       |
 
-Very rare (only two occurrences in Surah Yunus).
+The `madd_lazim` option keeps the long a. The `tasheel` option reads two
+hamzas, with the second hamza eased. This choice is the same in waqf and wasl;
+the boundary does not select or normalize either option. In `al-dhakrayn`,
+tasheel does not expose the article lam: lam-shamsiyyah assimilation remains,
+so the dhal remains doubled.
 
 ## C) Harfi (in Muqatta‘at)
 
@@ -157,13 +163,8 @@ Occurs in disjoint letters
 
 ## Exceptions
 
- Cannot be shortened
-
-Always 6
-
-No variation in Hafs
-
-So: no exception.
+Outside the six madd-lazim-or-tasheel locations above, madd lazim is not
+shortened.
 
 # Madd ‘Arid lil-Sukoon (مد عارض للسكون)
 هو أن يأتي بعد حرف المد سكون عارض بسبب الوقف.
@@ -249,7 +250,6 @@ Extended 2 harakat only.
 - المد المنفصل لا يُقصر في الأداء المشهور
 
 ---
-
 
 
 

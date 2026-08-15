@@ -23,13 +23,6 @@ HEAVY = {"heavy": True, "light": False}
 #: Whether a word-final yaa is still said once the stop has taken its vowel.
 KEPT = {"ithbat": True, "hadhf": False}
 
-#: The option set each sited point is read with.
-OPTIONS = {
-    KhilafId.RAA_TAFKHEEM: HEAVY,
-    KhilafId.YAA_ITHBAT: KEPT,
-}
-
-
 class KhilafError(ValueError):
     """An option name no rule can act on."""
 
@@ -51,6 +44,7 @@ def nasal_place(selection: VariantSelection, khilaf: KhilafId) -> CanonLetter:
 class Site:
     """One word of a khilaf that recurs word by word."""
 
+    khilaf: KhilafId
     at_stop: bool
     """The junction the dispute lives in; in the other one the reading is
     settled and the ordinary rule gives it."""
@@ -66,8 +60,8 @@ class SitedKhilaf:
     asked of different things, so they are one structure and not two.
     """
 
-    khilaf: KhilafId = KhilafId.RAA_TAFKHEEM
     sites: dict[str, Site] = field(default_factory=dict)
+    options: dict[KhilafId, dict[str, bool]] = field(default_factory=dict)
 
     def of(
         self, skeleton: str, stopped: bool, selection: VariantSelection
@@ -77,29 +71,16 @@ class SitedKhilaf:
         site = self.sites.get(skeleton)
         if site is None or site.at_stop is not stopped:
             return None
-        name = selection.chosen(self.khilaf, site=skeleton)
+        name = selection.chosen(site.khilaf)
         if name is None:
             return site.default
-        options = OPTIONS[self.khilaf]
+        options = self.options[site.khilaf]
         if name not in options:
             raise KhilafError(
-                f"{self.khilaf.value}: {name!r} is not an option; expected "
+                f"{site.khilaf.value}: {name!r} is not an option; expected "
                 f"one of {sorted(options)}"
             )
         return options[name]
-
-    def points(self) -> dict[str, dict[str, object]]:
-        """What a caller may choose, without reading the data file."""
-        options = OPTIONS[self.khilaf]
-        named = {value: name for name, value in options.items()}
-        return {
-            skeleton: {
-                "options": sorted(options),
-                "default": named[site.default],
-                "disputed_at": "stop" if site.at_stop else "join",
-            }
-            for skeleton, site in self.sites.items()
-        }
 
 
 def vocalised_word(word) -> str:

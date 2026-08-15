@@ -113,14 +113,14 @@ def lexeme_passes() -> tuple:
     `canon` supplies the shared two; spelling the muqattaat needs the
     opening and letter-name tables, so it is bound here instead.
     """
-    from ...canon.khilaf import apply_vowel_khilaf
+    from ...canon.khilaf import apply_canonical_khilaf
     from ...canon.passes import LEXEME_PASSES
     from ...canon.spell import spell_muqattaat
 
     return (
         *LEXEME_PASSES,
         spell_muqattaat(muqattaat()),
-        apply_vowel_khilaf(khilaf().vowel),
+        apply_canonical_khilaf(khilaf().canonical),
     )
 
 
