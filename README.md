@@ -415,13 +415,12 @@ print(available_variants("hafs")["iqlab_nasal"])
 ```
 
 ```
-['ikhfaa_shafawi_nasal', 'iqlab_nasal', 'nucleus_vowel', 'raa_tafkheem', 'seen_sad', 'yaa_ithbat']
+['daaf_haraka', 'ikhfaa_shafawi_nasal', 'iqlab_nasal', 'madd_lazim_tasheel', 'noon_yaseen_wasl', 'raa_alqitr_waqf', 'raa_asr_waqf', 'raa_firq_wasl', 'raa_misr_waqf', 'raa_nuthur_waqf', 'raa_yasr_waqf', 'seen_sad_al_musaytirun', 'seen_sad_bastah', 'seen_sad_bimusaytir', 'seen_sad_yabsut', 'yaa_aatani_waqf']
 {'options': ['assimilated', 'bilabial'], 'default': 'assimilated'}
 ```
 
-`seen_sad` is listed for completeness and has no sites in this build.
-
-`iqlab_nasal` and `ikhfaa_shafawi_nasal` take an option name directly, which applies everywhere the rule fires:
+Every variant takes one scalar option name. A grouped variant applies at all
+of its covered locations:
 
 ```python
 bilabial = Phonemizer(variants={"iqlab_nasal": "bilabial"})
@@ -437,10 +436,11 @@ m i ŋ b a ʕ d Q
 m i m̃ b a ʕ d Q
 ```
 
-The remaining points are disputed at named words, so they take a mapping of word to option. The word keys are the ones `available_variants()` returns.
+The word-specific variants are scalar too. Their IDs name the covered form and
+the junction restriction where one applies:
 
 ```python
-heavy = Phonemizer(variants={"raa_tafkheem": {"يaسرi": "heavy"}})
+heavy = Phonemizer(variants={"raa_yasr_waqf": "heavy"})
 
 print(pm.phonemize("89:4").text())
 print(" ".join(pm.phonemize("89:4").phonemes()))
@@ -452,6 +452,10 @@ print(" ".join(heavy.phonemize("89:4").phonemes()))
 w a ll a j l i ʔ i ð a: j a s r
 w a ll a j l i ʔ i ð a: j a s rˤ
 ```
+
+See [the Hafs variants catalogue](docs/hafs/variants.md) for all IDs, defaults,
+locations, phoneme effects, and tajweed projections. Imala is not a variant;
+its rendering is selected through the `imala` extra phoneme.
 
 ## Contributing
 

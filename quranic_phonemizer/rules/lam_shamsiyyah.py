@@ -54,6 +54,8 @@ class ArticleShape:
             # `ءَآلذَّكَرَيْنِ`: after an interrogative hamza the article's own
             # hamza is not written as one, it is the length that replaced it.
             return True
+        if _is_tashil_article(slots, index):
+            return True
         if before.letter is not L.LAM or before.nucleus.is_silent:
             return False
         # `لِلنَّاسِ` writes no hamza: the lam proclitic swallows the article's
@@ -123,6 +125,20 @@ def _is_ibdal_alif(slot) -> bool:
         slot.letter is L.HAMZA
         and slot.nucleus.is_long
         and slot.nucleus.quality is Quality.A
+    )
+
+
+def _is_tashil_article(slots, index: int) -> bool:
+    """The two-hamza tashil form preserves the article behind it."""
+    if index < 2:
+        return False
+    eased, first = slots[index - 1], slots[index - 2]
+    return (
+        eased.letter is L.HAMZA
+        and eased.onset is Onset.TASHIL
+        and first.letter is L.HAMZA
+        and first.nucleus.is_short
+        and first.nucleus.quality is Quality.A
     )
 
 

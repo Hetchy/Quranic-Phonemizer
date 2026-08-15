@@ -1,6 +1,6 @@
 # What is not 100%, and why
 
-The floors in `.github/workflows/gates.yml` are not all 1.000. This file names
+The floors in `tools/gates.py` are not all 1.000. This file names
 every row behind every one of them, so a floor short of 100% is a claim that
 can be checked rather than a number nobody looks at.
 
@@ -13,8 +13,8 @@ the row here and the entry there agree on the count.
 | cross-script, word | 99.997% | 2 words |
 | cross-script, verse | **100.000%** | none |
 | round-trip, uthmani | **100.000%** | none |
-| regression, word | 99.921% | 61 words |
-| regression, verse | 97.852% | see below |
+| regression, word | 99.919% | 63 words |
+| regression, verse | 97.850% | see below |
 | L1 | 18 rows over 287,057 slots | |
 | attestations | 176 uthmani, 237 indopak | |
 
@@ -29,10 +29,10 @@ forces separates them.
 | 26:61:2 | `تَرَآءَا` | `تَرَآءَ` | `tarˤaˤ:ʔa lʒamʕa:ni` both |
 | 59:9:2 | `تَبَوَّءُو` | `تَبَوَّءُ` | `tabawwaʔu dda:rˤaˤ` both |
 
-## Regression — 61 words
+## Regression — 63 words
 
 The oracle is the previous implementation with its own defects frozen in, so
-this gate is a change detector and not a target. Every row is one of five
+this gate is a change detector and not a target. Every row is one of six
 classes, and each class is a disagreement whose direction is established
 independently of the oracle.
 
@@ -54,6 +54,11 @@ vowel: `ʔi:ti`, not `ʔiʔti`.
 light). `research/hafs/syntheses/tafkheem_tarqeeq.md` §2G tabulates both defaults
 and records that the oracle's mechanical rule diverges from them at 89:4. All
 ten are khilaf sites, so the other wajh is selectable.
+
+**2 — the seen-default Seen/Saad sites** (`يَبْصُطُ` 2:245:14,
+`بَصْطَةً` 7:69:22). The written small seen is above the saad at both sites,
+so `seen` is the published default and `saad` remains selectable. The frozen
+oracle reads saad at both.
 
 **7 — a waw carrying fatha before the otiose alif** (`يَعْفُوَا۟`,
 `أَتْلُوَا۟`, `لِّيَرْبُوَا۟`, `لِّيَبْلُوَا۟`, `وَنَبْلُوَا۟`,
@@ -78,7 +83,7 @@ oracle's `-aa` is the nominative of a word standing in the genitive.
 
 ## Verse mode
 
-97.852% counts a word wrong when a sound merged across a boundary is credited
+97.850% counts a word wrong when a sound merged across a boundary is credited
 to the neighbour; the harness prints the phoneme sequence separately, and
-that is 77,432 of 77,433. The one word left is `يَسْرِ` at 89:4, already
-listed above under the disputed raa.
+that is 77,430 of 77,433. The three words left are the two Seen/Saad sites
+above and `يَسْرِ` at 89:4, already listed under the disputed raa.

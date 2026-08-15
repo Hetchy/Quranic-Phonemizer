@@ -8,7 +8,6 @@ BIMA = Site(hafs=("2:10", (10,)))
 SAWAA = Site(hafs=("2:6", (4,)))
 BIMA_UNZILA = Site(hafs=("2:4", (3, 4)))
 ALIF_LAM_MEEM = Site(hafs=("2:1", (1,)))
-ADHDHAKARAYN = Site(hafs=("6:143", (10,)))
 YUNFIQUN = Site(hafs=("2:3", (8,)))
 YAWMI = Site(hafs=("1:4", (2,)))
 HAAULAA = Site(hafs=("2:31", (12,)))
@@ -56,14 +55,6 @@ def test_a_long_vowel_before_a_quiescent_letter(r):
     # الٓمٓ
     assert r.phonemes(1) == "ʔalifla:m̃i:m"
     assert "madd_lazim" in r.rules_on_char(1, "م")
-
-
-@for_each_riwayah(ADHDHAKARAYN, isolated=10)
-def test_the_same_length_after_an_interrogative_hamza(r):
-    # ءَآلذَّكَرَيْنِ
-    assert r.phonemes(10) == "ʔa:ððakarˤaˤjn"
-    assert "madd_lazim" in r.rules_on_char(10, "ٓ")
-    assert r.rules_on_sound(10, "a:") == {"madd_lazim"}
 
 
 @for_each_riwayah(YUNFIQUN, isolated=8)

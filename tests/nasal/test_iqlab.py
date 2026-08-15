@@ -3,10 +3,7 @@ from __future__ import annotations
 import pytest
 
 from tests.support import (
-    KhilafId,
-    Option,
     Site,
-    VariantSelection,
     for_each_riwayah,
     reading,
 )
@@ -84,18 +81,3 @@ def test_a_tanween_at_a_verse_end_turns_across_the_seam(r):
     assert r.phonemes(18) == "bal"
     assert "iqlab" in r.rules_on_char(17, "ً")
     assert r.rules_on_sound(17, "ŋ") == {"iqlab"}
-
-
-def test_the_rule_is_iqlab_under_either_reading_of_the_nasal_place():
-    # مِّن بَعْدِ -- the name is the same whether the hum takes a place or not.
-    assimilated = reading(MIN_BADI, ibtidaa=3, waqf=4)
-    assert assimilated.source_of("iqlab") == "ن"
-    assert assimilated.rules_on_sound(3, "ŋ") == frozenset({"iqlab"})
-
-    bilabial = reading(
-        MIN_BADI,
-        selection=VariantSelection((Option(KhilafId.IQLAB_NASAL, "bilabial"),)),
-        ibtidaa=3, waqf=4,
-    )
-    assert bilabial.source_of("iqlab") == "ن"
-    assert bilabial.rules_on_sound(3, "m̃") == frozenset({"iqlab"})

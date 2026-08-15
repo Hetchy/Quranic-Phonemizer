@@ -18,7 +18,7 @@ from ..engine.plan import (
     Verdict,
     mint,
 )
-from ..model.address import BoundaryPlan, KhilafId, SlotId
+from ..model.address import BoundaryPlan, SlotId
 from ..model.canon import (
     CanonLetter,
     Onset,
@@ -45,9 +45,7 @@ class WaqfEnding:
     `Aspect` records the two separately.
     """
 
-    yaa: SitedKhilaf = field(
-        default_factory=lambda: SitedKhilaf(KhilafId.YAA_ITHBAT)
-    )
+    yaa: SitedKhilaf = field(default_factory=SitedKhilaf)
     rule: Rule = Rule.PAUSAL_SUKUN
     phase: Phase = Phase.BOUNDARY
     triggers: frozenset = frozenset()

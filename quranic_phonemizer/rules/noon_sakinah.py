@@ -18,7 +18,7 @@ from ..engine.plan import (
     Verdict,
     mint,
 )
-from ..model.address import BoundaryPlan, KhilafId, SlotId
+from ..model.address import BoundaryPlan, Junction, KhilafId, SlotId
 from ..model.canon import CanonLetter as L
 from ..model.canon import Rule, SlotOrigin
 from ..model.performance import Aspect, Consonant, Occurrence, Participants
@@ -32,6 +32,7 @@ class NoonSakinah:
     """One classifier for the whole family, because the family has one shape."""
 
     followers: Followers
+    opening_wasl: object | None = None
     rule: Rule = Rule.IKHFAA_HAQIQI
     phase: Phase = Phase.MERGE
     triggers: frozenset = field(default=frozenset({L.NOON}))
@@ -40,10 +41,16 @@ class NoonSakinah:
         self, near: Neighbourhood, plan: Plan, at: SlotId,
         boundaries: BoundaryPlan,
     ) -> Verdict | None:
-        del plan, boundaries  # `near` already refuses to look across a junction
+        del plan
         slot = near.slot(at)
         if not is_quiescent(slot):
             return None
+        opening = self._opening_wasl(near, at, boundaries)
+        if opening is not None:
+            choice = self.opening_wasl.choose(near.score.selection)
+            if choice == "izhar":
+                return _classification(Rule.IZHAR, at, None)
+            return _merge(Rule.IDGHAM_BI_GHUNNAH, at, opening, ghunnah=True)
         following = near.after(at)
         if following is None:
             if slot.origin is SlotOrigin.SPELLED and near.last_of_word(at):
@@ -76,6 +83,20 @@ class NoonSakinah:
         return _nasal(
             Rule.IKHFAA_HAQIQI, at, following.id, DEFAULT_NASAL_PLACE
         )
+
+    def _opening_wasl(self, near, at, boundaries):
+        word = near.word_of(at)
+        if self.opening_wasl is None or word is None:
+            return None
+        if boundaries.after(word) is not Junction.JOIN:
+            return None
+        location = near.score.words[word].location
+        if location not in self.opening_wasl.locations or not near.last_of_word(at):
+            return None
+        following = near.raw_after(at)
+        if following is None or following.letter is not L.WAW:
+            return None
+        return following
 
 
 def _between_names(slot, following) -> bool:

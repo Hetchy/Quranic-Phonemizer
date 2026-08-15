@@ -206,43 +206,31 @@ its own tokens knows which it supplied.
 
 ### 3.1 Variants
 
-A reading can differ at several points, and a reciter may take one wajh
-throughout and another in a single word. So a selection is per point, and per
-site within a point.
+A reading can differ at several named points. Every selection is a scalar
+option for one point:
 
 ```python
-variants={"raa_tafkheem": "heavy"}                  # every site of that point
-variants={"raa_tafkheem": {"<site>": "heavy"}}      # one site
+variants={"raa_misr_waqf": "light"}
 ```
 
-A string value broadcasts over the point's sites; a dict value names them. The
-nesting is what `available_variants` returns, so a caller hands a site key back
-rather than composing one.
+A grouped point applies its scalar choice to every covered form or location.
+Nested per-site selections are rejected. `available_variants` returns the
+legal scalar options and default for each point.
 
 | `khilaf` | Disputes |
 |---|---|
-| `seen_sad` | which letter is read where the rasm allows both |
+| `seen_sad_*` | which letter is read at one named word form |
 | `iqlab_nasal` | whether an iqlab's hum closes the lips or stays a hum |
 | `ikhfaa_shafawi_nasal` | whether ikhfaa shafawi's hum closes the lips or stays a hum |
-| `raa_tafkheem` | whether a raa is heavy or light |
-| `nucleus_vowel` | which vowel a position takes |
-| `yaa_ithbat` | whether a pronoun yaa is pronounced at a pause |
+| `raa_*` | whether the raa in one named form group is heavy or light |
+| `daaf_haraka` | whether the named daaf forms take fatha or damma |
+| `yaa_aatani_waqf` | whether the final yaa is retained at a pause |
+| `noon_yaseen_wasl` | whether the two opening joins use izhar or idgham |
+| `madd_lazim_tasheel` | whether six locations use madd lazim or tasheel |
 
-`seen_sad` is published and has no sites in the shipped Hafs data, so nothing
-selects it yet. Neither nasal point names a site: a selection carries the
-point alone, and it applies wherever the point's trigger occurs.
-
-**Every point in the shipped Hafs data is a set of sites, and one of them has
-sites whose defaults differ from each other.** So a whole-point choice is a
-broadcast that can move a site off its default rather than a name for a
-reading, which `raa_tafkheem` and its nine sites already show. `r.variant`
-publishes the resolved selection, every site with the value actually read, so a
-caller who passed nothing can still see what was taken where.
-
-**Rule identifiers are stable and site keys are not.** A site key is an opaque
-token read from `available_variants` and handed back; a planned refactor names
-a case per lexeme or pattern and rewrites them. A consumer that stores one
-stores a version with it.
+`r.variant` publishes the resolved scalar choice for every point, including
+defaults the caller did not pass. The full current catalogue is maintained in
+[the Hafs variants document](../../hafs/variants.md).
 
 ### 3.2 Optional phonemes
 

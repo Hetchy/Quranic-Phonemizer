@@ -44,6 +44,13 @@ class Neighbourhood:
         following = self._flat[position + 1]
         return None if self._blocked(at, following.id) else following
 
+    def raw_after(self, at: SlotId) -> Slot | None:
+        """Return the next slot before special opening and junction blocking."""
+        position = self._at.get(at)
+        if position is None or position + 1 >= len(self._flat):
+            return None
+        return self._flat[position + 1]
+
     def before(self, at: SlotId) -> Slot | None:
         """The previous slot in recitation order, junctions ignored.
 

@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from ...engine.classifier import RuleSet
 from ...engine.plan import Phase
-from ...model.address import Riwayah
+from ...model.address import KhilafId, Riwayah
 from ...rules.annotation import CanonicalColour, Tarqeeq
 from ...rules.boundary import (
     PausalAlif,
@@ -31,7 +31,8 @@ from .resources import khilaf, lexicon, rule_tables
 
 def _build() -> RuleSet:
     tables = rule_tables()
-    weight = Weight(always_heavy=tables.always_heavy, raa=khilaf().raa)
+    choices = khilaf()
+    weight = Weight(always_heavy=tables.always_heavy, raa=choices.raa)
     article = ArticleShape(
         prefixes=tables.proclitics,
         is_form_eight_lam=lexicon().is_form_eight_lam,
@@ -41,11 +42,14 @@ def _build() -> RuleSet:
             Phase.BOUNDARY: (
                 WaslHamza(), SoftenedHamza(), TanweenAtWaqf(), PausalAlif(),
                 TanweenBeforeWasl(),
-                WaqfEnding(yaa=khilaf().yaa),
+                WaqfEnding(yaa=choices.yaa),
                 TaaMarbutaAtWaqf(),
             ),
             Phase.MERGE: (
-                NoonSakinah(followers=tables.followers_of_noon),
+                NoonSakinah(
+                    followers=tables.followers_of_noon,
+                    opening_wasl=choices.definition(KhilafId.NOON_YASEEN_WASL),
+                ),
                 MeemSakinah(followers=tables.followers_of_meem),
                 ArticleLam(sun=tables.sun_letters, article=article),
                 GhunnahMushaddadah(sun=tables.sun_letters, article=article),

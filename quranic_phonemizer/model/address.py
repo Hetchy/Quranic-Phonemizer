@@ -123,12 +123,22 @@ class KhilafId(StrEnum):
     choice or per-location lexical only. Grows with `variants.yaml`, not code.
     """
 
-    SEEN_SAD = "seen_sad"
+    SEEN_SAD_YABSUT = "seen_sad_yabsut"
+    SEEN_SAD_BASTAH = "seen_sad_bastah"
+    SEEN_SAD_AL_MUSAYTIRUN = "seen_sad_al_musaytirun"
+    SEEN_SAD_BIMUSAYTIR = "seen_sad_bimusaytir"
     IQLAB_NASAL = "iqlab_nasal"
     IKHFAA_SHAFAWI_NASAL = "ikhfaa_shafawi_nasal"
-    RAA_TAFKHEEM = "raa_tafkheem"
-    NUCLEUS_VOWEL = "nucleus_vowel"
-    YAA_ITHBAT = "yaa_ithbat"
+    RAA_FIRQ_WASL = "raa_firq_wasl"
+    RAA_ALQITR_WAQF = "raa_alqitr_waqf"
+    RAA_MISR_WAQF = "raa_misr_waqf"
+    RAA_NUTHUR_WAQF = "raa_nuthur_waqf"
+    RAA_YASR_WAQF = "raa_yasr_waqf"
+    RAA_ASR_WAQF = "raa_asr_waqf"
+    DAAF_HARAKA = "daaf_haraka"
+    YAA_AATANI_WAQF = "yaa_aatani_waqf"
+    NOON_YASEEN_WASL = "noon_yaseen_wasl"
+    MADD_LAZIM_TASHEEL = "madd_lazim_tasheel"
 
 
 @dataclass(frozen=True, slots=True)
@@ -137,9 +147,6 @@ class Option:
 
     khilaf: KhilafId
     name: str
-    site: str = ""
-    """One word of a khilaf that recurs word by word, named by its canonical
-    letters. Empty means every site of the point."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -148,11 +155,9 @@ class VariantSelection:
 
     options: tuple[Option, ...] = ()
 
-    def chosen(self, khilaf: KhilafId, site: str = "") -> str | None:
-        """A choice made for this site outranks one made for the whole point,
-        so a reader can take one wajh throughout and another in one word."""
-        for scope in (site, "") if site else ("",):
-            for option in self.options:
-                if option.khilaf is khilaf and option.site == scope:
-                    return option.name
-        return None
+    def chosen(self, khilaf: KhilafId) -> str | None:
+        """Return the one scalar choice made for a khilaf point."""
+        found = [option.name for option in self.options if option.khilaf is khilaf]
+        if len(found) > 1:
+            raise ValueError(f"{khilaf.value}: more than one option was selected")
+        return found[0] if found else None

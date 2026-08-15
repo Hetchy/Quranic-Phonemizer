@@ -26,10 +26,12 @@ not that nothing else is there.
 Recorded because a register of defects with no counterweight reads as a verdict
 on the whole set.
 
-Every phoneme line in E1 through E21 reproduces the package at head, including
-the three the preamble declares and no undeclared one. `raa_tafkheem` has nine
-sites with differing defaults, `seen_sad` and both nasal points have no sited
-rows, and no vowel takes quality `e` under the default. `when_joined` has
+Every phoneme line in E1 through E21 reproduced the package at the audited
+revision, including the three the preamble declared and no undeclared one.
+The later granular Hafs khilaf implementation replaced the aggregate variant
+names and added the missing selectable sites; its current contract is in
+[the Hafs variants document](../../hafs/variants.md). No vowel takes quality
+`e` under the default. `when_joined` has
 exactly one site. Section 9's own claims check out where they are countable:
 `tafkheem` is the largest instance class and every instance of it owns nothing,
 the iltiqa repair owns nothing, and every release in the corpus sits on the
