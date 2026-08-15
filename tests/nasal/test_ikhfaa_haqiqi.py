@@ -44,6 +44,19 @@ TANWEEN_ACROSS_A_BOUNDARY = [
 ]
 
 
+#: The sites above where the letter doing the hiding is one of istilaa, so the
+#: hum takes its weight. A heavy sound is heavy under one name, and the name is
+#: tafkheem.
+HEAVY_HUM = frozenset(
+    {"7:192", "56:29", "37:92", "7:14", "7:119",
+     "69:6", "25:39", "51:53", "4:57", "16:117"}
+)
+
+
+def _hum_rules(ref: str) -> set[str]:
+    return {"ikhfaa_haqiqi"} | ({"tafkheem"} if ref in HEAVY_HUM else set())
+
+
 #: One site per tanween mark, to say which character the rule is read off.
 EACH_TANWEEN_MARK = [
     ("20:20", (4, 5), "ٌ"),   # حَيَّةٌ تَسْعَىٰ
@@ -58,7 +71,7 @@ def test_every_hiding_letter_hides_a_written_noon(ref, word, expected):
     r = reading(site, isolated=word)
     assert r.phonemes(word) == expected
     assert "ikhfaa_haqiqi" in r.rules_on_char(word, "ن")
-    assert r.rules_on_sound(word, "ŋ") == {"ikhfaa_haqiqi"}
+    assert r.rules_on_sound(word, "ŋ") == _hum_rules(ref)
 
 
 @pytest.mark.parametrize(
@@ -68,7 +81,7 @@ def test_every_hiding_letter_hides_a_tanween_noon(ref, words, expected):
     first, last = words
     r = reading(Site(hafs=(ref, words)), ibtidaa=first, waqf=last)
     assert (r.phonemes(first), r.phonemes(last)) == expected
-    assert r.rules_on_sound(first, "ŋ") == {"ikhfaa_haqiqi"}
+    assert r.rules_on_sound(first, "ŋ") == _hum_rules(ref)
 
 
 @pytest.mark.parametrize(("ref", "words", "mark"), EACH_TANWEEN_MARK)
@@ -84,7 +97,8 @@ def test_a_noon_is_hidden_when_the_hiding_letter_starts_a_word(r):
     assert r.phonemes(4) == "miŋ"
     assert r.phonemes(5) == "ðˤuluma:t"
     assert "ikhfaa_haqiqi" in r.rules_on_char(4, "ن")
-    assert r.rules_on_sound(4, "ŋ") == {"ikhfaa_haqiqi"}
+    # the zaa hiding it is a letter of istilaa, so the hum is heavy
+    assert r.rules_on_sound(4, "ŋ") == {"ikhfaa_haqiqi", "tafkheem"}
 
 
 @for_each_riwayah(HEENIN, ibtidaa=19, wasl=19)
@@ -105,4 +119,6 @@ def test_the_heavy_hiding_toggle_defaults_off():
     on = reading(MANDUD, extra_phonemes=("emphatic_ikhfaa",), isolated=2)
     assert off.phonemes(2) == "maŋdˤu:dQ"
     assert on.phonemes(2) == "maŋˤdˤu:dQ"
-    assert on.rules_on_sound(2, "ŋˤ") == {"ikhfaa_haqiqi"}
+    # the toggle spends a character on the weight; the rule names it either way
+    assert off.rules_on_sound(2, "ŋ") == {"ikhfaa_haqiqi", "tafkheem"}
+    assert on.rules_on_sound(2, "ŋˤ") == {"ikhfaa_haqiqi", "tafkheem"}
