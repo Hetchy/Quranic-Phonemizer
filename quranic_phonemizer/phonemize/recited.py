@@ -83,7 +83,7 @@ def write_recited(
     sounds = dict(performance.sounds)
     occurrences = {o.id: o for o in performance.occurrences}
     started = _slots_by_rule(performance, Rule.WASL_START)
-    sources = _source_graphemes(inscription)
+    sources = _source_graphemes(inscription, performance)
     signs = _stop_signs_by_word(score, inscription)
 
     out: list[RenderGlyph] = []
@@ -218,7 +218,7 @@ def _write_vowel(sound: Vowel, sound_id, slot_id, fact_glyphs, pen: Pen):
         )
 
 
-def _source_graphemes(inscription: Inscription) -> dict:
+def _source_graphemes(inscription: Inscription, performance: Performance) -> dict:
     """Every `Evidences` edge, keyed by (slot, fact): a base letter, a
     shadda, a haraka and its carrier each cite only their own source glyph.
     A `Decorates`/`Attests` edge names no fact; not part of this."""
@@ -228,7 +228,23 @@ def _source_graphemes(inscription: Inscription) -> dict:
         if fact not in _CONSONANT_FACTS and fact not in VOWEL_FACTS:
             continue
         out.setdefault((spelling.slot, fact), []).append(spelling.grapheme)
+    for carrier, quiescent in _ibdal_carriers(performance):
+        out.setdefault((carrier, SlotFact.VOWEL_LENGTH), []).extend(
+            out.get((quiescent, SlotFact.LETTER), ())
+        )
     return {key: tuple(graphemes) for key, graphemes in out.items()}
+
+
+def _ibdal_carriers(performance: Performance):
+    """(lengthened slot, the quiescent hamza it carries) for each ibdal.
+
+    The rasm writes no length on the prosthetic hamza, so the letter the
+    rule silences is the one the reading writes that length on."""
+    return [
+        (occurrence.parts.source, occurrence.parts.host)
+        for occurrence in performance.occurrences
+        if occurrence.rule is Rule.IBDAL_HAMZA and occurrence.parts.host is not None
+    ]
 
 
 def _fact_glyphs(fact_glyphs: dict, slot_id, fact: SlotFact) -> tuple:

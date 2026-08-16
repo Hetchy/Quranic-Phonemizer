@@ -89,3 +89,19 @@ def test_a_kept_letter_names_its_source_glyph(hafs, pen):
     glyphs = _write(hafs, pen, "1:1:1")
     kept = [g for g in glyphs if g.kind is GlyphKind.BASE]
     assert kept and all(g.from_glyphs for g in kept)
+
+
+@pytest.mark.parametrize(
+    "ref, quiescent, carrier", [("10:15:11", "ئ", "ى"), ("2:283:16", "ؤ", "و")]
+)
+def test_an_ibdal_madd_letter_names_the_hamza_it_carries(hafs, pen, ref, quiescent, carrier):
+    # ٱئْتِ started on is إِىٓتْ: the length is written where the quiescent
+    # hamza stands, so that hamza is the glyph the madd letter comes from.
+    session = phonemize_request(hafs, ref)
+    chars = {g.id: g.char for g in session.inscription.graphemes}
+    glyphs = write_recited(
+        session.score, session.inscription, session.performance, pen
+    )
+    written = [g for g in glyphs if g.char == carrier]
+    assert written, f"{ref} writes no {carrier}"
+    assert [chars[i] for i in written[0].from_glyphs] == [quiescent]
