@@ -60,7 +60,7 @@ python dev/compare_coverage.py cmap.ttx unicode_inventory.json
 
 ```bash
 # Split script data into s:v:w format in case it's not already formatted that way
-python dev/split_script.py quranic_phonemizer/resources/{hafs-warsh}/processed_data/quran_cleaned.json text_field dev/Quran_warsh.json
+python dev/split_script.py quranic_phonemizer/resources/{hafs-warsh}/processed_data/quran_cleaned.json {text_field} dev/Quran_warsh.json
 ```
 
 
