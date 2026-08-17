@@ -69,7 +69,7 @@ Gemination (shaddah) is represented by repeating the phoneme to create new disti
 | و | `u:` |
 | ي , ى | `i:` |
 
-`aˤ` / `aˤ:` are added by the `emphatic_fatha` optional phoneme, and `e:` by `imala`.
+`aˤ` is added by the `emphatic_fatha` optional phoneme; emphatic alef is always `aˤ:`. `e:` is added by `imala`.
 
 ### Tajweed Phonemes
 
@@ -372,7 +372,7 @@ Five distinctions are not written by default. Pass `extra_phonemes` to spend a p
 
 | Name | Distinction |
 | ---- | ----------- |
-| `emphatic_fatha` | A fatha next to an emphatic letter becomes `aˤ` / `aˤ:` |
+| `emphatic_fatha` | A short fatha next to an emphatic letter becomes `aˤ` |
 | `emphatic_ikhfaa` | Ikhfaa before an istilaa letter becomes `ŋˤ` |
 | `qalqala_degree` | Qalqala kubra and akbar become `QQ`, apart from sughra `Q` |
 | `tashil` | An eased hamza becomes `ʔ̞` |

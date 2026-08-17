@@ -21,8 +21,8 @@ def _sound_index(r, predicate) -> int:
 def test_the_toggle_changes_no_node_and_no_edge():
     """`token` is the one field a toggle may move; every other field of
     every sound, and every edge, stays identical between the two documents."""
-    off = Phonemizer().phonemize("41:44")
-    on = Phonemizer(extra_phonemes=("emphatic_fatha",)).phonemize("41:44")
+    off = Phonemizer().phonemize("2:29")
+    on = Phonemizer(extra_phonemes=("emphatic_fatha",)).phonemize("2:29")
     bare = lambda sounds: [dataclasses.replace(s, token="") for s in sounds]
     assert bare(off.sounds) == bare(on.sounds)
     assert off.attributions == on.attributions
@@ -38,12 +38,24 @@ def test_tashil_defaults_off():
     assert on.phonemes()[i] == "ʔ̞"
 
 
-def test_emphatic_fatha_defaults_off():
-    off = Phonemizer().phonemize("41:44")
-    on = Phonemizer(extra_phonemes=("emphatic_fatha",)).phonemize("41:44")
-    i = _sound_index(off, lambda s: s.kind.value == "vowel" and s.emphatic)
-    assert off.phonemes()[i] == "a:"
-    assert on.phonemes()[i] == "aˤ:"
+def test_emphatic_fatha_defaults_off_but_emphatic_alef_is_always_written():
+    short_off = Phonemizer().phonemize("2:29")
+    short_on = Phonemizer(extra_phonemes=("emphatic_fatha",)).phonemize("2:29")
+    short = _sound_index(
+        short_off,
+        lambda s: s.kind.value == "vowel" and s.emphatic and not s.long,
+    )
+    assert short_off.phonemes()[short] == "a"
+    assert short_on.phonemes()[short] == "aˤ"
+
+    alef_off = Phonemizer().phonemize("41:44")
+    alef_on = Phonemizer(extra_phonemes=("emphatic_fatha",)).phonemize("41:44")
+    alef = _sound_index(
+        alef_off,
+        lambda s: s.kind.value == "vowel" and s.emphatic and s.long,
+    )
+    assert alef_off.phonemes()[alef] == "aˤ:"
+    assert alef_on.phonemes()[alef] == "aˤ:"
 
 
 def test_emphatic_ikhfaa_defaults_off():
