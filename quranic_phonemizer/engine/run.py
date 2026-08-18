@@ -42,7 +42,7 @@ from .plan import (
     SoundFeature,
 )
 
-#: Which aspect a `CLASSIFICATION_ONLY` rule's `Classifies` edge names.
+#: Which aspect a rule's `Classifies` edge names.
 #: `ishmam` names the letter it rides, not the vowel it rounds for -- that
 #: vowel is the one thing it does not sound.
 _CLASSIFIES_ASPECT: dict[Rule, Aspect] = {
@@ -60,6 +60,7 @@ _CLASSIFIES_ASPECT: dict[Rule, Aspect] = {
     Rule.MADD_JAIZ_MUNFASIL: Aspect.VOWEL,
     Rule.MADD_LAZIM: Aspect.VOWEL,
     Rule.MADD_ARID_LIL_SUKUN: Aspect.VOWEL,
+    Rule.MADD_TABII: Aspect.VOWEL,
     #: The waw or yaa this rule names has no vowel; it classifies the consonant.
     Rule.MADD_LEEN: Aspect.CONSONANT,
     Rule.FAKK_IDGHAM: Aspect.CONSONANT,
@@ -287,14 +288,24 @@ def _modifiers_for(occurrence: Occurrence, effects, hosted) -> list[Modifier]:
             sound_id = hosted.get((effect.slot, Aspect.VOWEL))
             if sound_id is not None:
                 out.append(SetsLength(sound_id, occurrence.id, effect.length))
-    if not effects and occurrence.rule in CLASSIFICATION_ONLY:
-        aspect = _CLASSIFIES_ASPECT.get(occurrence.rule)
-        source_sound = None if aspect is None else hosted.get(
-            (occurrence.parts.source, aspect)
-        )
+    aspect = _CLASSIFIES_ASPECT.get(occurrence.rule)
+    if aspect is not None and _names_its_sound(occurrence, effects, aspect):
+        source_sound = hosted.get((occurrence.parts.source, aspect))
         if source_sound is not None:
             out.append(Classifies(source_sound, occurrence.id))
     return out
+
+
+def _names_its_sound(occurrence: Occurrence, effects, aspect: Aspect) -> bool:
+    """A rule names a sound it leaves alone, or the single one it realizes."""
+    if not effects:
+        return occurrence.rule in CLASSIFICATION_ONLY
+    if len(effects) != 1 or not isinstance(effects[0], Realize):
+        return False
+    return (
+        effects[0].slot == occurrence.parts.source
+        and effects[0].aspect is aspect
+    )
 
 
 def _colours(plan: Plan) -> dict[tuple[SlotId, Aspect], dict[SoundFeature, bool]]:

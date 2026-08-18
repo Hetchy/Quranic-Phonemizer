@@ -56,6 +56,21 @@ def test_a_stopped_pausal_alif_takes_madd_tabii_over_its_own_realization(
     assert word == "ʔana:"
 
 
+def test_madd_tabii_names_the_vowel_it_lengthens_and_nothing_else() -> None:
+    """20:1, `طه`: the rule holds the alif for two counts and says nothing
+    about the taa before it, so its edge names one sound of the two."""
+    from quranic_phonemizer import Phonemizer
+    from quranic_phonemizer.phonemize import edges as ed
+
+    result = Phonemizer().phonemize("20:1")
+    named = {
+        m.sound for m in result.modifiers
+        if result.rules[m.by].rule is Rule.MADD_TABII
+        and isinstance(m, ed.Classifies)
+    }
+    assert named == {1, 3}  # tˤ a: h a: -- the two alifs, neither consonant
+
+
 def test_a_stopped_final_glide_takes_madd_tabii_over_its_own_consonant(
     packed, hafs
 ) -> None:
