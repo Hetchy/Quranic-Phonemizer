@@ -248,11 +248,18 @@ def _merger_occurrences(performance: Performance) -> frozenset:
     )
 
 
+#: Rules whose second participant is a letter the reading silenced rather than
+#: a letter it merged into. The hamza an ibdal softens is written, and a cell
+#: for it names the rule that took its consonant away.
+_PUBLISHES_HOST: frozenset[Rule] = frozenset({Rule.IBDAL_HAMZA})
+
+
 def _rule_instance(occurrence, unit_of_slot, mergers) -> nd.RuleInstance:
-    """`host` is published only for a merger."""
+    """`host` is published for a merger and for a rule that silences a letter."""
     parts = occurrence.parts
     host = None
-    if parts.host is not None and occurrence.id in mergers:
+    names_host = occurrence.id in mergers or occurrence.rule in _PUBLISHES_HOST
+    if parts.host is not None and names_host:
         host = unit_of_slot[parts.host]
     return nd.RuleInstance(occurrence.rule, unit_of_slot[parts.source], host)
 

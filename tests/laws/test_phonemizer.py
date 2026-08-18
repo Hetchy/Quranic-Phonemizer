@@ -20,13 +20,14 @@ def test_the_contracts_own_example_runs():
         "ʔ", "a", "lˤlˤ", "a:", "h", "u", "l", "a:", "ʔ", "i", "l", "a:",
     )
     assert (len(r.rules), len(r.spellings), len(r.attributions), len(r.modifiers)) == (
-        77, 474, 295, 34,
+        77, 474, 295, 63,
     )
 
 
-def test_rule_host_is_published_only_for_a_merger():
-    """`host` is the second participant only where two units share one
-    sound. A trigger unit is not a host."""
+def test_rule_host_is_published_for_a_merger_and_for_an_ibdal():
+    """`host` is the second participant where two units share one sound, and
+    where an ibdal silences a hamza a cell must still name. A trigger unit is
+    neither."""
     r = Phonemizer().phonemize("2:255")
     merger_by = {
         a.by for a in r.attributions
@@ -39,6 +40,16 @@ def test_rule_host_is_published_only_for_a_merger():
                    if rule.rule.value == "madd_tabii"]
     assert non_mergers
     assert all(r.rules[i].host is None for i in non_mergers)
+
+
+def test_an_ibdal_publishes_the_hamza_it_softened():
+    """Started on, `ٱئْتُونِى` reads its quiescent hamza as the madd the kasra
+    before it opens. That hamza is the rule's host, so a consumer drawing the
+    letter can name what happened to it."""
+    r = Phonemizer().phonemize("46:4:18")
+    ibdal = [rule for rule in r.rules if rule.rule.value == "ibdal_hamza"]
+    assert len(ibdal) == 1
+    assert ibdal[0].host is not None and ibdal[0].host != ibdal[0].source
 
 
 def test_the_document_is_its_sixteen_members_and_nothing_else():
