@@ -28,8 +28,8 @@ from .ledger import EMPTY as EMPTY_LEDGER
 from .ledger import Ledger
 from .assemble import assemble
 from .draft import (
-    _Draft, letter_of, letter_offsets_of, nucleus_fact, set_fact,
-    stray_letter_offsets,
+    _Draft, decorated_offsets, letter_of, letter_offsets_of, nucleus_fact,
+    set_fact,
 )
 from .juncture import apply_cross_word_noon
 from .passes import LexemePass, apply_ledger
@@ -183,9 +183,9 @@ def _not_a_slot(letter, silenced: bool, context, cluster, rows, drafts, track,
         pending.append(cluster.offset)
     else:
         subject = drafts[-1] if drafts else None
-        _decorate(scribe, cluster.offset, subject, track)
-        for stray in stray_letter_offsets(rows, cluster.offset):
-            _decorate(scribe, stray, subject, track)
+        evidenced = {offset} if isinstance(outcome, Sets) else ()
+        for shown in decorated_offsets(rows, context, cluster.offset, evidenced):
+            _decorate(scribe, shown, subject, track)
     return True
 
 

@@ -9,7 +9,13 @@ from collections.abc import Iterable
 
 from ..model.address import SlotId
 from ..model.canon import CLASSIFICATION_ONLY, Rule, Score
-from ..model.inscription import Attests, Decorates, Evidences, Inscription
+from ..model.inscription import (
+    Attests,
+    Decorates,
+    Evidences,
+    GraphemeId,
+    Inscription,
+)
 from ..model.performance import (
     Aspect,
     Hosts,
@@ -177,6 +183,23 @@ def check_inscription(inscription: Inscription, score: Score) -> None:
                     f"in {inscription.script.value} — no grapheme accounts for "
                     f"it, so no projection can point at it"
                 )
+
+
+def check_graphemes_spelt(inscription: Inscription) -> None:
+    """Every grapheme must be the source of at least one `Spelling`.
+
+    The converse of `check_inscription`: a grapheme reaching no slot is one no
+    projection can place and no alignment can show."""
+    spelt: set[GraphemeId] = {
+        spelling.grapheme for spelling in inscription.spellings
+    }
+    for grapheme in inscription.graphemes:
+        if grapheme.id not in spelt:
+            raise LawError(
+                f"I8: grapheme {grapheme.id} ({grapheme.char!r}) is the source "
+                f"of no Spelling in {inscription.script.value} — the script "
+                f"wrote it and the Score accounts for it nowhere"
+            )
 
 
 #: What a written shadda can witness: every merger the model recognises.
