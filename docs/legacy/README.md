@@ -6,13 +6,12 @@ Everything in this directory describes the **pre-refactor** package: a flat
 computed projections. None of those modules exist any more. They were deleted
 when the pipeline became `Reading -> Score -> Performance`.
 
-These files are kept for one reason: `docs/design/projections/02-gate.md`
-section 3 defines a set of adapters that must reproduce the legacy views from
-the new graph, and these are the specification of what those views were. The
-frozen output itself is in `tests/snapshots/`, pinned by digest.
+These files are kept only as a specification of the legacy views that current
+compatibility projections may need to reproduce. The frozen output itself is
+in `tests/snapshots/legacy-api/`, pinned by digest.
 
 **Do not read these as documentation of the package.** For that, read
-`CLAUDE.md` and then `docs/design/projections/`.
+`CLAUDE.md`, then `docs/architecture.md` and `docs/public-api.md`.
 
 | File | Was |
 |---|---|
@@ -21,6 +20,4 @@ frozen output itself is in `tests/snapshots/`, pinned by digest.
 | `letter-phoneme-mappings.md` | Merge rules, extension splitting, validation |
 | `character-phoneme-mappings.md` | The per-character cell schema the shard consumer reads |
 
-`character-phoneme-mappings.md` is the one with a live downstream consumer, and
-`docs/design/projections/08-legacy-parity.md` reads its schema column by column
-against the contract.
+`character-phoneme-mappings.md` is the one with a live downstream consumer.

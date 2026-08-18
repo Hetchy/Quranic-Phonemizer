@@ -87,9 +87,8 @@ Consequences the internal model has to answer for:
 - **Supplying what a script omits is mostly rules, not rows.** 89% of the
   13,482 waṣl sites are the article and 92% of the 3,970 always-silent sites
   are the otiose alef after word-final wāw; the remainder reduces to a
-  ~526-entry canonical skeleton lexicon plus a few dozen one-offs. See
-  `research/evidence/internal-model-redesign.md` §3b. A location table growing
-  to 10⁴ entries means a rule is missing.
+  ~526-entry canonical skeleton lexicon plus a few dozen one-offs. A location
+  table growing to 10⁴ entries means a rule is missing.
 
 Sanity check worth knowing: IndoPak writes 3:1 as `ال࢜مَّ࢜` — with the fatha on
 the meem that the connected reading of `الٓمٓ ٱللَّهُ` requires, and which the

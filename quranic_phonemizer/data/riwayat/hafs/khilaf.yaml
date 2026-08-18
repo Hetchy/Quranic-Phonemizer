@@ -8,7 +8,7 @@ variants:
     default: heavy
     junction: wasl
     forms: ["\u0641i\u0631\u0642i\u0646"]
-    source: research/hafs/syntheses/tafkheem_tarqeeq.md
+    source: docs/hafs/research/tafkheem-tarqeeq.md
 
   raa_alqitr_waqf:
     kind: raa_weight
@@ -16,7 +16,7 @@ variants:
     default: light
     junction: waqf
     forms: ["\u0621a\u0644\u0642i\u0637\u0631i"]
-    source: research/hafs/syntheses/tafkheem_tarqeeq.md
+    source: docs/hafs/research/tafkheem-tarqeeq.md
 
   raa_misr_waqf:
     kind: raa_weight
@@ -24,7 +24,7 @@ variants:
     default: heavy
     junction: waqf
     forms: ["\u0645i\u0635\u0631a", "\u0628i\u0645i\u0635\u0631a"]
-    source: research/hafs/syntheses/tafkheem_tarqeeq.md
+    source: docs/hafs/research/tafkheem-tarqeeq.md
 
   raa_nuthur_waqf:
     kind: raa_weight
@@ -32,7 +32,7 @@ variants:
     default: heavy
     junction: waqf
     forms: ["\u0648a\u0646u\u0630u\u0631i", "\u0628i\u0621a\u0644\u0646u\u0630u\u0631i"]
-    source: research/hafs/syntheses/tafkheem_tarqeeq.md
+    source: docs/hafs/research/tafkheem-tarqeeq.md
 
   raa_yasr_waqf:
     kind: raa_weight
@@ -40,7 +40,7 @@ variants:
     default: light
     junction: waqf
     forms: ["\u064aa\u0633\u0631i"]
-    source: research/hafs/syntheses/tafkheem_tarqeeq.md
+    source: docs/hafs/research/tafkheem-tarqeeq.md
 
   raa_asr_waqf:
     kind: raa_weight
@@ -48,7 +48,7 @@ variants:
     default: light
     junction: waqf
     forms: ["\u0621a\u0633\u0631i", "\u0641a\u0621a\u0633\u0631i"]
-    source: research/hafs/syntheses/tafkheem_tarqeeq.md
+    source: docs/hafs/research/tafkheem-tarqeeq.md
 
   yaa_aatani_waqf:
     kind: final_yaa
@@ -56,7 +56,7 @@ variants:
     default: hadhf
     junction: waqf
     forms: ["\u0621a\u062aa\u0646i\u064aa"]
-    source: research/hafs/syntheses/waqf_ibtidaa.md
+    source: docs/hafs/research/waqf-ibtidaa.md
 
   daaf_haraka:
     kind: vowel
@@ -65,7 +65,7 @@ variants:
     slot: 0
     values: {fatha: a, damma: u}
     forms: ["\u0636a\u0639\u0641i\u0646", "\u0636u\u0639\u0641i\u0646", "\u0636a\u0639\u0641a\u0646", "\u0636u\u0639\u0641a\u0646"]
-    source: research/hafs/syntheses/special_rules.md
+    source: docs/hafs/research/special-rules.md
 
   seen_sad_yabsut:
     kind: letter
@@ -74,7 +74,7 @@ variants:
     slot: 3
     values: {seen: seen, saad: sad}
     locations: ["2:245:14"]
-    source: research/hafs/syntheses/special_rules.md
+    source: docs/hafs/research/special-rules.md
 
   seen_sad_bastah:
     kind: letter
@@ -83,7 +83,7 @@ variants:
     slot: 1
     values: {seen: seen, saad: sad}
     locations: ["7:69:22"]
-    source: research/hafs/syntheses/special_rules.md
+    source: docs/hafs/research/special-rules.md
 
   seen_sad_al_musaytirun:
     kind: letter
@@ -92,7 +92,7 @@ variants:
     slot: 3
     values: {saad: sad, seen: seen}
     locations: ["52:37:7"]
-    source: research/hafs/syntheses/special_rules.md
+    source: docs/hafs/research/special-rules.md
 
   seen_sad_bimusaytir:
     kind: letter
@@ -101,7 +101,7 @@ variants:
     slot: 2
     values: {saad: sad, seen: seen}
     locations: ["88:22:3"]
-    source: research/hafs/syntheses/special_rules.md
+    source: docs/hafs/research/special-rules.md
 
   noon_yaseen_wasl:
     kind: rule
@@ -109,25 +109,25 @@ variants:
     default: izhar
     junction: wasl
     locations: ["36:1:1", "68:1:1"]
-    source: research/hafs/syntheses/noon_meem_rules.md
+    source: docs/hafs/research/noon-meem.md
 
   madd_lazim_tasheel:
     kind: madd_tasheel
     options: [madd_lazim, tasheel]
     default: madd_lazim
     locations: ["6:143:10", "6:144:8", "10:51:7", "10:91:1", "10:59:14", "27:59:9"]
-    source: research/hafs/syntheses/madd_rules.md
+    source: docs/hafs/research/madd.md
 
   iqlab_nasal:
     kind: nasal_place
     options: [assimilated, bilabial]
     default: assimilated
     locations: [all_iqlab]
-    source: research/hafs/syntheses/noon_meem_rules.md
+    source: docs/hafs/research/noon-meem.md
 
   ikhfaa_shafawi_nasal:
     kind: nasal_place
     options: [assimilated, bilabial]
     default: assimilated
     locations: [all_ikhfaa_shafawi]
-    source: research/hafs/syntheses/noon_meem_rules.md
+    source: docs/hafs/research/noon-meem.md

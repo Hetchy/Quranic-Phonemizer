@@ -1,8 +1,0 @@
-rule	idgham_mutaqaribayn
-phonemizer_count	13
-tajweed_count	13
-matches	13
-
-extra_in_phonemizer	count=0
-
-missing_in_phonemizer	count=0

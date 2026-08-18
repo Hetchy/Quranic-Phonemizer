@@ -28,7 +28,8 @@ Potential use cases:
 
 The phoneme inventory uses the standard International Phonetic Alphabet (IPA) [Arabic phonemes](https://en.wikipedia.org/wiki/Help%3AIPA/Arabic?utm_source=chatgpt.com) alongside custom phonemes for Tajweed rules, totalling 69-71 phonemes (depending on Tajweed configuration).
 
-All phonemes are configurable in [resources/base_phonemes.yaml](quranic_phonemizer/resources/base_phonemes.yaml) and [resources/rule_phonemes.yaml](quranic_phonemizer/resources/rule_phonemes.yaml).
+The old package configured phonemes in `resources/base_phonemes.yaml` and
+`resources/rule_phonemes.yaml`; those paths no longer exist.
 
 ### Consonants
 | **Letter**               | **Phoneme**              | **Letter** | **Phoneme**               | **Letter** | **Phoneme**              | **Letter** | **Phoneme**              |
@@ -246,7 +247,7 @@ Extension characters (dagger alef `ٰ`, mini waw `ۥ`, mini yaa `ۦ`) are split 
 - `idgham_bila_ghunnah_noon`, `idgham_bila_ghunnah_tanween`
 - `idgham_mutamathilayn`, `idgham_mutaqaribayn`, `idgham_mutajanisayn_kamil`, `idgham_mutajanisayn_naqis`, `lam_shamsiyah`
 
-For full details, examples, and multi-rule overlap documentation, see [docs/tajweed-mappings.md](docs/tajweed-mappings.md).
+For the retained legacy detail, see [tajweed-mappings.md](tajweed-mappings.md).
 
 ## Letter-Phoneme Mappings
 
@@ -290,7 +291,8 @@ When both sides of a word boundary have phonemes, they stay separate with a spac
 
 Extension characters (dagger alef, mini waw, mini yaa) are split into their own entries. Mappings reflect stopping/starting context — entry count and merge patterns change depending on waqf.
 
-For full details, merge rule reference, and validation rules, see [docs/letter-phoneme-mappings.md](docs/letter-phoneme-mappings.md).
+For the retained legacy detail, see
+[letter-phoneme-mappings.md](letter-phoneme-mappings.md).
 
 
 ## Phonetic Text

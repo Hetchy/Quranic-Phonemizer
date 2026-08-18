@@ -16,7 +16,7 @@ from typing import Any, Callable
 
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_OUTPUT = REPO_ROOT / "research" / "legacy-baselines"
+DEFAULT_OUTPUT = REPO_ROOT / "tests" / "snapshots" / "legacy-api"
 REFERENCE = "1-114"
 
 
