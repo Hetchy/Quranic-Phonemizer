@@ -22,6 +22,8 @@ def main():
         print(f"Error: invalid JSON in {args.input_file}: {e}")
         sys.exit(1)
 
+    RUB_EL_HIZB = "۞"  # ۞ marks a Hizb-quarter boundary, not an actual word
+
     words_output = {}
     running_id = 1
 
@@ -32,7 +34,7 @@ def main():
 
         surah = str(record.get("sura_no"))
         ayah = str(record.get("aya_no"))
-        words = text.split()  # split on whitespace
+        words = [w for w in text.split() if w != RUB_EL_HIZB]  # split on whitespace, drop non-word marks
 
         for word_position, word in enumerate(words, start=1):
             word_str = str(word_position)
