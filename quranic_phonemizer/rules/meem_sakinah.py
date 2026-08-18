@@ -7,7 +7,7 @@ from ..engine.neighbourhood import Neighbourhood
 from ..engine.plan import MergeInto, Phase, Plan, Realize, Verdict, mint
 from ..model.address import BoundaryPlan, KhilafId, SlotId
 from ..model.canon import CanonLetter as L
-from ..model.canon import Onset, Rule, SlotOrigin
+from ..model.canon import Onset, Rule
 from ..model.performance import Aspect, Consonant, Occurrence, Participants
 from .lam_shamsiyyah import ArticleShape
 from .ownership import is_quiescent
@@ -93,10 +93,6 @@ class MeemSakinah:
             return None
         following = near.after(at)
         if following is None:
-            if slot.origin is SlotOrigin.SPELLED and near.last_of_word(at):
-                # The meem closing a disjoined-letter opening takes its own
-                # plain articulation rather than reaching into the next word.
-                return _verdict(Rule.IZHAR_SHAFAWI, at, None, ())
             return None
 
         match self.followers.of(following.letter):
