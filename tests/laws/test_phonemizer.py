@@ -17,7 +17,7 @@ from quranic_phonemizer.phonemize import edges as ed
 def test_the_contracts_own_example_runs():
     r = Phonemizer().phonemize("2:255")
     assert r.phonemes()[:12] == (
-        "ʔ", "a", "lˤlˤ", "a:", "h", "u", "l", "a:", "ʔ", "i", "l", "a:",
+        "ʔ", "a", "lˤlˤ", "aˤ:", "h", "u", "l", "a:", "ʔ", "i", "l", "a:",
     )
     assert (len(r.rules), len(r.spellings), len(r.attributions), len(r.modifiers)) == (
         77, 474, 295, 34,
