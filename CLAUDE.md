@@ -28,7 +28,8 @@ reads, and what is actually pronounced under a boundary plan.
 - Start with `docs/architecture.md`; use `docs/public-api.md` for the result
   contract and `docs/conformance.md` for known corpus-gate residue.
 - `docs/hafs/variants.md` and `docs/hafs/research/` cover the Hafs reading.
-- `docs/warsh/codepoint-audit.md` contains the available Warsh script audit.
+- `docs/warsh/codepoint-audit.md` audits the Warsh source encoding;
+  `docs/warsh/research/` contains the available Warsh research notes.
 - `docs/new-riwayah.md` is tentative guidance, not a final design.
 - `docs/legacy/` describes the pre-refactor API only.
 

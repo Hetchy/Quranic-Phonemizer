@@ -53,7 +53,7 @@ def _pen(riwayah: Riwayah, script: Script):
 
 @lru_cache(maxsize=None)
 def _editable(riwayah: Riwayah, script: Script) -> dict:
-    base = ROOT / "corpus_sources" / "riwayat" / riwayah.value / "scripts"
+    base = ROOT / "corpus_sources" / riwayah.value / "scripts"
     raw = json.loads(
         (base / script.value / "quran.json").read_text(encoding="utf-8")
     )

@@ -24,7 +24,7 @@ from quranic_phonemizer.model.address import (  # noqa: E402
     VerseRef,
 )
 
-SOURCES = ROOT / "corpus_sources" / "riwayat" / "hafs" / "scripts"
+SOURCES = ROOT / "corpus_sources" / "hafs" / "scripts"
 
 
 def load_verses(script: str) -> dict[tuple[int, int], list[tuple[Location, str]]]:

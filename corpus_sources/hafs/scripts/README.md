@@ -15,8 +15,7 @@ build one elsewhere.
 
 ## Uthmani
 
-The long-standing source. Unchanged by the IndoPak import beyond moving one
-directory level down.
+The long-standing source used to build the packaged Hafs corpus.
 
 ## IndoPak
 

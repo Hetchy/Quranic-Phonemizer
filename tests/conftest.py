@@ -64,7 +64,7 @@ def sources():
     from pathlib import Path
 
     root = Path(__file__).resolve().parent.parent
-    base = root / "corpus_sources" / "riwayat" / "hafs" / "scripts"
+    base = root / "corpus_sources" / "hafs" / "scripts"
     out: dict = {}
     for script in Script:
         raw = json.loads(

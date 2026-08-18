@@ -14,7 +14,7 @@ from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-SCRIPTS_DIR = REPO_ROOT / "corpus_sources" / "riwayat" / "hafs" / "scripts"
+SCRIPTS_DIR = REPO_ROOT / "corpus_sources" / "hafs" / "scripts"
 DST = SCRIPTS_DIR / "indopak" / "quran.json"
 SURAH_INFO = (
     REPO_ROOT
