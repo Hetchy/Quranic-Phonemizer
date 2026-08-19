@@ -119,6 +119,23 @@ pm = Phonemizer()
 result = pm.phonemize("1:1")
 ~~~
 
+A caller asks to stop in the two ways the reading offers. `stop_signs` names
+classes of written sign to stop at, and `stop_refs` names words to stop after:
+
+~~~python
+pm.phonemize("2:255", stop_signs=("compulsory_stop", "preferred_stop"))
+pm.phonemize("2:255", stop_refs=("2:255:9",))
+~~~
+
+A stop is always addressed as the word it follows. There is no boundary
+addressing and no way to ask for a sakt: sakt is authored, and a stop request
+at an authored sakt resolves to stop like anywhere else.
+
+`suspend_gc` is not carried over. It buys one bounded request a deferred
+collector at the cost of a process-global side effect, and the native result is
+a different allocation shape than the graph it replaces, so the option is
+re-argued from measurement if it is ever wanted again.
+
 The result exposes a small eager core and selective views:
 
 ~~~python
@@ -217,6 +234,7 @@ There are N + 1 boundaries for N words:
 | after | Word after the boundary, if any |
 | state | start, join, sakt, or stop |
 | stop_sign | Exact written stop or sakt sign at this boundary, if any |
+| stop_advice | What the mushaf's convention calls that sign, if any |
 
 Sakt coverage is what the ledger authors. Not every site a reader may take a
 sakt at carries one, so a boundary the ledger does not name resolves to join
@@ -240,8 +258,11 @@ The four states mean:
 The trailing request boundary is stop. An internal stop therefore already
 means both stop before and start after; no second boolean is needed.
 
-There is no edge state, left-word/right-word terminology, advice field, or
-allowed_states field. At an ordinary internal boundary, no stop override
+There is no edge state, left-word/right-word terminology, or allowed_states
+field. stop_advice is not allowed-states machinery: it says what class of sign
+is written here, which a consumer needs to decide where to stop by default and
+must not work out by reading codepoints. It says nothing about which stops are
+permitted. At an ordinary internal boundary, no stop override
 resolves to join and a stop override resolves to stop. At an authored sakt
 place, no override resolves to sakt and a stop override resolves to stop.
 Callers never request sakt as a generic choice, and an authored sakt never
@@ -1426,8 +1447,10 @@ are not the ones a lesson wants.
 2. Select surah and ayah, enter a reference, or choose Random ayah.
 3. Render exact source text in QPC Hafs.
 4. Render whole-word cells in RTL reading order.
-5. Click an internal stop-sign cell to add/remove a stop override: the visible
-   result switches join/stop ordinarily and sakt/stop at an authored sakt site.
+5. Click a stop cell to stop after that word or stop stopping there: the
+   visible result switches join/stop ordinarily and sakt/stop at an authored
+   sakt site. The verse's own end is one of these positions, so joining into
+   the next verse is the same interaction.
 6. Change a variant or extra-phoneme setting and re-render the same reference.
 7. Copy only source text or phonemes.
 
@@ -1477,7 +1500,8 @@ Choice presentation follows the data:
 
 ### 16.5 Stop cells
 
-Every internal word boundary receives a small between-word control:
+Every word boundary receives a small between-word control, the trailing one
+included, so a reader can join the last word into the next verse:
 
 - exact stop sign when one is written;
 - | | fallback otherwise;
@@ -1485,7 +1509,14 @@ Every internal word boundary receives a small between-word control:
 - hover label may say Join, Stop, or Sakt;
 - click is the only required interaction for the first release.
 
-The frontend sends only stop overrides and renders the returned resolved
+Stopping is a per-position choice, never a setting. The site does not offer
+sign classes as options. It starts every verse with the stops a reader would
+ordinarily take -- the verse end, and every compulsory or preferred sign -- and
+then lets the reader toggle each position on its own, including positions with
+no sign written. Which positions those are comes from each boundary's
+stop_advice, so the frontend never reads a sign's codepoint to decide.
+
+The frontend sends the words it stops after and renders the returned resolved
 state. It never requests sakt or applies waqf, ibtidaa, or sakt transformations
 itself.
 
@@ -1808,6 +1839,8 @@ pay for source tokenization or cells beyond the unavoidable engine result.
 - uniform global random-ayah mapping;
 - selector/ref URL state;
 - ordinary join/stop and authored sakt/stop;
+- default stops are the verse end plus compulsory and preferred signs, each
+  toggleable on its own, and the trailing position joins into the next verse;
 - variant and extra-phoneme settings remain separate;
 - iqlab/ikhfaa-shafawi phoneme-choice previews;
 - exact text and phoneme copy only;
