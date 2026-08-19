@@ -696,8 +696,8 @@ Multiple rules may coexist, including:
 - pausal_alif with madd_tabii;
 - waqf drops with the rule naming the resulting long vowel.
 
-The website can give overlapping rules separate underline lanes or a compact
-combined hover. It must not invent a semantic fold.
+A consumer may lay coexisting rules out however it likes -- stacked lanes, a
+shared mark, a badge that counts them. It must not invent a semantic fold.
 
 ### 9.4 Selective serialization
 
@@ -1129,8 +1129,8 @@ silent units, discover mergers, or classify rules.
 
 ### 13.3 Inspector owns
 
-- rendering the producer-supplied rows and spans;
-- CSS, colour, hover, selection, and responsive behavior;
+- placing the shared cell renderer of 13.4 inside its own page;
+- its own palette, legend, teaching folds, hover, and selection;
 - timestamp and audio interaction for QUA;
 - development diagnostics.
 
@@ -1139,6 +1139,12 @@ iqlab rows, and iltiqa placement. The domain decisions move to the
 phonemizer. Inspector code remaining after migration should be recognizably
 presentational.
 
+The Inspector and the website differ in what they show, not in how the grid
+is built. The Inspector keeps audio, timestamps, editing, reports, and the
+folds that make a reading teachable; the website keeps none of those and
+shows the occurrences unfolded. Both draw the same package, themed
+separately.
+
 ### 13.4 Website owns
 
 - request state and URL state;
@@ -1146,10 +1152,27 @@ presentational.
 - stop-cell click interaction;
 - settings layout;
 - copying text or phonemes;
-- responsive visual presentation.
+- responsive visual presentation;
+- the shared cell renderer that it and the Inspector both draw with.
 
 It consumes the phonemizer directly through its own thin backend and has no
 QUA SDK dependency.
+
+The cell grid is one component, not two. Both surfaces draw the same nested
+word/column/sound structure from the same DTO, so the renderer is a Svelte
+package living in the website repository. The website imports it from the
+workspace directly, so a layout change is one local edit with no publish step
+and no second deployment, and the Inspector consumes a published version,
+which is what keeps the website's release cadence independent of QUA's. It is
+not published from the phonemizer repository. Svelte follows from the
+Inspector already being Svelte and being the consumer that cannot cheaply
+move.
+
+That package draws; it does not decide. Section 8 of the QUA shard reference
+lists what the Inspector derives for itself today -- riding-mark folding,
+iqlab splitting, iltiqa lifting, share-group vowel grouping, pause bridges,
+greying. Every domain decision on that list moves to the producer under 13.1.
+What is left is the drawing, and the drawing is what the package holds.
 
 ## 14. QUA v11 compatibility and 114-shard gate
 
@@ -1353,6 +1376,12 @@ keeps both architectures in the candidate package.
 
 ### 16.1 Product scope
 
+The demo is the phonemizer repository's entry point: the shortest path from
+reading the README to seeing what the package produces. It stays legible to a
+learner, but teaching is not its job. The QUA Inspector is the learner-facing
+surface; this is the technical one, and where the two differ this site shows
+the reading as the phonemizer models it rather than as a lesson folds it.
+
 The first public demo shows only the most relevant projections:
 
 - exact Qur'anic source text;
@@ -1369,12 +1398,20 @@ The first public demo shows only the most relevant projections:
 - a link to GitHub.
 
 It does not include audio, playback, timestamps, a written/recited toggle,
-respelling, graph inspection, keyboard-only rule interaction, or long teaching
-panels.
+respelling, graph inspection, or teaching panels.
 
-Rule explanation is hover-only and concise. The legend is built from rules
-actually present in the result plus tajweed_rules metadata. There is no
-click-to-lock explanation.
+Rules are shown, not explained. A rule's name on the unit it fires on is the
+whole affordance: no tooltip prose, no hover summary, no click-to-lock panel.
+The phonemizer's short summaries exist for consumers that want them and this
+site is not one. A legend built from the rules actually present in the result
+carries the colour-to-name mapping and nothing further.
+
+Rules appear directly and unfolded. The Inspector folds and simplifies for
+teaching; this site does not, so every occurrence the result carries stays
+visible on the unit that owns it. Colour works the way the Inspector's does --
+a palette over rule families, marks on units, a legend naming them -- with its
+own grouping and its own legend, because the families a technical view wants
+are not the ones a lesson wants.
 
 ### 16.2 Main flow
 
@@ -1478,7 +1515,8 @@ replacement, not an incremental UI reskin.
 Recommended maintainable shape:
 
 - FastAPI remains a thin Python backend over quranic-phonemizer;
-- a small TypeScript component frontend owns the interactive nested cell UI;
+- a Svelte frontend owns the interactive nested cell UI, through the shared
+  cell package this repository publishes;
 - generated API types or runtime schema validation catch DTO drift;
 - the backend serializes only the views requested by this demo;
 - frontend components never import a tajweed rule-ID switch.
@@ -1491,10 +1529,10 @@ The first endpoints are:
 | POST /api/analyse | Source text, phonemes, boundaries, transformed cells, occurring rules. 400 with a typed reason for an unparseable or out-of-range reference |
 | GET /api/random-ayah | Uniform global ayah mapped to surah and ayah |
 
-The exact frontend library remains an implementation-time choice after a small
-cell-layout spike. Plain untyped JavaScript is not acceptable for the nested
-DTO; a framework is not justified unless the spike shows it materially
-simplifies state and layout.
+The frontend is Svelte, and the nested cell UI it renders is the shared
+package of 13.4, which lives in this repository and which the Inspector also
+consumes. The cell-layout spike no longer chooses the library; it settles the
+grid, the share-group spans, and the state shape the package exposes.
 
 Dependency policy:
 
@@ -1651,11 +1689,11 @@ Exit: SDK is a wire adapter and Inspector is a renderer.
 
 - Replace the obsolete backend import and dependency.
 - Add the thin analysis/meta/random API.
-- Implement the cell-layout spike, then the typed components.
+- Implement the cell-layout spike, then extract it as the shared package.
 - Apply the Impeccable design pass for hierarchy, spacing, responsive behavior,
   state clarity, and visual restraint.
-- Add QPC font, rule hover, stop toggles, settings, random ayah, and copy
-  actions.
+- Add QPC font, the rule palette and legend, stop toggles, settings, random
+  ayah, and copy actions.
 - Run screenshot, interaction, accessibility-smoke, and mobile gates.
 
 Exit: the public demo meets section 16 without frontend domain logic.
@@ -1766,7 +1804,7 @@ pay for source tokenization or cells beyond the unavoidable engine result.
 - variant and extra-phoneme settings remain separate;
 - iqlab/ikhfaa-shafawi phoneme-choice previews;
 - exact text and phoneme copy only;
-- hover-only rule explanation;
+- no rule explanation surface: names and colour only, no tooltip prose;
 - no audio/playback affordance;
 - no source/transformed switch in the first release;
 - QPC font coverage and no fallback;
@@ -1783,8 +1821,8 @@ These do not block Phase 1:
 
 | Decision | Default direction | Closing evidence |
 | --- | --- | --- |
-| Exact TypeScript UI library | Smallest typed component solution after spike | Cell-layout/state spike |
 | Current production host | Reuse existing viable container host | DNS/hosting audit |
+| Website rule palette and families | Inspector's mechanism, own grouping | Design pass over a real ayah set |
 
 Adding or removing a rule after this point requires changing its internal law,
 native fixtures, metadata, v11 mapping, and website legend behavior together.
