@@ -1255,8 +1255,20 @@ Exact fixtures cover ordinary and contextual badal, every final haraka/tanween
 form, taa marbuta with and without each tanween type, stopped silah, both
 Aatani choices at wasl and waqf, and pausal alif in both boundary states.
 
-Run the adapter over all 114 v11 shards for one fully migrated reciter with
-waqf/ibtidaa information. Compare:
+Run the adapter over all 114 shards of nasser_al_qatami_mp3quran, read from
+the prod bucket. It is complete, schema v11, phonemizer 2.13. This is a
+one-time local comparison run once the adapter exists, not a standing gate:
+it exists to find where the native result and the shipped shards disagree,
+and once each disagreement is classified it has done its job.
+
+What stays afterwards is the cheap half, and it needs no corpus: every tag,
+role, and status the adapter emits is asserted to be a member of the pinned
+vocabularies. That is a unit test, and it is the part worth keeping, because
+the alternative -- keeping the comparison alive -- means keeping a frozen copy
+of the old projection alive to compare against, which is the opposite of one
+public architecture.
+
+Compare:
 
 - reference and word order;
 - exact source characters;
@@ -1610,8 +1622,8 @@ need.
 ### Phase 0: freeze untrusted evidence
 
 - Build and hash a wheel from the old projection baseline.
-- Save representative old outputs and all 114 v11 shards outside the candidate
-  package.
+- Save representative old outputs, and the 114 shards of
+  nasser_al_qatami_mp3quran, outside the candidate package.
 - Record known incorrect categories.
 - Add a differential runner that executes old and new wheels in separate
   environments.
@@ -1823,9 +1835,8 @@ and the qua-sdk equivalent.)
 
 ### 20.4 Full compatibility gate
 
-- all 114 reciter shards;
-- every difference classified;
-- no unresolved category;
+- the one-time comparison over all 114 shards is run and every difference is
+  classified, with no unresolved category left;
 - adapter emits only frozen v11 tags;
 - native tests contain no v11 expectations;
 - legacy equality never substitutes for a native law.
