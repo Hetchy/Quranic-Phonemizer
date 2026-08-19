@@ -350,7 +350,7 @@ LetterUnit is the semantic and educational unit over source characters:
 | owned_sound_ids | Sounds this unit genuinely produces |
 | presented_sound_ids | Additional non-owned sounds visibly shared here |
 | rule_occurrence_ids | Rules placed on this visible unit |
-| silence | Typed silence reason, or null |
+| silence | Why this unit is silent: null, a rule occurrence ID, or orthographic |
 
 The role vocabulary is letter, haraka, sukun, tanween, and seen_alternative. It is not a mirror of internal SlotFact names, and it has no
 catch-all member: the script inventory is total over its scalars, so a mark
@@ -399,7 +399,14 @@ non-owning visible sharing. The two arrays are disjoint:
 - a merger contributor does not own the host's sound but may present the
   shared sound;
 - a genuinely silent letter owns and presents no sound and has a silence
-  reason;
+  reason. That reason is the rule occurrence that silenced it, so a consumer
+  resolves it to a RuleDefinition and gets the name and summary the phonemizer
+  already owns. There is no second vocabulary of causes to drift from the
+  rules;
+- the one silence no rule accounts for is a letter the script writes and the
+  reading does not read -- the alif of قَالُوا۟ -- which after 11.1 has no
+  occurrence to name. It takes the literal orthographic. Those are the only
+  two forms silence takes;
 - a shadda or silence mark can be soundless notation inside another unit
   without itself becoming a silent-letter unit;
 - a sukun is its own soundless notation unit without a SilenceReason.
@@ -725,7 +732,10 @@ The implementation must enforce these before serialization:
 17. Every source sound has at most one owner; owned and presented sound arrays
     are disjoint.
 18. A scalar that 7.2 folds into a unit creates no column of its own.
-19. A unit with a silence reason has no owned or presented sounds.
+19. A unit with a silence reason has no owned or presented sounds. The reason
+    is either a rule occurrence that resolves in this result and lists the
+    unit among its effects, or the literal orthographic; never both, and never
+    a free-text or invented cause.
 20. Every lexical source character of an included word appears in exactly one
     column's source_character_ids, and columns are in render order. Every
     LetterUnit of an included word has exactly one column.
@@ -1427,7 +1437,8 @@ without any legacy projection import.
 
 - Build exact Characters and LetterUnits.
 - Attach rule placements and honest sound ownership.
-- Add typed silence reasons.
+- Carry each silence reason from the occurrence that caused it, and the
+  literal orthographic where no rule did.
 - Implement highlight groups with the three fold directions of 8.1.
 - Run laws 32 to 33d over the whole corpus in every boundary state. The units
   they name are the folds nobody has decided yet; each one is closed against a
@@ -1600,7 +1611,6 @@ These do not block Phase 1:
 
 | Decision | Default direction | Closing evidence |
 | --- | --- | --- |
-| Exact typed silence reasons | Small stable enum by real cause, not one value per rule | Full silent-unit fixture matrix |
 | Exact TypeScript UI library | Smallest typed component solution after spike | Cell-layout/state spike |
 | Current production host | Reuse existing viable container host | DNS/hosting audit |
 
