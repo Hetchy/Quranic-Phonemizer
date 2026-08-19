@@ -176,6 +176,13 @@ AnalysisResult identifies the exact computation:
 | schema_version | Version of this native DTO contract |
 | canon_digest | Digest of the canonical source passage |
 
+schema_version is a monotonic integer, matching the shard convention. It is
+bumped when a DTO field or a role, change, state, or placement value is added,
+removed, or changes meaning, and when a law changes what a consumer may rely
+on. A rule added to or removed from the inventory does not bump it: the
+catalogue is data reached through tajweed_rules, which is what section 12.1
+keeps out of the shape.
+
 IDs are result-local, opaque, typed identifiers. Array position is not public
 identity. Every published reference is validated in both directions where a
 back-reference exists.
@@ -211,6 +218,11 @@ There are N + 1 boundaries for N words:
 | after | Word after the boundary, if any |
 | state | start, join, sakt, or stop |
 | stop_sign | Exact written stop or sakt sign at this boundary, if any |
+
+Sakt coverage is what the ledger authors. Not every site a reader may take a
+sakt at carries one, so a boundary the ledger does not name resolves to join
+like any other; 18:1:11 is the case to know. Adding a site is a ledger change,
+not a contract change.
 
 stop_sign is single-valued. One site writes two marks at the same boundary --
 36:52 carries both a sakt seen and a preferred-stop sign -- and there the
@@ -643,7 +655,7 @@ CellBoundary orders every boundary-owned column at that exact boundary.
 - A genuine idgham or other merger uses CellBridge with the shared CellSound.
 - CellBridge uses plural column endpoints because one merger can span the
   contributor's and the host's columns on each side.
-- A merger's one primary CellSound lives inside its boundary's CellBridge, not
+- A merger's one CellSound lives inside its boundary's CellBridge, not
   again inside the host CellWord. It renders exactly once between the words;
   its column_ids still align the contributor and host columns for
   co-highlighting.
@@ -710,7 +722,9 @@ wrong-kind, and contradictory references.
 
 ## 10. Native analysis laws
 
-The implementation must enforce these before serialization:
+The implementation must enforce these before serialization. A law's number is
+its identifier and is stable: a new law is inserted with a suffixed number
+rather than renumbering the ones after it.
 
 1. Source characters concatenate exactly to result.text().
 2. Word text concatenates from its lexical source characters exactly.
@@ -719,8 +733,8 @@ The implementation must enforce these before serialization:
 4. Boundary before/after are typed WordId or null, with exact
    leading/internal/trailing cardinality; word and boundary references are
    mutually consistent.
-5. Ordinary no-override/override resolves join/stop; authored sakt
-   no-override/override resolves sakt/stop. Sakt is never treated as waqf,
+5. At an internal boundary, ordinary no-override/override resolves join/stop
+   and authored sakt no-override/override resolves sakt/stop. Sakt is never treated as waqf,
    ibtidaa, or ordinary join.
 6. Every sound has one total order and one primary word allocation.
 7. Word.sound_ids and Sound.word_id are exact ordered inverses.
@@ -758,7 +772,7 @@ The implementation must enforce these before serialization:
     written_on_unit_id names. Where that unit has no main column of its own,
     it is the main column of the unit owning the sound the rider qualifies.
     Attachment is never derived from adjacency.
-22. Every core sound appears in exactly one primary CellSound, held by one
+22. Every core sound appears in exactly one CellSound, held by one
     CellWord, one CellBoundary, or one CellBridge.
 23. A non-gap CellSound's columns are exactly the columns that own or present
     its sound. A gap CellSound is the only exception to that agreement.
@@ -772,9 +786,9 @@ The implementation must enforce these before serialization:
     builder decides no silence of its own.
 24. A gap column has empty provenance, ownership, presentation, and silence,
     and exactly one valid unit/side anchor or boundary owner.
-25. Every CellBridge resolves to one Merger, owns the same primary CellSound,
-    and its endpoint columns are the MergerPlacement's contributor presenters
-    and host owner. The bridged sound has no duplicate inline CellSound.
+25. Every CellBridge resolves to one Merger, owns the same CellSound, and its
+    endpoint columns are the MergerPlacement's contributor presenters and host
+    owner. The bridged sound has no duplicate CellSound.
 26. No iltiqa boundary column creates a CellBridge.
 27. CellSound column references are ordered and nonempty, using an honest gap
     column where no source presenter exists.
@@ -802,6 +816,10 @@ The implementation must enforce these before serialization:
     insertion anchor, or a long vowel's carrier put another unit there. Ikhfaa,
     iqlab, and their shafawi counterparts therefore never fold across a
     boundary, because the nasalized unit still owns its sound.
+33e. Every published ID array has one stated order and is deterministic across
+    runs of the same request: sounds and columns in render order, occurrences
+    in the order their rules fired, and every back-reference in the order of
+    the array it points into.
 34. Validators reject missing, duplicated, contradictory, and wrong-kind IDs
     even when the underlying integer value exists in another ID space.
 35. Native tests pass when every legacy projection module is unavailable.
@@ -884,6 +902,16 @@ for its own sake.
 - Split wasl_start into hamza_wasl_fatha, hamza_wasl_kasra, and
   hamza_wasl_damma. The domain already resolves the starting vowel; clients
   should not derive the public rule name from it.
+- tafkheem and tarqeeq read as a pair but are not symmetric, and the asymmetry
+  is deliberate. tafkheem covers the isti'la letters, contextual raa, the lam
+  of the divine name, and the nasal hum of an ikhfaa; tarqeeq covers raa alone,
+  because every other letter's thinness is the absence of a rule rather than
+  one. Each RuleDefinition summary states its own scope so a legend does not
+  imply the pair covers one axis.
+- madd_lazim is one rule over kalimi and harfi, muthaqqal and mukhaffaf, and
+  the leen-lazim case. The four subtypes and leen-lazim are a teaching layer
+  the producer does not publish; a consumer that teaches them derives them from
+  the unit and the following sakin.
 - Remove orthographic_silence from Rule. It is a source-unit state, not a
   recitation rule occurrence.
 
@@ -1190,8 +1218,36 @@ Every difference receives exactly one reviewed category:
 5. frontend repair moved into the producer;
 6. unresolved defect, which fails the gate.
 
+Two of these are decided mechanically rather than by review. Category 1 is
+whatever compares equal. Every emitted tag, CellRole and CellStatus is asserted
+to be a member of TajweedRule, CellRole and CellStatus imported from the pinned
+qua_shared commit, so an invalid value fails the gate outright and can never be
+filed as category 2. Categories 2 to 5 each require the row of section 14 or
+14.1 that predicted them, named in the classification; a difference no row
+predicts is category 6 by default, which is what stops category 2 absorbing
+anything that merely looks like a translation.
+
 Frozen old output is evidence, not expected truth. Snapshot regeneration alone
 cannot approve categories 2 through 5.
+
+### 14.1 Cell differences already known and decided
+
+Four cell differences are settled in advance, measured against a full v11
+reciter at phonemizer_version 2.13. Each is category 3, and the adapter
+produces the v11 shape from the native one rather than the native model
+adopting it:
+
+| v11 | Native | Why |
+| --- | --- | --- |
+| The maddah takes its own madd cell and carries the rule | The maddah folds into the letter it marks, and the rule lands on that letter | A bar over a mark claims a length the mark does not own. The letter is what is read long |
+| The pausal zero takes a madd cell, as a length carrier | It folds, and is a silence sign | It writes an absence: the alif it sits on is silent when joined to. A zero is not a carrier |
+| The mini seen of a seen/saad khilaf composes into the saad | It is a unit with its own column, paired with the saad | One of the two is read and the other is not. Composing them cannot show which, and cannot carry the variant that decides it |
+| A sukun is status=dropped | A sukun is an ordinary present unit that owns no sound | Nothing is dropped. The mark is written and read as the absence of a vowel, which is not the same as a letter the reading discards |
+
+The 121,746 v11 cells carrying a share_group are the same relation section 8
+publishes as highlight groups, and its two commonest shapes -- a haraka with
+its carrier, and a haraka with two -- are what laws 33a to 33d cover.
+
 
 ## 15. Removing the old projection stack
 
@@ -1212,14 +1268,23 @@ Do not place the native result on top of the existing serialized graph.
 | phonemize/derived.py | Move proven facts to their actual owner, then delete |
 | phonemize/recited.py | Delete; add a separately named private transformed-cell builder with no general text writer |
 | phonemize/ordering.py | Keep only if it is pure Performance ordering; otherwise replace |
+| phonemize/names.py | Rewrite as the RuleDefinition, VariantDefinition, and ExtraPhonemeDefinition catalogue owner |
+| phonemize/session.py | Keep; it is the resolved request the native flow starts from |
+| phonemize/request.py | Keep |
+| phonemize/span.py | Keep; refresh its overlap rationale once fakk_idgham is gone |
+| phonemize/boundaries.py | Keep; it is the source of Boundary state |
+| phonemize/runtime.py | Keep |
+| phonemize/__init__.py | Rewrite as the facade over the native result |
 
 A row reading Delete may become Retain private under 15.1 if its callers are
 gone and nothing succeeds it; the manifest check of this section applies only
 to rows still marked Delete, so a deliberately retained private module is not
 indistinguishable from a missed one.
 
-The exact filenames must be refreshed against the implementation branch before
-deletion, but the architectural disposition is binding.
+The dispositions are binding. The filenames and the caller counts below are
+measured at the target baseline; re-measure them at the implementation branch
+before acting, because a caller added since then changes the order rather than
+the outcome.
 
 ### 15.1 A module leaves when its last caller does
 
@@ -1257,7 +1322,8 @@ what makes the previous commit a real rollback rather than a nominal one.
 The one permitted private flow is:
 
 ~~~text
-Session -> AnalysisFacts -> core / source / highlights / cells
+(Session, resolved request, Alphabet) -> AnalysisFacts
+        -> core / source / highlights / cells
 ~~~
 
 AnalysisFacts is a compact immutable cache of already resolved facts, not a
@@ -1297,6 +1363,8 @@ The first public demo shows only the most relevant projections:
 - clickable boundary stop cells;
 - variants;
 - extra phonemes;
+- an inline message for a reference that does not parse or falls outside the
+  Qur'an, leaving the previous result on screen;
 - a link to the latest PyPI release;
 - a link to GitHub.
 
@@ -1341,6 +1409,9 @@ transition.
 - Rule underlines attach to the exact producer-supplied letter or sound cell.
 - Every cell has a content-based minimum inline size large enough for its
   Arabic or phoneme content. It never shrinks until text overflows the box.
+- A column whose sound list is far longer than one -- the alif of `الٓمٓ` says
+  five -- stretches its phoneme row under one letter rather than borrowing the
+  columns beside it.
 - Long ayat wrap by whole-word containers. A word does not split its internal
   grid across lines.
 - Mobile preserves readable minimum cells and uses horizontal containment only
@@ -1417,7 +1488,7 @@ The first endpoints are:
 | Endpoint | Purpose |
 | --- | --- |
 | GET /api/meta | Surahs, rule definitions, separate setting catalogues, package/schema versions, links |
-| POST /api/analyse | Source text, phonemes, boundaries, transformed cells, occurring rules |
+| POST /api/analyse | Source text, phonemes, boundaries, transformed cells, occurring rules. 400 with a typed reason for an unparseable or out-of-range reference |
 | GET /api/random-ayah | Uniform global ayah mapped to surah and ayah |
 
 The exact frontend library remains an implementation-time choice after a small
@@ -1472,10 +1543,10 @@ new package.
 - Make badal, iwad, and silah overlaps native.
 - Replace generic pausal_sukun with the precise diacritic, silah, taa-marbuta,
   and pausal-alif outcomes.
-- Remove waqf_glide_drop and model Aatani directly as the
-  yaa_aatani_waqf variant outcome.
-- Delete or privatize the misleading generic Onset.GLIDE abstraction if the
-  implementation audit confirms its only use is Aatani.
+- Split the Onset.GLIDE branch out of the generic pausal-sukun occurrence and
+  re-express it as the yaa_aatani_waqf variant outcome. No waqf_glide_drop rule
+  is added, and the abstraction is privatized: its only shipped use is the one
+  ledger row for 27:36:8.
 - Correct ibdal targets and pausal-alif direction.
 - Demote orthographic silence from Rule.
 - Remove fakk_idgham and its reverse merger-table classifier.
@@ -1491,7 +1562,10 @@ teaching-label or assembler repair.
 - Encode the exact Character and LetterUnit laws.
 - Build a fixture matrix for every small mark, carrier, seat, attachment, and
   silence case.
-- Port the correct QUA v11 cell behavior into producer-owned expected fixtures.
+- Enumerate v11 cell behaviours as candidate cases. Each one is closed against
+  a native law or a docs/hafs/research citation before its fixture is written;
+  a v11 behaviour with no native justification is recorded in section 21 as
+  open, not ported. Section 14.1 lists the four already decided against v11.
 - Fixture the iqlab and open-tanween rows as facts about units and
   occurrences, with no glyph choice in the result.
 - Fixture every folded mark against its main column, and every unit role
@@ -1632,6 +1706,10 @@ At minimum:
 - sakt versus stop;
 - ishmam soundless gesture semantics.
 
+Every RuleDefinition returned by tajweed_rules("hafs") appears in at least one
+hard-case fixture. A rule with no fixture fails the gate, which is what keeps
+this list honest as the inventory changes rather than freezing today's 29.
+
 Each asserts exact subjects, context privacy, sound targets, source placements,
 boundary placements, and overlaps.
 
@@ -1650,8 +1728,14 @@ boundary placements, and overlaps.
   that must not fold;
 - iltiqa boundary insertion without Merger;
 - all transformed insertion/replacement/omission families;
+- all thirty muqattaat openings, over their fourteen distinct skeletons: one
+  letter unit owning several sounds, with no extension splitting inside a
+  spelled-out name;
 - no overflowing representative Arabic or phoneme cell;
-- no rule-ID/codepoint branches in consumers.
+(A ban on rule-ID and codepoint branching in consumers is not checkable from
+this repository. It is an exit criterion of phases 8 and 9 instead: an
+Inspector lint rejecting a rule-ID comparison outside its renderer registry,
+and the qua-sdk equivalent.)
 
 ### 20.4 Full compatibility gate
 
@@ -1688,6 +1772,8 @@ pay for source tokenization or cells beyond the unavoidable engine result.
 - QPC font coverage and no fallback;
 - desktop, narrow mobile, RTL, and long-ayah screenshots;
 - content-based cell minimum size and no overflow;
+- an invalid and an out-of-range reference both render the inline message and
+  leave the previous result standing;
 - exact package/schema version match;
 - PyPI latest and GitHub links.
 
