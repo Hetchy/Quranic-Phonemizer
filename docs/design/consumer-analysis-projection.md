@@ -615,8 +615,16 @@ inspecting a tanween codepoint together with a tajweed rule ID.
 ### 9.3 Rules in cells
 
 Rules on visible letters attach to CellColumn.rule_occurrence_ids. Rules on
-sounds attach to CellSound.rule_occurrence_ids. Both refer to the same native
-occurrences and definitions.
+sounds attach to CellSound.rule_occurrence_ids. Both are projections of the
+source and core arrays, never an independent classification: a column takes
+the placements that name its own source units, and a sound cell takes exactly
+what its Sound already names. Laws 23a and 23b state both derivations, so the
+cell builder has nothing left to decide and no reason to read a rule ID.
+
+An inserted column has no source units, so it carries no rules of its own. It
+always owns a sound, and its label comes from that CellSound. The dropped
+kasra of an iltiqa and the connecting vowel of a hamzat wasl are labelled on
+the phoneme row, not the letter row.
 
 Multiple rules may coexist, including:
 
@@ -692,6 +700,11 @@ The implementation must enforce these before serialization:
     CellSound, held by one CellWord, one CellBoundary, or one CellBridge.
 23. A non-gap CellSound's columns are exactly the columns that own or present
     its sound. A gap CellSound is the only exception to that agreement.
+23a. A column's rule_occurrence_ids are exactly the source RulePlacement
+    occurrences whose unit_ids intersect that column's source_unit_ids. A
+    column with no source units carries none.
+23b. A CellSound's rule_occurrence_ids are exactly its Sound's
+    rule_occurrence_ids.
 24. A gap column has empty provenance, ownership, and presentation and exactly
     one valid unit/side anchor or boundary owner.
 25. Every CellBridge resolves to one Merger, owns the same primary CellSound,
