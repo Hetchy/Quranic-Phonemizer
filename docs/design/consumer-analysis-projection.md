@@ -441,22 +441,48 @@ is sound ownership:
 The projection preserves exact source text and QPC shaping. The consumer maps
 timed sound IDs to these groups; timestamps remain outside the phonemizer.
 
-The phonemizer, not the consumer, decides silent folding and co-highlighting:
+### 8.1 The relation is the legacy letter-phoneme entry, made native
 
-- silent leading units may fold forward where the reading requires it;
-- silent trailing units may fold backward where the reading requires it;
-- a merger may co-highlight contributor and host units;
-- inserted sounds highlight their domain-selected source anchor;
-- structural stop-sign characters are not folded into lexical highlighting.
+A HighlightGroup is one entry of the legacy letter-phoneme mapping described
+in docs/legacy/letter-phoneme-mappings.md, expressed in native IDs instead of
+concatenated characters and phoneme strings. That specification already names
+every fold this view needs, and it already carries programmatic validation.
+It is the source for the folding rules below and for laws 33a to 33d; it is
+not an oracle for any individual result.
 
-These are audited per transformation family. They are not implemented as a
-single adjacency guess. A consumer that wants to skip all silent participation
-may ignore the optional highlight view and use honest unit ownership instead.
+The phonemizer, not the consumer, decides silent folding and co-highlighting.
+There are exactly three fold directions, and every silent unit takes one:
 
-In the full view, every sound occurs in exactly one HighlightGroup. A merger's
-shared sound therefore activates one group containing every source range that
-must co-highlight on both sides of the boundary. Ranges are producer-derived;
-the consumer never coalesces Character IDs or guesses a silent fold.
+- back: a silent unit joins the group of the unit before it. Silent alif, waw,
+  and yaa; the alif after tanween; the skipped mini yaa of a stopped Aatani.
+- forward: a silent unit at a word start joins the group of the next sounding
+  unit. Silent hamzat wasl, the article lam before a sun letter, and the
+  hamzat wasl or silent long vowel of an iltiqa.
+- across: a silent unit at a word end joins the first sounding unit of the
+  next word. Cross-word idgham of every family, and the iltiqa chain.
+
+A unit that keeps a sound of its own never folds. That is what separates
+idgham, which folds across, from ikhfaa and iqlab, which do not: the nasalized
+noon still sounds, so it holds its own group and the boundary stays between
+two groups.
+
+A merger co-highlights contributor and host in one group. An inserted sound
+joins the group of its domain-selected source anchor. Structural separators
+and stop signs belong to no group.
+
+Each fold is stated per transformation family, not implemented as a single
+adjacency guess. A consumer that wants to skip all silent participation may
+ignore this view and use honest unit ownership from section 7 instead.
+
+### 8.2 What makes a highlight view wrong
+
+Coverage, not comparison, is the acceptance evidence. A missing sound and a
+letter that never lights up are both failures, and only the first is caught by
+counting sounds. Laws 32 to 33d state both directions, and they are checkable
+over the whole corpus today without timestamps, a reciter, or legacy output.
+
+Ranges are producer-derived; the consumer never coalesces Character IDs or
+guesses a silent fold.
 
 ## 9. Educational cell view
 
@@ -691,6 +717,18 @@ The implementation must enforce these before serialization:
 32. Highlight groups refer only to source units and existing sounds; their
     ranges are ordered and non-overlapping.
 33. A full highlight view contains every sound exactly once.
+33a. A full highlight view contains every lexical source unit exactly once,
+    and the union of its ranges equals the lexical span of result.text().
+    Separator and stop-sign characters are the only exclusions.
+33b. Every highlight group holds at least one sound and at least one unit that
+    owns a sound. No group is silent-only, and no sound is orphaned from a
+    sounding presenter.
+33c. Every long-vowel sound has a madd unit in its own group, except the Allah
+    dagger alif, hamza with fathatan, and muqattaat.
+33d. A unit that owns a sound is alone in its group unless a merger, an
+    insertion anchor, or a long vowel's carrier put another unit there. Ikhfaa,
+    iqlab, and their shafawi counterparts therefore never fold across a
+    boundary, because the nasalized unit still owns its sound.
 34. Validators reject missing, duplicated, contradictory, and wrong-kind IDs
     even when the underlying integer value exists in another ID space.
 35. Native tests pass when every legacy projection module is unavailable.
@@ -1345,11 +1383,13 @@ without any legacy projection import.
 - Build exact Characters and LetterUnits.
 - Attach rule placements and honest sound ownership.
 - Add typed silence reasons.
-- Implement highlight groups for silent folding, insertions, and mergers.
-- Compare the highlight view with audited legacy teleprompter cases, not blind
-  legacy equality.
+- Implement highlight groups with the three fold directions of 8.1.
+- Run laws 32 to 33d over the whole corpus in every boundary state. The units
+  they name are the folds nobody has decided yet; each one is closed against a
+  native law or a docs/hafs/research citation, not against legacy output.
 
-Exit: continuous source-text highlighting needs only sound timing IDs.
+Exit: continuous source-text highlighting needs only sound timing IDs, and
+laws 32 to 33d hold over the full corpus with no exemption list.
 
 ### Phase 5: implement cells
 
@@ -1462,6 +1502,10 @@ boundary placements, and overlaps.
 - attached haraka and tanween columns;
 - silent ownership emptiness;
 - merger presentation and co-highlighting;
+- full corpus highlight coverage in every boundary state: laws 32 to 33d with
+  no exempted unit;
+- one fixture per fold direction of 8.1, including the ikhfaa and iqlab cases
+  that must not fold;
 - iltiqa boundary insertion without Merger;
 - all transformed insertion/replacement/omission families;
 - no overflowing representative Arabic or phoneme cell;
