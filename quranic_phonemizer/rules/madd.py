@@ -191,7 +191,7 @@ class MaddClass:
             # takes a fatha and stops nothing, so its madd is the plain two.
             return _classify(Rule.MADD_LAZIM, at, following.id)
 
-        if _stop_makes_quiescent(near, following, boundaries):
+        if _stop_makes_quiescent(near, following, boundaries, plan):
             # Voweled in the Score, sakin only because the stop lands here -- aridah lissukun, same shape as lazim.
             return _classify(Rule.MADD_ARID_LIL_SUKUN, at, following.id)
         # None of the five special outcomes: an ordinary long vowel.
@@ -214,7 +214,6 @@ class MaddLeen:
         self, near: Neighbourhood, plan: Plan, at: SlotId,
         boundaries: BoundaryPlan,
     ) -> Verdict | None:
-        del plan
         slot, word = near.slot(at), near.word_of(at)
         if slot is None or word is None:
             return None
@@ -234,13 +233,15 @@ class MaddLeen:
             # `عٓ` spells out as a leen before a sakin the Score holds for
             # good, so the length is obligatory rather than the stop's.
             return _classify(Rule.MADD_LAZIM, at, following.id)
-        if not _stop_makes_quiescent(near, following, boundaries):
+        if not _stop_makes_quiescent(near, following, boundaries, plan):
             # Only the letter the stop actually silences counts.
             return None
         return _classify(Rule.MADD_LEEN, at, following.id)
 
 
-def _stop_makes_quiescent(near: Neighbourhood, slot, boundaries) -> bool:
+def _stop_makes_quiescent(
+    near: Neighbourhood, slot, boundaries, plan: Plan
+) -> bool:
     """Is this the letter the stop silences? Last in its word but for a
     tanween noon -- `عَظِيمٌ` stops on the meem -- and holding a short vowel
     the stop takes rather than lengthens."""
@@ -250,7 +251,13 @@ def _stop_makes_quiescent(near: Neighbourhood, slot, boundaries) -> bool:
     if not slot.nucleus.is_short:
         return False
     slots = near.score.words[word].slots
-    letters = [s for s in slots if s.origin is not SlotOrigin.NUNATION]
+    # The written last letter need not be the one stopped on: the boundary
+    # phase silences the pronoun yaa of `ءَاتَىٰنِ` and hands the stop back.
+    letters = [
+        s for s in slots
+        if s.origin is not SlotOrigin.NUNATION
+        and not plan.merged_away(s.id, Aspect.CONSONANT)
+    ]
     if not letters or letters[-1].id != slot.id:
         return False
     if slots[-1].origin is SlotOrigin.NUNATION:

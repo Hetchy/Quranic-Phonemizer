@@ -208,6 +208,17 @@ def test_aatani_keeps_or_drops_the_final_yaa_only_at_waqf():
     assert joined_hadhf.phonemes(8) == joined_ithbat.phonemes(8)
 
 
+def test_aatani_hadhf_stops_on_the_noon_and_lengthens_before_it():
+    """The yaa is written but absent at the pause, so the noon is the letter
+    the stop silences and the `aa` before it is aridah, not tabii -- the same
+    shape as `لِلَّهِ`, whose written last letter is also the one stopped on.
+    """
+    # ءَاتَىٰنِۦَ
+    hadhf = _at(AATANI, 8, KhilafId.YAA_AATANI_WAQF, "hadhf")
+    assert Rule.MADD_ARID_LIL_SUKUN in _rules(hadhf)
+    assert hadhf.rules_on_sound(8, "a:") >= {"madd_arid_lil_sukun"}
+
+
 @pytest.mark.parametrize(
     ("word", "fatha", "damma"),
     ((5, "dˤaˤʕf", "dˤuʕf"), (10, "dˤaˤʕf", "dˤuʕf"),
