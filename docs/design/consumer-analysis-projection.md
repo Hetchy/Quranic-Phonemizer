@@ -1310,7 +1310,7 @@ adopting it:
 
 | v11 | Native | Why |
 | --- | --- | --- |
-| The maddah takes its own madd cell and carries the rule | The maddah folds into the letter it marks, and the rule lands on that letter | A bar over a mark claims a length the mark does not own. The letter is what is read long |
+| The maddah takes its own madd cell and carries the rule | The maddah folds into the letter it marks, and the rule lands on that letter | A bar over a mark claims a length the mark does not own. The letter is what is read long. The pre-v11 cells folded it too, and splitting it out is where the muqattaat grouping went wrong: in `الٓمٓ` the lam and its maddah share a group, the meem and its maddah do not, because the shared sound is last of the lam's three and middle of the meem's. Ten openings carry that split. Folding cannot express it |
 | The pausal zero takes a madd cell, as a length carrier | It folds, and is a silence sign | It writes an absence: the alif it sits on is silent when joined to. A zero is not a carrier |
 | The mini seen of a seen/saad khilaf composes into the saad | It is a unit with its own column, paired with the saad | One of the two is read and the other is not. Composing them cannot show which, and cannot carry the variant that decides it |
 | A sukun is status=dropped | A sukun is an ordinary present unit that owns no sound | Nothing is dropped. The mark is written and read as the absence of a vowel, which is not the same as a letter the reading discards |
