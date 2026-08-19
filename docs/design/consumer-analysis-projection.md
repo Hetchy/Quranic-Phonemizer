@@ -300,7 +300,7 @@ Neither record is a generic edge.
 
 Iltiqa kasra and iltiqa fatha are not mergers: they insert a vowel at a
 boundary but do not make two letters share a sound. Their RuleOccurrence names
-the boundary, and transformed cells place their inserted group at that
+the boundary, and transformed cells place their inserted column at that
 boundary. The frontend does not need to special-case their rule IDs.
 
 ## 7. Exact source view
@@ -373,8 +373,7 @@ The tokenization is normative:
 Character, LetterUnit, and shaping clusters are not required to coincide.
 This is intentional. A main unit can have multiple ranges when an independently
 tokenized haraka occurs between its base and shadda. written_on_unit_id states
-orthographic carrier/seat attachment; it is not educational CellGroup
-membership. The source string remains continuous and font-shaped as one string,
+orthographic carrier/seat attachment; it is not cell-column attachment. The source string remains continuous and font-shaped as one string,
 while producer-supplied scalar ranges state exact semantics.
 
 ### 7.3 Ownership, presentation, and silence
@@ -508,17 +507,14 @@ CellView
 
 CellWord
   word_id
-  groups: CellGroup[]
+  columns: CellColumn[]
+  sounds: CellSound[]
 
 CellBoundary
   boundary_id
-  groups: CellGroup[]
-  bridges: CellBridge[]
-
-CellGroup
-  id
   columns: CellColumn[]
   sounds: CellSound[]
+  bridges: CellBridge[]
 
 CellColumn
   id
@@ -546,8 +542,8 @@ CellSound
 
 CellBridge
   merger_id
-  before_group_ids[]
-  after_group_ids[]
+  before_column_ids[]
+  after_column_ids[]
   sound: CellSound
 ~~~
 
@@ -556,10 +552,14 @@ without rebuilding lookup maps. IDs remain only where alignment or a bridge
 crosses nested ownership. A private normalized index may exist inside the
 package.
 
-CellGroup is educational grouping. It must not be overloaded as orthographic
-shaping or canonical-slot identity. CellBoundary orders every boundary-owned
-group at that exact boundary. No group-kind taxonomy is needed until a fixture
-proves one.
+There is no grouping level between a word and its columns. A column carries
+its own attachment (placement plus attached_to_column_id) and its own sound
+participation, and CellSound.column_ids carries the alignment, so a group would
+only restate what those already say. A renderer that wants a box around a
+letter and its marks draws it from attachment, which the producer supplies;
+it does not infer one.
+
+CellBoundary orders every boundary-owned column at that exact boundary.
 
 ### 9.2 Normative tokenization and alignment
 
@@ -570,11 +570,11 @@ proves one.
   vowels, small waw/yaa, vowel carriers, and madd signs use role=madd.
 - Haraka, sukun, and tanween get separate smaller columns. Above/below
   placement and attached_to_column_id identify the exact main column they ride;
-  shared group membership alone is not used as an attachment guess.
+  attachment is stated, never guessed from adjacency.
 - Shadda and silence marks are composed directly into their main column text.
   They never open their own columns.
-- Long-vowel quality and carrier may occupy separate columns in one group.
-  One CellSound can span both.
+- Long-vowel quality and carrier may occupy separate columns. One CellSound
+  spans both.
 - A silent or omitted letter still has a column so it can be greyed; it has no
   overflowing placeholder phoneme.
 - source_character_ids and source_unit_ids are provenance, not displayed-text
@@ -593,12 +593,12 @@ proves one.
   empty role=gap, change=gap column anchored to a unit/side or boundary. It has
   empty source provenance and no owned/presented sound; CellSound references
   it only for alignment. This does not invent a source glyph or ownership.
-- Iltiqa insertion is an ordered boundary-owned group between two CellWords.
+- Iltiqa insertion is an ordered boundary-owned column between two CellWords.
 - A genuine idgham or other merger uses CellBridge with the shared CellSound.
-- CellBridge uses plural group endpoints because one merger can span multiple
-  educational groups.
+- CellBridge uses plural column endpoints because one merger can span the
+  contributor's and the host's columns on each side.
 - A merger's one primary CellSound lives inside its boundary's CellBridge, not
-  again inside the host CellGroup. It renders exactly once between the words;
+  again inside the host CellWord. It renders exactly once between the words;
   its column_ids still align the contributor and host columns for
   co-highlighting.
 - Sukun visibility, maddah folding, pausal zero, and carrier-seat handling are
@@ -645,9 +645,9 @@ preserved across scopes.
 
 For word-scoped cells:
 
-- requested CellWords and their owned boundary groups are complete;
+- requested CellWords and their owned boundary columns are complete;
 - every referenced source/core record is included;
-- a bridge is emitted only when both endpoint groups are present;
+- a bridge is emitted only when both endpoint columns are present;
 - a scoped contributor can still present an externally hosted sound without a
   dangling bridge.
 
@@ -690,23 +690,22 @@ The implementation must enforce these before serialization:
 18. Shadda and silence marks do not create their own educational columns.
 19. A unit with a silence reason has no owned or presented sounds.
 20. Cell columns partition every included display item in render order.
-21. Above/below attachment resolves to an exact sibling column.
+21. Above/below attachment resolves to an exact main column in the same
+    CellWord or CellBoundary.
 22. In a full CellView, every core sound appears in exactly one primary
-    CellSound, either inside one CellGroup or one CellBridge.
-23. A non-gap group CellSound's columns agree with the owning/presenting
-    columns in its group. A gap CellSound is the only group exception to that
-    agreement.
+    CellSound, held by one CellWord, one CellBoundary, or one CellBridge.
+23. A non-gap CellSound's columns are exactly the columns that own or present
+    its sound. A gap CellSound is the only exception to that agreement.
 24. A gap column has empty provenance, ownership, and presentation and exactly
     one valid unit/side anchor or boundary owner.
 25. Every CellBridge resolves to one Merger, owns the same primary CellSound,
-    and its endpoint groups contain the MergerPlacement's contributor
-    presenters and host owner. The bridged sound has no duplicate inline
-    CellSound.
-26. No iltiqa boundary group creates a CellBridge.
+    and its endpoint columns are the MergerPlacement's contributor presenters
+    and host owner. The bridged sound has no duplicate inline CellSound.
+26. No iltiqa boundary column creates a CellBridge.
 27. CellSound column references are ordered and nonempty, using an honest gap
     column where no source presenter exists.
-28. Cell groups, boundary groups, sound spans, and bridge endpoints are closed:
-    every referenced ID exists in the selected CellView.
+28. Word columns, boundary columns, sound spans, and bridge endpoints are
+    closed: every referenced ID exists in the selected CellView.
 29. A transformed inserted column has no invented source character or unit and
     has a valid unit/side anchor or boundary owner.
 30. A transformed replaced or omitted column retains exact source provenance;
@@ -989,7 +988,7 @@ Neither catalogue imports or wraps the other.
 - true sound ownership, shared presentation, and silence reasons;
 - resolved boundary behavior and stop signs;
 - mergers and boundary insertions;
-- source/transformed cell grouping and alignment;
+- source/transformed cell columns, attachment, and alignment;
 - continuous-text highlight groups, including silent folding;
 - variants and optional-phoneme catalogues.
 
@@ -1078,7 +1077,7 @@ waqf/ibtidaa information. Compare:
 - reference and word order;
 - exact source characters;
 - phoneme order and tokens;
-- source unit and cell grouping;
+- source unit tokenization and cell columns;
 - sound-to-column spans;
 - rules on letters and sounds;
 - silent and omitted units;
@@ -1199,7 +1198,7 @@ transition.
 - Omitted letters remain visible and greyed where educationally useful.
 - Inserted and replaced columns use a restrained dashed visual.
 - Haraka and tanween are smaller above/below columns attached to the main
-  letter group.
+  letter column.
 - Shadda and silence marks stay in the main cell.
 - Genuine cross-word mergers retain the in-between bridge presentation.
 - Iltiqa boundary insertion appears between words without masquerading as a
@@ -1394,8 +1393,8 @@ laws 32 to 33d hold over the full corpus with no exemption list.
 ### Phase 5: implement cells
 
 - Build source and transformed CellViews from native facts.
-- Add whole-word groups, attached marks, sound spans, omission/replacement
-  state, boundary insertion groups, and merger bridges.
+- Add whole-word columns, attached marks, sound spans, omission/replacement
+  state, boundary insertion columns, and merger bridges.
 - Prohibit rule-ID and codepoint reconstruction in the cell builder.
 
 Exit: the QUA Inspector and website can render rows without domain repairs.
