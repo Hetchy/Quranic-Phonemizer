@@ -72,8 +72,11 @@ evidences:
   "ۥ": {fact: LETTER, cls: base, role: small_waw, value: WAW, omitted: true}
   "ۦ": {fact: LETTER, cls: base, role: small_ya, value: YA, omitted: true}
   "ۧ": {fact: LETTER, cls: base, role: small_ya, value: YA, omitted: true}
-  "۠": {fact: VOWEL_LENGTH, cls: small_vowel, role: pausal,
-       derivation: pausal_length}   # the seven alifs
+  # A zero, not a vowel: the alif it sits on is silent when joined to and
+  # said at a pause. `silence_sign` is what it is; the length it evidences
+  # is what it does.
+  "۠": {fact: VOWEL_LENGTH, cls: silence_sign, role: pausal,
+       derivation: pausal_length}
   "۪": {fact: VOWEL_QUALITY, cls: annotation, role: imala,
        value: {kind: Long, quality: e}}
   "۫": {fact: TAJWEED_MARK, cls: annotation, role: ishmam, value: ISHMAM}
