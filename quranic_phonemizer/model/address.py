@@ -30,7 +30,6 @@ class VerseRef:
     def __str__(self) -> str:
         return f"{self.surah}:{self.ayah}"
 
-
 @dataclass(frozen=True, slots=True, order=True)
 class Location:
     """A word address. `word` is 1-based within the verse."""
@@ -46,7 +45,6 @@ class Location:
     def __str__(self) -> str:
         return f"{self.surah}:{self.ayah}:{self.word}"
 
-
 @dataclass(frozen=True, slots=True, order=True)
 class SlotId:
     """A canonical position. The ordinal counts slots across the *verse*."""
@@ -56,6 +54,9 @@ class SlotId:
 
     def __str__(self) -> str:
         return f"{self.verse}#{self.ordinal}"
+
+    def __hash__(self) -> int:
+        return self.verse.surah << 48 | self.verse.ayah << 32 | self.ordinal
 
 
 @dataclass(frozen=True, slots=True, order=True)
@@ -68,6 +69,9 @@ class GraphemeId:
     def __str__(self) -> str:
         return f"{self.verse}@{self.offset}"
 
+    def __hash__(self) -> int:
+        return self.verse.surah << 48 | self.verse.ayah << 32 | self.offset
+
 
 @dataclass(frozen=True, slots=True, order=True)
 class SoundId:
@@ -79,6 +83,9 @@ class SoundId:
     def __str__(self) -> str:
         return f"{self.verse}~{self.seq}"
 
+    def __hash__(self) -> int:
+        return self.verse.surah << 48 | self.verse.ayah << 32 | self.seq
+
 
 @dataclass(frozen=True, slots=True, order=True)
 class OccurrenceId:
@@ -87,6 +94,9 @@ class OccurrenceId:
 
     def __str__(self) -> str:
         return f"{self.verse}!{self.seq}"
+
+    def __hash__(self) -> int:
+        return self.verse.surah << 48 | self.verse.ayah << 32 | self.seq
 
 
 class Junction(StrEnum):

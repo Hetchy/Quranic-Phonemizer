@@ -334,7 +334,9 @@ def test_noon_yaseen_idgham_never_crosses_a_waqf(site, expected):
     result = _at(site, 1, KhilafId.NOON_YASEEN_WASL, "idgham")
     assert result.phonemes(1) == expected
     assert Rule.IDGHAM_BI_GHUNNAH not in _rules(result)
-    assert result.rules_on_sound(1, result.sounds(1)[-1]) == frozenset()
+    # A stop leaves the noon closing the opening to its own plain articulation,
+    # which is the reading the idgham would otherwise have replaced.
+    assert result.rules_on_sound(1, result.sounds(1)[-1]) == {"izhar"}
 
 
 @pytest.mark.parametrize(("site", "word", "madd", "tasheel"), MADD_CASES)

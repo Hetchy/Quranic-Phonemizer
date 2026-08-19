@@ -32,7 +32,7 @@ from .draft import (
     set_fact,
 )
 from .juncture import apply_cross_word_noon
-from .passes import LexemePass, apply_ledger
+from .passes import LexemePass, apply_ledger, word_bounds
 from .scribe import Scribe
 
 #: The two derivations the builder names itself. Both are properties of the
@@ -119,11 +119,12 @@ def _drafts(
     drafts: list[_Draft] = []
     consumed: set[int] = set()
     pending: list[int] = []
+    bounds_by_word = word_bounds(reading)
 
     for index, cluster in enumerate(reading.clusters):
         if index in consumed or cluster.offset in bare_seats:
             continue
-        bounds = reading.word_bounds(cluster.word)
+        bounds = bounds_by_word[cluster.word]
         context = _context(reading, index, bounds, drafts, lexicon)
         rows = by_cluster.get(index, ())
         letter = letter_of(rows, cluster)

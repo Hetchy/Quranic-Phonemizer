@@ -9,7 +9,7 @@ in [hafs/research/recitation-overview.md](hafs/research/recitation-overview.md).
 ## The shape of a request
 
 The package has one public operation: `Phonemizer(...).phonemize(ref,
-stop_signs=(), stop_refs=()) -> PhonemizeResult`.
+stop_signs=(), stop_refs=(), suspend_gc=False) -> PhonemizeResult`.
 
 [`quranic_phonemizer/phonemize/__init__.py`](../quranic_phonemizer/phonemize/__init__.py)
 implements that facade. Construction resolves and loads a riwayah, chooses a

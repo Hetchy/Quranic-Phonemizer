@@ -122,7 +122,7 @@ class Alphabet:
         entry = self.vowels[sound.quality]
         if entry.imala is not None and "imala" in active:
             token = entry.imala
-        elif sound.emphatic and "emphatic_fatha" in active:
+        elif sound.emphatic and (sound.long or "emphatic_fatha" in active):
             token = self._feature(entry.emphatic, "emphatic", sound)
         else:
             token = entry.plain

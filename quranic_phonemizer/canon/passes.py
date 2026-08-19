@@ -38,6 +38,27 @@ def word_of(reading: Reading, draft) -> int:
     which imports this module rather than the other way round."""
     return reading.clusters[draft.cluster].word if draft.cluster >= 0 else -1
 
+
+def word_spans(reading: Reading, drafts) -> list[list[_Draft]]:
+    """Drafts grouped by source word, preserving their canonical order."""
+    spans: list[list[_Draft]] = [[] for _ in reading.words]
+    for draft in drafts:
+        word = word_of(reading, draft)
+        if word >= 0:
+            spans[word].append(draft)
+    return spans
+
+
+def word_bounds(reading: Reading) -> tuple[tuple[int, int], ...]:
+    """Half-open cluster bounds grouped by source word."""
+    bounds = [[-1, -1] for _ in reading.words]
+    for index, cluster in enumerate(reading.clusters):
+        span = bounds[cluster.word]
+        if span[0] < 0:
+            span[0] = index
+        span[1] = index + 1
+    return tuple((lo, hi) for lo, hi in bounds)
+
 # The scribe is in the signature because a pass may *create* slots -- spelling
 # `الٓمٓصٓ` turns three into seven -- and every slot must trace to a grapheme.
 # The selection is, because a khilaf can put a different vowel in the Score.
@@ -159,8 +180,7 @@ def _apply_allah_lexeme(
     lend its last slot to the next word's opening lam.
     """
     del scribe, selection
-    for word_index in range(len(reading.words)):
-        span = [d for d in drafts if word_of(reading, d) == word_index]
+    for span in word_spans(reading, drafts):
         letters = [d.letter for d in span]
         nuclei = [d.nucleus for d in span]
         onsets = [d.onset for d in span]
@@ -179,8 +199,7 @@ def _apply_joined_particles(
     joins and over roots alike, so no script writes which one this is.
     """
     del scribe, selection
-    for word_index in range(len(reading.words)):
-        span = [d for d in drafts if word_of(reading, d) == word_index]
+    for span in word_spans(reading, drafts):
         if not span:
             continue
         letters = [d.letter for d in span]
@@ -203,10 +222,7 @@ def connect_plural_meem(
     behind it, so the meem is voweled to keep two of them from meeting.
     """
     del lexicon, scribe, selection
-    spans = [
-        [d for d in drafts if word_of(reading, d) == word]
-        for word in range(len(reading.words))
-    ]
+    spans = word_spans(reading, drafts)
     for index, span in enumerate(spans[:-1]):
         following = spans[index + 1]
         if not following or following[0].onset is not Onset.WASL:

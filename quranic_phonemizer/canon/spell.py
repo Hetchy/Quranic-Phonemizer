@@ -13,7 +13,7 @@ from ..model.canon import ABJAD, CanonLetter, Nucleus, Quality, SlotOrigin
 from ..model.inscription import SlotFact
 from ..orthography.adapter import Reading
 from .draft import _Draft, nucleus_fact
-from .passes import word_of
+from .passes import word_spans
 
 SCHEMA_VERSION = 1
 
@@ -107,13 +107,19 @@ def spell_muqattaat(names: Muqattaat):
         reading: Reading, drafts: list, lexicon, scribe, selection
     ) -> None:
         del lexicon, selection
-        for word in range(len(reading.words)):
-            if not _is_muqattaat(reading, word, names):
+        draft_spans = word_spans(reading, drafts)
+        cluster_spans: list[list[tuple[int, object]]] = [
+            [] for _ in reading.words
+        ]
+        for index, cluster in enumerate(reading.clusters):
+            cluster_spans[cluster.word].append((index, cluster))
+        for word, clusters in enumerate(cluster_spans):
+            if not _is_muqattaat(clusters, names):
                 continue
-            span = [d for d in drafts if word_of(reading, d) == word]
+            span = draft_spans[word]
             if not span:
                 continue
-            spelled = _spelled(reading, word, names)
+            spelled = _spelled(clusters, names)
             if spelled is None:
                 continue
             first = drafts.index(span[0])
@@ -135,26 +141,26 @@ def spell_muqattaat(names: Muqattaat):
     return apply
 
 
-def _is_muqattaat(reading: Reading, word: int, names: Muqattaat) -> bool:
+def _is_muqattaat(clusters, names: Muqattaat) -> bool:
     """One of the named openings, voweled nowhere but its last letter. Read
     from the clusters, where `ٱ` has not yet been given a helping vowel."""
-    clusters = [c for c in reading.clusters if c.word == word]
-    if not clusters or any(cluster.has(*HARAKAT) for cluster in clusters[:-1]):
+    values = [cluster for _, cluster in clusters]
+    if not values or any(cluster.has(*HARAKAT) for cluster in values[:-1]):
         return False
     skeleton = "".join(
-        ABJAD[c.letter.value] for c in clusters if c.letter is not None
+        ABJAD[c.letter.value] for c in values if c.letter is not None
     )
     return names.is_opening(skeleton)
 
 
-def _spelled(reading: Reading, word: int, names: Muqattaat) -> list | None:
+def _spelled(clusters, names: Muqattaat) -> list | None:
     """Spelled from the clusters, not the drafted slots: a derivation may
     have already absorbed a bare yaa into a neighboring long vowel there,
     but these letters are named, not read, so that absorption does not apply.
     """
     out: list[_Draft] = []
-    for index, cluster in enumerate(reading.clusters):
-        if cluster.word != word or cluster.letter is None:
+    for index, cluster in clusters:
+        if cluster.letter is None:
             continue
         letters = names.spell(cluster.letter)
         if letters is None:

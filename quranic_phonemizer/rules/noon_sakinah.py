@@ -53,6 +53,10 @@ class NoonSakinah:
             return _merge(Rule.IDGHAM_BI_GHUNNAH, at, opening, ghunnah=True)
         following = near.after(at)
         if following is None:
+            if slot.origin is SlotOrigin.SPELLED and near.last_of_word(at):
+                # The noon closing a disjoined-letter opening takes its own
+                # plain articulation rather than reaching into the next word.
+                return _classification(Rule.IZHAR, at, None)
             return None
 
         match self.followers.of(following.letter):

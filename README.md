@@ -69,7 +69,7 @@ Gemination (shaddah) is represented by repeating the phoneme to create new disti
 | و | `u:` |
 | ي , ى | `i:` |
 
-`aˤ` / `aˤ:` are added by the `emphatic_fatha` optional phoneme, and `e:` by `imala`.
+`aˤ` is added by the `emphatic_fatha` optional phoneme; emphatic alef is always `aˤ:`. `e:` is added by `imala`.
 
 ### Tajweed Phonemes
 
@@ -113,6 +113,12 @@ b i s m i ll a: h i rˤrˤ a ħ m a: n i rˤrˤ a ħ i: m
 ```
 
 `Phonemizer()` is built once and reused; every call to `phonemize()` returns a fresh `PhonemizeResult`. Hafs is the only riwaya shipped, and `supported_riwayat()` lists what a build has.
+
+For a single very large batch such as the whole Quran, pass
+`suspend_gc=True` to defer CPython cyclic collection until that call returns.
+This preserves the result and restores the prior collector state. Because the
+collector is process-global, reserve this option for bounded batch work with
+enough memory for the complete result.
 
 ## Input References
 `phonemize()` accepts a variety of flexible formats to specify which part of the Qurʾān to phonemize:
@@ -372,7 +378,7 @@ Five distinctions are not written by default. Pass `extra_phonemes` to spend a p
 
 | Name | Distinction |
 | ---- | ----------- |
-| `emphatic_fatha` | A fatha next to an emphatic letter becomes `aˤ` / `aˤ:` |
+| `emphatic_fatha` | A short fatha next to an emphatic letter becomes `aˤ` |
 | `emphatic_ikhfaa` | Ikhfaa before an istilaa letter becomes `ŋˤ` |
 | `qalqala_degree` | Qalqala kubra and akbar become `QQ`, apart from sughra `Q` |
 | `tashil` | An eased hamza becomes `ʔ̞` |

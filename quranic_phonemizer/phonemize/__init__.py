@@ -16,6 +16,7 @@ from . import edges, names, nodes
 from .assemble import assemble
 from .document import PhonemizeResult, build_result
 from .labels import with_labels
+from .runtime import suspend_collection
 from .session import phonemize_request
 
 supported_riwayat = names.supported_riwayat
@@ -58,6 +59,18 @@ class Phonemizer:
         *,
         stop_signs: Sequence[str] = (),
         stop_refs: Sequence[str] = (),
+        suspend_gc: bool = False,
+    ) -> PhonemizeResult:
+        if suspend_gc:
+            with suspend_collection():
+                return self._phonemize(ref, stop_signs, stop_refs)
+        return self._phonemize(ref, stop_signs, stop_refs)
+
+    def _phonemize(
+        self,
+        ref: str,
+        stop_signs: Sequence[str],
+        stop_refs: Sequence[str],
     ) -> PhonemizeResult:
         session = phonemize_request(
             self._recitation, ref, script=self._script,

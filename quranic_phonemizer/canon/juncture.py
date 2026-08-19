@@ -16,7 +16,7 @@ from ..model.inscription import SlotFact
 from ..orthography.adapter import Reading
 from .derive import tanween
 from .draft import _Draft, nucleus_fact
-from .passes import word_of
+from .passes import word_spans
 
 
 def apply_cross_word_noon(reading, drafts, right_context, scribe) -> None:
@@ -24,8 +24,9 @@ def apply_cross_word_noon(reading, drafts, right_context, scribe) -> None:
     marked = _split_tanween_words(reading)
     if right_context is not None and 0 in _split_tanween_words(right_context):
         marked.add(len(reading.words))
+    spans = word_spans(reading, drafts)
     for word_index in sorted(marked):
-        span = [d for d in drafts if word_of(reading, d) == word_index - 1]
+        span = spans[word_index - 1] if word_index else ()
         if word_index and span:
             _restore_noon(reading, drafts, span[-1], word_index, scribe)
 

@@ -6,6 +6,7 @@ once instead of gathering its adapters, data and rules by hand.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from functools import lru_cache
 from pathlib import Path
 
 from .canon.build import Built, Provenance, build
@@ -135,6 +136,7 @@ def recitation(riwayah: Riwayah) -> Recitation:
     )
 
 
+@lru_cache(maxsize=None)
 def alphabet(notation: str = "ipa") -> Alphabet:
     """The output notation. Shared across riwayat: it names sounds, not
     readings, so it is not part of a `Recitation`."""

@@ -4,6 +4,8 @@ Both adapters run this same code; only their inventory differs.
 """
 from __future__ import annotations
 
+import sys
+
 from ..model.address import Location, VerseRef
 from ..model.canon import CanonLetter
 from ..model.inscription import Grapheme, GraphemeClass, SlotFact, StopAdvice
@@ -23,7 +25,7 @@ def read_verse(
     for word_index, (location, text) in enumerate(words):
         state.begin_word(word_index)
         for char in text:
-            state.consume(char)
+            state.consume(sys.intern(char))
         state.end_word()
     return state.finish(tuple(location for location, _ in words))
 

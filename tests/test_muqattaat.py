@@ -59,12 +59,14 @@ def test_the_noon_of_ta_seen_stays_clear_before_the_word_after_it(r):
 
 
 @for_each_riwayah(TA_SEEN, ibtidaa=1, wasl=1)
-def test_the_opening_noon_of_ta_seen_names_no_letter_after_it(r):
-    assert r.rules_on_sound(1, "n") == frozenset()
+def test_the_opening_noon_of_ta_seen_takes_its_own_plain_articulation(r):
+    # The noon closing a spelled-out opening is read clear on its own terms
+    # rather than by whatever letter the next word begins with.
+    assert r.rules_on_sound(1, "n") == {"izhar"}
 
 
 @pytest.mark.parametrize("ref", ["2:1", "40:1"])
-def test_a_meem_final_opening_names_no_letter_after_it(ref):
+def test_a_meem_final_opening_takes_its_own_plain_articulation(ref):
     r = reading(Site(hafs=(ref, (1,))), ibtidaa=1, wasl=1)
-    assert r.rules_on_sound(1, "m") == frozenset()
+    assert r.rules_on_sound(1, "m") == {"izhar_shafawi"}
     assert "madd_lazim" in r.rules_on_char(1, "م")

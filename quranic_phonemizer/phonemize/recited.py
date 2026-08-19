@@ -5,6 +5,7 @@
 """
 from __future__ import annotations
 
+from bisect import bisect_left
 from dataclasses import dataclass
 
 from ..model.address import SlotId, SoundId
@@ -270,9 +271,9 @@ def _stop_signs_by_word(
     for grapheme in inscription.graphemes:
         if grapheme.cls is not GraphemeClass.ADVICE:
             continue
-        preceding = [offset for offset in ordered if offset < grapheme.id.offset]
-        if preceding:
-            out.setdefault(word_of[max(preceding)], []).append(grapheme)
+        preceding = bisect_left(ordered, grapheme.id.offset) - 1
+        if preceding >= 0:
+            out.setdefault(word_of[ordered[preceding]], []).append(grapheme)
     return {index: tuple(signs) for index, signs in out.items()}
 
 

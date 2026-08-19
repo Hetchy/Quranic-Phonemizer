@@ -51,8 +51,12 @@ def _slot(reading: Reading, draft, ordinal: int) -> Slot:
 def digest(words: tuple[ScoreWord, ...]) -> str:
     """Every field two Scores may differ in, so equal digests are equal
     Scores. A digest over part of a Slot would report a lost fact as a match."""
-    text = "|".join(_line(word) for word in words)
-    return hashlib.blake2b(text.encode("utf-8"), digest_size=16).hexdigest()
+    digest = hashlib.blake2b(digest_size=16)
+    for index, word in enumerate(words):
+        if index:
+            digest.update(b"|")
+        digest.update(_line(word).encode("utf-8"))
+    return digest.hexdigest()
 
 
 def _line(word: ScoreWord) -> str:

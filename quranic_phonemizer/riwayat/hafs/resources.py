@@ -1,7 +1,7 @@
 """Hafs: where its data lives, and how its adapters are assembled.
 
-Resources are instance-local: two riwayat, two scripts, and two notations
-can coexist in one process, so there is no module-level cache here.
+Resources are process-local and cached by their riwayah or script key, so
+multiple facades share the same immutable loaded data.
 """
 from __future__ import annotations
 
@@ -74,11 +74,13 @@ def adapters_for(riwayah: Riwayah) -> dict[Script, Adapter]:
     return {script: script_adapter(script) for script in SCRIPTS}
 
 
+@lru_cache(maxsize=None)
 def ledger() -> Ledger:
     path = DATA / "ledger.yaml"
     return load_ledger(path, riwayah=RIWAYAH) if path.exists() else EMPTY_LEDGER
 
 
+@lru_cache(maxsize=None)
 def lexicon() -> Lexicon:
     """The affixes are shared: which pronouns attach to a word, and which
     letters may stand before one, are facts about Arabic rather than about
@@ -90,23 +92,27 @@ def lexicon() -> Lexicon:
     return load_lexicon(path, affixes=affixes)
 
 
+@lru_cache(maxsize=None)
 def rule_tables() -> RuleTables:
     """Shared tajweed tables, plus whatever this riwayah overrides."""
     shared = DATA.parents[1] / "shared" / "rules.yaml"
     return load_rule_tables(shared, DATA / "rules.yaml")
 
 
+@lru_cache(maxsize=None)
 def khilaf() -> Khilaf:
     """Where this riwayah disagrees with itself, and by default how."""
     return load_khilaf(DATA / "khilaf.yaml")
 
 
+@lru_cache(maxsize=None)
 def muqattaat() -> Muqattaat:
     """Shared across riwayat: which openings are named, and what each letter is
     called, are facts about Arabic."""
     return load_muqattaat(DATA.parents[1] / "shared" / "muqattaat.yaml")
 
 
+@lru_cache(maxsize=None)
 def lexeme_passes() -> tuple:
     """Hafs' verse-level passes, in order.
 
@@ -124,6 +130,7 @@ def lexeme_passes() -> tuple:
     )
 
 
+@lru_cache(maxsize=None)
 def corpus() -> PackedCorpus:
     return load_corpus(DATA / "corpus" / "quran_db.bin",
                        DATA / "corpus" / "surah_info.json")
