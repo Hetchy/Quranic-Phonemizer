@@ -108,16 +108,16 @@ class Assembled:
 
 
 def _unit_indices(score: Score):
-    """`unit_of_slot`, `word_of_slot` and the `Unit` array, all keyed the
-    same way: position in `score.slots()` is a unit's index everywhere."""
-    unit_of_slot = {slot.id: i for i, slot in enumerate(score.slots())}
-    word_of_slot = {
-        slot.id: w for w, word in enumerate(score.words) for slot in word.slots
-    }
-    units = tuple(
-        nd.unit_of(word_of_slot[slot.id], slot) for slot in score.slots()
+    """Word indices and public units in canonical slot order."""
+    slots = score.slots()
+    word_of_slot = tuple(
+        word for word, score_word in enumerate(score.words)
+        for _ in score_word.slots
     )
-    return unit_of_slot, word_of_slot, units
+    units = tuple(
+        nd.unit_of(word_of_slot[index], slot) for index, slot in enumerate(slots)
+    )
+    return word_of_slot, units
 
 
 def assemble(
@@ -128,25 +128,24 @@ def assemble(
     extra_phonemes: frozenset[str] = frozenset(),
 ) -> Assembled:
     score = session.score
-    unit_of_slot, word_of_slot, units = _unit_indices(score)
+    word_of_slot, units = _unit_indices(score)
 
-    glyphs, glyph_of = _glyphs(session.inscription, word_of_slot, unit_of_slot)
-    spellings = _spellings(session.inscription, glyph_of, unit_of_slot)
+    glyphs, glyph_of = _glyphs(session.inscription, word_of_slot)
+    spellings = _spellings(session.inscription, glyph_of)
 
     performance = session.performance
     sound_ids = sounds_in_order(performance)
-    sound_of = {sound_id: i for i, sound_id in enumerate(sound_ids)}
-    by_id = dict(performance.sounds)
+    sound_of = {sound_id.seq: i for i, sound_id in enumerate(sound_ids)}
+    by_id = {sound_id.seq: sound for sound_id, sound in performance.sounds}
     sounds = tuple(
-        _sound(by_id[sound_id], alphabet, extra_phonemes) for sound_id in sound_ids
+        _sound(by_id[sound_id.seq], alphabet, extra_phonemes)
+        for sound_id in sound_ids
     )
 
-    occurrence_of = {o.id: i for i, o in enumerate(performance.occurrences)}
+    occurrence_of = {o.id.seq: i for i, o in enumerate(performance.occurrences)}
     mergers = _merger_occurrences(performance)
-    rules = [
-        _rule_instance(o, unit_of_slot, mergers) for o in performance.occurrences
-    ]
-    attributions = _attributions(performance, sound_of, unit_of_slot, occurrence_of)
+    rules = [_rule_instance(o, mergers) for o in performance.occurrences]
+    attributions = _attributions(performance, sound_of, occurrence_of)
     modifiers = _modifiers(performance, sound_of, occurrence_of)
 
     open_vowel = open_vowel_units(attributions, sounds)
@@ -159,7 +158,6 @@ def assemble(
 
     rendered = _rendered(
         session.score, session.inscription, performance, pen, glyph_of,
-        unit_of_slot,
     )
     words = _words(session, glyphs)
 
@@ -170,7 +168,7 @@ def assemble(
     )
 
 
-def _glyphs(inscription: Inscription, word_of_slot, unit_of_slot):
+def _glyphs(inscription: Inscription, word_of_slot):
     """Sorted by offset; the position in this array is `source_index`."""
     structural, vowel_absent = set(), set()
     unit_of_grapheme = {}
@@ -190,7 +188,7 @@ def _glyphs(inscription: Inscription, word_of_slot, unit_of_slot):
     for index, grapheme in enumerate(ordered):
         slot = unit_of_grapheme.get(grapheme.id)
         word = (
-            word_of_slot.get(slot)
+            word_of_slot[slot.ordinal]
             if slot is not None and grapheme.id not in structural
             else None
         )
@@ -208,7 +206,7 @@ def _glyphs(inscription: Inscription, word_of_slot, unit_of_slot):
     return tuple(glyphs), glyph_of
 
 
-def _spellings(inscription: Inscription, glyph_of, unit_of_slot):
+def _spellings(inscription: Inscription, glyph_of):
     out = []
     for spelling in inscription.spellings:
         match spelling:
@@ -216,11 +214,11 @@ def _spellings(inscription: Inscription, glyph_of, unit_of_slot):
                 fact = _FACT_OF.get(f)
                 if fact is None:
                     raise ValueError(f"{s}: unmapped spelling fact {f!r}")
-                out.append(ed.Supplies(glyph_of[g], unit_of_slot[s], fact))
+                out.append(ed.Supplies(glyph_of[g], s.ordinal, fact))
             case Attests(grapheme=g, anchor=s):
-                out.append(ed.Witnesses(glyph_of[g], unit_of_slot[s]))
+                out.append(ed.Witnesses(glyph_of[g], s.ordinal))
             case InscDecorates(grapheme=g, slot=s):
-                out.append(ed.Decorates(glyph_of[g], unit_of_slot[s]))
+                out.append(ed.Decorates(glyph_of[g], s.ordinal))
             case InscStructural(grapheme=g):
                 out.append(ed.Structural(glyph_of[g]))
     return tuple(out)
@@ -243,50 +241,50 @@ def _sound(sound, alphabet: Alphabet, extra_phonemes: frozenset[str]) -> nd.Soun
 def _merger_occurrences(performance: Performance) -> frozenset:
     """Occurrence ids that genuinely merge two units into one sound."""
     return frozenset(
-        a.by for a in performance.attributions
+        a.by.seq for a in performance.attributions
         if isinstance(a, PerfMergedInto)
     )
 
 
-def _rule_instance(occurrence, unit_of_slot, mergers) -> nd.RuleInstance:
+def _rule_instance(occurrence, mergers) -> nd.RuleInstance:
     """`host` is published only for a merger."""
     parts = occurrence.parts
     host = None
-    if parts.host is not None and occurrence.id in mergers:
-        host = unit_of_slot[parts.host]
-    return nd.RuleInstance(occurrence.rule, unit_of_slot[parts.source], host)
+    if parts.host is not None and occurrence.id.seq in mergers:
+        host = parts.host.ordinal
+    return nd.RuleInstance(occurrence.rule, parts.source.ordinal, host)
 
 
-def _attributions(performance: Performance, sound_of, unit_of_slot, occurrence_of):
+def _attributions(performance: Performance, sound_of, occurrence_of):
     out = []
     for attribution in performance.attributions:
-        by = occurrence_of.get(attribution.by) if attribution.by else None
+        by = occurrence_of.get(attribution.by.seq) if attribution.by else None
         match attribution:
             case PerfHosts(slots=slots, aspect=a, sound=s):
-                out.append(ed.Hosts(unit_of_slot[slots[0]], _PART_OF[a],
-                                     sound_of[s], by))
+                out.append(ed.Hosts(slots[0].ordinal, _PART_OF[a],
+                                     sound_of[s.seq], by))
             case Inserted(anchor=(slot, _), aspect=a, sound=s):
-                out.append(ed.Hosts(unit_of_slot[slot], _PART_OF[a],
-                                     sound_of[s], by))
+                out.append(ed.Hosts(slot.ordinal, _PART_OF[a],
+                                     sound_of[s.seq], by))
             case PerfMergedInto(slots=slots, aspect=a, sound=s):
-                out.append(ed.MergedInto(unit_of_slot[slots[0]], _PART_OF[a],
-                                          sound_of[s], by))
+                out.append(ed.MergedInto(slots[0].ordinal, _PART_OF[a],
+                                          sound_of[s.seq], by))
             case PerfSilent(slots=slots, aspect=a):
-                out.append(ed.Silent(unit_of_slot[slots[0]], _PART_OF[a], by))
+                out.append(ed.Silent(slots[0].ordinal, _PART_OF[a], by))
     return tuple(out)
 
 
 def _modifiers(performance: Performance, sound_of, occurrence_of):
     out = []
     for modifier in performance.modifiers:
-        by = occurrence_of[modifier.by]
+        by = occurrence_of[modifier.by.seq]
         match modifier:
             case Recolours(sound=s):
-                out.append(ed.Recolours(sound_of[s], by))
+                out.append(ed.Recolours(sound_of[s.seq], by))
             case SetsLength(sound=s, length=length):
-                out.append(ed.SetsLength(sound_of[s], by, length))
+                out.append(ed.SetsLength(sound_of[s.seq], by, length))
             case Classifies(sound=s):
-                out.append(ed.Classifies(sound_of[s], by))
+                out.append(ed.Classifies(sound_of[s.seq], by))
     return tuple(out)
 
 
@@ -309,8 +307,7 @@ def _words(session: Session, glyphs):
     )
 
 
-def _rendered(score: Score, inscription, performance, pen: Pen, glyph_of,
-             unit_of_slot):
+def _rendered(score: Score, inscription, performance, pen: Pen, glyph_of):
     written = write_recited(score, inscription, performance, pen)
     word_of = _rendered_words(written)
     counters: dict[int, int] = {}
@@ -325,7 +322,7 @@ def _rendered(score: Score, inscription, performance, pen: Pen, glyph_of,
             word=word, char=glyph.char, kind=glyph.kind, word_index=word_index,
             source_index=index,
             from_glyphs=tuple(glyph_of[g] for g in glyph.from_glyphs),
-            unit=unit_of_slot.get(glyph.slot)))
+            unit=glyph.slot.ordinal if glyph.slot is not None else None))
     return tuple(glyphs)
 
 

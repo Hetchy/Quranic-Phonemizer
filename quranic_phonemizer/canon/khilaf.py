@@ -8,7 +8,7 @@ from ..model.canon import CanonLetter, Nucleus, Onset, Quality, SlotOrigin
 from ..model.inscription import SlotFact
 from ..orthography.adapter import Reading
 from .draft import _Draft
-from .passes import vocalised, word_of
+from .passes import vocalised, word_spans
 
 
 @dataclass(frozen=True, slots=True)
@@ -56,8 +56,8 @@ def apply_canonical_khilaf(khilaf: CanonicalKhilaf):
 
     def apply(reading: Reading, drafts, lexicon, scribe, selection) -> None:
         del lexicon
-        for word, location in enumerate(reading.words):
-            span = [draft for draft in drafts if word_of(reading, draft) == word]
+        spans = word_spans(reading, drafts)
+        for location, span in zip(reading.words, spans):
             if not span:
                 continue
             _apply_vowel(khilaf.vowel, span, selection)

@@ -110,6 +110,7 @@ _RULE_SLOT_STRIDE = 1_000_000
 #: Separates two classifiers that legitimately declare the same `Rule` on
 #: the same slot (different aspects) -- rule plus slot alone is not unique.
 _VARIANT_STRIDE = 100_000_000
+_RULE_INDEX = {rule: index for index, rule in enumerate(Rule)}
 
 
 def mint(rule: Rule, at: SlotId, variant: int = 0) -> OccurrenceId:
@@ -120,7 +121,7 @@ def mint(rule: Rule, at: SlotId, variant: int = 0) -> OccurrenceId:
     """
     ordinal = (
         variant * _VARIANT_STRIDE
-        + list(Rule).index(rule) * _RULE_SLOT_STRIDE
+        + _RULE_INDEX[rule] * _RULE_SLOT_STRIDE
         + at.ordinal
     )
     return OccurrenceId(at.verse, ordinal)
@@ -138,6 +139,7 @@ class Plan:
     _keys: dict[tuple[Phase, tuple], tuple[OccurrenceId, Rule]] = field(
         default_factory=dict
     )
+    _removed: set[tuple[SlotId, Aspect]] = field(default_factory=set)
 
     def record(self, phase: Phase, verdict: Verdict) -> None:
         for effect in verdict.effects:
@@ -152,6 +154,8 @@ class Plan:
                     f"found bug, not a precedence question."
                 )
             self._keys[key] = (verdict.occurrence.id, verdict.occurrence.rule)
+            if isinstance(effect, (MergeInto, Silence)):
+                self._removed.add((effect.slot, effect.aspect))
         self.entries.append((phase, verdict))
 
     def effects(self, phase: Phase | None = None):
@@ -160,9 +164,4 @@ class Plan:
                 yield from verdict.effects
 
     def merged_away(self, slot: SlotId, aspect: Aspect) -> bool:
-        return any(
-            isinstance(effect, (MergeInto, Silence))
-            and effect.slot == slot
-            and effect.aspect is aspect
-            for effect in self.effects()
-        )
+        return (slot, aspect) in self._removed

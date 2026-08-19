@@ -27,6 +27,8 @@ reads, and what is actually pronounced under a boundary plan.
 
 - Start with `docs/architecture.md`; use `docs/public-api.md` for the result
   contract and `docs/conformance.md` for known corpus-gate residue.
+- Use `docs/performance.md` for reproducible benchmarks, profiling findings,
+  full-Quran resource measurements, and large-batch guidance.
 - `docs/hafs/variants.md` and `docs/hafs/research/` cover the Hafs reading.
 - `docs/warsh/codepoint-audit.md` contains the available Warsh script audit.
 - `docs/new-riwayah.md` is tentative guidance, not a final design.

@@ -6,6 +6,7 @@ functions are checked over a small sample.
 from __future__ import annotations
 
 import dataclasses
+import gc
 
 import pytest
 
@@ -144,6 +145,24 @@ def test_module_functions_answer_without_an_instance():
 def test_a_bare_phonemizer_is_hafs_uthmani():
     r = Phonemizer().phonemize("1:1")
     assert (r.riwayah, r.script) == ("hafs", "uthmani")
+
+
+def test_suspended_gc_preserves_output_and_restores_enabled_state():
+    phonemizer = Phonemizer()
+    expected = phonemizer.phonemize("1")
+    assert gc.isenabled()
+    assert phonemizer.phonemize("1", suspend_gc=True) == expected
+    assert gc.isenabled()
+
+
+def test_suspended_gc_preserves_a_disabled_state_on_failure():
+    gc.disable()
+    try:
+        with pytest.raises(ValueError):
+            Phonemizer().phonemize("not-a-ref", suspend_gc=True)
+        assert not gc.isenabled()
+    finally:
+        gc.enable()
 
 
 def test_the_retired_projections_are_gone():

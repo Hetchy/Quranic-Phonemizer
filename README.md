@@ -114,6 +114,12 @@ b i s m i ll a: h i rˤrˤ a ħ m a: n i rˤrˤ a ħ i: m
 
 `Phonemizer()` is built once and reused; every call to `phonemize()` returns a fresh `PhonemizeResult`. Hafs is the only riwaya shipped, and `supported_riwayat()` lists what a build has.
 
+For a single very large batch such as the whole Quran, pass
+`suspend_gc=True` to defer CPython cyclic collection until that call returns.
+This preserves the result and restores the prior collector state. Because the
+collector is process-global, reserve this option for bounded batch work with
+enough memory for the complete result.
+
 ## Input References
 `phonemize()` accepts a variety of flexible formats to specify which part of the Qurʾān to phonemize:
 

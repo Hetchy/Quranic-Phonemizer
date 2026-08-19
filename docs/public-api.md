@@ -16,6 +16,13 @@ sounds, applied rules, and the relations between them.
 The root `README.md` documents ordinary use. This document describes the
 result graph and the projections derived from it.
 
+For one unusually large, bounded request, `phonemize(..., suspend_gc=True)`
+defers CPython cyclic collection until the call returns. It does not change
+the result and restores the caller's prior collector state, including after
+an error. Cyclic GC is process-global, so this advanced option also defers
+collection of unrelated cycles created by other threads during the call. Use
+it only when the process has enough memory for the complete returned document.
+
 ## Result identity
 
 Every result identifies the request and the choices that produced it:

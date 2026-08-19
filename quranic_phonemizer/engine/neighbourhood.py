@@ -16,29 +16,36 @@ class Neighbourhood:
     score: Score
     boundaries: BoundaryPlan
     _flat: tuple[Slot, ...] = field(default=(), repr=False)
-    _at: dict[SlotId, int] = field(default_factory=dict, repr=False)
-    _word: dict[SlotId, int] = field(default_factory=dict, repr=False)
+    _word: tuple[int, ...] = field(default=(), repr=False)
 
     def __post_init__(self) -> None:
         flat: list[Slot] = []
+        words: list[int] = []
         for index, word in enumerate(self.score.words):
             for slot in word.slots:
-                self._word[slot.id] = index
-                self._at[slot.id] = len(flat)
                 flat.append(slot)
+                words.append(index)
         self._flat = tuple(flat)
+        self._word = tuple(words)
+
+    def _position(self, at: SlotId) -> int | None:
+        position = at.ordinal
+        if position < 0 or position >= len(self._flat) or self._flat[position].id != at:
+            return None
+        return position
 
     def slot(self, at: SlotId) -> Slot | None:
-        position = self._at.get(at)
+        position = self._position(at)
         return self._flat[position] if position is not None else None
 
     def word_of(self, at: SlotId) -> int | None:
-        return self._word.get(at)
+        position = self._position(at)
+        return self._word[position] if position is not None else None
 
     def after(self, at: SlotId) -> Slot | None:
         """The next slot in recitation order, or `None` when a junction blocks
         the view. A rule that cannot see across a stop cannot fire across it."""
-        position = self._at.get(at)
+        position = self._position(at)
         if position is None or position + 1 >= len(self._flat):
             return None
         following = self._flat[position + 1]
@@ -46,7 +53,7 @@ class Neighbourhood:
 
     def raw_after(self, at: SlotId) -> Slot | None:
         """Return the next slot before special opening and junction blocking."""
-        position = self._at.get(at)
+        position = self._position(at)
         if position is None or position + 1 >= len(self._flat):
             return None
         return self._flat[position + 1]
@@ -57,30 +64,32 @@ class Neighbourhood:
         Deliberately not the mirror of `after`: a stop blocks the view
         forward because recitation ends there, but the slot behind was said.
         """
-        position = self._at.get(at)
+        position = self._position(at)
         if not position:
             return None
         return self._flat[position - 1]
 
     def first_of_word(self, at: SlotId) -> bool:
-        position, word = self._at.get(at), self._word.get(at)
-        if position is None or word is None:
+        position = self._position(at)
+        if position is None:
             return False
-        return position == 0 or self._word[self._flat[position - 1].id] != word
+        word = self._word[position]
+        return position == 0 or self._word[position - 1] != word
 
     def last_of_word(self, at: SlotId) -> bool:
-        position, word = self._at.get(at), self._word.get(at)
-        if position is None or word is None:
+        position = self._position(at)
+        if position is None:
             return False
+        word = self._word[position]
         end = position + 1 == len(self._flat)
-        return end or self._word[self._flat[position + 1].id] != word
+        return end or self._word[position + 1] != word
 
     def crosses_word(self, at: SlotId) -> bool:
         following = self.after(at)
-        return following is not None and self._word[at] != self._word[following.id]
+        return following is not None and self.word_of(at) != self.word_of(following.id)
 
     def _blocked(self, here: SlotId, following: SlotId) -> bool:
-        left, right = self._word.get(here), self._word.get(following)
+        left, right = self.word_of(here), self.word_of(following)
         if left is None or right is None or left == right:
             return False
         if self._spelled_out(left):

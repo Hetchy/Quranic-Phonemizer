@@ -63,37 +63,33 @@ def _non_structural_source(assembled: Assembled) -> list[int]:
 
 # ----------------------------------------------------------------- pairings
 
-def _sound_of_part(assembled: Assembled) -> dict[tuple[int, ed.Part], int]:
-    """A part's own sound: `Hosts` or `MergedInto` share one `SoundId`, so
-    either edge answers. A `Silent` part has none."""
-    return {
-        (a.unit, a.part): a.sound
-        for a in assembled.attributions
-        if isinstance(a, (ed.Hosts, ed.MergedInto))
-    }
-
-
-def _release_of_unit(assembled: Assembled) -> dict[int, int]:
-    return {
-        a.unit: a.sound for a in assembled.attributions
-        if isinstance(a, ed.Hosts)
-        and assembled.sounds[a.sound].kind is nd.SoundKind.QALQALA
-    }
-
-
-def _rule_of_part(assembled: Assembled) -> dict[tuple[int, ed.Part], frozenset]:
-    out: dict[tuple[int, ed.Part], set] = {}
+def _part_indices(assembled: Assembled):
+    sound_of_part = {}
+    release_of_unit = {}
+    rule_of_part: dict[tuple[int, ed.Part], set] = {}
     for a in assembled.attributions:
+        key = (a.unit, a.part)
+        if isinstance(a, (ed.Hosts, ed.MergedInto)):
+            sound_of_part[key] = a.sound
+        if (
+            isinstance(a, ed.Hosts)
+            and assembled.sounds[a.sound].kind is nd.SoundKind.QALQALA
+        ):
+            release_of_unit[a.unit] = a.sound
         if a.by is not None:
-            out.setdefault((a.unit, a.part), set()).add(a.by)
+            rule_of_part.setdefault(key, set()).add(a.by)
     sound_parts: dict[int, list] = {}
     for a in assembled.attributions:
         if isinstance(a, (ed.Hosts, ed.MergedInto)):
             sound_parts.setdefault(a.sound, []).append((a.unit, a.part))
     for m in assembled.modifiers:
         for key in sound_parts.get(m.sound, ()):
-            out.setdefault(key, set()).add(m.by)
-    return {key: frozenset(rules) for key, rules in out.items()}
+            rule_of_part.setdefault(key, set()).add(m.by)
+    return (
+        sound_of_part,
+        release_of_unit,
+        {key: frozenset(rules) for key, rules in rule_of_part.items()},
+    )
 
 
 def _presenting_glyphs(reach, mute: frozenset[int]) -> dict[tuple[int, ed.Part], list]:
@@ -109,14 +105,6 @@ def _presenting_glyphs(reach, mute: frozenset[int]) -> dict[tuple[int, ed.Part],
         for unit, part, fact in reach[glyph]:
             out.setdefault((unit, part), []).append((glyph, fact))
     return out
-
-
-def _mute(assembled: Assembled, text: str) -> frozenset[int]:
-    """Glyphs a rule silenced. They keep their reach, which is what seats
-    them in their letter's cell, and present nothing."""
-    if text != "source":
-        return frozenset()
-    return frozenset(assembled.orthographic_silence)
 
 
 def _by_kind(assembled: Assembled, text: str, kind) -> frozenset[int]:
@@ -145,13 +133,11 @@ def _owning_glyph(part: ed.Part, candidates: list, seats, harakas) -> int | None
     return min(candidates, key=lambda c: (c[0] in seats, c[0]))[0]
 
 
-def _owners(assembled: Assembled, reach, seats, harakas, mute) -> list[int | None]:
+def _owners(
+    assembled: Assembled, reach, seats, harakas, mute, primary
+) -> list[int | None]:
     """The owning glyph of every sound, `None` where no glyph of this text
     presents it -- a gap."""
-    primary = {
-        a.sound: (a.unit, a.part) for a in assembled.attributions
-        if isinstance(a, ed.Hosts)
-    }
     by_part = _presenting_glyphs(reach, mute)
     out = []
     for index in range(len(assembled.sounds)):
@@ -164,27 +150,12 @@ def _owners(assembled: Assembled, reach, seats, harakas, mute) -> list[int | Non
     return out
 
 
-def _presented_sounds(reach, glyph, sound_of_part, release_of_unit) -> set[int]:
-    out: set[int] = set()
-    for unit, part, _ in reach.get(glyph, ()):
-        sound = sound_of_part.get((unit, part))
-        if sound is not None:
-            out.add(sound)
-        if part is ed.Part.CONSONANT and unit in release_of_unit:
-            out.add(release_of_unit[unit])
-    return out
-
-
-def _silent_glyphs(assembled: Assembled, text: str, reach) -> set[int]:
+def _silent_glyphs(text: str, reach, unsaid, orthographic_silence) -> set[int]:
     """Glyphs the reading does not say: rasm it never spells, a part a rule
     silenced, and a letter a merger absorbed into the one beside it."""
     if text == "recited":
         return set()
-    unsaid = {
-        (a.unit, a.part) for a in assembled.attributions
-        if isinstance(a, (ed.Silent, ed.MergedInto))
-    }
-    out = set(assembled.orthographic_silence)
+    out = set(orthographic_silence)
     for glyph, pairs in reach.items():
         if any(
             (u, p) in unsaid for u, p, fact in pairs
@@ -192,18 +163,6 @@ def _silent_glyphs(assembled: Assembled, text: str, reach) -> set[int]:
         ):
             out.add(glyph)
     return out
-
-
-def _group_rules(assembled: Assembled, text, group, reach,
-                 rule_of_part, mute: frozenset[int]) -> tuple[int, ...]:
-    rules: set[int] = set()
-    for glyph in group:
-        if glyph not in mute:
-            for unit, part, _ in reach.get(glyph, ()):
-                rules |= rule_of_part.get((unit, part), frozenset())
-        if text == "source" and glyph in assembled.orthographic_silence:
-            rules.add(assembled.orthographic_silence[glyph])
-    return tuple(sorted(rules))
 
 
 def _gap_anchor(sound_index: int, owner_group: list) -> int | None:
@@ -230,21 +189,26 @@ def _ordered_items(groups, owner_group) -> list[tuple[str, int]]:
 
 
 def _pairings(assembled: Assembled, text, groups, reach) -> tuple[Pairing, ...]:
-    sound_of_part = _sound_of_part(assembled)
-    release_of_unit = _release_of_unit(assembled)
-    rule_of_part = _rule_of_part(assembled)
-    silent = _silent_glyphs(assembled, text, reach)
+    sound_of_part, release_of_unit, rule_of_part = _part_indices(assembled)
     primary = {
         a.sound: (a.unit, a.part) for a in assembled.attributions
         if isinstance(a, ed.Hosts)
     }
+    unsaid = {
+        (a.unit, a.part) for a in assembled.attributions
+        if isinstance(a, (ed.Silent, ed.MergedInto))
+    }
+    orthographic_silence = (
+        assembled.orthographic_silence if text == "source" else {}
+    )
+    silent = _silent_glyphs(text, reach, unsaid, orthographic_silence)
 
-    mute = _mute(assembled, text)
+    mute = frozenset(orthographic_silence)
     owners = _owners(
         assembled, reach,
         _by_kind(assembled, text, nd.GlyphKind.TATWEEL),
         _by_kind(assembled, text, nd.GlyphKind.HARAKA),
-        mute,
+        mute, primary,
     )
     group_of_glyph = {g: i for i, group in enumerate(groups) for g in group}
     owner_group = [group_of_glyph.get(g) if g is not None else None for g in owners]
@@ -259,6 +223,7 @@ def _pairings(assembled: Assembled, text, groups, reach) -> tuple[Pairing, ...]:
             out.append(_real_pairing(
                 assembled, text, groups[ref], owned[ref], reach, sound_of_part,
                 release_of_unit, rule_of_part, silent, mute,
+                orthographic_silence,
             ))
         else:
             rules = rule_of_part.get(primary.get(ref), frozenset())
@@ -268,19 +233,26 @@ def _pairings(assembled: Assembled, text, groups, reach) -> tuple[Pairing, ...]:
 
 
 def _real_pairing(assembled, text, group, owned, reach, sound_of_part,
-                  release_of_unit, rule_of_part, silent, mute) -> Pairing:
+                  release_of_unit, rule_of_part, silent, mute,
+                  orthographic_silence) -> Pairing:
     presented: set[int] = set()
+    rules: set[int] = set()
     for glyph in group:
-        if glyph in mute:
-            continue
-        presented |= _presented_sounds(
-            reach, glyph, sound_of_part, release_of_unit
-        )
+        if glyph not in mute:
+            for unit, part, _ in reach.get(glyph, ()):
+                sound = sound_of_part.get((unit, part))
+                if sound is not None:
+                    presented.add(sound)
+                if part is ed.Part.CONSONANT and unit in release_of_unit:
+                    presented.add(release_of_unit[unit])
+                rules |= rule_of_part.get((unit, part), frozenset())
+        if text == "source" and glyph in orthographic_silence:
+            rules.add(orthographic_silence[glyph])
     return Pairing(
         glyphs=group, sounds=tuple(sorted(owned)),
         shares=tuple(sorted(presented - set(owned))),
         silent=tuple(g for g in group if g in silent),
-        rules=_group_rules(assembled, text, group, reach, rule_of_part, mute),
+        rules=tuple(sorted(rules)),
     )
 
 
