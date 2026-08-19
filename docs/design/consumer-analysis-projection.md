@@ -352,7 +352,7 @@ LetterUnit is the semantic and educational unit over source characters:
 | rule_occurrence_ids | Rules placed on this visible unit |
 | silence | Why this unit is silent: null, a rule occurrence ID, or orthographic |
 
-The role vocabulary is letter, haraka, sukun, tanween, and seen_alternative. It is not a mirror of internal SlotFact names, and it has no
+The role vocabulary is letter, haraka, sukun, and tanween. It is not a mirror of internal SlotFact names, and it has no
 catch-all member: the script inventory is total over its scalars, so a mark
 with no role is a producer bug, not an “other”.
 
@@ -371,10 +371,11 @@ other mark folds into the unit whose fact it states:
   lengthens the vowel before it or stands as a consonant of its own is a
   canonical fact, not a written one, so that split belongs to the cell column
   role and not here;
-- the mini seen of a seen/saad khilaf is a unit with role=seen_alternative.
-  It can own the sound its site reads, and the base saad can own it instead,
-  so the two are a pair and the resolved variant silences one of them. Its
-  above/below position states which reading the site takes by default;
+- the mini seen of a seen/saad khilaf is a unit, on the same test as any
+  letter: it can own the sound its site reads. The base saad can own it
+  instead, so the two are a pair and the resolved variant silences one of
+  them. Its above/below position states which reading the site takes by
+  default;
 - shadda, maddah, the Quranic silence mark, the pausal zero of the seven
   alifs, the imala, ishmam, and tashil marks, and a tatweel seat all stay
   Characters inside the unit they qualify. None owns a sound and none occupies
@@ -538,8 +539,7 @@ CellBoundary
 
 CellColumn
   id
-  role = letter | haraka | sukun | tanween | madd | seen_alternative
-       | stop_sign | gap
+  role = letter | haraka | sukun | tanween | madd | stop_sign | gap
   text
   source_character_ids[]
   source_unit_ids[]
@@ -594,10 +594,11 @@ CellBoundary orders every boundary-owned column at that exact boundary.
 - Haraka, sukun, and tanween take separate smaller columns. Above/below
   placement and attached_to_column_id identify the exact main column they ride;
   attachment is stated, never guessed from adjacency.
-- A seen_alternative unit takes a smaller column placed above or below like a
-  haraka, attached to the saad it rides. It and that saad are a pair: the
-  resolved variant sounds one and silences the other, and both carry the
-  variant_id and variant_choice that decided it.
+- A unit written small above or below a letter it rides takes a smaller
+  column with that placement and attached_to_column_id, not a main one. The
+  mini seen of a seen/saad khilaf is the case: it and the saad it rides are a
+  pair, the resolved variant sounds one and silences the other, and both carry
+  the variant_id and variant_choice that decided it.
 - Shadda, maddah, the silence mark, the pausal zero, imala, ishmam, tashil,
   and a tatweel seat are composed directly into their main column text. They
   never open their own columns, and the rules placed on them underline the
@@ -787,6 +788,9 @@ The implementation must enforce these before serialization:
 34. Validators reject missing, duplicated, contradictory, and wrong-kind IDs
     even when the underlying integer value exists in another ID space.
 35. Native tests pass when every legacy projection module is unavailable.
+36. No public DTO field, role, change, placement, or state value is named for
+    one riwayah, one script, or one site. A reading's vocabulary reaches a
+    consumer only through the rule, variant, and extra-phoneme catalogues.
 
 ## 11. Rule-model audit before DTO freeze
 
@@ -1033,6 +1037,26 @@ a compact toggle with before/after token previews.
 
 Catalogue IDs, choices, defaults, and request validation are exact tests.
 Neither catalogue imports or wraps the other.
+
+### 12.1 One shape, many readings
+
+The DTO shape is riwayah-independent. Words, boundaries, sounds, letter units,
+columns, occurrences, mergers, and highlight groups describe any reading; only
+the vocabulary filling them is a riwayah's own, and it is reached through
+tajweed_rules(riwayah), available_variants(riwayah), and
+available_extra_phonemes(riwayah). Adding Warsh adds rule IDs, variant IDs,
+and script inventories. It adds no public field, no role, and no column kind.
+
+Law 36 states this, and it is what keeps a Hafs peculiarity out of the shape.
+The mini seen of a seen/saad khilaf is the case that tested it: Warsh does not
+write that codepoint at all, so a role named for it would have been a Hafs word
+in a shared vocabulary. It does not need one. It is a letter that the resolved
+variant may or may not sound, which the column already says with placement,
+silence, variant_id, and variant_choice.
+
+This document otherwise describes Hafs, because Hafs is what ships. The 44
+rule IDs, the variant catalogue, and the QPC font gate of section 17 are that
+reading's content, not the contract's shape.
 
 ## 13. Ownership across repositories
 
