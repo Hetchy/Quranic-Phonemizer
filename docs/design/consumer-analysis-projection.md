@@ -203,6 +203,11 @@ There are N + 1 boundaries for N words:
 | state | start, join, sakt, or stop |
 | stop_sign | Exact written stop or sakt sign at this boundary, if any |
 
+stop_sign is single-valued. One site writes two marks at the same boundary --
+36:52 carries both a sakt seen and a preferred-stop sign -- and there the
+stop advice wins and the sakt mark is not published. A boundary shows the
+reader one sign.
+
 The four states mean:
 
 - start: the leading request boundary;
@@ -222,9 +227,9 @@ place, no override resolves to sakt and a stop override resolves to stop.
 Callers never request sakt as a generic choice, and an authored sakt never
 resolves to a false ordinary join.
 
-The website displays stop_sign when present and a visual | | fallback when it
-is absent. SourceView carries any exact sign characters through boundary_id.
-The fallback is presentation, not source text.
+SourceView carries any exact sign characters through boundary_id, and CellView
+gives every internal boundary a stop-sign column so a consumer never reads the
+sign back out of word text. The | | fallback is presentation, not source text.
 
 ### 6.3 Sound
 
@@ -347,25 +352,33 @@ LetterUnit is the semantic and educational unit over source characters:
 | rule_occurrence_ids | Rules placed on this visible unit |
 | silence | Typed silence reason, or null |
 
-The initial role vocabulary is limited to what rendering needs: letter,
-haraka, sukun, tanween, small_vowel, small_hamza, mini_noon, madd_sign, and
-other_mark. It is not a mirror of internal SlotFact names.
+The role vocabulary is letter, haraka, sukun, tanween, small_vowel, and
+seen_alternative. It is not a mirror of internal SlotFact names, and it has no
+catch-all member: the script inventory is total over its scalars, so a mark
+with no role is a producer bug, not an “other”.
 
-The tokenization is normative:
+The tokenization is normative. A scalar opens its own unit when it occupies
+the vowel position, or when it owns a sound in some boundary state. Every
+other mark folds into the unit whose fact it states:
 
-- a base letter is a unit;
-- dagger alif and every other sounded small vowel are their own units;
-- a small or combining hamza is its own unit, including carrier-seat cases;
-- small waw and small yaa are their own units;
-- mini noon is its own unit;
-- haraka is its own unit;
-- sukun is its own unit; it owns no sound but is not a “silent letter” and has
-  no SilenceReason merely because it denotes the absence of a vowel;
-- tanween is its own unit;
-- shadda stays a Character but is included in the main letter unit;
-- a Quranic silence mark stays a Character but is included in the main letter
-  unit it marks;
-- stop signs are boundary characters, not word letter units.
+- a base letter is a unit, and so is every letter the rasm leaves out and
+  writes small: combining hamza, small waw, small yaa, and mini noon. These
+  are letters, not marks, and they take role=letter;
+- haraka, sukun, and tanween each occupy the vowel position, so each is a
+  unit. A sukun owns no sound but is not a silent letter and has no
+  SilenceReason merely because it denotes the absence of a vowel;
+- dagger alif is a unit: it is the long vowel it writes;
+- the mini seen of a seen/saad khilaf is a unit with role=seen_alternative.
+  It can own the sound its site reads, and the base saad can own it instead,
+  so the two are a pair and the resolved variant silences one of them. Its
+  above/below position states which reading the site takes by default;
+- shadda, maddah, the Quranic silence mark, the pausal zero of the seven
+  alifs, the imala, ishmam, and tashil marks, and a tatweel seat all stay
+  Characters inside the unit they qualify. None owns a sound and none occupies
+  the vowel position: the box that owns the fact carries the mark and the
+  rules placed on it;
+- stop signs, sakt signs, and separators are boundary characters, not word
+  letter units.
 
 Character, LetterUnit, and shaping clusters are not required to coincide.
 This is intentional. A main unit can have multiple ranges when an independently
@@ -515,7 +528,8 @@ CellBoundary
 
 CellColumn
   id
-  role = letter | haraka | sukun | tanween | madd | mark | nasal_substitute | gap
+  role = letter | haraka | sukun | tanween | madd | nasal_substitute
+       | seen_alternative | stop_sign | gap
   text
   source_character_ids[]
   source_unit_ids[]
@@ -561,15 +575,21 @@ CellBoundary orders every boundary-owned column at that exact boundary.
 ### 9.2 Normative tokenization and alignment
 
 - The whole word is the outer visible cell.
-- Every base, small vowel, small hamza, small waw/yaa, and mini noon unit gets
-  its own main column.
-- Base letters, small hamzas, and mini noon use role=letter. Sounded small
-  vowels, small waw/yaa, vowel carriers, and madd signs use role=madd.
-- Haraka, sukun, and tanween get separate smaller columns. Above/below
+- Columns follow units. Every LetterUnit of the included words gets exactly
+  one column, and no scalar that 7.2 folded into a unit gets one, so the
+  column set is decided by tokenization rather than by a second list here.
+- A role=letter unit takes a main column. A vowel carrier takes role=madd.
+- Haraka, sukun, and tanween take separate smaller columns. Above/below
   placement and attached_to_column_id identify the exact main column they ride;
   attachment is stated, never guessed from adjacency.
-- Shadda and silence marks are composed directly into their main column text.
-  They never open their own columns.
+- A seen_alternative unit takes a smaller column placed above or below like a
+  haraka, attached to the saad it rides. It and that saad are a pair: the
+  resolved variant sounds one and silences the other, and both carry the
+  variant_id and variant_choice that decided it.
+- Shadda, maddah, the silence mark, the pausal zero, imala, ishmam, tashil,
+  and a tatweel seat are composed directly into their main column text. They
+  never open their own columns, and the rules placed on them underline the
+  main column by law 23a.
 - Long-vowel quality and carrier may occupy separate columns. One CellSound
   spans both.
 - A silent or omitted letter still has a column so it can be greyed; it has no
@@ -590,6 +610,13 @@ CellBoundary orders every boundary-owned column at that exact boundary.
   empty role=gap, change=gap column anchored to a unit/side or boundary. It has
   empty source provenance and no owned/presented sound; CellSound references
   it only for alignment. This does not invent a source glyph or ownership.
+- Every internal CellBoundary carries one role=stop_sign column. Its text is
+  the exact written sign when the boundary has one and empty when it does not,
+  so a consumer renders the pause control from the column and never reads a
+  sign back out of word text. The column owns no sound. A frontend paints the
+  | | fallback for an empty one, and decides from Boundary.state whether to
+  show, grey, or hide it -- which is what lets a stopped reading lift the sign
+  out of the word box it is written inside.
 - Iltiqa insertion is an ordered boundary-owned column between two CellWords.
 - A genuine idgham or other merger uses CellBridge with the shared CellSound.
 - CellBridge uses plural column endpoints because one merger can span the
@@ -598,9 +625,8 @@ CellBoundary orders every boundary-owned column at that exact boundary.
   again inside the host CellWord. It renders exactly once between the words;
   its column_ids still align the contributor and host columns for
   co-highlighting.
-- Sukun visibility, maddah folding, pausal zero, and carrier-seat handling are
-  settled by the producer. Frontends never inspect codepoints or rule IDs to
-  repair the rows.
+- Carrier-seat handling is settled by the producer. Frontends never inspect
+  codepoints or rule IDs to repair the rows.
 
 Iqlab is also producer-owned. Transformed cells expose the silent/replaced
 source component and a separate role=nasal_substitute column with exact sound
@@ -691,9 +717,13 @@ The implementation must enforce these before serialization:
     non-contiguous.
 17. Every source sound has at most one owner; owned and presented sound arrays
     are disjoint.
-18. Shadda and silence marks do not create their own educational columns.
+18. A scalar that 7.2 folds into a unit creates no column of its own.
 19. A unit with a silence reason has no owned or presented sounds.
-20. Cell columns partition every included display item in render order.
+20. Every lexical source character of an included word appears in exactly one
+    column's source_character_ids, and columns are in render order. Every
+    LetterUnit of an included word has exactly one column.
+20a. Every internal boundary of an included passage has exactly one
+    role=stop_sign column, which owns no sound.
 21. Above/below attachment resolves to an exact main column in the same
     CellWord or CellBoundary.
 22. In a full CellView, every core sound appears in exactly one primary
@@ -1369,7 +1399,8 @@ teaching-label or assembler repair.
 - Specify the neutral iqlab source/substitute split for every supported script.
 - Make stacked/open tanween a producer fact and fixture its script-specific
   glyph rendering.
-- Resolve sukun visibility, maddah folding, and pausal zero explicitly.
+- Fixture every folded mark against its main column, and every unit role
+  against its column.
 - Run the QPC font coverage and shaping spike.
 
 Exit: no frontend rule or codepoint heuristic is needed to produce rows.
@@ -1564,8 +1595,6 @@ These do not block Phase 1:
 | Decision | Default direction | Closing evidence |
 | --- | --- | --- |
 | Exact typed silence reasons | Small stable enum by real cause, not one value per rule | Full silent-unit fixture matrix |
-| Sukun visibility in transformed cells | Producer chooses one consistent QUA-derived result | Cell fixture and QPC rendering review |
-| Maddah and pausal-zero folding | Producer-owned, never Inspector-owned | v11 fixture audit |
 | Exact per-script glyph for nasal substitute and open tanween | Semantic role/form is native; glyph is script-owned | QPC and Digital Khatt fixture matrix |
 | Exact TypeScript UI library | Smallest typed component solution after spike | Cell-layout/state spike |
 | Current production host | Reuse existing viable container host | DNS/hosting audit |
