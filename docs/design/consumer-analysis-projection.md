@@ -352,8 +352,7 @@ LetterUnit is the semantic and educational unit over source characters:
 | rule_occurrence_ids | Rules placed on this visible unit |
 | silence | Typed silence reason, or null |
 
-The role vocabulary is letter, haraka, sukun, tanween, small_vowel, and
-seen_alternative. It is not a mirror of internal SlotFact names, and it has no
+The role vocabulary is letter, haraka, sukun, tanween, and seen_alternative. It is not a mirror of internal SlotFact names, and it has no
 catch-all member: the script inventory is total over its scalars, so a mark
 with no role is a producer bug, not an “other”.
 
@@ -367,7 +366,11 @@ other mark folds into the unit whose fact it states:
 - haraka, sukun, and tanween each occupy the vowel position, so each is a
   unit. A sukun owns no sound but is not a silent letter and has no
   SilenceReason merely because it denotes the absence of a vowel;
-- dagger alif is a unit: it is the long vowel it writes;
+- dagger alif is a unit and takes role=letter. It is a written alif the rasm
+  leaves out, like the small waw and small yaa beside it. Whether any of them
+  lengthens the vowel before it or stands as a consonant of its own is a
+  canonical fact, not a written one, so that split belongs to the cell column
+  role and not here;
 - the mini seen of a seen/saad khilaf is a unit with role=seen_alternative.
   It can own the sound its site reads, and the base saad can own it instead,
   so the two are a pair and the resolved variant silences one of them. Its
@@ -577,7 +580,10 @@ CellBoundary orders every boundary-owned column at that exact boundary.
 - Columns follow units. Every LetterUnit of the included words gets exactly
   one column, and no scalar that 7.2 folded into a unit gets one, so the
   column set is decided by tokenization rather than by a second list here.
-- A role=letter unit takes a main column. A vowel carrier takes role=madd.
+- A role=letter unit takes a main column: role=letter when the canon reads it
+  as a consonant, role=madd when it reads it as a long-vowel carrier. Full
+  alif, waw and yaa carriers, small waw and yaa, and the dagger alif all take
+  role=madd on that test; the mini noon of 21:88 takes role=letter.
 - Haraka, sukun, and tanween take separate smaller columns. Above/below
   placement and attached_to_column_id identify the exact main column they ride;
   attachment is stated, never guessed from adjacency.
