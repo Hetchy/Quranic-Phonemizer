@@ -599,7 +599,7 @@ Multiple rules may coexist, including:
 
 - madd_iwad with madd_tabii;
 - ordinary madd_silah with madd_tabii;
-- madd_silah with jaiz or wajib before hamza;
+- madd_silah with jaiz before a hamza opening the next word;
 - pausal_alif with madd_tabii;
 - waqf drops with the rule naming the resulting long vowel.
 
@@ -777,10 +777,15 @@ for its own sake.
 
 madd_badal remains first-class:
 
-- ordinary badal emits madd_badal and madd_tabii;
+- ordinary badal emits madd_badal alone. It names the same two harakat
+  madd_tabii names, so the two are mutually exclusive and never co-occur;
 - if another cause determines a contextual length, badal remains present and
-  the contextual madd replaces tabii;
+  the contextual madd names the length;
 - no sughra/kubra teaching layer is added.
+
+A consumer that does not teach badal separately may fold madd_badal into
+madd_tabii for presentation. The producer does not fold it, because the two
+name different causes of the same length.
 
 madd_iwad names the fathatan-to-long-aa transformation and co-occurs with
 madd_tabii for the resulting natural length.
@@ -788,9 +793,13 @@ madd_tabii for the resulting natural length.
 There is one madd_silah:
 
 - ordinary silah emits madd_silah plus madd_tabii;
-- before qualifying hamza it emits madd_silah plus madd_jaiz_munfasil or
-  madd_wajib_muttasil, without madd_tabii;
+- before a hamza opening the next word it emits madd_silah plus
+  madd_jaiz_munfasil, without madd_tabii;
 - at waqf it emits no madd_silah and uses waqf_silah_drop.
+
+Silah is never muttasil. The lengthened vowel belongs to the pronoun haa and
+the qualifying hamza opens the following word, so the meeting is always across
+a boundary. Only madd_jaiz_munfasil can accompany it.
 
 No silah_sughra or silah_kubra identifier is introduced.
 
@@ -804,7 +813,10 @@ At ibtidaa before a quiescent lexical hamza:
 - the appropriate hamza_wasl_kasra or hamza_wasl_damma occurrence names the
   starting quality;
 - ibdal_hamza targets the following lexical hamza that is replaced/silenced;
-- the starting vowel is lengthened with the matching quality;
+- the starting vowel is lengthened with the matching quality, and that length
+  is madd_badal: a hamza followed by a long vowel of its own quality is exactly
+  what badal names, so the occurrence pair is ibdal_hamza plus madd_badal,
+  without madd_tabii, under the ordinary badal rule of 11.2;
 - visible letter and sound placements record both effects without claiming
   that hamzat-wasl itself was the replaced hamza.
 
@@ -820,9 +832,9 @@ Use these exact outcomes:
 | Dammatan or kasratan | one waqf_diacritic_drop on the written tanween |
 | Non-taa-marbuta fathatan becoming long aa | waqf_diacritic_drop + madd_iwad + madd_tabii |
 | Taa marbuta with any haraka or tanween | waqf_diacritic_drop + waqf_taa_marbuta |
-| Performed silah suppressed | waqf_silah_drop; no madd_silah |
+| Performed silah suppressed | waqf_diacritic_drop on the haa's written haraka + waqf_silah_drop; no madd_silah |
 | Compatible final waw/yaa becoming long | waqf_diacritic_drop + madd_tabii |
-| Aatani hadhf at 27:36:8 | yaa_aatani_waqf variant omission plus waqf_diacritic_drop on each actually omitted vowel mark; no glide rule |
+| Aatani hadhf at 27:36:8 | yaa_aatani_waqf variant omission plus waqf_diacritic_drop on each actually omitted vowel mark, and madd_arid_lissukun on the long aa the newly quiescent noon now closes; no glide rule |
 | Aatani ithbat at 27:36:8 | waqf_diacritic_drop on the final fatha + madd_tabii |
 | Authored seven-alif realization | pausal_alif + madd_tabii |
 
@@ -837,6 +849,11 @@ replacement transformation, and madd_tabii names the resulting long sound.
 
 waqf_taa_marbuta names only the taa-to-haa consonant substitution. Associated
 vowel or tanween loss remains one waqf_diacritic_drop.
+
+waqf_silah_drop is scoped the same way: it names only the loss of the small
+waw or yaa that carried the length. The haa's own written haraka is an omitted
+haraka like any other and takes its own waqf_diacritic_drop, so both dropped
+scalars of `تَأْخُذُهُۥ` are separately placeable.
 
 There is no waqf_glide_drop rule. The only genuinely deleted written glide is
 the optional yaa of Aatani, and that outcome is already first-class as
@@ -1000,10 +1017,10 @@ Expected vocabulary translations include:
 | waqf_diacritic_drop with non-taa-marbuta madd_iwad | omit pausal_sukun; keep madd_iwad + madd_tabii |
 | waqf_silah_drop | pausal_sukun |
 | yaa_aatani_waqf=hadhf omitted yaa | place pausal_sukun on the omitted yaa's legacy cell from explicit variant provenance, then deduplicate within that cell's rules array |
-| ordinary madd_badal + madd_tabii | madd_tabii |
-| madd_badal + contextual madd | contextual madd only; suppress badal and compatibility tabii |
+| ordinary madd_badal | madd_tabii |
+| madd_badal + contextual madd | contextual madd only; suppress badal |
 | ordinary madd_silah + madd_tabii | madd_tabii |
-| madd_silah + jaiz/wajib | exact jaiz/wajib v11 tag, without duplicate tabii |
+| madd_silah + madd_jaiz_munfasil | exact madd_jaiz_munfasil v11 tag, without duplicate tabii |
 | pausal_alif at wasl | omitted |
 | pausal_alif at waqf | pausal_sukun |
 | native orthographic-silence state | orthographic_silence |
