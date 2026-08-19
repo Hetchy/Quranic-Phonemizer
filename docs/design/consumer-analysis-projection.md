@@ -1622,6 +1622,8 @@ need.
 ### Phase 0: freeze untrusted evidence
 
 - Build and hash a wheel from the old projection baseline.
+- Measure that wheel over the 20.5 rows and freeze the numbers. They are the
+  bar the native result has to beat.
 - Save representative old outputs, and the 114 shards of
   nasser_al_qatami_mp3quran, outside the candidate package.
 - Record known incorrect categories.
@@ -1852,6 +1854,13 @@ Measure cold and warm construction for one ayah, one surah, and the full Qur'an:
 
 Views are cached immutably after first construction. Phonemes-only use must not
 pay for source tokenization or cells beyond the unavoidable engine result.
+
+The bar is today's numbers. Phase 0 freezes a measurement of the current
+package over the same rows, and the native result must be at least as fast and
+no heavier on every one of them. A row that regresses fails the gate; a row
+that improves ratchets, so the new number becomes the bar. There is no separate
+target to argue about, and no row is exempt: the redesign is meant to cost less
+than the graph it replaces, not the same.
 
 ### 20.6 Website gate
 
