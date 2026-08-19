@@ -528,15 +528,14 @@ CellBoundary
 
 CellColumn
   id
-  role = letter | haraka | sukun | tanween | madd | nasal_substitute
-       | seen_alternative | stop_sign | gap
+  role = letter | haraka | sukun | tanween | madd | seen_alternative
+       | stop_sign | gap
   text
   source_character_ids[]
   source_unit_ids[]
   placement = main | above | below
   attached_to_column_id
   change = unchanged | inserted | replaced | omitted | gap
-  tanween_form = stacked | open | null
   variant_id
   variant_choice
   anchor_unit_id
@@ -626,17 +625,19 @@ CellBoundary orders every boundary-owned column at that exact boundary.
   its column_ids still align the contributor and host columns for
   co-highlighting.
 - Carrier-seat handling is settled by the producer. Frontends never inspect
-  codepoints or rule IDs to repair the rows.
+  codepoints to repair the rows.
 
-Iqlab is also producer-owned. Transformed cells expose the silent/replaced
-source component and a separate role=nasal_substitute column with exact sound
-ownership. A script adapter may render a Digital Khatt mini meem or the
-QPC-compatible no-glyph form, but neither SDK nor frontend discovers the split
-by checking rule_id == iqlab.
+The producer does not publish a glyph choice. Open tanween follows from the
+occurrence already on the tanween unit -- it is open under idgham, ikhfaa, and
+iqlab and stacked otherwise -- and the iqlab meem follows the same way, whether
+a script writes it as a mini meem beside the noon or splits a tanween into a
+haraka plus a mini meem. Both are the script's own convention over facts the
+result already states, so neither earns a field or a column role.
 
-The producer also sets tanween_form to stacked or open. Script adapters choose
-the supported glyph for that declared form; they never derive open tanween by
-inspecting a tanween codepoint together with a tajweed rule ID.
+This is not the codepoint inference principle 2 forbids. A consumer must not
+work out that a rule applies; here the producer has already said which rule
+applies to which unit, and a font or script adapter is only choosing how to
+draw it. Deciding tajweed is the producer's; drawing it is the renderer's.
 
 ### 9.3 Rules in cells
 
@@ -1049,7 +1050,7 @@ silent units, discover mergers, or classify rules.
 - development diagnostics.
 
 The current Inspector reconstructs groups, spanning sounds, riding marks,
-iqlab splits, and iltiqa placement. Those domain decisions move to the
+iqlab rows, and iltiqa placement. The domain decisions move to the
 phonemizer. Inspector code remaining after migration should be recognizably
 presentational.
 
@@ -1396,9 +1397,8 @@ teaching-label or assembler repair.
 - Build a fixture matrix for every small mark, carrier, seat, attachment, and
   silence case.
 - Port the correct QUA v11 cell behavior into producer-owned expected fixtures.
-- Specify the neutral iqlab source/substitute split for every supported script.
-- Make stacked/open tanween a producer fact and fixture its script-specific
-  glyph rendering.
+- Fixture the iqlab and open-tanween rows as facts about units and
+  occurrences, with no glyph choice in the result.
 - Fixture every folded mark against its main column, and every unit role
   against its column.
 - Run the QPC font coverage and shaping spike.
@@ -1595,7 +1595,6 @@ These do not block Phase 1:
 | Decision | Default direction | Closing evidence |
 | --- | --- | --- |
 | Exact typed silence reasons | Small stable enum by real cause, not one value per rule | Full silent-unit fixture matrix |
-| Exact per-script glyph for nasal substitute and open tanween | Semantic role/form is native; glyph is script-owned | QPC and Digital Khatt fixture matrix |
 | Exact TypeScript UI library | Smallest typed component solution after spike | Cell-layout/state spike |
 | Current production host | Reuse existing viable container host | DNS/hosting audit |
 
