@@ -10,10 +10,18 @@ graph and its alignment, respelling, and derived-label projections. It also
 defines the domain contract needed by the website, QUA v11 compatibility
 adapter, Inspector, and continuous-text highlighting.
 
-The current projections are not a correctness oracle. They contain known
-modelling and assembly errors. A frozen build of them is useful only as
-untrusted differential evidence: every match and every difference still has
-to be judged against native laws and reviewed fixtures.
+The current projections are not a correctness oracle, and a frozen build of
+them is useful only as untrusted differential evidence: every match and every
+difference still has to be judged against native laws and reviewed fixtures.
+
+That is a statement about their standing, not an accusation. The case for
+replacing them is that two public models is the cost, not that the old one is
+wrong. Section 11 audits real defects and every one of them is in the rule
+model this document keeps; the projection modules are being retired because a
+consumer should not have to traverse a graph to ask what a letter sounds, and
+because maintaining a second public architecture to answer that is the
+expense. Where a module has no successor and no defect, its disposition is to
+be made private and retargeted, not deleted.
 
 ## 1. Decision
 
@@ -1199,6 +1207,36 @@ Do not place the native result on top of the existing serialized graph.
 The exact filenames must be refreshed against the implementation branch before
 deletion, but the architectural disposition is binding.
 
+### 15.1 A module leaves when its last caller does
+
+Deletion is caller-driven, one module at a time, and never a single cutover
+commit. A module on this table is removed in the change that retires its last
+caller, and until then it stays and stays private. A module whose callers are
+all gone but which has no successor is made private and retargeted rather than
+deleted.
+
+This matters because the callers are not only the public result. Counted at
+the target baseline:
+
+| Caller | Delete-list modules it uses |
+| --- | --- |
+| tests/support/reading.py | edges, nodes, assemble, document, labels, pairing, legacy_views |
+| tools/parity.py, tools/cross_parity.py, tools/snapshot.py | legacy_views |
+| tools/benchmark.py | assemble, labels, document, schema |
+| tests/laws/test_pairing.py, test_respelling.py, test_recited_text.py, test_teaching_labels.py, test_anchored_projection.py, test_parity_floor.py | the module each is named for |
+
+tests/support/reading.py is the harness 51 of the 67 test files run through,
+and legacy_views backs the cross-script, regression, roundtrip, and attestation
+gates. A cutover that deletes these modules in one commit takes the rule suite
+and four corpus gates down with them, and nothing is left to prove the cutover
+did no harm.
+
+So the order is fixed: retarget the harness onto the native result first, then
+the four gate tools, then the tests named for a deleted projection are either
+rewritten against a native law or removed with their module in the same change.
+Only then does the module go. Every step keeps all eight gates green, which is
+what makes the previous commit a real rollback rather than a nominal one.
+
 The one permitted private flow is:
 
 ~~~text
@@ -1490,16 +1528,23 @@ Exit: the QUA Inspector and website can render rows without domain repairs.
 
 Exit: native semantics and frozen v11 wire compatibility are separately green.
 
-### Phase 7: destructive cutover
+### Phase 7: retire the old projection stack
 
-- Remove the old graph/projection modules according to section 15.
+Not one commit. Section 15.1 is the order, and every step lands green:
+
+- Retarget tests/support/reading.py onto the native result.
+- Retarget tools/parity.py, cross_parity.py, snapshot.py, and benchmark.py.
+- For each remaining module, rewrite the tests named for it against a native
+  law or remove them in the same change that removes it, then remove it.
+- Make private anything that has no successor and no caller left.
 - Update README and public API documentation to the consumer contract.
-- Build the release-candidate wheel after deletion.
+- Build the release-candidate wheel once the table is empty.
 - Prove old public types and modules are absent.
-- Re-run native, schema, export, wheel-manifest, and all 114-shard gates against
-  that exact post-deletion wheel.
+- Re-run all eight gates plus native, schema, export, wheel-manifest, and the
+  114-shard gate against that exact wheel.
 
-Exit: there is one public architecture.
+Exit: there is one public architecture, and every commit on the way to it had
+a working test suite.
 
 ### Phase 8: migrate QUA and Inspector
 
