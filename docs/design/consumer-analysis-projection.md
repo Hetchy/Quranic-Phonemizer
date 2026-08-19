@@ -40,7 +40,7 @@ The new public result has:
 - genuine cross-word mergers;
 - an exact source-character and letter-unit view;
 - an optional continuous-text highlight grouping;
-- an optional educational cell view in source or transformed presentation.
+- an optional educational cell view in source or transformed spelling.
 
 There is no general recited or performed text, no public graph, no public edit
 language, and no generic source-to-performed correspondence model.
@@ -151,7 +151,7 @@ result.mergers
 
 result.source                         # characters, letter units, placements
 result.highlight_groups()             # continuous source-text highlighting
-result.cells(presentation="transformed")   # or "source"
+result.cells(spelling="transformed")       # or "source"
 ~~~
 
 Riwayah metadata remains separate:
@@ -193,7 +193,7 @@ AnalysisResult identifies the exact computation:
 | canon_digest | Digest of the canonical source passage |
 
 schema_version is a monotonic integer, matching the shard convention. It is
-bumped when a DTO field or a role, change, state, or placement value is added,
+bumped when a DTO field or a role, status, state, or tier value is added,
 removed, or changes meaning, and when a law changes what a consumer may rely
 on. A rule added to or removed from the inventory does not bump it: the
 catalogue is data reached through tajweed_rules, which is what section 12.1
@@ -364,7 +364,7 @@ Character is one Unicode scalar:
 | id | Result-local character ID |
 | index | Scalar order in result.text() |
 | text | Exact scalar |
-| role | lexical, separator, or stop_sign |
+| kind | lexical, separator, or stop_sign |
 | word_id | Owning word, when lexical |
 | boundary_id | Owning boundary, when a stop sign or structural separator |
 | letter_unit_id | Owning LetterUnit, when lexical |
@@ -390,16 +390,21 @@ LetterUnit is the semantic and educational unit over source characters:
 | character_ids | Exact source characters in this unit |
 | ranges | Ordered half-open Unicode-scalar ranges in result.text() |
 | text | Their exact concatenation |
-| role | Plain consumer-facing role |
+| kind | What the script wrote here |
 | written_on_unit_id | Carrier/seat unit this mark is written on, when any |
 | owned_sound_ids | Sounds this unit genuinely produces |
 | presented_sound_ids | Additional non-owned sounds visibly shared here |
 | rule_occurrence_ids | Rules placed on this visible unit |
 | silence | Why this unit is silent: null, a rule occurrence ID, or orthographic |
 
-The role vocabulary is letter, haraka, sukun, and tanween. It is not a mirror of internal SlotFact names, and it has no
-catch-all member: the script inventory is total over its scalars, so a mark
-with no role is a producer bug, not an “other”.
+A unit's kind is letter, haraka, sukun, or tanween: what the script wrote. It
+is not a mirror of internal SlotFact names, and it has no catch-all member,
+because the script inventory is total over its scalars -- a mark with no kind
+is a producer bug, not an "other".
+
+Kind is not the cell column's role. Kind is what was written; role is what the
+row draws. A unit of kind letter takes a column of role madd where the canon
+reads it as a carrier, and of role letter where it reads it as a consonant.
 
 The tokenization is normative. A scalar opens its own unit when it occupies
 the vowel position, or when it owns a sound in some boundary state. Every
@@ -407,15 +412,15 @@ other mark folds into the unit whose fact it states:
 
 - a base letter is a unit, and so is every letter the rasm leaves out and
   writes small: combining hamza, small waw, small yaa, and mini noon. These
-  are letters, not marks, and they take role=letter;
+  are letters, not marks, and they take kind=letter;
 - haraka, sukun, and tanween each occupy the vowel position, so each is a
   unit. A sukun owns no sound but is not a silent letter and has no silence
   reason merely because it denotes the absence of a vowel;
-- dagger alif is a unit and takes role=letter. It is a written alif the rasm
+- dagger alif is a unit and takes kind=letter. It is a written alif the rasm
   leaves out, like the small waw and small yaa beside it. Whether any of them
   lengthens the vowel before it or stands as a consonant of its own is a
   canonical fact, not a written one, so that split belongs to the cell column
-  role and not here;
+  role and not to kind;
 - the mini seen of a seen/saad khilaf is a unit, on the same test as any
   letter: it can own the sound its site reads. The base saad can own it
   instead, so the two are a pair and the resolved variant silences one of
@@ -562,7 +567,7 @@ CellView is a producer-built layout contract, not a second text surface. It
 contains whole-word containers, letter columns, aligned sound cells, boundary
 insertions, and merger bridges.
 
-The two presentations are:
+The two spellings are:
 
 - source: source letter units only, with performed sounds anchored to them;
 - transformed: the educational cell spelling after insertions, replacements,
@@ -570,6 +575,13 @@ The two presentations are:
 
 There is no promise that concatenating transformed columns produces a
 general-purpose text string.
+
+A column's status names what the reading did with the rasm, and takes the
+shard vocabulary's word for it so an adapter renames nothing: present,
+inserted, replaced, dropped, plus gap, which the shard has no equivalent for.
+Sharing the word does not mean sharing every answer -- 14.1 records the sukun,
+which the shard calls dropped and this contract calls present, because nothing
+was dropped: the mark is written and read as the absence of a vowel.
 
 ### 9.1 Shape
 
@@ -595,9 +607,9 @@ CellColumn
   text
   source_character_ids[]
   source_unit_ids[]
-  placement = main | above | below
+  tier = main | above | below
   attached_to_column_id
-  change = unchanged | inserted | replaced | omitted | gap
+  status = present | inserted | replaced | dropped | gap
   variant_id
   variant_choice
   anchor_unit_id
@@ -625,7 +637,7 @@ crosses nested ownership. A private normalized index may exist inside the
 package.
 
 There is no grouping level between a word and its columns. A column carries
-its own attachment (placement plus attached_to_column_id) and its own sound
+its own attachment (tier plus attached_to_column_id) and its own sound
 participation, and CellSound.column_ids carries the alignment, so a group would
 only restate what those already say. A renderer that wants a box around a
 letter and its marks draws it from attachment, which the producer supplies;
@@ -639,15 +651,15 @@ CellBoundary orders every boundary-owned column at that exact boundary.
 - Columns follow units. Every LetterUnit of the included words gets exactly
   one column, and no scalar that 7.2 folded into a unit gets one, so the
   column set is decided by tokenization rather than by a second list here.
-- A role=letter unit takes a main column: role=letter when the canon reads it
+- A kind=letter unit takes a main column: role=letter when the canon reads it
   as a consonant, role=madd when it reads it as a long-vowel carrier. Full
   alif, waw and yaa carriers, small waw and yaa, and the dagger alif all take
   role=madd on that test; the mini noon of 21:88 takes role=letter.
 - Haraka, sukun, and tanween take separate smaller columns. Above/below
-  placement and attached_to_column_id identify the exact main column they ride;
+  tier and attached_to_column_id identify the exact main column they ride;
   attachment is stated, never guessed from adjacency.
 - A unit that pairs with the base letter it rides for the same sound takes a
-  smaller column with that placement and attached_to_column_id rather than a
+  smaller column with that tier and attached_to_column_id rather than a
   main one. The mini seen of a seen/saad khilaf is the only Hafs case: it and the saad it rides are a
   pair, the resolved variant sounds one and silences the other, and both carry
   the variant_id and variant_choice that decided it.
@@ -658,22 +670,22 @@ CellBoundary orders every boundary-owned column at that exact boundary.
 - Long-vowel quality and carrier occupy separate columns, and one CellSound
   spans both: the carrier column owns the sound, the haraka column presents
   it. This is the corpus's commonest shape by a wide margin.
-- A silent or omitted letter still has a column so it can be greyed; it has no
+- A silent or dropped letter still has a column so it can be greyed; it has no
   overflowing placeholder phoneme.
 - source_character_ids and source_unit_ids are provenance, not displayed-text
   IDs. An inserted transformed column leaves both empty and has either an
   anchor_unit_id plus before/after side or boundary ownership.
-- A replacement retains the exact replaced source provenance and uses change
-  = replaced.
+- A replacement retains the exact replaced source provenance and uses
+  status=replaced.
 - A cell whose displayed state or sound participation depends on a selected
   variant carries its variant_id and variant_choice. Both are null when the
   selected variant does not affect that cell in the resolved boundary state,
   so adapters and settings UIs never infer provenance from codepoints or rule
   IDs.
-- An omitted transformed column retains its exact source text and provenance
+- A dropped transformed column retains its exact source text and provenance
   so it can be greyed, while owning and presenting no performed sound.
-- A source presentation sound with no honest source presenter receives an
-  empty role=gap, change=gap column anchored to a unit/side or boundary. It has
+- A source-spelling sound with no honest source presenter receives an
+  empty role=gap, status=gap column anchored to a unit/side or boundary. It has
   empty source provenance and no owned/presented sound; CellSound references
   it only for alignment. This does not invent a source glyph or ownership.
 - Every internal CellBoundary carries one role=stop_sign column. Its text is
@@ -828,8 +840,8 @@ rather than renumbering the ones after it.
     closed: every referenced ID exists in the selected CellView.
 29. A transformed inserted column has no invented source character or unit and
     has a valid unit/side anchor or boundary owner.
-30. A transformed replaced or omitted column retains exact source provenance;
-    an omitted column retains source text.
+30. A transformed replaced or dropped column retains exact source provenance;
+    a dropped column retains source text.
 31. A column's variant_id and variant_choice are either both null or match the
     resolved result selection and accompany an actual variant-dependent
     displayed state or sound participation.
@@ -855,7 +867,7 @@ rather than renumbering the ones after it.
 34. Validators reject missing, duplicated, contradictory, and wrong-kind IDs
     even when the underlying integer value exists in another ID space.
 35. Native tests pass when every legacy projection module is unavailable.
-36. No public DTO field, role, change, placement, or state value is named for
+36. No public DTO field, role, status, tier, or state value is named for
     one riwayah, one script, or one site. A reading's vocabulary reaches a
     consumer only through the rule, variant, and extra-phoneme catalogues.
 
@@ -1032,7 +1044,7 @@ scalars of `تَأْخُذُهُۥ` are separately placeable.
 There is no waqf_glide_drop rule. The only genuinely deleted written glide is
 the optional yaa of Aatani, and that outcome is already first-class as
 yaa_aatani_waqf=hadhf. At waqf with hadhf, its transformed yaa column remains
-present with change=omitted so it can be greyed; it owns and presents no sound
+present with status=dropped so it can be greyed; it owns and presents no sound
 and carries variant_id=yaa_aatani_waqf, variant_choice=hadhf. At waqf with
 ithbat, the retained, sounding yaa column carries the same variant_id with
 variant_choice=ithbat and contributes to the resulting i:. At wasl the two
@@ -1063,10 +1075,10 @@ Model the visible outcome directly from source attestation plus resolved
 performance:
 
 - joined: retain the shadda and publish the genuine merger bridge;
-- started: the transformed main column uses change=replaced, omits only the
+- started: the transformed main column uses status=replaced, omits only the
   shadda from text, retains its complete source-character provenance, and
   aligns the one plain consonant;
-- source presentation: retain the literal written shadda;
+- source spelling: retain the literal written shadda;
 - publish no rule underline, fake merger, or preceding-word participant.
 
 Use ibtidaa_shadda_drop as the implementation and fixture name. It is not a
@@ -1126,13 +1138,13 @@ columns, occurrences, mergers, and highlight groups describe any reading; only
 the vocabulary filling them is a riwayah's own, and it is reached through
 tajweed_rules(riwayah), available_variants(riwayah), and
 available_extra_phonemes(riwayah). Adding Warsh adds rule IDs, variant IDs,
-and script inventories. It adds no public field, no role, and no column kind.
+and script inventories. It adds no public field, no kind, and no role.
 
 Law 36 states this, and it is what keeps a Hafs peculiarity out of the shape.
 The mini seen of a seen/saad khilaf is the case that tested it: Warsh does not
-write that codepoint at all, so a role named for it would have been a Hafs word
+write that codepoint at all, so a kind named for it would have been a Hafs word
 in a shared vocabulary. It does not need one. It is a letter that the resolved
-variant may or may not sound, which the column already says with placement,
+variant may or may not sound, which the column already says with tier,
 silence, variant_id, and variant_choice.
 
 This document otherwise describes Hafs, because Hafs is what ships. The 44
@@ -1666,8 +1678,8 @@ teaching-label or assembler repair.
   open, not ported. Section 14.1 lists the four already decided against v11.
 - Fixture the iqlab and open-tanween rows as facts about units and
   occurrences, with no glyph choice in the result.
-- Fixture every folded mark against its main column, and every unit role
-  against its column.
+- Fixture every folded mark against its main column, and every unit kind
+  against its column role.
 - Run the QPC font coverage and shaping spike.
 
 Exit: no frontend rule or codepoint heuristic is needed to produce rows.
@@ -1906,7 +1918,7 @@ The redesign is complete when:
    advice, or allowed-states output.
 4. Silent letters own no sounds, while optional highlight groups encode
    domain-correct folding.
-5. Source and transformed cell presentations share native sound/rule IDs, but
+5. Source and transformed cell spellings share native sound/rule IDs, but
    no general transformed text exists.
 6. Letter tokenization, attached marks, sound spans, mergers, and boundary
    insertions are producer-owned.
