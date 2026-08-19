@@ -142,7 +142,7 @@ Riwayah metadata remains separate:
 ~~~python
 tajweed_rules("hafs")
 available_variants("hafs")
-available_extra_phonemes("hafs", alphabet="ipa")
+available_extra_phonemes("hafs")
 ~~~
 
 The request and result retain separate variant and extra-phoneme values:
@@ -170,7 +170,6 @@ AnalysisResult identifies the exact computation:
 | ref | Resolved Qur'an reference |
 | riwayah | Selected transmission |
 | script | Selected source script |
-| alphabet | Selected phoneme alphabet |
 | variant | Resolved khilaf choices |
 | extra_phonemes | Resolved optional distinctions |
 | schema_version | Version of this native DTO contract |
@@ -258,13 +257,17 @@ sign back out of word text. The | | fallback is presentation, not source text.
 | --- | --- |
 | id | Result-local sound ID |
 | order | Total performed order |
-| token | Token in the selected alphabet |
+| token | Phoneme token |
 | word_id | Primary word allocation |
 | rule_occurrence_ids | Rules that classify or change this sound |
 
-Features needed by a supported alphabet may be added as typed fields only
-when the renderer or a named consumer requires them. Do not expose the entire
-internal sound object as an untyped features dictionary.
+The package emits IPA. There is no alphabet parameter and no alphabet field:
+one output notation is what every consumer wants today, and a second one is a
+change to make when a consumer asks rather than a seam to carry until then.
+
+Features a renderer needs may be added as typed fields only when a named
+consumer requires them. Do not expose the entire internal sound object as an
+untyped features dictionary.
 
 ### 6.4 Rule definition
 
@@ -1065,15 +1068,19 @@ available_variants returns VariantDefinition records with:
 - id;
 - concise name and summary;
 - default choice;
-- ordered choices, each with value, label, and alphabet-specific phoneme
-  preview where meaningful.
+- ordered choices, each with value, label, and the token that choice produces
+  where one token tells the story.
 
 available_extra_phonemes returns ExtraPhonemeDefinition records with:
 
 - id;
 - concise name and summary;
 - default enabled state;
-- disabled and enabled token previews for the chosen alphabet.
+- disabled and enabled token previews.
+
+A preview is the token the choice produces on its own, under the other
+settings' defaults. It is a label, not a promise about the caller's resolved
+request, which keeps the two catalogues independent as principle 7 asks.
 
 This is enough for intuitive UI without prescribing a widget. For example,
 the iqlab and ikhfaa-shafawi variants can render as a two-choice phoneme
