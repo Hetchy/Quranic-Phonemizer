@@ -125,10 +125,7 @@ result.mergers
 
 result.source                         # characters, letter units, placements
 result.highlight_groups()             # continuous source-text highlighting
-result.cells(
-    presentation="transformed",       # or "source"
-    words=None,
-)
+result.cells(presentation="transformed")   # or "source"
 ~~~
 
 Riwayah metadata remains separate:
@@ -643,13 +640,12 @@ A core-only envelope contains no source-unit or source-character reference.
 A source-only envelope contains no cell reference. Result-local IDs are
 preserved across scopes.
 
-For word-scoped cells:
-
-- requested CellWords and their owned boundary columns are complete;
-- every referenced source/core record is included;
-- a bridge is emitted only when both endpoint columns are present;
-- a scoped contributor can still present an externally hosted sound without a
-  dangling bridge.
+A CellView covers the whole requested passage. Cells are not scoped to a
+subset of a result's words, because a word is scoped by the request instead:
+phonemize("2:255:9") already resolves that word with a leading start and a
+trailing stop, so no cross-word merger exists to lose. Slicing a result after
+its boundaries were resolved in context would invent a word whose merged sound
+belongs to a neighbour that is no longer there.
 
 Every envelope validator has mutation tests for missing, mistyped, duplicated,
 wrong-kind, and contradictory references.
@@ -1526,7 +1522,6 @@ Measure cold and warm construction for one ayah, one surah, and the full Qur'an:
 - core only;
 - source;
 - highlight groups;
-- one word of cells;
 - one ayah of cells.
 
 Views are cached immutably after first construction. Phonemes-only use must not
