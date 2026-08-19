@@ -20,8 +20,9 @@ wrong. Section 11 audits real defects and every one of them is in the rule
 model this document keeps; the projection modules are being retired because a
 consumer should not have to traverse a graph to ask what a letter sounds, and
 because maintaining a second public architecture to answer that is the
-expense. Where a module has no successor and no defect, its disposition is to
-be made private and retargeted, not deleted.
+expense. A module whose callers are all gone but which has no successor is made
+private and retargeted rather than deleted; section 15 marks those rows Retain
+private.
 
 ## 1. Decision
 
@@ -372,8 +373,8 @@ other mark folds into the unit whose fact it states:
   writes small: combining hamza, small waw, small yaa, and mini noon. These
   are letters, not marks, and they take role=letter;
 - haraka, sukun, and tanween each occupy the vowel position, so each is a
-  unit. A sukun owns no sound but is not a silent letter and has no
-  SilenceReason merely because it denotes the absence of a vowel;
+  unit. A sukun owns no sound but is not a silent letter and has no silence
+  reason merely because it denotes the absence of a vowel;
 - dagger alif is a unit and takes role=letter. It is a written alif the rasm
   leaves out, like the small waw and small yaa beside it. Whether any of them
   lengthens the vowel before it or stands as a consonant of its own is a
@@ -418,7 +419,7 @@ non-owning visible sharing. The two arrays are disjoint:
   two forms silence takes;
 - a shadda or silence mark can be soundless notation inside another unit
   without itself becoming a silent-letter unit;
-- a sukun is its own soundless notation unit without a SilenceReason.
+- a sukun is its own soundless notation unit without a silence reason.
 
 Each source sound has at most one owning unit. No unit repeats one sound ID in
 both arrays.
@@ -602,9 +603,9 @@ CellBoundary orders every boundary-owned column at that exact boundary.
 - Haraka, sukun, and tanween take separate smaller columns. Above/below
   placement and attached_to_column_id identify the exact main column they ride;
   attachment is stated, never guessed from adjacency.
-- A unit written small above or below a letter it rides takes a smaller
-  column with that placement and attached_to_column_id, not a main one. The
-  mini seen of a seen/saad khilaf is the case: it and the saad it rides are a
+- A unit that pairs with the base letter it rides for the same sound takes a
+  smaller column with that placement and attached_to_column_id rather than a
+  main one. The mini seen of a seen/saad khilaf is the only Hafs case: it and the saad it rides are a
   pair, the resolved variant sounds one and silences the other, and both carry
   the variant_id and variant_choice that decided it.
 - Shadda, maddah, the silence mark, the pausal zero, imala, ishmam, tashil,
@@ -690,7 +691,7 @@ combined hover. It must not invent a semantic fold.
 
 In process, a CellView refers to IDs on its AnalysisResult. A standalone JSON
 cell envelope includes every referenced word, boundary, sound, rule occurrence,
-rule definition, merger, source unit, source character, and silence reason.
+rule definition, merger, source unit, and source character.
 The same closure rule applies to a standalone source or highlight envelope.
 
 A core-only envelope contains no source-unit or source-character reference.
@@ -734,8 +735,9 @@ The implementation must enforce these before serialization:
 13. Iltiqa insertions never appear as Merger records.
 14. Every Character is exactly lexical-unit-owned, boundary-owned, or an
     explicitly typed passage separator.
-15. Every sounded small vowel, small hamza, small waw/yaa, and mini noon has
-    its own LetterUnit.
+15. Every scalar that occupies the vowel position, and every letter the rasm
+    leaves out and writes small, has its own LetterUnit, whether or not it
+    sounds in the resolved boundary state.
 16. LetterUnit ranges reproduce exactly its character_ids, even when
     non-contiguous.
 17. Every source sound has at most one owner; owned and presented sound arrays
@@ -752,8 +754,12 @@ The implementation must enforce these before serialization:
     role=stop_sign column, which owns no sound.
 21. Above/below attachment resolves to an exact main column in the same
     CellWord or CellBoundary.
-22. In a full CellView, every core sound appears in exactly one primary
-    CellSound, held by one CellWord, one CellBoundary, or one CellBridge.
+21a. A riding column's attached_to_column_id is the column of the unit its
+    written_on_unit_id names. Where that unit has no main column of its own,
+    it is the main column of the unit owning the sound the rider qualifies.
+    Attachment is never derived from adjacency.
+22. Every core sound appears in exactly one primary CellSound, held by one
+    CellWord, one CellBoundary, or one CellBridge.
 23. A non-gap CellSound's columns are exactly the columns that own or present
     its sound. A gap CellSound is the only exception to that agreement.
 23a. A column's rule_occurrence_ids are exactly the source RulePlacement
@@ -761,8 +767,11 @@ The implementation must enforce these before serialization:
     column with no source units carries none.
 23b. A CellSound's rule_occurrence_ids are exactly its Sound's
     rule_occurrence_ids.
-24. A gap column has empty provenance, ownership, and presentation and exactly
-    one valid unit/side anchor or boundary owner.
+23c. A column's silence is exactly the silence of its source unit where it has
+    one, and null for an inserted, gap, or boundary-owned column. The cell
+    builder decides no silence of its own.
+24. A gap column has empty provenance, ownership, presentation, and silence,
+    and exactly one valid unit/side anchor or boundary owner.
 25. Every CellBridge resolves to one Merger, owns the same primary CellSound,
     and its endpoint columns are the MergerPlacement's contributor presenters
     and host owner. The bridged sound has no duplicate inline CellSound.
@@ -780,8 +789,8 @@ The implementation must enforce these before serialization:
     displayed state or sound participation.
 32. Highlight groups refer only to source units and existing sounds; their
     ranges are ordered and non-overlapping.
-33. A full highlight view contains every sound exactly once.
-33a. A full highlight view contains every lexical source unit exactly once,
+33. A highlight view contains every sound exactly once.
+33a. A highlight view contains every lexical source unit exactly once,
     and the union of its ranges equals the lexical span of result.text().
     Separator and stop-sign characters are the only exclusions.
 33b. Every highlight group holds at least one sound and at least one unit that
@@ -1204,6 +1213,11 @@ Do not place the native result on top of the existing serialized graph.
 | phonemize/recited.py | Delete; add a separately named private transformed-cell builder with no general text writer |
 | phonemize/ordering.py | Keep only if it is pure Performance ordering; otherwise replace |
 
+A row reading Delete may become Retain private under 15.1 if its callers are
+gone and nothing succeeds it; the manifest check of this section applies only
+to rows still marked Delete, so a deliberately retained private module is not
+indistinguishable from a missed one.
+
 The exact filenames must be refreshed against the implementation branch before
 deletion, but the architectural disposition is binding.
 
@@ -1223,17 +1237,20 @@ the target baseline:
 | tests/support/reading.py | edges, nodes, assemble, document, labels, pairing, legacy_views |
 | tools/parity.py, tools/cross_parity.py, tools/snapshot.py | legacy_views |
 | tools/benchmark.py | assemble, labels, document, schema |
-| tests/laws/test_pairing.py, test_respelling.py, test_recited_text.py, test_teaching_labels.py, test_anchored_projection.py, test_parity_floor.py | the module each is named for |
+| tests/laws/test_pairing.py, test_respelling.py, test_recited_text.py, test_teaching_labels.py | the module each is named for |
+| tests/laws/test_anchored_projection.py, test_parity_floor.py, test_continuous_assembly.py, test_madd_tabii.py, test_minimal_pairs.py, test_script_agreement.py | legacy_views, though none is named for it |
 
-tests/support/reading.py is the harness 51 of the 67 test files run through,
-and legacy_views backs the cross-script, regression, roundtrip, and attestation
-gates. A cutover that deletes these modules in one commit takes the rule suite
-and four corpus gates down with them, and nothing is left to prove the cutover
-did no harm.
+tests/support/reading.py is the harness 36 of the 67 test files run through.
+legacy_views backs the cross-script and regression corpus gates, the suite gate
+through six law tests, and the structure gate itself, because structure_lint
+import-smokes every committed tool and tools/snapshot.py is one of them. A
+cutover that deletes these modules in one commit takes the rule suite and three
+gates down together, and nothing is left to prove the cutover did no harm.
 
 So the order is fixed: retarget the harness onto the native result first, then
-the four gate tools, then the tests named for a deleted projection are either
-rewritten against a native law or removed with their module in the same change.
+the gate tools, then every test that reaches a delete-list module -- whether or
+not it is named for one -- is either rewritten against a native law or removed
+with that module in the same change.
 Only then does the module go. Every step keeps all eight gates green, which is
 what makes the previous commit a real rollback rather than a nominal one.
 
