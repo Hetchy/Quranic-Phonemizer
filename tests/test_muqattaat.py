@@ -70,3 +70,22 @@ def test_a_meem_final_opening_takes_its_own_plain_articulation(ref):
     r = reading(Site(hafs=(ref, (1,))), ibtidaa=1, wasl=1)
     assert r.rules_on_sound(1, "m") == {"izhar_shafawi"}
     assert "madd_lazim" in r.rules_on_char(1, "م")
+
+
+def test_an_opening_joined_to_the_name_of_god_breaks_the_meeting_with_a_fatha():
+    """`الٓمٓ ٱللَّهُ` (3:1 into 3:2): the meem meets the bare lam the elided hamza
+    leaves, takes a fatha, and stops the vowel before it no longer."""
+    from quranic_phonemizer import Phonemizer
+
+    joined = Phonemizer().phonemize(ref="3:1-3:2")
+    assert "".join(joined.phonemes())[:12] == "ʔalifla:m̃i:ma"[:12]
+    named = {r.rule.value for r in joined.rules}
+    assert "iltiqa_fatha" in named
+    # the meem is voweled now, so it is no longer a meem sakinah at all
+    meem = joined.sounds.index(next(s for s in joined.sounds if s.token == "m"))
+    on = {joined.rules[m.by].rule.value for m in joined.modifiers if m.sound == meem}
+    assert "izhar_shafawi" not in on
+
+    alone = Phonemizer().phonemize(ref="3:1")
+    assert "".join(alone.phonemes()) == "ʔalifla:m̃i:m"
+    assert "iltiqa_fatha" not in {r.rule.value for r in alone.rules}

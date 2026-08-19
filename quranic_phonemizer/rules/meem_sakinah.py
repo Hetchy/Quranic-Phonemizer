@@ -87,9 +87,10 @@ class MeemSakinah:
         self, near: Neighbourhood, plan: Plan, at: SlotId,
         boundaries: BoundaryPlan,
     ) -> Verdict | None:
-        del plan, boundaries  # `near` already refuses to look across a junction
+        del boundaries  # `near` already refuses to look across a junction
         slot = near.slot(at)
-        if not is_quiescent(slot):
+        # A repaired meeting leaves this one voweled, and so not a sakin at all.
+        if not is_quiescent(slot) or plan.voweled(at):
             return None
         following = near.after(at)
         if following is None:

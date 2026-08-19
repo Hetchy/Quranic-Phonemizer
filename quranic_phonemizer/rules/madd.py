@@ -149,7 +149,6 @@ class MaddClass:
         self, near: Neighbourhood, plan: Plan, at: SlotId,
         boundaries: BoundaryPlan,
     ) -> Verdict | None:
-        del plan
         slot, word = near.slot(at), near.word_of(at)
         if slot is None or word is None:
             return None
@@ -186,8 +185,10 @@ class MaddClass:
             )
             return _classify(rule, at, following.id)
 
-        if _opens_on_a_sakin(following):
+        if _opens_on_a_sakin(following) and not plan.voweled(following.id):
             # A sakin already in the Score is permanent -- a written sukun in `الٓمٓ`, the first half of the shadda in `ٱلضَّآلِّينَ`. Lazim.
+            # Unless a repair voweled it: joined to `ٱللَّهُ`, the meem of `الٓمٓ`
+            # takes a fatha and stops nothing, so its madd is the plain two.
             return _classify(Rule.MADD_LAZIM, at, following.id)
 
         if _stop_makes_quiescent(near, following, boundaries):

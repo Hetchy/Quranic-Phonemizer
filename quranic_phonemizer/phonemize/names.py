@@ -48,6 +48,7 @@ RULE_NAMES: dict[Rule, tuple[str, str]] = {
     Rule.WASL_ELISION: ("Hamza Wasl Elision", "حذف همزة الوصل"),
     Rule.WASL_START: ("Hamza Wasl Start", "همزة الوصل عند الابتداء"),
     Rule.ILTIQA_KASRA: ("Iltiqa Kasra", "كسر التقاء الساكنين"),
+    Rule.ILTIQA_FATHA: ("Iltiqa Fatha", "فتح التقاء الساكنين"),
     Rule.ILTIQA_SHORTENING: ("Iltiqa Shortening", "قصر عند التقاء الساكنين"),
     Rule.PAUSAL_SUKUN: ("Pausal Sukun", "سكون الوقف"),
     Rule.TAA_MARBUTA_PAUSAL: ("Taa Marbuta at a Pause", "تاء مربوطة عند الوقف"),

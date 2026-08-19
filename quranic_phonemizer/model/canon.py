@@ -313,6 +313,7 @@ class Rule(StrEnum):
     WASL_ELISION = "wasl_elision"
     WASL_START = "wasl_start"
     ILTIQA_KASRA = "iltiqa_kasra"
+    ILTIQA_FATHA = "iltiqa_fatha"
     ILTIQA_SHORTENING = "iltiqa_shortening"
     PAUSAL_SUKUN = "pausal_sukun"
     TAA_MARBUTA_PAUSAL = "taa_marbuta_pausal"

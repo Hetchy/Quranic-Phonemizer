@@ -165,3 +165,15 @@ class Plan:
 
     def merged_away(self, slot: SlotId, aspect: Aspect) -> bool:
         return (slot, aspect) in self._removed
+
+    def voweled(self, slot: SlotId) -> bool:
+        """Has an earlier phase given this slot a vowel it did not have?
+
+        A rule that asks the Score alone still reads a repaired sakin as sakin.
+        """
+        return any(
+            isinstance(effect, Realize)
+            and effect.slot == slot
+            and effect.aspect is Aspect.VOWEL
+            for effect in self.effects()
+        )

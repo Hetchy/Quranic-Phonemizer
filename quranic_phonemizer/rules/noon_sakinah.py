@@ -41,9 +41,10 @@ class NoonSakinah:
         self, near: Neighbourhood, plan: Plan, at: SlotId,
         boundaries: BoundaryPlan,
     ) -> Verdict | None:
-        del plan
         slot = near.slot(at)
-        if not is_quiescent(slot):
+        # A repair that broke a meeting of two quiescent letters leaves this one
+        # voweled, and a voweled letter is not a sakin at all.
+        if not is_quiescent(slot) or plan.voweled(at):
             return None
         opening = self._opening_wasl(near, at, boundaries)
         if opening is not None:

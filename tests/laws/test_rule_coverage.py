@@ -58,6 +58,9 @@ DEFERRED: set[Rule] = {
     #: it is never in `perform().occurrences`. Reachable only through a
     #: pairing's `silent`/`rules`, which `phonemize/pairing.py` builds.
     Rule.ORTHOGRAPHIC_SILENCE,
+    # Only `الٓمٓ ٱللَّهُ` meets it, and that join is across two verses while this
+    # scan scores one ayah at a time. `test_muqattaat` covers it on the pair.
+    Rule.ILTIQA_FATHA,
 }
 
 
