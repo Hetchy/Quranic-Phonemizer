@@ -442,6 +442,13 @@ non-owning visible sharing. The two arrays are disjoint:
 
 - an ordinary pronounced unit owns its sound and has no need to repeat it as
   presented;
+- a long vowel is owned by its carrier, and the haraka that gives it its
+  quality presents it. The carrier is always there to own it: a written alif,
+  waw or yaa, or the dagger alif and small waw or yaa the rasm leaves out,
+  which are carriers themselves rather than marks needing one. The dagger alif
+  of the divine name is inserted rather than written, and owns its length on
+  the same footing. So a length rule underlines the carrier, and the haraka
+  lights with it;
 - a merger contributor does not own the host's sound but may present the
   shared sound;
 - a genuinely silent letter owns and presents no sound and has a silence
@@ -648,8 +655,9 @@ CellBoundary orders every boundary-owned column at that exact boundary.
   and a tatweel seat are composed directly into their main column text. They
   never open their own columns, and the rules placed on them underline the
   main column by law 23a.
-- Long-vowel quality and carrier may occupy separate columns. One CellSound
-  spans both.
+- Long-vowel quality and carrier occupy separate columns, and one CellSound
+  spans both: the carrier column owns the sound, the haraka column presents
+  it. This is the corpus's commonest shape by a wide margin.
 - A silent or omitted letter still has a column so it can be greyed; it has no
   overflowing placeholder phoneme.
 - source_character_ids and source_unit_ids are provenance, not displayed-text
