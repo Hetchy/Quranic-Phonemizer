@@ -153,6 +153,19 @@ def test_deleted_names_stay_deleted() -> None:
         )
     assert not hasattr(canon.Rule, "SPELLING_EXPANSION")
     assert not hasattr(canon.Onset, "COLOUR")
+    for renamed in (
+        "FAKK_IDGHAM",
+        "IKHFAA_HAQIQI",
+        "IWAD",
+        "MADD_ARID_LIL_SUKUN",
+        "TAA_MARBUTA_PAUSAL",
+        "WASL_ELISION",
+        "WASL_START",
+    ):
+        assert not hasattr(canon.Rule, renamed), (
+            f"Rule.{renamed} is back; the identifier it was renamed to is the "
+            f"only one"
+        )
 
 
 def test_slot_origin_meets_the_conditions_that_let_it_return() -> None:
