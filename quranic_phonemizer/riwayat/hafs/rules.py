@@ -19,7 +19,6 @@ from ...rules.boundary import (
     WaqfEnding,
     WaslHamza,
 )
-from ...rules.ibtidaa import FakkIdgham
 from ...rules.idgham import Idgham
 from ...rules.lam_shamsiyyah import ArticleLam, ArticleShape
 from ...rules.madd import IltiqaShortening, MaddClass, MaddLeen, PausalGlide
@@ -58,12 +57,6 @@ def _build() -> RuleSet:
                 Idgham(pairs=tables.pairs,
                        never_follows=tables.never_follows,
                        article=article),
-                FakkIdgham(
-                    pairs=tables.pairs,
-                    followers_of_noon=tables.followers_of_noon,
-                    followers_of_meem=tables.followers_of_meem,
-                    never_follows=tables.never_follows,
-                ),
             ),
             Phase.LENGTH: (
                 PausalGlide(), IltiqaShortening(), MaddClass(), MaddLeen(),

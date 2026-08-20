@@ -15,10 +15,10 @@ from ..model.canon import Score
 from ..model.performance import Performance
 
 #: Exceeds the reach of any cross-word rule, in either direction:
-#: `engine.neighbourhood.Neighbourhood.after` sees one slot ahead,
-#: `canon/juncture.py`'s cross-word noon repair reaches a further word, and
-#: `fakk_idgham` reads one word behind. Two words on each side covers all
-#: three, so a chunk seam sees exactly what an unchunked build would show it.
+#: `engine.neighbourhood.Neighbourhood` sees one slot each way, and
+#: `canon/juncture.py`'s cross-word noon repair reaches a further word. Two
+#: words on each side covers both, so a chunk seam sees exactly what an
+#: unchunked build would show it.
 OVERLAP_WORDS = 2
 
 
