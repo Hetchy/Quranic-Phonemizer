@@ -421,11 +421,17 @@ other mark folds into the unit whose fact it states:
   lengthens the vowel before it or stands as a consonant of its own is a
   canonical fact, not a written one, so that split belongs to the cell column
   role and not to kind;
-- the mini seen of a seen/saad khilaf is a unit, on the same test as any
-  letter: it can own the sound its site reads. The base saad can own it
-  instead, so the two are a pair and the resolved variant silences one of
-  them. Its above/below position states which reading the site takes by
-  default;
+- the mini seen of a seen/saad khilaf is a unit wherever the script writes it,
+  on the same test as any letter: it can own the sound its site reads. The base
+  letter it rides can own that sound instead, so where both are present they
+  are a pair and the reading sounds one and silences the other. Whether the
+  pair exists is a script fact and not a variant one: Uthmani writes the mark
+  at three of the four sites and IndoPak at all four, and where it is unwritten
+  the base letter alone carries whichever sound the reading takes. Its
+  above/below position is that script's own convention and states nothing --
+  Uthmani writes it below where the site reads saad by default and above where
+  it reads seen, IndoPak above at all four -- so the default is the riwayah's
+  and is the same in both;
 - shadda, maddah, the Quranic silence mark, the pausal zero of the seven
   alifs, the imala, ishmam, and tashil marks, and a tatweel seat all stay
   Characters inside the unit they qualify. None owns a sound and none occupies
@@ -447,13 +453,15 @@ non-owning visible sharing. The two arrays are disjoint:
 
 - an ordinary pronounced unit owns its sound and has no need to repeat it as
   presented;
-- a long vowel is owned by its carrier, and the haraka that gives it its
-  quality presents it. The carrier is always there to own it: a written alif,
-  waw or yaa, or the dagger alif and small waw or yaa the rasm leaves out,
-  which are carriers themselves rather than marks needing one. The dagger alif
-  of the divine name is inserted rather than written, and owns its length on
-  the same footing. So a length rule underlines the carrier, and the haraka
-  lights with it;
+- a long vowel is owned by its carrier wherever the script writes one: a full
+  alif, waw or yaa, or the dagger alif and small waw or yaa the rasm reduces to
+  a mark, which are carriers themselves rather than marks needing one. The
+  haraka that gives the vowel its quality presents it. Where no carrier is
+  written the haraka owns the length instead, which is the divine name in
+  Uthmani: it spells no dagger alif, and the long vowel is the lam's own fatha
+  read long. IndoPak does spell it, so the same word is carrier-owned in one
+  script and haraka-owned in the other. A length rule underlines whichever unit
+  owns it, and the other lights with it;
 - a merger contributor does not own the host's sound but may present the
   shared sound;
 - a genuinely silent letter owns and presents no sound and has a silence
@@ -462,9 +470,12 @@ non-owning visible sharing. The two arrays are disjoint:
   already owns. There is no second vocabulary of causes to drift from the
   rules;
 - the one silence no rule accounts for is a letter the script writes and the
-  reading does not read -- the alif of قَالُوا۟ -- which after 11.1 has no
-  occurrence to name. It takes the literal orthographic. Those are the only
-  two forms silence takes;
+  reading does not read -- the alif of قَالُوا۟, and the unread half of a
+  seen/saad khilaf pair -- which after 11.1 has no occurrence to name. It takes
+  the literal orthographic. Where a selected variant decided it, the column's
+  variant_id and variant_choice say so, and the reason stays orthographic
+  rather than naming a rule that did not fire. Those are the only two forms
+  silence takes;
 - a shadda or silence mark can be soundless notation inside another unit
   without itself becoming a silent-letter unit;
 - a sukun is its own soundless notation unit without a silence reason.
@@ -531,10 +542,12 @@ The phonemizer, not the consumer, decides silent folding and co-highlighting.
 There are exactly three fold directions, and every silent unit takes one:
 
 - back: a silent unit joins the group of the unit before it. Silent alif, waw,
-  and yaa; the alif after tanween; the skipped mini yaa of a stopped Aatani.
+  and yaa; the alif after tanween; the skipped mini yaa of a stopped Aatani;
+  an unread mini seen, which is written after the base letter that is read.
 - forward: a silent unit at a word start joins the group of the next sounding
-  unit. Silent hamzat wasl, the article lam before a sun letter, and the
-  hamzat wasl or silent long vowel of an iltiqa.
+  unit. Silent hamzat wasl, the article lam before a sun letter, the hamzat
+  wasl or silent long vowel of an iltiqa, and an unread base letter of a
+  seen/saad pair, whose mini seen is read and written after it.
 - across: a silent unit at a word end joins the first sounding unit of the
   next word. Cross-word idgham of every family, and the iltiqa chain.
 
@@ -659,10 +672,15 @@ CellBoundary orders every boundary-owned column at that exact boundary.
   tier and attached_to_column_id identify the exact main column they ride;
   attachment is stated, never guessed from adjacency.
 - A unit that pairs with the base letter it rides for the same sound takes a
-  smaller column with that tier and attached_to_column_id rather than a
-  main one. The mini seen of a seen/saad khilaf is the only Hafs case: it and the saad it rides are a
-  pair, the resolved variant sounds one and silences the other, and both carry
-  the variant_id and variant_choice that decided it.
+  smaller column with that tier and attached_to_column_id rather than a main
+  one. The mini seen of a seen/saad khilaf is the only Hafs case. Where the
+  script writes it there are two columns and the site's one sound goes to
+  exactly one of them, the other being silent and owning no phoneme. The
+  riwayah's default decides that allocation and selecting the variant flips it,
+  and both columns carry the variant_id and variant_choice. Where the script
+  writes no mark there is no second column and no pair: the variant changes the
+  single main column's phoneme and leaves every letter column as it stands.
+  Uthmani reads that second shape at 88:22:3.
 - Shadda, maddah, the silence mark, the pausal zero, imala, ishmam, tashil,
   and a tatweel seat are composed directly into their main column text. They
   never open their own columns, and the rules placed on them underline the
@@ -854,10 +872,12 @@ rather than renumbering the ones after it.
 33b. Every highlight group holds at least one sound and at least one unit that
     owns a sound. No group is silent-only, and no sound is orphaned from a
     sounding presenter.
-33c. Every long-vowel sound has a madd unit in its own group, except the Allah
-    dagger alif, hamza with fathatan, and muqattaat.
+33c. Every long-vowel sound has a madd unit in its own group, except where the
+    script writes no carrier to be that unit: the divine name in a script that
+    spells no dagger alif, hamza with fathatan, and muqattaat.
 33d. A unit that owns a sound is alone in its group unless a merger, an
-    insertion anchor, or a long vowel's carrier put another unit there. Ikhfaa,
+    insertion anchor, a long vowel's carrier, or the unread half of a
+    seen/saad pair put another unit there. Ikhfaa,
     iqlab, and their shafawi counterparts therefore never fold across a
     boundary, because the nasalized unit still owns its sound.
 33e. Every published ID array has one stated order and is deterministic across
@@ -1145,7 +1165,9 @@ The mini seen of a seen/saad khilaf is the case that tested it: Warsh does not
 write that codepoint at all, so a kind named for it would have been a Hafs word
 in a shared vocabulary. It does not need one. It is a letter that the resolved
 variant may or may not sound, which the column already says with tier,
-silence, variant_id, and variant_choice.
+silence, variant_id, and variant_choice. Whether it is written at all is a
+script fact even inside Hafs, which is the second reason the shape must not
+name it.
 
 This document otherwise describes Hafs, because Hafs is what ships. The 44
 rule IDs, the variant catalogue, and the QPC font gate of section 17 are that
@@ -1324,7 +1346,7 @@ adopting it:
 | --- | --- | --- |
 | The maddah takes its own madd cell and carries the rule | The maddah folds into the letter it marks, and the rule lands on that letter | A bar over a mark claims a length the mark does not own. The letter is what is read long. The pre-v11 cells folded it too, and splitting it out is where the muqattaat grouping went wrong: in `الٓمٓ` the lam and its maddah share a group, the meem and its maddah do not, because the shared sound is last of the lam's three and middle of the meem's. Ten openings carry that split. Folding cannot express it |
 | The pausal zero takes a madd cell, as a length carrier | It folds, and is a silence sign | It writes an absence: the alif it sits on is silent when joined to. A zero is not a carrier |
-| The mini seen of a seen/saad khilaf composes into the saad | It is a unit with its own column, paired with the saad | One of the two is read and the other is not. Composing them cannot show which, and cannot carry the variant that decides it |
+| The mini seen of a seen/saad khilaf composes into the saad | Where the script writes it, it is a unit with its own column, paired with the base letter | Exactly one of the pair is sounded and the other silent, and two columns state that outright rather than leaving it to be read back off a variant field. Where the script writes no mark there is no pair and the variant changes the base column's phoneme alone, which is Uthmani at 88:22:3 |
 | A sukun is status=dropped | A sukun is an ordinary present unit that owns no sound | Nothing is dropped. The mark is written and read as the absence of a vowel, which is not the same as a letter the reading discards |
 
 The 121,746 v11 cells carrying a share_group are the same relation section 8
@@ -1566,8 +1588,9 @@ Before accepting it:
 3. Check the font cmap covers the complete set.
 4. Shape representative clusters with the browser/HarfBuzz path.
 5. Render screenshot fixtures for dagger alif, small vowels, small hamzas,
-   mini noon, carrier seats, shadda, silence marks, tanween, madd marks, stop
-   signs, stacked/open tanween, pausal alif, ibdal, iqlab, iltiqa, and mergers.
+   mini noon, the mini seen above and below its base letter, carrier seats,
+   shadda, silence marks, tanween, madd marks, stop signs, stacked/open
+   tanween, pausal alif, ibdal, iqlab, iltiqa, and mergers.
 6. Confirm there is no fallback font in those fixtures.
 7. Confirm source text round-trips exactly and transformed cells do not require
    Digital Khatt-only glyph conventions.
@@ -1827,7 +1850,8 @@ boundary placements, and overlaps.
 
 - full corpus source reconstruction;
 - exact unit inventory and no accidental unit merges;
-- independent small vowels, small hamzas, small waw/yaa, and mini noon;
+- independent small vowels, small hamzas, small waw/yaa, mini noon, and the
+  mini seen wherever the script writes it, with the unpaired Uthmani site;
 - shadda and silence-mark composition;
 - attached haraka and tanween columns;
 - silent ownership emptiness;
