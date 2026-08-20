@@ -1654,7 +1654,30 @@ need.
 
 ## 19. Implementation phases
 
-### Phase 0: freeze untrusted evidence
+Six phases, ending when a locally generated shard is proved to carry the same
+rules, cells, tokens, and phonemes as the shipped v11 shard it replaces. What
+follows those six is listed in 19.1 and is not detailed here.
+
+Each phase lands as one to three pull requests into the integration branch, and
+every one of them leaves all eight gates green, so the previous commit is a real
+rollback rather than a nominal one. Phases 1 to 5 are additive: the native model
+is built beside the legacy one, which nothing in these six phases retires. That
+is what makes per-request green achievable.
+
+Gate cadence follows measurement rather than caution. The fast gates take
+twenty-five seconds and the full set two minutes twenty. So: the targeted tests
+while working, the fast gates once before a request opens, the full set once
+before it merges. Per-commit gating buys nothing the pre-request run does not.
+
+Each phase states what would prove it failed. A phase with no falsifier is a
+phase that will declare success.
+
+### Phase 1: baseline and rule model
+
+Two halves. The baseline exists before any comparison claim can be made, and the
+rule model is correct before any DTO is shaped around it.
+
+The baseline:
 
 - Build and hash a wheel from the old projection baseline.
 - Measure that wheel over the 20.5 rows and freeze the numbers. They are the
@@ -1665,10 +1688,13 @@ need.
 - Add a differential runner that executes old and new wheels in separate
   environments.
 
-Exit: comparisons are reproducible without importing legacy modules into the
-new package.
+Most of that already exists. `tools/freeze_legacy_baselines.py` freezes legacy
+projections from a `git archive` of a named revision, which is the separate
+environment pattern rather than an approximation of it, and `tools/benchmark.py`
+already measures time and allocation against a `PHONEMIZER_BENCH_ROOT` other
+than its own. This half extends two working tools and adds the shard download.
 
-### Phase 1: correct the internal rule model
+The rule model:
 
 - Replace overloaded occurrence participants with subjects, context, boundary,
   and effects.
@@ -1687,8 +1713,16 @@ new package.
   site.
 - Add exhaustive occurrence target fixtures before DTO work.
 
-Exit: the internal model states the facts the consumer contract needs without
-teaching-label or assembler repair.
+These outcomes move the corpus floors. A floor moves only after the intentional
+change is recorded in `docs/conformance.md` with the references it affects; a
+floor edited to make a gate pass is the failure that rule exists to catch.
+
+Exit: comparisons are reproducible without importing legacy modules into the new
+package, and the internal model states the facts the consumer contract needs
+without teaching-label or assembler repair.
+
+Falsified by: a rule whose occurrence still needs the assembler or a teaching
+label to say what it affected.
 
 ### Phase 2: prove source-unit and cell tokenization
 
@@ -1699,13 +1733,17 @@ teaching-label or assembler repair.
   a native law or a docs/hafs/research citation before its fixture is written;
   a v11 behaviour with no native justification is recorded in section 21 as
   open, not ported. Section 14.1 lists the four already decided against v11.
-- Fixture the iqlab and open-tanween rows as facts about units and
-  occurrences, with no glyph choice in the result.
+- Fixture the iqlab and open-tanween rows as facts about units and occurrences,
+  with no glyph choice in the result.
 - Fixture every folded mark against its main column, and every unit kind
   against its column role.
 - Run the QPC font coverage and shaping spike.
 
 Exit: no frontend rule or codepoint heuristic is needed to produce rows.
+
+Falsified by: a row that can only be produced by reading a codepoint or
+branching on a rule ID. That is what the frontend does today and what this phase
+makes unnecessary.
 
 ### Phase 3: implement the native core
 
@@ -1715,23 +1753,31 @@ Exit: no frontend rule or codepoint heuristic is needed to produce rows.
   resolved facts.
 - Add closed-reference validation and deterministic ordering.
 - Implement separate catalogue functions.
+- Extend structure_lint so the native layer's isolation from the legacy
+  projection is proved by the import graph rather than audited module by module.
 
 Exit: text, phonemes, boundaries, sounds, rules, and mergers pass native laws
 without any legacy projection import.
+
+Falsified by: the native result reaching the banned set, directly or
+transitively.
 
 ### Phase 4: implement source and highlights
 
 - Build exact Characters and LetterUnits.
 - Attach rule placements and honest sound ownership.
-- Carry each silence reason from the occurrence that caused it, and the
-  literal orthographic where no rule did.
+- Carry each silence reason from the occurrence that caused it, and the literal
+  orthographic where no rule did.
 - Implement highlight groups with the three fold directions of 8.1.
 - Run laws 32 to 33d over the whole corpus in every boundary state. The units
   they name are the folds nobody has decided yet; each one is closed against a
   native law or a docs/hafs/research citation, not against legacy output.
 
-Exit: continuous source-text highlighting needs only sound timing IDs, and
-laws 32 to 33d hold over the full corpus with no exemption list.
+Exit: continuous source-text highlighting needs only sound timing IDs, and laws
+32 to 33d hold over the full corpus with no exemption list.
+
+Falsified by: an exemption list. A unit excused from coverage is a fold nobody
+decided.
 
 ### Phase 5: implement cells
 
@@ -1740,68 +1786,72 @@ laws 32 to 33d hold over the full corpus with no exemption list.
   state, boundary insertion columns, and merger bridges.
 - Prohibit rule-ID and codepoint reconstruction in the cell builder.
 
+The largest phase. Split by view: columns and attachment, then sounds and spans,
+then boundaries and bridges.
+
 Exit: the QUA Inspector and website can render rows without domain repairs.
 
-### Phase 6: schema, transport, and compatibility adapter
+Falsified by: the transformed-cell lint failing, or passing only because the
+builder was written to evade it.
+
+### Phase 6: schema, adapter, and the shard proof
+
+In this repository:
 
 - Freeze typed JSON schema for the native result and each selective view.
-- Implement a shadow thin v11 adapter in the QUA integration owner while the
-  old QUA path remains available only in its frozen comparison environment.
-- Run the 114-shard classified comparison between those separate paths.
-- Add exact wheel/API export tests.
+- Add exact wheel/API export tests. Nothing here knows about v11.
 
-Exit: native semantics and frozen v11 wire compatibility are separately green.
+In the QUA integration owner:
 
-### Phase 7: retire the old projection stack
+- Implement a shadow thin v11 adapter beside the existing cell producer, while
+  the old path remains available only in its frozen comparison environment.
+- Write the comparator, and run the 114-shard classified comparison between
+  those separate paths.
 
-Not one commit. Section 15.1 is the order, and every step lands green:
+Both run locally against the shards frozen in Phase 1. Nothing is written to a
+bucket and the shipping producer is untouched.
 
-- Retarget tests/support/reading.py onto the native result.
-- Retarget tools/parity.py, cross_parity.py, snapshot.py, and benchmark.py.
-- For each remaining module, rewrite the tests named for it against a native
-  law or remove them in the same change that removes it, then remove it.
-- Make private anything that has no successor and no caller left.
-- Update README and public API documentation to the consumer contract.
-- Build the release-candidate wheel once the table is empty.
-- Prove old public types and modules are absent.
-- Re-run all eight gates plus native, schema, export, wheel-manifest, and the
-  114-shard gate against that exact wheel.
+The bar is renderability, not bytes: the Inspector has to be able to draw the
+same thing for a reader. A justified difference is fine where the justification
+is real, which is what the six categories of section 14 decide.
 
-Exit: there is one public architecture, and every commit on the way to it had
-a working test suite.
+The existing bounded-equivalence tooling is not that comparator. It compares
+per-word tag sets and cannot see rule placement, and placement is exactly what
+moving the cell model upstream is for; a comparison blind to it would pass a
+build that puts every rule on the wrong cell. The comparator this phase writes
+compares cell for cell on the axes section 14 lists, placement included.
 
-### Phase 8: migrate QUA and Inspector
+Exit: native semantics and frozen v11 wire compatibility are separately green,
+and every difference carries a reviewed category.
 
-- Replace SDK cell reconstruction with native consumption plus v11 translation.
-- Remove Inspector grouping, folding, and rule reconstruction.
-- Run PR 78/81 and audio PR 233/234 behavior fixtures against the new owner.
-- Re-run the 114-shard gate after deleting the old SDK reconstruction.
-- Review the final diff for any domain decision still duplicated.
+Falsified by: a difference left in the unresolved category, or an adapter that
+had to reach for a codepoint.
 
-Exit: SDK is a wire adapter and Inspector is a renderer.
+### 19.1 The arc that follows
 
-### Phase 9: rebuild the website
+Out of scope above, in this order.
 
-- Replace the obsolete backend import and dependency.
-- Add the thin analysis/meta/random API.
-- Implement the cell-layout spike, then extract it as the shared package.
-- Apply the Impeccable design pass for hierarchy, spacing, responsive behavior,
-  state clarity, and visual restraint.
-- Add QPC font, the rule palette and legend, stop toggles, settings, random
-  ayah, and copy actions.
-- Run screenshot, interaction, accessibility-smoke, and mobile gates.
+**Retire the old projection stack.** Not one commit: 15.1 is the order, deletion
+is caller-driven, and every step lands green. Ends with one public architecture
+and a release-candidate wheel proving the old modules absent.
 
-Exit: the public demo meets section 16 without frontend domain logic.
+**Migrate QUA and Inspector.** SDK cell reconstruction becomes native
+consumption plus v11 translation, and Inspector grouping, folding, and rule
+reconstruction go. Ends with the SDK a wire adapter and the Inspector a
+renderer.
 
-### Phase 10: release and deploy
+**Rebuild the website.** The thin analysis API, the cell-layout spike extracted
+as the shared package, the design pass, and the section 16 surface. Ends with
+the public demo carrying no frontend domain logic.
 
-- Publish the phonemizer package.
-- Pin the exact release in the web lock.
-- Deploy staging then production using section 18.
-- Verify PyPI and GitHub links, version display, random ayah, representative
-  rules, stop toggles, and mobile layout.
+**Release and deploy.** Publish the package, pin the exact release in the web
+lock, and deploy staging then production per section 18. Ends with both
+repositories released from mutually tested immutable artifacts.
 
-Exit: both repositories are released from mutually tested immutable artifacts.
+Whether the shard schema moves past v11 is decided after the projection is
+proven, not alongside it. Reproducing v11 is what falsifies the model, and
+designing its successor at the same time would let a gap in the model be
+reclassified as a schema improvement.
 
 ## 20. Test and acceptance gates
 
@@ -1867,9 +1917,9 @@ boundary placements, and overlaps.
   spelled-out name;
 - no overflowing representative Arabic or phoneme cell;
 (A ban on rule-ID and codepoint branching in consumers is not checkable from
-this repository. It is an exit criterion of phases 8 and 9 instead: an
-Inspector lint rejecting a rule-ID comparison outside its renderer registry,
-and the qua-sdk equivalent.)
+this repository. It is an exit criterion of the Inspector
+migration and the website rebuild instead: an Inspector lint rejecting a
+rule-ID comparison outside its renderer registry, and the qua-sdk equivalent.)
 
 ### 20.4 Full compatibility gate
 
@@ -1891,7 +1941,7 @@ Measure cold and warm construction for one ayah, one surah, and the full Qur'an:
 Views are cached immutably after first construction. Phonemes-only use must not
 pay for source tokenization or cells beyond the unavoidable engine result.
 
-The bar is today's numbers. Phase 0 freezes a measurement of the current
+The bar is today's numbers. Phase 1 freezes a measurement of the current
 package over the same rows, and the native result must be at least as fast and
 no heavier on every one of them. A row that regresses fails the gate; a row
 that improves ratchets, so the new number becomes the bar. There is no separate
