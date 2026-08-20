@@ -133,6 +133,13 @@ def _opens_on_a_sakin(slot) -> bool:
     return slot.nucleus.is_silent or slot.onset is Onset.GEMINATE
 
 
+def _still_a_sakin(plan: Plan, slot) -> bool:
+    """A repair that vowels a sakin leaves nothing to stop the madd -- joined
+    to `ٱللَّهُ` the meem of `الٓمٓ` takes a fatha. A geminate's sakin is its
+    first half, so a vowel on the letter's own nucleus leaves it standing."""
+    return slot.onset is Onset.GEMINATE or not plan.voweled(slot.id)
+
+
 def _madd_of(
     near: Neighbourhood, plan: Plan, at: SlotId, boundaries: BoundaryPlan
 ) -> tuple[Rule, SlotId | None] | None:
@@ -182,10 +189,8 @@ def _in_context(
         )
         return (rule, following.id)
 
-    if _opens_on_a_sakin(following) and not plan.voweled(following.id):
+    if _opens_on_a_sakin(following) and _still_a_sakin(plan, following):
         # A sakin already in the Score is permanent -- a written sukun in `الٓمٓ`, the first half of the shadda in `ٱلضَّآلِّينَ`. Lazim.
-        # Unless a repair voweled it: joined to `ٱللَّهُ`, the meem of `الٓمٓ`
-        # takes a fatha and stops nothing, so its madd is the plain two.
         return (Rule.MADD_LAZIM, following.id)
 
     if _stop_makes_quiescent(near, following, boundaries, plan):

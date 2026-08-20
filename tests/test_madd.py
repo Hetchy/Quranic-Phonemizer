@@ -23,6 +23,7 @@ KAAHAYAAAINSAAD = Site(hafs=("19:1", (1,)))
 MIHAADAN = Site(hafs=("78:6", (4,)))
 AYNAN = Site(hafs=("2:60", (13,)))
 WAANA = Site(hafs=("6:163", (6,)))
+DAALLAN = Site(hafs=("93:7", (2,)))
 
 
 @for_each_riwayah(BIMA, isolated=10)
@@ -190,3 +191,11 @@ def test_a_pausal_alif_joined_is_short_and_separates_nothing(r):
     the hamza opening the next word has no length to separate."""
     assert r.phonemes(6) == "waʔana"
     assert "madd_jaiz_munfasil" not in r.rules_on_char(6, "ا")
+
+
+@for_each_riwayah(DAALLAN, isolated=2)
+def test_a_geminate_the_iwad_vowels_still_holds_the_madd_before_it(r):
+    """ضَآلًّا. The stop exchanges the fathatan for a long aa on the lam, and
+    the first half of the shadda stands under it, so the madd stays lazim."""
+    assert r.phonemes(2) == "dˤaˤ:lla:"
+    assert r.rules_on_sound(2, "aˤ:") == {"madd_lazim", "tafkheem"}
