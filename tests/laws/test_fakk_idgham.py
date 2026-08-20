@@ -7,7 +7,11 @@ from conftest import score_for
 from quranic_phonemizer.engine.run import perform
 from quranic_phonemizer.model.address import BoundaryPlan, Junction
 from quranic_phonemizer.model.canon import Rule
-from quranic_phonemizer.model.performance import Classifies, Consonant
+from quranic_phonemizer.model.performance import (
+    Classifies,
+    Consonant,
+    effect_targets,
+)
 from quranic_phonemizer.riwayat.hafs import HAFS
 
 
@@ -29,9 +33,9 @@ def test_fakk_idgham_fires_where_the_merger_would_have(packed, hafs) -> None:
     meem = score.words[2].slots[0]
     performance = perform(score, HAFS, _started_at(score, 3))
 
-    fired = [o for o in performance.occurrences if o.parts.source == meem.id]
+    fired = [o for o in performance.occurrences if meem.id in o.subjects]
     assert [o.rule for o in fired] == [Rule.FAKK_IDGHAM]
-    assert fired[0].parts.host == score.words[1].slots[-1].id
+    assert fired[0].context == (score.words[1].slots[-1].id,)
 
 
 def test_the_joined_reading_takes_the_merger_instead(packed, hafs) -> None:
@@ -41,8 +45,11 @@ def test_the_joined_reading_takes_the_merger_instead(packed, hafs) -> None:
     meem = score.words[2].slots[0]
     performance = perform(score, HAFS, all_join(len(score.words)))
 
-    fired = {o.rule for o in performance.occurrences if meem.id in
-             (o.parts.source, o.parts.host)}
+    targets = effect_targets(performance)
+    fired = {
+        o.rule for o in performance.occurrences
+        if meem.id in o.subjects + o.context + targets.get(o.id, ())
+    }
     assert Rule.FAKK_IDGHAM not in fired
     assert Rule.IDGHAM_SHAFAWI in fired
 

@@ -201,7 +201,7 @@ class Reading:
 
     def host_of(self, rule: str) -> str | None:
         """The character supplying `rule`'s host unit, or `None` where the
-        rule is not a merger -- `RuleInstance.host` only a merger carries."""
+        rule acted on its own unit alone."""
         host = self._instances_of(rule)[0].host
         return None if host is None else self._char_of_unit(host)
 

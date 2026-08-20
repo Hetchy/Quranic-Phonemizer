@@ -32,7 +32,6 @@ from ..model.performance import (
     Aspect,
     Consonant,
     Occurrence,
-    Participants,
     Vowel,
 )
 from .khilaf import SitedKhilaf, vocalised_word
@@ -86,7 +85,10 @@ class WaqfEnding:
         if not effects:
             return None
         return Verdict(
-            Occurrence(mint(Rule.PAUSAL_SUKUN, at), Rule.PAUSAL_SUKUN, Participants(at)),
+            Occurrence(
+                mint(Rule.PAUSAL_SUKUN, at), Rule.PAUSAL_SUKUN, (at,),
+                boundary=word,
+            ),
             tuple(effects),
         )
 
@@ -124,10 +126,17 @@ class WaslHamza:
             return None
         if boundaries.started_on(word) and near.first_of_word(at):
             return Verdict(
-                Occurrence(mint(Rule.WASL_START, at), Rule.WASL_START, Participants(at)), ()
+                Occurrence(
+                    mint(Rule.WASL_START, at), Rule.WASL_START, (at,),
+                    boundary=_junction_before(word),
+                ),
+                (),
             )
         return Verdict(
-            Occurrence(mint(Rule.WASL_ELISION, at), Rule.WASL_ELISION, Participants(at)),
+            Occurrence(
+                mint(Rule.WASL_ELISION, at), Rule.WASL_ELISION, (at,),
+                boundary=_junction_before(word),
+            ),
             (Silence(at, Aspect.CONSONANT), Silence(at, Aspect.VOWEL)),
         )
 
@@ -160,8 +169,8 @@ class SoftenedHamza:
             return None
         return Verdict(
             Occurrence(
-                mint(Rule.IBDAL_HAMZA, at), Rule.IBDAL_HAMZA,
-                Participants(at, following.id),
+                mint(Rule.IBDAL_HAMZA, at), Rule.IBDAL_HAMZA, (at,),
+                boundary=_junction_before(word),
             ),
             (
                 Relength(at, Length.LONG),
@@ -187,8 +196,8 @@ class TanweenBeforeWasl:
         boundaries: BoundaryPlan,
     ) -> Verdict | None:
         del plan, boundaries
-        slot = near.slot(at)
-        if slot is None or slot.origin is not SlotOrigin.NUNATION:
+        slot, word = near.slot(at), near.word_of(at)
+        if slot is None or word is None or slot.origin is not SlotOrigin.NUNATION:
             return None
         if not near.last_of_word(at):
             return None
@@ -198,8 +207,8 @@ class TanweenBeforeWasl:
             return None
         return Verdict(
             Occurrence(
-                mint(Rule.ILTIQA_KASRA, at), Rule.ILTIQA_KASRA,
-                Participants(at, following.id),
+                mint(Rule.ILTIQA_KASRA, at), Rule.ILTIQA_KASRA, (at,),
+                (following.id,), boundary=word,
             ),
             (Realize(at, Aspect.VOWEL, Vowel(Quality.I)),),
         )
@@ -239,8 +248,8 @@ class SpelledBeforeWasl:
             return None
         return Verdict(
             Occurrence(
-                mint(Rule.ILTIQA_FATHA, at), Rule.ILTIQA_FATHA,
-                Participants(at, following.id),
+                mint(Rule.ILTIQA_FATHA, at), Rule.ILTIQA_FATHA, (at,),
+                (following.id,), boundary=word,
             ),
             (Realize(at, Aspect.VOWEL, Vowel(Quality.A)),),
         )
@@ -274,8 +283,8 @@ class PausalAlif:
             return None
         return Verdict(
             Occurrence(
-                mint(Rule.PAUSAL_ALIF, at), Rule.PAUSAL_ALIF,
-                Participants(at),
+                mint(Rule.PAUSAL_ALIF, at), Rule.PAUSAL_ALIF, (at,),
+                boundary=word,
             ),
             (Relength(at, Length.SHORT),),
         )
@@ -313,7 +322,7 @@ class TanweenAtWaqf:
         if base.letter is CanonLetter.TAA_MARBUTA:
             # Taa marbuta stops as haa and takes no iwad, but the noon is still silent.
             return Verdict(
-                Occurrence(mint(rule, at), rule, Participants(at, base.id)),
+                Occurrence(mint(rule, at), rule, (at,), boundary=word),
                 tuple(effects),
             )
         if base.nucleus.quality is Quality.A:
@@ -322,7 +331,7 @@ class TanweenAtWaqf:
         else:
             effects.append(Silence(base.id, Aspect.VOWEL))
         return Verdict(
-            Occurrence(mint(rule, at), rule, Participants(at, base.id)),
+            Occurrence(mint(rule, at), rule, (at,), boundary=word),
             tuple(effects),
         )
 
@@ -349,9 +358,15 @@ class TaaMarbutaAtWaqf:
         # `بِسُورَةٍ` stops as haa with no iwad; "final" here excludes the tanween noon slot.
         return Verdict(
             Occurrence(mint(Rule.TAA_MARBUTA_PAUSAL, at), Rule.TAA_MARBUTA_PAUSAL,
-                       Participants(at)),
+                       (at,), boundary=word),
             (Realize(at, Aspect.CONSONANT, Consonant(CanonLetter.HEH)),),
         )
+
+
+def _junction_before(word: int) -> int | None:
+    """A `BoundaryPlan` keys a junction by the word it falls after, so the
+    one a started word reads is the word before it."""
+    return word - 1 if word else None
 
 
 def _is_final_letter(near: Neighbourhood, at: SlotId, word: int) -> bool:

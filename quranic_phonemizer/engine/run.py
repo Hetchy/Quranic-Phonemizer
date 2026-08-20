@@ -290,9 +290,10 @@ def _modifiers_for(occurrence: Occurrence, effects, hosted) -> list[Modifier]:
                 out.append(SetsLength(sound_id, occurrence.id, effect.length))
     aspect = _CLASSIFIES_ASPECT.get(occurrence.rule)
     if aspect is not None and _names_its_sound(occurrence, effects, aspect):
-        source_sound = hosted.get((occurrence.parts.source, aspect))
-        if source_sound is not None:
-            out.append(Classifies(source_sound, occurrence.id))
+        for subject in occurrence.subjects:
+            sound_id = hosted.get((subject, aspect))
+            if sound_id is not None:
+                out.append(Classifies(sound_id, occurrence.id))
     return out
 
 
@@ -303,7 +304,7 @@ def _names_its_sound(occurrence: Occurrence, effects, aspect: Aspect) -> bool:
     if len(effects) != 1 or not isinstance(effects[0], Realize):
         return False
     return (
-        effects[0].slot == occurrence.parts.source
+        effects[0].slot in occurrence.subjects
         and effects[0].aspect is aspect
     )
 

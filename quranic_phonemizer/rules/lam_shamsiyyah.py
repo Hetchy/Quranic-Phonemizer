@@ -15,7 +15,7 @@ from ..model.address import BoundaryPlan, SlotId
 from ..model.canon import ABJAD
 from ..model.canon import CanonLetter as L
 from ..model.canon import CanonLetter, Onset, Quality, Rule
-from ..model.performance import Aspect, Consonant, Occurrence, Participants
+from ..model.performance import Aspect, Consonant, Occurrence
 
 
 def _never(_skeleton: str) -> bool:
@@ -95,7 +95,8 @@ class ArticleLam:
                 Occurrence(
                     mint(Rule.LAM_QAMARIYYAH, at),
                     Rule.LAM_QAMARIYYAH,
-                    Participants(at, following.id),
+                    (at,),
+                    (following.id,),
                 ),
                 (),
             )
@@ -103,7 +104,7 @@ class ArticleLam:
             Occurrence(
                 mint(Rule.LAM_SHAMSIYYAH, at),
                 Rule.LAM_SHAMSIYYAH,
-                Participants(at, following.id),
+                (at,),
             ),
             (
                 Realize(

@@ -22,7 +22,7 @@ from ..model.address import BoundaryPlan, SlotId
 from ..model.canon import Annotation
 from ..model.canon import CanonLetter as L
 from ..model.canon import Onset, Quality, Rule, SlotOrigin, VowelForm
-from ..model.performance import Aspect, Occurrence, Participants, Vowel
+from ..model.performance import Aspect, Occurrence, Vowel
 
 #: Which glide lengthens which vowel.
 GLIDE_OF = {Quality.U: L.WAW, Quality.I: L.YA}
@@ -63,8 +63,7 @@ class PausalGlide:
             Occurrence(
                 mint(Rule.MADD_TABII, at),
                 Rule.MADD_TABII,
-                # The glide is the source; the vowel it merges into is the host.
-                Participants(source=at, host=before.id),
+                (at,),
             ),
             (
                 # Realizes the merged sound itself, so both halves share one occurrence.
@@ -121,7 +120,8 @@ class IltiqaShortening:
             Occurrence(
                 mint(Rule.ILTIQA_SHORTENING, at),
                 Rule.ILTIQA_SHORTENING,
-                Participants(at, following.id),
+                (at,),
+                (following.id,),
             ),
             (Relength(at, Length.SHORT),),
         )
@@ -267,9 +267,12 @@ def _stop_makes_quiescent(
 
 
 def _classify(rule: Rule, at: SlotId, other: SlotId | None) -> Verdict:
-    return Verdict(
-        Occurrence(mint(rule, at), rule, Participants(at, other)), ()
-    )
+    return Verdict(Occurrence(mint(rule, at), rule, (at,), _context(other)), ())
+
+
+def _context(other: SlotId | None) -> tuple[SlotId, ...]:
+    """The letter whose own shape decided which madd this is, untouched."""
+    return () if other is None else (other,)
 
 
 def _tabii(slot, at: SlotId, other: SlotId | None) -> Verdict:
@@ -277,7 +280,7 @@ def _tabii(slot, at: SlotId, other: SlotId | None) -> Verdict:
     the plain fill would have given it -- except a pausal alif, whose own
     rule realizes it already, and only takes a length here."""
     occurrence = Occurrence(
-        mint(Rule.MADD_TABII, at), Rule.MADD_TABII, Participants(at, other)
+        mint(Rule.MADD_TABII, at), Rule.MADD_TABII, (at,), _context(other)
     )
     if slot.nucleus.is_pausal_long:
         return Verdict(occurrence, (Relength(at, Length.LONG),))

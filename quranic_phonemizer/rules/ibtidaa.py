@@ -12,7 +12,7 @@ from ..engine.plan import Phase, Plan, Verdict, mint
 from ..model.address import BoundaryPlan, SlotId
 from ..model.canon import CanonLetter as L
 from ..model.canon import Rule, Slot, SlotOrigin
-from ..model.performance import Occurrence, Participants
+from ..model.performance import Occurrence
 from .ownership import is_quiescent
 from .tables import Followers, Pairs
 
@@ -47,8 +47,8 @@ class FakkIdgham:
             return None
         return Verdict(
             Occurrence(
-                mint(Rule.FAKK_IDGHAM, at), Rule.FAKK_IDGHAM,
-                Participants(at, before.id),
+                mint(Rule.FAKK_IDGHAM, at), Rule.FAKK_IDGHAM, (at,),
+                (before.id,), boundary=word - 1 if word else None,
             ),
             (),
         )

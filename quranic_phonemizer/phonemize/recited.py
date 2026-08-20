@@ -26,6 +26,7 @@ from ..model.performance import (
     Release,
     Silent,
     Vowel,
+    effect_targets,
 )
 from ..orthography.write import MADD, Pen, WriteError
 from . import nodes as nd
@@ -170,9 +171,10 @@ def _slots_by_rule(performance: Performance, rule: Rule) -> frozenset:
     started on -- the plain fill spells the canonical value untouched, so
     only the occurrence, not the attribution, says which rule that was."""
     return frozenset(
-        occurrence.parts.source
+        subject
         for occurrence in performance.occurrences
         if occurrence.rule is rule
+        for subject in occurrence.subjects
     )
 
 
@@ -241,10 +243,11 @@ def _ibdal_carriers(performance: Performance):
 
     The rasm writes no length on the prosthetic hamza, so the letter the
     rule silences is the one the reading writes that length on."""
+    targets = effect_targets(performance)
     return [
-        (occurrence.parts.source, occurrence.parts.host)
+        (occurrence.subjects[0], targets[occurrence.id][0])
         for occurrence in performance.occurrences
-        if occurrence.rule is Rule.IBDAL_HAMZA and occurrence.parts.host is not None
+        if occurrence.rule is Rule.IBDAL_HAMZA and targets.get(occurrence.id)
     ]
 
 

@@ -295,7 +295,8 @@ def test_nasal_place_choices_change_only_the_nasal_realization(
     assert generic.host_of(rule) is None and lips.host_of(rule) is None
     generic_occurrence = next(o for o in generic.performance.occurrences if o.rule.value == rule)
     lips_occurrence = next(o for o in lips.performance.occurrences if o.rule.value == rule)
-    assert generic_occurrence.parts == lips_occurrence.parts
+    assert generic_occurrence.subjects == lips_occurrence.subjects
+    assert generic_occurrence.context == lips_occurrence.context
 
 
 def test_selecting_one_nasal_point_leaves_the_other_at_default():

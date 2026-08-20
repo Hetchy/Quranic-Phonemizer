@@ -21,7 +21,7 @@ from ..engine.plan import (
 from ..model.address import BoundaryPlan, Junction, KhilafId, SlotId
 from ..model.canon import CanonLetter as L
 from ..model.canon import Rule, SlotOrigin
-from ..model.performance import Aspect, Consonant, Occurrence, Participants
+from ..model.performance import Aspect, Consonant, Occurrence
 from .ownership import is_quiescent
 from .khilaf import DEFAULT_NASAL_PLACE, nasal_place
 from .tables import Followers
@@ -114,13 +114,14 @@ def _between_names(slot, following) -> bool:
 def _classification(rule: Rule, at: SlotId, other: SlotId | None) -> Verdict:
     """Izhar produces no sound of its own; the occurrence exists so a
     projection can find it."""
-    return Verdict(Occurrence(mint(rule, at), rule, Participants(at, other)), ())
+    context = () if other is None else (other,)
+    return Verdict(Occurrence(mint(rule, at), rule, (at,), context), ())
 
 
 def _nasal(rule: Rule, at: SlotId, other: SlotId, letter: L) -> Verdict:
     """Iqlab and ikhfaa realize the noon as a hum on the letter it rides."""
     return Verdict(
-        Occurrence(mint(rule, at), rule, Participants(at, other)),
+        Occurrence(mint(rule, at), rule, (at,), (other,)),
         (Realize(at, Aspect.CONSONANT, Consonant(letter, ghunnah=True)),),
     )
 
@@ -132,7 +133,7 @@ def _merge(rule: Rule, at: SlotId, host, *, ghunnah: bool) -> Verdict:
     idgham, so the merged sound belongs to it and not to plain realization.
     """
     return Verdict(
-        Occurrence(mint(rule, at), rule, Participants(at, host.id)),
+        Occurrence(mint(rule, at), rule, (at,)),
         (
             Realize(
                 host.id,
@@ -169,7 +170,7 @@ class IkhfaaWeight:
             return None  # izhar, iqlab or idgham owns this pair instead
         return Verdict(
             Occurrence(
-                mint(Rule.TAFKHEEM, at), Rule.TAFKHEEM, Participants(at)
+                mint(Rule.TAFKHEEM, at), Rule.TAFKHEEM, (at,)
             ),
             (Recolour(at, Aspect.CONSONANT, SoundFeature.EMPHATIC, True),),
         )

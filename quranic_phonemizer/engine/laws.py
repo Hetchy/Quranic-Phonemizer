@@ -25,6 +25,7 @@ from ..model.performance import (
     Recolours,
     SetsLength,
     Silent,
+    effect_targets,
 )
 from .run import has_content
 
@@ -222,17 +223,15 @@ def check_attestations(
     attested: Iterable[SlotId],
     performance: Performance,
 ) -> list[str]:
-    """Every slot a script attests must be produced by some merger occurrence.
-
-    One-directional: a merger with no matching attestation is not an error.
-    Returns disagreements instead of raising them individually.
-    """
+    """Every slot a script attests must be produced by some merger occurrence:
+    its subject, and whatever its own edges name beside it. One-directional,
+    and disagreements are returned rather than raised one at a time."""
+    targets = effect_targets(performance)
     produced: set[SlotId] = set()
     for occurrence in performance.occurrences:
         if occurrence.rule in MERGER_RULES:
-            produced.add(occurrence.parts.source)
-            if occurrence.parts.host is not None:
-                produced.add(occurrence.parts.host)
+            produced.update(occurrence.subjects)
+            produced.update(targets.get(occurrence.id, ()))
     return [
         f"A1: {slot} is attested but no merger occurrence names it"
         for slot in attested

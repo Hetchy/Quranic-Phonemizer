@@ -167,8 +167,11 @@ transformation is character-for-character.
 
 ## Rules and teaching labels
 
-A `RuleInstance` identifies the rule, its source unit when it has one, its
-merger host when it has one, and optional teaching labels. The rule list is
+A `RuleInstance` identifies the rule, its source unit when it has one, the
+second unit the rule names when there is one, and optional teaching labels.
+That second unit is another unit the rule is about or one its own edges acted
+on -- a merger's host, a letter it silenced, a vowel it lengthened -- never a
+unit it only read to decide. The rule list is
 exhaustive for the performed passage, while labels such as `madd_badal` and
 `silah` are derived classifications for presentation.
 

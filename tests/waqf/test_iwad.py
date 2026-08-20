@@ -21,6 +21,15 @@ def test_a_fathatan_lengthens_the_letter_before_it_at_a_stop(r):
     assert "iwad" in r.rules_on_sound(3, "a:")
 
 
+@for_each_riwayah(HUDAN, isolated=3)
+def test_the_iwad_names_the_letter_it_lengthened(r):
+    """The tanween noon is the subject and the daal's fatha is what the rule
+    made long, so a consumer drawing that letter can name what did it."""
+    # هُدًى
+    assert r.source_of("iwad") == "ً"
+    assert r.host_of("iwad") == "د"
+
+
 @for_each_riwayah(HUDAN_MIN, ibtidaa=3, waqf=4)
 def test_that_fathatan_stays_a_short_vowel_when_joined_forward(r):
     # هُدًى مِّن
