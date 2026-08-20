@@ -100,11 +100,12 @@ Spelling: TypeAlias = Evidences | Attests | Decorates | Structural
 
 
 class SilenceReason(StrEnum):
-    """Why a written letter is said by nobody where no rule decided it. The
-    rasm keeps letters the reading never says, and that is not a tajweed
-    outcome; the spelling is the whole of it."""
+    """Why a written letter is said by nobody where no tajweed rule decided
+    it: the rasm keeps a letter the reading never says, or a variant leaves
+    an optional one off. Either way the spelling is the whole of it."""
 
     ORTHOGRAPHIC = "orthographic_silence"
+    VARIANT = "variant_silence"
 
 
 class StopAdvice(StrEnum):

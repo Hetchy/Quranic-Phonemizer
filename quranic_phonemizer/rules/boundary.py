@@ -27,6 +27,7 @@ from ..model.canon import (
     SlotOrigin,
     VowelForm,
 )
+from ..model.inscription import SilenceReason
 from ..model.performance import (
     Aspect,
     Consonant,
@@ -104,14 +105,12 @@ class WaqfSilahDrop:
 
 @dataclass(frozen=True, slots=True)
 class DroppedGlide:
-    """The pronoun yaa itself, where the reading leaves it off at a stop.
-
-    The haraka written on it takes its own drop; this owns the letter, so
-    the two need distinct occurrences on the one slot.
-    """
+    """The pronoun yaa the reading leaves off at a stop. Leaving it off is
+    the variant's outcome, not a rule: the letter is silenced for a variant
+    reason, while its written haraka drops under `WaqfHarakaDrop`."""
 
     yaa: SitedKhilaf = field(default_factory=SitedKhilaf)
-    rule: Rule = Rule.WAQF_DIACRITIC_DROP
+    rule: SilenceReason = SilenceReason.VARIANT
     phase: Phase = Phase.BOUNDARY
     triggers: frozenset = frozenset({Onset.GLIDE})
 
@@ -126,7 +125,11 @@ class DroppedGlide:
         if _omitted_glide(self.yaa, near, word) != at:
             return None
         return Verdict(
-            _drop(at, word, _GLIDE_VARIANT), (Silence(at, Aspect.CONSONANT),)
+            Occurrence(
+                mint(SilenceReason.VARIANT, at, _GLIDE_VARIANT),
+                SilenceReason.VARIANT, (at,), boundary=word,
+            ),
+            (Silence(at, Aspect.CONSONANT),),
         )
 
 

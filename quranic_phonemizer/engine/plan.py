@@ -11,6 +11,7 @@ from typing import TypeAlias
 
 from ..model.address import OccurrenceId, SlotId
 from ..model.canon import Rule
+from ..model.inscription import SilenceReason
 from ..model.performance import Aspect, Length, Occurrence, Side, Sound
 
 
@@ -110,10 +111,15 @@ _RULE_SLOT_STRIDE = 1_000_000
 #: Separates two classifiers that legitimately declare the same `Rule` on
 #: the same slot (different aspects) -- rule plus slot alone is not unique.
 _VARIANT_STRIDE = 100_000_000
-_RULE_INDEX = {rule: index for index, rule in enumerate(Rule)}
+_RULE_INDEX: dict[Rule | SilenceReason, int] = {
+    rule: index for index, rule in enumerate(Rule)
+}
+_RULE_INDEX.update(
+    {reason: len(Rule) + i for i, reason in enumerate(SilenceReason)}
+)
 
 
-def mint(rule: Rule, at: SlotId, variant: int = 0) -> OccurrenceId:
+def mint(rule: Rule | SilenceReason, at: SlotId, variant: int = 0) -> OccurrenceId:
     """Mint a stable occurrence id from rule, slot, and variant.
 
     `variant` is a small integer, not the classifier's identity -- ids must

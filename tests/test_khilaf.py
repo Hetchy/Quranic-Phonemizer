@@ -4,6 +4,7 @@ import pytest
 
 from quranic_phonemizer import Phonemizer, available_variants
 from quranic_phonemizer.model.canon import CanonLetter, Onset, Quality, Rule
+from quranic_phonemizer.model.inscription import SilenceReason
 from tests.support import KhilafId, Option, Site, VariantSelection, reading
 
 FIRQ = Site(hafs=("26:63", (11,)))
@@ -220,23 +221,31 @@ def test_aatani_hadhf_stops_on_the_noon_and_lengthens_before_it():
 
 
 def test_the_omitted_yaa_names_no_rule_of_its_own():
-    """Leaving the yaa off is the variant's outcome, not a rule: what the
-    reading records is the choice, and a drop per mark it left unsaid."""
+    """Leaving the yaa off is the variant's outcome, not a rule: the letter is
+    silenced for a variant reason, and only the harakat it leaves unsaid -- the
+    noon's kasra and the yaa's own fatha -- drop under waqf_diacritic_drop."""
     # ءَاتَىٰنِۦَ
     assert not any(
         rule.value.startswith("waqf_glide") for rule in Rule
     )
     hadhf = _at(AATANI, 8, KhilafId.YAA_AATANI_WAQF, "hadhf")
+    assert hadhf.phonemes(8) == "ʔa:ta:n"
     selection = hadhf.performance.selection
     assert selection.chosen(KhilafId.YAA_AATANI_WAQF) == "hadhf"
     assert hadhf.silent(8) == {"ۧ", "َ", "ِ"}
+    word = {slot.id for slot in hadhf.score.words[7].slots}
     drops = [
         o for o in hadhf.performance.occurrences
-        if o.rule is Rule.WAQF_DIACRITIC_DROP
-        and o.subjects[0] in {s.id for s in hadhf.score.words[7].slots}
+        if o.rule is Rule.WAQF_DIACRITIC_DROP and o.subjects[0] in word
     ]
-    assert len(drops) == 3
-    assert len({o.id for o in drops}) == 3
+    assert len(drops) == 2
+    assert len({o.id for o in drops}) == 2
+    # the yaa letter itself is silenced for a variant reason, naming no rule
+    glide = [
+        o for o in hadhf.performance.occurrences
+        if o.rule is SilenceReason.VARIANT and o.subjects[0] in word
+    ]
+    assert len(glide) == 1
 
 
 def test_the_kept_yaa_leaves_only_its_own_haraka_dropped():
