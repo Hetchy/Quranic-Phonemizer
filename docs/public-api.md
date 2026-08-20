@@ -175,9 +175,10 @@ unit it only read to decide. The rule list is
 exhaustive for the performed passage, while labels such as `madd_badal` and
 `silah` are derived classifications for presentation.
 
-`tajweed_rules(riwayah)` lists the public identifiers and their English and
-Arabic names. Rule indices attached to pairings point into the same `rules`
-array published on the result.
+`tajweed_rules(riwayah)` lists one row per rule: the public identifier, the
+English name, the Arabic name, and a one-sentence summary of what the rule
+does. Rule indices attached to pairings point into the same `rules` array
+published on the result.
 
 ## Schema stability
 

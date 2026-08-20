@@ -356,20 +356,19 @@ for rule in res.rules:
 مَالَهُۥٓ madd_jaiz_munfasil ('silah', 'silah_kubra')
 ```
 
-`tajweed_rules("hafs")` lists all 39 rule identifiers with their English and Arabic names.
+`tajweed_rules("hafs")` lists all 39 rule identifiers with their English name, Arabic name, and a one-sentence summary.
 
 ```python
 from quranic_phonemizer import tajweed_rules
 
-for row in tajweed_rules("hafs")[:4]:
-    print(row)
+for identifier, english, arabic, summary in tajweed_rules("hafs")[:3]:
+    print(identifier, "|", english, "|", arabic, "|", summary)
 ```
 
 ```
-('izhar', 'Izhar', 'إظهار')
-('ikhfaa', 'Ikhfaa Haqiqi', 'إخفاء حقيقي')
-('iqlab', 'Iqlab', 'إقلاب')
-('idgham_bi_ghunnah', 'Idgham bi-Ghunnah', 'إدغام بغنة')
+izhar | Izhar | إظهار | A quiescent noon or tanween keeps its own sound before a throat letter.
+ikhfaa | Ikhfaa Haqiqi | إخفاء حقيقي | A quiescent noon or tanween is hidden as a hum held at the following letter's place.
+iqlab | Iqlab | إقلاب | A quiescent noon or tanween becomes a hummed meem before baa.
 ```
 
 ## Optional Phonemes

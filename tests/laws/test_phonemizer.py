@@ -12,6 +12,7 @@ import pytest
 
 from quranic_phonemizer import Phonemizer, PhonemizeResult
 from quranic_phonemizer import supported_riwayat, tajweed_rules
+from quranic_phonemizer.model.canon import Rule
 from quranic_phonemizer.phonemize import edges as ed
 
 
@@ -166,9 +167,10 @@ def test_module_functions_answer_without_an_instance():
     assert supported_riwayat() == ("hafs",)
     rules = tajweed_rules("hafs")
     identifiers = {row[0] for row in rules}
-    assert "ikhfaa" in identifiers
-    for identifier, english, arabic in rules:
+    assert identifiers == {rule.value for rule in Rule}
+    for identifier, english, arabic, summary in rules:
         assert identifier and english and arabic
+        assert summary.endswith(".") and len(summary.split()) >= 5
 
 
 def test_a_bare_phonemizer_is_hafs_uthmani():
