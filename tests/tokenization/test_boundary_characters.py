@@ -1,5 +1,6 @@
-"""Stop signs, separators and the sakt belong to the boundary, not to a word
-letter unit."""
+"""Stop signs and separators belong to the boundary, not to a word letter
+unit. The sakt sign is different: it rides the word it follows as a mark and
+opens no unit, while the pause itself is a separate boundary state."""
 from __future__ import annotations
 
 from quranic_phonemizer.phonemize import edges as ed
@@ -37,10 +38,14 @@ def test_a_separator_is_boundary_owned():
 
 
 def test_the_sakt_is_a_boundary_state_and_its_seen_opens_no_unit():
-    """The sakt is stated on the word it follows, never read off array
-    position; the small seen that shows it opens no unit of its own."""
+    """The pause is stated on the word it follows, never read off array
+    position. The small seen that shows it rides a letter unit and opens none,
+    unlike a stop sign, which the boundary owns; that split is unsettled here."""
     # مَنْۜ رَاقٍ
     a = built(SAKT)
     assert a.words[1].sakt_after
     seen = only(a, char="ۜ")
     assert not opens_unit(a, seen)
+    # The seen rides its word today, where a stop sign has no word at all.
+    assert a.glyphs[seen].word is not None
+    assert units_named(a, seen)
