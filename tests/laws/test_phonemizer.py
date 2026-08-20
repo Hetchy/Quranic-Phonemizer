@@ -22,7 +22,7 @@ def test_the_contracts_own_example_runs():
         "ʔ", "a", "lˤlˤ", "aˤ:", "h", "u", "l", "a:", "ʔ", "i", "l", "a:",
     )
     assert (len(r.rules), len(r.spellings), len(r.attributions), len(r.modifiers)) == (
-        77, 474, 295, 63,
+        83, 474, 295, 69,
     )
 
 

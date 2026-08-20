@@ -136,6 +136,14 @@ RULE_DEFINITIONS: dict[Rule, tuple[str, str, str]] = {
         "Iwad", "عوض",
         "A fathatan stopped on is exchanged for a long aa.",
     ),
+    Rule.MADD_BADAL: (
+        "Madd Badal", "مد بدل",
+        "A long vowel on a hamza stands in for a second hamza the reading does not say.",
+    ),
+    Rule.MADD_SILAH: (
+        "Madd Silah", "مد صلة",
+        "A pronoun haa is drawn out because the word is joined to the one after it.",
+    ),
     Rule.IBDAL_HAMZA: (
         "Ibdal Hamza", "إبدال الهمزة",
         "Started on, a prosthetic hamza lengthens its vowel over the quiescent hamza after it.",

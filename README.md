@@ -341,22 +341,23 @@ madd_arid_lissukun qaf None
 tafkheem qaf None
 ```
 
-Some rules also carry teaching `labels` for the cases they are taught under: `madd_badal`, `silah` and `silah_kubra`.
+Badal and silah are rules rather than labels. `madd_badal` names a long vowel on a hamza and `madd_silah` the length a pronoun haa takes when the word is joined to; the madd beside a silah says how long it is held.
 
 ```python
 res = pm.phonemize("104:3")
 print(res.text())
 for rule in res.rules:
-    if rule.labels:
-        print(res.words[res.units[rule.source].word].text, rule.rule.value, rule.labels)
+    if rule.rule.value in ("madd_silah", "madd_jaiz_munfasil"):
+        print(res.words[res.units[rule.source].word].text, rule.rule.value)
 ```
 
 ```
 يَحْسَبُ أَنَّ مَالَهُۥٓ أَخْلَدَهُۥ
-مَالَهُۥٓ madd_jaiz_munfasil ('silah', 'silah_kubra')
+مَالَهُۥٓ madd_jaiz_munfasil
+مَالَهُۥٓ madd_silah
 ```
 
-`tajweed_rules("hafs")` lists all 42 rule identifiers with their English name, Arabic name, and a one-sentence summary.
+`tajweed_rules("hafs")` lists all 44 rule identifiers with their English name, Arabic name, and a one-sentence summary.
 
 ```python
 from quranic_phonemizer import tajweed_rules

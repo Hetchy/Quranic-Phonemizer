@@ -11,6 +11,7 @@ from ...model.address import KhilafId, Riwayah
 from ...rules.annotation import CanonicalColour, Tarqeeq
 from ...rules.boundary import (
     DroppedGlide,
+    IwadLength,
     PausalAlif,
     TaaMarbutaAtWaqf,
     TanweenDrop,
@@ -20,7 +21,14 @@ from ...rules.boundary import (
 )
 from ...rules.idgham import Idgham
 from ...rules.lam_shamsiyyah import ArticleLam, ArticleShape
-from ...rules.madd import IltiqaShortening, MaddClass, MaddLeen, PausalGlide
+from ...rules.madd import (
+    IltiqaShortening,
+    MaddBadal,
+    MaddClass,
+    MaddLeen,
+    MaddSilah,
+    PausalGlide,
+)
 from ...rules.meem_sakinah import GhunnahMushaddadah, MeemSakinah
 from ...rules.noon_sakinah import IkhfaaWeight, NoonSakinah
 from ...rules.qalqala import Qalqala
@@ -67,6 +75,7 @@ def _build() -> RuleSet:
             ),
             Phase.LENGTH: (
                 PausalGlide(), IltiqaShortening(), MaddClass(), MaddLeen(),
+                MaddBadal(), MaddSilah(), IwadLength(),
             ),
             Phase.COLOUR: (
                 Emphasis(weight=weight),

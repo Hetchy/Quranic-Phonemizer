@@ -194,7 +194,8 @@ class TanweenDrop:
 class TanweenIwad:
     """A fathatan stopped on is exchanged for a long aa rather than dropped.
 
-    `TanweenDrop` still silences the noon; only the exchange is here.
+    `TanweenDrop` still silences the noon; only the exchange is here, and
+    `IwadLength` names how long the aa it leaves is held.
     """
 
     rule: Rule = Rule.MADD_IWAD
@@ -212,6 +213,38 @@ class TanweenIwad:
         return Verdict(
             Occurrence(
                 mint(Rule.MADD_IWAD, at), Rule.MADD_IWAD, (at,), boundary=word,
+            ),
+            (
+                Realize(
+                    base.id, Aspect.VOWEL, Vowel(base.nucleus.quality, True)
+                ),
+            ),
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class IwadLength:
+    """The long aa an iwad leaves is held for the plain two counts.
+
+    A later phase than the exchange, so the length is set on the vowel
+    that exchange produced rather than competing with it.
+    """
+
+    rule: Rule = Rule.MADD_TABII
+    phase: Phase = Phase.LENGTH
+    triggers: frozenset = frozenset({CanonLetter.NOON})
+
+    def look(
+        self, near: Neighbourhood, plan: Plan, at: SlotId,
+        boundaries: BoundaryPlan,
+    ) -> Verdict | None:
+        del plan
+        base, word = _nunation_base(near, at, boundaries)
+        if base is None or word is None or not _takes_the_iwad(base):
+            return None
+        return Verdict(
+            Occurrence(
+                mint(Rule.MADD_TABII, base.id), Rule.MADD_TABII, (base.id,)
             ),
             (Relength(base.id, Length.LONG),),
         )

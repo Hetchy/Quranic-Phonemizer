@@ -99,10 +99,7 @@ def _sound(s) -> dict:
 
 
 def _rule_instance(r) -> dict:
-    return {
-        "rule": r.rule.value, "source": r.source, "host": r.host,
-        "labels": list(r.labels),
-    }
+    return {"rule": r.rule.value, "source": r.source, "host": r.host}
 
 
 def _spelling(e) -> dict:

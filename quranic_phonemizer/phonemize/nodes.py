@@ -112,8 +112,6 @@ class RuleInstance:
     reason it is unsaid takes this field instead."""
     source: int | None
     host: int | None
-    labels: tuple[str, ...] = ()
-    """Populated once `phonemize/labels.py` exists; empty is not yet derived."""
 
 
 class GlyphKind(StrEnum):

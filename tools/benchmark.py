@@ -13,7 +13,6 @@ import sys
 import time
 import tracemalloc
 from collections.abc import Callable
-from dataclasses import replace
 
 ROOT = pathlib.Path(os.environ.get(
     "PHONEMIZER_BENCH_ROOT", pathlib.Path(__file__).resolve().parent.parent
@@ -25,7 +24,6 @@ from quranic_phonemizer.phonemize import names  # noqa: E402
 from quranic_phonemizer.phonemize.assemble import assemble  # noqa: E402
 from quranic_phonemizer.phonemize.boundaries import resolve_boundaries  # noqa: E402
 from quranic_phonemizer.phonemize.document import build_result  # noqa: E402
-from quranic_phonemizer.phonemize.labels import with_labels  # noqa: E402
 from quranic_phonemizer.phonemize.request import resolve_words  # noqa: E402
 from quranic_phonemizer.phonemize.session import phonemize_request  # noqa: E402
 from quranic_phonemizer.phonemize.session import Session  # noqa: E402
@@ -73,7 +71,7 @@ def _constructor_scale(count: int) -> dict[str, float | int]:
 def _stage_times(phonemizer, ref: str, repeats: int) -> dict[str, float]:
     names_ = (
         "resolve", "corpus", "read", "build", "boundaries", "perform",
-        "assemble", "labels", "result",
+        "assemble", "result",
     )
     samples = []
     for _ in range(repeats):
@@ -104,10 +102,6 @@ def _stage_times(phonemizer, ref: str, repeats: int) -> dict[str, float]:
         assembled = assemble(
             session, phonemizer._pen, phonemizer._alphabet,
             extra_phonemes=phonemizer._extra,
-        )
-        points.append(CLOCK())
-        assembled = replace(
-            assembled, rules=with_labels(assembled.rules, assembled.units)
         )
         points.append(CLOCK())
         build_result(

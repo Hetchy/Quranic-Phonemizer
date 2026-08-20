@@ -308,6 +308,8 @@ class Rule(StrEnum):
     MADD_ARID_LISSUKUN = "madd_arid_lissukun"
     MADD_LEEN = "madd_leen"
     MADD_IWAD = "madd_iwad"
+    MADD_BADAL = "madd_badal"
+    MADD_SILAH = "madd_silah"
 
     IBDAL_HAMZA = "ibdal_hamza"
     HAMZA_WASL_SILENT = "hamza_wasl_silent"
@@ -341,6 +343,8 @@ CLASSIFICATION_ONLY: frozenset[Rule] = frozenset(
         Rule.IZHAR,
         Rule.IZHAR_SHAFAWI,
         Rule.LAM_QAMARIYYAH,
+        Rule.MADD_BADAL,
+        Rule.MADD_SILAH,
         Rule.MADD_WAJIB_MUTTASIL,
         Rule.MADD_JAIZ_MUNFASIL,
         Rule.MADD_LAZIM,
