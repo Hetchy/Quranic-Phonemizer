@@ -151,6 +151,8 @@ from tests.waqf.test_madd_badal import (
     as badal_contextual,
     test_a_long_vowel_on_a_hamza_is_a_badal_and_not_a_plain_madd
     as badal_ordinary,
+    test_the_plainest_badal_names_the_length_with_no_madd_beside_it
+    as badal_plain,
 )
 from tests.waqf.test_madd_iwad import (
     test_a_fathatan_lengthens_the_letter_before_it_at_a_stop as iwad_length,
@@ -215,7 +217,7 @@ RULE_FIXTURES: dict[str, tuple[Fixture, ...]] = {
     "madd_arid_lissukun": (arid_stopped,),
     "madd_leen": (leen_waw,),
     "madd_iwad": (iwad_length, iwad_subject),
-    "madd_badal": (badal_ordinary, badal_contextual),
+    "madd_badal": (badal_ordinary, badal_plain, badal_contextual),
     "madd_silah": (silah_joined, silah_before_a_hamza),
     "ibdal_hamza": (ibdal_started, ibdal_subject, ibdal_alone),
     "hamza_wasl_silent": (wasl_silent_article, wasl_silent_verb),
