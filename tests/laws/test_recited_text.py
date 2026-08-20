@@ -9,7 +9,7 @@ from quranic_phonemizer.model.address import Script
 from quranic_phonemizer.orthography.write import pen_for
 from quranic_phonemizer.phonemize.nodes import GlyphKind
 from quranic_phonemizer.phonemize.recited import text, write_recited
-from quranic_phonemizer.phonemize.session import phonemize_request
+from quranic_phonemizer.session import phonemize_request
 
 
 @pytest.fixture

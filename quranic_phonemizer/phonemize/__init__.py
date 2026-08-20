@@ -15,7 +15,7 @@ from . import edges, names, nodes
 from .assemble import assemble
 from .document import PhonemizeResult, build_result
 from .runtime import suspend_collection
-from .session import phonemize_request
+from ..session import phonemize_request
 
 supported_riwayat = names.supported_riwayat
 available_variants = names.available_variants

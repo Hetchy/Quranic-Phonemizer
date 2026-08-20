@@ -11,7 +11,7 @@ from quranic_phonemizer.phonemize import edges as ed
 from quranic_phonemizer.phonemize import nodes as nd
 from quranic_phonemizer.phonemize.assemble import Assembled, assemble
 from quranic_phonemizer.phonemize.pairing import alignment
-from quranic_phonemizer.phonemize.session import phonemize_request
+from quranic_phonemizer.session import phonemize_request
 
 #: Chosen for the fact-vocabulary and rule families they exercise:
 #: mergers, tanween's three outcomes, tafkheem, madd, qalqala, waqf, wasl,

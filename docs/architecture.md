@@ -18,7 +18,7 @@ writer. A call then follows one request path:
 
 `ref -> locations and corpus words -> Reading -> Built(Score, Inscription) -> BoundaryPlan -> Performance -> Assembled public graph -> PhonemizeResult and its projections`
 
-[`quranic_phonemizer/phonemize/session.py`](../quranic_phonemizer/phonemize/session.py)
+[`quranic_phonemizer/session/core.py`](../quranic_phonemizer/session/core.py)
 owns the request-shaped part of this flow. It resolves the reference, builds
 one score over the requested span, resolves stops, and performs the score.
 [`quranic_phonemizer/phonemize/assemble.py`](../quranic_phonemizer/phonemize/assemble.py)
@@ -281,7 +281,7 @@ For a new contributor, this order minimizes backtracking:
 1. [`model/canon.py`](../quranic_phonemizer/model/canon.py), then
    `model/inscription.py` and `model/performance.py` for the three graphs.
 2. [`api.py`](../quranic_phonemizer/api.py) and
-   [`phonemize/session.py`](../quranic_phonemizer/phonemize/session.py) for composition and call flow.
+   [`session/core.py`](../quranic_phonemizer/session/core.py) for composition and call flow.
 3. [`orthography/cluster.py`](../quranic_phonemizer/orthography/cluster.py) and
    [`canon/build.py`](../quranic_phonemizer/canon/build.py) for evidence becoming slots.
 4. [`engine/run.py`](../quranic_phonemizer/engine/run.py), `engine/plan.py`, and
