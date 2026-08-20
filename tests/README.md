@@ -169,7 +169,8 @@ merger's rule and nothing else; `madd_tabii` and `orthographic_silence` name
 an outcome and add no sound at all.
 
 `source_of(rule)` and `host_of(rule)` name the character supplying a rule's
-source and host unit -- `None` from `host_of` where the rule is not a merger.
+source and host unit -- `None` from `host_of` where the rule acted on its own
+unit alone.
 Both read the first instance in the whole reading, so prefer
 `rules_on_char` when the site is one word of several.
 

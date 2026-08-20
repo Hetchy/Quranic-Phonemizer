@@ -139,6 +139,7 @@ def test_deleted_names_stay_deleted() -> None:
         (canon, "PausalLong"),
         (canon, "SILENT"),
         (performance, "Attach"),
+        (performance, "Participants"),
         (performance, "SilenceReason"),
         (performance, "Nasal"),
         (performance, "NasalPlace"),

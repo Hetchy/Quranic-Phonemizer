@@ -108,8 +108,8 @@ class Sound:
 @dataclass(frozen=True, slots=True)
 class RuleInstance:
     rule: Rule | SilenceReason
-    """A silenced letter names no rule; the reason it is unsaid stands in
-    the same place, and publishes under the same identifier it always did."""
+    """A letter the rasm keeps and the reading never says names no rule; the
+    reason it is unsaid takes this field instead."""
     source: int | None
     host: int | None
     labels: tuple[str, ...] = ()

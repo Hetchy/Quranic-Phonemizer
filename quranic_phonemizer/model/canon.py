@@ -320,7 +320,6 @@ class Rule(StrEnum):
     PAUSAL_ALIF = "pausal_alif"
 
 
-
 #: Rules whose occurrence may produce no effect; `engine/run.py` mints each
 #: one a `Classifies` edge in place of an attribution, and only where it
 #: produced nothing. `ghunnah_mushaddadah` is here for the article's noon
