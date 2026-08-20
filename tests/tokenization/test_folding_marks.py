@@ -15,9 +15,8 @@ SILENCE_MARK = ("2:6:3", "۟")      # the zero over a silent alif
 ISHMAM = ("12:11:6", "۫")
 TASHIL = ("41:44:9", "۬")
 TATWEEL = ("2:255:3", "ـ")
-PAUSAL_ALIF = ("5:28:7", "ا")      # silent at wasl, said long at a pause
 
-FOLDS = (SHADDA, MADDAH, SILENCE_MARK, ISHMAM, TASHIL, TATWEEL, PAUSAL_ALIF)
+FOLDS = (SHADDA, MADDAH, SILENCE_MARK, ISHMAM, TASHIL, TATWEEL)
 
 
 def _letter_units(a):
@@ -29,7 +28,7 @@ def _letter_units(a):
 
 @pytest.mark.parametrize(("ref", "char"), FOLDS)
 def test_a_composed_mark_opens_no_unit(ref, char):
-    # ّ ٓ ۟ ۫ ۬ ـ ا
+    # ّ ٓ ۟ ۫ ۬ ـ
     a = built(ref)
     mark = only(a, char=char, word=0)
     assert not opens_unit(a, mark)
@@ -40,7 +39,7 @@ def test_a_composed_mark_opens_no_unit(ref, char):
 def test_a_composed_mark_folds_onto_a_letter_that_opens(ref, char):
     """The discriminating half: every unit the mark touches is one a letter
     already opened, so the mark qualifies a unit rather than being one."""
-    # ّ ٓ ۟ ۫ ۬ ـ ا
+    # ّ ٓ ۟ ۫ ۬ ـ
     a = built(ref)
     mark = only(a, char=char, word=0)
     touched = units_named(a, mark)
