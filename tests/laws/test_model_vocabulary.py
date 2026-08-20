@@ -6,6 +6,7 @@ any referenced name left undefined.
 from __future__ import annotations
 
 import dataclasses
+import importlib
 import inspect
 
 import pytest
@@ -167,6 +168,13 @@ def test_deleted_names_stay_deleted() -> None:
             f"Rule.{renamed} is back; the identifier it was renamed to is the "
             f"only one"
         )
+
+
+def test_the_teaching_labels_module_stays_deleted() -> None:
+    """Badal and silah are occurrences a rule minted, so nothing derives
+    them from an assembled madd afterwards."""
+    with pytest.raises(ModuleNotFoundError):
+        importlib.import_module("quranic_phonemizer.phonemize.labels")
 
 
 def test_slot_origin_meets_the_conditions_that_let_it_return() -> None:
