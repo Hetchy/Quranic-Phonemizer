@@ -1372,13 +1372,13 @@ Do not place the native result on top of the existing serialized graph.
 | phonemize/labels.py | Delete after rules become native |
 | phonemize/derived.py | Move proven facts to their actual owner, then delete |
 | phonemize/recited.py | Delete; add a separately named private transformed-cell builder with no general text writer |
-| phonemize/ordering.py | Keep only if it is pure Performance ordering; otherwise replace |
+| phonemize/ordering.py | Keep, and move to the native package: it projects a finished Performance, which is the first fact the cache holds |
 | phonemize/names.py | Rewrite as the RuleDefinition, VariantDefinition, and ExtraPhonemeDefinition catalogue owner |
 | phonemize/session.py | Keep; it is the resolved request the native flow starts from |
 | phonemize/request.py | Keep |
 | phonemize/span.py | Keep; refresh its overlap rationale once fakk_idgham is gone |
 | phonemize/boundaries.py | Keep; it is the source of Boundary state |
-| phonemize/runtime.py | Keep |
+| phonemize/runtime.py | Delete with the `suspend_gc` parameter section 4 drops |
 | phonemize/__init__.py | Rewrite as the facade over the native result |
 
 A row reading Delete may become Retain private under 15.1 if its callers are
