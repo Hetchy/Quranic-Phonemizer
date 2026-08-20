@@ -2011,6 +2011,21 @@ These do not block Phase 1:
 | Current production host | Reuse existing viable container host | DNS/hosting audit |
 | Website rule palette and families | Inspector's mechanism, own grouping | Design pass over a real ayah set |
 
+Three source-unit folds section 7.2 names cannot yet be produced from the
+tokenization surfaces the result exposes, because those surfaces resolve the
+fold from the fact a scalar states and these three states the wrong one. Each
+is left open for the LetterUnit builder, closed against 7.2 or a
+docs/hafs/research citation, not forced onto the current facts:
+
+| Decision | Default direction | Closing evidence |
+| --- | --- | --- |
+| Pausal zero (rectangular ARABIC SMALL HIGH UPRIGHT RECTANGULAR ZERO) fold | Folds into the unit it marks; the pausal alif beside it is the silent carrier | LetterUnit builder. The current fact edge has the zero supply the vowel length and the alif merely decorate, so the fold reads the codepoint until then |
+| Imala mark (ARABIC EMPTY CENTRE LOW STOP) fold | Folds into the letter it qualifies, which carries the imala length | LetterUnit builder. The current fact edge has the mark supply vowel quality, so it opens a unit rather than folding |
+| Mini seen as a paired unit | Its own unit wherever the script writes it, paired with the base letter it rides; one sounds and the other is silent | LetterUnit builder. The current surfaces fold the mark as a decoration on one unit whose letter the variant switches, so the pair reads the codepoint |
+
+The main-unit multiple-range case section 7.2 names is not open: a letter and
+its shadda straddling an independently tokenized haraka is attested and pinned.
+
 Adding or removing a rule after this point requires changing its internal law,
 native fixtures, metadata, v11 mapping, and website legend behavior together.
 
