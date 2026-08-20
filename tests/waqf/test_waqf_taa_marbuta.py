@@ -11,6 +11,7 @@ WAHIDATIN_WAKHALAQA = Site(hafs=("4:1", (9, 10)))
 QUWWATA = Site(hafs=("18:39", (10,)))
 TIJARATAN = Site(hafs=("2:282", (99,)))
 TIJARATAN_HADIRA = Site(hafs=("2:282", (99, 100)))
+HAYATAN = Site(hafs=("16:97", (11,)))
 
 
 @for_each_riwayah(BAUDATAN, isolated=9)
@@ -103,3 +104,11 @@ def test_that_fathatan_word_keeps_its_taa_when_joined_forward(r):
     assert r.phonemes(99) == "tiʒa:rˤaˤtan"
     assert r.silent(99) == frozenset()
     assert r.phonemes(100) == "ħa:dˤirˤaˤh"
+
+
+@for_each_riwayah(HAYATAN, isolated=11)
+def test_a_fathatan_on_a_taa_marbuta_leaves_the_haa_for_the_stop_to_silence(r):
+    """حَيَوٰةً. No iwad follows a taa marbuta, so the haa is quiescent and the
+    length before it is the stop's rather than the plain two."""
+    assert r.phonemes(11) == "ħaja:h"
+    assert r.rules_on_sound(11, "a:") == {"madd_arid_lissukun"}

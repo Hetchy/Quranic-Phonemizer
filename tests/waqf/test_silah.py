@@ -9,6 +9,7 @@ BI_IDHNIHI = Site(hafs=("2:255", (26,)))
 INDAHU = Site(hafs=("2:255", (24, 25)))
 FIHI = Site(hafs=("2:20", (9,)))
 ANNAHU = Site(hafs=("2:26", (16,)))
+FIHI_SILAH = Site(hafs=("25:69", (7,)))
 
 
 @for_each_riwayah(LAHU, ibtidaa=3, wasl=3)
@@ -121,3 +122,12 @@ def test_a_haa_before_a_word_opening_hamza_is_held_the_longer_count(r):
     # عِندَهُۥٓ إِلَّا
     assert r.phonemes(24) == "ʕiŋdahu:"
     assert r.rules_on_sound(24, "u:") == {"madd_silah", "madd_jaiz_munfasil"}
+
+
+@for_each_riwayah(FIHI_SILAH, isolated=7)
+def test_the_haa_the_stop_leaves_bare_is_the_letter_a_madd_reads(r):
+    """فِيهِۦ. The silah is gone at the stop, so the haa is quiescent and the
+    long yaa before it is held for the stop's count."""
+    assert r.phonemes(7) == "fi:h"
+    assert r.rules_on_char(7, "ۦ") == {"waqf_silah_drop"}
+    assert r.rules_on_sound(7, "i:") == {"madd_arid_lissukun"}

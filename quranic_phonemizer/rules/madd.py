@@ -323,12 +323,10 @@ def _stop_makes_quiescent(
     near: Neighbourhood, slot, boundaries, plan: Plan
 ) -> bool:
     """Is this the letter the stop silences? Last in its word but for a
-    tanween noon -- `عَظِيمٌ` stops on the meem -- and holding a short vowel
-    the stop takes rather than lengthens."""
+    tanween noon -- `عَظِيمٌ` stops on the meem -- and left bare by the
+    boundary phase rather than lengthened into an iwad."""
     word = near.word_of(slot.id)
     if word is None or not boundaries.stopped_on(word):
-        return False
-    if not slot.nucleus.is_short:
         return False
     slots = near.score.words[word].slots
     # The written last letter need not be the one stopped on: the boundary
@@ -340,10 +338,9 @@ def _stop_makes_quiescent(
     ]
     if not letters or letters[-1].id != slot.id:
         return False
-    if slots[-1].origin is SlotOrigin.NUNATION:
-        # A tanween fath lengthens into the iwad alif rather than dropping, so `مِهَـٰدًا` silences nothing behind it. Damm and kasr simply go.
-        return slot.nucleus.quality is not Quality.A
-    return True
+    # BOUNDARY runs before LENGTH, so the drop it made or withheld is the
+    # answer: a fathatan lengthens into the iwad alif instead of dropping.
+    return plan.merged_away(slot.id, Aspect.VOWEL)
 
 
 def _classify(rule: Rule, at: SlotId, other: SlotId | None) -> Verdict:
