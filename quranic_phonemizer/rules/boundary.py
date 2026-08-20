@@ -72,10 +72,6 @@ class WaqfEnding:
         elif slot.nucleus.is_silah:
             # Silah is long in wasl and absent at pause, mirroring `Onset.WASL`.
             effects.append(Silence(at, Aspect.VOWEL))
-        elif slot.nucleus.is_pausal_long:
-            effects.append(
-                Realize(at, Aspect.VOWEL, Vowel(slot.nucleus.quality, True))
-            )
         if slot.onset is Onset.GLIDE and not self._kept(near, word):
             # The pronoun yaa's onset must go too, or a stray glide remains,
             # and the stop then lands on the letter before it.
@@ -107,10 +103,8 @@ class WaqfEnding:
 class PausalAlif:
     """The seven alifs: long at a pause, short when the word is joined to.
 
-    The mirror of `Onset.GLIDE`, which `WaqfEnding` removes at a stop.
-    """
-    # Emits `Relength`, not a realization: the vowel is still plainly
-    # produced, and only its length changes.
+    Both readings are this rule's: the stop names the length it says, the
+    join names the length it takes away."""
 
     rule: Rule = Rule.PAUSAL_ALIF
     phase: Phase = Phase.BOUNDARY
@@ -126,16 +120,17 @@ class PausalAlif:
             return None
         if not slot.nucleus.is_pausal_long:
             return None
-        if boundaries.stopped_on(word):
-            # Stopped on, the alif is said and `WaqfEnding` owns the slot.
-            return None
-        return Verdict(
-            Occurrence(
-                mint(Rule.PAUSAL_ALIF, at), Rule.PAUSAL_ALIF, (at,),
-                boundary=word,
-            ),
-            (Relength(at, Length.SHORT),),
+        occurrence = Occurrence(
+            mint(Rule.PAUSAL_ALIF, at), Rule.PAUSAL_ALIF, (at,), boundary=word,
         )
+        if boundaries.stopped_on(word):
+            return Verdict(
+                occurrence,
+                (Realize(at, Aspect.VOWEL, Vowel(slot.nucleus.quality, True)),),
+            )
+        # Joined, the vowel is still plainly produced and only its length
+        # changes, so this half owns no sound.
+        return Verdict(occurrence, (Relength(at, Length.SHORT),))
 
 
 @dataclass(frozen=True, slots=True)

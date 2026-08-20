@@ -178,7 +178,8 @@ RULE_DEFINITIONS: dict[Rule, tuple[str, str, str]] = {
     ),
     Rule.PAUSAL_ALIF: (
         "Pausal Alif", "ألف الوقف",
-        "A pausal alif is shortened where the word is joined to the one after it.",
+        "A pausal alif is sounded long at a stop and shortened where the word "
+        "is joined to the one after it.",
     ),
 }
 

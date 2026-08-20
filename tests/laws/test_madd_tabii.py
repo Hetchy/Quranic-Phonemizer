@@ -36,7 +36,7 @@ def test_an_ordinary_mid_word_long_vowel_takes_madd_tabii(packed, hafs) -> None:
 def test_a_stopped_pausal_alif_takes_madd_tabii_over_its_own_realization(
     packed, hafs, alphabet
 ) -> None:
-    """Word 21 here, `أَنَا۠`: `WaqfEnding` realizes the long vowel;
+    """Word 21 here, `أَنَا۠`: `PausalAlif` realizes the long vowel;
     `madd_tabii` only names its length, so the token does not double."""
     score = score_for(packed, hafs, 2, 258)
     alif = score.words[20].slots[-1]
