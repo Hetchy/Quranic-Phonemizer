@@ -12,8 +12,9 @@ DEFAULT_SCRIPT: dict[Riwayah, Script] = {Riwayah.HAFS: Script.UTHMANI}
 
 #: `identifier` is the model's own `Rule.value`. Each row is the rule's
 #: English and Arabic name and a one-sentence summary of what it does.
-#: The boundary rules -- `wasl_start`/`hamza_wasl_silent`, and `pausal_alif`
-#: -- are real, minted rules and are included as the model spells them.
+#: The boundary rules -- the three hamza wasl starts, `hamza_wasl_silent`
+#: and `pausal_alif` -- are real, minted rules and are included as the
+#: model spells them.
 RULE_DEFINITIONS: dict[Rule, tuple[str, str, str]] = {
     Rule.IZHAR: (
         "Izhar", "إظهار",
@@ -143,9 +144,17 @@ RULE_DEFINITIONS: dict[Rule, tuple[str, str, str]] = {
         "Hamza Wasl Elision", "حذف همزة الوصل",
         "A prosthetic hamza is not sounded when the word before it is joined to it.",
     ),
-    Rule.WASL_START: (
-        "Hamza Wasl Start", "همزة الوصل عند الابتداء",
-        "A prosthetic hamza is sounded with its helping vowel where the reading starts on it.",
+    Rule.HAMZA_WASL_FATHA: (
+        "Hamza Wasl with Fatha", "همزة الوصل بالفتح",
+        "A prosthetic hamza the reading starts on is sounded with a fatha.",
+    ),
+    Rule.HAMZA_WASL_KASRA: (
+        "Hamza Wasl with Kasra", "همزة الوصل بالكسر",
+        "A prosthetic hamza the reading starts on is sounded with a kasra.",
+    ),
+    Rule.HAMZA_WASL_DAMMA: (
+        "Hamza Wasl with Damma", "همزة الوصل بالضم",
+        "A prosthetic hamza the reading starts on is sounded with a damma.",
     ),
     Rule.ILTIQA_KASRA: (
         "Iltiqa Kasra", "كسر التقاء الساكنين",

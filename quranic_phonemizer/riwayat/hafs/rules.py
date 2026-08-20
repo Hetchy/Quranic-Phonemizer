@@ -11,13 +11,9 @@ from ...model.address import KhilafId, Riwayah
 from ...rules.annotation import CanonicalColour, Tarqeeq
 from ...rules.boundary import (
     PausalAlif,
-    SoftenedHamza,
     TaaMarbutaAtWaqf,
     TanweenAtWaqf,
-    SpelledBeforeWasl,
-    TanweenBeforeWasl,
     WaqfEnding,
-    WaslHamza,
 )
 from ...rules.idgham import Idgham
 from ...rules.lam_shamsiyyah import ArticleLam, ArticleShape
@@ -26,6 +22,12 @@ from ...rules.meem_sakinah import GhunnahMushaddadah, MeemSakinah
 from ...rules.noon_sakinah import IkhfaaWeight, NoonSakinah
 from ...rules.qalqala import Qalqala
 from ...rules.tafkheem import Emphasis, Weight
+from ...rules.wasl import (
+    SoftenedHamza,
+    SpelledBeforeWasl,
+    TanweenBeforeWasl,
+    WaslHamza,
+)
 from .resources import khilaf, lexicon, rule_tables
 
 

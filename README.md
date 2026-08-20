@@ -276,10 +276,10 @@ for pairing in res.alignment(text="source", grouping="cell"):
 ```
 
 ```
-'ٱ' ['ʔ'] ['wasl_start']
+'ٱ' ['ʔ'] ['hamza_wasl_fatha']
 '' ['a'] []
 'ل' [] ['lam_shamsiyyah', 'tafkheem']
-'لَّ' ['lˤlˤ', 'a:'] ['lam_shamsiyyah', 'madd_arid_lissukun', 'tafkheem']
+'لَّ' ['lˤlˤ', 'aˤ:'] ['lam_shamsiyyah', 'madd_arid_lissukun', 'tafkheem']
 'هِ' ['h'] ['pausal_sukun']
 ```
 
@@ -356,7 +356,7 @@ for rule in res.rules:
 مَالَهُۥٓ madd_jaiz_munfasil ('silah', 'silah_kubra')
 ```
 
-`tajweed_rules("hafs")` lists all 39 rule identifiers with their English name, Arabic name, and a one-sentence summary.
+`tajweed_rules("hafs")` lists all 41 rule identifiers with their English name, Arabic name, and a one-sentence summary.
 
 ```python
 from quranic_phonemizer import tajweed_rules

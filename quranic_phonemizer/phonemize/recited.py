@@ -9,7 +9,15 @@ from bisect import bisect_left
 from dataclasses import dataclass
 
 from ..model.address import SlotId, SoundId
-from ..model.canon import CARRIER_OF, CanonLetter, Rule, Score, ScoreWord, SlotOrigin
+from ..model.canon import (
+    CARRIER_OF,
+    HAMZA_WASL_START,
+    CanonLetter,
+    Rule,
+    Score,
+    ScoreWord,
+    SlotOrigin,
+)
 from ..model.inscription import (
     VOWEL_FACTS,
     Grapheme,
@@ -84,7 +92,7 @@ def write_recited(
     releases = _releases_by_slot(performance)
     sounds = dict(performance.sounds)
     occurrences = {o.id: o for o in performance.occurrences}
-    started = _slots_by_rule(performance, Rule.WASL_START)
+    started = _slots_by_rule(performance, HAMZA_WASL_START)
     sources = _source_graphemes(inscription, performance)
     signs = _stop_signs_by_word(score, inscription)
 
@@ -166,14 +174,14 @@ def _releases_by_slot(performance: Performance) -> dict:
     }
 
 
-def _slots_by_rule(performance: Performance, rule: Rule) -> frozenset:
+def _slots_by_rule(performance: Performance, rules: frozenset[Rule]) -> frozenset:
     """`WaslHamza` records its occurrence with no effect at all when
     started on -- the plain fill spells the canonical value untouched, so
     only the occurrence, not the attribution, says which rule that was."""
     return frozenset(
         subject
         for occurrence in performance.occurrences
-        if occurrence.rule is rule
+        if occurrence.rule in rules
         for subject in occurrence.subjects
     )
 

@@ -311,7 +311,9 @@ class Rule(StrEnum):
 
     IBDAL_HAMZA = "ibdal_hamza"
     HAMZA_WASL_SILENT = "hamza_wasl_silent"
-    WASL_START = "wasl_start"
+    HAMZA_WASL_FATHA = "hamza_wasl_fatha"
+    HAMZA_WASL_KASRA = "hamza_wasl_kasra"
+    HAMZA_WASL_DAMMA = "hamza_wasl_damma"
     ILTIQA_KASRA = "iltiqa_kasra"
     ILTIQA_FATHA = "iltiqa_fatha"
     ILTIQA_SHORTENING = "iltiqa_shortening"
@@ -319,6 +321,11 @@ class Rule(StrEnum):
     WAQF_TAA_MARBUTA = "waqf_taa_marbuta"
     PAUSAL_ALIF = "pausal_alif"
 
+
+#: A prosthetic hamza started on, one rule per helping vowel.
+HAMZA_WASL_START: frozenset[Rule] = frozenset(
+    {Rule.HAMZA_WASL_FATHA, Rule.HAMZA_WASL_KASRA, Rule.HAMZA_WASL_DAMMA}
+)
 
 #: Rules whose occurrence may produce no effect; `engine/run.py` mints each
 #: one a `Classifies` edge in place of an attribution, and only where it
@@ -329,7 +336,6 @@ CLASSIFICATION_ONLY: frozenset[Rule] = frozenset(
     {
         Rule.TARQEEQ,
         Rule.GHUNNAH_MUSHADDADAH,
-        Rule.WASL_START,
         Rule.IDGHAM_MUTAJANISAYN_NAQIS,
         Rule.IZHAR,
         Rule.IZHAR_SHAFAWI,
@@ -343,4 +349,4 @@ CLASSIFICATION_ONLY: frozenset[Rule] = frozenset(
         Rule.TASHIL,
         Rule.ISHMAM,
     }
-)
+) | HAMZA_WASL_START

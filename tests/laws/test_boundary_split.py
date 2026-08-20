@@ -8,7 +8,7 @@ from __future__ import annotations
 from conftest import score_for
 from quranic_phonemizer.engine.run import perform
 from quranic_phonemizer.model.address import BoundaryPlan, Junction
-from quranic_phonemizer.model.canon import CanonLetter, Rule
+from quranic_phonemizer.model.canon import HAMZA_WASL_START, CanonLetter, Rule
 from quranic_phonemizer.model.performance import Aspect, Consonant, Hosts, Silent
 from quranic_phonemizer.riwayat.hafs import HAFS
 
@@ -65,6 +65,7 @@ def test_a_boundary_rule_names_the_junction_it_resolved(packed, hafs) -> None:
     started = perform(score, HAFS, _stopped_on(score, 4))
     wasl = next(
         o for o in started.occurrences
-        if o.rule is Rule.WASL_START and o.subjects[0] == score.words[4].slots[0].id
+        if o.rule in HAMZA_WASL_START
+        and o.subjects[0] == score.words[4].slots[0].id
     )
     assert wasl.boundary == 3
