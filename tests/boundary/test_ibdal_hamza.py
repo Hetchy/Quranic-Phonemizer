@@ -26,6 +26,15 @@ def test_the_ibdal_names_the_hamza_it_replaced(r):
     assert "hamza_wasl_kasra" in r.rules_on_char(18, "ٱ")
 
 
+@for_each_riwayah(ITUNI, isolated=18)
+def test_the_length_the_ibdal_made_takes_no_madd_beside_it(r):
+    """The helping vowel is short in the reading and long only because the
+    ibdal lengthened it, so no madd over the reading names it."""
+    # ٱئْتُونِى
+    assert r.rules_on_char(18, "ٱ") == {"ibdal_hamza", "hamza_wasl_kasra"}
+    assert r.rules_on_char(18, "ئ") == {"ibdal_hamza"}
+
+
 @for_each_riwayah(ITUNI_JOINED, ibtidaa=2, waqf=3)
 def test_the_same_hamza_is_said_as_a_hamza_when_the_word_before_joins(r):
     # ٱلْمَلِكُ ٱئْتُونِى
