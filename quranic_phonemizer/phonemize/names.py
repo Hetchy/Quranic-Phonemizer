@@ -168,9 +168,13 @@ RULE_DEFINITIONS: dict[Rule, tuple[str, str, str]] = {
         "Iltiqa Shortening", "قصر عند التقاء الساكنين",
         "A long vowel is shortened where it would meet a quiescent letter.",
     ),
-    Rule.PAUSAL_SUKUN: (
-        "Pausal Sukun", "سكون الوقف",
-        "The last letter of a word stopped on loses its vowel.",
+    Rule.WAQF_DIACRITIC_DROP: (
+        "Waqf Diacritic Drop", "حذف الحركة عند الوقف",
+        "A haraka or tanween written at the end of a word stopped on is not sounded.",
+    ),
+    Rule.WAQF_SILAH_DROP: (
+        "Waqf Silah Drop", "حذف الصلة عند الوقف",
+        "The length drawing out a pronoun haa is absent when the word is stopped on.",
     ),
     Rule.WAQF_TAA_MARBUTA: (
         "Taa Marbuta at a Pause", "تاء مربوطة عند الوقف",

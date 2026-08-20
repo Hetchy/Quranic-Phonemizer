@@ -317,7 +317,8 @@ class Rule(StrEnum):
     ILTIQA_KASRA = "iltiqa_kasra"
     ILTIQA_FATHA = "iltiqa_fatha"
     ILTIQA_SHORTENING = "iltiqa_shortening"
-    PAUSAL_SUKUN = "pausal_sukun"
+    WAQF_DIACRITIC_DROP = "waqf_diacritic_drop"
+    WAQF_SILAH_DROP = "waqf_silah_drop"
     WAQF_TAA_MARBUTA = "waqf_taa_marbuta"
     PAUSAL_ALIF = "pausal_alif"
 

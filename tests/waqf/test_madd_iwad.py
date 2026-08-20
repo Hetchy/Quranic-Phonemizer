@@ -19,6 +19,8 @@ def test_a_fathatan_lengthens_the_letter_before_it_at_a_stop(r):
     assert r.silent(3) == {"ً", "ى"}
     assert "madd_iwad" in r.rules_on_char(3, "ً")
     assert "madd_iwad" in r.rules_on_sound(3, "a:")
+    # the noon that mark also wrote is dropped by a rule of its own
+    assert "waqf_diacritic_drop" in r.rules_on_char(3, "ً")
 
 
 @for_each_riwayah(HUDAN, isolated=3)
@@ -64,6 +66,7 @@ def test_a_dammatan_is_simply_dropped_at_a_stop(r):
     assert r.silent(13) == {"ٌ"}
     # only a fathatan is exchanged for length; the other two are dropped
     assert "madd_iwad" not in r.rules_on_char(13, "ٌ")
+    assert "waqf_diacritic_drop" in r.rules_on_char(13, "ٌ")
 
 
 @for_each_riwayah(GHAFURUN_HALIM, ibtidaa=13, waqf=14)

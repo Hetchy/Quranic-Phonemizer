@@ -280,7 +280,7 @@ for pairing in res.alignment(text="source", grouping="cell"):
 '' ['a'] []
 'ل' [] ['lam_shamsiyyah', 'tafkheem']
 'لَّ' ['lˤlˤ', 'aˤ:'] ['lam_shamsiyyah', 'madd_arid_lissukun', 'tafkheem']
-'هِ' ['h'] ['pausal_sukun']
+'هِ' ['h'] ['waqf_diacritic_drop']
 ```
 
 A pairing with no characters is a phoneme no letter wrote, such as the helping fatha above; its `after` field names the pairing it follows. A pairing with no phonemes is a silent letter, such as the lam of the definite article assimilated into the lam after it.
@@ -335,7 +335,7 @@ for rule in res.rules:
 
 ```
 مَن يَقُولُ | m a j̃ a q u: l
-pausal_sukun lam None
+waqf_diacritic_drop lam None
 idgham_bi_ghunnah noon ya
 madd_arid_lissukun qaf None
 tafkheem qaf None
@@ -356,7 +356,7 @@ for rule in res.rules:
 مَالَهُۥٓ madd_jaiz_munfasil ('silah', 'silah_kubra')
 ```
 
-`tajweed_rules("hafs")` lists all 41 rule identifiers with their English name, Arabic name, and a one-sentence summary.
+`tajweed_rules("hafs")` lists all 42 rule identifiers with their English name, Arabic name, and a one-sentence summary.
 
 ```python
 from quranic_phonemizer import tajweed_rules

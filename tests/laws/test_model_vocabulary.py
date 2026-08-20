@@ -158,6 +158,7 @@ def test_deleted_names_stay_deleted() -> None:
         "IKHFAA_HAQIQI",
         "IWAD",
         "MADD_ARID_LIL_SUKUN",
+        "PAUSAL_SUKUN",
         "TAA_MARBUTA_PAUSAL",
         "WASL_ELISION",
         "WASL_START",

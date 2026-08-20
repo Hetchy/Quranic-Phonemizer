@@ -19,7 +19,10 @@ def test_a_taa_marbuta_is_read_as_a_haa_at_a_stop(r):
     assert r.phonemes(9) == "baʕu:dˤaˤh"
     assert r.silent(9) == {"ً"}
     assert "waqf_taa_marbuta" in r.rules_on_char(9, "ة")
-    assert "waqf_taa_marbuta" in r.rules_on_sound(9, "h")
+    # the substitution owns the consonant and nothing else
+    assert r.rules_on_sound(9, "h") == {"waqf_taa_marbuta"}
+    # the tanween it was written under is dropped by a rule of its own
+    assert "waqf_diacritic_drop" in r.rules_on_char(9, "ً")
 
 
 @for_each_riwayah(BAUDATAN_FAMA, ibtidaa=9, waqf=10)
@@ -69,7 +72,8 @@ def test_a_taa_marbuta_carrying_a_plain_fatha_becomes_a_haa(r):
     # قُوَّةَ
     assert r.phonemes(10) == "quwwah"
     assert r.silent(10) == {"َ"}
-    assert "waqf_taa_marbuta" in r.rules_on_char(10, "ة")
+    assert r.rules_on_sound(10, "h") == {"waqf_taa_marbuta"}
+    assert "waqf_diacritic_drop" in r.rules_on_char(10, "َ")
 
 
 @for_each_riwayah(QUWWATA, ibtidaa=10, wasl=10)

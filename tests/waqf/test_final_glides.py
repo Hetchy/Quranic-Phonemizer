@@ -23,6 +23,7 @@ def test_that_waw_becomes_pure_length_at_a_stop(r):
     # هُوَ
     assert r.phonemes(1) == "hu:"
     assert r.silent(1) == {"َ"}
+    assert "waqf_diacritic_drop" in r.rules_on_char(1, "َ")
     assert "madd_tabii" in r.rules_on_char(1, "و")
     assert r.rules_on_sound(1, "u:") == {"madd_tabii"}
 

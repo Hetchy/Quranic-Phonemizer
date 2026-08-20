@@ -10,10 +10,13 @@ from ...engine.plan import Phase
 from ...model.address import KhilafId, Riwayah
 from ...rules.annotation import CanonicalColour, Tarqeeq
 from ...rules.boundary import (
+    DroppedGlide,
     PausalAlif,
     TaaMarbutaAtWaqf,
-    TanweenAtWaqf,
-    WaqfEnding,
+    TanweenDrop,
+    TanweenIwad,
+    WaqfHarakaDrop,
+    WaqfSilahDrop,
 )
 from ...rules.idgham import Idgham
 from ...rules.lam_shamsiyyah import ArticleLam, ArticleShape
@@ -42,10 +45,12 @@ def _build() -> RuleSet:
     return RuleSet(
         {
             Phase.BOUNDARY: (
-                WaslHamza(), SoftenedHamza(), TanweenAtWaqf(), PausalAlif(),
+                WaslHamza(), SoftenedHamza(), PausalAlif(),
                 SpelledBeforeWasl(),
                 TanweenBeforeWasl(),
-                WaqfEnding(yaa=choices.yaa),
+                TanweenDrop(), TanweenIwad(),
+                WaqfHarakaDrop(), WaqfSilahDrop(),
+                DroppedGlide(yaa=choices.yaa),
                 TaaMarbutaAtWaqf(),
             ),
             Phase.MERGE: (

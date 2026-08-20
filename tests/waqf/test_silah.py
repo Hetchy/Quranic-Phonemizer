@@ -26,6 +26,8 @@ def test_the_same_haa_loses_its_length_at_a_stop(r):
     assert r.phonemes(3) == "lah"
     assert r.silent(3) == {"ُ", "ۥ"}
     assert "madd_tabii" not in r.rules_on_char(3, "ۥ")
+    # the haa is left bare, so one rule takes the whole nucleus
+    assert r.rules_on_char(3, "ۥ") == {"waqf_silah_drop"}
 
 
 @for_each_riwayah(HAWLAHU, ibtidaa=9, wasl=9)

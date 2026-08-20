@@ -1,4 +1,4 @@
-"""The waqf-ending split: `pausal_sukun`, `waqf_taa_marbuta`, `madd_iwad`.
+"""The waqf-ending split: `waqf_diacritic_drop`, `waqf_taa_marbuta`, `madd_iwad`.
 
 A stopped taa marbuta names two rules on one unit -- one per part -- which a
 shared rule identity could not do.
@@ -26,22 +26,22 @@ def _stopped_on(score, word_number: int) -> BoundaryPlan:
 
 def test_a_stopped_taa_marbuta_names_two_rules_one_per_part(packed, hafs) -> None:
     """`ٱلصَّلَاةَ` at 2:3:5, stopped on: the vowel goes silent under
-    `pausal_sukun` and the consonant is realized as haa under
+    `waqf_diacritic_drop` and the consonant is realized as haa under
     `waqf_taa_marbuta` -- two occurrences, not one shared identity."""
     score = score_for(packed, hafs, 2, 3)
     taa = score.words[4].slots[-1]
     performance = perform(score, HAFS, _stopped_on(score, 5))
 
     by_rule = {o.rule: o for o in performance.occurrences if taa.id in o.subjects}
-    assert Rule.PAUSAL_SUKUN in by_rule
+    assert Rule.WAQF_DIACRITIC_DROP in by_rule
     assert Rule.WAQF_TAA_MARBUTA in by_rule
-    assert by_rule[Rule.PAUSAL_SUKUN].id != by_rule[Rule.WAQF_TAA_MARBUTA].id
+    assert by_rule[Rule.WAQF_DIACRITIC_DROP].id != by_rule[Rule.WAQF_TAA_MARBUTA].id
 
     silences = {
         a.by for a in performance.attributions
         if isinstance(a, Silent) and taa.id in a.slots and a.aspect is Aspect.VOWEL
     }
-    assert silences == {by_rule[Rule.PAUSAL_SUKUN].id}
+    assert silences == {by_rule[Rule.WAQF_DIACRITIC_DROP].id}
 
     hosts = {
         a.by: a.sound for a in performance.attributions
