@@ -1945,8 +1945,41 @@ The bar is today's numbers. Phase 1 freezes a measurement of the current
 package over the same rows, and the native result must be at least as fast and
 no heavier on every one of them. A row that regresses fails the gate; a row
 that improves ratchets, so the new number becomes the bar. There is no separate
-target to argue about, and no row is exempt: the redesign is meant to cost less
-than the graph it replaces, not the same.
+target to argue about: the redesign is meant to cost less than the graph it
+replaces, not the same.
+
+That intent needs a protocol, or it fails honest work and passes slow work
+without either being visible.
+
+Wall time, not process CPU. The process clock on the reference platform ticks
+at 15.625 ms, so a row costing fewer than about twenty ticks measures the clock
+rather than the code, and no amount of batching inside one tick recovers it.
+Wall time resolves far below that and is recorded beside it already.
+
+The estimator is the minimum of several runs, not the median and not the
+maximum. Contention only ever adds time, so the minimum is the closest
+available reading of what the code itself costs, and it is the one statistic
+that does not drift with host load. A threshold set at the maximum of a few
+samples rejects unchanged code about a quarter of the time per row, which over
+a table of rows rejects the very measurement it was drawn from.
+
+A row fails when the challenger's minimum exceeds the baseline's minimum by
+more than that row's stated tolerance, and ratchets when it beats the baseline
+by more than the same tolerance. Ratcheting on any low reading inside the
+tolerance walks the bar down to the lowest number ever observed, after which
+the true cost is a permanently failing number.
+
+A row that cannot resolve above the clock, or whose measurement is not the
+thing its name claims, is not a bar row. It may be recorded as a diagnostic and
+read by a human. Stage timings and cold-start timings are diagnostics until
+they are measured in a way that survives this rule -- a cold reading taken
+after process-global caches are warm is not a cold reading, and the giveaway is
+a cold row that beats its own warm row.
+
+Memory is the other half of the gate and the stronger half. Retained and peak
+bytes are deterministic, so `no heavier` is an exact comparison where `at least
+as fast` is a statistical one. It needs a tight tolerance and no estimator at
+all.
 
 ### 20.6 Website gate
 
