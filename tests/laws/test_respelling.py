@@ -8,7 +8,7 @@ from quranic_phonemizer.orthography.write import pen_for
 from quranic_phonemizer.phonemize.assemble import assemble
 from quranic_phonemizer.phonemize.pairing import alignment
 from quranic_phonemizer.phonemize.respell import respelling
-from quranic_phonemizer.phonemize.session import phonemize_request
+from quranic_phonemizer.session import phonemize_request
 
 #: A verse each from the noon/meem, madd, tafkheem, waqf and muqattaat
 #: families -- the block law is a closure over `alignment`, already swept

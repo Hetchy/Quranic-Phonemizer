@@ -45,7 +45,7 @@ from .derived import (
 )
 from .ordering import sounds_in_order
 from .recited import write_recited
-from .session import Session
+from ..session import Session
 
 #: SlotFact.SAKT is not mapped; nothing evidences it.
 _FACT_OF = {

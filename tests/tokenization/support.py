@@ -11,7 +11,7 @@ from quranic_phonemizer.model.address import Riwayah, Script, VariantSelection
 from quranic_phonemizer.orthography.write import pen_for
 from quranic_phonemizer.phonemize import edges as ed
 from quranic_phonemizer.phonemize.assemble import Assembled, assemble
-from quranic_phonemizer.phonemize.session import phonemize_request
+from quranic_phonemizer.session import phonemize_request
 
 #: The facts whose presence gives a scalar a unit of its own: a letter, or a
 #: haraka, sukun or length carrier holding the vowel position. A shadda's

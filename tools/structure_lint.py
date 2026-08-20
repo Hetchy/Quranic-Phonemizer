@@ -36,11 +36,15 @@ ALLOWED: dict[str, set[str]] = {
         "canon", "corpus", "engine", "model", "orthography", "render",
         "riwayat",
     },
+    # The resolved request: words, boundaries, and the built score. It reads
+    # the request layers and nothing of the projection above it.
+    "session": {"canon", "corpus", "engine", "model"},
     # Above `api`: it imports the assembled bundle rather than re-deriving
-    # it. No `rules` edge -- rules arrive inside `Recitation.rules`, and a
-    # declared edge nothing exercises fails `_unused_permissions`.
+    # it. It reaches the request layers through `session` now, so it keeps no
+    # direct canon, corpus or engine edge -- a declared edge nothing exercises
+    # fails `_unused_permissions`.
     "phonemize": {
-        "api", "canon", "corpus", "engine", "model", "orthography", "render",
+        "api", "model", "orthography", "render", "session",
     },
 }
 
@@ -51,6 +55,8 @@ PHONEME_MARKERS = ("ˤ", "ː", "m̃", "ñ")
 #: Narrower than the package edge: `canon` reaches only one orthography module.
 MODULE_ALLOWED: dict[tuple[str, str], set[str]] = {
     ("canon", "orthography"): {"adapter"},
+    ("session", "canon"): {"build", "ledger"},
+    ("session", "engine"): {"boundary_plan"},
 }
 
 #: Names a consumer outside this repository may import. Everything else that

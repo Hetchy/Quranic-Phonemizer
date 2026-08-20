@@ -22,11 +22,11 @@ sys.path.insert(0, str(ROOT))
 from quranic_phonemizer import Phonemizer  # noqa: E402
 from quranic_phonemizer.phonemize import names  # noqa: E402
 from quranic_phonemizer.phonemize.assemble import assemble  # noqa: E402
-from quranic_phonemizer.phonemize.boundaries import resolve_boundaries  # noqa: E402
+from quranic_phonemizer.session import resolve_boundaries  # noqa: E402
 from quranic_phonemizer.phonemize.document import build_result  # noqa: E402
-from quranic_phonemizer.phonemize.request import resolve_words  # noqa: E402
-from quranic_phonemizer.phonemize.session import phonemize_request  # noqa: E402
-from quranic_phonemizer.phonemize.session import Session  # noqa: E402
+from quranic_phonemizer.session import resolve_words  # noqa: E402
+from quranic_phonemizer.session import phonemize_request  # noqa: E402
+from quranic_phonemizer.session import Session  # noqa: E402
 from quranic_phonemizer.phonemize.schema import canonical_bytes  # noqa: E402
 
 

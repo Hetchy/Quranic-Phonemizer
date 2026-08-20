@@ -26,7 +26,7 @@ from quranic_phonemizer.phonemize.legacy_views import (
     graphemes_by_id,
     phonemes_by_word,
 )
-from quranic_phonemizer.phonemize.session import Session as PhonemizeSession
+from quranic_phonemizer.session import Session as PhonemizeSession
 
 from .boundary import UnreachableWasl, plan_for, reaches_past
 from .site import Site
