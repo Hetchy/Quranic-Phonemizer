@@ -249,11 +249,11 @@ def _source_graphemes(inscription: Inscription, performance: Performance) -> dic
 def _ibdal_carriers(performance: Performance):
     """(lengthened slot, the quiescent hamza it carries) for each ibdal.
 
-    The rasm writes no length on the prosthetic hamza, so the letter the
+    The rasm writes no length on the prosthetic hamza, so the hamza this
     rule silences is the one the reading writes that length on."""
     targets = effect_targets(performance)
     return [
-        (occurrence.subjects[0], targets[occurrence.id][0])
+        (targets[occurrence.id][0], occurrence.subjects[0])
         for occurrence in performance.occurrences
         if occurrence.rule is Rule.IBDAL_HAMZA and targets.get(occurrence.id)
     ]

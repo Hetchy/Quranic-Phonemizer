@@ -78,7 +78,8 @@ class WaslHamza:
 @dataclass(frozen=True, slots=True)
 class SoftenedHamza:
     """Two hamzas are not said in a row. Started on, the prosthetic hamza's
-    vowel lengthens and carries the quiescent one as its madd letter."""
+    vowel lengthens and carries the quiescent one -- the subject, since it
+    is the hamza the length replaces -- as its madd letter."""
 
     rule: Rule = Rule.IBDAL_HAMZA
     phase: Phase = Phase.BOUNDARY
@@ -103,8 +104,8 @@ class SoftenedHamza:
             return None
         return Verdict(
             Occurrence(
-                mint(Rule.IBDAL_HAMZA, at), Rule.IBDAL_HAMZA, (at,),
-                boundary=_junction_before(word),
+                mint(Rule.IBDAL_HAMZA, following.id), Rule.IBDAL_HAMZA,
+                (following.id,), boundary=_junction_before(word),
             ),
             (
                 Relength(at, Length.LONG),

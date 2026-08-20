@@ -16,6 +16,16 @@ def test_a_quiescent_hamza_becomes_a_length_when_started_on(r):
     assert "ibdal_hamza" in r.rules_on_char(18, "ٱ")
 
 
+@for_each_riwayah(ITUNI, isolated=18)
+def test_the_ibdal_names_the_hamza_it_replaced(r):
+    """The quiescent hamza is the subject; the prosthetic one it lengthens
+    is named by the start rule that sounds it."""
+    # ٱئْتُونِى
+    assert r.source_of("ibdal_hamza") == "ئ"
+    assert r.host_of("ibdal_hamza") == "ٱ"
+    assert "hamza_wasl_kasra" in r.rules_on_char(18, "ٱ")
+
+
 @for_each_riwayah(ITUNI_JOINED, ibtidaa=2, waqf=3)
 def test_the_same_hamza_is_said_as_a_hamza_when_the_word_before_joins(r):
     # ٱلْمَلِكُ ٱئْتُونِى
