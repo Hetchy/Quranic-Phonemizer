@@ -140,6 +140,7 @@ class Plan:
         default_factory=dict
     )
     _removed: set[tuple[SlotId, Aspect]] = field(default_factory=set)
+    _voweled: set[SlotId] = field(default_factory=set)
 
     def record(self, phase: Phase, verdict: Verdict) -> None:
         for effect in verdict.effects:
@@ -156,6 +157,8 @@ class Plan:
             self._keys[key] = (verdict.occurrence.id, verdict.occurrence.rule)
             if isinstance(effect, (MergeInto, Silence)):
                 self._removed.add((effect.slot, effect.aspect))
+            elif isinstance(effect, Realize) and effect.aspect is Aspect.VOWEL:
+                self._voweled.add(effect.slot)
         self.entries.append((phase, verdict))
 
     def effects(self, phase: Phase | None = None):
@@ -171,9 +174,4 @@ class Plan:
 
         A rule that asks the Score alone still reads a repaired sakin as sakin.
         """
-        return any(
-            isinstance(effect, Realize)
-            and effect.slot == slot
-            and effect.aspect is Aspect.VOWEL
-            for effect in self.effects()
-        )
+        return slot in self._voweled
