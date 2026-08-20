@@ -49,7 +49,8 @@ from tests.boundary.test_hamza_wasl_start import (
 from tests.boundary.test_ibdal_hamza import (
     test_a_quiescent_hamza_becomes_a_length_when_started_on as ibdal_started,
     test_the_ibdal_names_the_hamza_it_replaced as ibdal_subject,
-    test_the_length_the_ibdal_made_takes_no_madd_beside_it as ibdal_alone,
+    test_the_ibdal_length_is_a_badal_with_no_plain_madd_beside_it
+    as ibdal_alone,
 )
 from tests.boundary.test_iltiqa_insertions import (
     test_a_spelled_out_opening_takes_a_fatha_to_reach_the_divine_name

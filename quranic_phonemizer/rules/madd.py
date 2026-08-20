@@ -230,13 +230,13 @@ class MaddClass:
 
 @dataclass(frozen=True, slots=True)
 class MaddBadal:
-    """A long vowel on a hamza, standing in for a second hamza the reading
-    does not say twice. It names the length rather than producing it, so a
-    contextual madd may name the same vowel beside it."""
+    """A long vowel on a hamza -- written, or drawn out by the ibdal a start
+    performs -- standing in for a second hamza. It names the length rather
+    than producing it, so a contextual madd may name the same vowel beside it."""
 
     rule: Rule = Rule.MADD_BADAL
     phase: Phase = Phase.LENGTH
-    triggers: frozenset = frozenset({VowelForm.LONG})
+    triggers: frozenset = frozenset({VowelForm.LONG, Onset.WASL})
 
     def look(
         self, near: Neighbourhood, plan: Plan, at: SlotId,
@@ -245,11 +245,22 @@ class MaddBadal:
         slot = near.slot(at)
         if slot is None or slot.letter is not L.HAMZA:
             return None
-        if _madd_of(near, plan, at, boundaries) is None:
+        if _madd_of(near, plan, at, boundaries) is None and not _ibdal_lengthened(plan, at):
             return None
         return Verdict(
             Occurrence(mint(Rule.MADD_BADAL, at), Rule.MADD_BADAL, (at,)), ()
         )
+
+
+def _ibdal_lengthened(plan: Plan, at: SlotId) -> bool:
+    """The ibdal drew this hamza's short helping vowel out to a long one in an
+    earlier phase, so the plan carries the length the Score does not."""
+    return any(
+        isinstance(effect, Relength)
+        and effect.slot == at
+        and effect.length is Length.LONG
+        for effect in plan.effects()
+    )
 
 
 @dataclass(frozen=True, slots=True)

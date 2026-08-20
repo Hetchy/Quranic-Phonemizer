@@ -27,12 +27,19 @@ def test_the_ibdal_names_the_hamza_it_replaced(r):
 
 
 @for_each_riwayah(ITUNI, isolated=18)
-def test_the_length_the_ibdal_made_takes_no_madd_beside_it(r):
+def test_the_ibdal_length_is_a_badal_with_no_plain_madd_beside_it(r):
     """The helping vowel is short in the reading and long only because the
-    ibdal lengthened it, so no madd over the reading names it."""
+    ibdal lengthened it into the hamza it carries, so a badal names that
+    length and no plain madd stands beside it."""
     # ٱئْتُونِى
-    assert r.rules_on_char(18, "ٱ") == {"ibdal_hamza", "hamza_wasl_kasra"}
+    assert r.phonemes(18) == "ʔi:tu:ni:"
+    assert r.rules_on_char(18, "ٱ") == {
+        "ibdal_hamza", "hamza_wasl_kasra", "madd_badal"
+    }
     assert r.rules_on_char(18, "ئ") == {"ibdal_hamza"}
+    # the natural length later in the word is a plain madd, untouched
+    assert r.rules_on_char(18, "و") == {"madd_tabii"}
+    assert r.rules_on_char(18, "ى") == {"madd_tabii"}
 
 
 @for_each_riwayah(ITUNI_JOINED, ibtidaa=2, waqf=3)
