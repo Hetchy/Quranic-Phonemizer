@@ -99,6 +99,14 @@ class Structural:
 Spelling: TypeAlias = Evidences | Attests | Decorates | Structural
 
 
+class SilenceReason(StrEnum):
+    """Why a written letter is said by nobody where no rule decided it. The
+    rasm keeps letters the reading never says, and that is not a tajweed
+    outcome; the spelling is the whole of it."""
+
+    ORTHOGRAPHIC = "orthographic_silence"
+
+
 class StopAdvice(StrEnum):
     """A mushaf convention, legitimately script-scoped. The *class* vocabulary
     is shared; the mapping from scalars into it is per (riwayah, script)."""

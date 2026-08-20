@@ -53,7 +53,6 @@ RULE_NAMES: dict[Rule, tuple[str, str]] = {
     Rule.PAUSAL_SUKUN: ("Pausal Sukun", "سكون الوقف"),
     Rule.TAA_MARBUTA_PAUSAL: ("Taa Marbuta at a Pause", "تاء مربوطة عند الوقف"),
     Rule.PAUSAL_ALIF: ("Pausal Alif", "ألف الوقف"),
-    Rule.ORTHOGRAPHIC_SILENCE: ("Orthographic Silence", "حرف لا ينطق به"),
 }
 
 

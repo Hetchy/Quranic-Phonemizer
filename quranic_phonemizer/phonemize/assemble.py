@@ -8,12 +8,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 from functools import cached_property
 
-from ..model.canon import Rule, Score
+from ..model.canon import Score
 from ..model.inscription import (
     Attests,
     Decorates as InscDecorates,
     Evidences,
     Inscription,
+    SilenceReason,
     SlotFact,
     Structural as InscStructural,
 )
@@ -95,7 +96,7 @@ class Assembled:
         )
         offset = next(
             (i for i, r in enumerate(self.rules)
-             if r.rule is Rule.ORTHOGRAPHIC_SILENCE),
+             if r.rule is SilenceReason.ORTHOGRAPHIC),
             len(self.rules),
         )
         out = {
@@ -154,7 +155,7 @@ def assemble(
         glyphs, spellings, open_vowel, decoration_targets(glyphs, spellings)
     )
     rules.extend(
-        nd.RuleInstance(Rule.ORTHOGRAPHIC_SILENCE, None, None) for _ in groups
+        nd.RuleInstance(SilenceReason.ORTHOGRAPHIC, None, None) for _ in groups
     )
 
     rendered = _rendered(

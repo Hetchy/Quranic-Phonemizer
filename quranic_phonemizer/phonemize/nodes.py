@@ -10,7 +10,7 @@ from enum import StrEnum
 
 from ..model.address import Location
 from ..model.canon import CanonLetter, Nucleus, Onset, Quality, Rule, SlotOrigin
-from ..model.inscription import GraphemeClass, StopAdvice
+from ..model.inscription import GraphemeClass, SilenceReason, StopAdvice
 from ..model.performance import Degree
 
 
@@ -107,7 +107,9 @@ class Sound:
 
 @dataclass(frozen=True, slots=True)
 class RuleInstance:
-    rule: Rule
+    rule: Rule | SilenceReason
+    """A silenced letter names no rule; the reason it is unsaid stands in
+    the same place, and publishes under the same identifier it always did."""
     source: int | None
     host: int | None
     labels: tuple[str, ...] = ()

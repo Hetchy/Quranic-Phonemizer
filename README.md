@@ -356,7 +356,7 @@ for rule in res.rules:
 مَالَهُۥٓ madd_jaiz_munfasil ('silah', 'silah_kubra')
 ```
 
-`tajweed_rules("hafs")` lists all 40 rule identifiers with their English and Arabic names.
+`tajweed_rules("hafs")` lists all 39 rule identifiers with their English and Arabic names.
 
 ```python
 from quranic_phonemizer import tajweed_rules

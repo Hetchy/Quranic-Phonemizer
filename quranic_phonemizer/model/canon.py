@@ -319,7 +319,6 @@ class Rule(StrEnum):
     TAA_MARBUTA_PAUSAL = "taa_marbuta_pausal"
     PAUSAL_ALIF = "pausal_alif"
 
-    ORTHOGRAPHIC_SILENCE = "orthographic_silence"
 
 
 #: Rules whose occurrence may produce no effect; `engine/run.py` mints each
