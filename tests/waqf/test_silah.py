@@ -31,6 +31,15 @@ def test_the_same_haa_loses_its_length_at_a_stop(r):
     assert r.rules_on_char(3, "ۥ") == {"waqf_silah_drop"}
 
 
+@for_each_riwayah(LAHU, isolated=3)
+def test_the_stop_leaves_no_second_drop_on_the_haa(r):
+    """The damma and the small waw spell one vowel between them, and the stop
+    takes all of it, so there is no separate haraka left to drop."""
+    # لَّهُۥ
+    assert r.rules_on_char(3, "ُ") == {"waqf_silah_drop"}
+    assert "waqf_diacritic_drop" not in r.rules_on_char(3, "ه")
+
+
 @for_each_riwayah(HAWLAHU, ibtidaa=9, wasl=9)
 def test_a_haa_with_damma_is_drawn_out_when_joined_forward(r):
     # حَوْلَهُۥ

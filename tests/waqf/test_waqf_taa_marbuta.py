@@ -40,7 +40,8 @@ def test_a_taa_marbuta_after_a_dammatan_becomes_a_haa_at_a_stop(r):
     assert r.phonemes(10) == "sinah"
     assert r.silent(10) == {"ٌ"}
     assert "waqf_taa_marbuta" in r.rules_on_char(10, "ة")
-    assert "waqf_taa_marbuta" in r.rules_on_sound(10, "h")
+    assert r.rules_on_sound(10, "h") == {"waqf_taa_marbuta"}
+    assert "waqf_diacritic_drop" in r.rules_on_char(10, "ٌ")
 
 
 @for_each_riwayah(SINATUN_WALA, ibtidaa=10, waqf=11)
@@ -57,6 +58,8 @@ def test_a_taa_marbuta_after_a_kasratan_becomes_a_haa_at_a_stop(r):
     assert r.phonemes(9) == "wa:ħidah"
     assert r.silent(9) == {"ٍ"}
     assert "waqf_taa_marbuta" in r.rules_on_char(9, "ة")
+    assert r.rules_on_sound(9, "h") == {"waqf_taa_marbuta"}
+    assert "waqf_diacritic_drop" in r.rules_on_char(9, "ٍ")
 
 
 @for_each_riwayah(WAHIDATIN_WAKHALAQA, ibtidaa=9, waqf=10)
@@ -90,6 +93,8 @@ def test_a_taa_marbuta_after_a_fathatan_becomes_a_haa_at_a_stop(r):
     assert r.phonemes(99) == "tiʒa:rˤaˤh"
     assert r.silent(99) == {"ً"}
     assert "waqf_taa_marbuta" in r.rules_on_char(99, "ة")
+    assert r.rules_on_sound(99, "h") == {"waqf_taa_marbuta"}
+    assert "waqf_diacritic_drop" in r.rules_on_char(99, "ً")
 
 
 @for_each_riwayah(TIJARATAN_HADIRA, ibtidaa=99, waqf=100)
