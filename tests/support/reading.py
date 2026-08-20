@@ -44,6 +44,11 @@ def _alphabet():
     return load_alphabet()
 
 
+def loaded(riwayah: str = "hafs"):
+    """The one copy of a riwayah every case in this suite reads from."""
+    return _recitation(Riwayah(riwayah))
+
+
 @lru_cache(maxsize=None)
 def _pen(riwayah: Riwayah, script: Script):
     return pen_for(_recitation(riwayah).inventory(script))
