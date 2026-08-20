@@ -135,7 +135,7 @@ the expectation.
 | `nasal/` | quiescent noon, tanween, quiescent meem |
 | `adjacent/` | a rule across two touching letters: idgham, the article lam |
 | `tafkheem/` | the istilaa letters, the divine name's lam, raa |
-| `waqf/` | pausal sukun, iwad, taa marbuta, silah, pausal alifs, final glides |
+| `waqf/` | diacritic drops, iwad, taa marbuta, silah, badal, pausal alifs, final glides |
 | `boundary/` | hamzat al-wasl, iltiqa, ibdal |
 | `test_rasm.py` | letters written and never said |
 | `test_madd.py`, `test_qalqala.py` | the lengths; the five qalqala letters |

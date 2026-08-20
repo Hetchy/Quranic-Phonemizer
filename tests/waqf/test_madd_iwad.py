@@ -18,7 +18,8 @@ def test_a_fathatan_lengthens_the_letter_before_it_at_a_stop(r):
     assert r.phonemes(3) == "huda:"
     assert r.silent(3) == {"ً", "ى"}
     assert "madd_iwad" in r.rules_on_char(3, "ً")
-    assert "madd_iwad" in r.rules_on_sound(3, "a:")
+    # the exchange makes the long aa, and the plain madd holds it
+    assert r.rules_on_sound(3, "a:") == {"madd_iwad", "madd_tabii"}
     # the noon that mark also wrote is dropped by a rule of its own
     assert "waqf_diacritic_drop" in r.rules_on_char(3, "ً")
 
