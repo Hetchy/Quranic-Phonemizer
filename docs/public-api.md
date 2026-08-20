@@ -1,5 +1,12 @@
 # Public API and projections
 
+This document describes the current schema-v1 graph. The accepted replacement
+architecture and phased implementation plan are in
+[design/consumer-analysis-projection.md](design/consumer-analysis-projection.md).
+Until that cutover lands, this document remains the contract for the released
+shape. Its output is untrusted differential evidence for the redesign, not a
+correctness oracle: native laws and audited fixtures decide the new semantics.
+
 The package has one public operation:
 
 ```python
