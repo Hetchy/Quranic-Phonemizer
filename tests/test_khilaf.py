@@ -219,6 +219,38 @@ def test_aatani_hadhf_stops_on_the_noon_and_lengthens_before_it():
     assert hadhf.rules_on_sound(8, "a:") >= {"madd_arid_lissukun"}
 
 
+def test_the_omitted_yaa_names_no_rule_of_its_own():
+    """Leaving the yaa off is the variant's outcome, not a rule: what the
+    reading records is the choice, and a drop per mark it left unsaid."""
+    # ءَاتَىٰنِۦَ
+    assert not any(
+        rule.value.startswith("waqf_glide") for rule in Rule
+    )
+    hadhf = _at(AATANI, 8, KhilafId.YAA_AATANI_WAQF, "hadhf")
+    selection = hadhf.performance.selection
+    assert selection.chosen(KhilafId.YAA_AATANI_WAQF) == "hadhf"
+    assert hadhf.silent(8) == {"ۧ", "َ", "ِ"}
+    drops = [
+        o for o in hadhf.performance.occurrences
+        if o.rule is Rule.WAQF_DIACRITIC_DROP
+        and o.subjects[0] in {s.id for s in hadhf.score.words[7].slots}
+    ]
+    assert len(drops) == 3
+    assert len({o.id for o in drops}) == 3
+
+
+def test_the_kept_yaa_leaves_only_its_own_haraka_dropped():
+    # ءَاتَىٰنِۦَ
+    ithbat = _at(AATANI, 8, KhilafId.YAA_AATANI_WAQF, "ithbat")
+    assert ithbat.silent(8) == {"َ"}
+    drops = [
+        o for o in ithbat.performance.occurrences
+        if o.rule is Rule.WAQF_DIACRITIC_DROP
+        and o.subjects[0] in {s.id for s in ithbat.score.words[7].slots}
+    ]
+    assert len(drops) == 1
+
+
 @pytest.mark.parametrize(
     ("word", "fatha", "damma"),
     ((5, "dˤaˤʕf", "dˤuʕf"), (10, "dˤaˤʕf", "dˤuʕf"),

@@ -49,7 +49,7 @@ def _build() -> RuleSet:
                 SpelledBeforeWasl(),
                 TanweenBeforeWasl(),
                 TanweenDrop(), TanweenIwad(),
-                WaqfHarakaDrop(), WaqfSilahDrop(),
+                WaqfHarakaDrop(yaa=choices.yaa), WaqfSilahDrop(),
                 DroppedGlide(yaa=choices.yaa),
                 TaaMarbutaAtWaqf(),
             ),

@@ -42,12 +42,13 @@ _GLIDE_VARIANT = 1
 
 @dataclass(frozen=True, slots=True)
 class WaqfHarakaDrop:
-    """The haraka on the letter a stop lands on is written and not said.
+    """The haraka on a letter a stop lands on is written and not said.
 
     `كِتَٰبٌ` at waqf: the onset still sounds while the nucleus drops, so
     `Aspect` records the two separately.
     """
 
+    yaa: SitedKhilaf = field(default_factory=SitedKhilaf)
     rule: Rule = Rule.WAQF_DIACRITIC_DROP
     phase: Phase = Phase.BOUNDARY
     triggers: frozenset = frozenset()
@@ -60,10 +61,12 @@ class WaqfHarakaDrop:
         slot, word = near.slot(at), near.word_of(at)
         if slot is None or word is None or not boundaries.stopped_on(word):
             return None
-        if not slot.nucleus.is_short or not _is_final_letter(near, at, word):
+        if not slot.nucleus.is_short:
             return None
         if _followed_by_tanween_noon(near, word):
             # One written tanween, one drop: `TanweenDrop` takes this vowel too.
+            return None
+        if not _takes_the_stop(near, at, word, _omitted_glide(self.yaa, near, word)):
             return None
         return Verdict(_drop(at, word), (Silence(at, Aspect.VOWEL),))
 
@@ -101,10 +104,10 @@ class WaqfSilahDrop:
 
 @dataclass(frozen=True, slots=True)
 class DroppedGlide:
-    """The pronoun yaa the reader may leave off at a stop.
+    """The pronoun yaa itself, where the reading leaves it off at a stop.
 
-    Its onset must go too, or a stray glide remains, and the stop then
-    lands on the letter before it.
+    The haraka written on it takes its own drop; this owns the letter, so
+    the two need distinct occurrences on the one slot.
     """
 
     yaa: SitedKhilaf = field(default_factory=SitedKhilaf)
@@ -117,27 +120,13 @@ class DroppedGlide:
         boundaries: BoundaryPlan,
     ) -> Verdict | None:
         del plan
-        slot, word = near.slot(at), near.word_of(at)
-        if slot is None or word is None or not boundaries.stopped_on(word):
+        word = near.word_of(at)
+        if word is None or not boundaries.stopped_on(word):
             return None
-        if slot.onset is not Onset.GLIDE or self._kept(near, word):
-            return None
-        if not _is_final_letter(near, at, word):
+        if _omitted_glide(self.yaa, near, word) != at:
             return None
         return Verdict(
-            _drop(at, word, _GLIDE_VARIANT),
-            (Silence(at, Aspect.CONSONANT), *_hands_the_stop_back(near, at)),
-        )
-
-    def _kept(self, near: Neighbourhood, word: int) -> bool:
-        """Ithbat: the reader says the optional yaa anyway, so the stop takes
-        its vowel and `PausalGlide` lengthens what is left."""
-        return bool(
-            self.yaa.of(
-                vocalised_word(near.score.words[word]),
-                True,
-                near.score.selection,
-            )
+            _drop(at, word, _GLIDE_VARIANT), (Silence(at, Aspect.CONSONANT),)
         )
 
 
@@ -299,12 +288,29 @@ def _followed_by_tanween_noon(near: Neighbourhood, word: int) -> bool:
     return bool(slots) and slots[-1].origin is SlotOrigin.NUNATION
 
 
-def _hands_the_stop_back(near: Neighbourhood, at: SlotId):
-    """A letter absent at the pause is not the one stopped on, so the vowel
-    of the letter before it drops instead."""
-    if near.first_of_word(at):
-        return ()
-    before = near.before(at)
-    if before is None or not before.nucleus.is_short:
-        return ()
-    return (Silence(before.id, Aspect.VOWEL),)
+def _omitted_glide(
+    yaa: SitedKhilaf, near: Neighbourhood, word: int
+) -> SlotId | None:
+    """The final glide this reading leaves off, if it leaves one off.
+
+    Ithbat says the optional yaa anyway, so the stop takes its vowel and
+    `PausalGlide` lengthens what is left.
+    """
+    slots = near.score.words[word].slots
+    if not slots or slots[-1].onset is not Onset.GLIDE:
+        return None
+    kept = yaa.of(
+        vocalised_word(near.score.words[word]), True, near.score.selection
+    )
+    return None if kept else slots[-1].id
+
+
+def _takes_the_stop(
+    near: Neighbourhood, at: SlotId, word: int, omitted: SlotId | None
+) -> bool:
+    """A letter absent at the pause is not the one stopped on, so the letter
+    before it takes the stop instead."""
+    if _is_final_letter(near, at, word):
+        return True
+    following = near.after(at)
+    return omitted is not None and following is not None and following.id == omitted
