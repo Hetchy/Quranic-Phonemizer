@@ -23,6 +23,7 @@ def test_that_waw_becomes_pure_length_at_a_stop(r):
     # هُوَ
     assert r.phonemes(1) == "hu:"
     assert r.silent(1) == {"َ"}
+    assert "waqf_diacritic_drop" in r.rules_on_char(1, "َ")
     assert "madd_tabii" in r.rules_on_char(1, "و")
     assert r.rules_on_sound(1, "u:") == {"madd_tabii"}
 
@@ -39,6 +40,7 @@ def test_that_prefixed_waw_becomes_pure_length_at_a_stop(r):
     # وَهُوَ
     assert r.phonemes(16) == "wahu:"
     assert r.silent(16) == {"َ"}
+    assert "waqf_diacritic_drop" in r.rules_on_char(16, "َ")
     assert r.rules_on_sound(16, "u:") == {"madd_tabii"}
 
 
@@ -55,6 +57,7 @@ def test_that_yaa_becomes_pure_length_at_a_stop(r):
     # هِىَ
     assert r.phonemes(8) == "hi:"
     assert r.silent(8) == {"َ"}
+    assert "waqf_diacritic_drop" in r.rules_on_char(8, "َ")
     assert "madd_tabii" in r.rules_on_char(8, "ى")
     assert r.rules_on_sound(8, "i:") == {"madd_tabii"}
 
@@ -71,6 +74,7 @@ def test_that_pronoun_yaa_becomes_pure_length_at_a_stop(r):
     # رَبِّىَ
     assert r.phonemes(16) == "rˤaˤbbi:"
     assert r.silent(16) == {"َ"}
+    assert "waqf_diacritic_drop" in r.rules_on_char(16, "َ")
     assert r.rules_on_sound(16, "i:") == {"madd_tabii"}
 
 
@@ -109,3 +113,5 @@ def test_the_stop_drops_that_fatha_and_leaves_the_waw_as_length(
     r = reading(Site(hafs=(ref, (word,))), isolated=word)
     assert r.phonemes(word) == stopped
     assert r.silent(word) == {"ا", "َ", "۟"}
+    assert "waqf_diacritic_drop" in r.rules_on_char(word, "َ")
+    assert "madd_tabii" in r.rules_on_char(word, "و")

@@ -44,7 +44,7 @@ def test_the_rasm_writes_one_lam_where_the_article_meets_a_lam(r):
     lam under a shadda, so there is none to merge and none to colour: the
     doubling is canonical and no rule names it. ٱللَّغْوِ draws both."""
     assert r.phonemes(7) == "ʔallajl"
-    assert r.rules_on_char(7, "ل") == {"pausal_sukun"}
+    assert r.rules_on_char(7, "ل") == {"waqf_diacritic_drop"}
     assert r.rules_on_sound(7, "ll") == frozenset()
 
 

@@ -10,7 +10,7 @@ from enum import StrEnum
 
 from ..model.address import Location
 from ..model.canon import CanonLetter, Nucleus, Onset, Quality, Rule, SlotOrigin
-from ..model.inscription import GraphemeClass, StopAdvice
+from ..model.inscription import GraphemeClass, SilenceReason, StopAdvice
 from ..model.performance import Degree
 
 
@@ -107,11 +107,11 @@ class Sound:
 
 @dataclass(frozen=True, slots=True)
 class RuleInstance:
-    rule: Rule
+    rule: Rule | SilenceReason
+    """A letter the rasm keeps and the reading never says names no rule; the
+    reason it is unsaid takes this field instead."""
     source: int | None
     host: int | None
-    labels: tuple[str, ...] = ()
-    """Populated once `phonemize/labels.py` exists; empty is not yet derived."""
 
 
 class GlyphKind(StrEnum):

@@ -74,19 +74,16 @@ Sound: TypeAlias = Consonant | Vowel | Release
 
 
 @dataclass(frozen=True, slots=True)
-class Participants:
-    """A rule's units. `host` is the slot that keeps a shared sound, present
-    only for a merger."""
-
-    source: SlotId
-    host: SlotId | None = None
-
-
-@dataclass(frozen=True, slots=True)
 class Occurrence:
+    """`context` is what the rule read without touching it and `boundary` the
+    junction it resolved, keyed as a `BoundaryPlan` keys one. What it did to
+    a unit beside its subjects is on the edges, not here."""
+
     id: OccurrenceId
     rule: Rule
-    parts: Participants
+    subjects: tuple[SlotId, ...]
+    context: tuple[SlotId, ...] = ()
+    boundary: int | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -181,3 +178,39 @@ class Performance:
     occurrences: tuple[Occurrence, ...]
     selection: VariantSelection
     boundaries: BoundaryPlan
+
+
+def effect_targets(
+    performance: Performance,
+) -> dict[OccurrenceId, tuple[SlotId, ...]]:
+    """Per occurrence, the slots its own edges name apart from its subjects:
+    a merger's host, a letter it silenced, a vowel it relengthened. A
+    modifier names a sound, so it reaches the slot hosting that sound."""
+    hosting: dict[SoundId, set[SlotId]] = {}
+    for attribution in performance.attributions:
+        if isinstance(attribution, Hosts):
+            hosting.setdefault(attribution.sound, set()).update(attribution.slots)
+
+    named: dict[OccurrenceId, set[SlotId]] = {}
+    for attribution in performance.attributions:
+        if attribution.by is not None:
+            named.setdefault(attribution.by, set()).update(_named(attribution))
+    for modifier in performance.modifiers:
+        named.setdefault(modifier.by, set()).update(
+            hosting.get(modifier.sound, ())
+        )
+
+    subjects = {
+        occurrence.id: frozenset(occurrence.subjects)
+        for occurrence in performance.occurrences
+    }
+    return {
+        occurrence: tuple(sorted(slots - subjects.get(occurrence, frozenset())))
+        for occurrence, slots in named.items()
+    }
+
+
+def _named(attribution: Attribution) -> tuple[SlotId, ...]:
+    if isinstance(attribution, Inserted):
+        return (attribution.anchor[0],)
+    return attribution.slots

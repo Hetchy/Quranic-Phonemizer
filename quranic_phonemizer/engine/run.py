@@ -50,20 +50,23 @@ _CLASSIFIES_ASPECT: dict[Rule, Aspect] = {
     Rule.ISHMAM: Aspect.CONSONANT,
     Rule.GHUNNAH_MUSHADDADAH: Aspect.CONSONANT,
     Rule.TASHIL: Aspect.CONSONANT,
-    Rule.WASL_START: Aspect.CONSONANT,
+    Rule.HAMZA_WASL_FATHA: Aspect.CONSONANT,
+    Rule.HAMZA_WASL_KASRA: Aspect.CONSONANT,
+    Rule.HAMZA_WASL_DAMMA: Aspect.CONSONANT,
     Rule.IDGHAM_MUTAJANISAYN_NAQIS: Aspect.CONSONANT,
     Rule.IZHAR: Aspect.CONSONANT,
     Rule.IZHAR_SHAFAWI: Aspect.CONSONANT,
     Rule.LAM_QAMARIYYAH: Aspect.CONSONANT,
     Rule.IMALA: Aspect.VOWEL,
+    Rule.MADD_BADAL: Aspect.VOWEL,
+    Rule.MADD_SILAH: Aspect.VOWEL,
     Rule.MADD_WAJIB_MUTTASIL: Aspect.VOWEL,
     Rule.MADD_JAIZ_MUNFASIL: Aspect.VOWEL,
     Rule.MADD_LAZIM: Aspect.VOWEL,
-    Rule.MADD_ARID_LIL_SUKUN: Aspect.VOWEL,
+    Rule.MADD_ARID_LISSUKUN: Aspect.VOWEL,
     Rule.MADD_TABII: Aspect.VOWEL,
     #: The waw or yaa this rule names has no vowel; it classifies the consonant.
     Rule.MADD_LEEN: Aspect.CONSONANT,
-    Rule.FAKK_IDGHAM: Aspect.CONSONANT,
 }
 
 class MaterialisationError(AssertionError):
@@ -290,9 +293,10 @@ def _modifiers_for(occurrence: Occurrence, effects, hosted) -> list[Modifier]:
                 out.append(SetsLength(sound_id, occurrence.id, effect.length))
     aspect = _CLASSIFIES_ASPECT.get(occurrence.rule)
     if aspect is not None and _names_its_sound(occurrence, effects, aspect):
-        source_sound = hosted.get((occurrence.parts.source, aspect))
-        if source_sound is not None:
-            out.append(Classifies(source_sound, occurrence.id))
+        for subject in occurrence.subjects:
+            sound_id = hosted.get((subject, aspect))
+            if sound_id is not None:
+                out.append(Classifies(sound_id, occurrence.id))
     return out
 
 
@@ -303,7 +307,7 @@ def _names_its_sound(occurrence: Occurrence, effects, aspect: Aspect) -> bool:
     if len(effects) != 1 or not isinstance(effects[0], Realize):
         return False
     return (
-        effects[0].slot == occurrence.parts.source
+        effects[0].slot in occurrence.subjects
         and effects[0].aspect is aspect
     )
 

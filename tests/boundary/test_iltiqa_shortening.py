@@ -62,7 +62,7 @@ def test_a_vowel_is_put_on_the_first_word_when_it_cannot_shorten(
     r = _joined(ref, words)
     assert (r.phonemes(first), r.phonemes(last)) == expected
     # the script writes the linking vowel here, so only the elision is read
-    assert "wasl_elision" in r.rules_on_char(last, "ٱ")
+    assert "hamza_wasl_silent" in r.rules_on_char(last, "ٱ")
 
 
 @pytest.mark.parametrize(

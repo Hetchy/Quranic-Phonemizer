@@ -11,7 +11,7 @@ from quranic_phonemizer.model.address import (
 )
 
 from .boundary import UnreachableWasl, plan_for
-from .reading import Reading, reading
+from .reading import Reading, loaded, reading
 from .site import Site
 
 __all__ = [
@@ -23,6 +23,7 @@ __all__ = [
     "UnreachableWasl",
     "VariantSelection",
     "for_each_riwayah",
+    "loaded",
     "plan_for",
     "reading",
 ]

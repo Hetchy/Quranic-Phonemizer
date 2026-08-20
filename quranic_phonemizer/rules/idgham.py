@@ -12,7 +12,7 @@ from ..engine.plan import MergeInto, Phase, Plan, Realize, Verdict, mint
 from ..model.address import BoundaryPlan, SlotId
 from ..model.canon import CanonLetter as L
 from ..model.canon import CanonLetter, Rule
-from ..model.performance import Aspect, Consonant, Occurrence, Participants
+from ..model.performance import Aspect, Consonant, Occurrence
 from .lam_shamsiyyah import ArticleShape
 from .meem_sakinah import NASAL_LETTERS
 from .tables import Pairs
@@ -64,15 +64,15 @@ class Idgham:
             if rule is None:
                 return None
 
-        occurrence = Occurrence(
-            mint(rule, at), rule, Participants(at, following.id)
-        )
         if rule is Rule.IDGHAM_MUTAJANISAYN_NAQIS:
             # The first letter survives as a colour on the second, so nothing
-            # merges and the pair is recorded for the projection alone.
-            return Verdict(occurrence, ())
+            # merges. Both letters are the rule's own: it names a pair, and a
+            # projection that shows one half of it shows nothing.
+            return Verdict(
+                Occurrence(mint(rule, at), rule, (at, following.id)), ()
+            )
         return Verdict(
-            occurrence,
+            Occurrence(mint(rule, at), rule, (at,)),
             (
                 Realize(
                     following.id,

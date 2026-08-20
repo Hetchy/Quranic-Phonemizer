@@ -9,7 +9,15 @@ from bisect import bisect_left
 from dataclasses import dataclass
 
 from ..model.address import SlotId, SoundId
-from ..model.canon import CARRIER_OF, CanonLetter, Rule, Score, ScoreWord, SlotOrigin
+from ..model.canon import (
+    CARRIER_OF,
+    HAMZA_WASL_START,
+    CanonLetter,
+    Rule,
+    Score,
+    ScoreWord,
+    SlotOrigin,
+)
 from ..model.inscription import (
     VOWEL_FACTS,
     Grapheme,
@@ -26,6 +34,7 @@ from ..model.performance import (
     Release,
     Silent,
     Vowel,
+    effect_targets,
 )
 from ..orthography.write import MADD, Pen, WriteError
 from . import nodes as nd
@@ -41,7 +50,7 @@ _BASE_QUALITY = {"e": "i"}
 #: A tanween noon these rules realize is left bare -- no sukun mark -- because
 #: bareness is what signals the assimilation; every other realization keeps
 #: the mark.
-_BARE_TANWEEN_NOON = frozenset({Rule.IKHFAA_HAQIQI, Rule.IQLAB})
+_BARE_TANWEEN_NOON = frozenset({Rule.IKHFAA, Rule.IQLAB})
 
 #: A hamza wasl started on is the hamza its vowel calls for, never the bare
 #: letter or the seat the rasm wrote.
@@ -83,7 +92,7 @@ def write_recited(
     releases = _releases_by_slot(performance)
     sounds = dict(performance.sounds)
     occurrences = {o.id: o for o in performance.occurrences}
-    started = _slots_by_rule(performance, Rule.WASL_START)
+    started = _slots_by_rule(performance, HAMZA_WASL_START)
     sources = _source_graphemes(inscription, performance)
     signs = _stop_signs_by_word(score, inscription)
 
@@ -165,14 +174,15 @@ def _releases_by_slot(performance: Performance) -> dict:
     }
 
 
-def _slots_by_rule(performance: Performance, rule: Rule) -> frozenset:
+def _slots_by_rule(performance: Performance, rules: frozenset[Rule]) -> frozenset:
     """`WaslHamza` records its occurrence with no effect at all when
     started on -- the plain fill spells the canonical value untouched, so
     only the occurrence, not the attribution, says which rule that was."""
     return frozenset(
-        occurrence.parts.source
+        subject
         for occurrence in performance.occurrences
-        if occurrence.rule is rule
+        if occurrence.rule in rules
+        for subject in occurrence.subjects
     )
 
 
@@ -239,12 +249,13 @@ def _source_graphemes(inscription: Inscription, performance: Performance) -> dic
 def _ibdal_carriers(performance: Performance):
     """(lengthened slot, the quiescent hamza it carries) for each ibdal.
 
-    The rasm writes no length on the prosthetic hamza, so the letter the
+    The rasm writes no length on the prosthetic hamza, so the hamza this
     rule silences is the one the reading writes that length on."""
+    targets = effect_targets(performance)
     return [
-        (occurrence.parts.source, occurrence.parts.host)
+        (targets[occurrence.id][0], occurrence.subjects[0])
         for occurrence in performance.occurrences
-        if occurrence.rule is Rule.IBDAL_HAMZA and occurrence.parts.host is not None
+        if occurrence.rule is Rule.IBDAL_HAMZA and targets.get(occurrence.id)
     ]
 
 

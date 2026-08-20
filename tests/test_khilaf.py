@@ -4,6 +4,7 @@ import pytest
 
 from quranic_phonemizer import Phonemizer, available_variants
 from quranic_phonemizer.model.canon import CanonLetter, Onset, Quality, Rule
+from quranic_phonemizer.model.inscription import SilenceReason
 from tests.support import KhilafId, Option, Site, VariantSelection, reading
 
 FIRQ = Site(hafs=("26:63", (11,)))
@@ -215,8 +216,48 @@ def test_aatani_hadhf_stops_on_the_noon_and_lengthens_before_it():
     """
     # ءَاتَىٰنِۦَ
     hadhf = _at(AATANI, 8, KhilafId.YAA_AATANI_WAQF, "hadhf")
-    assert Rule.MADD_ARID_LIL_SUKUN in _rules(hadhf)
-    assert hadhf.rules_on_sound(8, "a:") >= {"madd_arid_lil_sukun"}
+    assert Rule.MADD_ARID_LISSUKUN in _rules(hadhf)
+    assert hadhf.rules_on_sound(8, "a:") >= {"madd_arid_lissukun"}
+
+
+def test_the_omitted_yaa_names_no_rule_of_its_own():
+    """Leaving the yaa off is the variant's outcome, not a rule: the letter is
+    silenced for a variant reason, and only the harakat it leaves unsaid -- the
+    noon's kasra and the yaa's own fatha -- drop under waqf_diacritic_drop."""
+    # ءَاتَىٰنِۦَ
+    assert not any(
+        rule.value.startswith("waqf_glide") for rule in Rule
+    )
+    hadhf = _at(AATANI, 8, KhilafId.YAA_AATANI_WAQF, "hadhf")
+    assert hadhf.phonemes(8) == "ʔa:ta:n"
+    selection = hadhf.performance.selection
+    assert selection.chosen(KhilafId.YAA_AATANI_WAQF) == "hadhf"
+    assert hadhf.silent(8) == {"ۧ", "َ", "ِ"}
+    word = {slot.id for slot in hadhf.score.words[7].slots}
+    drops = [
+        o for o in hadhf.performance.occurrences
+        if o.rule is Rule.WAQF_DIACRITIC_DROP and o.subjects[0] in word
+    ]
+    assert len(drops) == 2
+    assert len({o.id for o in drops}) == 2
+    # the yaa letter itself is silenced for a variant reason, naming no rule
+    glide = [
+        o for o in hadhf.performance.occurrences
+        if o.rule is SilenceReason.VARIANT and o.subjects[0] in word
+    ]
+    assert len(glide) == 1
+
+
+def test_the_kept_yaa_leaves_only_its_own_haraka_dropped():
+    # ءَاتَىٰنِۦَ
+    ithbat = _at(AATANI, 8, KhilafId.YAA_AATANI_WAQF, "ithbat")
+    assert ithbat.silent(8) == {"َ"}
+    drops = [
+        o for o in ithbat.performance.occurrences
+        if o.rule is Rule.WAQF_DIACRITIC_DROP
+        and o.subjects[0] in {s.id for s in ithbat.score.words[7].slots}
+    ]
+    assert len(drops) == 1
 
 
 @pytest.mark.parametrize(
@@ -295,7 +336,8 @@ def test_nasal_place_choices_change_only_the_nasal_realization(
     assert generic.host_of(rule) is None and lips.host_of(rule) is None
     generic_occurrence = next(o for o in generic.performance.occurrences if o.rule.value == rule)
     lips_occurrence = next(o for o in lips.performance.occurrences if o.rule.value == rule)
-    assert generic_occurrence.parts == lips_occurrence.parts
+    assert generic_occurrence.subjects == lips_occurrence.subjects
+    assert generic_occurrence.context == lips_occurrence.context
 
 
 def test_selecting_one_nasal_point_leaves_the_other_at_default():

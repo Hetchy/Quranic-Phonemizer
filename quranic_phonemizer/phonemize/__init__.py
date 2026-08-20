@@ -4,7 +4,6 @@ performs and assembles one `PhonemizeResult` per call.
 """
 from __future__ import annotations
 
-import dataclasses
 from collections.abc import Sequence
 from dataclasses import dataclass
 
@@ -15,7 +14,6 @@ from ..render.alphabet import EXTRA_PHONEMES
 from . import edges, names, nodes
 from .assemble import assemble
 from .document import PhonemizeResult, build_result
-from .labels import with_labels
 from .runtime import suspend_collection
 from .session import phonemize_request
 
@@ -79,9 +77,6 @@ class Phonemizer:
         )
         assembled = assemble(
             session, self._pen, self._alphabet, extra_phonemes=self._extra
-        )
-        assembled = dataclasses.replace(
-            assembled, rules=with_labels(assembled.rules, assembled.units)
         )
         return build_result(
             ref=ref, riwayah=self.riwayah, script=self._script.value,

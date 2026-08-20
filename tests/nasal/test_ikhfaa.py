@@ -54,7 +54,7 @@ HEAVY_HUM = frozenset(
 
 
 def _hum_rules(ref: str) -> set[str]:
-    return {"ikhfaa_haqiqi"} | ({"tafkheem"} if ref in HEAVY_HUM else set())
+    return {"ikhfaa"} | ({"tafkheem"} if ref in HEAVY_HUM else set())
 
 
 #: One site per tanween mark, to say which character the rule is read off.
@@ -70,7 +70,7 @@ def test_every_hiding_letter_hides_a_written_noon(ref, word, expected):
     site = Site(hafs=(ref, (word,)))
     r = reading(site, isolated=word)
     assert r.phonemes(word) == expected
-    assert "ikhfaa_haqiqi" in r.rules_on_char(word, "ن")
+    assert "ikhfaa" in r.rules_on_char(word, "ن")
     assert r.rules_on_sound(word, "ŋ") == _hum_rules(ref)
 
 
@@ -88,7 +88,7 @@ def test_every_hiding_letter_hides_a_tanween_noon(ref, words, expected):
 def test_the_rule_is_read_off_the_tanween_mark(ref, words, mark):
     first, last = words
     r = reading(Site(hafs=(ref, words)), ibtidaa=first, waqf=last)
-    assert "ikhfaa_haqiqi" in r.rules_on_char(first, mark)
+    assert "ikhfaa" in r.rules_on_char(first, mark)
 
 
 @for_each_riwayah(MIN_ZULUMAT, ibtidaa=4, waqf=5)
@@ -96,9 +96,9 @@ def test_a_noon_is_hidden_when_the_hiding_letter_starts_a_word(r):
     # مِّن ظُلُمَـٰتِ
     assert r.phonemes(4) == "miŋ"
     assert r.phonemes(5) == "ðˤuluma:t"
-    assert "ikhfaa_haqiqi" in r.rules_on_char(4, "ن")
+    assert "ikhfaa" in r.rules_on_char(4, "ن")
     # the zaa hiding it is a letter of istilaa, so the hum is heavy
-    assert r.rules_on_sound(4, "ŋ") == {"ikhfaa_haqiqi", "tafkheem"}
+    assert r.rules_on_sound(4, "ŋ") == {"ikhfaa", "tafkheem"}
 
 
 @for_each_riwayah(HEENIN, ibtidaa=19, wasl=19)
@@ -106,8 +106,8 @@ def test_a_tanween_at_a_verse_end_is_hidden_across_the_seam(r):
     # حِينٍ فَتَلَقَّىٰٓ
     assert r.phonemes(19) == "ħi:niŋ"
     assert r.phonemes(20) == "fatalaqqaˤ:"
-    assert "ikhfaa_haqiqi" in r.rules_on_char(19, "ٍ")
-    assert r.rules_on_sound(19, "ŋ") == {"ikhfaa_haqiqi"}
+    assert "ikhfaa" in r.rules_on_char(19, "ٍ")
+    assert r.rules_on_sound(19, "ŋ") == {"ikhfaa"}
 
 
 MANDUD = Site(hafs=("56:29", (2,)))
@@ -120,5 +120,5 @@ def test_the_heavy_hiding_toggle_defaults_off():
     assert off.phonemes(2) == "maŋdˤu:dQ"
     assert on.phonemes(2) == "maŋˤdˤu:dQ"
     # the toggle spends a character on the weight; the rule names it either way
-    assert off.rules_on_sound(2, "ŋ") == {"ikhfaa_haqiqi", "tafkheem"}
-    assert on.rules_on_sound(2, "ŋˤ") == {"ikhfaa_haqiqi", "tafkheem"}
+    assert off.rules_on_sound(2, "ŋ") == {"ikhfaa", "tafkheem"}
+    assert on.rules_on_sound(2, "ŋˤ") == {"ikhfaa", "tafkheem"}

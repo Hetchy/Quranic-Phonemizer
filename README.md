@@ -276,11 +276,11 @@ for pairing in res.alignment(text="source", grouping="cell"):
 ```
 
 ```
-'ٱ' ['ʔ'] ['wasl_start']
+'ٱ' ['ʔ'] ['hamza_wasl_fatha']
 '' ['a'] []
 'ل' [] ['lam_shamsiyyah', 'tafkheem']
-'لَّ' ['lˤlˤ', 'a:'] ['lam_shamsiyyah', 'madd_arid_lil_sukun', 'tafkheem']
-'هِ' ['h'] ['pausal_sukun']
+'لَّ' ['lˤlˤ', 'aˤ:'] ['lam_shamsiyyah', 'madd_arid_lissukun', 'tafkheem']
+'هِ' ['h'] ['waqf_diacritic_drop']
 ```
 
 A pairing with no characters is a phoneme no letter wrote, such as the helping fatha above; its `after` field names the pairing it follows. A pairing with no phonemes is a silent letter, such as the lam of the definite article assimilated into the lam after it.
@@ -322,7 +322,7 @@ for block in res.respelling():
 
 ## Tajweed Rules
 
-`rules` holds every rule the passage applied. `source` is the letter the rule is about, and `host` the letter it merges into; only a merger has a host. Both are indices into `units`. Cross-word rules disappear when stopping, and rules such as `qalqala_kubra` and `madd_arid_lil_sukun` only appear at a stop.
+`rules` holds every rule the passage applied. `source` is the letter the rule is about, and `host` the letter it merges into; only a merger has a host. Both are indices into `units`. Cross-word rules disappear when stopping, and rules such as `qalqala_kubra` and `madd_arid_lissukun` only appear at a stop.
 
 ```python
 res = pm.phonemize("2:8:3-2:8:4")
@@ -335,41 +335,41 @@ for rule in res.rules:
 
 ```
 مَن يَقُولُ | m a j̃ a q u: l
-pausal_sukun lam None
+waqf_diacritic_drop lam None
 idgham_bi_ghunnah noon ya
-madd_arid_lil_sukun qaf None
+madd_arid_lissukun qaf None
 tafkheem qaf None
 ```
 
-Some rules also carry teaching `labels` for the cases they are taught under: `madd_badal`, `silah` and `silah_kubra`.
+Badal and silah are rules rather than labels. `madd_badal` names a long vowel on a hamza and `madd_silah` the length a pronoun haa takes when the word is joined to; the madd beside a silah says how long it is held.
 
 ```python
 res = pm.phonemize("104:3")
 print(res.text())
 for rule in res.rules:
-    if rule.labels:
-        print(res.words[res.units[rule.source].word].text, rule.rule.value, rule.labels)
+    if rule.rule.value in ("madd_silah", "madd_jaiz_munfasil"):
+        print(res.words[res.units[rule.source].word].text, rule.rule.value)
 ```
 
 ```
 يَحْسَبُ أَنَّ مَالَهُۥٓ أَخْلَدَهُۥ
-مَالَهُۥٓ madd_jaiz_munfasil ('silah', 'silah_kubra')
+مَالَهُۥٓ madd_jaiz_munfasil
+مَالَهُۥٓ madd_silah
 ```
 
-`tajweed_rules("hafs")` lists all 40 rule identifiers with their English and Arabic names.
+`tajweed_rules("hafs")` lists all 44 rule identifiers with their English name, Arabic name, and a one-sentence summary.
 
 ```python
 from quranic_phonemizer import tajweed_rules
 
-for row in tajweed_rules("hafs")[:4]:
-    print(row)
+for identifier, english, arabic, summary in tajweed_rules("hafs")[:3]:
+    print(identifier, "|", english, "|", arabic, "|", summary)
 ```
 
 ```
-('izhar', 'Izhar', 'إظهار')
-('ikhfaa_haqiqi', 'Ikhfaa Haqiqi', 'إخفاء حقيقي')
-('iqlab', 'Iqlab', 'إقلاب')
-('idgham_bi_ghunnah', 'Idgham bi-Ghunnah', 'إدغام بغنة')
+izhar | Izhar | إظهار | A quiescent noon or tanween keeps its own sound before a throat letter.
+ikhfaa | Ikhfaa Haqiqi | إخفاء حقيقي | A quiescent noon or tanween is hidden as a hum held at the following letter's place.
+iqlab | Iqlab | إقلاب | A quiescent noon or tanween becomes a hummed meem before baa.
 ```
 
 ## Optional Phonemes

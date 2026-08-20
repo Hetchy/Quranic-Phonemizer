@@ -165,16 +165,19 @@ Blocks may contain several pairings on either side, which preserves expansions,
 contractions, mergers, insertions, and deletions without pretending that the
 transformation is character-for-character.
 
-## Rules and teaching labels
+## Rules
 
-A `RuleInstance` identifies the rule, its source unit when it has one, its
-merger host when it has one, and optional teaching labels. The rule list is
-exhaustive for the performed passage, while labels such as `madd_badal` and
-`silah` are derived classifications for presentation.
+A `RuleInstance` identifies the rule, its source unit when it has one, and the
+second unit the rule names when there is one. That second unit is another unit
+the rule is about or one its own edges acted on -- a merger's host, a letter it
+silenced, a vowel it lengthened -- never a unit it only read to decide. The rule
+list is exhaustive for the performed passage: `madd_badal` and `madd_silah` are
+rules in it, not derived labels beside it.
 
-`tajweed_rules(riwayah)` lists the public identifiers and their English and
-Arabic names. Rule indices attached to pairings point into the same `rules`
-array published on the result.
+`tajweed_rules(riwayah)` lists one row per rule: the public identifier, the
+English name, the Arabic name, and a one-sentence summary of what the rule
+does. Rule indices attached to pairings point into the same `rules` array
+published on the result.
 
 ## Schema stability
 

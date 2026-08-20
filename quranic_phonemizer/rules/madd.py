@@ -22,7 +22,7 @@ from ..model.address import BoundaryPlan, SlotId
 from ..model.canon import Annotation
 from ..model.canon import CanonLetter as L
 from ..model.canon import Onset, Quality, Rule, SlotOrigin, VowelForm
-from ..model.performance import Aspect, Occurrence, Participants, Vowel
+from ..model.performance import Aspect, Occurrence, Vowel
 
 #: Which glide lengthens which vowel.
 GLIDE_OF = {Quality.U: L.WAW, Quality.I: L.YA}
@@ -63,8 +63,7 @@ class PausalGlide:
             Occurrence(
                 mint(Rule.MADD_TABII, at),
                 Rule.MADD_TABII,
-                # The glide is the source; the vowel it merges into is the host.
-                Participants(source=at, host=before.id),
+                (at,),
             ),
             (
                 # Realizes the merged sound itself, so both halves share one occurrence.
@@ -121,7 +120,8 @@ class IltiqaShortening:
             Occurrence(
                 mint(Rule.ILTIQA_SHORTENING, at),
                 Rule.ILTIQA_SHORTENING,
-                Participants(at, following.id),
+                (at,),
+                (following.id,),
             ),
             (Relength(at, Length.SHORT),),
         )
@@ -133,12 +133,79 @@ def _opens_on_a_sakin(slot) -> bool:
     return slot.nucleus.is_silent or slot.onset is Onset.GEMINATE
 
 
+def _still_a_sakin(plan: Plan, slot) -> bool:
+    """A repair that vowels a sakin leaves nothing to stop the madd -- joined
+    to `ٱللَّهُ` the meem of `الٓمٓ` takes a fatha. A geminate's sakin is its
+    first half, so a vowel on the letter's own nucleus leaves it standing."""
+    return slot.onset is Onset.GEMINATE or not plan.voweled(slot.id)
+
+
+def _madd_of(
+    near: Neighbourhood, plan: Plan, at: SlotId, boundaries: BoundaryPlan
+) -> tuple[Rule, SlotId | None] | None:
+    """Which madd this long vowel is, and the letter that decided it.
+
+    `MADD_TABII` holds wherever none of the other five applies: an
+    ordinary canonically long vowel, and the seven alifs at a stop.
+    """
+    slot, word = near.slot(at), near.word_of(at)
+    if slot is None or word is None or not slot.nucleus.sounds_long:
+        return None
+    slots = near.score.words[word].slots
+    final = bool(slots) and slots[-1].id == at
+
+    if final and boundaries.stopped_on(word):
+        # Nothing follows inside the word and the stop ends it; a silah's stopped form is absent rather than long, and takes no instance.
+        return None if slot.nucleus.is_silah else (Rule.MADD_TABII, None)
+
+    following = near.after(at)
+    if following is None:
+        return None
+
+    if following.onset is Onset.WASL:
+        # A joined wasl hamza is not there to lengthen for: the two sakins
+        # that meet behind it are `IltiqaShortening`'s, and it shortens.
+        return None
+
+    if slot.nucleus.is_pausal_long:
+        # Joined, a pausal alif's own vowel is canonically short, so there
+        # is no length here to classify -- `وَأَنَا۠ أَوَّلُ` separates
+        # nothing. `PausalAlif` owns the stopped reading.
+        return None
+    return _in_context(near, plan, slot, following, final, boundaries)
+
+
+def _in_context(
+    near: Neighbourhood, plan: Plan, slot, following, final: bool,
+    boundaries: BoundaryPlan,
+) -> tuple[Rule, SlotId | None]:
+    """The outcome the letter after a long vowel decides."""
+    if following.letter is L.HAMZA:
+        # Muttasil in the same word, munfasil across a boundary -- and a particle the rasm joined is a boundary the writing does not show.
+        rule = (
+            Rule.MADD_JAIZ_MUNFASIL
+            if final or Annotation.JOINED_PARTICLE in slot.annotations
+            else Rule.MADD_WAJIB_MUTTASIL
+        )
+        return (rule, following.id)
+
+    if _opens_on_a_sakin(following) and _still_a_sakin(plan, following):
+        # A sakin already in the Score is permanent -- a written sukun in `الٓمٓ`, the first half of the shadda in `ٱلضَّآلِّينَ`. Lazim.
+        return (Rule.MADD_LAZIM, following.id)
+
+    if _stop_makes_quiescent(near, following, boundaries, plan):
+        # Voweled in the Score, sakin only because the stop lands here -- aridah lissukun, same shape as lazim.
+        return (Rule.MADD_ARID_LISSUKUN, following.id)
+    # None of the five special outcomes: an ordinary long vowel.
+    return (Rule.MADD_TABII, following.id)
+
+
 @dataclass(frozen=True, slots=True)
 class MaddClass:
     """Which madd this long vowel is -- six outcomes, one classifier.
 
-    `MADD_TABII` holds wherever none of the other five applies: an
-    ordinary canonically long vowel, and the seven alifs at a stop.
+    A plain length on a hamza is `MaddBadal`'s instead; the five
+    contextual outcomes are named here whatever letter carries them.
     """
 
     rule: Rule = Rule.MADD_LAZIM
@@ -149,53 +216,77 @@ class MaddClass:
         self, near: Neighbourhood, plan: Plan, at: SlotId,
         boundaries: BoundaryPlan,
     ) -> Verdict | None:
-        slot, word = near.slot(at), near.word_of(at)
-        if slot is None or word is None:
+        found = _madd_of(near, plan, at, boundaries)
+        if found is None:
             return None
-        if not slot.nucleus.sounds_long:
+        rule, other = found
+        if rule is not Rule.MADD_TABII:
+            return _classify(rule, at, other)
+        slot = near.slot(at)
+        if slot.letter is L.HAMZA:
             return None
-        slots = near.score.words[word].slots
-        final = bool(slots) and slots[-1].id == at
+        return _tabii(slot, at, other)
 
-        if final and boundaries.stopped_on(word):
-            # Nothing follows inside the word and the stop ends it; a silah's stopped form is absent rather than long, and takes no instance.
-            return None if slot.nucleus.is_silah else _tabii(slot, at, None)
 
-        following = near.after(at)
-        if following is None:
+@dataclass(frozen=True, slots=True)
+class MaddBadal:
+    """A long vowel on a hamza -- written, or drawn out by the ibdal a start
+    performs -- standing in for a second hamza. It names the length rather
+    than producing it, so a contextual madd may name the same vowel beside it."""
+
+    rule: Rule = Rule.MADD_BADAL
+    phase: Phase = Phase.LENGTH
+    triggers: frozenset = frozenset({VowelForm.LONG, Onset.WASL})
+
+    def look(
+        self, near: Neighbourhood, plan: Plan, at: SlotId,
+        boundaries: BoundaryPlan,
+    ) -> Verdict | None:
+        slot = near.slot(at)
+        if slot is None or slot.letter is not L.HAMZA:
             return None
-
-        if following.onset is Onset.WASL:
-            # A joined wasl hamza is not there to lengthen for: the two sakins
-            # that meet behind it are `IltiqaShortening`'s, and it shortens.
+        if _madd_of(near, plan, at, boundaries) is None and not _ibdal_lengthened(plan, at):
             return None
+        return Verdict(
+            Occurrence(mint(Rule.MADD_BADAL, at), Rule.MADD_BADAL, (at,)), ()
+        )
 
-        if slot.nucleus.is_pausal_long:
-            # Joined, a pausal alif's own vowel is canonically short, so there
-            # is no length here to classify -- `وَأَنَا۠ أَوَّلُ` separates
-            # nothing. `PausalAlif` owns the stopped reading.
+
+def _ibdal_lengthened(plan: Plan, at: SlotId) -> bool:
+    """The ibdal drew this hamza's short helping vowel out to a long one in an
+    earlier phase, so the plan carries the length the Score does not."""
+    return any(
+        isinstance(effect, Relength)
+        and effect.slot == at
+        and effect.length is Length.LONG
+        for effect in plan.effects()
+    )
+
+
+@dataclass(frozen=True, slots=True)
+class MaddSilah:
+    """The pronoun haa drawn out because the word is joined to.
+
+    The madd beside it says how long it is held: the plain two counts, or
+    the longer count a hamza opening the next word calls for.
+    """
+
+    rule: Rule = Rule.MADD_SILAH
+    phase: Phase = Phase.LENGTH
+    triggers: frozenset = frozenset({VowelForm.LONG})
+
+    def look(
+        self, near: Neighbourhood, plan: Plan, at: SlotId,
+        boundaries: BoundaryPlan,
+    ) -> Verdict | None:
+        slot = near.slot(at)
+        if slot is None or not slot.nucleus.is_silah:
             return None
-
-        if following.letter is L.HAMZA:
-            # Muttasil in the same word, munfasil across a boundary -- and a particle the rasm joined is a boundary the writing does not show.
-            rule = (
-                Rule.MADD_JAIZ_MUNFASIL
-                if final or Annotation.JOINED_PARTICLE in slot.annotations
-                else Rule.MADD_WAJIB_MUTTASIL
-            )
-            return _classify(rule, at, following.id)
-
-        if _opens_on_a_sakin(following) and not plan.voweled(following.id):
-            # A sakin already in the Score is permanent -- a written sukun in `الٓمٓ`, the first half of the shadda in `ٱلضَّآلِّينَ`. Lazim.
-            # Unless a repair voweled it: joined to `ٱللَّهُ`, the meem of `الٓمٓ`
-            # takes a fatha and stops nothing, so its madd is the plain two.
-            return _classify(Rule.MADD_LAZIM, at, following.id)
-
-        if _stop_makes_quiescent(near, following, boundaries, plan):
-            # Voweled in the Score, sakin only because the stop lands here -- aridah lissukun, same shape as lazim.
-            return _classify(Rule.MADD_ARID_LIL_SUKUN, at, following.id)
-        # None of the five special outcomes: an ordinary long vowel.
-        return _tabii(slot, at, following.id)
+        if _madd_of(near, plan, at, boundaries) is None:
+            return None
+        return Verdict(
+            Occurrence(mint(Rule.MADD_SILAH, at), Rule.MADD_SILAH, (at,)), ()
+        )
 
 
 @dataclass(frozen=True, slots=True)
@@ -243,12 +334,10 @@ def _stop_makes_quiescent(
     near: Neighbourhood, slot, boundaries, plan: Plan
 ) -> bool:
     """Is this the letter the stop silences? Last in its word but for a
-    tanween noon -- `عَظِيمٌ` stops on the meem -- and holding a short vowel
-    the stop takes rather than lengthens."""
+    tanween noon -- `عَظِيمٌ` stops on the meem -- and left bare by the
+    boundary phase rather than lengthened into an iwad."""
     word = near.word_of(slot.id)
     if word is None or not boundaries.stopped_on(word):
-        return False
-    if not slot.nucleus.is_short:
         return False
     slots = near.score.words[word].slots
     # The written last letter need not be the one stopped on: the boundary
@@ -260,16 +349,18 @@ def _stop_makes_quiescent(
     ]
     if not letters or letters[-1].id != slot.id:
         return False
-    if slots[-1].origin is SlotOrigin.NUNATION:
-        # A tanween fath lengthens into the iwad alif rather than dropping, so `مِهَـٰدًا` silences nothing behind it. Damm and kasr simply go.
-        return slot.nucleus.quality is not Quality.A
-    return True
+    # BOUNDARY runs before LENGTH, so the drop it made or withheld is the
+    # answer: a fathatan lengthens into the iwad alif instead of dropping.
+    return plan.merged_away(slot.id, Aspect.VOWEL)
 
 
 def _classify(rule: Rule, at: SlotId, other: SlotId | None) -> Verdict:
-    return Verdict(
-        Occurrence(mint(rule, at), rule, Participants(at, other)), ()
-    )
+    return Verdict(Occurrence(mint(rule, at), rule, (at,), _context(other)), ())
+
+
+def _context(other: SlotId | None) -> tuple[SlotId, ...]:
+    """The letter whose own shape decided which madd this is, untouched."""
+    return () if other is None else (other,)
 
 
 def _tabii(slot, at: SlotId, other: SlotId | None) -> Verdict:
@@ -277,7 +368,7 @@ def _tabii(slot, at: SlotId, other: SlotId | None) -> Verdict:
     the plain fill would have given it -- except a pausal alif, whose own
     rule realizes it already, and only takes a length here."""
     occurrence = Occurrence(
-        mint(Rule.MADD_TABII, at), Rule.MADD_TABII, Participants(at, other)
+        mint(Rule.MADD_TABII, at), Rule.MADD_TABII, (at,), _context(other)
     )
     if slot.nucleus.is_pausal_long:
         return Verdict(occurrence, (Relength(at, Length.LONG),))

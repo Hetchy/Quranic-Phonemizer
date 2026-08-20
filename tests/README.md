@@ -135,7 +135,7 @@ the expectation.
 | `nasal/` | quiescent noon, tanween, quiescent meem |
 | `adjacent/` | a rule across two touching letters: idgham, the article lam |
 | `tafkheem/` | the istilaa letters, the divine name's lam, raa |
-| `waqf/` | pausal sukun, iwad, taa marbuta, silah, pausal alifs, final glides |
+| `waqf/` | diacritic drops, iwad, taa marbuta, silah, badal, pausal alifs, final glides |
 | `boundary/` | hamzat al-wasl, iltiqa, ibdal |
 | `test_rasm.py` | letters written and never said |
 | `test_madd.py`, `test_qalqala.py` | the lengths; the five qalqala letters |
@@ -169,7 +169,8 @@ merger's rule and nothing else; `madd_tabii` and `orthographic_silence` name
 an outcome and add no sound at all.
 
 `source_of(rule)` and `host_of(rule)` name the character supplying a rule's
-source and host unit -- `None` from `host_of` where the rule is not a merger.
+source and host unit -- `None` from `host_of` where the rule acted on its own
+unit alone.
 Both read the first instance in the whole reading, so prefer
 `rules_on_char` when the site is one word of several.
 

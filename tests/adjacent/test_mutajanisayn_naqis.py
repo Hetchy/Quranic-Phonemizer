@@ -20,3 +20,5 @@ def test_a_taa_takes_the_place_of_the_tah_but_not_its_heaviness(
     assert r.phonemes(word) == expected
     assert "idgham_mutajanisayn_naqis" in r.rules_on_char(word, "ط")
     assert "idgham_mutajanisayn_naqis" in r.rules_on_sound(word, "tˤ")
+    # The pair is the rule; a projection showing one half of it shows nothing.
+    assert "idgham_mutajanisayn_naqis" in r.rules_on_char(word, "ت")

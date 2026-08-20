@@ -1,4 +1,4 @@
-"""Waqf and ibtidaa: what the edges of a reading do to it.
+"""Waqf: what a stop does to the end of a word.
 
 Everything here reads the `BoundaryPlan`. The Score is boundary-free, so
 these are the only rules that may ask where the reciter stops.
@@ -18,8 +18,7 @@ from ..engine.plan import (
     Verdict,
     mint,
 )
-from ..model.address import BoundaryPlan, Junction, SlotId
-
+from ..model.address import BoundaryPlan, SlotId
 from ..model.canon import (
     CanonLetter,
     Onset,
@@ -28,26 +27,30 @@ from ..model.canon import (
     SlotOrigin,
     VowelForm,
 )
+from ..model.inscription import SilenceReason
 from ..model.performance import (
     Aspect,
     Consonant,
     Occurrence,
-    Participants,
     Vowel,
 )
 from .khilaf import SitedKhilaf, vocalised_word
 
+#: The glide's own drop, so its occurrence does not collide with the drop
+#: of the haraka written on the same letter.
+_GLIDE_VARIANT = 1
+
 
 @dataclass(frozen=True, slots=True)
-class WaqfEnding:
-    """The last slot of a word stopped on loses its vowel.
+class WaqfHarakaDrop:
+    """The haraka on a letter a stop lands on is written and not said.
 
     `كِتَٰبٌ` at waqf: the onset still sounds while the nucleus drops, so
     `Aspect` records the two separately.
     """
 
     yaa: SitedKhilaf = field(default_factory=SitedKhilaf)
-    rule: Rule = Rule.PAUSAL_SUKUN
+    rule: Rule = Rule.WAQF_DIACRITIC_DROP
     phase: Phase = Phase.BOUNDARY
     triggers: frozenset = frozenset()
 
@@ -56,63 +59,30 @@ class WaqfEnding:
         boundaries: BoundaryPlan,
     ) -> Verdict | None:
         del plan
-        slot = near.slot(at)
-        word = near.word_of(at)
+        slot, word = near.slot(at), near.word_of(at)
         if slot is None or word is None or not boundaries.stopped_on(word):
             return None
-        if not _is_final_letter(near, at, word):
+        if not slot.nucleus.is_short:
             return None
-        if _followed_by_tanween_noon(near, word) and (
-            slot.letter is not CanonLetter.TAA_MARBUTA
-        ):
-            # TanweenAtWaqf owns the ending; taa marbuta drops its vowel here instead.
+        if _followed_by_tanween_noon(near, word):
+            # One written tanween, one drop: `TanweenDrop` takes this vowel too.
             return None
-
-        effects = []
-        if slot.nucleus.is_short:
-            effects.append(Silence(at, Aspect.VOWEL))
-        elif slot.nucleus.is_silah:
-            # Silah is long in wasl and absent at pause, mirroring `Onset.WASL`.
-            effects.append(Silence(at, Aspect.VOWEL))
-        elif slot.nucleus.is_pausal_long:
-            effects.append(
-                Realize(at, Aspect.VOWEL, Vowel(slot.nucleus.quality, True))
-            )
-        if slot.onset is Onset.GLIDE and not self._kept(near, word):
-            # The pronoun yaa's onset must go too, or a stray glide remains,
-            # and the stop then lands on the letter before it.
-            effects.append(Silence(at, Aspect.CONSONANT))
-            effects.extend(_hands_the_stop_back(near, at))
-        if not effects:
+        if not _takes_the_stop(near, at, word, _omitted_glide(self.yaa, near, word)):
             return None
-        return Verdict(
-            Occurrence(mint(Rule.PAUSAL_SUKUN, at), Rule.PAUSAL_SUKUN, Participants(at)),
-            tuple(effects),
-        )
-
-    def _kept(self, near: Neighbourhood, word: int) -> bool:
-        """Ithbat: the reader says the optional yaa anyway, so the stop takes
-        its vowel and `PausalGlide` lengthens what is left."""
-        return bool(
-            self.yaa.of(
-                vocalised_word(near.score.words[word]),
-                True,
-                near.score.selection,
-            )
-        )
+        return Verdict(_drop(at, word), (Silence(at, Aspect.VOWEL),))
 
 
 @dataclass(frozen=True, slots=True)
-class WaslHamza:
-    """The prosthetic hamza sounds only when started on.
+class WaqfSilahDrop:
+    """The length drawing out a pronoun haa is absent at a pause.
 
-    Its nucleus is the helping vowel: joining silences both aspects,
-    starting leaves the canonical value untouched.
+    The haa is left bare rather than short, so the whole nucleus goes,
+    mirroring `Onset.WASL`.
     """
 
-    rule: Rule = Rule.WASL_ELISION
+    rule: Rule = Rule.WAQF_SILAH_DROP
     phase: Phase = Phase.BOUNDARY
-    triggers: frozenset = frozenset({Onset.WASL})
+    triggers: frozenset = frozenset()
 
     def look(
         self, near: Neighbourhood, plan: Plan, at: SlotId,
@@ -120,129 +90,46 @@ class WaslHamza:
     ) -> Verdict | None:
         del plan
         slot, word = near.slot(at), near.word_of(at)
-        if slot is None or word is None or slot.onset is not Onset.WASL:
+        if slot is None or word is None or not boundaries.stopped_on(word):
             return None
-        if boundaries.started_on(word) and near.first_of_word(at):
-            return Verdict(
-                Occurrence(mint(Rule.WASL_START, at), Rule.WASL_START, Participants(at)), ()
-            )
+        if not slot.nucleus.is_silah or not _is_final_letter(near, at, word):
+            return None
         return Verdict(
-            Occurrence(mint(Rule.WASL_ELISION, at), Rule.WASL_ELISION, Participants(at)),
-            (Silence(at, Aspect.CONSONANT), Silence(at, Aspect.VOWEL)),
+            Occurrence(
+                mint(Rule.WAQF_SILAH_DROP, at), Rule.WAQF_SILAH_DROP, (at,),
+                boundary=word,
+            ),
+            (Silence(at, Aspect.VOWEL),),
         )
 
 
 @dataclass(frozen=True, slots=True)
-class SoftenedHamza:
-    """Two hamzas are not said in a row. Started on, the prosthetic hamza's
-    vowel lengthens and carries the quiescent one as its madd letter."""
+class DroppedGlide:
+    """The pronoun yaa the reading leaves off at a stop. Leaving it off is
+    the variant's outcome, not a rule: the letter is silenced for a variant
+    reason, while its written haraka drops under `WaqfHarakaDrop`."""
 
-    rule: Rule = Rule.IBDAL_HAMZA
+    yaa: SitedKhilaf = field(default_factory=SitedKhilaf)
+    rule: SilenceReason = SilenceReason.VARIANT
     phase: Phase = Phase.BOUNDARY
-    triggers: frozenset = frozenset({Onset.WASL})
+    triggers: frozenset = frozenset({Onset.GLIDE})
 
     def look(
         self, near: Neighbourhood, plan: Plan, at: SlotId,
         boundaries: BoundaryPlan,
     ) -> Verdict | None:
         del plan
-        slot, word = near.slot(at), near.word_of(at)
-        if slot is None or word is None or slot.onset is not Onset.WASL:
+        word = near.word_of(at)
+        if word is None or not boundaries.stopped_on(word):
             return None
-        if not (boundaries.started_on(word) and near.first_of_word(at)):
-            return None   # joined, the prosthetic hamza has no vowel to carry
-        following = near.after(at)
-        if (
-            following is None
-            or following.letter is not CanonLetter.HAMZA
-            or not following.nucleus.is_silent
-        ):
+        if _omitted_glide(self.yaa, near, word) != at:
             return None
         return Verdict(
             Occurrence(
-                mint(Rule.IBDAL_HAMZA, at), Rule.IBDAL_HAMZA,
-                Participants(at, following.id),
+                mint(SilenceReason.VARIANT, at, _GLIDE_VARIANT),
+                SilenceReason.VARIANT, (at,), boundary=word,
             ),
-            (
-                Relength(at, Length.LONG),
-                Silence(following.id, Aspect.CONSONANT),
-            ),
-        )
-
-
-@dataclass(frozen=True, slots=True)
-class TanweenBeforeWasl:
-    """A tanween noon grows a kasra to reach the word after it."""
-    # `خَيْرٌ ٱهْبِطُوا۟` joins a quiescent noon to the quiescent letter the elided
-    # prosthetic hamza leaves bare, and two of them cannot meet: the noon
-    # takes the kasra that breaks them. The other half of the same repair
-    # shortens a madd instead -- see `rules/madd.py::IltiqaShortening`.
-
-    rule: Rule = Rule.ILTIQA_KASRA
-    phase: Phase = Phase.BOUNDARY
-    triggers: frozenset = frozenset({CanonLetter.NOON})
-
-    def look(
-        self, near: Neighbourhood, plan: Plan, at: SlotId,
-        boundaries: BoundaryPlan,
-    ) -> Verdict | None:
-        del plan, boundaries
-        slot = near.slot(at)
-        if slot is None or slot.origin is not SlotOrigin.NUNATION:
-            return None
-        if not near.last_of_word(at):
-            return None
-        # `after` is `None` at a stop, where `TanweenAtWaqf` owns the noon.
-        following = near.after(at)
-        if following is None or following.onset is not Onset.WASL:
-            return None
-        return Verdict(
-            Occurrence(
-                mint(Rule.ILTIQA_KASRA, at), Rule.ILTIQA_KASRA,
-                Participants(at, following.id),
-            ),
-            (Realize(at, Aspect.VOWEL, Vowel(Quality.I)),),
-        )
-
-
-@dataclass(frozen=True, slots=True)
-class SpelledBeforeWasl:
-    """A spelled-out letter grows a fatha to reach the word after it."""
-    # `الٓمٓ ٱللَّهُ` joins the quiescent meem closing the opening to the quiescent
-    # lam the elided prosthetic hamza leaves bare. Two of them cannot meet, and
-    # the letter names of an opening take the lighter fatha where a tanween noon
-    # takes a kasra -- see `TanweenBeforeWasl`. Breaking the meeting also leaves
-    # the meem voweled, so the long vowel before it is no longer stopped by a
-    # sakin and `MaddLazim` reads it as the ordinary two counts.
-
-    rule: Rule = Rule.ILTIQA_FATHA
-    phase: Phase = Phase.BOUNDARY
-    triggers: frozenset = frozenset({VowelForm.ABSENT})
-
-    def look(
-        self, near: Neighbourhood, plan: Plan, at: SlotId,
-        boundaries: BoundaryPlan,
-    ) -> Verdict | None:
-        del plan
-        slot, word = near.slot(at), near.word_of(at)
-        if slot is None or word is None or slot.origin is not SlotOrigin.SPELLED:
-            return None
-        if not slot.nucleus.is_silent or not near.last_of_word(at):
-            return None
-        if boundaries.after(word) is not Junction.JOIN:
-            return None
-        # `after` hides the word past an opening: a name is spelled rather than
-        # read, so nothing carries out of it. Two quiescent letters still meet
-        # in performance, and the repair is the one thing that has to see them.
-        following = near.raw_after(at)
-        if following is None or following.onset is not Onset.WASL:
-            return None
-        return Verdict(
-            Occurrence(
-                mint(Rule.ILTIQA_FATHA, at), Rule.ILTIQA_FATHA,
-                Participants(at, following.id),
-            ),
-            (Realize(at, Aspect.VOWEL, Vowel(Quality.A)),),
+            (Silence(at, Aspect.CONSONANT),),
         )
 
 
@@ -250,10 +137,8 @@ class SpelledBeforeWasl:
 class PausalAlif:
     """The seven alifs: long at a pause, short when the word is joined to.
 
-    The mirror of `Onset.GLIDE`, which `WaqfEnding` removes at a stop.
-    """
-    # Emits `Relength`, not a realization: the vowel is still plainly
-    # produced, and only its length changes.
+    Both readings are this rule's: the stop names the length it says, the
+    join names the length it takes away."""
 
     rule: Rule = Rule.PAUSAL_ALIF
     phase: Phase = Phase.BOUNDARY
@@ -269,27 +154,28 @@ class PausalAlif:
             return None
         if not slot.nucleus.is_pausal_long:
             return None
-        if boundaries.stopped_on(word):
-            # Stopped on, the alif is said and `WaqfEnding` owns the slot.
-            return None
-        return Verdict(
-            Occurrence(
-                mint(Rule.PAUSAL_ALIF, at), Rule.PAUSAL_ALIF,
-                Participants(at),
-            ),
-            (Relength(at, Length.SHORT),),
+        occurrence = Occurrence(
+            mint(Rule.PAUSAL_ALIF, at), Rule.PAUSAL_ALIF, (at,), boundary=word,
         )
+        if boundaries.stopped_on(word):
+            return Verdict(
+                occurrence,
+                (Realize(at, Aspect.VOWEL, Vowel(slot.nucleus.quality, True)),),
+            )
+        # Joined, the vowel is still plainly produced and only its length
+        # changes, so this half owns no sound.
+        return Verdict(occurrence, (Relength(at, Length.SHORT),))
 
 
 @dataclass(frozen=True, slots=True)
-class TanweenAtWaqf:
-    """The tanween noon is silent at a stop; after a fatha it leaves the iwad.
+class TanweenDrop:
+    """A written tanween is not said at a stop.
 
-    Two effects on two slots: `Silence` on the noon, and -- for fathatan
-    only -- `Relength` on the base. Dammatan and kasratan are just silences.
+    One mark, one drop: the noon goes, and with it the vowel the same mark
+    wrote -- unless that vowel is exchanged for the iwad instead.
     """
 
-    rule: Rule = Rule.IWAD
+    rule: Rule = Rule.WAQF_DIACRITIC_DROP
     phase: Phase = Phase.BOUNDARY
     triggers: frozenset = frozenset({CanonLetter.NOON})
 
@@ -298,32 +184,72 @@ class TanweenAtWaqf:
         boundaries: BoundaryPlan,
     ) -> Verdict | None:
         del plan
-        slot, word = near.slot(at), near.word_of(at)
-        if slot is None or word is None or not boundaries.stopped_on(word):
-            return None
-        if not near.last_of_word(at):
-            return None
-        if slot.origin is not SlotOrigin.NUNATION:
-            return None
-        base = near.before(at)
-        if base is None or not base.nucleus.is_short:
+        base, word = _nunation_base(near, at, boundaries)
+        if base is None or word is None:
             return None
         effects = [Silence(at, Aspect.CONSONANT)]
-        rule = Rule.PAUSAL_SUKUN
-        if base.letter is CanonLetter.TAA_MARBUTA:
-            # Taa marbuta stops as haa and takes no iwad, but the noon is still silent.
-            return Verdict(
-                Occurrence(mint(rule, at), rule, Participants(at, base.id)),
-                tuple(effects),
-            )
-        if base.nucleus.quality is Quality.A:
-            rule = Rule.IWAD
-            effects.append(Relength(base.id, Length.LONG))
-        else:
+        if not _takes_the_iwad(base):
             effects.append(Silence(base.id, Aspect.VOWEL))
+        return Verdict(_drop(at, word), tuple(effects))
+
+
+@dataclass(frozen=True, slots=True)
+class TanweenIwad:
+    """A fathatan stopped on is exchanged for a long aa rather than dropped.
+
+    `TanweenDrop` still silences the noon; only the exchange is here, and
+    `IwadLength` names how long the aa it leaves is held.
+    """
+
+    rule: Rule = Rule.MADD_IWAD
+    phase: Phase = Phase.BOUNDARY
+    triggers: frozenset = frozenset({CanonLetter.NOON})
+
+    def look(
+        self, near: Neighbourhood, plan: Plan, at: SlotId,
+        boundaries: BoundaryPlan,
+    ) -> Verdict | None:
+        del plan
+        base, word = _nunation_base(near, at, boundaries)
+        if base is None or word is None or not _takes_the_iwad(base):
+            return None
         return Verdict(
-            Occurrence(mint(rule, at), rule, Participants(at, base.id)),
-            tuple(effects),
+            Occurrence(
+                mint(Rule.MADD_IWAD, at), Rule.MADD_IWAD, (at,), boundary=word,
+            ),
+            (
+                Realize(
+                    base.id, Aspect.VOWEL, Vowel(base.nucleus.quality, True)
+                ),
+            ),
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class IwadLength:
+    """The long aa an iwad leaves is held for the plain two counts.
+
+    A later phase than the exchange, so the length is set on the vowel
+    that exchange produced rather than competing with it.
+    """
+
+    rule: Rule = Rule.MADD_TABII
+    phase: Phase = Phase.LENGTH
+    triggers: frozenset = frozenset({CanonLetter.NOON})
+
+    def look(
+        self, near: Neighbourhood, plan: Plan, at: SlotId,
+        boundaries: BoundaryPlan,
+    ) -> Verdict | None:
+        del plan
+        base, word = _nunation_base(near, at, boundaries)
+        if base is None or word is None or not _takes_the_iwad(base):
+            return None
+        return Verdict(
+            Occurrence(
+                mint(Rule.MADD_TABII, base.id), Rule.MADD_TABII, (base.id,)
+            ),
+            (Relength(base.id, Length.LONG),),
         )
 
 
@@ -332,7 +258,7 @@ class TaaMarbutaAtWaqf:
     """`ة` is a taa in connection and a haa at pause -- a canonical,
     rasm-conditioned alternation."""
 
-    rule: Rule = Rule.TAA_MARBUTA_PAUSAL
+    rule: Rule = Rule.WAQF_TAA_MARBUTA
     phase: Phase = Phase.BOUNDARY
     triggers: frozenset = frozenset({CanonLetter.TAA_MARBUTA})
 
@@ -348,10 +274,39 @@ class TaaMarbutaAtWaqf:
             return None
         # `بِسُورَةٍ` stops as haa with no iwad; "final" here excludes the tanween noon slot.
         return Verdict(
-            Occurrence(mint(Rule.TAA_MARBUTA_PAUSAL, at), Rule.TAA_MARBUTA_PAUSAL,
-                       Participants(at)),
+            Occurrence(mint(Rule.WAQF_TAA_MARBUTA, at), Rule.WAQF_TAA_MARBUTA,
+                       (at,), boundary=word),
             (Realize(at, Aspect.CONSONANT, Consonant(CanonLetter.HEH)),),
         )
+
+
+def _drop(at: SlotId, word: int, variant: int = 0) -> Occurrence:
+    return Occurrence(
+        mint(Rule.WAQF_DIACRITIC_DROP, at, variant), Rule.WAQF_DIACRITIC_DROP,
+        (at,), boundary=word,
+    )
+
+
+def _nunation_base(near: Neighbourhood, at: SlotId, boundaries: BoundaryPlan):
+    """The letter a final tanween noon is written over, at a stop."""
+    slot, word = near.slot(at), near.word_of(at)
+    if slot is None or word is None or not boundaries.stopped_on(word):
+        return None, None
+    if slot.origin is not SlotOrigin.NUNATION or not near.last_of_word(at):
+        return None, None
+    base = near.before(at)
+    if base is None or not base.nucleus.is_short:
+        return None, None
+    return base, word
+
+
+def _takes_the_iwad(base) -> bool:
+    """Taa marbuta stops as haa and takes no iwad, so only a fathatan on
+    some other letter is exchanged for length."""
+    return (
+        base.letter is not CanonLetter.TAA_MARBUTA
+        and base.nucleus.quality is Quality.A
+    )
 
 
 def _is_final_letter(near: Neighbourhood, at: SlotId, word: int) -> bool:
@@ -369,12 +324,29 @@ def _followed_by_tanween_noon(near: Neighbourhood, word: int) -> bool:
     return bool(slots) and slots[-1].origin is SlotOrigin.NUNATION
 
 
-def _hands_the_stop_back(near: Neighbourhood, at: SlotId):
-    """A letter absent at the pause is not the one stopped on, so the vowel
-    of the letter before it drops instead."""
-    if near.first_of_word(at):
-        return ()
-    before = near.before(at)
-    if before is None or not before.nucleus.is_short:
-        return ()
-    return (Silence(before.id, Aspect.VOWEL),)
+def _omitted_glide(
+    yaa: SitedKhilaf, near: Neighbourhood, word: int
+) -> SlotId | None:
+    """The final glide this reading leaves off, if it leaves one off.
+
+    Ithbat says the optional yaa anyway, so the stop takes its vowel and
+    `PausalGlide` lengthens what is left.
+    """
+    slots = near.score.words[word].slots
+    if not slots or slots[-1].onset is not Onset.GLIDE:
+        return None
+    kept = yaa.of(
+        vocalised_word(near.score.words[word]), True, near.score.selection
+    )
+    return None if kept else slots[-1].id
+
+
+def _takes_the_stop(
+    near: Neighbourhood, at: SlotId, word: int, omitted: SlotId | None
+) -> bool:
+    """A letter absent at the pause is not the one stopped on, so the letter
+    before it takes the stop instead."""
+    if _is_final_letter(near, at, word):
+        return True
+    following = near.after(at)
+    return omitted is not None and following is not None and following.id == omitted

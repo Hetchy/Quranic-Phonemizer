@@ -11,7 +11,7 @@ from ..engine.neighbourhood import Neighbourhood
 from ..engine.plan import Phase, Plan, Realize, Verdict, mint
 from ..model.address import BoundaryPlan, SlotId
 from ..model.canon import CanonLetter, Onset, Rule
-from ..model.performance import Aspect, Degree, Occurrence, Participants, Release
+from ..model.performance import Aspect, Degree, Occurrence, Release
 from .tables import Pairs
 
 #: The rule each degree is minted under, keyed the other way for the sound.
@@ -60,7 +60,7 @@ class Qalqala:
             degree = Rule.QALQALA_SUGHRA
 
         return Verdict(
-            Occurrence(mint(degree, at), degree, Participants(at)),
+            Occurrence(mint(degree, at), degree, (at,)),
             (Realize(at, Aspect.CONSONANT, Release(_DEGREE_OF_RULE[degree])),),
         )
 

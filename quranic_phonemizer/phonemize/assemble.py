@@ -8,12 +8,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 from functools import cached_property
 
-from ..model.canon import Rule, Score
+from ..model.canon import Score
 from ..model.inscription import (
     Attests,
     Decorates as InscDecorates,
     Evidences,
     Inscription,
+    SilenceReason,
     SlotFact,
     Structural as InscStructural,
 )
@@ -30,6 +31,7 @@ from ..model.performance import (
     SetsLength,
     Silent as PerfSilent,
     Vowel,
+    effect_targets,
 )
 from ..orthography.write import Pen
 from ..render.alphabet import Alphabet
@@ -94,7 +96,7 @@ class Assembled:
         )
         offset = next(
             (i for i, r in enumerate(self.rules)
-             if r.rule is Rule.ORTHOGRAPHIC_SILENCE),
+             if r.rule is SilenceReason.ORTHOGRAPHIC),
             len(self.rules),
         )
         out = {
@@ -143,8 +145,8 @@ def assemble(
     )
 
     occurrence_of = {o.id.seq: i for i, o in enumerate(performance.occurrences)}
-    mergers = _merger_occurrences(performance)
-    rules = [_rule_instance(o, mergers) for o in performance.occurrences]
+    targets = effect_targets(performance)
+    rules = [_rule_instance(o, targets) for o in performance.occurrences]
     attributions = _attributions(performance, sound_of, occurrence_of)
     modifiers = _modifiers(performance, sound_of, occurrence_of)
 
@@ -153,7 +155,7 @@ def assemble(
         glyphs, spellings, open_vowel, decoration_targets(glyphs, spellings)
     )
     rules.extend(
-        nd.RuleInstance(Rule.ORTHOGRAPHIC_SILENCE, None, None) for _ in groups
+        nd.RuleInstance(SilenceReason.ORTHOGRAPHIC, None, None) for _ in groups
     )
 
     rendered = _rendered(
@@ -238,28 +240,16 @@ def _sound(sound, alphabet: Alphabet, extra_phonemes: frozenset[str]) -> nd.Soun
     raise TypeError(f"{sound!r} is not a Sound")
 
 
-def _merger_occurrences(performance: Performance) -> frozenset:
-    """Occurrence ids that genuinely merge two units into one sound."""
-    return frozenset(
-        a.by.seq for a in performance.attributions
-        if isinstance(a, PerfMergedInto)
+def _rule_instance(occurrence, targets) -> nd.RuleInstance:
+    """`host` is the second unit the rule names: another subject, or one its
+    own edges acted on -- a merger's host, a letter it silenced, a vowel it
+    relengthened. A unit it only read to decide is not one."""
+    named = occurrence.subjects[1:] + targets.get(occurrence.id, ())
+    return nd.RuleInstance(
+        occurrence.rule,
+        occurrence.subjects[0].ordinal,
+        named[0].ordinal if named else None,
     )
-
-
-#: Rules whose second participant is a letter the reading silenced rather than
-#: a letter it merged into. The hamza an ibdal softens is written, and a cell
-#: for it names the rule that took its consonant away.
-_PUBLISHES_HOST: frozenset[Rule] = frozenset({Rule.IBDAL_HAMZA})
-
-
-def _rule_instance(occurrence, mergers) -> nd.RuleInstance:
-    """`host` is published for a merger and for a rule that silences a letter."""
-    parts = occurrence.parts
-    host = None
-    names_host = occurrence.id.seq in mergers or occurrence.rule in _PUBLISHES_HOST
-    if parts.host is not None and names_host:
-        host = parts.host.ordinal
-    return nd.RuleInstance(occurrence.rule, parts.source.ordinal, host)
 
 
 def _attributions(performance: Performance, sound_of, occurrence_of):

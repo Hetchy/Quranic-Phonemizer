@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import dataclasses
 import json
 from collections import defaultdict
 from functools import lru_cache
@@ -21,7 +20,6 @@ from quranic_phonemizer.phonemize import edges as ed
 from quranic_phonemizer.phonemize import nodes as nd
 from quranic_phonemizer.phonemize.assemble import assemble
 from quranic_phonemizer.phonemize.document import phonemes as assembled_phonemes
-from quranic_phonemizer.phonemize.labels import with_labels
 from quranic_phonemizer.phonemize.pairing import alignment
 from quranic_phonemizer.phonemize.legacy_views import (
     anchored,
@@ -44,6 +42,11 @@ def _recitation(riwayah: Riwayah):
 @lru_cache(maxsize=None)
 def _alphabet():
     return load_alphabet()
+
+
+def loaded(riwayah: str = "hafs"):
+    """The one copy of a riwayah every case in this suite reads from."""
+    return _recitation(Riwayah(riwayah))
 
 
 @lru_cache(maxsize=None)
@@ -201,7 +204,7 @@ class Reading:
 
     def host_of(self, rule: str) -> str | None:
         """The character supplying `rule`'s host unit, or `None` where the
-        rule is not a merger -- `RuleInstance.host` only a merger carries."""
+        rule acted on its own unit alone."""
         host = self._instances_of(rule)[0].host
         return None if host is None else self._char_of_unit(host)
 
@@ -261,11 +264,8 @@ def _assembled_for(name, script, built, plan, performance, words, extra):
         score=built.score, inscription=built.inscription,
         boundaries=plan, performance=performance,
     )
-    assembled = assemble(
+    return assemble(
         session, _pen(name, script), _alphabet(), extra_phonemes=extra
-    )
-    return dataclasses.replace(
-        assembled, rules=with_labels(assembled.rules, assembled.units)
     )
 
 

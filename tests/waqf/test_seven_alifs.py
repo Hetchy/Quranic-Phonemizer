@@ -33,9 +33,12 @@ def test_each_pausal_alif_is_sounded_when_it_is_stopped_on(
 ):
     r = reading(site, isolated=word)
     assert r.phonemes(word) == stopped
-    # stopped on, the alif is said in full and the waqf ending owns the slot
-    assert "pausal_alif" not in r.rules_on_char(word, "۠")
-    assert "pausal_sukun" in r.rules_on_char(word, "۠")
+    # stopped on, this rule says the alif and the natural madd holds it
+    assert "pausal_alif" in r.rules_on_char(word, "۠")
+    assert "madd_tabii" in r.rules_on_char(word, "۠")
+    # the alif is sounded, so the stop drops nothing here
+    assert "waqf_diacritic_drop" not in r.rules_on_char(word, "۠")
+    assert r.silent(word) == frozenset()
 
 
 @pytest.mark.parametrize(("site", "word", "stopped", "joined"),

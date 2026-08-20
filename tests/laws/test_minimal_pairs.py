@@ -110,7 +110,7 @@ def test_an_assimilated_closure_has_no_qalqala(packed, hafs, alphabet) -> None:
     held = {slot.id for slot in score.words[1].slots}
     fired = {
         o.rule for o in performance.occurrences
-        if held & {o.parts.source, o.parts.host}
+        if held & set(o.subjects + o.context)
     }
     assert Rule.IDGHAM_MUTAJANISAYN_NAQIS in fired
     assert not fired & {
@@ -127,7 +127,7 @@ def test_a_complete_merger_has_no_tafkheem(packed, hafs, alphabet) -> None:
         if slot.letter is CanonLetter.QAF
     )
     fired = {
-        o.rule for o in performance.occurrences if o.parts.source == qaf.id
+        o.rule for o in performance.occurrences if qaf.id in o.subjects
     }
     assert Rule.IDGHAM_MUTAQARIBAYN in fired
     assert Rule.TAFKHEEM not in fired
