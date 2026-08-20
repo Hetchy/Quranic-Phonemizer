@@ -135,7 +135,7 @@ def _every_modifier_resolves(performance: Performance) -> None:
     # `Classifies` is exempt from the one-edge-per-sound count below: unlike
     # a `Recolour`/`Relength`, which the Plan's own conflict detection keeps
     # to one per (slot, aspect), independent facts may classify one sound
-    # more than once -- an imala vowel that is also `madd_arid_lil_sukun`.
+    # more than once -- an imala vowel that is also `madd_arid_lissukun`.
     known_sounds = {sound_id for sound_id, _ in performance.sounds}
     known_occurrences = {occurrence.id for occurrence in performance.occurrences}
     seen: dict[tuple[type, object], int] = {}

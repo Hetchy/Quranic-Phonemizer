@@ -144,7 +144,7 @@ def helping_vowel(context: Context) -> Quality:
     """The three-branch grammatical decision for the wasl helping vowel.
 
     The canonical nucleus of a wasl slot is this vowel, silenced by
-    `WASL_ELISION` in connection and realized at ibtida.
+    `HAMZA_WASL_SILENT` in connection and realized at ibtida.
     """
     return _helping_vowel(context)
 

@@ -33,7 +33,7 @@ class NoonSakinah:
 
     followers: Followers
     opening_wasl: object | None = None
-    rule: Rule = Rule.IKHFAA_HAQIQI
+    rule: Rule = Rule.IKHFAA
     phase: Phase = Phase.MERGE
     triggers: frozenset = field(default=frozenset({L.NOON}))
 
@@ -82,7 +82,7 @@ class NoonSakinah:
                 )
         # Ikhfaa haqiqi has no khilaf: it is not a bilabial hiding.
         return _nasal(
-            Rule.IKHFAA_HAQIQI, at, following.id, DEFAULT_NASAL_PLACE
+            Rule.IKHFAA, at, following.id, DEFAULT_NASAL_PLACE
         )
 
     def _opening_wasl(self, near, at, boundaries):

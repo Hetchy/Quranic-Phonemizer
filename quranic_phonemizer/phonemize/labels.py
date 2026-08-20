@@ -15,7 +15,7 @@ from . import nodes as nd
 #: rather than reading one, so neither is a candidate here.
 MADD_RULES = frozenset({
     Rule.MADD_TABII, Rule.MADD_WAJIB_MUTTASIL, Rule.MADD_JAIZ_MUNFASIL,
-    Rule.MADD_LAZIM, Rule.MADD_ARID_LIL_SUKUN,
+    Rule.MADD_LAZIM, Rule.MADD_ARID_LISSUKUN,
 })
 
 

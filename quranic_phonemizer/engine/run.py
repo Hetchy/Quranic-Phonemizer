@@ -59,7 +59,7 @@ _CLASSIFIES_ASPECT: dict[Rule, Aspect] = {
     Rule.MADD_WAJIB_MUTTASIL: Aspect.VOWEL,
     Rule.MADD_JAIZ_MUNFASIL: Aspect.VOWEL,
     Rule.MADD_LAZIM: Aspect.VOWEL,
-    Rule.MADD_ARID_LIL_SUKUN: Aspect.VOWEL,
+    Rule.MADD_ARID_LISSUKUN: Aspect.VOWEL,
     Rule.MADD_TABII: Aspect.VOWEL,
     #: The waw or yaa this rule names has no vowel; it classifies the consonant.
     Rule.MADD_LEEN: Aspect.CONSONANT,

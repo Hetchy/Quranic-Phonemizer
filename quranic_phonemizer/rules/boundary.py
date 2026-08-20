@@ -112,7 +112,7 @@ class WaslHamza:
     starting leaves the canonical value untouched.
     """
 
-    rule: Rule = Rule.WASL_ELISION
+    rule: Rule = Rule.HAMZA_WASL_SILENT
     phase: Phase = Phase.BOUNDARY
     triggers: frozenset = frozenset({Onset.WASL})
 
@@ -134,7 +134,7 @@ class WaslHamza:
             )
         return Verdict(
             Occurrence(
-                mint(Rule.WASL_ELISION, at), Rule.WASL_ELISION, (at,),
+                mint(Rule.HAMZA_WASL_SILENT, at), Rule.HAMZA_WASL_SILENT, (at,),
                 boundary=_junction_before(word),
             ),
             (Silence(at, Aspect.CONSONANT), Silence(at, Aspect.VOWEL)),
@@ -298,7 +298,7 @@ class TanweenAtWaqf:
     only -- `Relength` on the base. Dammatan and kasratan are just silences.
     """
 
-    rule: Rule = Rule.IWAD
+    rule: Rule = Rule.MADD_IWAD
     phase: Phase = Phase.BOUNDARY
     triggers: frozenset = frozenset({CanonLetter.NOON})
 
@@ -326,7 +326,7 @@ class TanweenAtWaqf:
                 tuple(effects),
             )
         if base.nucleus.quality is Quality.A:
-            rule = Rule.IWAD
+            rule = Rule.MADD_IWAD
             effects.append(Relength(base.id, Length.LONG))
         else:
             effects.append(Silence(base.id, Aspect.VOWEL))
@@ -341,7 +341,7 @@ class TaaMarbutaAtWaqf:
     """`ة` is a taa in connection and a haa at pause -- a canonical,
     rasm-conditioned alternation."""
 
-    rule: Rule = Rule.TAA_MARBUTA_PAUSAL
+    rule: Rule = Rule.WAQF_TAA_MARBUTA
     phase: Phase = Phase.BOUNDARY
     triggers: frozenset = frozenset({CanonLetter.TAA_MARBUTA})
 
@@ -357,7 +357,7 @@ class TaaMarbutaAtWaqf:
             return None
         # `بِسُورَةٍ` stops as haa with no iwad; "final" here excludes the tanween noon slot.
         return Verdict(
-            Occurrence(mint(Rule.TAA_MARBUTA_PAUSAL, at), Rule.TAA_MARBUTA_PAUSAL,
+            Occurrence(mint(Rule.WAQF_TAA_MARBUTA, at), Rule.WAQF_TAA_MARBUTA,
                        (at,), boundary=word),
             (Realize(at, Aspect.CONSONANT, Consonant(CanonLetter.HEH)),),
         )

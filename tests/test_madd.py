@@ -62,8 +62,8 @@ def test_a_long_vowel_before_a_letter_the_stop_silences(r):
     # يُنفِقُونَ
     assert r.phonemes(8) == "juŋfiqu:n"
     assert r.silent(8) == {"َ"}
-    assert "madd_arid_lil_sukun" in r.rules_on_char(8, "و")
-    assert "madd_arid_lil_sukun" in r.rules_on_sound(8, "u:")
+    assert "madd_arid_lissukun" in r.rules_on_char(8, "و")
+    assert "madd_arid_lissukun" in r.rules_on_sound(8, "u:")
 
 
 @for_each_riwayah(YAWMI, isolated=2)
@@ -126,7 +126,7 @@ def test_a_tanween_noon_is_not_the_letter_the_stop_lands_on(r):
     # عَظِيمٌ -- the stop drops the tanween and stops on the meem, so the
     # long vowel before it meets a sukun the reading made.
     assert r.phonemes(12) == "ʕaðˤi:m"
-    assert "madd_arid_lil_sukun" in r.rules_on_char(12, "ي")
+    assert "madd_arid_lissukun" in r.rules_on_char(12, "ي")
 
 
 @for_each_riwayah(QURAYSH, isolated=2)
@@ -157,7 +157,7 @@ def test_a_long_vowel_before_a_doubled_letter_is_lazim(r):
     before it meets a sukun the Score holds permanently."""
     assert r.phonemes(9) == "ʔadˤdˤaˤ:lli:n"
     assert "madd_lazim" in r.rules_on_char(9, "ا")
-    assert "madd_arid_lil_sukun" in r.rules_on_char(9, "ي")
+    assert "madd_arid_lissukun" in r.rules_on_char(9, "ي")
 
 
 @for_each_riwayah(KAAHAYAAAINSAAD, isolated=1)
@@ -175,7 +175,7 @@ def test_a_tanween_fath_lengthens_at_the_stop_and_silences_nothing(r):
     it lands on is never quiescent and the madd before it stays plain."""
     assert r.phonemes(4) == "miha:da:"
     assert "madd_tabii" in r.rules_on_char(4, "ٰ")
-    assert "madd_arid_lil_sukun" not in r.rules_on_char(4, "ٰ")
+    assert "madd_arid_lissukun" not in r.rules_on_char(4, "ٰ")
 
 
 @for_each_riwayah(AYNAN, isolated=13)

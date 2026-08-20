@@ -11,11 +11,11 @@ from ..model.canon import Rule
 DEFAULT_SCRIPT: dict[Riwayah, Script] = {Riwayah.HAFS: Script.UTHMANI}
 
 #: `identifier` is the model's own `Rule.value`. Two boundary rules --
-#: `wasl_start`/`wasl_elision`, and `pausal_alif`, are real, minted
+#: `wasl_start`/`hamza_wasl_silent`, and `pausal_alif`, are real, minted
 #: rules and are included as the model spells them.
 RULE_NAMES: dict[Rule, tuple[str, str]] = {
     Rule.IZHAR: ("Izhar", "إظهار"),
-    Rule.IKHFAA_HAQIQI: ("Ikhfaa Haqiqi", "إخفاء حقيقي"),
+    Rule.IKHFAA: ("Ikhfaa Haqiqi", "إخفاء حقيقي"),
     Rule.IQLAB: ("Iqlab", "إقلاب"),
     Rule.IDGHAM_BI_GHUNNAH: ("Idgham bi-Ghunnah", "إدغام بغنة"),
     Rule.IDGHAM_BILA_GHUNNAH: ("Idgham bila-Ghunnah", "إدغام بلا غنة"),
@@ -41,17 +41,17 @@ RULE_NAMES: dict[Rule, tuple[str, str]] = {
     Rule.MADD_WAJIB_MUTTASIL: ("Madd Wajib Muttasil", "مد واجب متصل"),
     Rule.MADD_JAIZ_MUNFASIL: ("Madd Jaiz Munfasil", "مد جائز منفصل"),
     Rule.MADD_LAZIM: ("Madd Lazim", "مد لازم"),
-    Rule.MADD_ARID_LIL_SUKUN: ("Madd Arid lil-Sukun", "مد عارض للسكون"),
+    Rule.MADD_ARID_LISSUKUN: ("Madd Arid lil-Sukun", "مد عارض للسكون"),
     Rule.MADD_LEEN: ("Madd Leen", "مد لين"),
-    Rule.IWAD: ("Iwad", "عوض"),
+    Rule.MADD_IWAD: ("Iwad", "عوض"),
     Rule.IBDAL_HAMZA: ("Ibdal Hamza", "إبدال الهمزة"),
-    Rule.WASL_ELISION: ("Hamza Wasl Elision", "حذف همزة الوصل"),
+    Rule.HAMZA_WASL_SILENT: ("Hamza Wasl Elision", "حذف همزة الوصل"),
     Rule.WASL_START: ("Hamza Wasl Start", "همزة الوصل عند الابتداء"),
     Rule.ILTIQA_KASRA: ("Iltiqa Kasra", "كسر التقاء الساكنين"),
     Rule.ILTIQA_FATHA: ("Iltiqa Fatha", "فتح التقاء الساكنين"),
     Rule.ILTIQA_SHORTENING: ("Iltiqa Shortening", "قصر عند التقاء الساكنين"),
     Rule.PAUSAL_SUKUN: ("Pausal Sukun", "سكون الوقف"),
-    Rule.TAA_MARBUTA_PAUSAL: ("Taa Marbuta at a Pause", "تاء مربوطة عند الوقف"),
+    Rule.WAQF_TAA_MARBUTA: ("Taa Marbuta at a Pause", "تاء مربوطة عند الوقف"),
     Rule.PAUSAL_ALIF: ("Pausal Alif", "ألف الوقف"),
 }
 

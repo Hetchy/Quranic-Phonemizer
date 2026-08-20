@@ -42,7 +42,7 @@ _BASE_QUALITY = {"e": "i"}
 #: A tanween noon these rules realize is left bare -- no sukun mark -- because
 #: bareness is what signals the assimilation; every other realization keeps
 #: the mark.
-_BARE_TANWEEN_NOON = frozenset({Rule.IKHFAA_HAQIQI, Rule.IQLAB})
+_BARE_TANWEEN_NOON = frozenset({Rule.IKHFAA, Rule.IQLAB})
 
 #: A hamza wasl started on is the hamza its vowel calls for, never the bare
 #: letter or the seat the rasm wrote.

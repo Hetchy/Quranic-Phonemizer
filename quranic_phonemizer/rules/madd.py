@@ -193,7 +193,7 @@ class MaddClass:
 
         if _stop_makes_quiescent(near, following, boundaries, plan):
             # Voweled in the Score, sakin only because the stop lands here -- aridah lissukun, same shape as lazim.
-            return _classify(Rule.MADD_ARID_LIL_SUKUN, at, following.id)
+            return _classify(Rule.MADD_ARID_LISSUKUN, at, following.id)
         # None of the five special outcomes: an ordinary long vowel.
         return _tabii(slot, at, following.id)
 

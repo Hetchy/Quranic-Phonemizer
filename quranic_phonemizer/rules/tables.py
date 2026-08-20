@@ -6,7 +6,7 @@ from dataclasses import dataclass
 
 from ..model.canon import CanonLetter, Rule
 
-#: What a quiescent noon's table may name. The remainder is IKHFAA_HAQIQI, and
+#: What a quiescent noon's table may name. The remainder is IKHFAA, and
 #: IZHAR also fires from within a word rather than selected by a letter.
 NOON_OUTCOMES = frozenset({
     Rule.IZHAR,

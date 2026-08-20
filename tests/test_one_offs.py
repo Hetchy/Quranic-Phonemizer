@@ -69,8 +69,8 @@ def test_a_sakt_keeps_a_lam_clear_of_the_raa_after_it(r):
 def test_the_one_small_noon_in_the_corpus_is_a_noon_that_is_hidden(r):
     # نُـۨجِى
     assert r.phonemes(7) == "nuŋʒi:"
-    assert "ikhfaa_haqiqi" in r.rules_on_char(7, "ۨ")
-    assert r.rules_on_sound(7, "ŋ") == {"ikhfaa_haqiqi"}
+    assert "ikhfaa" in r.rules_on_char(7, "ۨ")
+    assert r.rules_on_sound(7, "ŋ") == {"ikhfaa"}
 
 
 @for_each_riwayah(MALIYAH, ibtidaa=4, wasl=4)

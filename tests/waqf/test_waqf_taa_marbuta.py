@@ -18,8 +18,8 @@ def test_a_taa_marbuta_is_read_as_a_haa_at_a_stop(r):
     # بَعُوضَةً
     assert r.phonemes(9) == "baʕu:dˤaˤh"
     assert r.silent(9) == {"ً"}
-    assert "taa_marbuta_pausal" in r.rules_on_char(9, "ة")
-    assert "taa_marbuta_pausal" in r.rules_on_sound(9, "h")
+    assert "waqf_taa_marbuta" in r.rules_on_char(9, "ة")
+    assert "waqf_taa_marbuta" in r.rules_on_sound(9, "h")
 
 
 @for_each_riwayah(BAUDATAN_FAMA, ibtidaa=9, waqf=10)
@@ -27,7 +27,7 @@ def test_that_taa_marbuta_is_read_as_a_taa_when_joined_forward(r):
     # بَعُوضَةً فَمَا
     assert r.phonemes(9) == "baʕu:dˤaˤtaŋ"
     assert r.silent(9) == frozenset()
-    assert "taa_marbuta_pausal" not in r.rules_on_char(9, "ة")
+    assert "waqf_taa_marbuta" not in r.rules_on_char(9, "ة")
     assert r.phonemes(10) == "fama:"
 
 
@@ -36,8 +36,8 @@ def test_a_taa_marbuta_after_a_dammatan_becomes_a_haa_at_a_stop(r):
     # سِنَةٌ
     assert r.phonemes(10) == "sinah"
     assert r.silent(10) == {"ٌ"}
-    assert "taa_marbuta_pausal" in r.rules_on_char(10, "ة")
-    assert "taa_marbuta_pausal" in r.rules_on_sound(10, "h")
+    assert "waqf_taa_marbuta" in r.rules_on_char(10, "ة")
+    assert "waqf_taa_marbuta" in r.rules_on_sound(10, "h")
 
 
 @for_each_riwayah(SINATUN_WALA, ibtidaa=10, waqf=11)
@@ -53,7 +53,7 @@ def test_a_taa_marbuta_after_a_kasratan_becomes_a_haa_at_a_stop(r):
     # وَٰحِدَةٍ
     assert r.phonemes(9) == "wa:ħidah"
     assert r.silent(9) == {"ٍ"}
-    assert "taa_marbuta_pausal" in r.rules_on_char(9, "ة")
+    assert "waqf_taa_marbuta" in r.rules_on_char(9, "ة")
 
 
 @for_each_riwayah(WAHIDATIN_WAKHALAQA, ibtidaa=9, waqf=10)
@@ -69,7 +69,7 @@ def test_a_taa_marbuta_carrying_a_plain_fatha_becomes_a_haa(r):
     # قُوَّةَ
     assert r.phonemes(10) == "quwwah"
     assert r.silent(10) == {"َ"}
-    assert "taa_marbuta_pausal" in r.rules_on_char(10, "ة")
+    assert "waqf_taa_marbuta" in r.rules_on_char(10, "ة")
 
 
 @for_each_riwayah(QUWWATA, ibtidaa=10, wasl=10)
@@ -77,7 +77,7 @@ def test_that_plain_fatha_word_keeps_its_taa_when_joined_forward(r):
     # قُوَّةَ
     assert r.phonemes(10) == "quwwata"
     assert r.silent(10) == frozenset()
-    assert "taa_marbuta_pausal" not in r.rules_on_char(10, "ة")
+    assert "waqf_taa_marbuta" not in r.rules_on_char(10, "ة")
 
 
 @for_each_riwayah(TIJARATAN, isolated=99)
@@ -85,7 +85,7 @@ def test_a_taa_marbuta_after_a_fathatan_becomes_a_haa_at_a_stop(r):
     # تِجَـٰرَةً
     assert r.phonemes(99) == "tiʒa:rˤaˤh"
     assert r.silent(99) == {"ً"}
-    assert "taa_marbuta_pausal" in r.rules_on_char(99, "ة")
+    assert "waqf_taa_marbuta" in r.rules_on_char(99, "ة")
 
 
 @for_each_riwayah(TIJARATAN_HADIRA, ibtidaa=99, waqf=100)

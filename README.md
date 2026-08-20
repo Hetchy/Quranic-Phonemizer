@@ -279,7 +279,7 @@ for pairing in res.alignment(text="source", grouping="cell"):
 'ٱ' ['ʔ'] ['wasl_start']
 '' ['a'] []
 'ل' [] ['lam_shamsiyyah', 'tafkheem']
-'لَّ' ['lˤlˤ', 'a:'] ['lam_shamsiyyah', 'madd_arid_lil_sukun', 'tafkheem']
+'لَّ' ['lˤlˤ', 'a:'] ['lam_shamsiyyah', 'madd_arid_lissukun', 'tafkheem']
 'هِ' ['h'] ['pausal_sukun']
 ```
 
@@ -322,7 +322,7 @@ for block in res.respelling():
 
 ## Tajweed Rules
 
-`rules` holds every rule the passage applied. `source` is the letter the rule is about, and `host` the letter it merges into; only a merger has a host. Both are indices into `units`. Cross-word rules disappear when stopping, and rules such as `qalqala_kubra` and `madd_arid_lil_sukun` only appear at a stop.
+`rules` holds every rule the passage applied. `source` is the letter the rule is about, and `host` the letter it merges into; only a merger has a host. Both are indices into `units`. Cross-word rules disappear when stopping, and rules such as `qalqala_kubra` and `madd_arid_lissukun` only appear at a stop.
 
 ```python
 res = pm.phonemize("2:8:3-2:8:4")
@@ -337,7 +337,7 @@ for rule in res.rules:
 مَن يَقُولُ | m a j̃ a q u: l
 pausal_sukun lam None
 idgham_bi_ghunnah noon ya
-madd_arid_lil_sukun qaf None
+madd_arid_lissukun qaf None
 tafkheem qaf None
 ```
 
@@ -367,7 +367,7 @@ for row in tajweed_rules("hafs")[:4]:
 
 ```
 ('izhar', 'Izhar', 'إظهار')
-('ikhfaa_haqiqi', 'Ikhfaa Haqiqi', 'إخفاء حقيقي')
+('ikhfaa', 'Ikhfaa Haqiqi', 'إخفاء حقيقي')
 ('iqlab', 'Iqlab', 'إقلاب')
 ('idgham_bi_ghunnah', 'Idgham bi-Ghunnah', 'إدغام بغنة')
 ```

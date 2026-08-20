@@ -273,7 +273,7 @@ class Rule(StrEnum):
     """The only rule vocabulary. One name, one place."""
 
     IZHAR = "izhar"
-    IKHFAA_HAQIQI = "ikhfaa_haqiqi"
+    IKHFAA = "ikhfaa"
     IQLAB = "iqlab"
     IDGHAM_BI_GHUNNAH = "idgham_bi_ghunnah"
     IDGHAM_BILA_GHUNNAH = "idgham_bila_ghunnah"
@@ -305,18 +305,18 @@ class Rule(StrEnum):
     MADD_WAJIB_MUTTASIL = "madd_wajib_muttasil"
     MADD_JAIZ_MUNFASIL = "madd_jaiz_munfasil"
     MADD_LAZIM = "madd_lazim"
-    MADD_ARID_LIL_SUKUN = "madd_arid_lil_sukun"
+    MADD_ARID_LISSUKUN = "madd_arid_lissukun"
     MADD_LEEN = "madd_leen"
-    IWAD = "iwad"
+    MADD_IWAD = "madd_iwad"
 
     IBDAL_HAMZA = "ibdal_hamza"
-    WASL_ELISION = "wasl_elision"
+    HAMZA_WASL_SILENT = "hamza_wasl_silent"
     WASL_START = "wasl_start"
     ILTIQA_KASRA = "iltiqa_kasra"
     ILTIQA_FATHA = "iltiqa_fatha"
     ILTIQA_SHORTENING = "iltiqa_shortening"
     PAUSAL_SUKUN = "pausal_sukun"
-    TAA_MARBUTA_PAUSAL = "taa_marbuta_pausal"
+    WAQF_TAA_MARBUTA = "waqf_taa_marbuta"
     PAUSAL_ALIF = "pausal_alif"
 
 
@@ -337,7 +337,7 @@ CLASSIFICATION_ONLY: frozenset[Rule] = frozenset(
         Rule.MADD_WAJIB_MUTTASIL,
         Rule.MADD_JAIZ_MUNFASIL,
         Rule.MADD_LAZIM,
-        Rule.MADD_ARID_LIL_SUKUN,
+        Rule.MADD_ARID_LISSUKUN,
         Rule.MADD_LEEN,
         Rule.IMALA,
         Rule.TASHIL,

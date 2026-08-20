@@ -146,12 +146,12 @@ def test_two_effects_on_one_key_raise_with_both_tags() -> None:
     plan = Plan()
     slot = SlotId(VerseRef(1, 1), 0)
     sound = (Consonant(CanonLetter.NOON),)
-    for rule in (Rule.IKHFAA_HAQIQI, Rule.IQLAB):
+    for rule in (Rule.IKHFAA, Rule.IQLAB):
         verdict = _verdict(rule, slot, sound)
-        if rule is Rule.IKHFAA_HAQIQI:
+        if rule is Rule.IKHFAA:
             plan.record(Phase.MERGE, verdict)
         else:
-            with pytest.raises(ConflictError, match="ikhfaa_haqiqi"):
+            with pytest.raises(ConflictError, match="ikhfaa"):
                 plan.record(Phase.MERGE, verdict)
 
 

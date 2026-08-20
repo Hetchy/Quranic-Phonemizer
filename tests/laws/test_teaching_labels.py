@@ -56,6 +56,6 @@ def test_a_rule_outside_the_madd_family_never_takes_a_label():
         for instance in r.rules
         if instance.rule not in (
             Rule.MADD_TABII, Rule.MADD_WAJIB_MUTTASIL,
-            Rule.MADD_JAIZ_MUNFASIL, Rule.MADD_LAZIM, Rule.MADD_ARID_LIL_SUKUN,
+            Rule.MADD_JAIZ_MUNFASIL, Rule.MADD_LAZIM, Rule.MADD_ARID_LISSUKUN,
         )
     )

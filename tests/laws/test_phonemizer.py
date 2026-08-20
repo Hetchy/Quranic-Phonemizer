@@ -166,7 +166,7 @@ def test_module_functions_answer_without_an_instance():
     assert supported_riwayat() == ("hafs",)
     rules = tajweed_rules("hafs")
     identifiers = {row[0] for row in rules}
-    assert "ikhfaa_haqiqi" in identifiers
+    assert "ikhfaa" in identifiers
     for identifier, english, arabic in rules:
         assert identifier and english and arabic
 

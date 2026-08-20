@@ -215,8 +215,8 @@ def test_aatani_hadhf_stops_on_the_noon_and_lengthens_before_it():
     """
     # ءَاتَىٰنِۦَ
     hadhf = _at(AATANI, 8, KhilafId.YAA_AATANI_WAQF, "hadhf")
-    assert Rule.MADD_ARID_LIL_SUKUN in _rules(hadhf)
-    assert hadhf.rules_on_sound(8, "a:") >= {"madd_arid_lil_sukun"}
+    assert Rule.MADD_ARID_LISSUKUN in _rules(hadhf)
+    assert hadhf.rules_on_sound(8, "a:") >= {"madd_arid_lissukun"}
 
 
 @pytest.mark.parametrize(
