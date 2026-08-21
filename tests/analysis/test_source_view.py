@@ -228,6 +228,47 @@ def test_the_divine_name_long_vowel_is_haraka_owned_without_a_carrier(hafs):
     assert owners[aa].kind is LetterUnitKind.HARAKA
 
 
+#: The hamzat al-wasl, elided by a rule when read in continuation.
+_WASL_HAMZA = "ٱ"
+#: The small high rounded zero, marking a written letter no reading pronounces.
+_SILENT_ZERO = "۟"
+
+
+def test_a_silenced_wasl_hamza_carries_its_rule_not_the_orthographic(hafs):
+    """A hamzat al-wasl read in continuation is elided by a rule, so a silent
+    one names that occurrence. Pins that a rule silence is never downgraded to
+    the orthographic, which the shape checks alone accept."""
+    seen = 0
+    for ref, kwargs in SITES:
+        _, bundle, view = _both(hafs, ref, kwargs)
+        occ_ids = {occ.id for occ in bundle.rule_occurrences}
+        for unit in view.units:
+            if _WASL_HAMZA not in unit.text or unit.silence is None:
+                continue
+            seen += 1
+            assert not isinstance(unit.silence, LiteralSilence), (
+                f"{ref} unit {unit.id.value}: an elided wasl hamza went orthographic"
+            )
+            assert unit.silence in occ_ids
+    assert seen, "the sites exercise no silenced wasl hamza"
+
+
+def test_a_letter_no_rule_reads_takes_the_orthographic(hafs):
+    """The small high rounded zero marks a letter the rasm writes but no reading
+    pronounces -- silent by orthography, never by a named occurrence."""
+    seen = 0
+    for ref, kwargs in SITES:
+        _, _, view = _both(hafs, ref, kwargs)
+        for unit in view.units:
+            if _SILENT_ZERO not in unit.text or unit.silence is None:
+                continue
+            seen += 1
+            assert unit.silence is LiteralSilence.ORTHOGRAPHIC, (
+                f"{ref} unit {unit.id.value}: an orthographic silence named a rule"
+            )
+    assert seen, "the sites exercise no orthographic silence"
+
+
 def test_a_written_carrier_owns_its_long_vowel_and_the_haraka_presents_it(hafs):
     """The waw of الطور carries the long vowel; the damma before it presents it."""
     _, bundle, view = _both(hafs, "52:1:1", {})
