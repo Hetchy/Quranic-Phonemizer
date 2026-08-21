@@ -54,6 +54,11 @@ class HighlightId:
 
 
 @dataclass(frozen=True, slots=True, order=True)
+class CellColumnId:
+    value: int
+
+
+@dataclass(frozen=True, slots=True, order=True)
 class RuleId:
     """The stable rule identifier a `RuleDefinition` and every occurrence that
     cites it share. Its value is the model rule name."""
@@ -64,6 +69,7 @@ class RuleId:
 __all__ = [
     "SCHEMA_VERSION",
     "BoundaryId",
+    "CellColumnId",
     "CharacterId",
     "HighlightId",
     "LetterUnitId",

@@ -5,6 +5,7 @@ offset -- the position in that order is the source index every edge names.
 """
 from __future__ import annotations
 
+import unicodedata
 from dataclasses import dataclass
 from typing import TypeAlias
 
@@ -20,6 +21,9 @@ from ..model.inscription import (
 )
 from ..session import Session
 from .glyphs import Glyph, glyph_kind_of
+
+#: Canonical combining class of a mark the script writes below the baseline.
+_COMBINING_BELOW = 220
 
 
 @dataclass(frozen=True, slots=True)
@@ -59,6 +63,8 @@ class InscriptionFacts:
     slot_of: dict[int, SlotId]
     structural: frozenset[int]
     vowel_absent: frozenset[int]
+    below: frozenset[int]
+    """Source indices whose mark the script writes below the baseline."""
 
 
 def _word_of_slot(score: Score) -> tuple[int, ...]:
@@ -129,6 +135,10 @@ def _spellings(inscription: Inscription, grapheme_index) -> tuple[SpellingEdge, 
     return tuple(out)
 
 
+def _written_below(char: str) -> bool:
+    return len(char) == 1 and unicodedata.combining(char) == _COMBINING_BELOW
+
+
 def inscribe(session: Session) -> InscriptionFacts:
     inscription = session.inscription
     word_of_slot = _word_of_slot(session.score)
@@ -143,6 +153,9 @@ def inscribe(session: Session) -> InscriptionFacts:
         slot_of=slot_of,
         structural=frozenset(grapheme_index[g] for g in structural),
         vowel_absent=frozenset(grapheme_index[g] for g in vowel_absent),
+        below=frozenset(
+            g.source_index for g in glyphs if _written_below(g.char)
+        ),
     )
 
 
