@@ -34,9 +34,13 @@ from .dtos import (
 )
 from .facts import AnalysisFacts, analyse
 from .glyphs import Glyph, GlyphKind, glyph_kind_of
+from .highlight_dtos import HighlightGroup
+from .highlight_laws import HighlightValidationError, validate_highlight_groups
+from .highlights import highlight_groups
 from .ids import (
     SCHEMA_VERSION,
     BoundaryId,
+    HighlightId,
     MergerId,
     OccurrenceId,
     RuleId,
@@ -81,6 +85,9 @@ __all__ = [
     "Decorated",
     "Glyph",
     "GlyphKind",
+    "HighlightGroup",
+    "HighlightId",
+    "HighlightValidationError",
     "Hosted",
     "Insertion",
     "InscriptionFacts",
@@ -117,6 +124,7 @@ __all__ = [
     "build_source_view",
     "decoration_targets",
     "glyph_kind_of",
+    "highlight_groups",
     "inscribe",
     "open_vowel_units",
     "rule_definitions",
@@ -124,5 +132,6 @@ __all__ = [
     "silent_groups",
     "tajweed_rules",
     "validate",
+    "validate_highlight_groups",
     "validate_source_view",
 ]
