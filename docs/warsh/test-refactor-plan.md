@@ -1,0 +1,802 @@
+# Test refactor plan
+
+This document is the executable plan for reorganizing the current tests and
+adding Warsh coverage. It owns the target tree, logical case budgets, compact
+test style, harness contract, coverage method, migration order, and acceptance
+criteria.
+
+The domain truth stays in `docs/warsh/research/v2/`. Public selector IDs,
+values, defaults, and scopes stay in `docs/variants.md`. This document does not
+repeat those specifications. `warsh-test-placement.md` owns the shared versus
+riwayah-prefixed file split and the adapter-first Warsh extension audit.
+
+## Outcome
+
+The refactor must produce one semantically organized phonemization suite for
+all riwayat. It must not produce parallel `hafs/` and `warsh/` test trees.
+
+The target has these properties:
+
+- all hand-authored recitation examples live under `tests/phonemize/`;
+- adapter, API, document, engine, schema, conformance, and snapshots do not
+  mix with phonemization examples;
+- each Warsh implementation vertical has an obvious owning test file;
+- wasl, waqf, ibtidaa, and sakt are state dimensions inside semantic owners,
+  not top-level folders;
+- complete phoneme spans, source reach, sound reach, and state are visible in
+  compact case tables;
+- finite alphabets and closed registers are exhaustive;
+- representation and state dimensions are tested orthogonally instead of as
+  unjustified Cartesian products; and
+- variants are implemented and tested only in the final phase.
+
+## What a case count means
+
+The tree below counts logical review cases, not pytest's final collected node
+count.
+
+A logical case is one adjacent Arabic example and one domain claim that a
+reviewer verifies as a unit. One case may execute:
+
+- multiple boundary states through `StateCase`;
+- every declared riwayah and its supported scripts;
+- several exact source and sound assertions; and
+- every value of one selector through `VariantCase` in the final phase.
+
+The harness reports each state, riwayah, script, selector value, and exact
+occurrence as a separate subcheck. A failure remains narrow even when the
+reviewer reads one compact row.
+
+`V` in the tree means a logical case added in the final variant phase. The
+fixed/default target is 474 cases. The final target is 544 cases, consisting
+of 474 fixed/default cases plus 70 semantic selector cases. The generic API
+contract covers the metadata of all 71 public selectors in `docs/variants.md`;
+per the explicit test-ownership decision, `tamanna_noon` does not get another
+phonemization behavior case.
+
+Large occurrence registers are not expanded into hundreds of full-output
+cases. They have:
+
+1. a test-owned exact register;
+2. one generated completeness/reconciliation test; and
+3. representative full-output cases for every distinct implementation
+   branch, state, and rule-reach shape.
+
+Changing a planned count is allowed only with an updated coverage matrix. A
+count is a review budget backed by coverage, not a target to pad.
+
+## Target tree and case budgets
+
+Every Python test file in the target tree is listed below. Helper and data
+files are included for discoverability even when they contain no cases.
+
+```text
+tests/
+  README.md
+  __init__.py
+  conftest.py
+
+  phonemize/                                      # 544 cases total
+    __init__.py
+
+    articles/                                     # 21 cases
+      __init__.py
+      test_lam_qamariyyah.py                      # 8
+      test_lam_shamsiyyah.py                      # 9
+      test_lam_contrasts.py                       # 4
+
+    assimilation/                                 # 32 cases: 30 fixed + 2V
+      __init__.py
+      test_mutamathilayn.py                       # 10
+      test_mutaqaribayn.py                        # 4
+      test_mutajanisayn_kamil.py                  # 9
+      test_mutajanisayn_naqis.py                  # 4
+      test_fakk_idgham.py                         # 3
+      test_hafs_idgham_choices.py                 # 2V
+
+    emphasis/                                     # 99 cases: 64 fixed + 35V
+      __init__.py
+      test_istilaa.py                             # 12
+      test_hafs_letter_forms.py                   # 4V
+      test_raa.py                                 # 8: 2 fixed + 6V
+      test_hafs_raa.py                            # 19
+      test_warsh_raa.py                           # 31: 11 fixed + 20V
+      test_lam.py                                 # 8
+      test_warsh_lam_taghliz.py                   # 17: 12 fixed + 5V
+
+    hamza/                                        # 114 cases: 102 fixed + 12V
+      __init__.py
+      test_wasl_start.py                          # 14
+      test_hafs_alism_ibtidaa.py                  # 1V
+      test_wasl_elision.py                        # 8
+      test_iltiqa.py                              # 10
+      test_warsh_iltiqa.py                        # 4
+      test_seats.py                               # 8
+      test_ibdal.py                               # 8
+      test_tashil.py                              # 5
+      test_warsh_naql.py                          # 16: 14 fixed + 2V
+      test_warsh_single_hamza.py                  # 15: 13 fixed + 2V
+      test_istifham_article.py                    # 1V
+      test_warsh_hamza_meetings.py                # 24: 18 fixed + 6V
+
+    nasal/                                        # 57 cases: 55 fixed + 2V
+      __init__.py
+      test_ghunnah_mushaddadah.py                 # 3
+      test_idgham_bi_ghunnah.py                   # 7
+      test_idgham_bila_ghunnah.py                 # 4
+      test_idgham_shafawi.py                      # 3
+      test_ikhfaa_haqiqi.py                       # 12
+      test_ikhfaa_shafawi.py                      # 4: 3 fixed + 1V
+      test_iqlab.py                               # 7: 6 fixed + 1V
+      test_izhar.py                               # 7
+      test_izhar_mutlaq.py                        # 3
+      test_izhar_shafawi.py                       # 3
+      test_noon_partition.py                      # 4
+
+    vowels/                                       # 167 cases: 155 fixed + 12V
+      __init__.py
+
+      inclination/                                # 49 cases: 40 fixed + 9V
+        __init__.py
+        test_quality.py                           # 6
+        test_hafs_inclination.py                  # 2
+        test_warsh_inclination.py                 # 20: 11 fixed + 9V
+        test_warsh_inclination_classification.py  # 14
+        test_warsh_inclination_coloring.py        # 7
+
+      madd/                                       # 58 cases
+        __init__.py
+        test_tabii.py                             # 8
+        test_muttasil.py                          # 4
+        test_munfasil.py                          # 5
+        test_lazim.py                             # 6
+        test_arid.py                              # 5
+        test_leen.py                              # 6
+        test_iwad.py                              # 4
+        test_warsh_badal.py                       # 12
+        test_warsh_leen_mahmuz.py                 # 8
+
+      test_short_vowels.py                        # 3
+      test_hafs_short_vowels.py                   # 1V
+      test_pausal_vowels.py                       # 3
+      test_final_glides.py                        # 9
+      test_joined_only.py                         # 8
+      test_warsh_mim_al_jam.py                    # 7
+      test_warsh_yaa_zawaid.py                    # 7
+      test_seven_alifs.py                         # 14: 12 fixed + 2V
+      test_written_carriers.py                    # 8
+
+    test_muqattaat.py                             # 13
+    test_hafs_muqattaat.py                        # 4: 2 fixed + 2V
+    test_warsh_muqattaat.py                       # 2
+    test_qalqala.py                               # 14
+    test_sakt.py                                  # 1V
+    test_hafs_sakt.py                             # 4V
+    test_silent_letters.py                        # 11
+    test_taa_marbuta.py                           # 5
+
+  adapter/                                        # 99 cases total
+    __init__.py
+    test_warsh_corpus_alignment.py                # 8
+    test_warsh_script_projection.py               # 24
+    test_inventory_contract.py                    # 13
+    test_inscription.py                           # 12
+    test_attestations.py                          # 8
+    test_hamza_seats.py                           # 6
+    test_roundtrip.py                             # 18
+    test_selectors.py                             # 10
+
+  api/                                            # 54 cases total
+    __init__.py
+    test_phonemizer.py                            # 17
+    test_requests.py                              # 20
+    test_extra_phonemes.py                        # 8
+    test_variants.py                              # 9, final phase only
+
+  conformance/                                    # 116 cases total
+    __init__.py
+    test_hafs_legacy_parity.py                    # 3
+    test_rule_coverage.py                         # 70
+    test_hafs_script_agreement.py                  # 21
+    test_warsh_registers.py                       # 16
+    test_warsh_default_profile.py                 # 6
+
+  document/                                       # 446 cases total
+    __init__.py
+    test_alignment.py                             # 404 generated samples
+    test_source_alignment.py                      # 6
+    test_recited_text.py                          # 16
+    test_respelling.py                            # 12
+    test_labels.py                                # 8
+
+  engine/                                         # 34 cases total
+    __init__.py
+    test_canon_build.py                           # 8
+    test_windowing.py                             # 4
+    test_neighbourhood.py                         # 6
+    test_rule_plan.py                             # 8
+    test_effective_state.py                       # 8
+
+  schema/                                         # 102 cases total
+    __init__.py
+    test_canonical_roundtrip.py                   # 5
+    test_ledger.py                                # 19
+    test_lexicon.py                               # 14
+    test_negative_cases.py                        # 22
+    test_phoneme_inventory.py                     # 18
+    test_model_vocabulary.py                      # 24
+
+  support/                                        # 20 harness cases total
+    __init__.py
+    assertions.py
+    boundary.py
+    case.py
+    reading.py
+    selectors.py
+    site.py
+    test_case_contract.py                         # 20
+
+  data/
+    warsh/
+      hamza_meetings.json
+      inclination.json
+      lam.json
+      naql.json
+      raa.json
+      seven_alifs.json
+      single_hamza.json
+      yaa_zawaid.json
+
+  snapshots/
+    head/
+    legacy-api/
+    phonemes/
+    warsh/                                        # added only after fixed conformance
+```
+
+The whole final tree has a logical budget of 1,415 cases. That number is not
+expected to equal pytest collection because semantic rows expand by state,
+riwayah, and script. The important totals for domain review are 474 fixed
+phonemization cases, 70 variant phonemization cases, and 544 final cases under
+`phonemize/`.
+
+## Why these semantic counts are sufficient
+
+### Articles: 21 cases
+
+The current suite spends 30 rows on one article per row. A corpus set-cover
+over one- and two-word spans finds all 14 sun-letter hosts in 9 rows and all
+14 moon-letter hosts in 8 rows. These rows also include both an article at the
+start of the span and an article reached after a preceding word, so wasl start
+and elision are not a second alphabet sweep.
+
+Examples of dense rows are:
+
+- `وَٱلتِّينِ وَٱلزَّيْتُونِ`, 95:1: taa and zay;
+- `ٱلنَّجْمُ ٱلثَّاقِبُ`, 86:3: noon and tha;
+- `ٱلْوَسْوَاسِ ٱلْخَنَّاسِ`, 114:4: waw and kha; and
+- `ٱلْبَلَدِ ٱلْأَمِينِ`, 95:3: baa and hamza.
+
+`test_lam_contrasts.py` keeps four negative/minimal contrasts: true article
+lam, lexical lam, the one-lam written form, and the interrogative/article
+shape. A dense positive table must not replace an overreach test.
+
+### Nasal families: 57 cases
+
+The target keeps every trigger letter and every materially different source
+representation without testing every trigger against every representation.
+
+For `ikhfaa_haqiqi`, a corpus set-cover proves that 10 one- or two-word rows
+cover all 15 followers. The rows deliberately mix a written noon and tanwin
+where possible. Two orthogonal rows cover a verse seam and the optional
+emphatic nasal token, for 12 total cases instead of the current 36.
+
+The 10 trigger rows include:
+
+| Span | Followers covered |
+| --- | --- |
+| `تِجَارَةٍ تُنجِيكُم` 61:10 | taa, jeem |
+| `إِنسٌ قَبْلَهُمْ` 55:74 | seen, qaf |
+| `بِقَدَرٍ فَأَنشَرْنَا` 43:11 | fa, sheen |
+| `أَندَادًا ذَٰلِكَ` 41:9 | dal, thal |
+| `مَعِيشَةً ضَنكًا` 20:124 | dad, kaf |
+| `حِينَئِذٍ تَنظُرُونَ` 56:84 | taa, zah |
+| `مَيِّتٍ فَأَنزَلْنَا` 7:57 | fa, zay |
+| `قِنطَارًا فَلَا` 4:20 | tah, fa |
+| `إِن تَنصُرُوا` 47:7 | ta, sad |
+| `وَٱلْأُنثَىٰ` 2:178 | tha |
+
+Repeated followers in this set are acceptable when they are the cheapest way
+to reach a second uncovered letter. They are not counted as extra coverage.
+
+For the other noon families:
+
+- six throat letters use five dense trigger rows plus one seam row and one
+  source-representation row, for 7 `izhar` cases;
+- the four `idgham_bi_ghunnah` hosts use four trigger rows plus three rows for
+  the missing tanwin quality, muqattaat origin, and verse seam, for 7 cases;
+- lam and raa use two trigger rows plus noon/tanwin and state contrasts, for 4
+  `idgham_bila_ghunnah` cases;
+- iqlab has one host letter, so its six fixed cases cover internal noon,
+  cross-word noon, all three tanwin qualities, and a seam without pretending
+  these are six trigger rules; and
+- the four `izhar_mutlaq` words are one test-owned register with three full
+  phoneme cases: one ordinary member, one prefixed member, and one contrast.
+
+`test_noon_partition.py` is not another example sweep. Its four generated
+cases prove that every relevant next-letter class belongs to exactly one noon
+family, every emitted family reaches one source and one result, exceptions are
+disjoint, and no plan contains competing noon rules.
+
+### Assimilation: 32 cases
+
+Every distinct source/host pair remains covered. Repeated joined and stopped
+bodies become state matrices. Complete and incomplete mutajanisayn stay in
+separate files because they have different sound and emphasis contracts.
+
+The two final variant cases in `test_hafs_idgham_choices.py` own
+`irkab_maana` and `yalhath_dhalik`. They are not duplicated in the shared
+mutajanisayn file or in an API behavior suite.
+
+### Emphasis: 99 cases
+
+`test_istilaa.py` covers the seven letters once, then separately covers every
+dependent A shape: short fatha, fathatan, long alif, and pausal iwad. A heavy
+or taghliz source colors its causally dependent A realization; a light source
+removes only that cause.
+
+`test_raa.py` owns two shared coloring/reach cases and the six shared lexical
+selectors. `test_hafs_raa.py` keeps all 19 distinct Hafs decision branches.
+`test_warsh_raa.py` owns the Warsh structural branches and representative
+closed-scope shapes required by `raa.md`. Closed lexical positions are
+register data, not repeated full-output tests. Its 20 Warsh-only selector rows
+are added last.
+
+`test_lam.py` owns ordinary and divine-name lam. The Warsh structural taghliz,
+selected tarqiq, dependent short/long/fathatan coloring, coupled inclination
+sites, and register representatives live in `test_warsh_lam_taghliz.py`. Its
+five selector rows are added last.
+
+`test_hafs_letter_forms.py` exists only in the final phase for the four Hafs
+seen/saad selectors. Keeping them together is clearer than hiding letter
+identity changes inside raa or general vowel tests.
+
+### Hamza: 114 cases
+
+The folder follows implementation ownership rather than source spelling:
+
+- `test_wasl_start.py` covers article A, heard and patterned noun I, verb I/U,
+  every temporary-damma family, the Warsh lexical-input contrast, and both
+  started silent-root-hamza carrier qualities; the Hafs-only al-ism selector
+  has its own final-phase file;
+- `test_wasl_elision.py` covers the same structural classes under joining,
+  including exact onset/nucleus reach and lexical-qata contrasts;
+- `test_iltiqa.py` covers shared shortening and ordinary A/I repair;
+  `test_warsh_iltiqa.py` owns the Warsh U register and its exclusions;
+- `test_ibdal.py` and `test_tashil.py` prove the generic transformation,
+  phoneme inventory, effective madd, extra-token behavior, and exact reach;
+- `test_warsh_single_hamza.py` owns the morphology-backed and lexical Warsh
+  classifiers;
+- `test_istifham_article.py` owns the selector shared by both riwayat; and
+- `test_warsh_hamza_meetings.py` owns one-word and cross-word A/U/I matrices,
+  fixed exclusions, and narrow registers.
+
+This split avoids repeating generic ibdal/tashil mechanics in every lexical
+classifier test. The classifier file asserts that the correct transformation
+was selected; the generic file exhausts how that transformation is rendered
+and attributed.
+
+The 16 silent-root-hamza starts, 25 iwaa exclusions, 56 fixed single-hamza
+ibdal tokens, 60 one-word meetings, 156 cross-word meetings, and other closed
+sets are independent data registers. Only distinct structural branches get
+full manual phoneme cases.
+
+### Vowels and madd: 167 cases
+
+`test_pausal_vowels.py`, `test_final_glides.py`, `test_iwad.py`, and
+`test_taa_marbuta.py` use state matrices. Joined and stopped outcomes remain
+separate executed checks but one reviewed row.
+
+The seven alifs keep one row per distinct lexical/orthographic shape. Repeated
+members with identical behavior move to the register. The two final Hafs
+waqf selectors are added as `VariantCase` rows in the same file.
+
+Joined-only vowel shape is tested once in `test_joined_only.py`. Pronoun haa,
+Warsh mim al-jam, and yaa zawaid retain separate files because they have
+different domain identity, corpus predicates, and madd interactions. The two
+Warsh files carry an explicit `test_warsh_` prefix.
+
+The old mixed `test_madd.py` is split by public rule. Each madd file covers
+only its structural predicate, boundary masks, exclusions, effective-state
+creation where relevant, and exact sound/source reach. Counts are not public
+phonemes and do not multiply behavior cases.
+
+Inclination has five owners:
+
+- `test_quality.py`: shared typed fath, taqlil, and kubra sound/render
+  mechanics;
+- `test_hafs_inclination.py`: the fixed Hafs kubra case;
+- `test_warsh_inclination.py`: fixed, default, opening-letter, and selectable
+  Warsh outcomes;
+- `test_warsh_inclination_classification.py`: generated predicate/register
+  completeness and overlap rejection; and
+- `test_warsh_inclination_coloring.py`: raa/lam dependency and carrier
+  masking.
+
+### Focused root files: 54 cases
+
+Shared muqattaat letter-name construction stays together because its internal
+seams do not fit ordinary word morphology. Hafs choices and Warsh fixed
+opening behavior use separate prefixed files. Qalqala keeps every letter and
+materially distinct degree/state but removes repeated bodies. Silent written
+letters remain one focused semantic file while their low-level source
+recognition lives in adapter tests.
+
+Tamanna is not placed under nasal and receives no new phonemization behavior
+test. Its public metadata remains covered by the generated API contract. The
+shared Maliyah selector lives in `test_sakt.py`; the four Hafs-only lexical
+choices live in `test_hafs_sakt.py`. An explicit waqf before the second word
+masks each joined-only selection and is a state inside the row, not another
+selector or folder.
+
+## Compact semantic case style
+
+### One dense case, two independently checked occurrences
+
+The example below covers tanwin-before-taa and written-noon-before-jeem in one
+review row. The harness still reports them separately.
+
+```python
+# تِجَـٰرَةٍ تُنجِيكُم
+pytest.param(
+    Case(
+        site=Site(hafs=("61:10", (7, 8))),
+        read=through(),
+        phonemes=(
+            "t i ʒ a: rˤ aˤ t i ŋ",
+            "t u ŋ ʒ i: k u m",
+        ),
+        char_rules={
+            "@kasratan": R("ikhfaa_haqiqi"),
+            "ن": R("ikhfaa_haqiqi"),
+        },
+        sound_rules={
+            "ŋ[1]": R("ikhfaa_haqiqi"),
+            "ŋ[2]": R("ikhfaa_haqiqi"),
+        },
+    ),
+    id="ta-jeem",
+)
+```
+
+`[1]` and `[2]` are required here because the full focused span has two `ŋ`
+tokens. A one-word case with one noon and one nasal uses plain `"ن"` and
+`"ŋ"`; adding `[1]` there is rejected as noise.
+
+### One state matrix, not repeated test bodies
+
+```python
+# إِثْمًا
+StateCase(
+    site=Site(hafs=("4:48", (19,))),
+    states={
+        "joined": Expect(
+            read=joining(),
+            phonemes="ʔ i θ m a n",
+        ),
+        "stopped": Expect(
+            read=isolated(),
+            phonemes="ʔ i θ m a:",
+            char_rules={"@fathatan": R("iwad")},
+            sound_rules={"a:": R("iwad")},
+        ),
+    },
+)
+```
+
+The exact production site may change during authoring if another word gives a
+cleaner span. The shape is the contract: one domain row, two independently
+reported states.
+
+## Harness contract
+
+### `Case`, `StateCase`, and `VariantCase`
+
+`Case` owns one state. `StateCase` owns a common site and several named state
+expectations. `VariantCase`, introduced only in the final phase, owns one
+public selector and includes:
+
+- every legal value;
+- the project default;
+- active and masked boundary states;
+- exact sound and source reach; and
+- exclusions or same-ID riwayah differences where applicable.
+
+The common assertion engine handles all three. Regular semantic files should
+have one or two parametrized test functions; reviewers inspect tables, not
+dozens of mechanical bodies.
+
+### Sites and riwayat
+
+Use canonical/public coordinates in semantic cases.
+
+```python
+Site.shared("2:42", (7,), riwayat=("hafs", "warsh"))
+```
+
+Use per-riwayah site values only when canonical coordinates or focused spans
+actually differ. Selected-source coordinates and exact source text belong in
+adapter fixtures.
+
+Plain expected values apply to all declared riwayat. `pick()` is limited to a
+small output detail under the same domain law. Different applicability, rule
+identity, state behavior, or explanation requires separate rows.
+
+### Boundary plans
+
+Keep `BoundaryPlan` and `Junction` as the underlying model. The semantic
+shorthands are:
+
+- `isolated()`: start and stop on the one focused word;
+- `joining()`: start on the focused word and continue to its required
+  neighbour;
+- `through()`: start on the first word and stop on the last word of a
+  multiword site; and
+- an explicit plan only for a non-default interior stop, start, sakt, or
+  cross-ayah seam.
+
+An interior explicit stop followed by another included word makes that next
+word an ibtidaa. It does not make the word unperformed. Sakt is continuation,
+not waqf.
+
+### Phoneme strings
+
+Every expected sequence is parsed as inventory tokens separated by exactly
+one ASCII space. Leading whitespace, trailing whitespace, double spaces,
+concatenated tokens, and unknown tokens fail collection.
+
+Atomic tokens include:
+
+- geminates such as `jj`, `ñ`, `m̃`, and `lˤlˤ`;
+- long vowels such as `a:` and `ɛ:`; and
+- qalqala release `Q`, which remains separate from its consonant: `q Q`.
+
+The comparison target is `Reading.sounds()`. No semantic test compares an
+unparsed concatenated string.
+
+### Exact source and sound selectors
+
+All selectors remain strings.
+
+- A plain string is a visible grapheme cluster or exact sound token.
+- An `@name` is a registered semantic source selector.
+- A one-based `[n]` suffix is allowed only when the unsuffixed target is
+  ambiguous inside the focused span.
+
+The initial registry is:
+
+| Selector | Typed meaning |
+| --- | --- |
+| `@fatha`, `@damma`, `@kasra`, `@sukun`, `@shadda` | ordinary haraka or shadda role |
+| `@fathatan`, `@dammatan`, `@kasratan` | canonical tanwin quality, independent of source glyph form |
+| `@dagger_alif`, `@madd_sign` | the corresponding inscription role/fact |
+| `@small_noon`, `@small_waw`, `@small_yaa` | a mini-letter role supplying or attesting the named canonical fact |
+| `@mini_meem` | the reviewed Warsh iqlab hint inside a noon/tanwin composition |
+| `@round_zero`, `@rectangular_zero` | the reviewed alif-silence/pausal convention |
+| `@imala_mark`, `@ishmam_mark` | vowel-quality or annotation evidence, not the rule trigger |
+| `@sakt_mark`, `@stop_mark` | structural boundary evidence in adapter tests |
+
+The registry is typed over inscription relations and canonical facts. It is
+not a global Unicode alias table. For example, U+06EA cannot globally mean
+imala because the selected Warsh source uses it in several sequence roles.
+
+An adapter test proves every registered selector for every supported script.
+An unknown selector fails collection. Raw subtle combining marks are rejected
+as semantic mapping keys.
+
+### Rule reach
+
+Use two compact maps:
+
+```python
+char_rules={"ن": R("ikhfaa_haqiqi")}
+sound_rules={"ŋ": R("ikhfaa_haqiqi", "tafkheem")}
+```
+
+When the same rule appears in both maps, the assertion must find one rule
+occurrence connecting those exact targets. Matching two unrelated occurrences
+with the same ID does not pass.
+
+For recoloring rules, target every causally owned A realization: short fatha,
+fathatan, long alif, and iwad. Lightening removes only that owner's cause; it
+must not remove emphasis independently supplied elsewhere.
+
+`iltiqa_haraka` reaches only the inserted A/I/U sound. The source consonant or
+nunation slot and any written linking mark own character reach, but the base
+consonant sound is not classified by `iltiqa_haraka`.
+
+## Mechanical enforcement
+
+`tests/support/test_case_contract.py` and a fast-gate style check enforce:
+
+1. exactly one ASCII space between known phoneme tokens;
+2. one-word string versus multiword tuple shape;
+3. site/span and boundary-plan consistency;
+4. unique literal, registered selector, and sound resolution;
+5. `[n]` only when the unsuffixed target is ambiguous;
+6. connected char/sound reach for a shared rule ID;
+7. a readable `pytest.param` ID and immediately adjacent Arabic comment;
+8. no raw subtle combining-mark mapping keys;
+9. no duplicate semantic fingerprint across files;
+10. a test-owned closed register rather than importing runtime authored data;
+11. one declared owner for every public rule under each riwayah RuleSet; and
+12. use of the shared table assertion for regular semantic cases.
+
+Failure output includes the selector, resolved codepoints, source word,
+highlighted target, sound index, rule occurrence, riwayah, script, and state.
+
+## Coverage authoring method
+
+Every semantic refactor follows this sequence:
+
+1. List the domain partitions from v2 or the established Hafs source.
+2. Map every current test to a partition, representation, state, reach
+   invariant, exclusion, or duplicate.
+3. Search the corpus for one- and two-word candidates containing several
+   uncovered occurrences of the same rule.
+4. Run a greedy set-cover only to suggest compact candidates.
+5. Manually verify Arabic, domain classification, complete phonemes, and rule
+   reach from the normative docs and source.
+6. Add orthogonal cases for representation, boundary, extras, and exclusions
+   not already covered by the trigger sweep.
+7. Record removed current tests in a deletion ledger with the surviving case
+   that owns their distinct assertion.
+8. Add a generated register/conformance check where the domain is finite.
+
+Current engine output may locate candidates and expose ordinary shared rules.
+It is not the oracle for Warsh expectations. A dense example is rejected if
+its shown span contains an unresolved or unimplemented Warsh-specific
+phenomenon.
+
+The corpus query used to choose cases must be retained as a deterministic
+tool or documented command. The chosen case table is hand-authored and stable;
+tests do not run an optimizer during collection.
+
+## Adapter-first Warsh baseline
+
+The first Warsh PR adds corpus alignment and script projection before a new
+Warsh tajweed classifier. It should then extend vetted shared semantic cases.
+
+Good early shared cases include:
+
+- ordinary letters and harakat;
+- qalqala away from a Warsh-specific boundary;
+- noon, tanwin, and meem families away from naql or mim al-jam;
+- ordinary consonant assimilation and article lam;
+- safe pausal vowels, iwad, taa marbuta, and final glides;
+- safe structural madd; and
+- verified ordinary wasl starts/elisions.
+
+A failure in one of these independently reviewed shared cases is strong
+evidence of adapter projection, canonical construction, hidden Hafs coupling,
+or a genuinely missing shared rule. It is not permission to copy the current
+wrong output into the expectation.
+
+The adapter PR must not add Warsh snapshots. It proves that the source can be
+projected and that already shared rules come for free where their canonical
+inputs agree.
+
+## PR sequence
+
+1. **Mechanical move.** Move and rename files only. Preserve 1,340 collected
+   cases, 1,336 passes, 4 skips, and every Hafs snapshot byte-for-byte.
+2. **Harness.** Add `Case`, `StateCase`, exact selectors, spaced phonemes,
+   package-aware riwayah iteration, and style lint without changing behavior.
+3. **Semantic compaction.** Apply the coverage method folder by folder. Every
+   deletion must have a coverage-ledger entry. Reach the 474 fixed/default
+   case budget with equal or stronger coverage.
+4. **Warsh adapter.** Add source/public alignment, script projection,
+   selector fixtures, smoke construction, and vetted shared semantic rows.
+5. **RuleSet foundation.** Add global rule vocabulary, riwayah-bound
+   classifiers, complete `emits` declarations, typed taqlil/taghliz, and
+   effective-state madd support with schema/engine/API tests.
+6. **Wasl and iltiqa.** Implement `wasl-hamza.md` and `iltiqa.md` with their
+   owning adapter and phonemization files.
+7. **Naql.** Implement `naql.md`, including A/I/U transfer, tanwin, article
+   starts, qata restoration, and the exact register.
+8. **Single hamza.** Implement `single-hamza.md` plus generic ibdal/tashil
+   mechanics and reach.
+9. **Hamza meetings.** Implement `hamza-meetings.md` and its one-word,
+   cross-word, exception, and boundary matrices.
+10. **Joined-only vowels.** Implement mim al-jam and yaa zawaid after the
+    neutral joined-only model exists.
+11. **Seven alifs and madd.** Implement the fixed matrices, badal, and leen
+    mahmuz with effective-structure classification.
+12. **Inclination.** Implement quality, classification, opening, and coupled
+    coloring files.
+13. **Raa.** Implement structural branches and independent closed registers.
+14. **Lam/taghliz.** Implement taghliz, tarqiq, dependent A coloring, and
+    independent closed registers.
+15. **Default conformance.** Prove rule reachability, conflict freedom,
+    register reconciliation, cross-script agreement, and only then add Warsh
+    default-profile snapshots.
+16. **Variants last.** Add the 70 semantic `VariantCase` rows and the small
+    generic API contract covering all 71 selectors. Do not recreate
+    `test_khilaf.py`.
+
+## Acceptance criteria
+
+### Mechanical reorganization
+
+- every current test has a recorded destination;
+- no `adjacent/`, `boundary/`, `waqf/`, `tafkheem/`, `laws/`, root catch-all,
+  or giant `test_khilaf.py` remains;
+- collection remains exactly 1,340 during the move;
+- the fast gate remains 1,336 passed and 4 skipped; and
+- all existing Hafs snapshot files remain unchanged.
+
+### Harness and style
+
+- every semantic expected sequence is inventory-tokenized with ASCII spaces;
+- unique targets never carry an occurrence suffix;
+- subtle marks use the reviewed selector registry;
+- repeated glyphs/sounds are addressed exactly, never unioned accidentally;
+- state matrices replace repeated joined/stopped bodies;
+- case tables contain Arabic, site, state, full phonemes, char reach, sound
+  reach, and readable IDs together; and
+- the fast gate rejects every style or targeting violation described above.
+
+### Coverage and compaction
+
+- every distinct current law, trigger partition, source representation,
+  boundary state, exclusion, and public reach invariant survives in the
+  coverage ledger;
+- all 14 sun letters, 14 moon letters, 15 ikhfa letters, six throat letters,
+  four ghunnah-idgham hosts, two no-ghunnah hosts, seven istilaa letters, five
+  qalqala letters, seven alifs, and every distinct raa/lam branch remain
+  exhaustive;
+- no trigger alphabet is needlessly crossed with every representation;
+- no large closed register becomes a full-output test per member;
+- no duplicate semantic fingerprint remains; and
+- each target file stays within its planned case budget unless its coverage
+  matrix documents why another case is necessary.
+
+### Warsh fixed/default implementation
+
+- every v2 phenomenon has one obvious owning test file and implementation PR;
+- semantic sites use canonical/public coordinates;
+- adapter fixtures preserve selected-source coordinates and source text;
+- every manual token belongs to the reviewed phoneme inventory;
+- every named rule reaches the exact required sound and source material;
+- closed registers are independent of production authored data;
+- shared rules use shared cases rather than duplicated riwayah files;
+- all fixed/default semantic and conformance gates pass before snapshots; and
+- Warsh snapshots are added only for the complete default profile.
+
+### Variants
+
+- variants are the final phase;
+- 70 selectors have exactly one semantic `VariantCase` owner;
+- `tamanna_noon` has catalogue/default validation only, by explicit decision;
+- every legal value, default, active state, masked state, register, exclusion,
+  and same-ID riwayah difference is tested;
+- arbitrary explicit combinations remain accepted without a tariq validator;
+- generic catalogue validation stays in `api/test_variants.py`; and
+- no variant's sound behavior is duplicated in the API file.
+
+## Validation commands
+
+Use these at each relevant stage:
+
+```text
+python -m pytest --collect-only -q
+python tools/gates.py --fast
+git diff --exit-code -- tests/snapshots
+```
+
+Run the full gate before handing off adapter, runtime, corpus, schema,
+snapshot, or broad test changes:
+
+```text
+python tools/gates.py
+```

@@ -415,19 +415,19 @@ print(available_variants("hafs")["iqlab_nasal"])
 ```
 
 ```
-['daaf_haraka', 'ikhfaa_shafawi_nasal', 'iqlab_nasal', 'madd_lazim_tasheel', 'noon_yaseen_wasl', 'raa_alqitr_waqf', 'raa_asr_waqf', 'raa_firq_wasl', 'raa_misr_waqf', 'raa_nuthur_waqf', 'raa_yasr_waqf', 'seen_sad_al_musaytirun', 'seen_sad_bastah', 'seen_sad_bimusaytir', 'seen_sad_yabsut', 'yaa_aatani_waqf']
-{'options': ['assimilated', 'bilabial'], 'default': 'assimilated'}
+['alism_ibtidaa', 'almusaytirun', 'bal_ran', 'bastah', 'bimusaytir', 'daaf_haraka', 'ikhfaa_shafawi_nasal', 'iqlab_nasal', 'irkab_maana', 'istifham_article', 'iwaja_qayyima', 'maliyah_halak', 'man_raq', 'marqadina_hadha', 'noon_wasl', 'raa_alqitr_waqf', 'raa_asr_waqf', 'raa_firq', 'raa_misr_waqf', 'raa_wanuthur_waqf', 'raa_yasr_waqf', 'salasila_waqf', 'tamanna_noon', 'yaa_aatani_waqf', 'yabsut', 'yalhath_dhalik', 'yaseen_wasl']
+{'options': ['open', 'closed'], 'default': 'open'}
 ```
 
 Every variant takes one scalar option name. A grouped variant applies at all
 of its covered locations:
 
 ```python
-bilabial = Phonemizer(variants={"iqlab_nasal": "bilabial"})
+closed = Phonemizer(variants={"iqlab_nasal": "closed"})
 
 print(pm.phonemize("2:56:3-2:56:4").text())
 print(" ".join(pm.phonemize("2:56:3-2:56:4").phonemes()))
-print(" ".join(bilabial.phonemize("2:56:3-2:56:4").phonemes()))
+print(" ".join(closed.phonemize("2:56:3-2:56:4").phonemes()))
 ```
 
 ```
@@ -453,9 +453,10 @@ w a ll a j l i ʔ i ð a: j a s r
 w a ll a j l i ʔ i ð a: j a s rˤ
 ```
 
-See [the Hafs variants catalogue](docs/hafs/variants.md) for all IDs, defaults,
-locations, phoneme effects, and tajweed projections. Imala is not a variant;
-its rendering is selected through the `imala` extra phoneme.
+See [the variants catalogue](docs/variants.md) for all IDs, defaults,
+locations, phoneme effects, and tajweed projections. The fixed Hafs imala
+shown above is not a variant; its rendering is selected through the `imala`
+extra phoneme.
 
 ## Contributing
 
