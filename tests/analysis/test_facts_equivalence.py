@@ -5,6 +5,8 @@ every boundary state, both are built and every performance-tier fact compared.
 """
 from __future__ import annotations
 
+import dataclasses
+
 import pytest
 
 from quranic_phonemizer.analysis import (
@@ -18,11 +20,15 @@ from quranic_phonemizer.analysis import (
     analyse,
 )
 from quranic_phonemizer.model.address import Junction, Script
-from quranic_phonemizer.model.performance import Aspect, Consonant, Release, Vowel
+from quranic_phonemizer.model.performance import (
+    Aspect, Consonant, Hosts, Inserted, Release, Side, Vowel,
+)
 from quranic_phonemizer.orthography.write import pen_for
 from quranic_phonemizer.phonemize import edges as ed
 from quranic_phonemizer.phonemize import nodes as nd
+from quranic_phonemizer.analysis.sounds import sounds_in_order as native_order
 from quranic_phonemizer.phonemize.assemble import assemble
+from quranic_phonemizer.phonemize.ordering import sounds_in_order as legacy_order
 from quranic_phonemizer.session import phonemize_request
 
 #: One reference per boundary state, chosen for the hard cases they exercise:
@@ -173,3 +179,29 @@ def test_the_site_set_exercises_the_hard_cases(hafs, alphabet):
     assert releases and mergers and silences
     assert junctions == set(Junction)
     assert modifiers == {Recoloured, Relengthened, Classified}
+
+
+@pytest.mark.parametrize(
+    "side,before", [(Side.BEFORE, True), (Side.AFTER, False)]
+)
+def test_an_inserted_sound_lands_on_its_anchor_side(hafs, side, before):
+    # No Hafs rule mints an Insert effect, so the corpus never reaches the
+    # inserted-anchor branch. Synthesize one that collides with a hosted sound
+    # on the same slot and aspect, where the anchor side is what orders them,
+    # and hold the native ordering to the legacy on it.
+    session = phonemize_request(hafs, "2:255")
+    perf = session.performance
+    hosted = next(a for a in perf.attributions if isinstance(a, Hosts) and a.slots)
+    guest = next(s for s, _ in perf.sounds if s != hosted.sound)
+    inserted = Inserted(
+        anchor=(hosted.slots[0], side), aspect=hosted.aspect,
+        sound=guest, by=hosted.by,
+    )
+    synthetic = dataclasses.replace(
+        perf, attributions=perf.attributions + (inserted,)
+    )
+    order = native_order(synthetic)
+
+    assert any(isinstance(a, Inserted) for a in synthetic.attributions)
+    assert order == legacy_order(synthetic)
+    assert (order.index(guest) < order.index(hosted.sound)) is before
