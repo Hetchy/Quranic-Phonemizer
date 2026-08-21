@@ -20,6 +20,8 @@ from .dtos import (
     CellWord,
 )
 from .laws import CellValidationError, validate_cell_columns, validate_cell_sounds
+from .transform import transform_words
+from .transform_laws import validate_transformed
 from .view import build_cell_view
 from .view_laws import validate_cell_view
 
@@ -38,7 +40,9 @@ __all__ = [
     "build_cell_sounds",
     "build_cell_view",
     "build_cell_words",
+    "transform_words",
     "validate_cell_columns",
     "validate_cell_sounds",
     "validate_cell_view",
+    "validate_transformed",
 ]
