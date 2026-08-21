@@ -9,9 +9,11 @@ from dataclasses import dataclass
 from enum import StrEnum
 
 from ..ids import (
+    BoundaryId,
     CellColumnId,
     CharacterId,
     LetterUnitId,
+    MergerId,
     OccurrenceId,
     SoundId,
     WordId,
@@ -21,15 +23,16 @@ from ...model.address import KhilafId
 
 
 class CellRole(StrEnum):
-    """What the row draws, distinct from what the script wrote: a letter unit
-    reads as a consonant or as a long-vowel carrier. A gap column stands for a
-    performed sound the source spells no presenter for."""
+    """What the row draws, distinct from what the script wrote: a consonant or
+    long-vowel carrier for a letter unit, a boundary's written pause sign for a
+    stop_sign column, a source-less performed sound for a gap column."""
 
     LETTER = "letter"
     HARAKA = "haraka"
     SUKUN = "sukun"
     TANWEEN = "tanween"
     MADD = "madd"
+    STOP_SIGN = "stop_sign"
     GAP = "gap"
 
 
@@ -41,6 +44,7 @@ class CellTier(StrEnum):
 
 class CellStatus(StrEnum):
     PRESENT = "present"
+    INSERTED = "inserted"
     DROPPED = "dropped"
     GAP = "gap"
 
@@ -84,12 +88,44 @@ class CellWord:
     sounds: tuple[CellSound, ...]
 
 
+@dataclass(frozen=True, slots=True)
+class CellBridge:
+    """A cross-word merger's shared sound, rendered once between the words. Its
+    endpoints are the contributor's presenter columns and the host's owner
+    columns, so a renderer co-highlights both sides of the join."""
+
+    merger_id: MergerId
+    before_column_ids: tuple[CellColumnId, ...]
+    after_column_ids: tuple[CellColumnId, ...]
+    sound: CellSound
+
+
+@dataclass(frozen=True, slots=True)
+class CellBoundary:
+    """The between-word junction: its stop-sign pause column, any boundary-owned
+    inserted column and its sound, and a bridge per cross-word merger."""
+
+    boundary_id: BoundaryId
+    columns: tuple[CellColumn, ...]
+    sounds: tuple[CellSound, ...]
+    bridges: tuple[CellBridge, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class CellView:
+    words: tuple[CellWord, ...]
+    boundaries: tuple[CellBoundary, ...]
+
+
 __all__ = [
+    "CellBoundary",
+    "CellBridge",
     "CellColumn",
     "CellRole",
     "CellSide",
     "CellSound",
     "CellStatus",
     "CellTier",
+    "CellView",
     "CellWord",
 ]
