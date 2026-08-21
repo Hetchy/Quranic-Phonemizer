@@ -6,6 +6,7 @@ Total by coverage, so a feature no entry offers raises at lookup.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -14,6 +15,9 @@ from ..model.canon import CanonLetter, Quality
 from ..model.performance import Consonant, Degree, Release, Sound, Vowel
 
 SCHEMA_VERSION = 2
+
+#: The packaged notation data. IPA is what the native result emits.
+_NOTATION = Path(__file__).resolve().parent.parent / "data" / "render"
 
 #: What a long vowel adds. One character, but it is notation, so it lives
 #: beside the tokens rather than inside the resolver's control flow.
@@ -168,6 +172,12 @@ def load_alphabet(path: Path) -> Alphabet:
         vowels=_entries(Quality, data["vowels"], "vowels", path),
         releases=_tokens(Degree, data["releases"], "releases", path),
     )
+
+
+@lru_cache(maxsize=None)
+def packaged_alphabet(notation: str = "ipa") -> Alphabet:
+    """The notation shipped with the package, loaded once and cached."""
+    return load_alphabet(_NOTATION / f"{notation}.yaml")
 
 
 def _entries(enum: type, raw: Any, section: str, path: Path) -> dict:
