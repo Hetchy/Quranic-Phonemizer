@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from ..dtos import Sound
 from ..source_dtos import CharacterKind, SourceView
-from .dtos import CellRole, CellColumn, CellSound, CellStatus, CellTier, CellWord
+from .dtos import CellColumn, CellSound, CellStatus, CellTier, CellWord
 
 
 class CellValidationError(ValueError):
@@ -165,7 +165,7 @@ def _check_gap_columns(columns: dict[int, CellColumn]) -> None:
     for col in columns.values():
         if col.status is not CellStatus.GAP:
             continue
-        _require(col.role is CellRole.GAP, f"gap column {col.id.value} is not role gap")
+        _require(col.role.value == "gap", f"gap column {col.id.value} is not role gap")
         _require(
             not col.source_character_ids and not col.source_unit_ids
             and not col.owned_sound_ids and not col.presented_sound_ids
