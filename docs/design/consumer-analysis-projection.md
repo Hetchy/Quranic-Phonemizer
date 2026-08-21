@@ -2011,23 +2011,19 @@ These do not block Phase 1:
 | Current production host | Reuse existing viable container host | DNS/hosting audit |
 | Website rule palette and families | Inspector's mechanism, own grouping | Design pass over a real ayah set |
 
-Four source-unit tokenizations section 7.2 names cannot yet be pinned as
-passing fixtures against the current surfaces: the fact a scalar supplies
-states the fold the wrong way round, and reversing it is the LetterUnit
-builder's job. None of the four needs the raw codepoint to close: the grapheme
-kind already distinguishes each case, so the builder keys on the typed kind and
-supplied fact, never on the scalar. Each is left open, closed against 7.2 or a
-docs/hafs/research citation, not forced onto the current facts:
+Four source-unit tokenizations section 7.2 names are now decided in the native
+LetterUnit builder. Each keys on the typed grapheme kind and the fact it
+supplies, never on the raw codepoint, and each is asserted by a native fixture:
 
-| Decision | Default direction | Closing evidence |
+| Decision | Closed as | How the builder decides it |
 | --- | --- | --- |
-| Pausal zero fold | Folds into the unit it marks; the pausal alif beside it is the silent carrier | LetterUnit builder. Today the zero (grapheme kind silence_sign) supplies the vowel length and the alif merely decorates, the reverse of 7.2; the builder folds a silence_sign that supplies a length rather than opening a unit for it |
-| Imala mark fold | Folds into the letter it qualifies, which carries the imala length | LetterUnit builder. Today the mark (grapheme kind tajweed_mark) supplies vowel quality, so it opens a unit; genuine vowel-position marks are haraka, tanween, or small_vowel, so the builder folds a tajweed_mark that supplies quality |
-| Mini seen as a paired unit | Its own unit wherever the script writes it, paired with the base letter it rides; one sounds and the other is silent | LetterUnit builder. The current surfaces fold the mark as a decoration on one unit whose letter the variant switches, so the pair is not yet two units |
-| Sakt sign ownership | The boundary owns the pause; the small sakt seen is a mark on the word it follows | LetterUnit builder. Today the seen rides its word as a tajweed_mark and opens no unit, so its own boundary-versus-word ownership is not yet stated the way a stop sign's is |
+| Pausal zero fold | Folds into the carrier unit it marks; the pausal alif beside it is that carrier | A silence_sign supplying a length opens no unit; the base carrier it rides owns the length and the zero is a character inside it |
+| Imala mark fold | Folds into the letter it qualifies, which carries the imala length | A tajweed_mark supplying vowel quality opens no unit; only kind haraka, tanween or small_vowel opens the vowel position, so the mark joins its letter |
+| Mini seen as a paired unit | Its own letter unit wherever the script writes it, riding the base it pairs with; one sounds and the other is silent | A decorated tajweed_mark on a word with no sakt opens its own unit and names the base it rides in written_on_unit_id |
+| Sakt sign ownership | The boundary owns the pause; the small sakt seen is a boundary character, not a word letter unit | A decorated tajweed_mark on a word carrying a sakt is a boundary character like a stop sign, with a boundary_id and no letter unit |
 
-The main-unit multiple-range case section 7.2 names is not open: a letter and
-its shadda straddling an independently tokenized haraka is attested and pinned.
+The main-unit multiple-range case section 7.2 names is likewise held: a letter
+and its shadda straddling an independently tokenized haraka is attested.
 
 Adding or removing a rule after this point requires changing its internal law,
 native fixtures, metadata, v11 mapping, and website legend behavior together.

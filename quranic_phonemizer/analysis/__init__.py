@@ -54,6 +54,18 @@ from .inscription import (
 from .laws import ValidationError, validate
 from .result import AnalysisResult, build_result
 from .sounds import SoundFact
+from .source import build_source_view
+from .source_dtos import (
+    Character,
+    CharacterKind,
+    LetterUnit,
+    LetterUnitKind,
+    LiteralSilence,
+    MergerPlacement,
+    RulePlacement,
+    SourceView,
+)
+from .source_laws import SourceValidationError, validate_source_view
 
 __all__ = [
     "SCHEMA_VERSION",
@@ -63,6 +75,8 @@ __all__ = [
     "Boundary",
     "BoundaryId",
     "BoundaryState",
+    "Character",
+    "CharacterKind",
     "Classified",
     "Decorated",
     "Glyph",
@@ -70,19 +84,26 @@ __all__ = [
     "Hosted",
     "Insertion",
     "InscriptionFacts",
+    "LetterUnit",
+    "LetterUnitKind",
+    "LiteralSilence",
     "Merged",
     "Merger",
     "MergerId",
+    "MergerPlacement",
     "OccurrenceId",
     "Recoloured",
     "Relengthened",
     "RuleDefinition",
     "RuleId",
     "RuleOccurrence",
+    "RulePlacement",
     "Silenced",
     "Sound",
     "SoundFact",
     "SoundId",
+    "SourceValidationError",
+    "SourceView",
     "Structural",
     "Supplied",
     "UnknownRiwayah",
@@ -93,6 +114,7 @@ __all__ = [
     "analyse",
     "build_bundle",
     "build_result",
+    "build_source_view",
     "decoration_targets",
     "glyph_kind_of",
     "inscribe",
@@ -102,4 +124,5 @@ __all__ = [
     "silent_groups",
     "tajweed_rules",
     "validate",
+    "validate_source_view",
 ]

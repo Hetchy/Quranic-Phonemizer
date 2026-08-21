@@ -1,15 +1,21 @@
 """Stop signs and separators belong to the boundary, not to a word letter
-unit. The sakt sign is different: it rides the word it follows as a mark and
-opens no unit, while the pause itself is a separate boundary state."""
+unit. The sakt sign is the same: the native builder makes its small seen a
+boundary character, while the pause itself is a separate boundary state."""
 from __future__ import annotations
 
+from quranic_phonemizer.analysis.source import build_source_view
+from quranic_phonemizer.analysis.source_dtos import CharacterKind
+from quranic_phonemizer.api import recitation
+from quranic_phonemizer.model.address import Riwayah
 from quranic_phonemizer.phonemize import edges as ed
 from quranic_phonemizer.phonemize import nodes as nd
+from quranic_phonemizer.session import phonemize_request
 
-from .support import built, find, only, opens_unit, units_named
+from .support import built, find, only, units_named
 
 KURSI = "2:255"
 SAKT = "75:27"           # an authored sakt after the second word
+SAKT_SEEN = "ۜ"
 
 
 def _structural(a, glyph):
@@ -37,15 +43,24 @@ def test_a_separator_is_boundary_owned():
     assert not units_named(a, space)
 
 
-def test_the_sakt_is_a_boundary_state_and_its_seen_opens_no_unit():
-    """The pause is stated on the word it follows, never read off array
-    position. The small seen that shows it rides a letter unit and opens none,
-    unlike a stop sign, which the boundary owns; that split is unsettled here."""
+def test_the_sakt_is_a_boundary_state_and_its_seen_is_a_boundary_character():
+    """The pause is stated on the word it follows, and the small seen that shows
+    it is a boundary character like a stop sign: the native builder gives it no
+    letter unit, where the same scalar written as a khilaf mark opens one."""
     # مَنْۜ رَاقٍ
     a = built(SAKT)
     assert a.words[1].sakt_after
-    seen = only(a, char="ۜ")
-    assert not opens_unit(a, seen)
-    # The seen rides its word today, where a stop sign has no word at all.
-    assert a.glyphs[seen].word is not None
-    assert units_named(a, seen)
+    session = phonemize_request(recitation(Riwayah("hafs")), SAKT)
+    view = build_source_view(
+        session, ref=SAKT, riwayah="hafs", script="uthmani", variant={}
+    )
+    seen = only_char(view, SAKT_SEEN)
+    assert seen.kind is CharacterKind.STOP_SIGN
+    assert seen.letter_unit_id is None and seen.boundary_id is not None
+    assert not any(seen.id in unit.character_ids for unit in view.units)
+
+
+def only_char(view, scalar):
+    hits = [c for c in view.characters if c.text == scalar]
+    assert len(hits) == 1, f"expected one {scalar!r}, got {len(hits)}"
+    return hits[0]
