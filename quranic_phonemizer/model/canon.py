@@ -302,8 +302,8 @@ class Rule(StrEnum):
     ISHMAM = "ishmam"
 
     MADD_TABII = "madd_tabii"
-    MADD_WAJIB_MUTTASIL = "madd_wajib_muttasil"
-    MADD_JAIZ_MUNFASIL = "madd_jaiz_munfasil"
+    MADD_MUTTASIL = "madd_muttasil"
+    MADD_MUNFASIL = "madd_munfasil"
     MADD_LAZIM = "madd_lazim"
     MADD_ARID_LISSUKUN = "madd_arid_lissukun"
     MADD_LEEN = "madd_leen"
@@ -316,8 +316,7 @@ class Rule(StrEnum):
     HAMZA_WASL_FATHA = "hamza_wasl_fatha"
     HAMZA_WASL_KASRA = "hamza_wasl_kasra"
     HAMZA_WASL_DAMMA = "hamza_wasl_damma"
-    ILTIQA_KASRA = "iltiqa_kasra"
-    ILTIQA_FATHA = "iltiqa_fatha"
+    ILTIQA_HARAKA = "iltiqa_haraka"
     ILTIQA_SHORTENING = "iltiqa_shortening"
     WAQF_DIACRITIC_DROP = "waqf_diacritic_drop"
     WAQF_SILAH_DROP = "waqf_silah_drop"
@@ -345,8 +344,8 @@ CLASSIFICATION_ONLY: frozenset[Rule] = frozenset(
         Rule.LAM_QAMARIYYAH,
         Rule.MADD_BADAL,
         Rule.MADD_SILAH,
-        Rule.MADD_WAJIB_MUTTASIL,
-        Rule.MADD_JAIZ_MUNFASIL,
+        Rule.MADD_MUTTASIL,
+        Rule.MADD_MUNFASIL,
         Rule.MADD_LAZIM,
         Rule.MADD_ARID_LISSUKUN,
         Rule.MADD_LEEN,

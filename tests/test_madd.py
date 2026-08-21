@@ -38,8 +38,8 @@ def test_an_ordinary_long_vowel_takes_the_plain_length(r):
 def test_a_long_vowel_before_a_hamza_in_the_same_word(r):
     # سَوَآءٌ
     assert r.phonemes(4) == "sawa:ʔ"
-    assert "madd_wajib_muttasil" in r.rules_on_char(4, "ا")
-    assert r.rules_on_sound(4, "a:") == {"madd_wajib_muttasil"}
+    assert "madd_muttasil" in r.rules_on_char(4, "ا")
+    assert r.rules_on_sound(4, "a:") == {"madd_muttasil"}
 
 
 @for_each_riwayah(BIMA_UNZILA, ibtidaa=3, waqf=4)
@@ -47,8 +47,8 @@ def test_a_long_vowel_ending_a_word_before_a_hamza_opening_the_next(r):
     # بِمَآ أُنزِلَ
     assert r.phonemes(3) == "bima:"
     assert r.phonemes(4) == "ʔuŋzil"
-    assert "madd_jaiz_munfasil" in r.rules_on_char(3, "ا")
-    assert r.rules_on_sound(3, "a:") == {"madd_jaiz_munfasil"}
+    assert "madd_munfasil" in r.rules_on_char(3, "ا")
+    assert r.rules_on_sound(3, "a:") == {"madd_munfasil"}
 
 
 @for_each_riwayah(ALIF_LAM_MEEM, isolated=1)
@@ -87,8 +87,8 @@ def test_a_particle_the_rasm_joined_holds_the_length_of_a_separation(r):
     # هَـٰٓؤُلَآءِ -- ها التنبيه and أولاء, one word written and two spoken,
     # so the word carries a separated madd and a joined one.
     assert r.phonemes(12) == "ha:ʔula:ʔi"
-    assert r.rules_on_char(12, "ه") == {"madd_jaiz_munfasil"}
-    assert r.rules_on_char(12, "ل") == {"madd_wajib_muttasil"}
+    assert r.rules_on_char(12, "ه") == {"madd_munfasil"}
+    assert r.rules_on_char(12, "ل") == {"madd_muttasil"}
 
 
 @for_each_riwayah(AHAAULAA, wasl=7)
@@ -96,14 +96,14 @@ def test_an_interrogative_hamza_before_the_particle_moves_neither_madd(r):
     # أَهَـٰٓؤُلَآءِ -- the hamza stands before ها, not between ها and أولاء,
     # so the separation it does not touch reads as it does without it.
     assert r.phonemes(7) == "ʔaha:ʔula:ʔi"
-    assert r.rules_on_char(7, "ه") == {"madd_jaiz_munfasil"}
-    assert r.rules_on_char(7, "ل") == {"madd_wajib_muttasil"}
+    assert r.rules_on_char(7, "ه") == {"madd_munfasil"}
+    assert r.rules_on_char(7, "ل") == {"madd_muttasil"}
 
 
 @for_each_riwayah(YAAAYYUHA, wasl=1)
 def test_the_vocative_particle_is_separated_the_same_way(r):
     # يَـٰٓأَيُّهَا
-    assert r.rules_on_char(1, "ي") == {"madd_jaiz_munfasil"}
+    assert r.rules_on_char(1, "ي") == {"madd_munfasil"}
 
 
 @for_each_riwayah(HAAUM, wasl=7)
@@ -111,7 +111,7 @@ def test_the_same_shape_inside_one_lexeme_stays_joined(r):
     # هَآؤُمُ -- the imperative noun هاء, whose hamza is a third radical and
     # not a word standing behind a particle.
     assert r.phonemes(7) == "ha:ʔumu"
-    assert r.rules_on_char(7, "ه") == {"madd_wajib_muttasil"}
+    assert r.rules_on_char(7, "ه") == {"madd_muttasil"}
 
 
 @for_each_riwayah(YAAAYYUHA, wasl=1)
@@ -190,7 +190,7 @@ def test_a_pausal_alif_joined_is_short_and_separates_nothing(r):
     """وَأَنَا۠ أَوَّلُ. Joined, the alif's own vowel is canonically short, so
     the hamza opening the next word has no length to separate."""
     assert r.phonemes(6) == "waʔana"
-    assert "madd_jaiz_munfasil" not in r.rules_on_char(6, "ا")
+    assert "madd_munfasil" not in r.rules_on_char(6, "ا")
 
 
 @for_each_riwayah(DAALLAN, isolated=2)

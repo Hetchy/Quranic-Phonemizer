@@ -121,7 +121,7 @@ def test_a_haa_before_a_word_opening_hamza_is_held_the_longer_count(r):
     word says how long it is held, and no plain madd names it too."""
     # عِندَهُۥٓ إِلَّا
     assert r.phonemes(24) == "ʕiŋdahu:"
-    assert r.rules_on_sound(24, "u:") == {"madd_silah", "madd_jaiz_munfasil"}
+    assert r.rules_on_sound(24, "u:") == {"madd_silah", "madd_munfasil"}
 
 
 @for_each_riwayah(FIHI_SILAH, isolated=7)

@@ -233,7 +233,7 @@ def test_the_site_set_exercises_the_hard_cases(hafs, pen, alphabet):
         states |= {boundary.state for boundary in native.boundaries}
         mergers |= bool(native.mergers)
         iltiqa |= any(
-            occ.rule_id.value == "iltiqa_fatha"
+            occ.rule_id.value == "iltiqa_haraka"
             for occ in native.rule_occurrences
         )
     assert states == set(BoundaryState)
@@ -244,7 +244,7 @@ def test_an_iltiqa_is_not_a_merger_and_names_its_boundary(hafs, pen, alphabet):
     _, _, native = _both(hafs, pen, alphabet, "3:1-3:2", {})
     iltiqa = [
         occ for occ in native.rule_occurrences
-        if occ.rule_id.value == "iltiqa_fatha"
+        if occ.rule_id.value == "iltiqa_haraka"
     ]
     assert iltiqa and all(occ.boundary_ids for occ in iltiqa)
     assert not native.mergers

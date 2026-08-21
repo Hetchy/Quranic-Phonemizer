@@ -112,12 +112,12 @@ RULE_DEFINITIONS: dict[Rule, tuple[str, str, str]] = {
         "Madd Tabii", "مد طبيعي",
         "A long vowel is held for its plain length, with nothing after it to extend it.",
     ),
-    Rule.MADD_WAJIB_MUTTASIL: (
-        "Madd Wajib Muttasil", "مد واجب متصل",
+    Rule.MADD_MUTTASIL: (
+        "Madd Muttasil", "مد متصل",
         "A long vowel is extended before a hamza in the same word.",
     ),
-    Rule.MADD_JAIZ_MUNFASIL: (
-        "Madd Jaiz Munfasil", "مد جائز منفصل",
+    Rule.MADD_MUNFASIL: (
+        "Madd Munfasil", "مد منفصل",
         "A long vowel is extended before a hamza opening the next word.",
     ),
     Rule.MADD_LAZIM: (
@@ -164,13 +164,9 @@ RULE_DEFINITIONS: dict[Rule, tuple[str, str, str]] = {
         "Hamza Wasl with Damma", "همزة الوصل بالضم",
         "A prosthetic hamza the reading starts on is sounded with a damma.",
     ),
-    Rule.ILTIQA_KASRA: (
-        "Iltiqa Kasra", "كسر التقاء الساكنين",
-        "A tanween noon takes a kasra so that it does not meet the quiescent letter after it.",
-    ),
-    Rule.ILTIQA_FATHA: (
-        "Iltiqa Fatha", "فتح التقاء الساكنين",
-        "A spelled-out letter takes a fatha so that it does not meet the quiescent letter after it.",
+    Rule.ILTIQA_HARAKA: (
+        "Iltiqa Haraka", "تحريك التقاء الساكنين",
+        "A letter takes a haraka so that it does not meet the quiescent letter after it.",
     ),
     Rule.ILTIQA_SHORTENING: (
         "Iltiqa Shortening", "قصر عند التقاء الساكنين",

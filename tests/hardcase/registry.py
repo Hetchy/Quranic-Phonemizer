@@ -212,8 +212,8 @@ RULE_FIXTURES: dict[str, tuple[Fixture, ...]] = {
     "tashil": (tashil_site,),
     "ishmam": (ishmam_site, ishmam_subject, ishmam_edge),
     "madd_tabii": (tabii_ordinary, tabii_subject),
-    "madd_wajib_muttasil": (muttasil_inside,),
-    "madd_jaiz_munfasil": (munfasil_across, silah_before_a_hamza),
+    "madd_muttasil": (muttasil_inside,),
+    "madd_munfasil": (munfasil_across, silah_before_a_hamza),
     "madd_lazim": (lazim_sakin, lazim_doubled),
     "madd_arid_lissukun": (arid_stopped,),
     "madd_leen": (leen_waw,),
@@ -225,8 +225,10 @@ RULE_FIXTURES: dict[str, tuple[Fixture, ...]] = {
     "hamza_wasl_fatha": (wasl_fatha,),
     "hamza_wasl_kasra": (wasl_kasra, wasl_kasra_nouns),
     "hamza_wasl_damma": (wasl_damma,),
-    "iltiqa_kasra": (iltiqa_kasra_site, iltiqa_kasra_insert),
-    "iltiqa_fatha": (iltiqa_fatha_site, iltiqa_fatha_insert),
+    "iltiqa_haraka": (
+        iltiqa_kasra_site, iltiqa_kasra_insert,
+        iltiqa_fatha_site, iltiqa_fatha_insert,
+    ),
     "iltiqa_shortening": (shortening_madd, shortening_waw),
     "waqf_diacritic_drop": (
         drop_fatha, drop_damma, drop_kasra, drop_before_a_glide,

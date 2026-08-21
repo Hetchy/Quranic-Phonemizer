@@ -80,7 +80,7 @@ def test_an_opening_joined_to_the_name_of_god_breaks_the_meeting_with_a_fatha():
     joined = Phonemizer().phonemize(ref="3:1-3:2")
     assert "".join(joined.phonemes())[:12] == "ʔalifla:m̃i:ma"[:12]
     named = {r.rule.value for r in joined.rules}
-    assert "iltiqa_fatha" in named
+    assert "iltiqa_haraka" in named
     # the meem is voweled now, so it is no longer a meem sakinah at all
     meem = joined.sounds.index(next(s for s in joined.sounds if s.token == "m"))
     on = {joined.rules[m.by].rule.value for m in joined.modifiers if m.sound == meem}
@@ -88,4 +88,4 @@ def test_an_opening_joined_to_the_name_of_god_breaks_the_meeting_with_a_fatha():
 
     alone = Phonemizer().phonemize(ref="3:1")
     assert "".join(alone.phonemes()) == "ʔalifla:m̃i:m"
-    assert "iltiqa_fatha" not in {r.rule.value for r in alone.rules}
+    assert "iltiqa_haraka" not in {r.rule.value for r in alone.rules}
