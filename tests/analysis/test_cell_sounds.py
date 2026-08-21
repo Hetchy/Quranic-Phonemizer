@@ -357,3 +357,22 @@ def test_the_cell_sound_laws_hold_over_the_whole_corpus(hafs, packed, sources):
                 checked += 1
     assert checked > 24000
     assert gaps == 0
+
+
+def test_validation_rejects_a_gap_column_that_is_not_an_honest_gap():
+    words, sounds = _synthetic()
+    aligned = build_cell_sounds(words, sounds)
+    gap = next(c for w in aligned for c in w.columns if c.role is CellRole.GAP)
+    for broken in (
+        dataclasses.replace(gap, role=CellRole.LETTER),
+        dataclasses.replace(gap, anchor_unit_id=None, side=None),
+        dataclasses.replace(gap, source_unit_ids=(LetterUnitId(0),)),
+    ):
+        patched = tuple(
+            dataclasses.replace(
+                w, columns=tuple(broken if c.id == gap.id else c for c in w.columns)
+            )
+            for w in aligned
+        )
+        with pytest.raises(CellValidationError):
+            validate_cell_sounds(patched, sounds)

@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from ..dtos import Sound
 from ..source_dtos import CharacterKind, SourceView
-from .dtos import CellColumn, CellSound, CellStatus, CellTier, CellWord
+from .dtos import CellRole, CellColumn, CellSound, CellStatus, CellTier, CellWord
 
 
 class CellValidationError(ValueError):
@@ -159,6 +159,25 @@ def _check_sound_coverage(words: tuple[CellWord, ...], sounds: tuple[Sound, ...]
         )
 
 
+def _check_gap_columns(columns: dict[int, CellColumn]) -> None:
+    """A gap column is role and status gap, carries no provenance, ownership or
+    silence, and anchors to exactly one unit/side."""
+    for col in columns.values():
+        if col.status is not CellStatus.GAP:
+            continue
+        _require(col.role is CellRole.GAP, f"gap column {col.id.value} is not role gap")
+        _require(
+            not col.source_character_ids and not col.source_unit_ids
+            and not col.owned_sound_ids and not col.presented_sound_ids
+            and col.silence is None,
+            f"gap column {col.id.value} carries provenance, sound, or silence",
+        )
+        _require(
+            col.anchor_unit_id is not None and col.side is not None,
+            f"gap column {col.id.value} has no unit and side anchor",
+        )
+
+
 def _check_span(cell: CellSound, spans: dict[int, list[CellColumn]],
                 columns: dict[int, CellColumn]) -> None:
     expected = [col.id for col in spans.get(cell.sound_id.value, ())]
@@ -188,6 +207,7 @@ def validate_cell_sounds(
     columns = {col.id.value: col for word in words for col in word.columns}
     rules = {s.id.value: s.rule_occurrence_ids for s in sounds}
     _check_sound_coverage(words, sounds)
+    _check_gap_columns(columns)
     for word in words:
         for cell in word.sounds:
             _check_span(cell, spans, columns)
