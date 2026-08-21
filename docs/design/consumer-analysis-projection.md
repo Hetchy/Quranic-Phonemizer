@@ -926,8 +926,8 @@ imala
 tashil
 ishmam
 madd_tabii
-madd_wajib_muttasil
-madd_jaiz_munfasil
+madd_muttasil
+madd_munfasil
 madd_lazim
 madd_arid_lissukun
 madd_leen
@@ -939,8 +939,7 @@ hamza_wasl_silent
 hamza_wasl_fatha
 hamza_wasl_kasra
 hamza_wasl_damma
-iltiqa_kasra
-iltiqa_fatha
+iltiqa_haraka
 iltiqa_shortening
 waqf_diacritic_drop
 waqf_silah_drop
@@ -1000,12 +999,12 @@ There is one madd_silah:
 
 - ordinary silah emits madd_silah plus madd_tabii;
 - before a hamza opening the next word it emits madd_silah plus
-  madd_jaiz_munfasil, without madd_tabii;
+  madd_munfasil, without madd_tabii;
 - at waqf it emits no madd_silah and uses waqf_silah_drop.
 
 Silah is never muttasil. The lengthened vowel belongs to the pronoun haa and
 the qualifying hamza opens the following word, so the meeting is always across
-a boundary. Only madd_jaiz_munfasil can accompany it.
+a boundary. Only madd_munfasil can accompany it.
 
 No silah_sughra or silah_kubra identifier is introduced.
 
