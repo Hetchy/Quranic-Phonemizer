@@ -12,7 +12,7 @@ from ..build import build_bundle
 from ..dtos import Boundary, Merger
 from ..ids import CellColumnId
 from ..source import build_source_view
-from ..source_dtos import MergerPlacement
+from ..source_dtos import Character, CharacterKind, MergerPlacement, SourceView
 from .columns import build_cell_words
 from .dtos import (
     CellBoundary,
@@ -71,12 +71,25 @@ def _bridge(
     )
 
 
-def _stop_sign_column(boundary: Boundary, new_id: int) -> CellColumn:
+def _boundary_signs(
+    boundary: Boundary, source: SourceView
+) -> tuple[Character, ...]:
+    """Every written stop or sakt sign the source assigns to this boundary, in
+    text order; a boundary may carry more than one."""
+    return tuple(
+        c for c in source.characters
+        if c.boundary_id == boundary.id and c.kind is CharacterKind.STOP_SIGN
+    )
+
+
+def _stop_sign_column(
+    signs: tuple[Character, ...], new_id: int
+) -> CellColumn:
     return CellColumn(
         id=CellColumnId(new_id),
         role=CellRole.STOP_SIGN,
-        text=boundary.stop_sign or "",
-        source_character_ids=(),
+        text="".join(c.text for c in signs),
+        source_character_ids=tuple(c.id for c in signs),
         source_unit_ids=(),
         tier=CellTier.MAIN,
         attached_to_column_id=None,
@@ -94,6 +107,7 @@ def _stop_sign_column(boundary: Boundary, new_id: int) -> CellColumn:
 
 def _boundaries(
     bundle,
+    source: SourceView,
     placement_of: dict[int, MergerPlacement],
     column_of_unit: dict[int, CellColumnId],
     shared: dict[int, CellSound],
@@ -109,7 +123,7 @@ def _boundaries(
     for boundary in bundle.boundaries:
         if boundary.before is None or boundary.after is None:
             continue
-        column = _stop_sign_column(boundary, next_id)
+        column = _stop_sign_column(_boundary_signs(boundary, source), next_id)
         next_id += 1
         out.append(CellBoundary(
             boundary_id=boundary.id,
@@ -138,7 +152,7 @@ def build_cell_view(
     column_of_unit = _column_of_unit(words)
     words, shared = _extract_merger_sounds(words, bundle.mergers)
     boundaries = _boundaries(
-        bundle, placement_of, column_of_unit, shared, _next_id(words)
+        bundle, source, placement_of, column_of_unit, shared, _next_id(words)
     )
     view = CellView(words=words, boundaries=boundaries)
     validate_cell_view(view, bundle, source)

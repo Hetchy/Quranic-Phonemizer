@@ -93,9 +93,18 @@ def test_the_view_laws_hold(hafs, ref, kwargs):
     validate_cell_view(view, bundle, source)
 
 
+def _boundary_signs(source, boundary_id):
+    return tuple(
+        c for c in source.characters
+        if c.boundary_id is not None
+        and c.boundary_id.value == boundary_id
+        and c.kind.value == "stop_sign"
+    )
+
+
 @pytest.mark.parametrize(("ref", "kwargs"), SITES)
 def test_every_internal_boundary_has_one_stop_sign(hafs, ref, kwargs):
-    view, bundle, _ = _build(hafs, ref, kwargs)
+    view, bundle, source = _build(hafs, ref, kwargs)
     internal = {
         b.id.value: b for b in bundle.boundaries
         if b.before is not None and b.after is not None
@@ -105,7 +114,9 @@ def test_every_internal_boundary_has_one_stop_sign(hafs, ref, kwargs):
         signs = [c for c in cb.columns if c.role.value == "stop_sign"]
         assert len(signs) == 1
         assert not signs[0].owned_sound_ids and not signs[0].presented_sound_ids
-        assert signs[0].text == (internal[cb.boundary_id.value].stop_sign or "")
+        written = _boundary_signs(source, cb.boundary_id.value)
+        assert signs[0].text == "".join(c.text for c in written)
+        assert signs[0].source_character_ids == tuple(c.id for c in written)
 
 
 @pytest.mark.parametrize(("ref", "kwargs"), SITES)
@@ -161,12 +172,45 @@ def test_idgham_of_noon_and_of_tanween_both_bridge(hafs):
 def test_the_sakt_sign_rides_its_boundary_column(hafs):
     """The written sakt sign at the end of the ayah lives on the boundary's
     stop-sign column, not the word text, so a stopped reading can lift it out."""
-    view, bundle, _ = _build(hafs, "36:52-36:53", {})
+    view, bundle, source = _build(hafs, "36:52-36:53", {})
     sakt = next(b for b in bundle.boundaries if b.state is BoundaryState.SAKT)
     cb = next(b for b in view.boundaries if b.boundary_id == sakt.id)
     sign = next(c for c in cb.columns if c.role.value == "stop_sign")
-    assert sign.text == sakt.stop_sign
+    written = _boundary_signs(source, cb.boundary_id.value)
+    assert sign.text == "".join(c.text for c in written)
     assert sign.text
+
+
+def test_a_two_sign_boundary_keeps_both_written_signs(hafs):
+    """The sakt boundary at 36:52 carries a sakt sign and a stop-advice sign; the
+    stop-sign column holds both, in text order, and names both characters."""
+    view, bundle, source = _build(hafs, "36:52-36:53", {})
+    sakt = next(b for b in bundle.boundaries if b.state is BoundaryState.SAKT)
+    cb = next(b for b in view.boundaries if b.boundary_id == sakt.id)
+    sign = next(c for c in cb.columns if c.role.value == "stop_sign")
+    written = _boundary_signs(source, cb.boundary_id.value)
+    sakt_sign, stop_advice_sign = chr(0x06DC), chr(0x06D7)
+    assert len(written) == 2
+    assert sign.text == sakt_sign + stop_advice_sign
+    assert sign.source_character_ids == tuple(c.id for c in written)
+    assert len(sign.source_character_ids) == 2
+
+
+def test_a_single_sign_boundary_shows_its_one_sign(hafs):
+    """A boundary with one written sign shows exactly that sign and names its one
+    character."""
+    view, _, source = _build(hafs, "2:5", {})
+    seen = False
+    for cb in view.boundaries:
+        written = _boundary_signs(source, cb.boundary_id.value)
+        if len(written) != 1:
+            continue
+        sign = next(c for c in cb.columns if c.role.value == "stop_sign")
+        assert sign.text == written[0].text
+        assert sign.source_character_ids == (written[0].id,)
+        if sign.text == chr(0x06D6):
+            seen = True
+    assert seen, "expected the single U+06D6 sign at 2:5"
 
 
 def test_an_internal_stop_has_an_empty_stop_sign(hafs):
@@ -306,7 +350,7 @@ def test_an_iltiqa_insertion_given_a_bridge_fails_law_26(hafs):
 
 
 def test_law_26_in_isolation_rejects_an_inserted_bridge_endpoint(hafs):
-    view, _, _ = _build(hafs, "36:52-36:53", {})
+    view, bundle, _ = _build(hafs, "36:52-36:53", {})
     cb = _a_bridge_boundary(view)
     inserted = _inserted_column(9000)
     routed = dataclasses.replace(cb.bridges[0], after_column_ids=(inserted.id,))
@@ -315,7 +359,32 @@ def test_law_26_in_isolation_rejects_an_inserted_bridge_endpoint(hafs):
         columns=(*cb.columns, inserted), bridges=(routed, *cb.bridges[1:]),
     )
     with pytest.raises(CellValidationError):
-        _check_no_iltiqa_bridge(broken)
+        _check_no_iltiqa_bridge(broken, bundle)
+
+
+def test_law_26_bites_a_bridge_over_the_real_host_owned_iltiqa(hafs):
+    """The iltiqa fatha at 3:1-3:2 is a host word's own sound on the join, not a
+    merger. A bridge fabricated over that boundary and sound is rejected by law 26
+    itself, before law 25 would catch it as a stray bridge."""
+    from quranic_phonemizer.analysis.ids import MergerId
+
+    view, bundle, _ = _build(hafs, "3:1-3:2", {})
+    occ = next(
+        o for o in bundle.rule_occurrences if o.rule_id.value == "iltiqa_fatha"
+    )
+    assert occ.boundary_ids and occ.sound_ids
+    boundary_id = occ.boundary_ids[0]
+    host = next(w for w in view.words for c in w.sounds if c.sound_id == occ.sound_ids[0])
+    cell = next(c for c in host.sounds if c.sound_id == occ.sound_ids[0])
+    bridge = CellBridge(
+        merger_id=MergerId(0),
+        before_column_ids=cell.column_ids,
+        after_column_ids=cell.column_ids,
+        sound=cell,
+    )
+    broken = _replace_boundary(view, boundary_id, bridges=(bridge,))
+    with pytest.raises(CellValidationError, match="iltiqa"):
+        _check_no_iltiqa_bridge(broken, bundle)
 
 
 def test_a_dangling_bridge_endpoint_fails_law_28(hafs):

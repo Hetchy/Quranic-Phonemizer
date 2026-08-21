@@ -121,14 +121,35 @@ def _check_bridges(
                  "a boundary's bridges are not its mergers")
 
 
-def _check_no_iltiqa_bridge(view: CellView) -> None:
-    """An iltiqa is an insertion, never a merger, so no inserted boundary column
-    is ever a bridge endpoint."""
+def _iltiqa_binds(bundle: AnalysisBundle) -> tuple[set[int], set[int]]:
+    """The boundaries and sounds an iltiqa occurrence binds. Its connecting vowel
+    is a host word's own sound, not a merger, so neither may back a bridge."""
+    boundaries: set[int] = set()
+    sounds: set[int] = set()
+    for occ in bundle.rule_occurrences:
+        if occ.rule_id.value.startswith("iltiqa"):
+            boundaries.update(b.value for b in occ.boundary_ids)
+            sounds.update(s.value for s in occ.sound_ids)
+    return boundaries, sounds
+
+
+def _check_no_iltiqa_bridge(view: CellView, bundle: AnalysisBundle) -> None:
+    """An iltiqa is never a merger: its boundary carries no bridge, its host-owned
+    sound backs none, and no boundary insertion column is a bridge endpoint."""
+    iltiqa_boundaries, iltiqa_sounds = _iltiqa_binds(bundle)
     for cb in view.boundaries:
         inserted = {
             c.id.value for c in cb.columns if c.status is CellStatus.INSERTED
         }
         for bridge in cb.bridges:
+            _require(
+                cb.boundary_id.value not in iltiqa_boundaries,
+                "a bridge sits on an iltiqa boundary",
+            )
+            _require(
+                bridge.sound.sound_id.value not in iltiqa_sounds,
+                "a bridge holds an iltiqa sound",
+            )
             endpoints = {
                 c.value for c in (*bridge.before_column_ids, *bridge.after_column_ids)
             }
@@ -158,7 +179,7 @@ def validate_cell_view(
 ) -> None:
     _check_stop_signs(view, bundle)
     _check_one_cell_per_sound(view, bundle)
-    _check_no_iltiqa_bridge(view)
+    _check_no_iltiqa_bridge(view, bundle)
     _check_bridges(view, bundle, source)
     _check_closure(view, bundle)
 
