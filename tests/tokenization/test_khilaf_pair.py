@@ -1,8 +1,13 @@
-"""The mini seen of a seen/saad khilaf: whether the script writes it, and how
-the riwayah's default and the variant decide the sound. Whether it tokenizes
-as its own paired unit is left open; these pin the script and sound facts."""
+"""The mini seen of a seen/saad khilaf: whether the script writes it, how the
+riwayah's default and the variant decide the sound, and -- now decided -- that
+where the script writes it the native builder makes it its own paired unit."""
 from __future__ import annotations
 
+from quranic_phonemizer.analysis.source import build_source_view
+from quranic_phonemizer.analysis.source_dtos import LetterUnitKind
+from quranic_phonemizer.api import recitation
+from quranic_phonemizer.model.address import Riwayah
+from quranic_phonemizer.session import phonemize_request
 from tests.support import KhilafId, Option, Script, Site, VariantSelection, reading
 
 SEEN_ABOVE = "ۜ"
@@ -53,6 +58,20 @@ def test_at_the_unwritten_site_one_unit_carries_the_variant_sound():
     assert "sˤ" not in seen.phonemes(3)
     indopak = reading(BIMUSAYTIR, script=Script.INDOPAK, isolated=3)
     assert indopak.phonemes(3) == default.phonemes(3)
+
+
+def test_a_written_mini_seen_tokenizes_as_its_own_paired_unit():
+    """The decided fold: at a written site the seen is its own letter unit,
+    riding the base it pairs with, and the pair is two units."""
+    ref = "2:245:14"
+    session = phonemize_request(recitation(Riwayah("hafs")), ref)
+    view = build_source_view(
+        session, ref=ref, riwayah="hafs", script="uthmani", variant={}
+    )
+    seen = next(u for u in view.units if u.text in SEEN_MARKS)
+    assert seen.kind is LetterUnitKind.LETTER
+    assert seen.written_on_unit_id is not None
+    assert seen.written_on_unit_id != seen.id
 
 
 def test_the_position_states_nothing_about_the_default():
