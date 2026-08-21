@@ -177,6 +177,40 @@ def test_the_sites_exercise_every_boundary_state(hafs):
     assert states == set(BoundaryState)
 
 
+@pytest.mark.slow
+def test_the_cell_column_laws_hold_over_the_whole_corpus(hafs, packed):
+    """build_cell_words validates the columns against their source view; run it
+    over every verse joined and stopped after each internal word, so the laws
+    bite in every boundary state, not only on the curated sites."""
+    from quranic_phonemizer.model.address import Script
+    from quranic_phonemizer.orthography.inventory import InventoryError
+
+    info = packed.surah_info
+    uthmani = 0
+    indopak = 0
+    for surah in range(1, 115):
+        for ayah in range(1, len(info[str(surah)]) + 1):
+            ref = f"{surah}:{ayah}"
+            words = info[str(surah)][ayah - 1]
+            stops = [f"{ref}:{word}" for word in range(1, words)]
+            for kwargs in ({}, {"stop_refs": stops}):
+                _build(hafs, ref, kwargs)
+                uthmani += 1
+                try:
+                    session = phonemize_request(
+                        hafs, ref, script=Script.INDOPAK, **kwargs
+                    )
+                    build_cell_words(
+                        session, ref=ref, riwayah="hafs", script="indopak",
+                        variant={},
+                    )
+                except InventoryError:
+                    continue
+                indopak += 1
+    assert uthmani > 12000
+    assert indopak > 1500
+
+
 def test_a_long_vowel_is_a_madd_carrier_with_the_haraka_above_it(hafs):
     """The waw of الطور carries the long vowel and takes a main madd column; the
     damma before it rides that column, attached above."""
@@ -262,6 +296,21 @@ def test_the_default_seen_sad_site_is_two_columns_without_a_variant(hafs):
         if view.units[c.source_unit_ids[0].value].written_on_unit_id is not None
     ]
     assert len(riders) == 1
+    assert all(c.variant_id is None for c in _columns(words))
+
+
+@pytest.mark.parametrize(
+    "option",
+    [
+        Option(KhilafId.MADD_LAZIM_TASHEEL, "tasheel"),
+        Option(KhilafId.IQLAB_NASAL, "assimilated"),
+        Option(KhilafId.SEEN_SAD_BASTAH, "seen"),
+    ],
+)
+def test_a_foreign_khilaf_leaves_the_seen_sad_pair_unmarked(hafs, option):
+    """Selecting a khilaf that does not govern this pair's word -- another
+    site's seen/saad among them -- marks neither cell of the pair."""
+    _, words, _ = _build(hafs, "2:245:14", {}, VariantSelection((option,)))
     assert all(c.variant_id is None for c in _columns(words))
 
 

@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from ...model.address import Option, SlotId, VariantSelection
+from ...model.address import KhilafId, Location, Option, SlotId, VariantSelection
 from ...model.performance import Consonant, Quality, Vowel
 from ...render.alphabet import packaged_alphabet
 from ...session import Session
@@ -33,8 +33,18 @@ class _Reading:
     variant_of_unit: dict[int, Option]
 
 
+#: Where the rasm writes a base letter and a mini seen riding it, the read half
+#: turns on one seen/saad khilaf, one per word it covers.
+_SEEN_SAD_SITES: dict[Location, KhilafId] = {
+    Location(2, 245, 14): KhilafId.SEEN_SAD_YABSUT,
+    Location(7, 69, 22): KhilafId.SEEN_SAD_BASTAH,
+    Location(52, 37, 7): KhilafId.SEEN_SAD_AL_MUSAYTIRUN,
+    Location(88, 22, 3): KhilafId.SEEN_SAD_BIMUSAYTIR,
+}
+
+
 def _reading(view: SourceView, facts: AnalysisFacts, insc: InscriptionFacts,
-             selection: VariantSelection) -> _Reading:
+             locations: tuple[Location, ...], selection: VariantSelection) -> _Reading:
     long_vowel = frozenset(
         i for i, f in enumerate(facts.sounds)
         if isinstance(f.value, Vowel) and f.value.long
@@ -59,22 +69,29 @@ def _reading(view: SourceView, facts: AnalysisFacts, insc: InscriptionFacts,
     )
     return _Reading(
         long_vowel, consonant, quality, slot_of_unit, owner, main,
-        _variant_of_unit(view, selection),
+        _variant_of_unit(view, locations, selection),
     )
 
 
-def _variant_of_unit(view: SourceView, selection: VariantSelection) -> dict[int, Option]:
-    """The one khilaf whose selection this request carries, on both cells of the
-    single riding-letter pair whose displayed state it decides."""
-    pairs = [
-        (unit.id.value, unit.written_on_unit_id.value)
-        for unit in view.units
-        if unit.kind is LetterUnitKind.LETTER and unit.written_on_unit_id is not None
-    ]
-    if len(pairs) != 1 or len(selection.options) != 1:
-        return {}
-    option = selection.options[0]
-    return {pairs[0][0]: option, pairs[0][1]: option}
+def _variant_of_unit(
+    view: SourceView, locations: tuple[Location, ...], selection: VariantSelection
+) -> dict[int, Option]:
+    """On both cells of a riding-letter pair, the seen/saad khilaf governing the
+    pair's word, but only where this request selects that khilaf's option."""
+    out: dict[int, Option] = {}
+    for unit in view.units:
+        if unit.kind is not LetterUnitKind.LETTER or unit.written_on_unit_id is None:
+            continue
+        khilaf = _SEEN_SAD_SITES.get(locations[unit.word_id.value])
+        if khilaf is None:
+            continue
+        choice = selection.chosen(khilaf)
+        if choice is None:
+            continue
+        option = Option(khilaf, choice)
+        out[unit.id.value] = option
+        out[unit.written_on_unit_id.value] = option
+    return out
 
 
 def _role(unit: LetterUnit, reading: _Reading) -> CellRole:
@@ -200,7 +217,9 @@ def build_cell_words(
     )
     facts = analyse(session, packaged_alphabet(), extra_phonemes=extra_phonemes)
     insc = inscribe(session)
-    reading = _reading(view, facts, insc, session.performance.selection)
+    reading = _reading(
+        view, facts, insc, session.locations, session.performance.selection
+    )
     words = _words(view, reading)
     validate_cell_columns(words, view, reading.slot_of_unit)
     return words
