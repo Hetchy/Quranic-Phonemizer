@@ -26,11 +26,13 @@ class _Reading:
 
     long_vowel_orders: frozenset[int]
     consonant_orders: frozenset[int]
-    quality_of_order: dict[int, Quality]
+    canonical_quality: dict[int, Quality | None]
     slot_of_unit: dict[int, SlotId]
     owner_of_sound: dict[int, int]
     main_units: tuple[int, ...]
     variant_of_unit: dict[int, Option]
+    below_units: frozenset[int]
+    written_on: dict[int, int]
 
 
 #: Where the rasm writes a base letter and a mini seen riding it, the read half
@@ -52,13 +54,13 @@ def _reading(view: SourceView, facts: AnalysisFacts, insc: InscriptionFacts,
     consonant = frozenset(
         i for i, f in enumerate(facts.sounds) if isinstance(f.value, Consonant)
     )
-    quality = {
-        i: f.value.quality for i, f in enumerate(facts.sounds)
-        if isinstance(f.value, Vowel)
-    }
     slot_of_unit = {
         unit.id.value: insc.slot_of[min(c.value for c in unit.character_ids)]
         for unit in view.units if unit.character_ids
+    }
+    canonical_quality = {
+        uid: facts.slots[facts.slot_index[slot]].nucleus.quality
+        for uid, slot in slot_of_unit.items()
     }
     owner = {
         s.value: unit.id.value for unit in view.units for s in unit.owned_sound_ids
@@ -67,9 +69,17 @@ def _reading(view: SourceView, facts: AnalysisFacts, insc: InscriptionFacts,
         unit.id.value for unit in view.units
         if unit.kind is LetterUnitKind.LETTER and unit.written_on_unit_id is None
     )
+    below = frozenset(
+        unit.id.value for unit in view.units
+        if any(c.value in insc.below for c in unit.character_ids)
+    )
+    written_on = {
+        unit.id.value: unit.written_on_unit_id.value
+        for unit in view.units if unit.written_on_unit_id is not None
+    }
     return _Reading(
-        long_vowel, consonant, quality, slot_of_unit, owner, main,
-        _variant_of_unit(view, locations, selection),
+        long_vowel, consonant, canonical_quality, slot_of_unit, owner, main,
+        _variant_of_unit(view, locations, selection), below, written_on,
     )
 
 
@@ -109,18 +119,41 @@ def _rides(unit: LetterUnit) -> bool:
     return unit.kind is not LetterUnitKind.LETTER or unit.written_on_unit_id is not None
 
 
-def _rider_quality(unit: LetterUnit, reading: _Reading) -> Quality | None:
-    for sound in (*unit.owned_sound_ids, *unit.presented_sound_ids):
-        if sound.value in reading.quality_of_order:
-            return reading.quality_of_order[sound.value]
-    return None
-
-
 def _tier(unit: LetterUnit, reading: _Reading) -> CellTier:
+    """The written position of a riding mark, invariant of the boundary. A
+    riding letter (the mini seen) takes its script's own position; a haraka or
+    tanween is below for a kasra or kasratan and above otherwise."""
     if not _rides(unit):
         return CellTier.MAIN
-    quality = _rider_quality(unit, reading)
+    if unit.kind is LetterUnitKind.LETTER:
+        return CellTier.BELOW if unit.id.value in reading.below_units else CellTier.ABOVE
+    quality = reading.canonical_quality.get(unit.id.value)
     return CellTier.BELOW if quality is Quality.I else CellTier.ABOVE
+
+
+def _main_of_slot(unit_id: int, reading: _Reading) -> int | None:
+    slot = reading.slot_of_unit.get(unit_id)
+    seats = [
+        u for u in reading.main_units
+        if reading.slot_of_unit.get(u) == slot and u != unit_id
+    ]
+    consonants = [u for u in seats if _owns_consonant(u, reading)]
+    picked = consonants or seats
+    return picked[0] if picked else None
+
+
+def _followed_to_main(target: int, reading: _Reading) -> int | None:
+    """A written_on target may itself be a riding mark -- the iqlab meem sits on
+    the tanween, not the letter. Follow it to the main column it rests on."""
+    main = set(reading.main_units)
+    seen: set[int] = set()
+    while target not in main:
+        nxt = reading.written_on.get(target)
+        if nxt is None or nxt in seen:
+            return _main_of_slot(target, reading)
+        seen.add(target)
+        target = nxt
+    return target
 
 
 def _seat_unit(unit: LetterUnit, reading: _Reading) -> int | None:
@@ -128,21 +161,14 @@ def _seat_unit(unit: LetterUnit, reading: _Reading) -> int | None:
     written_on names, the carrier owning a long vowel it presents, or the
     consonant seat of its own slot."""
     if unit.written_on_unit_id is not None:
-        return unit.written_on_unit_id.value
+        return _followed_to_main(unit.written_on_unit_id.value, reading)
     for sound in unit.presented_sound_ids:
         if sound.value not in reading.long_vowel_orders:
             continue
         owner = reading.owner_of_sound.get(sound.value)
         if owner is not None:
             return owner
-    slot = reading.slot_of_unit.get(unit.id.value)
-    seats = [
-        u for u in reading.main_units
-        if reading.slot_of_unit.get(u) == slot and u != unit.id.value
-    ]
-    consonants = [u for u in seats if _owns_consonant(u, reading)]
-    picked = consonants or seats
-    return picked[0] if picked else None
+    return _main_of_slot(unit.id.value, reading)
 
 
 def _owns_consonant(unit_id: int, reading: _Reading) -> bool:

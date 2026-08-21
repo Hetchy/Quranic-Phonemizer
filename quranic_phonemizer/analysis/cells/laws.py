@@ -1,7 +1,7 @@
 """Validation the source cell columns must pass before a consumer reads them.
 
-One column per unit; every lexical character in one column in render order; a
-riding mark on a main column of its word and slot; unit rules and silence exact.
+One column per unit, its characters and text that unit's; every lexical
+character once in render order; a riding mark on a main column; rules exact.
 """
 from __future__ import annotations
 
@@ -26,6 +26,16 @@ def _by_unit(columns: list[CellColumn]) -> dict[int, CellColumn]:
         _require(uid not in out, f"unit {uid} has two columns")
         out[uid] = col
     return out
+
+
+def _check_unit_binding(columns: list[CellColumn], view: SourceView) -> None:
+    for col in columns:
+        unit = view.units[col.source_unit_ids[0].value]
+        _require(
+            col.source_character_ids == unit.character_ids,
+            "a column's characters are not its unit's",
+        )
+        _require(col.text == unit.text, "a column's text is not its unit's")
 
 
 def _check_coverage(columns: list[CellColumn], view: SourceView) -> None:
@@ -61,13 +71,13 @@ def _check_attachment(
         _require(target in mains, "attachment is not a main column of the word")
         unit = view.units[col.source_unit_ids[0].value]
         seat = view.units[columns[target].source_unit_ids[0].value]
-        if unit.written_on_unit_id is not None:
-            _require(seat.id == unit.written_on_unit_id, "attachment ignores written_on")
-        else:
-            _require(
-                slot_of_unit.get(unit.id.value) == slot_of_unit.get(seat.id.value),
-                "attachment crosses a slot",
-            )
+        # A written_on target that is itself riding -- the iqlab meem on the
+        # tanween -- seats on a main of that target's slot, not the target.
+        seated_on = unit.written_on_unit_id.value if unit.written_on_unit_id else unit.id.value
+        _require(
+            slot_of_unit.get(seat.id.value) == slot_of_unit.get(seated_on),
+            "attachment leaves the mark's slot",
+        )
 
 
 def _check_rules(columns: list[CellColumn], view: SourceView) -> None:
@@ -99,6 +109,7 @@ def validate_cell_columns(
     columns = [col for word in words for col in word.columns]
     by_unit = _by_unit(columns)
     _require(len(by_unit) == len(view.units), "there is not one column per unit")
+    _check_unit_binding(columns, view)
     _check_coverage(columns, view)
     _check_order(words, view)
     for word in words:

@@ -20,13 +20,21 @@ from quranic_phonemizer.analysis.cells import (
 from quranic_phonemizer.analysis.cells.laws import _by_unit
 from quranic_phonemizer.analysis.inscription import inscribe
 from quranic_phonemizer.analysis.source import build_source_view
-from quranic_phonemizer.analysis.source_dtos import CharacterKind, LiteralSilence
+from quranic_phonemizer.analysis.source_dtos import (
+    CharacterKind,
+    LetterUnitKind,
+    LiteralSilence,
+)
 from quranic_phonemizer.model.address import (
     KhilafId,
     Option,
+    Script,
     VariantSelection,
+    VerseRef,
 )
 from quranic_phonemizer.session import phonemize_request
+from quranic_phonemizer.session.boundaries import resolve_boundaries
+from quranic_phonemizer.session.core import Session
 
 #: One reference per boundary state and hard case: a word isolated, a start,
 #: joined words, ikhfaa, a cross-word idgham merger, muqattaat, a long ayah, the
@@ -52,6 +60,8 @@ _SILENT_ZERO = "۟"
 _TATWEEL = "ـ"
 #: The dagger alif the rasm leaves out, a carrier where the reading lengthens.
 _DAGGER = "ٰ"
+#: The small high meem IndoPak writes over a tanween to mark iqlab.
+_IQLAB_MEEM = "ۢ"
 
 
 def _build(hafs, ref, kwargs, selection=VariantSelection()):
@@ -68,6 +78,22 @@ def _build(hafs, ref, kwargs, selection=VariantSelection()):
         for u in view.units if u.character_ids
     }
     return view, words, slot_of_unit
+
+
+def _indopak_session(hafs, sources, surah, ayah, stop_refs=()):
+    """A Session over a verse's own IndoPak source text. The packed corpus is
+    Uthmani only, so reading a verse as IndoPak means reading it from here."""
+    verse = VerseRef(surah, ayah)
+    words = sources[Script.INDOPAK][(surah, ayah)]
+    locations = tuple(location for location, _ in words)
+    built = hafs.build(hafs.read(Script.INDOPAK, verse, words))
+    boundaries = resolve_boundaries(
+        built.inscription.advice, locations, built.score, stop_refs=stop_refs
+    )
+    performance = hafs.perform(built.score, boundaries)
+    return Session(
+        locations, built.score, built.inscription, boundaries, performance
+    )
 
 
 def _columns(words):
@@ -178,13 +204,10 @@ def test_the_sites_exercise_every_boundary_state(hafs):
 
 
 @pytest.mark.slow
-def test_the_cell_column_laws_hold_over_the_whole_corpus(hafs, packed):
-    """build_cell_words validates the columns against their source view; run it
-    over every verse joined and stopped after each internal word, so the laws
-    bite in every boundary state, not only on the curated sites."""
-    from quranic_phonemizer.model.address import Script
-    from quranic_phonemizer.orthography.inventory import InventoryError
-
+def test_the_cell_column_laws_hold_over_the_whole_corpus(hafs, packed, sources):
+    """Run build_cell_words over every verse joined and stopped after each
+    internal word, so the laws bite in every boundary state. IndoPak is read
+    from its own source text, not the packed Uthmani under its inventory."""
     info = packed.surah_info
     uthmani = 0
     indopak = 0
@@ -196,19 +219,14 @@ def test_the_cell_column_laws_hold_over_the_whole_corpus(hafs, packed):
             for kwargs in ({}, {"stop_refs": stops}):
                 _build(hafs, ref, kwargs)
                 uthmani += 1
-                try:
-                    session = phonemize_request(
-                        hafs, ref, script=Script.INDOPAK, **kwargs
-                    )
-                    build_cell_words(
-                        session, ref=ref, riwayah="hafs", script="indopak",
-                        variant={},
-                    )
-                except InventoryError:
-                    continue
+            for stop_refs in ((), tuple(stops)):
+                session = _indopak_session(hafs, sources, surah, ayah, stop_refs)
+                build_cell_words(
+                    session, ref=ref, riwayah="hafs", script="indopak", variant={}
+                )
                 indopak += 1
     assert uthmani > 12000
-    assert indopak > 1500
+    assert indopak > 12000
 
 
 def test_a_long_vowel_is_a_madd_carrier_with_the_haraka_above_it(hafs):
@@ -314,6 +332,80 @@ def test_a_foreign_khilaf_leaves_the_seen_sad_pair_unmarked(hafs, option):
     assert all(c.variant_id is None for c in _columns(words))
 
 
+def test_a_kasra_is_below_whatever_the_boundary(hafs):
+    """Tier is the written position, invariant of the boundary: every kasra of
+    1:1:1 is below whether it sounds joined or drops at a stop -- including the
+    final one, which the performed vowel would leave unplaced at a stop."""
+    for kwargs in ({}, {"stop_refs": ["1:1:1"]}):
+        view, words, _ = _build(hafs, "1:1:1", kwargs)
+        harakas = [
+            c for c in _columns(words)
+            if view.units[c.source_unit_ids[0].value].kind is LetterUnitKind.HARAKA
+        ]
+        assert harakas and all(c.tier is CellTier.BELOW for c in harakas)
+
+
+def test_a_sukun_and_a_non_kasra_haraka_ride_above(hafs):
+    """The other harakas and the sukun take the position above the letter."""
+    view, words, _ = _build(hafs, "52:37:7", {})
+    for col in _columns(words):
+        unit = view.units[col.source_unit_ids[0].value]
+        if unit.kind is LetterUnitKind.SUKUN:
+            assert col.tier is CellTier.ABOVE
+        if unit.kind is LetterUnitKind.HARAKA and unit.text != "ِ":
+            assert col.tier is CellTier.ABOVE
+
+
+def test_the_uthmani_low_seen_rides_below(hafs):
+    """The mini seen at 52:37:7 is the small low seen; its tier is the script's
+    own written position, below, though it owns no vowel to sound above."""
+    view, words, _ = _build(hafs, "52:37:7", {})
+    seen = next(
+        c for c in _columns(words)
+        if view.units[c.source_unit_ids[0].value].written_on_unit_id is not None
+    )
+    assert seen.tier is CellTier.BELOW
+
+
+def test_the_indopak_pass_validates_the_indopak_mini_seen(hafs, sources):
+    """At bimusaytir Uthmani writes no mark and IndoPak writes the mini seen, so
+    reading the IndoPak source -- not the packed Uthmani under the IndoPak
+    inventory -- is what brings the pair under the laws, above where it sits."""
+    session = _indopak_session(hafs, sources, 88, 22)
+    view = build_source_view(
+        session, ref="88:22", riwayah="hafs", script="indopak", variant={}
+    )
+    words = build_cell_words(
+        session, ref="88:22", riwayah="hafs", script="indopak", variant={}
+    )
+    riders = [
+        c for c in _columns(words)
+        if view.units[c.source_unit_ids[0].value].written_on_unit_id is not None
+    ]
+    assert len(riders) == 1
+    assert riders[0].tier is CellTier.ABOVE
+
+
+def test_the_indopak_iqlab_meem_seats_on_the_letter_not_the_tanween(hafs, sources):
+    """The IndoPak iqlab meem is written over the tanween, itself a riding mark,
+    so its column follows through to the main letter the tanween sits on."""
+    session = _indopak_session(hafs, sources, 2, 10)
+    view = build_source_view(
+        session, ref="2:10", riwayah="hafs", script="indopak", variant={}
+    )
+    words = build_cell_words(
+        session, ref="2:10", riwayah="hafs", script="indopak", variant={}
+    )
+    meem = next(c for c in _columns(words) if c.text == _IQLAB_MEEM)
+    assert meem.tier is CellTier.ABOVE
+    word = next(w for w in words if any(c.id == meem.id for c in w.columns))
+    seat = next(c for c in word.columns if c.id == meem.attached_to_column_id)
+    seat_unit = view.units[seat.source_unit_ids[0].value]
+    assert seat.tier is CellTier.MAIN
+    assert seat_unit.kind is LetterUnitKind.LETTER
+    assert seat_unit.written_on_unit_id is None
+
+
 def _replace_column(words, target, **changes):
     out = []
     for word in words:
@@ -377,6 +469,33 @@ def test_validation_rejects_an_invented_silence(hafs):
     )
     with pytest.raises(CellValidationError):
         validate_cell_columns(broken, view, slot)
+
+
+def test_validation_rejects_a_column_whose_characters_are_not_its_unit(hafs):
+    """Moving a folded shadda into its own column -- لّ | َ -> لَ | ّ -- keeps the
+    global coverage and one column per unit, yet each column's characters and
+    text no longer match the unit it stands for."""
+    view, words, slot = _build(hafs, "112:1", {})
+    lam = next(
+        c for c in _columns(words)
+        if _SHADDA in c.text and len(c.source_character_ids) > 1
+    )
+    word = next(w for w in words if any(c.id == lam.id for c in w.columns))
+    haraka = word.columns[[c.id for c in word.columns].index(lam.id) + 1]
+    fatha_id = haraka.source_character_ids[0]
+    text = {c.id.value: c.text for c in view.characters}
+    moved = _replace_column(
+        words, lam.id,
+        source_character_ids=(lam.source_character_ids[0], fatha_id),
+        text=text[lam.source_character_ids[0].value] + text[fatha_id.value],
+    )
+    moved = _replace_column(
+        moved, haraka.id,
+        source_character_ids=(lam.source_character_ids[1],),
+        text=text[lam.source_character_ids[1].value],
+    )
+    with pytest.raises(CellValidationError):
+        validate_cell_columns(moved, view, slot)
 
 
 def test_by_unit_rejects_two_columns_for_one_unit(hafs):
