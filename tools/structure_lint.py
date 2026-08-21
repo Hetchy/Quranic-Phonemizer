@@ -40,9 +40,9 @@ ALLOWED: dict[str, set[str]] = {
     # the request layers and nothing of the projection above it.
     "session": {"canon", "corpus", "engine", "model"},
     # The native projection's facts. It reimplements what it needs and reads
-    # only the resolved request, the model, and the notation -- no edge to the
-    # public assembler above it.
-    "analysis": {"model", "render", "session"},
+    # only the resolved request, the model, the notation, and the pen -- no
+    # edge to the public assembler above it.
+    "analysis": {"model", "orthography", "render", "session"},
     # Above `api`: it imports the assembled bundle rather than re-deriving
     # it. It reaches the request layers through `session` now, so it keeps no
     # direct canon, corpus or engine edge -- a declared edge nothing exercises
@@ -61,6 +61,9 @@ MODULE_ALLOWED: dict[tuple[str, str], set[str]] = {
     ("canon", "orthography"): {"adapter"},
     ("session", "canon"): {"build", "ledger"},
     ("session", "engine"): {"boundary_plan"},
+    # The transformed cell view spells the performed letter with the pen; it
+    # takes typed canon values and returns them, so no inventory or codepoint.
+    ("analysis", "orthography"): {"write"},
 }
 
 #: Names a consumer outside this repository may import. Everything else that
@@ -442,6 +445,28 @@ def role_vocabulary() -> list[Problem]:
     return out
 
 
+#: Attributes that name a rule's identity. Reading either to decide a
+#: transformed status is what the transform lint forbids. The source columns
+#: read occurrences for the silence law and the highlights read a rule family,
+#: both legitimately, so the ban is scoped to the one transform module.
+_RULE_IDENTITY = frozenset({"rule", "rule_id"})
+
+
+def transform_rule_id() -> list[Problem]:
+    """`transform.py` must decide status from the attribution kind and the
+    letter, never from a rule identity ported out of the legacy respelling."""
+    out: list[Problem] = []
+    path = PACKAGE / "analysis" / "cells" / "transform.py"
+    if not path.exists():
+        return out
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Attribute) and node.attr in _RULE_IDENTITY:
+            out.append((path, node.lineno, "transform-rule-id",
+                        f"reads .{node.attr} to decide a transformed status"))
+    return out
+
+
 def _parameters(node) -> tuple[str, ...]:
     """Positional and keyword-only names, less `self`. Keyed on names rather
     than on the function's own name, so an implementation is recognised by
@@ -508,6 +533,7 @@ CHECKS = {
     "import-graph": import_graph,
     "unused-imports": unused_imports,
     "role-vocabulary": role_vocabulary,
+    "transform-rule-id": transform_rule_id,
     "signature-honesty": signature_honesty,
     "module-size": module_size,
     "dead-exports": dead_exports,

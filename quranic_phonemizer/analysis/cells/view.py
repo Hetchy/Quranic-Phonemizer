@@ -13,6 +13,7 @@ from ..dtos import Boundary, Merger
 from ..ids import CellColumnId
 from ..source import build_source_view
 from ..source_dtos import Character, CharacterKind, MergerPlacement, SourceView
+from ...orthography.write import Pen
 from .columns import build_cell_words
 from .dtos import (
     CellBoundary,
@@ -25,6 +26,8 @@ from .dtos import (
     CellView,
     CellWord,
 )
+from .transform import transform_words
+from .transform_laws import validate_transformed
 from .view_laws import validate_cell_view
 
 
@@ -142,12 +145,22 @@ def build_cell_view(
     script: str,
     variant: dict,
     extra_phonemes: frozenset[str] = frozenset(),
+    spelling: str = "source",
+    pen: Pen | None = None,
 ) -> CellView:
+    if spelling not in ("source", "transformed"):
+        raise ValueError(f"spelling must be 'source' or 'transformed', got {spelling!r}")
     kw = dict(ref=ref, riwayah=riwayah, script=script, variant=variant,
               extra_phonemes=extra_phonemes)
     words = build_cell_words(session, **kw)
     bundle = build_bundle(session, **kw)
     source = build_source_view(session, **kw)
+    if spelling == "transformed":
+        if pen is None:
+            raise ValueError("the transformed spelling needs a pen")
+        words = transform_words(
+            words, session, source, pen, extra_phonemes=extra_phonemes
+        )
     placement_of = {p.merger_id.value: p for p in source.merger_placements}
     column_of_unit = _column_of_unit(words)
     words, shared = _extract_merger_sounds(words, bundle.mergers)
@@ -156,6 +169,8 @@ def build_cell_view(
     )
     view = CellView(words=words, boundaries=boundaries)
     validate_cell_view(view, bundle, source)
+    if spelling == "transformed":
+        validate_transformed(view, source, session.performance.selection)
     return view
 
 

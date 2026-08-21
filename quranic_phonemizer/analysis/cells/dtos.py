@@ -45,6 +45,7 @@ class CellTier(StrEnum):
 class CellStatus(StrEnum):
     PRESENT = "present"
     INSERTED = "inserted"
+    REPLACED = "replaced"
     DROPPED = "dropped"
     GAP = "gap"
 
