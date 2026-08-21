@@ -4,14 +4,27 @@ Each keys on the grapheme kind and the fact it supplies, never on the scalar.
 """
 from __future__ import annotations
 
+from quranic_phonemizer.analysis.ids import RuleId
+from quranic_phonemizer.analysis.result import build_result
 from quranic_phonemizer.analysis.source import build_source_view
-from quranic_phonemizer.analysis.source_dtos import CharacterKind, LetterUnitKind
-from quranic_phonemizer.model.address import Script, VerseRef
+from quranic_phonemizer.analysis.source_dtos import (
+    CharacterKind,
+    LetterUnitKind,
+    LiteralSilence,
+)
+from quranic_phonemizer.model.address import (
+    KhilafId,
+    Option,
+    Script,
+    VariantSelection,
+    VerseRef,
+)
 from quranic_phonemizer.session import phonemize_request
 from quranic_phonemizer.session.boundaries import resolve_boundaries
 from quranic_phonemizer.session.core import Session
 
 PAUSAL_ZERO = "۠"      # the rectangular zero of the seven alifs
+ROUND_ZERO = "۟"       # the round zero over a purely orthographic alif
 IMALA_MARK = "۪"       # the empty-centre low stop over the imala raa
 SEEN_ABOVE = "ۜ"       # the small high seen
 SEEN_BELOW = "ۣ"       # the small low seen
@@ -64,6 +77,31 @@ def test_the_pausal_zero_folds_into_the_silent_alif_it_marks(hafs):
     assert not any(u.text == PAUSAL_ZERO for u in view.units)
 
 
+def test_a_shortened_pausal_alif_carrier_names_the_rule_that_shortened_it(hafs):
+    """Joined, wasl takes the pausal alif's length back: the carrier sounds
+    nothing and its silence is the pausal_alif occurrence, not the literal."""
+    session = phonemize_request(hafs, "18:38", script=Script("uthmani"))
+    view = build_source_view(
+        session, ref="18:38", riwayah="hafs", script="uthmani", variant={}
+    )
+    carrier = _unit_of(view, PAUSAL_ZERO)
+    assert carrier.silence not in (None, LiteralSilence.ORTHOGRAPHIC)
+    assert carrier.silence in carrier.rule_occurrence_ids
+    result = build_result(
+        session, ref="18:38", riwayah="hafs", script="uthmani", variant={}
+    )
+    occurrence = next(o for o in result.rule_occurrences if o.id == carrier.silence)
+    assert occurrence.rule_id == RuleId("pausal_alif")
+
+
+def test_a_purely_orthographic_alif_keeps_the_literal_silence(hafs):
+    """The dropped alif of qaaluu is written and never said with no rule
+    taking a length back, so its silence stays the literal orthographic."""
+    view = _view(hafs, "2:32:1")
+    carrier = _unit_of(view, ROUND_ZERO)
+    assert carrier.silence is LiteralSilence.ORTHOGRAPHIC
+
+
 def test_the_imala_mark_folds_into_the_letter_it_qualifies(hafs):
     """The mark supplies a vowel quality yet mints no unit; the raa carries it."""
     view = _view(hafs, "11:41")
@@ -73,9 +111,10 @@ def test_the_imala_mark_folds_into_the_letter_it_qualifies(hafs):
     assert not any(u.text == IMALA_MARK for u in view.units)
 
 
-def test_a_written_mini_seen_is_its_own_paired_unit(hafs):
-    """The seen the script writes rides the base saad as its own letter unit,
-    and the pair is two units; one sounds and the other is silent."""
+def test_the_read_half_of_the_seen_saad_pair_owns_the_sound(hafs):
+    """The seen the script writes rides the base saad as its own letter unit.
+    On the seen reading the mini seen sounds and the base saad is silent; the
+    unread half takes the literal orthographic, not the sound."""
     view = _view(hafs, "2:245:14")
     seen = _unit_of(view, SEEN_ABOVE)
     saad = _unit_of(view, SAD)
@@ -83,8 +122,23 @@ def test_a_written_mini_seen_is_its_own_paired_unit(hafs):
     assert seen.id != saad.id
     assert seen.written_on_unit_id == saad.id
     assert seen.text == SEEN_ABOVE
-    sounding = bool(seen.owned_sound_ids) ^ bool(saad.owned_sound_ids)
-    assert sounding, "exactly one of the pair sounds"
+    assert seen.owned_sound_ids and not saad.owned_sound_ids
+    assert seen.silence is None
+    assert saad.silence is LiteralSilence.ORTHOGRAPHIC
+
+
+def test_the_saad_reading_flips_which_half_of_the_pair_sounds(hafs):
+    """Selecting saad at the same site reads the base and silences the mini
+    seen: the owner and the orthographic-silent half swap with the reading."""
+    view = _view(
+        hafs, "2:245:14",
+        selection=VariantSelection((Option(KhilafId.SEEN_SAD_YABSUT, "saad"),)),
+    )
+    seen = _unit_of(view, SEEN_ABOVE)
+    saad = _unit_of(view, SAD)
+    assert saad.owned_sound_ids and not seen.owned_sound_ids
+    assert saad.silence is None
+    assert seen.silence is LiteralSilence.ORTHOGRAPHIC
 
 
 def test_the_mini_seen_pairs_in_both_scripts(hafs, sources):

@@ -155,7 +155,7 @@ def build_source_view(
         i for i, word in enumerate(session.score.words) if word.sakt_after
     )
     tok = tokenize(insc, sakt_words)
-    own = ownership(facts, tok)
+    own = ownership(facts, tok, insc)
     plc = placements(own, bundle.sounds, bundle.rule_occurrences, bundle.mergers)
 
     owned = _owned_by_unit(own)
