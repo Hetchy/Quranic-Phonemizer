@@ -39,6 +39,10 @@ ALLOWED: dict[str, set[str]] = {
     # The resolved request: words, boundaries, and the built score. It reads
     # the request layers and nothing of the projection above it.
     "session": {"canon", "corpus", "engine", "model"},
+    # The native projection's facts. It reimplements what it needs and reads
+    # only the resolved request, the model, and the notation -- no edge to the
+    # public assembler above it.
+    "analysis": {"model", "render", "session"},
     # Above `api`: it imports the assembled bundle rather than re-deriving
     # it. It reaches the request layers through `session` now, so it keeps no
     # direct canon, corpus or engine edge -- a declared edge nothing exercises
