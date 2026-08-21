@@ -8,7 +8,7 @@ from __future__ import annotations
 from dataclasses import replace
 
 from ...model.canon import Onset, Quality
-from ...model.performance import Consonant, Side, Vowel
+from ...model.performance import Consonant, Vowel
 from ...orthography.write import Pen
 from ...render.alphabet import packaged_alphabet
 from ...session import Session
@@ -105,42 +105,15 @@ def _inserted_column(
     )
 
 
-def _unit_of_slot(slot_of_unit: dict[int, object]) -> dict[object, int]:
-    out: dict[object, int] = {}
-    for unit, slot in sorted(slot_of_unit.items()):
-        out.setdefault(slot, unit)
-    return out
-
-
 def _insertions(
     words: tuple[CellWord, ...], facts: AnalysisFacts,
-    slot_of_unit: dict[int, object], pen: Pen,
 ) -> tuple[CellWord, ...]:
-    """Hafs mints no insertion, so this yields nothing over the corpus; the
-    machinery stands for the reading that will."""
-    if not facts.insertions:
-        return words
-    unit_of_slot = _unit_of_slot(slot_of_unit)
-    next_id = 1 + max(c.id.value for w in words for c in w.columns)
-    by_word: dict[int, list[CellColumn]] = {}
-    for edge in facts.insertions:
-        slot, side = edge.anchor
-        anchor = unit_of_slot.get(slot)
-        if anchor is None:
-            continue
-        by_word.setdefault(facts.word_of_slot[slot.ordinal], []).append(
-            _inserted_column(
-                next_id, LetterUnitId(anchor),
-                CellSide.BEFORE if side is Side.BEFORE else CellSide.AFTER,
-                edge.sound, facts, pen,
-            )
-        )
-        next_id += 1
-    return tuple(
-        replace(w, columns=(*w.columns, *by_word.get(w.word_id.value, ())))
-        if w.word_id.value in by_word else w
-        for w in words
-    )
+    """No Hafs reading inserts a slot-less sound. Assembling an inserted column
+    at its anchor and spanning its sound belongs to the reading that mints one;
+    `_inserted_column` states the shape such a column takes."""
+    if facts.insertions:
+        raise NotImplementedError("inserting a slot-less sound is unimplemented")
+    return words
 
 
 def transform_words(
@@ -157,7 +130,7 @@ def transform_words(
         ))
         for word in words
     )
-    return _insertions(out, facts, slot_of_unit, pen)
+    return _insertions(out, facts)
 
 
 __all__ = ["transform_words"]
