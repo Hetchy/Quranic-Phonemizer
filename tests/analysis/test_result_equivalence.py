@@ -162,6 +162,7 @@ def test_occurrences_agree_in_words_boundaries_and_sounds(
             per_sound[sound].add(edge.by)
     for modifier in legacy.modifiers:
         per_sound[modifier.sound].add(modifier.by)
+    assert len(native.rule_occurrences) == len(session.performance.occurrences)
     for i, occurrence in enumerate(session.performance.occurrences):
         instance, native_occ = legacy.rules[i], native.rule_occurrences[i]
         assert native_occ.rule_id.value == occurrence.rule.value
@@ -210,6 +211,20 @@ def test_closed_reference_validation_rejects_a_dangling_id(
         validate(broken)
 
 
+@pytest.mark.parametrize(("ref", "kwargs"), [("2:255", {})])
+def test_validation_rejects_a_duplicate_occurrence(hafs, pen, alphabet, ref, kwargs):
+    session = phonemize_request(hafs, ref, **kwargs)
+    bundle = build_bundle(
+        session, ref=ref, riwayah="hafs", script="uthmani", variant={}
+    )
+    validate(bundle)  # the honest bundle passes
+    doubled = dataclasses.replace(
+        bundle, rule_occurrences=bundle.rule_occurrences + (bundle.rule_occurrences[-1],)
+    )
+    with pytest.raises(ValidationError):
+        validate(doubled)
+
+
 def test_the_site_set_exercises_the_hard_cases(hafs, pen, alphabet):
     states: set[BoundaryState] = set()
     mergers = iltiqa = False
@@ -256,3 +271,21 @@ def test_the_equivalence_bites(hafs, pen, alphabet):
         for i, legacy_word in enumerate(legacy.words):
             after = broken.boundaries[i + 1]
             assert (after.state is BoundaryState.STOP) == legacy_word.is_stopped_on
+
+
+@pytest.mark.parametrize(("ref", "kwargs"), SITES)
+def test_a_boundary_with_advice_carries_its_written_sign(hafs, pen, alphabet, ref, kwargs):
+    _, _, native = _both(hafs, pen, alphabet, ref, kwargs)
+    signed = [b for b in native.boundaries if b.stop_advice is not None]
+    for boundary in signed:
+        assert boundary.stop_sign, "an advised boundary writes no sign"
+
+
+def test_the_written_signs_are_exercised(hafs, pen, alphabet):
+    # non-vacuity: the sweep actually has advised, sign-carrying boundaries.
+    total = 0
+    for ref, kwargs in SITES:
+        _, _, native = _both(hafs, pen, alphabet, ref, kwargs)
+        total += sum(1 for b in native.boundaries if b.stop_sign)
+    assert total > 0
+

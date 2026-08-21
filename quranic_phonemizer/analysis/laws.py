@@ -20,6 +20,10 @@ def validate(bundle: AnalysisBundle) -> None:
     sound_ids = {sound.id for sound in bundle.sounds}
     occ_ids = {occurrence.id for occurrence in bundle.rule_occurrences}
     rule_ids = {definition.id for definition in rule_definitions()}
+    _require(
+        len(occ_ids) == len(bundle.rule_occurrences),
+        "occurrence ids are not unique",
+    )
 
     _check_boundaries(bundle, word_ids)
     _check_words(bundle, boundary_ids, sound_ids)
