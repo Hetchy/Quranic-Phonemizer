@@ -1,0 +1,209 @@
+"""Build the source cell columns of a request from its source view.
+
+Role and tier come from the unit kind and the reading; a riding mark attaches to
+the main column its written_on names, or of the carrier or seat it qualifies.
+"""
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+from ...model.address import Option, SlotId, VariantSelection
+from ...model.performance import Consonant, Quality, Vowel
+from ...render.alphabet import packaged_alphabet
+from ...session import Session
+from ..facts import AnalysisFacts, analyse
+from ..ids import CellColumnId
+from ..inscription import InscriptionFacts, inscribe
+from ..source import build_source_view
+from ..source_dtos import LetterUnit, LetterUnitKind, SourceView
+from .dtos import CellColumn, CellRole, CellStatus, CellTier, CellWord
+from .laws import validate_cell_columns
+
+
+@dataclass(frozen=True, slots=True)
+class _Reading:
+    """What the reading says about the units, keyed for column decisions."""
+
+    long_vowel_orders: frozenset[int]
+    consonant_orders: frozenset[int]
+    quality_of_order: dict[int, Quality]
+    slot_of_unit: dict[int, SlotId]
+    owner_of_sound: dict[int, int]
+    main_units: tuple[int, ...]
+    variant_of_unit: dict[int, Option]
+
+
+def _reading(view: SourceView, facts: AnalysisFacts, insc: InscriptionFacts,
+             selection: VariantSelection) -> _Reading:
+    long_vowel = frozenset(
+        i for i, f in enumerate(facts.sounds)
+        if isinstance(f.value, Vowel) and f.value.long
+    )
+    consonant = frozenset(
+        i for i, f in enumerate(facts.sounds) if isinstance(f.value, Consonant)
+    )
+    quality = {
+        i: f.value.quality for i, f in enumerate(facts.sounds)
+        if isinstance(f.value, Vowel)
+    }
+    slot_of_unit = {
+        unit.id.value: insc.slot_of[min(c.value for c in unit.character_ids)]
+        for unit in view.units if unit.character_ids
+    }
+    owner = {
+        s.value: unit.id.value for unit in view.units for s in unit.owned_sound_ids
+    }
+    main = tuple(
+        unit.id.value for unit in view.units
+        if unit.kind is LetterUnitKind.LETTER and unit.written_on_unit_id is None
+    )
+    return _Reading(
+        long_vowel, consonant, quality, slot_of_unit, owner, main,
+        _variant_of_unit(view, selection),
+    )
+
+
+def _variant_of_unit(view: SourceView, selection: VariantSelection) -> dict[int, Option]:
+    """The one khilaf whose selection this request carries, on both cells of the
+    single riding-letter pair whose displayed state it decides."""
+    pairs = [
+        (unit.id.value, unit.written_on_unit_id.value)
+        for unit in view.units
+        if unit.kind is LetterUnitKind.LETTER and unit.written_on_unit_id is not None
+    ]
+    if len(pairs) != 1 or len(selection.options) != 1:
+        return {}
+    option = selection.options[0]
+    return {pairs[0][0]: option, pairs[0][1]: option}
+
+
+def _role(unit: LetterUnit, reading: _Reading) -> CellRole:
+    if unit.kind is LetterUnitKind.HARAKA:
+        return CellRole.HARAKA
+    if unit.kind is LetterUnitKind.SUKUN:
+        return CellRole.SUKUN
+    if unit.kind is LetterUnitKind.TANWEEN:
+        return CellRole.TANWEEN
+    carries = any(s.value in reading.long_vowel_orders for s in unit.owned_sound_ids)
+    return CellRole.MADD if carries else CellRole.LETTER
+
+
+def _rides(unit: LetterUnit) -> bool:
+    return unit.kind is not LetterUnitKind.LETTER or unit.written_on_unit_id is not None
+
+
+def _rider_quality(unit: LetterUnit, reading: _Reading) -> Quality | None:
+    for sound in (*unit.owned_sound_ids, *unit.presented_sound_ids):
+        if sound.value in reading.quality_of_order:
+            return reading.quality_of_order[sound.value]
+    return None
+
+
+def _tier(unit: LetterUnit, reading: _Reading) -> CellTier:
+    if not _rides(unit):
+        return CellTier.MAIN
+    quality = _rider_quality(unit, reading)
+    return CellTier.BELOW if quality is Quality.I else CellTier.ABOVE
+
+
+def _seat_unit(unit: LetterUnit, reading: _Reading) -> int | None:
+    """The main letter or carrier a riding mark attaches to: the unit its
+    written_on names, the carrier owning a long vowel it presents, or the
+    consonant seat of its own slot."""
+    if unit.written_on_unit_id is not None:
+        return unit.written_on_unit_id.value
+    for sound in unit.presented_sound_ids:
+        if sound.value not in reading.long_vowel_orders:
+            continue
+        owner = reading.owner_of_sound.get(sound.value)
+        if owner is not None:
+            return owner
+    slot = reading.slot_of_unit.get(unit.id.value)
+    seats = [
+        u for u in reading.main_units
+        if reading.slot_of_unit.get(u) == slot and u != unit.id.value
+    ]
+    consonants = [u for u in seats if _owns_consonant(u, reading)]
+    picked = consonants or seats
+    return picked[0] if picked else None
+
+
+def _owns_consonant(unit_id: int, reading: _Reading) -> bool:
+    return any(
+        owned == unit_id and sound in reading.consonant_orders
+        for sound, owned in reading.owner_of_sound.items()
+    )
+
+
+def _column(unit: LetterUnit, reading: _Reading,
+            column_of_unit: dict[int, int]) -> CellColumn:
+    role = _role(unit, reading)
+    tier = _tier(unit, reading)
+    attached = None
+    if tier is not CellTier.MAIN:
+        seat = _seat_unit(unit, reading)
+        attached = None if seat is None else CellColumnId(column_of_unit[seat])
+    status = CellStatus.DROPPED if unit.silence is not None else CellStatus.PRESENT
+    option = reading.variant_of_unit.get(unit.id.value)
+    return CellColumn(
+        id=CellColumnId(column_of_unit[unit.id.value]),
+        role=role,
+        text=unit.text,
+        source_character_ids=unit.character_ids,
+        source_unit_ids=(unit.id,),
+        tier=tier,
+        attached_to_column_id=attached,
+        status=status,
+        rule_occurrence_ids=unit.rule_occurrence_ids,
+        silence=unit.silence,
+        variant_id=None if option is None else option.khilaf,
+        variant_choice=None if option is None else option.name,
+    )
+
+
+def _anchor(unit: LetterUnit) -> int:
+    return min(c.value for c in unit.character_ids)
+
+
+def _words(view: SourceView, reading: _Reading) -> tuple[CellWord, ...]:
+    by_word: dict[int, list[LetterUnit]] = {}
+    for unit in view.units:
+        by_word.setdefault(unit.word_id.value, []).append(unit)
+    ordered = {w: sorted(units, key=_anchor) for w, units in by_word.items()}
+
+    column_of_unit: dict[int, int] = {}
+    for word in sorted(ordered):
+        for unit in ordered[word]:
+            column_of_unit[unit.id.value] = len(column_of_unit)
+
+    out: list[CellWord] = []
+    for word in sorted(ordered):
+        columns = tuple(
+            _column(unit, reading, column_of_unit) for unit in ordered[word]
+        )
+        out.append(CellWord(view.units[ordered[word][0].id.value].word_id, columns))
+    return tuple(out)
+
+
+def build_cell_words(
+    session: Session,
+    *,
+    ref: str,
+    riwayah: str,
+    script: str,
+    variant: dict,
+    extra_phonemes: frozenset[str] = frozenset(),
+) -> tuple[CellWord, ...]:
+    view = build_source_view(
+        session, ref=ref, riwayah=riwayah, script=script, variant=variant,
+        extra_phonemes=extra_phonemes,
+    )
+    facts = analyse(session, packaged_alphabet(), extra_phonemes=extra_phonemes)
+    insc = inscribe(session)
+    reading = _reading(view, facts, insc, session.performance.selection)
+    words = _words(view, reading)
+    validate_cell_columns(words, view, reading.slot_of_unit)
+    return words
+
+
+__all__ = ["build_cell_words"]
