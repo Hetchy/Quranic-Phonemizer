@@ -14,18 +14,46 @@ from .attributions import (
     Relengthened,
     Silenced,
 )
+from .derivations import (
+    decoration_targets,
+    open_vowel_units,
+    shortened_carriers,
+    silent_groups,
+)
 from .facts import AnalysisFacts, analyse
+from .glyphs import Glyph, GlyphKind, glyph_kind_of
+from .inscription import (
+    Decorated,
+    InscriptionFacts,
+    Structural,
+    Supplied,
+    Witnessed,
+    inscribe,
+)
 from .sounds import SoundFact
 
 __all__ = [
     "AnalysisFacts",
     "Classified",
+    "Decorated",
+    "Glyph",
+    "GlyphKind",
     "Hosted",
     "Insertion",
+    "InscriptionFacts",
     "Merged",
     "Recoloured",
     "Relengthened",
     "Silenced",
     "SoundFact",
+    "Structural",
+    "Supplied",
+    "Witnessed",
     "analyse",
+    "decoration_targets",
+    "glyph_kind_of",
+    "inscribe",
+    "open_vowel_units",
+    "shortened_carriers",
+    "silent_groups",
 ]
