@@ -56,7 +56,7 @@ def test_a_tanween_noon_takes_a_kasra_to_reach_the_next_word(
 ):
     r = reading(Site(hafs=(ref, (word, word + 1))), ibtidaa=word, waqf=word + 1)
     assert (r.phonemes(word), r.phonemes(word + 1)) == (first, second)
-    occurrence = _at_boundary(r, Rule.ILTIQA_KASRA, word)
+    occurrence = _at_boundary(r, Rule.ILTIQA_HARAKA, word)
     assert occurrence.subjects == (r.score.words[word - 1].slots[-1].id,)
     assert occurrence.context == (r.score.words[word].slots[0].id,)
 
@@ -68,7 +68,7 @@ def test_that_kasra_is_put_in_rather_than_merged(ref, word, first, second):
     """The falsifier for a repair read as an assimilation: a `MergedInto`
     citing it would say a letter was lost, and none is."""
     r = reading(Site(hafs=(ref, (word, word + 1))), ibtidaa=word, waqf=word + 1)
-    occurrence = _at_boundary(r, Rule.ILTIQA_KASRA, word)
+    occurrence = _at_boundary(r, Rule.ILTIQA_HARAKA, word)
     assert _mergers(r, occurrence) == []
     assert len(_hosted(r, occurrence)) == 1
 
@@ -77,7 +77,7 @@ def test_a_spelled_out_opening_takes_a_fatha_to_reach_the_divine_name():
     # الٓمٓ ٱللَّهُ
     r = reading(ALIF_LAM_MEEM_ALLAH, ibtidaa=1, wasl=1)
     assert (r.phonemes(1), r.phonemes(2)) == ("ʔalifla:m̃i:ma", "lla:hu")
-    occurrence = _at_boundary(r, Rule.ILTIQA_FATHA, 1)
+    occurrence = _at_boundary(r, Rule.ILTIQA_HARAKA, 1)
     assert occurrence.subjects == (r.score.words[0].slots[-1].id,)
     assert occurrence.context == (r.score.words[1].slots[0].id,)
 
@@ -85,7 +85,7 @@ def test_a_spelled_out_opening_takes_a_fatha_to_reach_the_divine_name():
 def test_that_fatha_is_put_in_rather_than_merged():
     # الٓمٓ ٱللَّهُ
     r = reading(ALIF_LAM_MEEM_ALLAH, ibtidaa=1, wasl=1)
-    occurrence = _at_boundary(r, Rule.ILTIQA_FATHA, 1)
+    occurrence = _at_boundary(r, Rule.ILTIQA_HARAKA, 1)
     assert _mergers(r, occurrence) == []
     assert len(_hosted(r, occurrence)) == 1
 
@@ -94,6 +94,6 @@ def test_the_opening_stopped_on_needs_no_fatha_at_all():
     # الٓمٓ
     r = reading(ALIF_LAM_MEEM_ALLAH, isolated=1)
     assert r.phonemes(1) == "ʔalifla:m̃i:m"
-    assert Rule.ILTIQA_FATHA not in {
+    assert Rule.ILTIQA_HARAKA not in {
         occurrence.rule for occurrence in r.performance.occurrences
     }

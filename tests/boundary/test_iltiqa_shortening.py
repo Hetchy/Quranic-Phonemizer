@@ -74,7 +74,7 @@ def test_a_tanween_takes_a_linking_kasra_before_a_prosthetic_hamza(
     first, last = words
     r = _joined(ref, words)
     assert (r.phonemes(first), r.phonemes(last)) == expected
-    assert "iltiqa_kasra" in r.rules_on_char(first, mark)
+    assert "iltiqa_haraka" in r.rules_on_char(first, mark)
 
 
 AMILU_SSALIHAT = Site(hafs=("2:25", (4, 5)))

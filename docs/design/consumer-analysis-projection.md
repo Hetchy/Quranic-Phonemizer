@@ -1265,8 +1265,7 @@ Expected vocabulary translations include:
 | hamza_wasl_fatha/kasra/damma | same exact v11 tag |
 | ibdal_hamza | ibdal_hamza |
 | iltiqa_shortening | iltiqaa |
-| iltiqa_kasra | iltiqaa_kasra |
-| iltiqa_fatha | iltiqaa_fatha |
+| iltiqa_haraka | iltiqaa_kasra or iltiqaa_fatha per context; the Phase 6 adapter resolves which |
 | waqf_taa_marbuta | taa_marbuta_pausal |
 | waqf_diacritic_drop | place pausal_sukun on the corresponding legacy cell and deduplicate within that cell's rules array |
 | waqf_diacritic_drop with non-taa-marbuta madd_iwad | omit pausal_sukun; keep madd_iwad + madd_tabii |
@@ -1275,7 +1274,7 @@ Expected vocabulary translations include:
 | ordinary madd_badal | madd_tabii |
 | madd_badal + contextual madd | contextual madd only; suppress badal |
 | ordinary madd_silah + madd_tabii | madd_tabii |
-| madd_silah + madd_jaiz_munfasil | exact madd_jaiz_munfasil v11 tag, without duplicate tabii |
+| madd_silah + madd_munfasil | exact madd_jaiz_munfasil v11 tag, without duplicate tabii |
 | pausal_alif at wasl | omitted |
 | pausal_alif at waqf | pausal_sukun |
 | native orthographic-silence state | orthographic_silence |

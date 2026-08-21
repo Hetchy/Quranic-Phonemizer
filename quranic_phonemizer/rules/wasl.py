@@ -122,7 +122,7 @@ class TanweenBeforeWasl:
     # takes the kasra that breaks them. The other half of the same repair
     # shortens a madd instead -- see `rules/madd.py::IltiqaShortening`.
 
-    rule: Rule = Rule.ILTIQA_KASRA
+    rule: Rule = Rule.ILTIQA_HARAKA
     phase: Phase = Phase.BOUNDARY
     triggers: frozenset = frozenset({CanonLetter.NOON})
 
@@ -142,7 +142,7 @@ class TanweenBeforeWasl:
             return None
         return Verdict(
             Occurrence(
-                mint(Rule.ILTIQA_KASRA, at), Rule.ILTIQA_KASRA, (at,),
+                mint(Rule.ILTIQA_HARAKA, at), Rule.ILTIQA_HARAKA, (at,),
                 (following.id,), boundary=word,
             ),
             (Realize(at, Aspect.VOWEL, Vowel(Quality.I)),),
@@ -159,7 +159,7 @@ class SpelledBeforeWasl:
     # the meem voweled, so the long vowel before it is no longer stopped by a
     # sakin and `MaddLazim` reads it as the ordinary two counts.
 
-    rule: Rule = Rule.ILTIQA_FATHA
+    rule: Rule = Rule.ILTIQA_HARAKA
     phase: Phase = Phase.BOUNDARY
     triggers: frozenset = frozenset({VowelForm.ABSENT})
 
@@ -183,7 +183,7 @@ class SpelledBeforeWasl:
             return None
         return Verdict(
             Occurrence(
-                mint(Rule.ILTIQA_FATHA, at), Rule.ILTIQA_FATHA, (at,),
+                mint(Rule.ILTIQA_HARAKA, at), Rule.ILTIQA_HARAKA, (at,),
                 (following.id,), boundary=word,
             ),
             (Realize(at, Aspect.VOWEL, Vowel(Quality.A)),),

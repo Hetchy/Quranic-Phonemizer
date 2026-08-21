@@ -157,8 +157,12 @@ def test_deleted_names_stay_deleted() -> None:
     for renamed in (
         "FAKK_IDGHAM",
         "IKHFAA_HAQIQI",
+        "ILTIQA_FATHA",
+        "ILTIQA_KASRA",
         "IWAD",
         "MADD_ARID_LIL_SUKUN",
+        "MADD_JAIZ_MUNFASIL",
+        "MADD_WAJIB_MUTTASIL",
         "PAUSAL_SUKUN",
         "TAA_MARBUTA_PAUSAL",
         "WASL_ELISION",

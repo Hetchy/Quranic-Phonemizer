@@ -57,7 +57,7 @@ def test_a_rule_publishes_only_a_unit_its_own_edges_name():
     }
     assert merger_by and all(r.rules[i].host is not None for i in merger_by)
     classifying = [i for i, rule in enumerate(r.rules)
-                   if rule.rule.value == "madd_jaiz_munfasil"]
+                   if rule.rule.value == "madd_munfasil"]
     assert classifying
     assert all(r.rules[i].host is None for i in classifying)
 

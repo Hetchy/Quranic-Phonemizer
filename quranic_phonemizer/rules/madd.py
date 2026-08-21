@@ -183,9 +183,9 @@ def _in_context(
     if following.letter is L.HAMZA:
         # Muttasil in the same word, munfasil across a boundary -- and a particle the rasm joined is a boundary the writing does not show.
         rule = (
-            Rule.MADD_JAIZ_MUNFASIL
+            Rule.MADD_MUNFASIL
             if final or Annotation.JOINED_PARTICLE in slot.annotations
-            else Rule.MADD_WAJIB_MUTTASIL
+            else Rule.MADD_MUTTASIL
         )
         return (rule, following.id)
 

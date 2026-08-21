@@ -53,11 +53,7 @@ SAMPLE = (
 #: produced by some classifier in the corpus; a member here needs a reason,
 #: and `test_the_deferred_list_does_not_rot` fails once the reason no longer
 #: holds.
-DEFERRED: set[Rule] = {
-    # Only `الٓمٓ ٱللَّهُ` meets it, and that join is across two verses while this
-    # scan scores one ayah at a time. `test_muqattaat` covers it on the pair.
-    Rule.ILTIQA_FATHA,
-}
+DEFERRED: set[Rule] = set()
 
 
 def _fired(packed, hafs, surah, ayah):

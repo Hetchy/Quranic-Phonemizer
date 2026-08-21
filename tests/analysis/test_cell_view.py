@@ -370,7 +370,7 @@ def test_law_26_bites_a_bridge_over_the_real_host_owned_iltiqa(hafs):
 
     view, bundle, _ = _build(hafs, "3:1-3:2", {})
     occ = next(
-        o for o in bundle.rule_occurrences if o.rule_id.value == "iltiqa_fatha"
+        o for o in bundle.rule_occurrences if o.rule_id.value == "iltiqa_haraka"
     )
     assert occ.boundary_ids and occ.sound_ids
     boundary_id = occ.boundary_ids[0]
