@@ -5,6 +5,7 @@ is silent-only; a group holds one owner unless a shared sound joins a second.
 """
 from __future__ import annotations
 
+from . import ids
 from .dtos import AnalysisBundle
 from .highlight_dtos import HighlightGroup
 from .source_dtos import CharacterKind, SourceView
@@ -23,15 +24,42 @@ def _check_references(groups, view: SourceView, bundle: AnalysisBundle) -> None:
     unit_ids = {unit.id for unit in view.units}
     sound_ids = {sound.id for sound in bundle.sounds}
     for order, group in enumerate(groups):
-        _require(group.id.value == order, "group ids are not positional")
+        _require(group.id == ids.HighlightId(order), "group ids are not positional")
         for unit in group.unit_ids:
             _require(unit in unit_ids, f"group {order} names a missing unit")
         for sound in group.sound_ids:
             _require(sound in sound_ids, f"group {order} names a missing sound")
-        for (lo, hi), (nlo, _) in zip(group.ranges, group.ranges[1:]):
-            _require(lo < hi <= nlo, f"group {order} ranges overlap or misorder")
-        for lo, hi in group.ranges:
-            _require(lo < hi, f"group {order} has an empty range")
+
+
+def _coalesce(positions: list[int]) -> tuple[tuple[int, int], ...]:
+    spans: list[list[int]] = []
+    for value in sorted(positions):
+        if spans and spans[-1][1] == value:
+            spans[-1][1] = value + 1
+        else:
+            spans.append([value, value + 1])
+    return tuple((lo, hi) for lo, hi in spans)
+
+
+def _check_ranges(groups, view: SourceView) -> None:
+    """A group's ranges are exactly its own units' scalars, coalesced; and no
+    two groups' ranges overlap anywhere in the text."""
+    for order, group in enumerate(groups):
+        expected = _coalesce(
+            [
+                scalar
+                for u in group.unit_ids
+                for lo, hi in view.units[u.value].ranges
+                for scalar in range(lo, hi)
+            ]
+        )
+        _require(
+            group.ranges == expected,
+            f"group {order} ranges are not its units' scalars",
+        )
+    spans = sorted(span for group in groups for span in group.ranges)
+    for (lo, hi), (nlo, _) in zip(spans, spans[1:]):
+        _require(hi <= nlo, "highlight ranges overlap across groups")
 
 
 def _check_sounds(groups, bundle: AnalysisBundle) -> None:
@@ -77,6 +105,18 @@ def _check_groups_are_sounded(groups, view: SourceView) -> None:
             bool(owners),
             f"group {group.id.value} is silent-only, no unit owns a sound",
         )
+        held = {
+            sound
+            for u in group.unit_ids
+            for sound in view.units[u.value].owned_sound_ids
+            + view.units[u.value].presented_sound_ids
+        }
+        for sound in group.sound_ids:
+            _require(
+                sound in held,
+                f"group {group.id.value} sound {sound.value} has no owner or "
+                "presenter in it",
+            )
 
 
 def _owner_of(view: SourceView) -> dict[int, int]:
@@ -145,6 +185,7 @@ def validate_highlight_groups(
     bundle: AnalysisBundle,
 ) -> None:
     _check_references(groups, view, bundle)
+    _check_ranges(groups, view)
     _check_sounds(groups, bundle)
     _check_coverage(groups, view)
     _check_groups_are_sounded(groups, view)

@@ -19,6 +19,10 @@ from quranic_phonemizer.analysis.highlight_laws import (
 )
 from quranic_phonemizer.analysis.highlights import highlight_groups
 from quranic_phonemizer.analysis.source import build_source_view
+from quranic_phonemizer.analysis.source_dtos import LetterUnitKind
+from quranic_phonemizer.model.address import Script
+from quranic_phonemizer.orthography.inventory import InventoryError
+from quranic_phonemizer.model.canon import Rule
 from quranic_phonemizer.session import phonemize_request
 
 #: One site per fold direction and hard case: a silent alif that folds back,
@@ -46,13 +50,13 @@ SITES = [
 ]
 
 
-def _built(hafs, ref, kwargs):
-    session = phonemize_request(hafs, ref, **kwargs)
+def _built(hafs, ref, kwargs, script=Script.UTHMANI):
+    session = phonemize_request(hafs, ref, script=script, **kwargs)
     bundle = build_bundle(
-        session, ref=ref, riwayah="hafs", script="uthmani", variant={}
+        session, ref=ref, riwayah="hafs", script=script.value, variant={}
     )
     view = build_source_view(
-        session, ref=ref, riwayah="hafs", script="uthmani", variant={}
+        session, ref=ref, riwayah="hafs", script=script.value, variant={}
     )
     return bundle, view, highlight_groups(view, bundle)
 
@@ -61,10 +65,32 @@ def _is_long(token: str) -> bool:
     return ("ː" in token) or (":" in token)
 
 
+def _rule_names(bundle, sound) -> set[str]:
+    rule_of = {occ.id.value: occ.rule_id.value for occ in bundle.rule_occurrences}
+    return {rule_of[o.value] for o in sound.rule_occurrence_ids}
+
+
+def _is_carrier(bundle, view, unit_id) -> bool:
+    """A written madd carrier is a source letter that sounds no consonant of its
+    own: a bare alif, waw, or yaa, or a silent length letter folded in."""
+    unit = view.units[unit_id]
+    if unit.kind is not LetterUnitKind.LETTER:
+        return False
+    return not any(
+        not _is_long(bundle.sounds[s.value].token) for s in unit.owned_sound_ids
+    )
+
+
+def _owns_consonant(bundle, unit) -> bool:
+    return any(
+        not _is_long(bundle.sounds[s.value].token) for s in unit.owned_sound_ids
+    )
+
+
 def _long_vowel_violations(bundle, view, groups) -> list[str]:
-    """Every long vowel owns a madd unit alone in its group, except where the
-    script writes no separate carrier: a spelled-out muqattaat letter owns its
-    whole name, and the divine name and hamza with fathatan own it on a haraka."""
+    """Every long vowel has a madd unit alone with its own owner in its group,
+    except where the script writes no carrier: a muqattaat letter spelling its
+    own name, or the divine name and hamza with fathatan seated on a haraka."""
     owner_unit = {
         sound.value: unit.id.value
         for unit in view.units
@@ -77,20 +103,30 @@ def _long_vowel_violations(bundle, view, groups) -> list[str]:
     for sound in bundle.sounds:
         if not _is_long(sound.token):
             continue
+        group = group_of[sound.id.value]
         owner = view.units[owner_unit[sound.id.value]]
-        spelt_out = any(
-            not _is_long(bundle.sounds[s.value].token)
-            for s in owner.owned_sound_ids
-        )
-        if spelt_out:
+        if any(_is_carrier(bundle, view, u.value) for u in group.unit_ids):
+            foreign = [
+                u.value
+                for u in group.unit_ids
+                if u.value != owner.id.value
+                and _owns_consonant(bundle, view.units[u.value])
+            ]
+            if foreign:
+                out.append(
+                    f"{bundle.ref}: long {sound.id.value} shares its group "
+                    f"with {foreign}"
+                )
             continue
-        others = [
-            s.value
-            for s in group_of[sound.id.value].sound_ids
-            if s.value != sound.id.value
-        ]
-        if others:
-            out.append(f"{bundle.ref}: long {sound.id.value} shares {others}")
+        # No carrier in the group; excused only where the script writes none:
+        # the divine name and hamza with fathatan seat the length on a mark, a
+        # muqattaat letter spells the length into its own name.
+        seated_on_mark = owner.kind is not LetterUnitKind.LETTER
+        muqattaat = _owns_consonant(bundle, owner) and (
+            Rule.IMALA.value not in _rule_names(bundle, sound)
+        )
+        if not (seated_on_mark or muqattaat):
+            out.append(f"{bundle.ref}: long {sound.id.value} has no madd unit")
     return out
 
 
@@ -127,6 +163,30 @@ def test_an_elided_hamzat_wasl_folds_forward(hafs):
     wasl = next(u for u in view.units if u.text == "ٱ" and u.silence)
     lam = next(u for u in view.units if "لّ" in u.text)  # shaddad lam
     assert of_unit[wasl.id.value] is of_unit[lam.id.value]
+
+
+def test_a_prefixed_wasl_still_folds_forward_not_into_the_prefix(hafs):
+    """A hamzat wasl carries a sounding prefix vowel before it in the same word
+    (2:3 bi-al-ghayb). It still elides into the letter after it; folding it back
+    into the prefix -- the adjacency guess -- is the direction bug."""
+    _, view, groups = _built(hafs, "2:3", {})
+    of_unit = _group_of_unit(groups)
+    wasl = next(
+        u for i, u in enumerate(view.units)
+        if isinstance(u.silence, ids.OccurrenceId)
+        and u.text == "ٱ"
+        and i > 0
+        and view.units[i - 1].word_id == u.word_id
+        and (
+            view.units[i - 1].owned_sound_ids
+            or view.units[i - 1].presented_sound_ids
+        )
+    )
+    after = view.units[wasl.id.value + 1]
+    before = view.units[wasl.id.value - 1]
+    assert after.owned_sound_ids
+    assert of_unit[wasl.id.value] is of_unit[after.id.value]
+    assert of_unit[wasl.id.value] is not of_unit[before.id.value]
 
 
 def test_an_iltiqa_vowel_chains_across_the_boundary(hafs):
@@ -195,20 +255,38 @@ def test_the_madd_carrier_is_a_group_apart_from_its_consonant(hafs):
 # --- the whole corpus, opt-in ---------------------------------------------
 
 
+def _hold(hafs, ref, kwargs, script) -> None:
+    bundle, view, groups = _built(hafs, ref, kwargs, script)
+    validate_highlight_groups(groups, view, bundle)
+    violations = _long_vowel_violations(bundle, view, groups)
+    assert not violations, violations
+
+
 @pytest.mark.slow
 def test_the_laws_hold_over_the_whole_corpus(hafs, packed):
     info = packed.surah_info
-    checked = 0
+    uthmani = 0
+    indopak = 0
     for surah in range(1, 115):
         for ayah in range(1, len(info[str(surah)]) + 1):
             ref = f"{surah}:{ayah}"
-            for kwargs in ({}, {"stop_refs": [ref]}):
-                bundle, view, groups = _built(hafs, ref, kwargs)
-                validate_highlight_groups(groups, view, bundle)
-                violations = _long_vowel_violations(bundle, view, groups)
-                assert not violations, violations
-                checked += 1
-    assert checked > 12000
+            words = info[str(surah)][ayah - 1]
+            # Stop after every internal word so the paused plan really differs
+            # from the joined one; a bare verse ref names no internal boundary.
+            stops = [f"{ref}:{word}" for word in range(1, words)]
+            for kwargs in ({}, {"stop_refs": stops}):
+                _hold(hafs, ref, kwargs, Script.UTHMANI)
+                uthmani += 1
+                try:
+                    _hold(hafs, ref, kwargs, Script.INDOPAK)
+                except InventoryError:
+                    # The IndoPak inventory does not declare every corpus
+                    # scalar; where it cannot read the verse there is nothing
+                    # to highlight. The law itself carries no site exemption.
+                    continue
+                indopak += 1
+    assert uthmani > 12000
+    assert indopak > 1500
 
 
 # --- the checks bite -------------------------------------------------------
@@ -311,4 +389,85 @@ def test_a_long_vowel_merged_into_its_consonant_fails_the_long_vowel_law(hafs):
     )
     rest = [g for g in groups if g not in (madd_group, meem_group)] + [merged]
     broken = _reindexed(rest)
+    assert _long_vowel_violations(bundle, view, broken)
+
+
+def _singles(groups) -> list[HighlightGroup]:
+    return [g for g in groups if len(g.unit_ids) == 1 and len(g.sound_ids) == 1]
+
+
+def test_swapped_units_between_groups_fails_the_sound_owner_law(hafs):
+    """Two groups keep their sounds but trade unit_ids and ranges; neither
+    group's sound now resolves to an owner or presenter inside it."""
+    bundle, view, groups = _built(hafs, "1:1", {})
+    a, b = _singles(groups)[0], _singles(groups)[1]
+    swapped_a = dataclasses.replace(a, unit_ids=b.unit_ids, ranges=b.ranges)
+    swapped_b = dataclasses.replace(b, unit_ids=a.unit_ids, ranges=a.ranges)
+    broken = tuple(
+        swapped_a if g is a else swapped_b if g is b else g for g in groups
+    )
+    with pytest.raises(HighlightValidationError):
+        validate_highlight_groups(broken, view, bundle)
+
+
+def test_swapped_ranges_between_groups_fail_the_range_law(hafs):
+    """Ranges no longer coalesce from each group's own units."""
+    bundle, view, groups = _built(hafs, "1:1", {})
+    a, b = _singles(groups)[0], _singles(groups)[1]
+    broken = tuple(
+        dataclasses.replace(a, ranges=b.ranges) if g is a
+        else dataclasses.replace(b, ranges=a.ranges) if g is b
+        else g
+        for g in groups
+    )
+    with pytest.raises(HighlightValidationError):
+        validate_highlight_groups(broken, view, bundle)
+
+
+def test_overlapping_ranges_across_groups_fail_the_range_law(hafs):
+    """One group swallows a scalar a distant group still owns; each group's
+    ranges match its own units, yet the two overlap across the text."""
+    bundle, view, groups = _built(hafs, "1:1", {})
+    early = groups[0]
+    later = next(g for g in groups if g.ranges[0][0] > early.ranges[-1][1])
+    grown = dataclasses.replace(
+        later,
+        unit_ids=tuple(sorted(later.unit_ids + early.unit_ids)),
+        ranges=tuple(sorted(later.ranges + early.ranges)),
+    )
+    broken = tuple(grown if g is later else g for g in groups)
+    with pytest.raises(HighlightValidationError):
+        validate_highlight_groups(broken, view, bundle)
+
+
+def test_a_sound_id_in_place_of_a_highlight_id_fails(hafs):
+    """A group keyed by a SoundId of the same integer as its position is a
+    wrong-kind id, rejected though the integer matches its order."""
+    bundle, view, groups = _built(hafs, "1:1", {})
+    first = groups[0]
+    mistyped = dataclasses.replace(first, id=ids.SoundId(first.id.value))
+    broken = (mistyped,) + tuple(groups[1:])
+    with pytest.raises(HighlightValidationError):
+        validate_highlight_groups(broken, view, bundle)
+
+
+def test_removing_the_madd_units_from_an_imala_group_fails(hafs):
+    """Strip the written madd letters out of the imala group and the long vowel
+    has no carrier left, though its owner still sounds its consonant."""
+    bundle, view, groups = _built(hafs, "11:41", {})
+    imala = next(
+        s for s in bundle.sounds
+        if _is_long(s.token) and Rule.IMALA.value in _rule_names(bundle, s)
+    )
+    group = next(
+        g for g in groups if any(s.value == imala.id.value for s in g.sound_ids)
+    )
+    kept = tuple(
+        u for u in group.unit_ids if not _is_carrier(bundle, view, u.value)
+    )
+    ranges = tuple(
+        sorted(span for u in kept for span in view.units[u.value].ranges)
+    )
+    thinned = dataclasses.replace(group, unit_ids=kept, ranges=ranges)
+    broken = tuple(thinned if g is group else g for g in groups)
     assert _long_vowel_violations(bundle, view, broken)

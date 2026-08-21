@@ -14,6 +14,15 @@ from .highlight_dtos import HighlightGroup
 from .highlight_laws import validate_highlight_groups
 from .source_dtos import SourceView
 
+#: Silence reasons whose unit folds toward the sound that took its place: a
+#: word-start elision, an article lam assimilated into a sun letter, an iltiqa
+#: chain, and cross-word idgham of every family. Every other silence folds back
+#: into the sound before it.
+_FOLD_FORWARD = frozenset(
+    rule.value for rule in Rule
+    if rule.value.startswith(("idgham", "iltiqa"))
+) | {Rule.HAMZA_WASL_SILENT.value, Rule.LAM_SHAMSIYYAH.value}
+
 
 class _Merge:
     """Disjoint-set over unit indices."""
@@ -68,16 +77,6 @@ def _has_owner(view: SourceView, merge: _Merge) -> list[bool]:
     return roots
 
 
-def _predecessor_sounds(view: SourceView, sounding: list[bool], index: int) -> bool:
-    word = view.units[index].word_id
-    cursor = index - 1
-    while cursor >= 0 and view.units[cursor].word_id == word:
-        if sounding[cursor]:
-            return True
-        cursor -= 1
-    return False
-
-
 def _nearest(sounding: list[bool], index: int, step: int) -> int | None:
     cursor = index + step
     while 0 <= cursor < len(sounding):
@@ -87,12 +86,14 @@ def _nearest(sounding: list[bool], index: int, step: int) -> int | None:
     return None
 
 
-def _direction(unit, has_predecessor: bool, iltiqa: bool) -> int:
-    """+1 folds forward, -1 folds back. A soundless mark and a trailing silent
-    letter fold back; a word-start elision and an iltiqa carrier fold forward."""
-    if unit.silence is None:
-        return -1
-    if not has_predecessor or iltiqa:
+def _direction(unit, rule_of: dict[int, str]) -> int:
+    """+1 folds toward the sound that took the unit's place, -1 folds back into
+    the sound before it. The family is the unit's silence reason, not adjacency."""
+    silence = unit.silence
+    if (
+        isinstance(silence, ids.OccurrenceId)
+        and rule_of.get(silence.value) in _FOLD_FORWARD
+    ):
         return 1
     return -1
 
@@ -105,13 +106,7 @@ def _fold(
     for index, unit in enumerate(view.units):
         if has_owner[merge.find(index)]:
             continue
-        iltiqa = (
-            isinstance(unit.silence, ids.OccurrenceId)
-            and rule_of.get(unit.silence.value) == Rule.ILTIQA_SHORTENING.value
-        )
-        step = _direction(
-            unit, _predecessor_sounds(view, sounding, index), iltiqa
-        )
+        step = _direction(unit, rule_of)
         target = _nearest(sounding, index, step)
         if target is None:
             target = _nearest(sounding, index, -step)
