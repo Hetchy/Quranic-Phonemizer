@@ -11,13 +11,15 @@ from ...model.address import KhilafId, Location, Option, SlotId, VariantSelectio
 from ...model.performance import Consonant, Quality, Vowel
 from ...render.alphabet import packaged_alphabet
 from ...session import Session
+from ..build import build_bundle
 from ..facts import AnalysisFacts, analyse
 from ..ids import CellColumnId
 from ..inscription import InscriptionFacts, inscribe
 from ..source import build_source_view
 from ..source_dtos import LetterUnit, LetterUnitKind, SourceView
+from .align import build_cell_sounds
 from .dtos import CellColumn, CellRole, CellStatus, CellTier, CellWord
-from .laws import validate_cell_columns
+from .laws import validate_cell_columns, validate_cell_sounds
 
 
 @dataclass(frozen=True, slots=True)
@@ -201,6 +203,10 @@ def _column(unit: LetterUnit, reading: _Reading,
         silence=unit.silence,
         variant_id=None if option is None else option.khilaf,
         variant_choice=None if option is None else option.name,
+        owned_sound_ids=unit.owned_sound_ids,
+        presented_sound_ids=unit.presented_sound_ids,
+        anchor_unit_id=None,
+        side=None,
     )
 
 
@@ -224,7 +230,9 @@ def _words(view: SourceView, reading: _Reading) -> tuple[CellWord, ...]:
         columns = tuple(
             _column(unit, reading, column_of_unit) for unit in ordered[word]
         )
-        out.append(CellWord(view.units[ordered[word][0].id.value].word_id, columns))
+        out.append(CellWord(
+            view.units[ordered[word][0].id.value].word_id, columns, ()
+        ))
     return tuple(out)
 
 
@@ -246,8 +254,13 @@ def build_cell_words(
     reading = _reading(
         view, facts, insc, session.locations, session.performance.selection
     )
-    words = _words(view, reading)
+    bundle = build_bundle(
+        session, ref=ref, riwayah=riwayah, script=script, variant=variant,
+        extra_phonemes=extra_phonemes,
+    )
+    words = build_cell_sounds(_words(view, reading), bundle.sounds)
     validate_cell_columns(words, view, reading.slot_of_unit)
+    validate_cell_sounds(words, bundle.sounds)
     return words
 
 

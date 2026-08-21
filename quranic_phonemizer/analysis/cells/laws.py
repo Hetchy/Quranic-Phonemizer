@@ -5,8 +5,9 @@ character once in render order; a riding mark on a main column; rules exact.
 """
 from __future__ import annotations
 
+from ..dtos import Sound
 from ..source_dtos import CharacterKind, SourceView
-from .dtos import CellColumn, CellTier, CellWord
+from .dtos import CellColumn, CellSound, CellStatus, CellTier, CellWord
 
 
 class CellValidationError(ValueError):
@@ -50,6 +51,8 @@ def _check_order(words: tuple[CellWord, ...], view: SourceView) -> None:
     for word in words:
         last = -1
         for col in word.columns:
+            if col.status is CellStatus.GAP:
+                continue
             unit = view.units[col.source_unit_ids[0].value]
             _require(unit.word_id == word.word_id, "a column sits in the wrong word")
             first = min(c.value for c in col.source_character_ids)
@@ -106,7 +109,10 @@ def _check_silence(by_unit: dict[int, CellColumn], view: SourceView) -> None:
 def validate_cell_columns(
     words: tuple[CellWord, ...], view: SourceView, slot_of_unit: dict[int, object]
 ) -> None:
-    columns = [col for word in words for col in word.columns]
+    columns = [
+        col for word in words for col in word.columns
+        if col.status is not CellStatus.GAP
+    ]
     by_unit = _by_unit(columns)
     _require(len(by_unit) == len(view.units), "there is not one column per unit")
     _check_unit_binding(columns, view)
@@ -118,4 +124,82 @@ def validate_cell_columns(
     _check_silence(by_unit, view)
 
 
-__all__ = ["CellValidationError", "validate_cell_columns"]
+def _spans(words: tuple[CellWord, ...]) -> dict[int, list[CellColumn]]:
+    """Per sound, the source columns whose own set names it, in render order."""
+    out: dict[int, list[CellColumn]] = {}
+    for word in words:
+        for col in word.columns:
+            for sound in (*col.owned_sound_ids, *col.presented_sound_ids):
+                out.setdefault(sound.value, []).append(col)
+    return out
+
+
+def _render_index(words: tuple[CellWord, ...]) -> dict[int, int]:
+    return {
+        col.id.value: i
+        for i, col in enumerate(col for word in words for col in word.columns)
+    }
+
+
+def _check_sound_coverage(words: tuple[CellWord, ...], sounds: tuple[Sound, ...]) -> None:
+    held: dict[int, int] = {}
+    for word in words:
+        for cell in word.sounds:
+            sid = cell.sound_id.value
+            _require(sid not in held, f"sound {sid} has two cells")
+            held[sid] = word.word_id.value
+    _require(
+        set(held) == {s.id.value for s in sounds},
+        "the sound cells are not exactly the core sounds",
+    )
+    for sound in sounds:
+        _require(
+            held[sound.id.value] == sound.word_id.value,
+            f"sound {sound.id.value} is held by the wrong word",
+        )
+
+
+def _check_span(cell: CellSound, spans: dict[int, list[CellColumn]],
+                columns: dict[int, CellColumn]) -> None:
+    expected = [col.id for col in spans.get(cell.sound_id.value, ())]
+    if expected:
+        _require(list(cell.column_ids) == expected,
+                 f"sound {cell.sound_id.value} spans other than its columns")
+    else:
+        _require(len(cell.column_ids) == 1,
+                 f"presenter-less sound {cell.sound_id.value} spans not one gap")
+        gap = columns[cell.column_ids[0].value]
+        _require(gap.status is CellStatus.GAP,
+                 f"sound {cell.sound_id.value} hangs on a non-gap column")
+
+
+def _check_ordered_nonempty(cell: CellSound, render: dict[int, int]) -> None:
+    _require(bool(cell.column_ids), f"sound {cell.sound_id.value} spans nothing")
+    positions = [render[c.value] for c in cell.column_ids]
+    _require(positions == sorted(set(positions)),
+             f"sound {cell.sound_id.value} span is out of render order")
+
+
+def validate_cell_sounds(
+    words: tuple[CellWord, ...], sounds: tuple[Sound, ...]
+) -> None:
+    spans = _spans(words)
+    render = _render_index(words)
+    columns = {col.id.value: col for word in words for col in word.columns}
+    rules = {s.id.value: s.rule_occurrence_ids for s in sounds}
+    _check_sound_coverage(words, sounds)
+    for word in words:
+        for cell in word.sounds:
+            _check_span(cell, spans, columns)
+            _check_ordered_nonempty(cell, render)
+            _require(
+                cell.rule_occurrence_ids == rules[cell.sound_id.value],
+                f"sound {cell.sound_id.value} cell rules are not its sound's",
+            )
+
+
+__all__ = [
+    "CellValidationError",
+    "validate_cell_columns",
+    "validate_cell_sounds",
+]
