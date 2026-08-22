@@ -4,9 +4,9 @@ Use this prompt in the dedicated tests task for `feat/warsh-phonemizer`.
 
 ## Mission
 
-Reorganize and harden the current suite, add the Warsh script-adapter
-baseline, and then add fixed Warsh behavior one implementation vertical at a
-time. Public variants are the final phase.
+Continue from the completed Hafs test reorganization and compact semantic
+harness. Add the Warsh script-adapter baseline, then add fixed Warsh behavior
+one implementation vertical at a time. Public variants are the final phase.
 
 ## Required reading
 
@@ -32,17 +32,17 @@ restate these contracts inside implementation PRs.
 
 ## Ordered work
 
-1. Perform the mechanical move and preserve all current behavior and counts.
-2. Implement the compact exact-occurrence harness and its fast-gate lint.
-3. Compact the Hafs semantic suite using the coverage method and deletion
-   ledger in the plan.
-4. Add canonical/source alignment and the selected Warsh script adapter.
-5. Extend independently verified shared semantic cases to Warsh.
-6. Add the shared model and riwayah RuleSet foundation.
-7. Implement the fixed Warsh verticals in the exact PR order in the plan.
-8. Prove complete default-profile conformance and only then add Warsh
+1. Treat the existing semantic tree, `Case`/`StateCase`/`VariantCase`
+   harness, selectors, and spaced-token convention as the starting
+   foundation. Existing Hafs selector cases exercise the harness; adding
+   Warsh selector behavior remains the final implementation phase.
+2. Add canonical/source alignment and the selected Warsh script adapter.
+3. Extend independently verified shared semantic cases to Warsh.
+4. Add the shared model and riwayah RuleSet foundation.
+5. Implement the fixed Warsh verticals in the exact PR order in the plan.
+6. Prove complete default-profile conformance and only then add Warsh
    snapshots.
-9. Implement selectors last: 70 semantic `VariantCase` rows plus the small
+7. Implement selectors last: 72 semantic `VariantCase` rows plus the small
    generic API contract covering all 71 selectors. `tamanna_noon` has no new
    phonemization behavior case.
 
@@ -70,13 +70,16 @@ restate these contracts inside implementation PRs.
   snapshot.
 - Variants remain last.
 
-## Working gates
+## Starting checkpoint
 
-During the mechanical move, preserve:
-
-- 1,340 collected cases;
-- 1,336 passed and 4 skipped under the fast gate; and
-- byte-identical Hafs snapshots.
+The semantic refactor runs every declared packaged riwayah and every shipped
+script, so pytest collection is intentionally larger than the historical
+single-script baseline. Preserve byte-identical Hafs snapshots. Corrected
+ownership specifications currently expose runtime gaps in
+`test_mutajanisayn_naqis.py`, `test_ibdal.py`, `test_iltiqa.py`,
+`test_istifham_article.py`, `test_muqattaat.py`, and `test_iwad.py`. Do not
+weaken those expectations to make the checkpoint green; turn each owning file
+green in the corresponding foundation/rule vertical.
 
 Run while working:
 

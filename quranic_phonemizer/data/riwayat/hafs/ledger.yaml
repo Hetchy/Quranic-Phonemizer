@@ -11,6 +11,11 @@ schema_version: 1
 riwayah: hafs
 
 supplies:
+  # 41:44 `ءَا۬عْجَمِيٌّ` - tashil is a reading fact even where the selected
+  # script does not carry the Uthmani easing mark.
+  - {slot: "41:44:9#1", skeleton: "ءءعجمين", fact: ONSET, value: TASHIL,
+     citation: "Hafs; fixed tashil in aajamiyy"}
+
   # رَءَا — Uthmani writes the hamza with a following alif, IndoPak writes a
   # bare alif that carries nothing. The long a is the recitation fact both
   # are spelling.

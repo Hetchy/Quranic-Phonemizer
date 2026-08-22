@@ -286,7 +286,8 @@ def reading(
     recitation_ = _recitation(name)
     address = site.address(riwayah)
     words = _words(recitation_, name, script, address.verse)
-    if reaches_past(len(words), **boundary):
+    focused_past_verse = bool(address.words) and max(address.words) > len(words)
+    if focused_past_verse or reaches_past(len(words), **boundary):
         words = _through(recitation_, name, script, address.verse)
     built = recitation_.build(
         recitation_.read(script, address.verse, words), selection=selection

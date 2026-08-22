@@ -292,6 +292,8 @@ def _modifiers_for(occurrence: Occurrence, effects, hosted) -> list[Modifier]:
         source_sound = None if aspect is None else hosted.get(
             (occurrence.parts.source, aspect)
         )
+        if source_sound is None and occurrence.rule is Rule.MADD_LAZIM:
+            source_sound = hosted.get((occurrence.parts.source, Aspect.CONSONANT))
         if source_sound is not None:
             out.append(Classifies(source_sound, occurrence.id))
     return out

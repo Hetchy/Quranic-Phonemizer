@@ -7,10 +7,10 @@ from ..engine.neighbourhood import Neighbourhood
 from ..engine.plan import MergeInto, Phase, Plan, Realize, Verdict, mint
 from ..model.address import BoundaryPlan, KhilafId, SlotId
 from ..model.canon import CanonLetter as L
-from ..model.canon import Onset, Rule, SlotOrigin
+from ..model.canon import Onset, Rule
 from ..model.performance import Aspect, Consonant, Occurrence, Participants
 from .lam_shamsiyyah import ArticleShape
-from .ownership import is_quiescent
+from .ownership import is_effectively_quiescent
 from .khilaf import nasal_place
 from .tables import Followers
 
@@ -87,15 +87,14 @@ class MeemSakinah:
         self, near: Neighbourhood, plan: Plan, at: SlotId,
         boundaries: BoundaryPlan,
     ) -> Verdict | None:
-        del plan, boundaries  # `near` already refuses to look across a junction
         slot = near.slot(at)
-        if not is_quiescent(slot):
+        if not is_effectively_quiescent(near, plan, at, boundaries):
             return None
         following = near.after(at)
         if following is None:
-            if slot.origin is SlotOrigin.SPELLED and near.last_of_word(at):
-                # The meem closing a disjoined-letter opening takes its own
-                # plain articulation rather than reaching into the next word.
+            if not plan.merged_away(at, Aspect.CONSONANT):
+                # A stop masks the forward family. Any surviving meem is clear,
+                # including a disjoined-letter name.
                 return _verdict(Rule.IZHAR_SHAFAWI, at, None, ())
             return None
 

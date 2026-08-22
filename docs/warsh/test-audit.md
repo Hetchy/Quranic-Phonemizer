@@ -89,7 +89,7 @@ without a boundary or waqf bucket:
 | Owner | Rules and behaviors |
 | --- | --- |
 | `articles/` | `lam_shamsiyyah`, `lam_qamariyyah`, and article/non-article contrasts |
-| `assimilation/` | `idgham_mutamathilayn`, `idgham_mutaqaribayn`, both `idgham_mutajanisayn` forms, and `fakk_idgham` |
+| `assimilation/` | `idgham_mutamathilayn`, `idgham_mutaqaribayn`, both `idgham_mutajanisayn` forms, and ibtidaa recovery from a cross-word merger |
 | `emphasis/` | `tafkheem`, `tarqeeq`, `taghliz`, raa weight, lam weight, and dependent A coloring including fathatan and iwad |
 | `hamza/` | `wasl_start`, `wasl_elision`, `iltiqa_haraka`, `iltiqa_shortening`, `ibdal_hamza`, `tashil`, `naql`, hamza seats, and hamza meetings |
 | `nasal/` | `izhar`, `ikhfaa_haqiqi`, `iqlab`, noon idgham, the three shafawi rules, and `ghunnah_mushaddadah` |
@@ -367,12 +367,10 @@ increase review cost without increasing confidence.
 
 ### Tamanna
 
-Tamanna ishmam is not part of the generic nasal family. Keep one focused
-`phonemize/test_tamanna.py` regression because it has a distinct public sound
-and rule occurrence and later gains selectable behavior. Do not build a
-generic ishmam or nasal matrix around it. At the variants-last stage, extend
-that same file with the alternate face instead of duplicating the default in
-an API test.
+Tamanna ishmam is not part of the generic nasal family and has no clean owner
+in this semantic tree. Do not add another phonemization behavior case. Its
+selector ID, options, default, and scope remain covered by the generated API
+catalogue contract in the variants-last phase.
 
 ## Existing semantic suites
 
@@ -400,16 +398,16 @@ collected case is accounted for by its file row.
 | `nasal/test_ikhfaa_shafawi.py` | 2 | Meem-before-baa and stop reversal. | `phonemize/nasal/test_ikhfaa_shafawi.py` |
 | `nasal/test_iqlab.py` | 13 | Noon/tanwin, internal/cross-word/seam and character ownership. | `phonemize/nasal/test_iqlab.py` |
 | `nasal/test_izhar.py` | 22 | Exhaustive throat letters, noon/tanwin and verse seam. | `phonemize/nasal/test_izhar.py` |
-| `nasal/test_izhar_mutlaq.py` | 4 | Closed four-word exception family. | `phonemize/nasal/test_izhar_mutlaq.py` |
+| `nasal/test_izhar_mutlaq.py` | 4 | Closed four-word exception family. | Merge into `phonemize/nasal/test_izhar.py`. |
 | `nasal/test_izhar_shafawi.py` | 3 | Internal and cross-word clear meem. | `phonemize/nasal/test_izhar_shafawi.py` |
 | `tafkheem/test_istilaa.py` | 19 | Heavy-letter inventory, light contrasts, dependent A coloring, extras. | `phonemize/emphasis/test_istilaa.py` |
-| `tafkheem/test_lam.py` | 17 | Divine-name lam contexts and ordinary-lam contrasts. | `phonemize/emphasis/test_lam.py` |
+| `tafkheem/test_lam.py` | 17 | Divine-name lam contexts and ordinary-lam contrasts. | Keep the divine-name coverage in `phonemize/emphasis/test_allah_lam.py`; drop redundant ordinary-light contrasts. |
 | `tafkheem/test_raa.py` | 19 | Systematic Hafs raa conditions in moving, sakin, stopped, and doubled forms. | `phonemize/emphasis/test_raa.py` |
 | `waqf/test_final_glides.py` | 22 | Joined consonantal glides versus stopped long vowels. | `phonemize/vowels/test_final_glides.py` |
 | `waqf/test_iwad.py` | 8 | Every tanwin quality in joined and stopped states. | `phonemize/vowels/madd/test_iwad.py` |
 | `waqf/test_pausal_sukun.py` | 6 | A/U/I final vowels in joined and stopped states. | `phonemize/vowels/test_pausal_vowels.py` |
 | `waqf/test_seven_alifs.py` | 18 | Seven pausal alifs plus round-zero and Salasila behavior. | `phonemize/vowels/test_seven_alifs.py`; absorb the canonical-shape tests below. |
-| `waqf/test_silah.py` | 12 | Pronoun-haa joined-only length and blockers. | `phonemize/vowels/test_joined_only.py`; later include mim al-jam and vocalic yaa zawaid. |
+| `waqf/test_silah.py` | 12 | Pronoun-haa joined-only length and blockers. | `phonemize/vowels/madd/test_haa_silah.py`; mim al-jam and yaa zawaid keep separate authored-family files. |
 | `waqf/test_taa_marbuta_pausal.py` | 10 | Every final-vowel/tanwin shape in joined and stopped states. | `phonemize/test_taa_marbuta.py` |
 | `test_madd.py` | 21 | Strong behavior but too broad: tabii, muttasil, munfasil, lazim, arid, leen, iwad and exclusions. | Split across `phonemize/vowels/madd/test_tabii.py`, `test_muttasil.py`, `test_munfasil.py`, `test_lazim.py`, `test_arid.py`, and `test_leen.py`. |
 | `test_muqattaat.py` | 27 | Opening-name phonemes, state stability, final noon/meem behavior. | `phonemize/test_muqattaat.py` |
@@ -423,7 +421,7 @@ collected case is accounted for by its file row.
 | Cases | Destination |
 | --- | --- |
 | Majraha inclination and its extra token | `phonemize/vowels/inclination/test_quality.py` |
-| Tamanna ishmam | `phonemize/test_tamanna.py`; keep one focused regression, not a nasal-family test |
+| Tamanna ishmam | No phonemization behavior case; generated selector metadata only |
 | Aajamiyy tashil and its extra token | `phonemize/hamza/test_tashil.py` |
 | Man Raq, Bal Ran, and Maliyah sakt | `phonemize/test_sakt.py` |
 | Nunji small noon | semantic assertion in `phonemize/nasal/test_ikhfaa_haqiqi.py`; source-sequence fixture in `adapter/` |
@@ -442,7 +440,7 @@ document, API, schema, conformance, and ordinary phonemization behavior.
 | `laws/test_build_contract.py` | 8 | Canon builder inputs, draft identity, edge withdrawal, replacement spans. | `engine/test_canon_build.py` |
 | `laws/test_continuous_assembly.py` | 8 | Public request boundaries mixed with window assembly. | Request cases to `api/test_requests.py`; window privacy/equivalence to `engine/test_windowing.py`. |
 | `laws/test_extra_phonemes.py` | 7 | Public token toggles and graph invariance. | `api/test_extra_phonemes.py` |
-| `laws/test_fakk_idgham.py` | 3 | A named semantic classification and joined countercase. | `phonemize/assimilation/test_fakk_idgham.py` |
+| `laws/test_fakk_idgham.py` | 3 | A named classification and joined/started countercase. | Fold the started state and attribution into the owning idgham state matrices; no standalone target file. |
 | `laws/test_inscription_hygiene.py` | 8 | Grapheme/spelling relation invariants and source projection edge cases. | `adapter/test_inscription.py` |
 | `laws/test_madd_tabii.py` | 3 | Exact tabii classification over ordinary and boundary-created lengths. | `phonemize/vowels/madd/test_tabii.py` |
 | `laws/test_minimal_pairs.py` | 19 | Valuable semantic contrasts, but no single conformance responsibility. | Dissolve into the semantic owners listed below. |
@@ -473,7 +471,7 @@ document, API, schema, conformance, and ordinary phonemization behavior.
 | Qalqala release ordering | `phonemize/test_qalqala.py` |
 | Plural meem before wasl | `phonemize/hamza/test_iltiqa.py` |
 | Muqattaat name seam | `phonemize/test_muqattaat.py` |
-| Divine name versus ordinary lexical lam | `phonemize/emphasis/test_lam.py` |
+| Heavy/light Allah-lam conditions | `phonemize/emphasis/test_allah_lam.py` |
 | Written silent letters, hamza seats, and vowel-carrier contrasts | corresponding root `test_silent_letters.py`, `phonemize/hamza/`, or `phonemize/vowels/` file |
 
 After this split there is no useful `minimal_pairs` conformance file. The

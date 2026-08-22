@@ -1,8 +1,4 @@
-"""Where a case sits, keyed by riwayah.
-
-Word indices are riwayah data, so the same words take a different address
-under a different transmission and a site cannot share one.
-"""
+"""Canonical/public locations used by semantic recitation cases."""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -31,6 +27,18 @@ class Site:
         self.addresses = {
             name: _address(value) for name, value in per_riwayah.items()
         }
+
+    @classmethod
+    def shared(
+        cls,
+        ref: str,
+        words: tuple[int, ...] = (),
+        *,
+        riwayat: tuple[str, ...] = ("hafs", "warsh"),
+    ) -> Site:
+        """Use one canonical address for each named riwayah."""
+        value = (ref, words) if words else ref
+        return cls(**{name: value for name in riwayat})
 
     def shipped(self) -> tuple[str, ...]:
         """Declared riwayat this build can actually read, in declared order."""

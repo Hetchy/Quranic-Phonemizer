@@ -16,7 +16,7 @@ reading.
 | round-trip, uthmani | **100.000%** | none |
 | regression, word | 99.919% | 63 words |
 | regression, verse | 97.850% | see below |
-| L1 | 18 rows over 287,057 slots | |
+| L1 | 17 rows over 287,057 slots | |
 | attestations | 176 uthmani, 237 indopak | |
 
 ## Cross-script — 2 words

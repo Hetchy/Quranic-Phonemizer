@@ -24,7 +24,7 @@ validation may still correct a concluded decision.
 | Variant design | Concluded | Public scopes, values, defaults, registers, and interactions are recorded in [`../variants.md`](../variants.md) |
 | Phoneme and rule vocabulary | Concluded | Required additions and reused sound primitives identified; not implemented |
 | Cross-riwayah variant audit | Concluded | Shared IDs and riwayah-specific defaults and site scopes are recorded in [`../variants.md`](../variants.md) |
-| Test organization | Plan complete | The current-suite audit is in [`test-audit.md`](test-audit.md), the target tree and harness are in [`test-refactor-plan.md`](test-refactor-plan.md), and shared/Hafs/Warsh file ownership is in [`warsh-test-placement.md`](warsh-test-placement.md); no test file has been moved and no Warsh fixture has been added |
+| Test organization | Complete | Tests are organized by semantic owner, the compact case harness is active, duplicate Hafs coverage is reduced, and non-phonemization contracts are separated; no Warsh fixture has been added |
 | Canonical and model changes | Not started | Required foundation work is listed below |
 | Warsh corpus integration | Not started | No production corpus package, adapter, or address normalization exists |
 | Warsh rules | Not started | No Warsh classifier set or authored exception data exists |
@@ -139,19 +139,24 @@ claims about the current runtime.
 
 ## Test work
 
-Test organization must be refactored before existing cases are extended or new
-Warsh failures are added. The read-only checkpoint is complete in
-[`test-audit.md`](test-audit.md). The executable refactor specification is
-[`test-refactor-plan.md`](test-refactor-plan.md), and the concise handoff is
-[`tests-task.md`](tests-task.md). The remaining test work must:
+The Hafs test reorganization and compact semantic harness are complete. The
+audit remains in [`test-audit.md`](test-audit.md), the target and acceptance
+contract in [`test-refactor-plan.md`](test-refactor-plan.md), and Warsh file
+ownership in [`warsh-test-placement.md`](warsh-test-placement.md). Remaining
+test work begins with the adapter baseline:
 
-- mechanically move every current test to its audited semantic owner;
-- refactor the harness and compact duplicate coverage before adding Warsh;
-- extend every vetted shared case to Warsh through the adapter baseline;
-- preserve an executable inventory of every researched exception; and
-- keep public variant behavior until the final test and implementation phase.
+- extend vetted shared cases to Warsh after source projection exists;
+- preserve executable inventories of every researched exception; and
+- implement new Warsh fixed behavior before adding public variants last.
 
-The target tree has 474 fixed/default phonemization review cases and 70 final
+Correct Hafs ownership specifications intentionally expose current runtime
+gaps in incomplete-idgham host reach, started ibdal and effective madd reach,
+iltiqa-haraka source reach, istifham-article hamza transformation reach, iwad
+carrier reach, and complete muqattaat rule reach. These expectations must not
+be weakened to restore a green suite; the corresponding model/rule verticals
+own the repairs.
+
+The target tree has 466 fixed/default phonemization review cases and 72 final
 variant behavior cases. The generic API contract covers all 71 selector
 metadata rows; `tamanna_noon` intentionally has no new behavior case. Actual
 pytest collection expands semantic rows by state, riwayah, script, and exact

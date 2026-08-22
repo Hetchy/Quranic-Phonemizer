@@ -22,7 +22,7 @@ from ..model.address import BoundaryPlan, Junction, KhilafId, SlotId
 from ..model.canon import CanonLetter as L
 from ..model.canon import Rule, SlotOrigin
 from ..model.performance import Aspect, Consonant, Occurrence, Participants
-from .ownership import is_quiescent
+from .ownership import is_effectively_quiescent, is_quiescent
 from .khilaf import DEFAULT_NASAL_PLACE, nasal_place
 from .tables import Followers
 
@@ -41,9 +41,8 @@ class NoonSakinah:
         self, near: Neighbourhood, plan: Plan, at: SlotId,
         boundaries: BoundaryPlan,
     ) -> Verdict | None:
-        del plan
         slot = near.slot(at)
-        if not is_quiescent(slot):
+        if not is_effectively_quiescent(near, plan, at, boundaries):
             return None
         opening = self._opening_wasl(near, at, boundaries)
         if opening is not None:
@@ -53,9 +52,9 @@ class NoonSakinah:
             return _merge(Rule.IDGHAM_BI_GHUNNAH, at, opening, ghunnah=True)
         following = near.after(at)
         if following is None:
-            if slot.origin is SlotOrigin.SPELLED and near.last_of_word(at):
-                # The noon closing a disjoined-letter opening takes its own
-                # plain articulation rather than reaching into the next word.
+            if not plan.merged_away(at, Aspect.CONSONANT):
+                # A stop masks the forward family. A surviving noon is clear,
+                # including a disjoined-letter name; a dropped tanween is not.
                 return _classification(Rule.IZHAR, at, None)
             return None
 

@@ -23,13 +23,14 @@ FLOORS = {
     ("roundtrip", "uthmani"): "100.0",
     ("attest", "uthmani"): "176",
     ("attest", "indopak"): "237",
-    ("l1", "-"): "18",
+    ("l1", "-"): "17",
 }
 
 GATES: dict[str, tuple[tuple[str, ...], ...]] = {
     "suite": ((sys.executable, "-m", "pytest", "tests/", "-q"),),
     "comments": ((sys.executable, "tools/comment_lint.py"),),
     "structure": ((sys.executable, "tools/structure_lint.py"),),
+    "test-style": ((sys.executable, "tools/test_style_lint.py"),),
     "cross-script": (("cross", "word"), ("cross", "verse")),
     "regression": (("regression", "word"), ("regression", "verse")),
     "roundtrip": (("roundtrip", "uthmani"),),
@@ -39,7 +40,7 @@ GATES: dict[str, tuple[tuple[str, ...], ...]] = {
 
 #: The three that read no corpus. Seconds rather than minutes, so these are the
 #: ones worth running after every change.
-FAST = ("suite", "comments", "structure")
+FAST = ("suite", "comments", "structure", "test-style")
 
 
 def _command(step: tuple[str, ...]) -> list[str]:

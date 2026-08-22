@@ -48,8 +48,8 @@ occurrence as a separate subcheck. A failure remains narrow even when the
 reviewer reads one compact row.
 
 `V` in the tree means a logical case added in the final variant phase. The
-fixed/default target is 474 cases. The final target is 544 cases, consisting
-of 474 fixed/default cases plus 70 semantic selector cases. The generic API
+fixed/default target is 466 cases. The final target is 538 cases, consisting
+of 466 fixed/default cases plus 72 semantic selector cases. The generic API
 contract covers the metadata of all 71 public selectors in `docs/variants.md`;
 per the explicit test-ownership decision, `tamanna_noon` does not get another
 phonemization behavior case.
@@ -76,7 +76,7 @@ tests/
   __init__.py
   conftest.py
 
-  phonemize/                                      # 544 cases total
+  phonemize/                                      # 538 cases total
     __init__.py
 
     articles/                                     # 21 cases
@@ -85,26 +85,25 @@ tests/
       test_lam_shamsiyyah.py                      # 9
       test_lam_contrasts.py                       # 4
 
-    assimilation/                                 # 32 cases: 30 fixed + 2V
+    assimilation/                                 # 29 cases: 27 fixed + 2V
       __init__.py
       test_mutamathilayn.py                       # 10
       test_mutaqaribayn.py                        # 4
       test_mutajanisayn_kamil.py                  # 9
       test_mutajanisayn_naqis.py                  # 4
-      test_fakk_idgham.py                         # 3
       test_hafs_idgham_choices.py                 # 2V
 
     emphasis/                                     # 99 cases: 64 fixed + 35V
       __init__.py
       test_istilaa.py                             # 12
-      test_hafs_letter_forms.py                   # 4V
+      test_hafs_seen_sad.py                       # 4V
       test_raa.py                                 # 8: 2 fixed + 6V
       test_hafs_raa.py                            # 19
       test_warsh_raa.py                           # 31: 11 fixed + 20V
-      test_lam.py                                 # 8
+      test_allah_lam.py                           # 8
       test_warsh_lam_taghliz.py                   # 17: 12 fixed + 5V
 
-    hamza/                                        # 114 cases: 102 fixed + 12V
+    hamza/                                        # 116 cases: 102 fixed + 14V
       __init__.py
       test_wasl_start.py                          # 14
       test_hafs_alism_ibtidaa.py                  # 1V
@@ -116,10 +115,10 @@ tests/
       test_tashil.py                              # 5
       test_warsh_naql.py                          # 16: 14 fixed + 2V
       test_warsh_single_hamza.py                  # 15: 13 fixed + 2V
-      test_istifham_article.py                    # 1V
+      test_istifham_article.py                    # 3V
       test_warsh_hamza_meetings.py                # 24: 18 fixed + 6V
 
-    nasal/                                        # 57 cases: 55 fixed + 2V
+    nasal/                                        # 61 cases: 59 fixed + 2V
       __init__.py
       test_ghunnah_mushaddadah.py                 # 3
       test_idgham_bi_ghunnah.py                   # 7
@@ -128,12 +127,11 @@ tests/
       test_ikhfaa_haqiqi.py                       # 12
       test_ikhfaa_shafawi.py                      # 4: 3 fixed + 1V
       test_iqlab.py                               # 7: 6 fixed + 1V
-      test_izhar.py                               # 7
-      test_izhar_mutlaq.py                        # 3
-      test_izhar_shafawi.py                       # 3
+      test_izhar.py                               # 12
+      test_izhar_shafawi.py                       # 5
       test_noon_partition.py                      # 4
 
-    vowels/                                       # 167 cases: 155 fixed + 12V
+    vowels/                                       # 161 cases: 149 fixed + 12V
       __init__.py
 
       inclination/                                # 49 cases: 40 fixed + 9V
@@ -144,7 +142,7 @@ tests/
         test_warsh_inclination_classification.py  # 14
         test_warsh_inclination_coloring.py        # 7
 
-      madd/                                       # 58 cases
+      madd/                                       # 77 cases
         __init__.py
         test_tabii.py                             # 8
         test_muttasil.py                          # 4
@@ -153,25 +151,23 @@ tests/
         test_arid.py                              # 5
         test_leen.py                              # 6
         test_iwad.py                              # 4
+        test_haa_silah.py                         # 5
         test_warsh_badal.py                       # 12
         test_warsh_leen_mahmuz.py                 # 8
+        test_warsh_mim_al_jam.py                  # 7
+        test_warsh_yaa_zawaid.py                  # 7
 
-      test_short_vowels.py                        # 3
-      test_hafs_short_vowels.py                   # 1V
+      test_hafs_daaf_vowel.py                     # 1V
       test_pausal_vowels.py                       # 3
       test_final_glides.py                        # 9
-      test_joined_only.py                         # 8
-      test_warsh_mim_al_jam.py                    # 7
-      test_warsh_yaa_zawaid.py                    # 7
-      test_seven_alifs.py                         # 14: 12 fixed + 2V
+      test_hafs_aatani.py                         # 1V
+      test_seven_alifs.py                         # 13: 12 fixed + 1V
       test_written_carriers.py                    # 8
 
-    test_muqattaat.py                             # 13
-    test_hafs_muqattaat.py                        # 4: 2 fixed + 2V
-    test_warsh_muqattaat.py                       # 2
+    test_muqattaat.py                             # 15: 14 fixed + 1V
+    test_hafs_muqattaat.py                        # 1V
     test_qalqala.py                               # 14
-    test_sakt.py                                  # 1V
-    test_hafs_sakt.py                             # 4V
+    test_sakt.py                                  # 5V
     test_silent_letters.py                        # 11
     test_taa_marbuta.py                           # 5
 
@@ -256,8 +252,8 @@ tests/
 
 The whole final tree has a logical budget of 1,415 cases. That number is not
 expected to equal pytest collection because semantic rows expand by state,
-riwayah, and script. The important totals for domain review are 474 fixed
-phonemization cases, 70 variant phonemization cases, and 544 final cases under
+riwayah, and script. The important totals for domain review are 466 fixed
+phonemization cases, 72 variant phonemization cases, and 538 final cases under
 `phonemize/`.
 
 ## Why these semantic counts are sufficient
@@ -281,7 +277,7 @@ Examples of dense rows are:
 lam, lexical lam, the one-lam written form, and the interrogative/article
 shape. A dense positive table must not replace an overreach test.
 
-### Nasal families: 57 cases
+### Nasal families: 61 cases
 
 The target keeps every trigger letter and every materially different source
 representation without testing every trigger against every representation.
@@ -320,19 +316,56 @@ For the other noon families:
 - iqlab has one host letter, so its six fixed cases cover internal noon,
   cross-word noon, all three tanwin qualities, and a seam without pretending
   these are six trigger rules; and
-- the four `izhar_mutlaq` words are one test-owned register with three full
-  phoneme cases: one ordinary member, one prefixed member, and one contrast.
+- the four `izhar_mutlaq` words are a test-owned register inside
+  `test_izhar.py`, with three full phoneme cases: one ordinary member, one
+  prefixed member, and one contrast. The subcase does not need another file.
+
+Four dedicated pausal-clear cases cover a separate boundary branch that the
+trigger alphabets do not prove:
+
+| Surviving base | Dropped ending | Example | Required stopped result |
+| --- | --- | --- | --- |
+| noon | short haraka | `نَسْتَعِينُ`, 1:5:4 | Audible `/n/` with `izhar` after the damma drops |
+| noon | tanwin | `مُبِينٌ`, 37:113:10 | The tanwin noon drops; the lexical `/n/` remains with `izhar` |
+| meem | short haraka | `مَرْيَمَ`, 2:87:12 | Audible `/m/` with `izhar_shafawi` after the fatha drops |
+| meem | tanwin | `عَلِيمٌ`, 2:29:19 | The tanwin noon drops; the lexical `/m/` remains with `izhar_shafawi` |
+
+The clear-rule occurrence reaches the surviving noon or meem character and
+sound. It does not attach to the dropped tanwin mark. The pausal rule still
+owns removal of the haraka or tanwin.
+
+Existing cross-word rows in `test_idgham_bi_ghunnah.py`,
+`test_idgham_bila_ghunnah.py`, and `test_idgham_shafawi.py` gain a stopped
+state. In that state the forward host is invisible, the joined idgham rule is
+absent, and the surviving source consonant must recover `izhar` or
+`izhar_shafawi`. This is required even when the selected script writes no
+sukun on that noon or meem because its ordinary joined reading assimilates.
+The corresponding cross-word ikhfaa and iqlab state matrices enforce the same
+general stop-recovery law without adding separate logical cases for every
+next-letter class.
 
 `test_noon_partition.py` is not another example sweep. Its four generated
 cases prove that every relevant next-letter class belongs to exactly one noon
 family, every emitted family reaches one source and one result, exceptions are
-disjoint, and no plan contains competing noon rules.
+disjoint, and no plan contains competing noon rules. Its boundary invariant
+also proves that a stop blocks every cross-word noon family and gives any
+surviving audible noon the clear `izhar` classification.
 
-### Assimilation: 32 cases
+### Assimilation: 29 cases
 
 Every distinct source/host pair remains covered. Repeated joined and stopped
 bodies become state matrices. Complete and incomplete mutajanisayn stay in
 separate files because they have different sound and emphasis contracts.
+
+There is no standalone `test_fakk_idgham.py`. `Fakk al-idgham` is a valid but
+broader domain expression for undoing a merger. The exact event tested here is
+simpler: ibtidaa on word two makes its cross-word merger unavailable, so the
+host is pronounced once rather than as the second half of a geminate. Tests
+name this state `ibtidaa-on-host` and keep it beside the joined state in the
+owning idgham file. They assert the single host sound, the absence of the
+joined merger, and the `fakk_idgham` attribution only where the public model
+retains that domain explanation. The three old standalone tests collapse into
+those state matrices.
 
 The two final variant cases in `test_hafs_idgham_choices.py` own
 `irkab_maana` and `yalhath_dhalik`. They are not duplicated in the shared
@@ -352,16 +385,18 @@ closed-scope shapes required by `raa.md`. Closed lexical positions are
 register data, not repeated full-output tests. Its 20 Warsh-only selector rows
 are added last.
 
-`test_lam.py` owns ordinary and divine-name lam. The Warsh structural taghliz,
-selected tarqiq, dependent short/long/fathatan coloring, coupled inclination
-sites, and register representatives live in `test_warsh_lam_taghliz.py`. Its
-five selector rows are added last.
+`test_allah_lam.py` owns only the divine-name forms: heavy standalone forms,
+light prefixed forms, and the joined fatha/damma versus kasra condition. An
+ordinary light lam needs no dedicated semantic sweep. The Warsh structural
+taghliz, selected tarqiq, dependent short/long/fathatan coloring, coupled
+inclination sites, and register representatives live in
+`test_warsh_lam_taghliz.py`. Its five selector rows are added last.
 
-`test_hafs_letter_forms.py` exists only in the final phase for the four Hafs
+`test_hafs_seen_sad.py` exists only in the final phase for the four Hafs
 seen/saad selectors. Keeping them together is clearer than hiding letter
 identity changes inside raa or general vowel tests.
 
-### Hamza: 114 cases
+### Hamza: 116 cases
 
 The folder follows implementation ownership rather than source spelling:
 
@@ -377,7 +412,11 @@ The folder follows implementation ownership rather than source spelling:
   phoneme inventory, effective madd, extra-token behavior, and exact reach;
 - `test_warsh_single_hamza.py` owns the morphology-backed and lexical Warsh
   classifiers;
-- `test_istifham_article.py` owns the selector shared by both riwayat; and
+- `test_istifham_article.py` owns three `VariantCase` rows for the distinct
+  lexical forms `ءَآلذَّكَرَيْنِ`, `ءَآلْـَٰٔنَ`, and `ءَآللَّهُ`. Repeated
+  occurrences reconcile through the closed register; the forms stay separate
+  because article assimilation, internal root-hamza behavior, and Allah-lam
+  coloring differ; and
 - `test_warsh_hamza_meetings.py` owns one-word and cross-word A/U/I matrices,
   fixed exclusions, and narrow registers.
 
@@ -391,20 +430,28 @@ ibdal tokens, 60 one-word meetings, 156 cross-word meetings, and other closed
 sets are independent data registers. Only distinct structural branches get
 full manual phoneme cases.
 
-### Vowels and madd: 167 cases
+### Vowels and madd: 161 cases
 
 `test_pausal_vowels.py`, `test_final_glides.py`, `test_iwad.py`, and
 `test_taa_marbuta.py` use state matrices. Joined and stopped outcomes remain
 separate executed checks but one reviewed row.
 
-The seven alifs keep one row per distinct lexical/orthographic shape. Repeated
-members with identical behavior move to the register. The two final Hafs
-waqf selectors are added as `VariantCase` rows in the same file.
+Ordinary A/I/U projection is exercised throughout the semantic suite and
+does not need a separate short-vowel file. The Hafs `ضَعْف` selector remains
+the explicitly named `test_hafs_daaf_vowel.py`.
 
-Joined-only vowel shape is tested once in `test_joined_only.py`. Pronoun haa,
-Warsh mim al-jam, and yaa zawaid retain separate files because they have
-different domain identity, corpus predicates, and madd interactions. The two
-Warsh files carry an explicit `test_warsh_` prefix.
+The seven alifs keep one row per distinct lexical/orthographic shape. Repeated
+members with identical behavior move to the register. The unrelated Aatani
+waqf selector is isolated in `test_hafs_aatani.py`.
+
+Pronoun-haa silah is owned by `madd/test_haa_silah.py`, including ordinary
+silah, its blockers, waqf masking, and silah kubra before hamza. Warsh mim
+al-jam and yaa zawaid retain
+separate domain files under `madd/`: most performed branches are conditional
+`madd_tabii` or `madd_jaiz_munfasil` in wasl, and their acceptance matrices
+are organized by those resulting madd classes. Each file also owns its
+non-madd branch, including mim before wasl and the single consonantal
+yaa-zawaid site, so the authored family is not fragmented.
 
 The old mixed `test_madd.py` is split by public rule. Each madd file covers
 only its structural predicate, boundary masks, exclusions, effective-state
@@ -423,21 +470,31 @@ Inclination has five owners:
 - `test_warsh_inclination_coloring.py`: raa/lam dependency and carrier
   masking.
 
-### Focused root files: 54 cases
+### Focused root files: 51 cases
 
-Shared muqattaat letter-name construction stays together because its internal
-seams do not fit ordinary word morphology. Hafs choices and Warsh fixed
-opening behavior use separate prefixed files. Qalqala keeps every letter and
-materially distinct degree/state but removes repeated bodies. Silent written
-letters remain one focused semantic file while their low-level source
-recognition lives in adapter tests.
+`test_muqattaat.py` has one fixed/default case for each of the fourteen unique
+forms: `الم`, `المص`, `الر`, `المر`, `كهيعص`, `طه`, `طسم`, `طس`, `يس`, `ص`,
+`حم`, `حم عسق`, `ق`, and `ن`. Every case asserts both the complete phoneme
+sequence and every applicable rule on its exact source and sound: letter-name
+madd, nasal behavior, qalqala, emphasis, inclination, and boundary behavior.
+Riwayah picks keep the same form adjacent when the fixed/default output
+differs. The shared `noon_wasl` selector is the fifteenth case;
+`test_hafs_muqattaat.py` contains only the Hafs `yaseen_wasl` selector. Warsh
+opening inclination selectors remain in the inclination owner and are
+integrated into the default muqattaat rows without duplicating their variant
+matrix.
+
+Qalqala keeps every letter and materially distinct degree/state but removes
+repeated bodies. Silent written letters remain one focused semantic file while
+their low-level source recognition lives in adapter tests.
 
 Tamanna is not placed under nasal and receives no new phonemization behavior
-test. Its public metadata remains covered by the generated API contract. The
-shared Maliyah selector lives in `test_sakt.py`; the four Hafs-only lexical
-choices live in `test_hafs_sakt.py`. An explicit waqf before the second word
-masks each joined-only selection and is a state inside the row, not another
-selector or folder.
+test. Its public metadata remains covered by the generated API contract. One
+`test_sakt.py` owns the shared Maliyah selector and the four Hafs-only lexical
+sakt choices. All five rows assert sakt versus idraj phonemes, the precise
+downstream rule blocked or restored, and the explicit-waqf mask. Sakt is the
+common phenomenon, so splitting the Hafs sites into another file would make
+review harder without clarifying ownership.
 
 ## Compact semantic case style
 
@@ -580,10 +637,11 @@ The initial registry is:
 | `@fatha`, `@damma`, `@kasra`, `@sukun`, `@shadda` | ordinary haraka or shadda role |
 | `@fathatan`, `@dammatan`, `@kasratan` | canonical tanwin quality, independent of source glyph form |
 | `@dagger_alif`, `@madd_sign` | the corresponding inscription role/fact |
+| `@hamza_mark` | a combining hamza source when the script does not use a full seated letter |
 | `@small_noon`, `@small_waw`, `@small_yaa` | a mini-letter role supplying or attesting the named canonical fact |
 | `@mini_meem` | the reviewed Warsh iqlab hint inside a noon/tanwin composition |
 | `@round_zero`, `@rectangular_zero` | the reviewed alif-silence/pausal convention |
-| `@imala_mark`, `@ishmam_mark` | vowel-quality or annotation evidence, not the rule trigger |
+| `@imala_mark`, `@tashil_mark`, `@ishmam_mark` | vowel-quality or annotation evidence, not the rule trigger |
 | `@sakt_mark`, `@stop_mark` | structural boundary evidence in adapter tests |
 
 The registry is typed over inscription relations and canonical facts. It is
@@ -625,12 +683,15 @@ consonant sound is not classified by `iltiqa_haraka`.
 4. unique literal, registered selector, and sound resolution;
 5. `[n]` only when the unsuffixed target is ambiguous;
 6. connected char/sound reach for a shared rule ID;
-7. a readable `pytest.param` ID and immediately adjacent Arabic comment;
-8. no raw subtle combining-mark mapping keys;
-9. no duplicate semantic fingerprint across files;
-10. a test-owned closed register rather than importing runtime authored data;
-11. one declared owner for every public rule under each riwayah RuleSet; and
-12. use of the shared table assertion for regular semantic cases.
+7. both written participants for every merger assertion, with hidden
+   muqattaat terminals represented only by their result sound and written host;
+8. literal ordinary alif, waw, yaa, and wasl alif rather than semantic aliases;
+9. a readable `pytest.param` ID and immediately adjacent Arabic comment;
+10. no raw subtle combining-mark mapping keys;
+11. no duplicate semantic fingerprint across files;
+12. a test-owned closed register rather than importing runtime authored data;
+13. one declared owner for every public rule under each riwayah RuleSet; and
+14. use of the shared table assertion for regular semantic cases.
 
 Failure output includes the selector, resolved codepoints, source word,
 highlighted target, sound index, rule occurrence, riwayah, script, and state.
@@ -693,7 +754,7 @@ inputs agree.
 2. **Harness.** Add `Case`, `StateCase`, exact selectors, spaced phonemes,
    package-aware riwayah iteration, and style lint without changing behavior.
 3. **Semantic compaction.** Apply the coverage method folder by folder. Every
-   deletion must have a coverage-ledger entry. Reach the 474 fixed/default
+   deletion must have a coverage-ledger entry. Reach the 466 fixed/default
    case budget with equal or stronger coverage.
 4. **Warsh adapter.** Add source/public alignment, script projection,
    selector fixtures, smoke construction, and vetted shared semantic rows.
@@ -720,7 +781,7 @@ inputs agree.
 15. **Default conformance.** Prove rule reachability, conflict freedom,
     register reconciliation, cross-script agreement, and only then add Warsh
     default-profile snapshots.
-16. **Variants last.** Add the 70 semantic `VariantCase` rows and the small
+16. **Variants last.** Add the 72 semantic `VariantCase` rows and the small
     generic API contract covering all 71 selectors. Do not recreate
     `test_khilaf.py`.
 
@@ -738,9 +799,13 @@ inputs agree.
 ### Harness and style
 
 - every semantic expected sequence is inventory-tokenized with ASCII spaces;
+- ordinary alif, waw, yaa, and wasl alif use literal script forms rather than
+  semantic source aliases;
 - unique targets never carry an occurrence suffix;
 - subtle marks use the reviewed selector registry;
 - repeated glyphs/sounds are addressed exactly, never unioned accidentally;
+- every merger assertion names both written participants; a hidden muqattaat
+  terminal names only its result sound and written host;
 - state matrices replace repeated joined/stopped bodies;
 - case tables contain Arabic, site, state, full phonemes, char reach, sound
   reach, and readable IDs together; and
@@ -755,6 +820,12 @@ inputs agree.
   four ghunnah-idgham hosts, two no-ghunnah hosts, seven istilaa letters, five
   qalqala letters, seven alifs, and every distinct raa/lam branch remain
   exhaustive;
+- final noon and meem recover clear classification after pausal haraka or
+  tanwin removal, and an explicit stop recovers it when a cross-word idgham,
+  ikhfaa, or iqlab is masked;
+- every one of the fourteen unique muqattaat forms has a complete phoneme and
+  exact rule-reach expectation, not a phoneme-only smoke row;
+- the three istifham-article forms each receive a semantic selector row;
 - no trigger alphabet is needlessly crossed with every representation;
 - no large closed register becomes a full-output test per member;
 - no duplicate semantic fingerprint remains; and
@@ -776,7 +847,8 @@ inputs agree.
 ### Variants
 
 - variants are the final phase;
-- 70 selectors have exactly one semantic `VariantCase` owner;
+- all 71 selectors have exactly one semantic owner, with 72 behavior rows
+  because the three distinct istifham-article forms share one selector;
 - `tamanna_noon` has catalogue/default validation only, by explicit decision;
 - every legal value, default, active state, masked state, register, exclusion,
   and same-ID riwayah difference is tested;
