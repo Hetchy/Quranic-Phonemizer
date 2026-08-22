@@ -76,7 +76,7 @@ def _documents(hafs, session, ref, script):
     (kind, serialized, schema) triple ready to validate."""
     kw = dict(ref=ref, riwayah="hafs", script=script.value, variant={})
     bundle = build_bundle(session, **kw)
-    source = build_source_view(session, **kw)
+    source = build_source_view(session, bundle=bundle)
     pen = pen_for(hafs.inventory(script))
     built = {
         "analysis_result": wire.analysis_document(build_result(session, **kw)),

@@ -61,15 +61,11 @@ _WASL_ALIF = "ٱ"
 
 def _build(hafs, ref, kwargs):
     session = phonemize_request(hafs, ref, **kwargs)
-    words = build_cell_words(
-        session, ref=ref, riwayah="hafs", script="uthmani", variant={}
-    )
     bundle = build_bundle(
         session, ref=ref, riwayah="hafs", script="uthmani", variant={}
     )
-    view = build_source_view(
-        session, ref=ref, riwayah="hafs", script="uthmani", variant={}
-    )
+    view = build_source_view(session, bundle=bundle)
+    words = build_cell_words(session, bundle=bundle, view=view)
     return words, bundle, view
 
 
@@ -347,12 +343,10 @@ def test_the_cell_sound_laws_hold_over_the_whole_corpus(hafs, packed, sources):
                 checked += 1
             for stop_refs in ((), tuple(stops)):
                 session = _indopak_session(hafs, sources, surah, ayah, stop_refs)
-                words = build_cell_words(
-                    session, ref=ref, riwayah="hafs", script="indopak", variant={}
-                )
                 bundle = build_bundle(
                     session, ref=ref, riwayah="hafs", script="indopak", variant={}
                 )
+                words = build_cell_words(session, bundle=bundle)
                 validate_cell_sounds(words, bundle.sounds)
                 checked += 1
     assert checked > 24000

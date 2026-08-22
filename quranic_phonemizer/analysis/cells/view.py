@@ -17,6 +17,7 @@ from ..inscription import inscribe
 from ..source import build_source_view
 from ..source_dtos import Character, CharacterKind, MergerPlacement, SourceView
 from ...orthography.write import Pen
+from .align import next_column_id
 from .columns import build_cell_words
 from .laws import CellValidationError
 from .dtos import (
@@ -40,12 +41,6 @@ def _column_of_unit(words: tuple[CellWord, ...]) -> dict[int, CellColumnId]:
         unit.value: col.id
         for word in words for col in word.columns for unit in col.source_unit_ids
     }
-
-
-def _next_id(words: tuple[CellWord, ...]) -> int:
-    return 1 + max(
-        (col.id.value for word in words for col in word.columns), default=-1
-    )
 
 
 def _extract_merger_sounds(
@@ -160,11 +155,14 @@ def build_cell_view(
         raise ValueError(f"spelling must be 'source' or 'transformed', got {spelling!r}")
     facts = analyse(session, packaged_alphabet(), extra_phonemes=extra_phonemes)
     insc = inscribe(session)
-    kw = dict(ref=ref, riwayah=riwayah, script=script, variant=variant,
-              extra_phonemes=extra_phonemes, facts=facts, insc=insc)
-    bundle = build_bundle(session, **kw)
-    source = build_source_view(session, bundle=bundle, **kw)
-    words = build_cell_words(session, view=source, bundle=bundle, **kw)
+    bundle = build_bundle(
+        session, ref=ref, riwayah=riwayah, script=script, variant=variant,
+        extra_phonemes=extra_phonemes, facts=facts, insc=insc,
+    )
+    source = build_source_view(session, bundle=bundle, facts=facts, insc=insc)
+    words = build_cell_words(
+        session, bundle=bundle, view=source, facts=facts, insc=insc
+    )
     if spelling == "transformed":
         if pen is None:
             raise ValueError("the transformed spelling needs a pen")
@@ -176,7 +174,7 @@ def build_cell_view(
     column_of_unit = _column_of_unit(words)
     words, shared = _extract_merger_sounds(words, bundle.mergers)
     boundaries = _boundaries(
-        bundle, source, placement_of, column_of_unit, shared, _next_id(words)
+        bundle, source, placement_of, column_of_unit, shared, next_column_id(words)
     )
     view = CellView(words=words, boundaries=boundaries)
     validate_cell_view(view, bundle, source)

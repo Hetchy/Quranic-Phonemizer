@@ -6,10 +6,13 @@ cell, a bridge that resolves to its merger, no bridge on an iltiqa, and closure.
 from __future__ import annotations
 
 from ...model.canon import ILTIQA_RULES
+from ..checks import requirer
 from ..dtos import AnalysisBundle
 from ..source_dtos import MergerPlacement, SourceView
-from .dtos import CellSound, CellStatus, CellView
-from .laws import _require
+from .dtos import CellRole, CellSound, CellStatus, CellView
+from .laws import CellValidationError
+
+_require = requirer(CellValidationError)
 
 
 def _all_columns(view: CellView) -> dict[int, object]:
@@ -38,7 +41,7 @@ def _check_stop_signs(view: CellView, bundle: AnalysisBundle) -> None:
     got = {cb.boundary_id.value for cb in view.boundaries}
     _require(got == internal, "the cell boundaries are not the internal boundaries")
     for cb in view.boundaries:
-        signs = [c for c in cb.columns if c.role.value == "stop_sign"]
+        signs = [c for c in cb.columns if c.role is CellRole.STOP_SIGN]
         _require(len(signs) == 1, "an internal boundary has not one stop-sign column")
         _require(
             not signs[0].owned_sound_ids and not signs[0].presented_sound_ids,

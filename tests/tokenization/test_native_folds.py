@@ -4,6 +4,7 @@ Each keys on the grapheme kind and the fact it supplies, never on the scalar.
 """
 from __future__ import annotations
 
+from quranic_phonemizer.analysis.build import build_bundle
 from quranic_phonemizer.analysis.ids import RuleId
 from quranic_phonemizer.analysis.result import build_result
 from quranic_phonemizer.analysis.source import build_source_view
@@ -35,9 +36,10 @@ SAD = "ص"
 
 def _view(hafs, ref, script="uthmani", **kwargs):
     session = phonemize_request(hafs, ref, script=Script(script), **kwargs)
-    return build_source_view(
+    bundle = build_bundle(
         session, ref=ref, riwayah="hafs", script=script, variant={}
     )
+    return build_source_view(session, bundle=bundle)
 
 
 def _indopak_word_view(hafs, sources, surah, ayah, ordinal):
@@ -50,9 +52,10 @@ def _indopak_word_view(hafs, sources, surah, ayah, ordinal):
     session = Session(
         (location,), built.score, built.inscription, boundaries, performance
     )
-    return build_source_view(
+    bundle = build_bundle(
         session, ref=str(location), riwayah="hafs", script="indopak", variant={}
     )
+    return build_source_view(session, bundle=bundle)
 
 
 def _char(view, scalar):
@@ -81,9 +84,10 @@ def test_a_shortened_pausal_alif_carrier_names_the_rule_that_shortened_it(hafs):
     """Joined, wasl takes the pausal alif's length back: the carrier sounds
     nothing and its silence is the pausal_alif occurrence, not the literal."""
     session = phonemize_request(hafs, "18:38", script=Script("uthmani"))
-    view = build_source_view(
+    bundle = build_bundle(
         session, ref="18:38", riwayah="hafs", script="uthmani", variant={}
     )
+    view = build_source_view(session, bundle=bundle)
     carrier = _unit_of(view, PAUSAL_ZERO)
     assert carrier.silence not in (None, LiteralSilence.ORTHOGRAPHIC)
     assert carrier.silence in carrier.rule_occurrence_ids

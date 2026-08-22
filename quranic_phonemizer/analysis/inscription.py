@@ -134,6 +134,8 @@ def _spellings(inscription: Inscription, grapheme_index) -> tuple[SpellingEdge, 
                 out.append(Decorated(grapheme_index[g], s))
             case InscStructural(grapheme=g):
                 out.append(Structural(grapheme_index[g]))
+            case _:
+                raise TypeError(f"unmapped spelling edge {type(spelling).__name__}")
     return tuple(out)
 
 

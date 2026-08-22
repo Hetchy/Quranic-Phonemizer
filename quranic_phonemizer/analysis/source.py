@@ -10,7 +10,6 @@ from collections import defaultdict
 from ..render.alphabet import packaged_alphabet
 from ..session import Session
 from . import ids
-from .build import build_bundle
 from .dtos import AnalysisBundle
 from .facts import AnalysisFacts, analyse
 from ..model.inscription import Glyph, GlyphKind
@@ -24,6 +23,7 @@ from .source_dtos import (
     SourceView,
 )
 from .source_laws import validate_source_view
+from .spans import coalesce
 from .source_ownership import Ownership, ownership
 from .source_placements import Placements, placements
 from .source_units import Tokenization, UnitDraft, tokenize
@@ -74,16 +74,6 @@ def _characters(insc: InscriptionFacts, tok: Tokenization) -> tuple[Character, .
     return tuple(out)
 
 
-def _ranges(glyphs: list[int]) -> tuple[tuple[int, int], ...]:
-    out: list[list[int]] = []
-    for g in glyphs:
-        if out and out[-1][1] == g:
-            out[-1][1] = g + 1
-        else:
-            out.append([g, g + 1])
-    return tuple((lo, hi) for lo, hi in out)
-
-
 def _owned_by_unit(own: Ownership) -> dict[int, list[int]]:
     out: dict[int, list[int]] = defaultdict(list)
     for sound, unit in own.owner.items():
@@ -119,7 +109,7 @@ def _letter_unit(
         id=ids.LetterUnitId(index),
         word_id=ids.WordId(draft.word),
         character_ids=tuple(ids.CharacterId(g) for g in draft.glyphs),
-        ranges=_ranges(draft.glyphs),
+        ranges=coalesce(draft.glyphs),
         text="".join(insc.glyphs[g].char for g in draft.glyphs),
         kind=draft.kind,
         written_on_unit_id=(
@@ -140,24 +130,16 @@ def _letter_unit(
 def build_source_view(
     session: Session,
     *,
-    ref: str,
-    riwayah: str,
-    script: str,
-    variant: dict,
-    extra_phonemes: frozenset[str] = frozenset(),
-    bundle: AnalysisBundle | None = None,
+    bundle: AnalysisBundle,
     facts: AnalysisFacts | None = None,
     insc: InscriptionFacts | None = None,
 ) -> SourceView:
     if facts is None:
-        facts = analyse(session, packaged_alphabet(), extra_phonemes=extra_phonemes)
+        facts = analyse(
+            session, packaged_alphabet(), extra_phonemes=bundle.extra_phonemes
+        )
     if insc is None:
         insc = inscribe(session)
-    if bundle is None:
-        bundle = build_bundle(
-            session, ref=ref, riwayah=riwayah, script=script, variant=variant,
-            extra_phonemes=extra_phonemes, facts=facts, insc=insc,
-        )
     sakt_words = frozenset(
         i for i, word in enumerate(session.score.words) if word.sakt_after
     )

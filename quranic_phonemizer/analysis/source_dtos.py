@@ -39,7 +39,7 @@ class LiteralSilence(StrEnum):
     """The one silence no rule accounts for: a letter the script writes and the
     reading never says."""
 
-    ORTHOGRAPHIC = "orthographic"
+    ORTHOGRAPHIC = "orthographic_silence"
 
 
 #: A unit is silent for a reason, and the reason is either the occurrence that

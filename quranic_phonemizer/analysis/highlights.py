@@ -13,6 +13,7 @@ from .dtos import AnalysisBundle
 from .highlight_dtos import HighlightGroup
 from .highlight_laws import validate_highlight_groups
 from .source_dtos import SourceView
+from .spans import coalesce
 
 #: Silence reasons whose unit folds toward the sound that took its place: a
 #: word-start elision, an article lam assimilated into a sun letter, an iltiqa
@@ -117,16 +118,6 @@ def _fold(
             has_owner[merge.find(index)] = True
 
 
-def _coalesce(indices: list[int]) -> tuple[tuple[int, int], ...]:
-    spans: list[list[int]] = []
-    for value in sorted(indices):
-        if spans and spans[-1][1] == value:
-            spans[-1][1] = value + 1
-        else:
-            spans.append([value, value + 1])
-    return tuple((lo, hi) for lo, hi in spans)
-
-
 def _assemble(view: SourceView, merge: _Merge) -> tuple[HighlightGroup, ...]:
     members: dict[int, list[int]] = defaultdict(list)
     for index in range(len(view.units)):
@@ -146,7 +137,7 @@ def _assemble(view: SourceView, merge: _Merge) -> tuple[HighlightGroup, ...]:
         HighlightGroup(
             id=ids.HighlightId(order),
             unit_ids=tuple(ids.LetterUnitId(u) for u in units),
-            ranges=_coalesce(chars),
+            ranges=coalesce(chars),
             sound_ids=tuple(ids.SoundId(s) for s in sounds),
         )
         for order, (sounds, units, chars) in enumerate(drafts)

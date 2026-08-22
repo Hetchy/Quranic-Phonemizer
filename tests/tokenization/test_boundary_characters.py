@@ -3,6 +3,7 @@ unit. The sakt sign is the same: the native builder makes its small seen a
 boundary character, while the pause itself is a separate boundary state."""
 from __future__ import annotations
 
+from quranic_phonemizer.analysis.build import build_bundle
 from quranic_phonemizer.analysis.source import build_source_view
 from quranic_phonemizer.analysis.source_dtos import CharacterKind
 from quranic_phonemizer.api import recitation
@@ -51,9 +52,10 @@ def test_the_sakt_is_a_boundary_state_and_its_seen_is_a_boundary_character():
     a = built(SAKT)
     assert a.words[1].sakt_after
     session = phonemize_request(recitation(Riwayah("hafs")), SAKT)
-    view = build_source_view(
+    bundle = build_bundle(
         session, ref=SAKT, riwayah="hafs", script="uthmani", variant={}
     )
+    view = build_source_view(session, bundle=bundle)
     seen = only_char(view, SAKT_SEEN)
     assert seen.kind is CharacterKind.STOP_SIGN
     assert seen.letter_unit_id is None and seen.boundary_id is not None

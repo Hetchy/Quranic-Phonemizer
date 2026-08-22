@@ -31,7 +31,7 @@ def _columns_of_sound(words: tuple[CellWord, ...]) -> dict[int, list[CellColumn]
     return out
 
 
-def _next_id(words: tuple[CellWord, ...]) -> int:
+def next_column_id(words: tuple[CellWord, ...]) -> int:
     return 1 + max(
         (col.id.value for word in words for col in word.columns), default=-1
     )
@@ -115,7 +115,7 @@ def build_cell_sounds(
     by_word: dict[int, list[Sound]] = {}
     for sound in sounds:
         by_word.setdefault(sound.word_id.value, []).append(sound)
-    next_id = _next_id(words)
+    next_id = next_column_id(words)
     out: list[CellWord] = []
     for word in words:
         ordered = sorted(by_word.get(word.word_id.value, ()), key=lambda s: s.order)
@@ -124,4 +124,4 @@ def build_cell_sounds(
     return tuple(out)
 
 
-__all__ = ["build_cell_sounds"]
+__all__ = ["build_cell_sounds", "next_column_id"]

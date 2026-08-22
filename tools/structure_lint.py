@@ -349,7 +349,12 @@ def _role_sites(tree: ast.Module) -> Iterator[ast.expr]:
             and node.func.attr in ("has", "mark")
         ):
             yield from node.args
-        elif isinstance(node, ast.Compare) and _names_role(node.left):
+        elif (
+            isinstance(node, ast.Compare)
+            and _names_role(node.left)
+            # An identity test compares enum members, never a role string.
+            and not any(isinstance(op, (ast.Is, ast.IsNot)) for op in node.ops)
+        ):
             yield from node.comparators
 
 

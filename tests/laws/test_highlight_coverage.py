@@ -55,9 +55,7 @@ def _built(hafs, ref, kwargs, script=Script.UTHMANI):
     bundle = build_bundle(
         session, ref=ref, riwayah="hafs", script=script.value, variant={}
     )
-    view = build_source_view(
-        session, ref=ref, riwayah="hafs", script=script.value, variant={}
-    )
+    view = build_source_view(session, bundle=bundle)
     return bundle, view, highlight_groups(view, bundle)
 
 

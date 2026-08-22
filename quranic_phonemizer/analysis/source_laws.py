@@ -5,6 +5,7 @@ characters; sounds have one owner; a silent unit names a rule or the orthographi
 """
 from __future__ import annotations
 
+from .checks import requirer
 from .dtos import AnalysisBundle
 from .source_dtos import CharacterKind, LiteralSilence, SourceView
 
@@ -13,9 +14,7 @@ class SourceValidationError(ValueError):
     """A source view whose characters, units or placements do not close."""
 
 
-def _require(condition: bool, message: str) -> None:
-    if not condition:
-        raise SourceValidationError(message)
+_require = requirer(SourceValidationError)
 
 
 def _check_characters(view: SourceView, unit_ids: set, word_ids: set) -> None:

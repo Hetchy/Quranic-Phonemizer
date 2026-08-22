@@ -6,6 +6,7 @@ is silent-only; a group holds one owner unless a shared sound joins a second.
 from __future__ import annotations
 
 from . import ids
+from .checks import requirer
 from .dtos import AnalysisBundle
 from .highlight_dtos import HighlightGroup
 from .source_dtos import CharacterKind, SourceView
@@ -15,9 +16,7 @@ class HighlightValidationError(ValueError):
     """Highlight groups whose coverage or order does not close."""
 
 
-def _require(condition: bool, message: str) -> None:
-    if not condition:
-        raise HighlightValidationError(message)
+_require = requirer(HighlightValidationError)
 
 
 def _check_references(groups, view: SourceView, bundle: AnalysisBundle) -> None:

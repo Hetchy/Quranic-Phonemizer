@@ -3,6 +3,7 @@ riwayah's default and the variant decide the sound, and -- now decided -- that
 where the script writes it the native builder makes it its own paired unit."""
 from __future__ import annotations
 
+from quranic_phonemizer.analysis.build import build_bundle
 from quranic_phonemizer.analysis.source import build_source_view
 from quranic_phonemizer.analysis.source_dtos import LetterUnitKind
 from quranic_phonemizer.api import recitation
@@ -65,9 +66,10 @@ def test_a_written_mini_seen_tokenizes_as_its_own_paired_unit():
     riding the base it pairs with, and the pair is two units."""
     ref = "2:245:14"
     session = phonemize_request(recitation(Riwayah("hafs")), ref)
-    view = build_source_view(
+    bundle = build_bundle(
         session, ref=ref, riwayah="hafs", script="uthmani", variant={}
     )
+    view = build_source_view(session, bundle=bundle)
     seen = next(u for u in view.units if u.text in SEEN_MARKS)
     assert seen.kind is LetterUnitKind.LETTER
     assert seen.written_on_unit_id is not None

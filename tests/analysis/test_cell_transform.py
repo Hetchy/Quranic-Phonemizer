@@ -17,6 +17,7 @@ from quranic_phonemizer.analysis.cells import (
     build_cell_view,
     validate_transformed,
 )
+from quranic_phonemizer.analysis.build import build_bundle
 from quranic_phonemizer.analysis.cells.transform import _inserted_column
 from quranic_phonemizer.analysis.facts import analyse
 from quranic_phonemizer.analysis.ids import LetterUnitId
@@ -58,7 +59,7 @@ def _build(hafs, pen, ref, kwargs, selection=VariantSelection()):
     session = phonemize_request(hafs, ref, selection=selection, **kwargs)
     kw = dict(ref=ref, riwayah="hafs", script="uthmani", variant={})
     view = build_cell_view(session, spelling="transformed", pen=pen, **kw)
-    source = build_source_view(session, **kw)
+    source = build_source_view(session, bundle=build_bundle(session, **kw))
     return view, source, session
 
 
@@ -310,7 +311,7 @@ def test_the_transformed_laws_hold_over_the_whole_corpus(hafs, packed, sources):
                 kw = dict(ref=ref, riwayah="hafs", script="uthmani", variant={})
                 view = build_cell_view(session, spelling="transformed",
                                        pen=pens[Script.UTHMANI], **kw)
-                source = build_source_view(session, **kw)
+                source = build_source_view(session, bundle=build_bundle(session, **kw))
                 validate_transformed(view, source, session.performance.selection)
                 replaced += sum(1 for c in _columns(view)
                                 if c.status is CellStatus.REPLACED)
@@ -322,7 +323,7 @@ def test_the_transformed_laws_hold_over_the_whole_corpus(hafs, packed, sources):
                 kw = dict(ref=ref, riwayah="hafs", script="indopak", variant={})
                 view = build_cell_view(session, spelling="transformed",
                                        pen=pens[Script.INDOPAK], **kw)
-                source = build_source_view(session, **kw)
+                source = build_source_view(session, bundle=build_bundle(session, **kw))
                 validate_transformed(view, source, session.performance.selection)
                 inserted += sum(1 for c in _columns(view)
                                 if c.status is CellStatus.INSERTED)

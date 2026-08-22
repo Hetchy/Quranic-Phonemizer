@@ -5,18 +5,17 @@ character once in render order; a riding mark on a main column; rules exact.
 """
 from __future__ import annotations
 
+from ..checks import requirer
 from ..dtos import Sound
 from ..source_dtos import CharacterKind, SourceView
-from .dtos import CellColumn, CellSound, CellStatus, CellTier, CellWord
+from .dtos import CellColumn, CellRole, CellSound, CellStatus, CellTier, CellWord
 
 
 class CellValidationError(ValueError):
     """Source cell columns that do not close over their source view."""
 
 
-def _require(condition: bool, message: str) -> None:
-    if not condition:
-        raise CellValidationError(message)
+_require = requirer(CellValidationError)
 
 
 def _by_unit(columns: list[CellColumn]) -> dict[int, CellColumn]:
@@ -165,7 +164,7 @@ def _check_gap_columns(columns: dict[int, CellColumn]) -> None:
     for col in columns.values():
         if col.status is not CellStatus.GAP:
             continue
-        _require(col.role.value == "gap", f"gap column {col.id.value} is not role gap")
+        _require(col.role is CellRole.GAP, f"gap column {col.id.value} is not role gap")
         _require(
             not col.source_character_ids and not col.source_unit_ids
             and not col.owned_sound_ids and not col.presented_sound_ids

@@ -51,9 +51,7 @@ def _both(hafs, ref, kwargs):
     bundle = build_bundle(
         session, ref=ref, riwayah="hafs", script="uthmani", variant={}
     )
-    view = build_source_view(
-        session, ref=ref, riwayah="hafs", script="uthmani", variant={}
-    )
+    view = build_source_view(session, bundle=bundle)
     return session, bundle, view
 
 
@@ -75,9 +73,7 @@ def _indopak_word(hafs, sources, surah, ayah, ordinal):
     bundle = build_bundle(
         session, ref=ref, riwayah="hafs", script="indopak", variant={}
     )
-    view = build_source_view(
-        session, ref=ref, riwayah="hafs", script="indopak", variant={}
-    )
+    view = build_source_view(session, bundle=bundle)
     return session, bundle, view
 
 

@@ -51,7 +51,7 @@ def _build(hafs, ref, kwargs, script="uthmani"):
     session = phonemize_request(hafs, ref, **kwargs)
     view = build_cell_view(session, ref=ref, riwayah="hafs", script=script, variant={})
     bundle = build_bundle(session, ref=ref, riwayah="hafs", script=script, variant={})
-    source = build_source_view(session, ref=ref, riwayah="hafs", script=script, variant={})
+    source = build_source_view(session, bundle=bundle)
     return view, bundle, source
 
 
@@ -425,7 +425,7 @@ def test_the_view_laws_hold_over_the_whole_corpus(hafs, packed, sources):
                 kw = dict(ref=ref, riwayah="hafs", script="indopak", variant={})
                 view = build_cell_view(session, **kw)
                 bundle = build_bundle(session, **kw)
-                source = build_source_view(session, **kw)
+                source = build_source_view(session, bundle=bundle)
                 validate_cell_view(view, bundle, source)
                 bridges += sum(len(b.bridges) for b in view.boundaries)
                 checked += 1

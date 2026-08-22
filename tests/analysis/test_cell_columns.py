@@ -17,6 +17,7 @@ from quranic_phonemizer.analysis.cells import (
     build_cell_words,
     validate_cell_columns,
 )
+from quranic_phonemizer.analysis.build import build_bundle
 from quranic_phonemizer.analysis.cells.laws import _by_unit
 from quranic_phonemizer.analysis.inscription import inscribe
 from quranic_phonemizer.analysis.source import build_source_view
@@ -66,12 +67,11 @@ _IQLAB_MEEM = "ۢ"
 
 def _build(hafs, ref, kwargs, selection=VariantSelection()):
     session = phonemize_request(hafs, ref, selection=selection, **kwargs)
-    view = build_source_view(
+    bundle = build_bundle(
         session, ref=ref, riwayah="hafs", script="uthmani", variant={}
     )
-    words = build_cell_words(
-        session, ref=ref, riwayah="hafs", script="uthmani", variant={}
-    )
+    view = build_source_view(session, bundle=bundle)
+    words = build_cell_words(session, bundle=bundle, view=view)
     insc = inscribe(session)
     slot_of_unit = {
         u.id.value: insc.slot_of[min(c.value for c in u.character_ids)]
@@ -190,7 +190,6 @@ def test_column_silence_and_status_are_the_units(hafs, ref, kwargs):
 
 
 def test_the_sites_exercise_every_boundary_state(hafs):
-    from quranic_phonemizer.analysis.build import build_bundle
     from quranic_phonemizer.analysis.dtos import BoundaryState
 
     states: set[BoundaryState] = set()
@@ -221,9 +220,9 @@ def test_the_cell_column_laws_hold_over_the_whole_corpus(hafs, packed, sources):
                 uthmani += 1
             for stop_refs in ((), tuple(stops)):
                 session = _indopak_session(hafs, sources, surah, ayah, stop_refs)
-                build_cell_words(
+                build_cell_words(session, bundle=build_bundle(
                     session, ref=ref, riwayah="hafs", script="indopak", variant={}
-                )
+                ))
                 indopak += 1
     assert uthmani > 12000
     assert indopak > 12000
@@ -372,12 +371,11 @@ def test_the_indopak_pass_validates_the_indopak_mini_seen(hafs, sources):
     reading the IndoPak source -- not the packed Uthmani under the IndoPak
     inventory -- is what brings the pair under the laws, above where it sits."""
     session = _indopak_session(hafs, sources, 88, 22)
-    view = build_source_view(
+    bundle = build_bundle(
         session, ref="88:22", riwayah="hafs", script="indopak", variant={}
     )
-    words = build_cell_words(
-        session, ref="88:22", riwayah="hafs", script="indopak", variant={}
-    )
+    view = build_source_view(session, bundle=bundle)
+    words = build_cell_words(session, bundle=bundle, view=view)
     riders = [
         c for c in _columns(words)
         if view.units[c.source_unit_ids[0].value].written_on_unit_id is not None
@@ -390,12 +388,11 @@ def test_the_indopak_iqlab_meem_seats_on_the_letter_not_the_tanween(hafs, source
     """The IndoPak iqlab meem is written over the tanween, itself a riding mark,
     so its column follows through to the main letter the tanween sits on."""
     session = _indopak_session(hafs, sources, 2, 10)
-    view = build_source_view(
+    bundle = build_bundle(
         session, ref="2:10", riwayah="hafs", script="indopak", variant={}
     )
-    words = build_cell_words(
-        session, ref="2:10", riwayah="hafs", script="indopak", variant={}
-    )
+    view = build_source_view(session, bundle=bundle)
+    words = build_cell_words(session, bundle=bundle, view=view)
     meem = next(c for c in _columns(words) if c.text == _IQLAB_MEEM)
     assert meem.tier is CellTier.ABOVE
     word = next(w for w in words if any(c.id == meem.id for c in w.columns))

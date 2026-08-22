@@ -7,11 +7,15 @@ from __future__ import annotations
 
 from . import ids
 from .catalogue import rule_definitions
+from .checks import requirer
 from .dtos import AnalysisBundle, BoundaryState
 
 
 class ValidationError(ValueError):
     """A bundle whose ids or structure do not close."""
+
+
+_require = requirer(ValidationError)
 
 
 def validate(bundle: AnalysisBundle) -> None:
@@ -31,11 +35,6 @@ def validate(bundle: AnalysisBundle) -> None:
     _check_sound_occurrence_inverse(bundle)
     _check_occurrences(bundle, word_ids, boundary_ids, sound_ids, rule_ids)
     _check_mergers(bundle, word_ids, boundary_ids, sound_ids, occ_ids)
-
-
-def _require(condition: bool, message: str) -> None:
-    if not condition:
-        raise ValidationError(message)
 
 
 def _check_boundaries(bundle: AnalysisBundle, word_ids: set) -> None:

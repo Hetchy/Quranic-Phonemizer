@@ -6,9 +6,12 @@ column keeps its provenance, and variant fields match the resolved selection.
 from __future__ import annotations
 
 from ...model.address import VariantSelection
+from ..checks import requirer
 from ..source_dtos import SourceView
 from .dtos import CellColumn, CellStatus, CellView
-from .laws import _require
+from .laws import CellValidationError
+
+_require = requirer(CellValidationError)
 
 
 def _all_columns(view: CellView) -> list[CellColumn]:

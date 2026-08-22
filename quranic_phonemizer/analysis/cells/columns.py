@@ -11,7 +11,7 @@ from ...model.address import Option, SlotId
 from ...model.performance import Consonant, Quality, Vowel
 from ...render.alphabet import packaged_alphabet
 from ...session import Session
-from ..build import build_bundle
+from ..dtos import AnalysisBundle
 from ..facts import AnalysisFacts, analyse
 from ..ids import CellColumnId
 from ..inscription import InscriptionFacts, inscribe
@@ -237,30 +237,19 @@ def _words(view: SourceView, reading: _Reading) -> tuple[CellWord, ...]:
 def build_cell_words(
     session: Session,
     *,
-    ref: str,
-    riwayah: str,
-    script: str,
-    variant: dict,
-    extra_phonemes: frozenset[str] = frozenset(),
+    bundle: AnalysisBundle,
     view: SourceView | None = None,
-    bundle=None,
     facts: AnalysisFacts | None = None,
     insc: InscriptionFacts | None = None,
 ) -> tuple[CellWord, ...]:
     if facts is None:
-        facts = analyse(session, packaged_alphabet(), extra_phonemes=extra_phonemes)
+        facts = analyse(
+            session, packaged_alphabet(), extra_phonemes=bundle.extra_phonemes
+        )
     if insc is None:
         insc = inscribe(session)
-    if bundle is None:
-        bundle = build_bundle(
-            session, ref=ref, riwayah=riwayah, script=script, variant=variant,
-            extra_phonemes=extra_phonemes, facts=facts, insc=insc,
-        )
     if view is None:
-        view = build_source_view(
-            session, ref=ref, riwayah=riwayah, script=script, variant=variant,
-            extra_phonemes=extra_phonemes, bundle=bundle, facts=facts, insc=insc,
-        )
+        view = build_source_view(session, bundle=bundle, facts=facts, insc=insc)
     reading = _reading(view, facts, insc, session)
     words = build_cell_sounds(_words(view, reading), bundle.sounds)
     validate_cell_columns(words, view, reading.slot_of_unit)
