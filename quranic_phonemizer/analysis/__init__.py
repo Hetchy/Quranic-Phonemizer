@@ -57,6 +57,18 @@ from .inscription import (
 )
 from .laws import ValidationError, validate
 from .result import AnalysisResult, build_result
+from .schema import (
+    KINDS,
+    analysis_document,
+    cell_document,
+    closed_reference_errors,
+    combined_reference_errors,
+    document_schema,
+    highlight_document,
+    serialize_document,
+    source_document,
+    validation_errors,
+)
 from .sounds import SoundFact
 from .source import build_source_view
 from .source_dtos import (
@@ -72,6 +84,7 @@ from .source_dtos import (
 from .source_laws import SourceValidationError, validate_source_view
 
 __all__ = [
+    "KINDS",
     "SCHEMA_VERSION",
     "AnalysisBundle",
     "AnalysisFacts",
@@ -119,19 +132,28 @@ __all__ = [
     "Word",
     "WordId",
     "analyse",
+    "analysis_document",
     "build_bundle",
     "build_result",
     "build_source_view",
+    "cell_document",
+    "closed_reference_errors",
+    "combined_reference_errors",
     "decoration_targets",
+    "document_schema",
     "glyph_kind_of",
+    "highlight_document",
     "highlight_groups",
     "inscribe",
     "open_vowel_units",
     "rule_definitions",
+    "serialize_document",
     "shortened_carriers",
     "silent_groups",
+    "source_document",
     "tajweed_rules",
     "validate",
     "validate_highlight_groups",
     "validate_source_view",
+    "validation_errors",
 ]

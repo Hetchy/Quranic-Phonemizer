@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import replace
 
-from ...model.canon import Onset, Quality
+from ...model.canon import CanonLetter, Onset, Quality
 from ...model.performance import Consonant, Vowel
 from ...orthography.write import Pen
 from ...render.alphabet import packaged_alphabet
@@ -43,8 +43,11 @@ def _consonant_spelling(cons: Consonant, pen: Pen) -> str:
 
 
 def _is_replaced(cons: Consonant, slot) -> bool:
-    """A started prosthetic hamza -- a wasl connector now sounding -- or a
-    letter the reading swaps for another, e.g. a taa marbuta read as a haa."""
+    """A started prosthetic hamza, or a letter the reading swaps for another
+    (a taa marbuta read as a haa). A meem hidden with ghunnah keeps its letter:
+    the reader still says a meem, nasalised, so it is not a replacement."""
+    if cons.ghunnah and slot.letter is CanonLetter.MEEM:
+        return False
     return slot.onset is Onset.WASL or cons.letter is not slot.letter
 
 
