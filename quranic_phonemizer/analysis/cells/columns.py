@@ -35,6 +35,8 @@ class _Reading:
     variant_of_unit: dict[int, Option]
     below_units: frozenset[int]
     written_on: dict[int, int]
+    mains_of_slot: dict[SlotId | None, tuple[int, ...]]
+    consonant_units: frozenset[int]
 
 
 def _reading(view: SourceView, facts: AnalysisFacts, insc: InscriptionFacts,
@@ -69,9 +71,17 @@ def _reading(view: SourceView, facts: AnalysisFacts, insc: InscriptionFacts,
         unit.id.value: unit.written_on_unit_id.value
         for unit in view.units if unit.written_on_unit_id is not None
     }
+    mains_of_slot: dict[SlotId | None, list[int]] = {}
+    for unit_id in main:
+        mains_of_slot.setdefault(slot_of_unit.get(unit_id), []).append(unit_id)
+    consonant_units = frozenset(
+        unit for sound, unit in owner.items() if sound in consonant
+    )
     return _Reading(
         long_vowel, consonant, canonical_quality, slot_of_unit, owner, main,
         _variant_of_unit(view, session), below, written_on,
+        {slot: tuple(units) for slot, units in mains_of_slot.items()},
+        consonant_units,
     )
 
 
@@ -128,8 +138,7 @@ def _tier(unit: LetterUnit, reading: _Reading) -> CellTier:
 def _main_of_slot(unit_id: int, reading: _Reading) -> int | None:
     slot = reading.slot_of_unit.get(unit_id)
     seats = [
-        u for u in reading.main_units
-        if reading.slot_of_unit.get(u) == slot and u != unit_id
+        u for u in reading.mains_of_slot.get(slot, ()) if u != unit_id
     ]
     consonants = [u for u in seats if _owns_consonant(u, reading)]
     picked = consonants or seats
@@ -166,10 +175,7 @@ def _seat_unit(unit: LetterUnit, reading: _Reading) -> int | None:
 
 
 def _owns_consonant(unit_id: int, reading: _Reading) -> bool:
-    return any(
-        owned == unit_id and sound in reading.consonant_orders
-        for sound, owned in reading.owner_of_sound.items()
-    )
+    return unit_id in reading.consonant_units
 
 
 def _column(unit: LetterUnit, reading: _Reading,

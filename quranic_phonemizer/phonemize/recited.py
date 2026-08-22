@@ -84,7 +84,8 @@ def text(rendered: tuple[RenderGlyph, ...]) -> str:
 
 
 def write_recited(
-    score: Score, inscription: Inscription, performance: Performance, pen: Pen
+    score: Score, inscription: Inscription, performance: Performance, pen: Pen,
+    targets: dict | None = None,
 ) -> tuple[RenderGlyph, ...]:
     """One word's worth of glyphs at a time, a space between words, and any
     stop sign the source carries after that word."""
@@ -93,7 +94,7 @@ def write_recited(
     sounds = dict(performance.sounds)
     occurrences = {o.id: o for o in performance.occurrences}
     started = _slots_by_rule(performance, HAMZA_WASL_START)
-    sources = _source_graphemes(inscription, performance)
+    sources = _source_graphemes(inscription, performance, targets)
     signs = _stop_signs_by_word(score, inscription)
 
     out: list[RenderGlyph] = []
@@ -229,7 +230,9 @@ def _write_vowel(sound: Vowel, sound_id, slot_id, fact_glyphs, pen: Pen):
         )
 
 
-def _source_graphemes(inscription: Inscription, performance: Performance) -> dict:
+def _source_graphemes(
+    inscription: Inscription, performance: Performance, targets: dict | None
+) -> dict:
     """Every `Evidences` edge, keyed by (slot, fact): a base letter, a
     shadda, a haraka and its carrier each cite only their own source glyph.
     A `Decorates`/`Attests` edge names no fact; not part of this."""
@@ -239,19 +242,20 @@ def _source_graphemes(inscription: Inscription, performance: Performance) -> dic
         if fact not in _CONSONANT_FACTS and fact not in VOWEL_FACTS:
             continue
         out.setdefault((spelling.slot, fact), []).append(spelling.grapheme)
-    for carrier, quiescent in _ibdal_carriers(performance):
+    for carrier, quiescent in _ibdal_carriers(performance, targets):
         out.setdefault((carrier, SlotFact.VOWEL_LENGTH), []).extend(
             out.get((quiescent, SlotFact.LETTER), ())
         )
     return {key: tuple(graphemes) for key, graphemes in out.items()}
 
 
-def _ibdal_carriers(performance: Performance):
+def _ibdal_carriers(performance: Performance, targets: dict | None = None):
     """(lengthened slot, the quiescent hamza it carries) for each ibdal.
 
     The rasm writes no length on the prosthetic hamza, so the hamza this
     rule silences is the one the reading writes that length on."""
-    targets = effect_targets(performance)
+    if targets is None:
+        targets = effect_targets(performance)
     return [
         (targets[occurrence.id][0], occurrence.subjects[0])
         for occurrence in performance.occurrences

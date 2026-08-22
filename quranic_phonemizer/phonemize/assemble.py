@@ -159,7 +159,7 @@ def assemble(
     )
 
     rendered = _rendered(
-        session.score, session.inscription, performance, pen, glyph_of,
+        session.score, session.inscription, performance, pen, glyph_of, targets,
     )
     words = _words(session, glyphs)
 
@@ -304,8 +304,8 @@ def _words(session: Session, glyphs):
     )
 
 
-def _rendered(score: Score, inscription, performance, pen: Pen, glyph_of):
-    written = write_recited(score, inscription, performance, pen)
+def _rendered(score: Score, inscription, performance, pen: Pen, glyph_of, targets):
+    written = write_recited(score, inscription, performance, pen, targets=targets)
     word_of = _rendered_words(written)
     counters: dict[int, int] = {}
     glyphs = []

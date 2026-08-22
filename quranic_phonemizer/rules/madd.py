@@ -245,22 +245,12 @@ class MaddBadal:
         slot = near.slot(at)
         if slot is None or slot.letter is not L.HAMZA:
             return None
-        if _madd_of(near, plan, at, boundaries) is None and not _ibdal_lengthened(plan, at):
+        # the ibdal case: the plan carries a length the Score does not
+        if _madd_of(near, plan, at, boundaries) is None and not plan.relengthened_long(at):
             return None
         return Verdict(
             Occurrence(mint(Rule.MADD_BADAL, at), Rule.MADD_BADAL, (at,)), ()
         )
-
-
-def _ibdal_lengthened(plan: Plan, at: SlotId) -> bool:
-    """The ibdal drew this hamza's short helping vowel out to a long one in an
-    earlier phase, so the plan carries the length the Score does not."""
-    return any(
-        isinstance(effect, Relength)
-        and effect.slot == at
-        and effect.length is Length.LONG
-        for effect in plan.effects()
-    )
 
 
 @dataclass(frozen=True, slots=True)

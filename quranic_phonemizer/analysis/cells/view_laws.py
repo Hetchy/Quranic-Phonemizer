@@ -5,6 +5,7 @@ cell, a bridge that resolves to its merger, no bridge on an iltiqa, and closure.
 """
 from __future__ import annotations
 
+from ...model.canon import ILTIQA_RULES
 from ..dtos import AnalysisBundle
 from ..source_dtos import MergerPlacement, SourceView
 from .dtos import CellSound, CellStatus, CellView
@@ -25,7 +26,6 @@ def _all_columns(view: CellView) -> dict[int, object]:
 def _all_cells(view: CellView) -> list[CellSound]:
     cells: list[CellSound] = [c for word in view.words for c in word.sounds]
     for boundary in view.boundaries:
-        cells.extend(boundary.sounds)
         cells.extend(bridge.sound for bridge in boundary.bridges)
     return cells
 
@@ -126,8 +126,9 @@ def _iltiqa_binds(bundle: AnalysisBundle) -> tuple[set[int], set[int]]:
     is a host word's own sound, not a merger, so neither may back a bridge."""
     boundaries: set[int] = set()
     sounds: set[int] = set()
+    iltiqa = frozenset(rule.value for rule in ILTIQA_RULES)
     for occ in bundle.rule_occurrences:
-        if occ.rule_id.value.startswith("iltiqa"):
+        if occ.rule_id.value in iltiqa:
             boundaries.update(b.value for b in occ.boundary_ids)
             sounds.update(s.value for s in occ.sound_ids)
     return boundaries, sounds

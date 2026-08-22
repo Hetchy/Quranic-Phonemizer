@@ -147,6 +147,7 @@ class Plan:
     )
     _removed: set[tuple[SlotId, Aspect]] = field(default_factory=set)
     _voweled: set[SlotId] = field(default_factory=set)
+    _lengthened: set[SlotId] = field(default_factory=set)
 
     def record(self, phase: Phase, verdict: Verdict) -> None:
         for effect in verdict.effects:
@@ -165,6 +166,8 @@ class Plan:
                 self._removed.add((effect.slot, effect.aspect))
             elif isinstance(effect, Realize) and effect.aspect is Aspect.VOWEL:
                 self._voweled.add(effect.slot)
+            elif isinstance(effect, Relength) and effect.length is Length.LONG:
+                self._lengthened.add(effect.slot)
         self.entries.append((phase, verdict))
 
     def effects(self, phase: Phase | None = None):
@@ -181,3 +184,8 @@ class Plan:
         A rule that asks the Score alone still reads a repaired sakin as sakin.
         """
         return slot in self._voweled
+
+    def relengthened_long(self, slot: SlotId) -> bool:
+        """Has an earlier phase drawn this slot's vowel out to a long one
+        the Score does not carry?"""
+        return slot in self._lengthened

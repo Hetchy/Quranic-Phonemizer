@@ -329,6 +329,24 @@ HAMZA_WASL_START: frozenset[Rule] = frozenset(
     {Rule.HAMZA_WASL_FATHA, Rule.HAMZA_WASL_KASRA, Rule.HAMZA_WASL_DAMMA}
 )
 
+#: The idgham family: a quiescent letter folds into the letter after it.
+IDGHAM_RULES: frozenset[Rule] = frozenset(
+    {
+        Rule.IDGHAM_BI_GHUNNAH,
+        Rule.IDGHAM_BILA_GHUNNAH,
+        Rule.IDGHAM_SHAFAWI,
+        Rule.IDGHAM_MUTAMATHILAYN,
+        Rule.IDGHAM_MUTAQARIBAYN,
+        Rule.IDGHAM_MUTAJANISAYN_KAMIL,
+        Rule.IDGHAM_MUTAJANISAYN_NAQIS,
+    }
+)
+
+#: The two repairs where quiescent letters may not meet.
+ILTIQA_RULES: frozenset[Rule] = frozenset(
+    {Rule.ILTIQA_HARAKA, Rule.ILTIQA_SHORTENING}
+)
+
 #: Rules whose occurrence may produce no effect; `engine/run.py` mints each
 #: one a `Classifies` edge in place of an attribution, and only where it
 #: produced nothing. `ghunnah_mushaddadah` is here for the article's noon

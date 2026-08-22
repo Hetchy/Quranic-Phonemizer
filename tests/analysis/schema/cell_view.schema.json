@@ -18,19 +18,12 @@
             "$ref": "#/$defs/CellColumn"
           },
           "type": "array"
-        },
-        "sounds": {
-          "items": {
-            "$ref": "#/$defs/CellSound"
-          },
-          "type": "array"
         }
       },
       "required": [
         "boundary_id",
         "bridges",
-        "columns",
-        "sounds"
+        "columns"
       ],
       "type": "object"
     },

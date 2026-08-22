@@ -18,6 +18,7 @@ from ..source import build_source_view
 from ..source_dtos import Character, CharacterKind, MergerPlacement, SourceView
 from ...orthography.write import Pen
 from .columns import build_cell_words
+from .laws import CellValidationError
 from .dtos import (
     CellBoundary,
     CellBridge,
@@ -56,7 +57,12 @@ def _extract_merger_sounds(
     shared: dict[int, CellSound] = {}
     for merger in mergers:
         cells = held[merger.after_word_id.value]
-        cell = next(c for c in cells if c.sound_id == merger.sound_id)
+        cell = next((c for c in cells if c.sound_id == merger.sound_id), None)
+        if cell is None:
+            raise CellValidationError(
+                f"merger {merger.id.value} names sound {merger.sound_id.value} "
+                f"with no cell left in its host word"
+            )
         cells.remove(cell)
         shared[merger.id.value] = cell
     out = tuple(replace(w, sounds=tuple(held[w.word_id.value])) for w in words)
@@ -134,7 +140,6 @@ def _boundaries(
         out.append(CellBoundary(
             boundary_id=boundary.id,
             columns=(column,),
-            sounds=(),
             bridges=tuple(bridges.get(boundary.id.value, ())),
         ))
     return tuple(out)

@@ -136,7 +136,7 @@ class TanweenBeforeWasl:
             return None
         if not near.last_of_word(at):
             return None
-        # `after` is `None` at a stop, where `TanweenAtWaqf` owns the noon.
+        # `after` is `None` at a stop, where `TanweenDrop` owns the noon.
         following = near.after(at)
         if following is None or following.onset is not Onset.WASL:
             return None
@@ -157,7 +157,7 @@ class SpelledBeforeWasl:
     # the letter names of an opening take the lighter fatha where a tanween noon
     # takes a kasra -- see `TanweenBeforeWasl`. Breaking the meeting also leaves
     # the meem voweled, so the long vowel before it is no longer stopped by a
-    # sakin and `MaddLazim` reads it as the ordinary two counts.
+    # sakin and `MaddClass` reads it as the ordinary two counts, not madd lazim.
 
     rule: Rule = Rule.ILTIQA_HARAKA
     phase: Phase = Phase.BOUNDARY

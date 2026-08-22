@@ -111,7 +111,7 @@ def _draft_openers(insc, seen_marks, sakt_words):
 _VOWEL_POSITION_FACTS = (SlotFact.VOWEL_QUALITY, SlotFact.VOWEL_ABSENCE)
 
 
-def _slot_roles(insc, drafts, unit_of_anchor) -> Roles:
+def _slot_roles(insc, unit_of_anchor, anchors_of_slot) -> Roles:
     """Each slot's letter, vowel-position and length-carrier unit indices, read
     off the opener edges: a tanween supplies the vowel of the seat it rides and
     the letter of the noon it mints, so its unit answers for both slots."""
@@ -128,11 +128,11 @@ def _slot_roles(insc, drafts, unit_of_anchor) -> Roles:
             letter.setdefault(edge.slot, unit)
         elif edge.fact in _VOWEL_POSITION_FACTS:
             vowel.setdefault(edge.slot, unit)
-    _carriers(insc, drafts, unit_of_anchor, carrier)
+    _carriers(insc, unit_of_anchor, anchors_of_slot, carrier)
     return Roles(letter, vowel, carrier)
 
 
-def _carriers(insc, drafts, unit_of_anchor, carrier):
+def _carriers(insc, unit_of_anchor, anchors_of_slot, carrier):
     """The unit that carries a slot's length: the glyph that supplies it when
     that glyph opens a unit, else the base opener the mark decorates."""
     for edge in insc.spellings:
@@ -141,27 +141,32 @@ def _carriers(insc, drafts, unit_of_anchor, carrier):
         if edge.glyph in unit_of_anchor:
             carrier.setdefault(edge.slot, unit_of_anchor[edge.glyph])
             continue
-        base = _nearest_opener(
-            drafts, unit_of_anchor, edge.glyph, edge.slot, before=True
-        )
+        base = _nearest_opener(anchors_of_slot, edge.glyph, edge.slot, before=True)
         if base is not None:
             carrier.setdefault(edge.slot, base)
 
 
-def _nearest_opener(drafts, unit_of_anchor, glyph_index, slot, *, before):
+def _anchors_of_slot(drafts, unit_of_anchor):
+    """Each slot's opener anchors and their units, one short list per slot."""
+    out: dict = {}
+    for anchor, unit in unit_of_anchor.items():
+        out.setdefault(drafts[unit].slot, []).append((anchor, unit))
+    return out
+
+
+def _nearest_opener(anchors_of_slot, glyph_index, slot, *, before):
     """The opener nearest `glyph_index` in the same slot, on the named side."""
     best: int | None = None
-    for anchor in unit_of_anchor:
-        if drafts[unit_of_anchor[anchor]].slot != slot:
-            continue
+    best_unit: int | None = None
+    for anchor, unit in anchors_of_slot.get(slot, ()):
         if (anchor < glyph_index) != before:
             continue
         if best is None or abs(anchor - glyph_index) < abs(best - glyph_index):
-            best = anchor
-    return unit_of_anchor[best] if best is not None else None
+            best, best_unit = anchor, unit
+    return best_unit
 
 
-def _fold_target(index, slot, facts, witnessed, drafts, unit_of_anchor, roles):
+def _fold_target(index, slot, facts, witnessed, anchors_of_slot, roles):
     """The unit a non-opening glyph joins. A gemination witness or an onset
     joins the base letter; every other mark joins the opener it sits on, or the
     unit answering its slot where a muqattaat name is one glyph."""
@@ -169,7 +174,7 @@ def _fold_target(index, slot, facts, witnessed, drafts, unit_of_anchor, roles):
     if consonant and slot in roles.letter:
         return roles.letter[slot]
     for before in (True, False):
-        opener = _nearest_opener(drafts, unit_of_anchor, index, slot, before=before)
+        opener = _nearest_opener(anchors_of_slot, index, slot, before=before)
         if opener is not None:
             return opener
     for table in (roles.carrier, roles.vowel, roles.letter):
@@ -186,7 +191,8 @@ def tokenize(insc: InscriptionFacts, sakt_words: frozenset[int]) -> Tokenization
     )
     sakt_seen = sakt_seen_glyphs(insc, sakt_words)
     drafts, unit_of_anchor = _draft_openers(insc, seen_marks, sakt_words)
-    roles = _slot_roles(insc, drafts, unit_of_anchor)
+    anchors_of_slot = _anchors_of_slot(drafts, unit_of_anchor)
+    roles = _slot_roles(insc, unit_of_anchor, anchors_of_slot)
 
     unit_of_glyph = dict(unit_of_anchor)
     for glyph in insc.glyphs:
@@ -195,7 +201,7 @@ def tokenize(insc: InscriptionFacts, sakt_words: frozenset[int]) -> Tokenization
             continue
         target = _fold_target(
             index, insc.slot_of.get(index), facts, witnessed,
-            drafts, unit_of_anchor, roles,
+            anchors_of_slot, roles,
         )
         if target is not None:
             drafts[target].glyphs.append(index)

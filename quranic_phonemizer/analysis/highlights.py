@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 
-from ..model.canon import Rule
+from ..model.canon import IDGHAM_RULES, ILTIQA_RULES, Rule
 from . import ids
 from .dtos import AnalysisBundle
 from .highlight_dtos import HighlightGroup
@@ -19,9 +19,11 @@ from .source_dtos import SourceView
 #: chain, and cross-word idgham of every family. Every other silence folds back
 #: into the sound before it.
 _FOLD_FORWARD = frozenset(
-    rule.value for rule in Rule
-    if rule.value.startswith(("idgham", "iltiqa"))
-) | {Rule.HAMZA_WASL_SILENT.value, Rule.LAM_SHAMSIYYAH.value}
+    rule.value for rule in (
+        *IDGHAM_RULES, *ILTIQA_RULES,
+        Rule.HAMZA_WASL_SILENT, Rule.LAM_SHAMSIYYAH,
+    )
+)
 
 
 class _Merge:

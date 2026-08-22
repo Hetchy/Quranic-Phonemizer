@@ -76,7 +76,6 @@ def _columns(view: CellView) -> dict[int, CellColumn]:
 def _all_cells(view: CellView):
     cells = [c for w in view.words for c in w.sounds]
     for b in view.boundaries:
-        cells.extend(b.sounds)
         cells.extend(br.sound for br in b.bridges)
     return cells
 

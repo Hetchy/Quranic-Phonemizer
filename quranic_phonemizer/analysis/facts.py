@@ -41,22 +41,10 @@ class AnalysisFacts:
     modifiers: tuple[Modifier, ...]
     junctions: tuple[Junction, ...]
     alphabet: Alphabet
-
-    @property
-    def hosts(self) -> tuple[Hosted, ...]:
-        return tuple(a for a in self.attributions if isinstance(a, Hosted))
-
-    @property
-    def insertions(self) -> tuple[Insertion, ...]:
-        return tuple(a for a in self.attributions if isinstance(a, Insertion))
-
-    @property
-    def silences(self) -> tuple[Silenced, ...]:
-        return tuple(a for a in self.attributions if isinstance(a, Silenced))
-
-    @property
-    def merges(self) -> tuple[Merged, ...]:
-        return tuple(a for a in self.attributions if isinstance(a, Merged))
+    hosts: tuple[Hosted, ...]
+    insertions: tuple[Insertion, ...]
+    silences: tuple[Silenced, ...]
+    merges: tuple[Merged, ...]
 
 
 def analyse(
@@ -74,6 +62,10 @@ def analyse(
     occurrence_index = {
         occurrence.id: i for i, occurrence in enumerate(performance.occurrences)
     }
+    edges = attributions(performance, sound_index, occurrence_index)
+    by_type: dict[type, list] = {Hosted: [], Insertion: [], Silenced: [], Merged: []}
+    for edge in edges:
+        by_type[type(edge)].append(edge)
     return AnalysisFacts(
         slots=slots,
         slot_index={slot.id: i for i, slot in enumerate(slots)},
@@ -86,10 +78,14 @@ def analyse(
         occurrences=performance.occurrences,
         occurrence_index=occurrence_index,
         effect_targets=effect_targets(performance),
-        attributions=attributions(performance, sound_index, occurrence_index),
+        attributions=edges,
         modifiers=modifiers(performance, sound_index, occurrence_index),
         junctions=session.boundaries.junctions,
         alphabet=alphabet,
+        hosts=tuple(by_type[Hosted]),
+        insertions=tuple(by_type[Insertion]),
+        silences=tuple(by_type[Silenced]),
+        merges=tuple(by_type[Merged]),
     )
 
 

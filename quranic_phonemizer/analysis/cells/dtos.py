@@ -103,12 +103,11 @@ class CellBridge:
 
 @dataclass(frozen=True, slots=True)
 class CellBoundary:
-    """The between-word junction: its stop-sign pause column, any boundary-owned
-    inserted column and its sound, and a bridge per cross-word merger."""
+    """The between-word junction: its stop-sign pause column and a bridge per
+    cross-word merger."""
 
     boundary_id: BoundaryId
     columns: tuple[CellColumn, ...]
-    sounds: tuple[CellSound, ...]
     bridges: tuple[CellBridge, ...]
 
 
