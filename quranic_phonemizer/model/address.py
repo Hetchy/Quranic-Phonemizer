@@ -15,6 +15,21 @@ class Riwayah(StrEnum):
     HAFS = "hafs"
 
 
+class UnknownRiwayah(ValueError):
+    """Named rather than a bare KeyError, so the message lists what ships."""
+
+
+def check_riwayah(riwayah: str) -> Riwayah:
+    """The membership gate: `Riwayah` is closed, so a member is shipped."""
+    try:
+        return Riwayah(riwayah)
+    except ValueError:
+        raise UnknownRiwayah(
+            f"{riwayah!r} is not a riwayah; this build ships "
+            f"{[r.value for r in Riwayah]}"
+        ) from None
+
+
 class Script(StrEnum):
     """Closed per riwayah. Both members below are *Hafs* scripts."""
 

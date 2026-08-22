@@ -15,12 +15,14 @@ from ..model.inscription import (
     Attests,
     Decorates,
     Evidences,
+    Glyph,
+    GlyphKind,
     Inscription,
     SlotFact,
     Structural as InscStructural,
+    glyph_kind_of,
 )
 from ..session import Session
-from .glyphs import Glyph, glyph_kind_of
 
 #: Canonical combining class of a mark the script writes below the baseline.
 _COMBINING_BELOW = 220
@@ -135,6 +137,19 @@ def _spellings(inscription: Inscription, grapheme_index) -> tuple[SpellingEdge, 
     return tuple(out)
 
 
+def sakt_seen_glyphs(
+    insc: InscriptionFacts, sakt_words: frozenset[int]
+) -> frozenset[int]:
+    """The written sakt signs: each is a decorated annotation glyph on a word
+    the reading holds a sakt after."""
+    return frozenset(
+        e.glyph for e in insc.spellings
+        if isinstance(e, Decorated)
+        and insc.glyphs[e.glyph].kind is GlyphKind.TAJWEED_MARK
+        and insc.glyphs[e.glyph].word in sakt_words
+    )
+
+
 def _written_below(char: str) -> bool:
     return len(char) == 1 and unicodedata.combining(char) == _COMBINING_BELOW
 
@@ -166,4 +181,5 @@ __all__ = [
     "Supplied",
     "Witnessed",
     "inscribe",
+    "sakt_seen_glyphs",
 ]

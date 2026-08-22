@@ -11,8 +11,9 @@ from ..render.alphabet import packaged_alphabet
 from ..session import Session
 from . import ids
 from .build import build_bundle
-from .facts import analyse
-from .glyphs import Glyph, GlyphKind
+from .dtos import AnalysisBundle
+from .facts import AnalysisFacts, analyse
+from ..model.inscription import Glyph, GlyphKind
 from .inscription import InscriptionFacts, inscribe
 from .source_dtos import (
     Character,
@@ -144,13 +145,19 @@ def build_source_view(
     script: str,
     variant: dict,
     extra_phonemes: frozenset[str] = frozenset(),
+    bundle: AnalysisBundle | None = None,
+    facts: AnalysisFacts | None = None,
+    insc: InscriptionFacts | None = None,
 ) -> SourceView:
-    bundle = build_bundle(
-        session, ref=ref, riwayah=riwayah, script=script, variant=variant,
-        extra_phonemes=extra_phonemes,
-    )
-    facts = analyse(session, packaged_alphabet(), extra_phonemes=extra_phonemes)
-    insc = inscribe(session)
+    if facts is None:
+        facts = analyse(session, packaged_alphabet(), extra_phonemes=extra_phonemes)
+    if insc is None:
+        insc = inscribe(session)
+    if bundle is None:
+        bundle = build_bundle(
+            session, ref=ref, riwayah=riwayah, script=script, variant=variant,
+            extra_phonemes=extra_phonemes, facts=facts, insc=insc,
+        )
     sakt_words = frozenset(
         i for i, word in enumerate(session.score.words) if word.sakt_after
     )

@@ -28,7 +28,7 @@ from quranic_phonemizer.phonemize import edges as ed
 from quranic_phonemizer.phonemize import nodes as nd
 from quranic_phonemizer.analysis.sounds import sounds_in_order as native_order
 from quranic_phonemizer.phonemize.assemble import assemble
-from quranic_phonemizer.phonemize.ordering import sounds_in_order as legacy_order
+from quranic_phonemizer.model.performance import sounds_in_order as legacy_order
 from quranic_phonemizer.session import phonemize_request
 
 #: One reference per boundary state, chosen for the hard cases they exercise:

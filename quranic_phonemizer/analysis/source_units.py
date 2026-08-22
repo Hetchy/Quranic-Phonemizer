@@ -9,8 +9,14 @@ from dataclasses import dataclass, field
 
 from ..model.address import SlotId
 from ..model.inscription import SlotFact
-from .glyphs import GlyphKind
-from .inscription import Decorated, InscriptionFacts, Supplied, Witnessed
+from ..model.inscription import GlyphKind
+from .inscription import (
+    Decorated,
+    InscriptionFacts,
+    Supplied,
+    Witnessed,
+    sakt_seen_glyphs,
+)
 
 from .source_dtos import LetterUnitKind
 
@@ -178,9 +184,7 @@ def tokenize(insc: InscriptionFacts, sakt_words: frozenset[int]) -> Tokenization
     witnessed = frozenset(
         e.glyph for e in insc.spellings if isinstance(e, Witnessed)
     )
-    sakt_seen = frozenset(
-        g for g in seen_marks if insc.glyphs[g].word in sakt_words
-    )
+    sakt_seen = sakt_seen_glyphs(insc, sakt_words)
     drafts, unit_of_anchor = _draft_openers(insc, seen_marks, sakt_words)
     roles = _slot_roles(insc, drafts, unit_of_anchor)
 

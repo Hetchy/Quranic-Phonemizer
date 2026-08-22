@@ -6,7 +6,7 @@ throughout: no derivation here reads the public assembler.
 from __future__ import annotations
 
 from ..model.address import Junction, SlotId
-from ..model.inscription import SlotFact
+from ..model.inscription import GlyphKind
 from ..render.alphabet import packaged_alphabet
 from ..session import Session
 from . import ids
@@ -21,8 +21,7 @@ from .dtos import (
     Word,
 )
 from .facts import AnalysisFacts, analyse
-from .glyphs import GlyphKind
-from .inscription import InscriptionFacts, Supplied, inscribe
+from .inscription import InscriptionFacts, inscribe, sakt_seen_glyphs
 
 _STATE_OF = {
     Junction.JOIN: BoundaryState.JOIN,
@@ -67,25 +66,23 @@ def _word_texts(insc: InscriptionFacts, n_words: int) -> list[str]:
     return ["".join(chars) for chars in parts]
 
 
-def _advice_signs(insc: InscriptionFacts) -> dict[int, str]:
-    """The stop-sign character written after each word, by word."""
-    out: dict[int, str] = {}
+def _boundary_signs(session: Session, insc: InscriptionFacts) -> dict[int, str]:
+    """Every stop or sakt sign written after a word, joined in text order.
+    The sakt seen rides the word itself; an advice sign follows it."""
+    sakt_words = frozenset(
+        i for i, word in enumerate(session.score.words) if word.sakt_after
+    )
+    sakt_seen = sakt_seen_glyphs(insc, sakt_words)
+    parts: dict[int, list[str]] = {}
     current: int | None = None
     for glyph in insc.glyphs:
         if glyph.word is not None:
             current = glyph.word
+        if glyph.source_index in sakt_seen:
+            parts.setdefault(glyph.word, []).append(glyph.char)
         elif glyph.kind is GlyphKind.STOP_SIGN and current is not None:
-            out[current] = glyph.char
-    return out
-
-
-def _sakt_signs(facts: AnalysisFacts, insc: InscriptionFacts) -> dict[int, str]:
-    """The sakt sign character, by the word it is written after."""
-    out: dict[int, str] = {}
-    for edge in insc.spellings:
-        if isinstance(edge, Supplied) and edge.fact is SlotFact.SAKT:
-            out[_word_of(facts, edge.slot)] = insc.glyphs[edge.glyph].char
-    return out
+            parts.setdefault(current, []).append(glyph.char)
+    return {word: "".join(chars) for word, chars in parts.items()}
 
 
 def _build_sounds(
@@ -128,8 +125,7 @@ def _build_words(
 def _build_boundaries(
     session: Session,
     facts: AnalysisFacts,
-    advice_signs: dict[int, str],
-    sakt_signs: dict[int, str],
+    signs: dict[int, str],
 ) -> tuple[Boundary, ...]:
     n_words = len(session.score.words)
     advice = session.inscription.advice
@@ -143,7 +139,7 @@ def _build_boundaries(
             word = i - 1
             state = _STATE_OF[facts.junctions[word]]
             note = advice[word]
-            sign = advice_signs.get(word) if note is not None else sakt_signs.get(word)
+            sign = signs.get(word)
         out.append(Boundary(ids.BoundaryId(i), before, after, state, sign, note))
     return tuple(out)
 
@@ -212,10 +208,13 @@ def build_bundle(
     script: str,
     variant: dict,
     extra_phonemes: frozenset[str] = frozenset(),
+    facts: AnalysisFacts | None = None,
+    insc: InscriptionFacts | None = None,
 ) -> AnalysisBundle:
-    alphabet = packaged_alphabet()
-    facts = analyse(session, alphabet, extra_phonemes=extra_phonemes)
-    insc = inscribe(session)
+    if facts is None:
+        facts = analyse(session, packaged_alphabet(), extra_phonemes=extra_phonemes)
+    if insc is None:
+        insc = inscribe(session)
 
     sound_word = _sound_word(facts)
     sound_occ = _sound_occurrences(facts)
@@ -232,9 +231,7 @@ def build_bundle(
         source_text="".join(glyph.char for glyph in insc.glyphs),
         tokens=tuple(fact.token for fact in facts.sounds),
         words=_build_words(facts, session, texts, sound_word),
-        boundaries=_build_boundaries(
-            session, facts, _advice_signs(insc), _sakt_signs(facts, insc)
-        ),
+        boundaries=_build_boundaries(session, facts, _boundary_signs(session, insc)),
         sounds=_build_sounds(facts, sound_word, sound_occ),
         rule_occurrences=_build_occurrences(facts, sound_occ),
         mergers=_build_mergers(facts, sound_word),

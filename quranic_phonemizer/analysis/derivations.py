@@ -10,7 +10,7 @@ from ..model.inscription import SlotFact
 from ..model.performance import Aspect, Length, Vowel
 from .attributions import Insertion, Relengthened
 from .facts import AnalysisFacts
-from .glyphs import GlyphKind
+from ..model.inscription import GlyphKind
 from .inscription import Decorated, InscriptionFacts, Supplied
 
 _VOWEL_FACTS = (SlotFact.VOWEL_QUALITY, SlotFact.VOWEL_LENGTH)

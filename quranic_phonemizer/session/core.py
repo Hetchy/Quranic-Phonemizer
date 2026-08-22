@@ -6,9 +6,15 @@ is no second, request-shaped entry into `canon.build` or `engine.run`.
 from __future__ import annotations
 
 from collections.abc import Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
-from ..model.address import BoundaryPlan, Location, Script, VariantSelection
+from ..model.address import (
+    BoundaryPlan,
+    KhilafId,
+    Location,
+    Script,
+    VariantSelection,
+)
 from ..model.canon import Score
 from ..model.inscription import Inscription
 from ..model.performance import Performance
@@ -28,6 +34,9 @@ class Session:
     inscription: Inscription
     boundaries: BoundaryPlan
     performance: Performance
+    letter_khilaf_sites: dict[Location, KhilafId] = field(default_factory=dict)
+    """Where the reading's authored data sites a per-location letter khilaf,
+    for a projection to tag; empty when a caller resolves without one."""
 
 
 def phonemize_request(
@@ -56,5 +65,9 @@ def phonemize_request(
         built.score, boundaries, selection=selection
     )
     return Session(
-        locations, built.score, built.inscription, boundaries, performance
+        locations, built.score, built.inscription, boundaries, performance,
+        letter_khilaf_sites={
+            site.location: site.khilaf
+            for site in recitation.khilaf.canonical.letters
+        },
     )

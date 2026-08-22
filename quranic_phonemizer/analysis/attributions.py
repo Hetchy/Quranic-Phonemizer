@@ -97,6 +97,8 @@ def attributions(
                 out.append(Merged(slots, aspect, sound_index[sound], by))
             case Silent(slots=slots, aspect=aspect):
                 out.append(Silenced(slots, aspect, by))
+            case _:
+                raise TypeError(f"unmapped attribution edge {type(edge).__name__}")
     return tuple(out)
 
 
@@ -115,6 +117,8 @@ def modifiers(
                 out.append(Relengthened(sound_index[sound], by, length))
             case Classifies(sound=sound):
                 out.append(Classified(sound_index[sound], by))
+            case _:
+                raise TypeError(f"unmapped modifier edge {type(edge).__name__}")
     return tuple(out)
 
 

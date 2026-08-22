@@ -190,7 +190,7 @@ class SpelledBeforeWasl:
         )
 
 
-def _junction_before(word: int) -> int | None:
+def _junction_before(word: int) -> int:
     """A `BoundaryPlan` keys a junction by the word it falls after, so the
-    one a started word reads is the word before it."""
-    return word - 1 if word else None
+    one a started word reads is the word before it; -1 is the span's start."""
+    return word - 1

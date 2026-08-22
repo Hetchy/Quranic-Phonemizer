@@ -7,10 +7,13 @@ from __future__ import annotations
 
 from dataclasses import replace
 
+from ...render.alphabet import packaged_alphabet
 from ...session import Session
 from ..build import build_bundle
 from ..dtos import Boundary, Merger
+from ..facts import analyse
 from ..ids import CellColumnId
+from ..inscription import inscribe
 from ..source import build_source_view
 from ..source_dtos import Character, CharacterKind, MergerPlacement, SourceView
 from ...orthography.write import Pen
@@ -150,16 +153,19 @@ def build_cell_view(
 ) -> CellView:
     if spelling not in ("source", "transformed"):
         raise ValueError(f"spelling must be 'source' or 'transformed', got {spelling!r}")
+    facts = analyse(session, packaged_alphabet(), extra_phonemes=extra_phonemes)
+    insc = inscribe(session)
     kw = dict(ref=ref, riwayah=riwayah, script=script, variant=variant,
-              extra_phonemes=extra_phonemes)
-    words = build_cell_words(session, **kw)
+              extra_phonemes=extra_phonemes, facts=facts, insc=insc)
     bundle = build_bundle(session, **kw)
-    source = build_source_view(session, **kw)
+    source = build_source_view(session, bundle=bundle, **kw)
+    words = build_cell_words(session, view=source, bundle=bundle, **kw)
     if spelling == "transformed":
         if pen is None:
             raise ValueError("the transformed spelling needs a pen")
         words = transform_words(
-            words, session, source, pen, extra_phonemes=extra_phonemes
+            words, session, source, pen, extra_phonemes=extra_phonemes,
+            facts=facts, insc=insc,
         )
     placement_of = {p.merger_id.value: p for p in source.merger_placements}
     column_of_unit = _column_of_unit(words)

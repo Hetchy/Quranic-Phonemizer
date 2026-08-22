@@ -122,9 +122,13 @@ def _insertions(
 def transform_words(
     words: tuple[CellWord, ...], session: Session, source: SourceView, pen: Pen,
     *, extra_phonemes: frozenset[str] = frozenset(),
+    facts: AnalysisFacts | None = None,
+    insc: InscriptionFacts | None = None,
 ) -> tuple[CellWord, ...]:
-    facts = analyse(session, packaged_alphabet(), extra_phonemes=extra_phonemes)
-    insc = inscribe(session)
+    if facts is None:
+        facts = analyse(session, packaged_alphabet(), extra_phonemes=extra_phonemes)
+    if insc is None:
+        insc = inscribe(session)
     slot_of_unit = _slot_of_unit(source, insc)
     out = tuple(
         replace(word, columns=tuple(

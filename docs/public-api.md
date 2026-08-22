@@ -174,10 +174,11 @@ silenced, a vowel it lengthened -- never a unit it only read to decide. The rule
 list is exhaustive for the performed passage: `madd_badal` and `madd_silah` are
 rules in it, not derived labels beside it.
 
-`tajweed_rules(riwayah)` lists one row per rule: the public identifier, the
-English name, the Arabic name, and a one-sentence summary of what the rule
-does. Rule indices attached to pairings point into the same `rules` array
-published on the result.
+`tajweed_rules(riwayah)` lists one row per identifier a result can publish --
+every rule, then the two silence reasons (`orthographic_silence` and
+`variant_silence`): the public identifier, the English name, the Arabic name,
+and a one-sentence summary. Rule indices attached to pairings point into the
+same `rules` array published on the result.
 
 ## Schema stability
 

@@ -5,7 +5,7 @@ module; it sits at the top and only reads the records below it.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, fields
 
 from ..session import Session
 from .build import build_bundle
@@ -51,23 +51,15 @@ class AnalysisResult:
         )
 
 
+#: Bundle fields the result keeps behind its reader methods.
+_PRIVATE = {"source_text": "_source_text", "tokens": "_tokens"}
+
+
 def _from_bundle(bundle: AnalysisBundle) -> AnalysisResult:
-    return AnalysisResult(
-        ref=bundle.ref,
-        riwayah=bundle.riwayah,
-        script=bundle.script,
-        variant=bundle.variant,
-        extra_phonemes=bundle.extra_phonemes,
-        schema_version=bundle.schema_version,
-        canon_digest=bundle.canon_digest,
-        words=bundle.words,
-        boundaries=bundle.boundaries,
-        sounds=bundle.sounds,
-        rule_occurrences=bundle.rule_occurrences,
-        mergers=bundle.mergers,
-        _source_text=bundle.source_text,
-        _tokens=bundle.tokens,
-    )
+    return AnalysisResult(**{
+        _PRIVATE.get(f.name, f.name): getattr(bundle, f.name)
+        for f in fields(AnalysisBundle)
+    })
 
 
 def build_result(

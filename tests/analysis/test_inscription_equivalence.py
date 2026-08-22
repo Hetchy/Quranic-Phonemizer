@@ -18,7 +18,7 @@ from quranic_phonemizer.analysis import (
     shortened_carriers,
     silent_groups,
 )
-from quranic_phonemizer.analysis.glyphs import GlyphKind
+from quranic_phonemizer.model.inscription import GlyphKind
 from quranic_phonemizer.model.address import Junction, Script
 from quranic_phonemizer.model.inscription import SlotFact
 from quranic_phonemizer.orthography.write import pen_for

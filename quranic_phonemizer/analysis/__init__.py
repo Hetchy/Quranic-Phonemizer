@@ -33,7 +33,7 @@ from .dtos import (
     Word,
 )
 from .facts import AnalysisFacts, analyse
-from .glyphs import Glyph, GlyphKind, glyph_kind_of
+from ..model.inscription import Glyph, GlyphKind, glyph_kind_of
 from .highlight_dtos import HighlightGroup
 from .highlight_laws import HighlightValidationError, validate_highlight_groups
 from .highlights import highlight_groups

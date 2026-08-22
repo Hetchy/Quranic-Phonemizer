@@ -144,8 +144,18 @@ from tests.test_qalqala import (
     test_every_qalqala_letter_echoes_quiescent_inside_a_word as qalqala_sughra,
     test_every_qalqala_letter_echoes_when_the_stop_silences_it as qalqala_kubra,
 )
+from tests.test_rasm import (
+    test_a_waw_the_rasm_writes_and_recitation_never_says as rasm_silent_waw,
+    test_the_alif_after_a_plural_waw_is_never_said as rasm_silent_alif,
+)
 from tests.waqf.test_final_glides import (
     test_that_waw_becomes_pure_length_at_a_stop as drop_before_a_glide,
+)
+from tests.waqf.test_variant_silence import (
+    test_the_joined_pronoun_yaa_is_said_and_names_no_silence
+    as variant_silence_joined,
+    test_the_pronoun_yaa_the_stop_omits_names_a_variant_silence
+    as variant_silence_stopped,
 )
 from tests.waqf.test_madd_badal import (
     test_a_badal_before_a_permanent_sakin_keeps_the_madd_that_holds_it
@@ -236,4 +246,6 @@ RULE_FIXTURES: dict[str, tuple[Fixture, ...]] = {
     "waqf_silah_drop": (silah_drop, silah_drop_alone),
     "waqf_taa_marbuta": (taa_marbuta_haa, taa_marbuta_tanween),
     "pausal_alif": (pausal_alif_stopped, pausal_alif_joined),
+    "orthographic_silence": (rasm_silent_waw, rasm_silent_alif),
+    "variant_silence": (variant_silence_stopped, variant_silence_joined),
 }

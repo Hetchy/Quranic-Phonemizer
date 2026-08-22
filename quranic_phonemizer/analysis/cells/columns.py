@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from ...model.address import KhilafId, Location, Option, SlotId, VariantSelection
+from ...model.address import Option, SlotId
 from ...model.performance import Consonant, Quality, Vowel
 from ...render.alphabet import packaged_alphabet
 from ...session import Session
@@ -37,18 +37,8 @@ class _Reading:
     written_on: dict[int, int]
 
 
-#: Where the rasm writes a base letter and a mini seen riding it, the read half
-#: turns on one seen/saad khilaf, one per word it covers.
-_SEEN_SAD_SITES: dict[Location, KhilafId] = {
-    Location(2, 245, 14): KhilafId.SEEN_SAD_YABSUT,
-    Location(7, 69, 22): KhilafId.SEEN_SAD_BASTAH,
-    Location(52, 37, 7): KhilafId.SEEN_SAD_AL_MUSAYTIRUN,
-    Location(88, 22, 3): KhilafId.SEEN_SAD_BIMUSAYTIR,
-}
-
-
 def _reading(view: SourceView, facts: AnalysisFacts, insc: InscriptionFacts,
-             locations: tuple[Location, ...], selection: VariantSelection) -> _Reading:
+             session: Session) -> _Reading:
     long_vowel = frozenset(
         i for i, f in enumerate(facts.sounds)
         if isinstance(f.value, Vowel) and f.value.long
@@ -81,20 +71,22 @@ def _reading(view: SourceView, facts: AnalysisFacts, insc: InscriptionFacts,
     }
     return _Reading(
         long_vowel, consonant, canonical_quality, slot_of_unit, owner, main,
-        _variant_of_unit(view, locations, selection), below, written_on,
+        _variant_of_unit(view, session), below, written_on,
     )
 
 
-def _variant_of_unit(
-    view: SourceView, locations: tuple[Location, ...], selection: VariantSelection
-) -> dict[int, Option]:
-    """On both cells of a riding-letter pair, the seen/saad khilaf governing the
-    pair's word, but only where this request selects that khilaf's option."""
+def _variant_of_unit(view: SourceView, session: Session) -> dict[int, Option]:
+    """On both cells of a riding-letter pair, the letter khilaf the authored
+    data sites at the pair's word, but only where this request selects that
+    khilaf's option."""
+    selection = session.performance.selection
     out: dict[int, Option] = {}
     for unit in view.units:
         if unit.kind is not LetterUnitKind.LETTER or unit.written_on_unit_id is None:
             continue
-        khilaf = _SEEN_SAD_SITES.get(locations[unit.word_id.value])
+        khilaf = session.letter_khilaf_sites.get(
+            session.locations[unit.word_id.value]
+        )
         if khilaf is None:
             continue
         choice = selection.chosen(khilaf)
@@ -244,20 +236,26 @@ def build_cell_words(
     script: str,
     variant: dict,
     extra_phonemes: frozenset[str] = frozenset(),
+    view: SourceView | None = None,
+    bundle=None,
+    facts: AnalysisFacts | None = None,
+    insc: InscriptionFacts | None = None,
 ) -> tuple[CellWord, ...]:
-    view = build_source_view(
-        session, ref=ref, riwayah=riwayah, script=script, variant=variant,
-        extra_phonemes=extra_phonemes,
-    )
-    facts = analyse(session, packaged_alphabet(), extra_phonemes=extra_phonemes)
-    insc = inscribe(session)
-    reading = _reading(
-        view, facts, insc, session.locations, session.performance.selection
-    )
-    bundle = build_bundle(
-        session, ref=ref, riwayah=riwayah, script=script, variant=variant,
-        extra_phonemes=extra_phonemes,
-    )
+    if facts is None:
+        facts = analyse(session, packaged_alphabet(), extra_phonemes=extra_phonemes)
+    if insc is None:
+        insc = inscribe(session)
+    if bundle is None:
+        bundle = build_bundle(
+            session, ref=ref, riwayah=riwayah, script=script, variant=variant,
+            extra_phonemes=extra_phonemes, facts=facts, insc=insc,
+        )
+    if view is None:
+        view = build_source_view(
+            session, ref=ref, riwayah=riwayah, script=script, variant=variant,
+            extra_phonemes=extra_phonemes, bundle=bundle, facts=facts, insc=insc,
+        )
+    reading = _reading(view, facts, insc, session)
     words = build_cell_sounds(_words(view, reading), bundle.sounds)
     validate_cell_columns(words, view, reading.slot_of_unit)
     validate_cell_sounds(words, bundle.sounds)

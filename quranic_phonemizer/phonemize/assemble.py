@@ -43,7 +43,7 @@ from .derived import (
     shortened_carriers,
     silent_groups,
 )
-from .ordering import sounds_in_order
+from ..model.performance import sounds_in_order
 from .recited import write_recited
 from ..session import Session
 

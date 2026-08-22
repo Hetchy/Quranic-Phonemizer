@@ -10,7 +10,13 @@ from enum import StrEnum
 
 from ..model.address import Location
 from ..model.canon import CanonLetter, Nucleus, Onset, Quality, Rule, SlotOrigin
-from ..model.inscription import GraphemeClass, SilenceReason, StopAdvice
+from ..model.inscription import (
+    Glyph,
+    GlyphKind,
+    SilenceReason,
+    StopAdvice,
+    glyph_kind_of,
+)
 from ..model.performance import Degree
 
 
@@ -112,69 +118,6 @@ class RuleInstance:
     reason it is unsaid takes this field instead."""
     source: int | None
     host: int | None
-
-
-class GlyphKind(StrEnum):
-    """This `kind` vocabulary, distinct from the model's `GraphemeClass`,
-    which folds a sukun into `haraka`, has no `vowel_letter`, and calls a
-    tajweed mark `annotation`."""
-
-    BASE = "base"
-    HARAKA = "haraka"
-    TANWEEN = "tanween"
-    SHADDA = "shadda"
-    VOWEL_LETTER = "vowel_letter"
-    SMALL_VOWEL = "small_vowel"
-    MADD_SIGN = "madd_sign"
-    SUKUN = "sukun"
-    SILENCE_SIGN = "silence_sign"
-    TAJWEED_MARK = "tajweed_mark"
-    STOP_SIGN = "stop_sign"
-    TATWEEL = "tatweel"
-    STRUCTURAL = "structural"
-
-
-#: `GraphemeClass` members with a single `GlyphKind` regardless of what fact
-#: the grapheme evidences. `HARAKA` is not here: a sukun and an ordinary
-#: haraka share a `GraphemeClass` and split only on `SlotFact.VOWEL_ABSENCE`
-#: -- `glyph_kind_of` below reads that separately.
-_KIND_OF_GRAPHEME_CLASS = {
-    GraphemeClass.BASE: GlyphKind.BASE,
-    GraphemeClass.TANWEEN: GlyphKind.TANWEEN,
-    GraphemeClass.SHADDA: GlyphKind.SHADDA,
-    GraphemeClass.SMALL_VOWEL: GlyphKind.SMALL_VOWEL,
-    GraphemeClass.MADD_SIGN: GlyphKind.MADD_SIGN,
-    GraphemeClass.SILENCE_SIGN: GlyphKind.SILENCE_SIGN,
-    GraphemeClass.ANNOTATION: GlyphKind.TAJWEED_MARK,
-    GraphemeClass.ADVICE: GlyphKind.STOP_SIGN,
-    GraphemeClass.STRUCTURAL: GlyphKind.STRUCTURAL,
-    GraphemeClass.LENGTH_CARRIER: GlyphKind.VOWEL_LETTER,
-}
-
-
-def glyph_kind_of(
-    cls: GraphemeClass, *, vowel_absent: bool = False, structural: bool = True
-) -> GlyphKind:
-    """`vowel_absent` is `SlotFact.VOWEL_ABSENCE` evidenced at this grapheme.
-    `structural` says it carries the `Structural` edge; one of this class
-    without that edge is a seat a mark was written on, inside a word."""
-    if cls is GraphemeClass.HARAKA:
-        return GlyphKind.SUKUN if vowel_absent else GlyphKind.HARAKA
-    if cls is GraphemeClass.STRUCTURAL and not structural:
-        return GlyphKind.TATWEEL
-    return _KIND_OF_GRAPHEME_CLASS[cls]
-
-
-@dataclass(frozen=True, slots=True)
-class Glyph:
-    """One source scalar. `word`/`word_index` are absent for a glyph
-    carrying the `Structural` spelling edge."""
-
-    word: int | None
-    char: str
-    kind: GlyphKind
-    word_index: int | None
-    source_index: int
 
 
 @dataclass(frozen=True, slots=True)
