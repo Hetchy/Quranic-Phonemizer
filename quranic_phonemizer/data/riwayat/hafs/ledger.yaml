@@ -192,11 +192,8 @@ supplies:
   # and no rule over canonical context can separate the two. Four locations,
   # and every tajwid source lists exactly these four: the Ledger's own
   # definition.
-  # 18:1:11 `عِوَجَاۜ` is deliberately absent. Its skeleton is not the same in
-  # the two scripts -- IndoPak builds the tanwin nun and Uthmani does not, which
-  # is one of the L1 rows -- so a mandatory skeleton cannot match both. The
-  # entry belongs here and cannot be written until that row closes; addressing
-  # it slot-wise would mean weakening the check that catches ordinal drift.
+  - {slot: "18:1:11#2", skeleton: ["عوج", "عوجن"], fact: SAKT, value: true,
+     citation: "Hafs; sakt, 1 of 4"}
   - {slot: "36:52:6#4", skeleton: "مرقدن", fact: SAKT, value: true,
      citation: "Hafs; sakt, 2 of 4"}
   - {slot: "75:27:2#1", skeleton: "من", fact: SAKT, value: true,

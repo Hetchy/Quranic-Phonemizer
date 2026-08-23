@@ -92,8 +92,21 @@ def apply_ledger(reading: Reading, drafts, ledger: Ledger, track) -> None:
         _check_skeleton(reading, drafts, ordinal, supply.skeleton)
         # A Ledger supply is authored, not written by any script: it never
         # evidences a glyph, so no scribe is passed.
-        set_fact(drafts[ordinal], drafts, supply.fact, supply.value, Target.HERE)
+        target = (
+            _word_tail(reading, drafts, ordinal)
+            if supply.fact is SlotFact.SAKT
+            else ordinal
+        )
+        set_fact(drafts[target], drafts, supply.fact, supply.value, Target.HERE)
         track.from_ledger += 1
+
+
+def _word_tail(reading: Reading, drafts, ordinal: int) -> int:
+    word = word_of(reading, drafts[ordinal])
+    return max(
+        i for i, draft in enumerate(drafts)
+        if word_of(reading, draft) == word
+    )
 
 
 def _check_witnesses(reading: Reading, drafts, ledger: Ledger) -> None:
@@ -156,14 +169,17 @@ def _ordinal(reading: Reading, drafts, ref) -> int | None:
     return span[ref.index] if 0 <= ref.index < len(span) else None
 
 
-def _check_skeleton(reading: Reading, drafts, ordinal: int, claimed: str) -> None:
+def _check_skeleton(
+    reading: Reading, drafts, ordinal: int, claimed: str | tuple[str, ...]
+) -> None:
     """The mandatory `skeleton` is what catches ordinal drift. Without it a
     Ledger entry silently starts describing a different slot."""
     word = word_of(reading, drafts[ordinal])
     actual = "".join(
         ABJAD[d.letter.value] for d in drafts if word_of(reading, d) == word
     )
-    if actual != claimed:
+    expected = (claimed,) if isinstance(claimed, str) else claimed
+    if actual not in expected:
         raise LedgerAddressError(
             f"{reading.verse} slot {ordinal}: ledger entry claims skeleton "
             f"{claimed!r} but the word is {actual!r}. The ordinal has "

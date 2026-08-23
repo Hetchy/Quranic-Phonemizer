@@ -19,10 +19,6 @@ SAKT_SITES = [
     ("69:28", 4, 5),    # مَالِيَهْۜ هَلَكَ
 ]
 
-#: Written with the same small seen and carrying no sakt. Its skeleton is not
-#: the same in the two scripts, so the reading does not claim one here.
-IWAJA = ("18:1", 11)
-
 #: The one sakt word that also carries a stop sign.
 MARQADINA = ("36:52", 6)
 
@@ -72,13 +68,13 @@ def _next_verse(ref: str) -> str:
     return f"{surah}:{ayah + 1}"
 
 
-def test_a_word_written_with_the_same_mark_and_no_sakt_reads_straight_on():
+def test_iwaja_carries_the_first_authored_sakt():
     # عِوَجَاۜ قَيِّمًا
-    ref, word = IWAJA
+    ref, word = "18:1", 11
     result = Phonemizer().phonemize(f"{ref}-{_next_verse(ref)}")
     held = result.words[word - 1]
     assert "ۜ" in held.text
-    assert not held.sakt_after
+    assert held.sakt_after
     assert not held.is_stopped_on
     assert "".join(result.phonemes("word")[word - 1]) == "ʕiwaʒa:"
 
