@@ -8,7 +8,11 @@ from __future__ import annotations
 import pytest
 
 from quranic_phonemizer.engine.boundary_plan import all_join
-from quranic_phonemizer.engine.laws import LawError, check_inscription
+from quranic_phonemizer.engine.laws import (
+    LawError,
+    check_graphemes_spelt,
+    check_inscription,
+)
 from quranic_phonemizer.engine.run import perform
 from quranic_phonemizer.model.address import SlotId
 from quranic_phonemizer.model.inscription import Attests, Decorates, Evidences
@@ -19,7 +23,7 @@ from conftest import built_for
 
 #: Chosen to cover distinct cases: an article lam that assimilates, a verse
 #: with cross-word noon, the muqattaat, and one of the four sakt sites.
-VERSES = [(112, 2), (2, 20), (1, 1), (7, 1), (18, 1), (33, 10)]
+VERSES = [(112, 2), (2, 20), (1, 1), (7, 1), (18, 1), (33, 10), (11, 41)]
 
 
 def _view(packed, hafs, surah, ayah, alphabet):
@@ -37,6 +41,45 @@ def test_every_slot_is_reachable_from_the_writing(packed, hafs, surah, ayah):
     """
     built = built_for(packed, hafs, surah, ayah)
     check_inscription(built.inscription, built.score)
+
+
+@pytest.mark.parametrize(("surah", "ayah"), VERSES)
+def test_every_grapheme_reaches_the_score(packed, hafs, surah, ayah):
+    """A grapheme the script wrote that spells nothing is one no projection can
+    place and no alignment can show."""
+    built = built_for(packed, hafs, surah, ayah)
+    check_graphemes_spelt(built.inscription)
+
+
+def test_the_imala_dagger_shows_the_slot_it_is_written_on(packed, hafs):
+    """11:41 `مَجْر۪ىٰهَا`: the imala mark has already made the vowel long, so
+    the dagger after it supplies nothing -- and is still written."""
+    built = built_for(packed, hafs, 11, 41)
+    daggers = [
+        g for g in built.inscription.graphemes if g.char == "ٰ"
+    ]
+    assert daggers, "11:41 writes a dagger alif"
+    spelt = {s.grapheme for s in built.inscription.spellings}
+    for dagger in daggers:
+        assert dagger.id in spelt
+
+
+def test_i8_fails_when_a_grapheme_spells_nothing(packed, hafs):
+    """Dropping the edges from one grapheme must raise, naming it."""
+    built = built_for(packed, hafs, 112, 2)
+    orphan = built.inscription.graphemes[-1].id
+    crippled = type(built.inscription)(
+        verse=built.inscription.verse,
+        script=built.inscription.script,
+        words=built.inscription.words,
+        graphemes=built.inscription.graphemes,
+        spellings=tuple(
+            s for s in built.inscription.spellings if s.grapheme != orphan
+        ),
+        advice=built.inscription.advice,
+    )
+    with pytest.raises(LawError, match="I8"):
+        check_graphemes_spelt(crippled)
 
 
 def test_i7_fails_when_a_slot_is_unreachable(packed, hafs):

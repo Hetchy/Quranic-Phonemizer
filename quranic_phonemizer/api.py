@@ -6,6 +6,7 @@ once instead of gathering its adapters, data and rules by hand.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from functools import lru_cache
 from pathlib import Path
 
 from .canon.build import Built, Provenance, build
@@ -21,6 +22,7 @@ from .model.address import (
     Location,
     Riwayah,
     Script,
+    UnknownRiwayah,
     VariantSelection,
     VerseRef,
 )
@@ -37,9 +39,10 @@ DATA = Path(__file__).resolve().parent / "data"
 #: Every riwayah this build ships. Adding one is one row plus its package.
 PACKAGES = {Riwayah.HAFS: hafs}
 
-
-class UnknownRiwayah(ValueError):
-    """Named rather than a KeyError, so the message lists what is shipped."""
+#: `Riwayah` is the closed vocabulary the gates check against; a member with
+#: no package here would pass them and fail late, so refuse to load instead.
+if set(PACKAGES) != set(Riwayah):
+    raise RuntimeError("every Riwayah member needs a package in PACKAGES")
 
 
 @dataclass(frozen=True, slots=True)
@@ -135,6 +138,7 @@ def recitation(riwayah: Riwayah) -> Recitation:
     )
 
 
+@lru_cache(maxsize=None)
 def alphabet(notation: str = "ipa") -> Alphabet:
     """The output notation. Shared across riwayat: it names sounds, not
     readings, so it is not part of a `Recitation`."""

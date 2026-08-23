@@ -3,8 +3,8 @@ from __future__ import annotations
 
 import hashlib
 
-from ..model.address import SlotId
-from ..model.canon import Score, ScoreWord, Slot
+from ..model.address import SlotId, SpellingRunId
+from ..model.canon import Score, ScoreWord, Slot, SpellingRun
 from ..orthography.adapter import Reading
 
 
@@ -14,10 +14,15 @@ def assemble(
     by_word: dict[int, list[Slot]] = {}
     ordinals: dict[int, int] = {}
     sakt: set[int] = set()
+    run_drafts: dict[int, dict[int, list]] = {}
     for ordinal, draft in enumerate(drafts):
         ordinals[draft.uid] = ordinal
         word = reading.clusters[draft.cluster].word if draft.cluster >= 0 else 0
         by_word.setdefault(word, []).append(_slot(reading, draft, ordinal))
+        if draft.spelling_run is not None:
+            run_drafts.setdefault(word, {}).setdefault(
+                draft.spelling_run, []
+            ).append((draft, ordinal))
         if draft.sakt_after:
             sakt.add(word)
 
@@ -26,6 +31,9 @@ def assemble(
             location=location,
             slots=tuple(by_word.get(index, ())),
             sakt_after=index in sakt,
+            spelling_runs=_spelling_runs(
+                location, run_drafts.get(index, {})
+            ),
         )
         for index, location in enumerate(reading.words)
     )
@@ -35,6 +43,20 @@ def assemble(
         selection=selection,
         digest=digest(words),
     ), ordinals
+
+
+def _spelling_runs(location, drafts_by_run) -> tuple[SpellingRun, ...]:
+    out = []
+    for run, drafts in sorted(drafts_by_run.items()):
+        letters = {draft.spelled_letter for draft, _ in drafts}
+        if len(letters) != 1 or None in letters:
+            raise ValueError(f"{location}: spelling run {run} has no single letter")
+        out.append(SpellingRun(
+            id=SpellingRunId(location, run),
+            source_letter=next(iter(letters)),
+            slot_ids=tuple(SlotId(location.verse, ordinal) for _, ordinal in drafts),
+        ))
+    return tuple(out)
 
 
 def _slot(reading: Reading, draft, ordinal: int) -> Slot:
@@ -51,12 +73,20 @@ def _slot(reading: Reading, draft, ordinal: int) -> Slot:
 def digest(words: tuple[ScoreWord, ...]) -> str:
     """Every field two Scores may differ in, so equal digests are equal
     Scores. A digest over part of a Slot would report a lost fact as a match."""
-    text = "|".join(_line(word) for word in words)
-    return hashlib.blake2b(text.encode("utf-8"), digest_size=16).hexdigest()
+    digest = hashlib.blake2b(digest_size=16)
+    for index, word in enumerate(words):
+        if index:
+            digest.update(b"|")
+        digest.update(_line(word).encode("utf-8"))
+    return digest.hexdigest()
 
 
 def _line(word: ScoreWord) -> str:
-    return f"{word.location}/{int(word.sakt_after)}/" + "|".join(
+    runs = ";".join(
+        f"{run.source_letter.value}:{','.join(str(slot.ordinal) for slot in run.slot_ids)}"
+        for run in word.spelling_runs
+    )
+    return f"{word.location}/{int(word.sakt_after)}/{runs}/" + "|".join(
         f"{slot.letter.value}:{slot.onset.value}:{_nucleus(slot.nucleus)}:"
         f"{slot.origin.value}:"
         f"{','.join(sorted(a.value for a in slot.annotations))}"

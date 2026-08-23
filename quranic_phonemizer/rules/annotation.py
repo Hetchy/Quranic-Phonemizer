@@ -11,12 +11,12 @@ from ..engine.plan import Phase, Plan, Verdict, mint
 from ..model.address import BoundaryPlan, SlotId
 from ..model.canon import CanonLetter as L
 from ..model.canon import Annotation, Onset, Rule
-from ..model.performance import Occurrence, Participants
+from ..model.performance import Occurrence
 from .tafkheem import Weight
 
 
 def _classification(rule: Rule, at: SlotId) -> Verdict:
-    return Verdict(Occurrence(mint(rule, at), rule, Participants(at)), ())
+    return Verdict(Occurrence(mint(rule, at), rule, (at,)), ())
 
 
 @dataclass(frozen=True, slots=True)
@@ -44,7 +44,9 @@ class CanonicalColour:
         if Annotation.IMALA in slot.annotations:
             return _classification(Rule.IMALA, at)
         if Annotation.ISHMAM in slot.annotations:
-            return _classification(Rule.ISHMAM, at)
+            following = near.after(at)
+            if following is not None and following.letter is L.NOON:
+                return _classification(Rule.ISHMAM, following.id)
         return None
 
 

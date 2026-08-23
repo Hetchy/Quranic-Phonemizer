@@ -58,7 +58,7 @@ class Supply:
     ref: SlotRef
     fact: SlotFact
     value: object
-    skeleton: str
+    skeleton: str | tuple[str, ...]
     citation: str
 
 
@@ -70,7 +70,7 @@ class Assert:
     ref: SlotRef
     fact: SlotFact
     value: object
-    skeleton: str
+    skeleton: str | tuple[str, ...]
 
 
 @dataclass(frozen=True, slots=True)
@@ -235,14 +235,15 @@ def _assert(row: Any, *, where: str) -> Assert:
     )
 
 
-def _skeleton(raw: object, *, where: str) -> str:
-    text = str(raw).strip()
-    if not text:
+def _skeleton(raw: object, *, where: str) -> str | tuple[str, ...]:
+    values = raw if isinstance(raw, list) else [raw]
+    skeletons = tuple(str(value).strip() for value in values)
+    if not skeletons or any(not text for text in skeletons):
         raise LedgerError(
             f"{where}: `skeleton` is mandatory — it is what keeps a "
             f"verse-scoped ordinal reviewable and catches ordinal drift"
         )
-    return text
+    return skeletons[0] if len(skeletons) == 1 else skeletons
 
 
 def _reject_duplicate_supply(supplies: tuple[Supply, ...], path: Path) -> None:

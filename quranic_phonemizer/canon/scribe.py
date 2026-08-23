@@ -5,6 +5,7 @@ on is only known at the moment `_set` picks its target.
 """
 from __future__ import annotations
 
+from bisect import bisect_left
 from dataclasses import dataclass, field
 
 from ..model.address import GraphemeId, SlotId, VerseRef
@@ -102,10 +103,10 @@ class Scribe:
         for decoration in reading.decorations:
             ordinal = by_cluster.get(decoration.cluster)
             if ordinal is None:
-                earlier = [c for c in ordered if c < decoration.cluster]
-                if not earlier:
+                preceding = bisect_left(ordered, decoration.cluster) - 1
+                if preceding < 0:
                     continue
-                ordinal = by_cluster[earlier[-1]]
+                ordinal = by_cluster[ordered[preceding]]
             offset = decoration.offset
             if offset < 0:
                 continue

@@ -15,6 +15,21 @@ class Riwayah(StrEnum):
     HAFS = "hafs"
 
 
+class UnknownRiwayah(ValueError):
+    """Named rather than a bare KeyError, so the message lists what ships."""
+
+
+def check_riwayah(riwayah: str) -> Riwayah:
+    """The membership gate: `Riwayah` is closed, so a member is shipped."""
+    try:
+        return Riwayah(riwayah)
+    except ValueError:
+        raise UnknownRiwayah(
+            f"{riwayah!r} is not a riwayah; this build ships "
+            f"{[r.value for r in Riwayah]}"
+        ) from None
+
+
 class Script(StrEnum):
     """Closed per riwayah. Both members below are *Hafs* scripts."""
 
@@ -29,7 +44,6 @@ class VerseRef:
 
     def __str__(self) -> str:
         return f"{self.surah}:{self.ayah}"
-
 
 @dataclass(frozen=True, slots=True, order=True)
 class Location:
@@ -46,7 +60,6 @@ class Location:
     def __str__(self) -> str:
         return f"{self.surah}:{self.ayah}:{self.word}"
 
-
 @dataclass(frozen=True, slots=True, order=True)
 class SlotId:
     """A canonical position. The ordinal counts slots across the *verse*."""
@@ -56,6 +69,20 @@ class SlotId:
 
     def __str__(self) -> str:
         return f"{self.verse}#{self.ordinal}"
+
+    def __hash__(self) -> int:
+        return self.verse.surah << 48 | self.verse.ayah << 32 | self.ordinal
+
+
+@dataclass(frozen=True, slots=True, order=True)
+class SpellingRunId:
+    """A named-letter run within one Quran word."""
+
+    location: Location
+    ordinal: int
+
+    def __str__(self) -> str:
+        return f"{self.location}~{self.ordinal}"
 
 
 @dataclass(frozen=True, slots=True, order=True)
@@ -68,6 +95,9 @@ class GraphemeId:
     def __str__(self) -> str:
         return f"{self.verse}@{self.offset}"
 
+    def __hash__(self) -> int:
+        return self.verse.surah << 48 | self.verse.ayah << 32 | self.offset
+
 
 @dataclass(frozen=True, slots=True, order=True)
 class SoundId:
@@ -79,6 +109,9 @@ class SoundId:
     def __str__(self) -> str:
         return f"{self.verse}~{self.seq}"
 
+    def __hash__(self) -> int:
+        return self.verse.surah << 48 | self.verse.ayah << 32 | self.seq
+
 
 @dataclass(frozen=True, slots=True, order=True)
 class OccurrenceId:
@@ -87,6 +120,9 @@ class OccurrenceId:
 
     def __str__(self) -> str:
         return f"{self.verse}!{self.seq}"
+
+    def __hash__(self) -> int:
+        return self.verse.surah << 48 | self.verse.ayah << 32 | self.seq
 
 
 class Junction(StrEnum):

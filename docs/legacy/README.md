@@ -7,8 +7,8 @@ computed projections. None of those modules exist any more. They were deleted
 when the pipeline became `Reading -> Score -> Performance`.
 
 These files are kept only as a specification of the legacy views that current
-compatibility projections may need to reproduce. The frozen output itself is
-in `tests/snapshots/legacy-api/`, pinned by digest.
+compatibility projections may need to reproduce. The frozen phoneme output is
+in `tests/snapshots/phonemes/`, held by the parity floor.
 
 **Do not read these as documentation of the package.** For that, read
 `CLAUDE.md`, then `docs/architecture.md` and `docs/public-api.md`.

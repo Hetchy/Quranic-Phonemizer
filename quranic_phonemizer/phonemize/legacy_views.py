@@ -27,7 +27,7 @@ from ..model.performance import (
     Silent,
 )
 from ..render.alphabet import Alphabet
-from .ordering import _hosts_key, _ASPECT_ORDER, sounds_in_order
+from ..model.performance import _ASPECT_ORDER, _hosts_key, sounds_in_order
 
 
 def phonemes_by_word(

@@ -4,7 +4,7 @@ from __future__ import annotations
 import pytest
 
 from quranic_phonemizer.model.address import Location
-from quranic_phonemizer.phonemize.request import resolve_words
+from quranic_phonemizer.session import resolve_words
 
 
 @pytest.mark.parametrize(

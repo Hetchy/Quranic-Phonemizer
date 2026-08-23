@@ -8,7 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import StrEnum
 
-from .address import Location, Riwayah, SlotId, VariantSelection
+from .address import Location, Riwayah, SlotId, SpellingRunId, VariantSelection
 
 
 class CanonLetter(StrEnum):
@@ -252,10 +252,20 @@ class Slot:
 
 
 @dataclass(frozen=True, slots=True)
+class SpellingRun:
+    """The canonical slots that spell one compact muqattaat letter."""
+
+    id: SpellingRunId
+    source_letter: CanonLetter
+    slot_ids: tuple[SlotId, ...]
+
+
+@dataclass(frozen=True, slots=True)
 class ScoreWord:
     location: Location
     slots: tuple[Slot, ...]
     sakt_after: bool = False
+    spelling_runs: tuple[SpellingRun, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -273,7 +283,7 @@ class Rule(StrEnum):
     """The only rule vocabulary. One name, one place."""
 
     IZHAR = "izhar"
-    IKHFAA_HAQIQI = "ikhfaa_haqiqi"
+    IKHFAA = "ikhfaa"
     IQLAB = "iqlab"
     IDGHAM_BI_GHUNNAH = "idgham_bi_ghunnah"
     IDGHAM_BILA_GHUNNAH = "idgham_bila_ghunnah"
@@ -302,25 +312,50 @@ class Rule(StrEnum):
     ISHMAM = "ishmam"
 
     MADD_TABII = "madd_tabii"
-    MADD_WAJIB_MUTTASIL = "madd_wajib_muttasil"
-    MADD_JAIZ_MUNFASIL = "madd_jaiz_munfasil"
+    MADD_MUTTASIL = "madd_muttasil"
+    MADD_MUNFASIL = "madd_munfasil"
     MADD_LAZIM = "madd_lazim"
-    MADD_ARID_LIL_SUKUN = "madd_arid_lil_sukun"
+    MADD_ARID_LISSUKUN = "madd_arid_lissukun"
     MADD_LEEN = "madd_leen"
-    IWAD = "iwad"
+    MADD_IWAD = "madd_iwad"
+    MADD_BADAL = "madd_badal"
+    MADD_SILAH = "madd_silah"
 
     IBDAL_HAMZA = "ibdal_hamza"
-    WASL_ELISION = "wasl_elision"
-    WASL_START = "wasl_start"
-    ILTIQA_KASRA = "iltiqa_kasra"
+    HAMZA_WASL_SILENT = "hamza_wasl_silent"
+    HAMZA_WASL_FATHA = "hamza_wasl_fatha"
+    HAMZA_WASL_KASRA = "hamza_wasl_kasra"
+    HAMZA_WASL_DAMMA = "hamza_wasl_damma"
+    ILTIQA_HARAKA = "iltiqa_haraka"
     ILTIQA_SHORTENING = "iltiqa_shortening"
-    PAUSAL_SUKUN = "pausal_sukun"
-    TAA_MARBUTA_PAUSAL = "taa_marbuta_pausal"
+    WAQF_DIACRITIC_DROP = "waqf_diacritic_drop"
+    WAQF_SILAH_DROP = "waqf_silah_drop"
+    WAQF_TAA_MARBUTA = "waqf_taa_marbuta"
     PAUSAL_ALIF = "pausal_alif"
-    FAKK_IDGHAM = "fakk_idgham"
 
-    ORTHOGRAPHIC_SILENCE = "orthographic_silence"
 
+#: A prosthetic hamza started on, one rule per helping vowel.
+HAMZA_WASL_START: frozenset[Rule] = frozenset(
+    {Rule.HAMZA_WASL_FATHA, Rule.HAMZA_WASL_KASRA, Rule.HAMZA_WASL_DAMMA}
+)
+
+#: The idgham family: a quiescent letter folds into the letter after it.
+IDGHAM_RULES: frozenset[Rule] = frozenset(
+    {
+        Rule.IDGHAM_BI_GHUNNAH,
+        Rule.IDGHAM_BILA_GHUNNAH,
+        Rule.IDGHAM_SHAFAWI,
+        Rule.IDGHAM_MUTAMATHILAYN,
+        Rule.IDGHAM_MUTAQARIBAYN,
+        Rule.IDGHAM_MUTAJANISAYN_KAMIL,
+        Rule.IDGHAM_MUTAJANISAYN_NAQIS,
+    }
+)
+
+#: The two repairs where quiescent letters may not meet.
+ILTIQA_RULES: frozenset[Rule] = frozenset(
+    {Rule.ILTIQA_HARAKA, Rule.ILTIQA_SHORTENING}
+)
 
 #: Rules whose occurrence may produce no effect; `engine/run.py` mints each
 #: one a `Classifies` edge in place of an attribution, and only where it
@@ -331,19 +366,20 @@ CLASSIFICATION_ONLY: frozenset[Rule] = frozenset(
     {
         Rule.TARQEEQ,
         Rule.GHUNNAH_MUSHADDADAH,
-        Rule.WASL_START,
         Rule.IDGHAM_MUTAJANISAYN_NAQIS,
         Rule.IZHAR,
         Rule.IZHAR_SHAFAWI,
         Rule.LAM_QAMARIYYAH,
-        Rule.MADD_WAJIB_MUTTASIL,
-        Rule.MADD_JAIZ_MUNFASIL,
+        Rule.MADD_BADAL,
+        Rule.MADD_SILAH,
+        Rule.MADD_MUTTASIL,
+        Rule.MADD_MUNFASIL,
         Rule.MADD_LAZIM,
-        Rule.MADD_ARID_LIL_SUKUN,
+        Rule.MADD_ARID_LISSUKUN,
         Rule.MADD_LEEN,
+        Rule.IBDAL_HAMZA,
         Rule.IMALA,
         Rule.TASHIL,
         Rule.ISHMAM,
-        Rule.FAKK_IDGHAM,
     }
-)
+) | HAMZA_WASL_START

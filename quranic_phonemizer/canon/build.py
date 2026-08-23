@@ -28,11 +28,11 @@ from .ledger import EMPTY as EMPTY_LEDGER
 from .ledger import Ledger
 from .assemble import assemble
 from .draft import (
-    _Draft, letter_of, letter_offsets_of, nucleus_fact, set_fact,
-    stray_letter_offsets,
+    _Draft, decorated_offsets, letter_of, letter_offsets_of, nucleus_fact,
+    set_fact,
 )
 from .juncture import apply_cross_word_noon
-from .passes import LexemePass, apply_ledger
+from .passes import LexemePass, apply_ledger, word_bounds
 from .scribe import Scribe
 
 #: The two derivations the builder names itself. Both are properties of the
@@ -119,11 +119,12 @@ def _drafts(
     drafts: list[_Draft] = []
     consumed: set[int] = set()
     pending: list[int] = []
+    bounds_by_word = word_bounds(reading)
 
     for index, cluster in enumerate(reading.clusters):
         if index in consumed or cluster.offset in bare_seats:
             continue
-        bounds = reading.word_bounds(cluster.word)
+        bounds = bounds_by_word[cluster.word]
         context = _context(reading, index, bounds, drafts, lexicon)
         rows = by_cluster.get(index, ())
         letter = letter_of(rows, cluster)
@@ -183,9 +184,9 @@ def _not_a_slot(letter, silenced: bool, context, cluster, rows, drafts, track,
         pending.append(cluster.offset)
     else:
         subject = drafts[-1] if drafts else None
-        _decorate(scribe, cluster.offset, subject, track)
-        for stray in stray_letter_offsets(rows, cluster.offset):
-            _decorate(scribe, stray, subject, track)
+        evidenced = {offset} if isinstance(outcome, Sets) else ()
+        for shown in decorated_offsets(rows, context, cluster.offset, evidenced):
+            _decorate(scribe, shown, subject, track)
     return True
 
 

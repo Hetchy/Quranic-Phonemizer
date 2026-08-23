@@ -2,9 +2,9 @@
 from __future__ import annotations
 
 from quranic_phonemizer.model.address import Junction, Location
-from quranic_phonemizer.phonemize import span
-from quranic_phonemizer.phonemize.session import phonemize_request
-from quranic_phonemizer.phonemize.span import windows
+from quranic_phonemizer.session import span
+from quranic_phonemizer.session import phonemize_request
+from quranic_phonemizer.session import windows
 from quranic_phonemizer.phonemize.legacy_views import phonemes_by_word
 
 

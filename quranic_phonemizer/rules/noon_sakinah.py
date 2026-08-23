@@ -21,8 +21,8 @@ from ..engine.plan import (
 from ..model.address import BoundaryPlan, Junction, KhilafId, SlotId
 from ..model.canon import CanonLetter as L
 from ..model.canon import Rule, SlotOrigin
-from ..model.performance import Aspect, Consonant, Occurrence, Participants
-from .ownership import is_effectively_quiescent, is_quiescent
+from ..model.performance import Aspect, Consonant, Occurrence
+from .ownership import is_performed_quiescent, is_quiescent
 from .khilaf import DEFAULT_NASAL_PLACE, nasal_place
 from .tables import Followers
 
@@ -33,7 +33,7 @@ class NoonSakinah:
 
     followers: Followers
     opening_wasl: object | None = None
-    rule: Rule = Rule.IKHFAA_HAQIQI
+    rule: Rule = Rule.IKHFAA
     phase: Phase = Phase.MERGE
     triggers: frozenset = field(default=frozenset({L.NOON}))
 
@@ -42,8 +42,15 @@ class NoonSakinah:
         boundaries: BoundaryPlan,
     ) -> Verdict | None:
         slot = near.slot(at)
-        if not is_effectively_quiescent(near, plan, at, boundaries):
+        # A repair that broke a meeting of two quiescent letters leaves this one
+        # voweled, and a voweled letter is not a sakin at all.
+        if not is_performed_quiescent(slot, plan, at):
             return None
+        word = near.word_of(at)
+        clear = word is not None and near.last_of_word(at) and (
+            boundaries.stopped_on(word)
+            or boundaries.after(word) is Junction.SAKT
+        )
         opening = self._opening_wasl(near, at, boundaries)
         if opening is not None:
             choice = self.opening_wasl.choose(near.score.selection)
@@ -52,9 +59,11 @@ class NoonSakinah:
             return _merge(Rule.IDGHAM_BI_GHUNNAH, at, opening, ghunnah=True)
         following = near.after(at)
         if following is None:
-            if not plan.merged_away(at, Aspect.CONSONANT):
-                # A stop masks the forward family. A surviving noon is clear,
-                # including a disjoined-letter name; a dropped tanween is not.
+            if clear or (
+                slot.origin is SlotOrigin.SPELLED and near.last_of_word(at)
+            ):
+                # The noon closing a disjoined-letter opening takes its own
+                # plain articulation rather than reaching into the next word.
                 return _classification(Rule.IZHAR, at, None)
             return None
 
@@ -80,7 +89,7 @@ class NoonSakinah:
                 )
         # Ikhfaa haqiqi has no khilaf: it is not a bilabial hiding.
         return _nasal(
-            Rule.IKHFAA_HAQIQI, at, following.id, DEFAULT_NASAL_PLACE
+            Rule.IKHFAA, at, following.id, DEFAULT_NASAL_PLACE
         )
 
     def _opening_wasl(self, near, at, boundaries):
@@ -112,13 +121,14 @@ def _between_names(slot, following) -> bool:
 def _classification(rule: Rule, at: SlotId, other: SlotId | None) -> Verdict:
     """Izhar produces no sound of its own; the occurrence exists so a
     projection can find it."""
-    return Verdict(Occurrence(mint(rule, at), rule, Participants(at, other)), ())
+    context = () if other is None else (other,)
+    return Verdict(Occurrence(mint(rule, at), rule, (at,), context), ())
 
 
 def _nasal(rule: Rule, at: SlotId, other: SlotId, letter: L) -> Verdict:
     """Iqlab and ikhfaa realize the noon as a hum on the letter it rides."""
     return Verdict(
-        Occurrence(mint(rule, at), rule, Participants(at, other)),
+        Occurrence(mint(rule, at), rule, (at,), (other,)),
         (Realize(at, Aspect.CONSONANT, Consonant(letter, ghunnah=True)),),
     )
 
@@ -130,7 +140,7 @@ def _merge(rule: Rule, at: SlotId, host, *, ghunnah: bool) -> Verdict:
     idgham, so the merged sound belongs to it and not to plain realization.
     """
     return Verdict(
-        Occurrence(mint(rule, at), rule, Participants(at, host.id)),
+        Occurrence(mint(rule, at), rule, (at,)),
         (
             Realize(
                 host.id,
@@ -167,7 +177,7 @@ class IkhfaaWeight:
             return None  # izhar, iqlab or idgham owns this pair instead
         return Verdict(
             Occurrence(
-                mint(Rule.TAFKHEEM, at), Rule.TAFKHEEM, Participants(at)
+                mint(Rule.TAFKHEEM, at), Rule.TAFKHEEM, (at,)
             ),
             (Recolour(at, Aspect.CONSONANT, SoundFeature.EMPHATIC, True),),
         )

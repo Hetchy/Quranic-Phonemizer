@@ -1,5 +1,12 @@
 # Public API and projections
 
+This document describes the current schema-v1 graph. The accepted replacement
+architecture and phased implementation plan are in
+[design/consumer-analysis-projection.md](design/consumer-analysis-projection.md).
+Until that cutover lands, this document remains the contract for the released
+shape. Its output is untrusted differential evidence for the redesign, not a
+correctness oracle: native laws and audited fixtures decide the new semantics.
+
 The package has one public operation:
 
 ```python
@@ -15,6 +22,13 @@ sounds, applied rules, and the relations between them.
 
 The root `README.md` documents ordinary use. This document describes the
 result graph and the projections derived from it.
+
+For one unusually large, bounded request, `phonemize(..., suspend_gc=True)`
+defers CPython cyclic collection until the call returns. It does not change
+the result and restores the caller's prior collector state, including after
+an error. Cyclic GC is process-global, so this advanced option also defers
+collection of unrelated cycles created by other threads during the call. Use
+it only when the process has enough memory for the complete returned document.
 
 ## Result identity
 
@@ -151,18 +165,31 @@ Blocks may contain several pairings on either side, which preserves expansions,
 contractions, mergers, insertions, and deletions without pretending that the
 transformation is character-for-character.
 
-## Rules and teaching labels
+## Rules
 
-A `RuleInstance` identifies the rule, its source unit when it has one, its
-merger host when it has one, and optional teaching labels. The rule list is
-exhaustive for the performed passage, while labels such as `madd_badal` and
-`silah` are derived classifications for presentation.
+A `RuleInstance` identifies the rule, its source unit when it has one, and the
+second unit the rule names when there is one. That second unit is another unit
+the rule is about or one its own edges acted on -- a merger's host, a letter it
+silenced, a vowel it lengthened -- never a unit it only read to decide. The rule
+list is exhaustive for the performed passage: `madd_badal` and `madd_silah` are
+rules in it, not derived labels beside it.
 
-`tajweed_rules(riwayah)` lists the public identifiers and their English and
-Arabic names. Rule indices attached to pairings point into the same `rules`
-array published on the result.
+`tajweed_rules(riwayah)` lists one row per identifier a result can publish --
+every rule, then the two silence reasons (`orthographic_silence` and
+`variant_silence`): the public identifier, the English name, the Arabic name,
+and a one-sentence summary. Rule indices attached to pairings point into the
+same `rules` array published on the result.
 
 ## Schema stability
+
+The native analysis documents use the integer `schema_version` stamped at the
+top of each wire document. A change to a wire record or its meaning requires a
+version bump. Native schema 2 adds canonical slot provenance, flat named-letter
+runs, and intra-word merger bridges to the cell document. The
+`@quranic-phonemizer/cells` package major equals the native schema version it
+reads, so package 2.x accepts native schema 2 and throws on a mismatch. The rule
+catalogue returned by `tajweed_rules()` is additive metadata outside that
+versioned document contract.
 
 The canonical JSON-shaped representation is defined in
 `quranic_phonemizer/phonemize/schema.py`. Its tagged unions and indices are

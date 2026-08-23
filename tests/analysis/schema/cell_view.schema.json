@@ -1,0 +1,488 @@
+{
+  "$defs": {
+    "CellBoundary": {
+      "additionalProperties": false,
+      "properties": {
+        "boundary_id": {
+          "type": "integer",
+          "x-ref": "Boundary"
+        },
+        "bridges": {
+          "items": {
+            "$ref": "#/$defs/CellBridge"
+          },
+          "type": "array"
+        },
+        "columns": {
+          "items": {
+            "$ref": "#/$defs/CellColumn"
+          },
+          "type": "array"
+        },
+        "exclusive_group": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sounds": {
+          "items": {
+            "$ref": "#/$defs/CellSound"
+          },
+          "type": "array"
+        },
+        "state": {
+          "anyOf": [
+            {
+              "enum": [
+                "start",
+                "join",
+                "sakt",
+                "stop"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "verse_end": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "boundary_id",
+        "bridges",
+        "columns",
+        "exclusive_group",
+        "sounds",
+        "state",
+        "verse_end"
+      ],
+      "type": "object"
+    },
+    "CellBridge": {
+      "additionalProperties": false,
+      "properties": {
+        "after_column_ids": {
+          "items": {
+            "type": "integer",
+            "x-ref": "CellColumn"
+          },
+          "type": "array"
+        },
+        "before_column_ids": {
+          "items": {
+            "type": "integer",
+            "x-ref": "CellColumn"
+          },
+          "type": "array"
+        },
+        "merger_id": {
+          "type": "integer",
+          "x-ref": "Merger"
+        },
+        "sound": {
+          "$ref": "#/$defs/CellSound"
+        }
+      },
+      "required": [
+        "after_column_ids",
+        "before_column_ids",
+        "merger_id",
+        "sound"
+      ],
+      "type": "object"
+    },
+    "CellColumn": {
+      "additionalProperties": false,
+      "properties": {
+        "anchor_unit_id": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "x-ref": "LetterUnit"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "attached_to_column_id": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "x-ref": "CellColumn"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "type": "integer",
+          "x-ref": "CellColumn"
+        },
+        "owned_sound_ids": {
+          "items": {
+            "type": "integer",
+            "x-ref": "Sound"
+          },
+          "type": "array"
+        },
+        "presented_sound_ids": {
+          "items": {
+            "type": "integer",
+            "x-ref": "Sound"
+          },
+          "type": "array"
+        },
+        "role": {
+          "enum": [
+            "letter",
+            "haraka",
+            "sukun",
+            "tanween",
+            "madd",
+            "stop_sign",
+            "gap"
+          ],
+          "type": "string"
+        },
+        "rule_occurrence_ids": {
+          "items": {
+            "type": "integer",
+            "x-ref": "RuleOccurrence"
+          },
+          "type": "array"
+        },
+        "side": {
+          "anyOf": [
+            {
+              "enum": [
+                "before",
+                "after"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "silence": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "x-ref": "RuleOccurrence"
+            },
+            {
+              "enum": [
+                "orthographic_silence",
+                "variant_silence"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "slot_ids": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "source_character_ids": {
+          "items": {
+            "type": "integer",
+            "x-ref": "Character"
+          },
+          "type": "array"
+        },
+        "source_unit_ids": {
+          "items": {
+            "type": "integer",
+            "x-ref": "LetterUnit"
+          },
+          "type": "array"
+        },
+        "status": {
+          "enum": [
+            "present",
+            "inserted",
+            "replaced",
+            "dropped",
+            "gap"
+          ],
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "tier": {
+          "enum": [
+            "main",
+            "above",
+            "below"
+          ],
+          "type": "string"
+        },
+        "variant_choice": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "variant_id": {
+          "anyOf": [
+            {
+              "enum": [
+                "seen_sad_yabsut",
+                "seen_sad_bastah",
+                "seen_sad_al_musaytirun",
+                "seen_sad_bimusaytir",
+                "iqlab_nasal",
+                "ikhfaa_shafawi_nasal",
+                "raa_firq_wasl",
+                "raa_alqitr_waqf",
+                "raa_misr_waqf",
+                "raa_nuthur_waqf",
+                "raa_yasr_waqf",
+                "raa_asr_waqf",
+                "daaf_haraka",
+                "yaa_aatani_waqf",
+                "noon_yaseen_wasl",
+                "madd_lazim_tasheel"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "anchor_unit_id",
+        "attached_to_column_id",
+        "id",
+        "owned_sound_ids",
+        "presented_sound_ids",
+        "role",
+        "rule_occurrence_ids",
+        "side",
+        "silence",
+        "slot_ids",
+        "source_character_ids",
+        "source_unit_ids",
+        "status",
+        "text",
+        "tier",
+        "variant_choice",
+        "variant_id"
+      ],
+      "type": "object",
+      "x-record": "CellColumn"
+    },
+    "CellDocument": {
+      "additionalProperties": false,
+      "properties": {
+        "cell_view": {
+          "$ref": "#/$defs/CellView"
+        },
+        "schema_version": {
+          "const": 2,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "cell_view",
+        "schema_version"
+      ],
+      "type": "object"
+    },
+    "CellGroup": {
+      "additionalProperties": false,
+      "properties": {
+        "column_ids": {
+          "items": {
+            "type": "integer",
+            "x-ref": "CellColumn"
+          },
+          "type": "array"
+        },
+        "key": {
+          "type": "integer",
+          "x-ref": "CellColumn"
+        },
+        "kind": {
+          "enum": [
+            "base",
+            "vowel"
+          ],
+          "type": "string"
+        },
+        "sound_ids": {
+          "items": {
+            "type": "integer",
+            "x-ref": "Sound"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "column_ids",
+        "key",
+        "kind",
+        "sound_ids"
+      ],
+      "type": "object"
+    },
+    "CellRun": {
+      "additionalProperties": false,
+      "properties": {
+        "column_ids": {
+          "items": {
+            "type": "integer",
+            "x-ref": "CellColumn"
+          },
+          "type": "array"
+        },
+        "id": {
+          "type": "integer",
+          "x-ref": "CellRun"
+        },
+        "source_unit_id": {
+          "type": "integer",
+          "x-ref": "LetterUnit"
+        }
+      },
+      "required": [
+        "column_ids",
+        "id",
+        "source_unit_id"
+      ],
+      "type": "object",
+      "x-record": "CellRun"
+    },
+    "CellSound": {
+      "additionalProperties": false,
+      "properties": {
+        "column_ids": {
+          "items": {
+            "type": "integer",
+            "x-ref": "CellColumn"
+          },
+          "type": "array"
+        },
+        "rule_occurrence_ids": {
+          "items": {
+            "type": "integer",
+            "x-ref": "RuleOccurrence"
+          },
+          "type": "array"
+        },
+        "sound_id": {
+          "type": "integer",
+          "x-ref": "Sound"
+        }
+      },
+      "required": [
+        "column_ids",
+        "rule_occurrence_ids",
+        "sound_id"
+      ],
+      "type": "object"
+    },
+    "CellView": {
+      "additionalProperties": false,
+      "properties": {
+        "boundaries": {
+          "items": {
+            "$ref": "#/$defs/CellBoundary"
+          },
+          "type": "array"
+        },
+        "words": {
+          "items": {
+            "$ref": "#/$defs/CellWord"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "boundaries",
+        "words"
+      ],
+      "type": "object"
+    },
+    "CellWord": {
+      "additionalProperties": false,
+      "properties": {
+        "bridges": {
+          "items": {
+            "$ref": "#/$defs/CellBridge"
+          },
+          "type": "array"
+        },
+        "columns": {
+          "items": {
+            "$ref": "#/$defs/CellColumn"
+          },
+          "type": "array"
+        },
+        "groups": {
+          "items": {
+            "$ref": "#/$defs/CellGroup"
+          },
+          "type": "array"
+        },
+        "runs": {
+          "items": {
+            "$ref": "#/$defs/CellRun"
+          },
+          "type": "array"
+        },
+        "sounds": {
+          "items": {
+            "$ref": "#/$defs/CellSound"
+          },
+          "type": "array"
+        },
+        "word_id": {
+          "type": "integer",
+          "x-ref": "Word"
+        }
+      },
+      "required": [
+        "bridges",
+        "columns",
+        "groups",
+        "runs",
+        "sounds",
+        "word_id"
+      ],
+      "type": "object"
+    }
+  },
+  "$ref": "#/$defs/CellDocument",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

@@ -10,28 +10,43 @@ from ...engine.plan import Phase
 from ...model.address import KhilafId, Riwayah
 from ...rules.annotation import CanonicalColour, Tarqeeq
 from ...rules.boundary import (
+    DroppedGlide,
+    IwadLength,
     PausalAlif,
-    SoftenedHamza,
     TaaMarbutaAtWaqf,
-    TanweenAtWaqf,
-    TanweenBeforeWasl,
-    WaqfEnding,
-    WaslHamza,
+    TanweenDrop,
+    TanweenIwad,
+    WaqfHarakaDrop,
+    WaqfSilahDrop,
 )
-from ...rules.ibtidaa import FakkIdgham
 from ...rules.idgham import Idgham
 from ...rules.lam_shamsiyyah import ArticleLam, ArticleShape
-from ...rules.madd import IltiqaShortening, MaddClass, MaddLeen, PausalGlide
+from ...rules.madd import (
+    IltiqaShortening,
+    MaddBadal,
+    MaddClass,
+    MaddLazimIbdal,
+    MaddLeen,
+    MaddSilah,
+    PausalGlide,
+)
 from ...rules.meem_sakinah import GhunnahMushaddadah, MeemSakinah
 from ...rules.noon_sakinah import IkhfaaWeight, NoonSakinah
 from ...rules.qalqala import Qalqala
 from ...rules.tafkheem import Emphasis, Weight
+from ...rules.wasl import (
+    SoftenedHamza,
+    SpelledBeforeWasl,
+    TanweenBeforeWasl,
+    WaslHamza,
+)
 from .resources import khilaf, lexicon, rule_tables
 
 
 def _build() -> RuleSet:
     tables = rule_tables()
     choices = khilaf()
+    madd_tasheel = choices.definition(KhilafId.MADD_LAZIM_TASHEEL)
     weight = Weight(always_heavy=tables.always_heavy, raa=choices.raa)
     article = ArticleShape(
         prefixes=tables.proclitics,
@@ -40,9 +55,12 @@ def _build() -> RuleSet:
     return RuleSet(
         {
             Phase.BOUNDARY: (
-                WaslHamza(), SoftenedHamza(), TanweenAtWaqf(), PausalAlif(),
+                WaslHamza(), SoftenedHamza(), PausalAlif(),
+                SpelledBeforeWasl(),
                 TanweenBeforeWasl(),
-                WaqfEnding(yaa=choices.yaa),
+                TanweenDrop(), TanweenIwad(),
+                WaqfHarakaDrop(yaa=choices.yaa), WaqfSilahDrop(),
+                DroppedGlide(yaa=choices.yaa),
                 TaaMarbutaAtWaqf(),
             ),
             Phase.MERGE: (
@@ -56,15 +74,12 @@ def _build() -> RuleSet:
                 Idgham(pairs=tables.pairs,
                        never_follows=tables.never_follows,
                        article=article),
-                FakkIdgham(
-                    pairs=tables.pairs,
-                    followers_of_noon=tables.followers_of_noon,
-                    followers_of_meem=tables.followers_of_meem,
-                    never_follows=tables.never_follows,
-                ),
             ),
             Phase.LENGTH: (
-                PausalGlide(), IltiqaShortening(), MaddClass(), MaddLeen(),
+                PausalGlide(), IltiqaShortening(),
+                MaddLazimIbdal(madd_tasheel.locations, madd_tasheel.default),
+                MaddClass(), MaddClass(additive_arid=True), MaddLeen(),
+                MaddBadal(), MaddSilah(), IwadLength(),
             ),
             Phase.COLOUR: (
                 Emphasis(weight=weight),

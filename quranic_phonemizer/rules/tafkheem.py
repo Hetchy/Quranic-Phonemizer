@@ -17,7 +17,7 @@ from ..model.canon import (
     Quality,
     Rule,
 )
-from ..model.performance import Aspect, Occurrence, Participants
+from ..model.performance import Aspect, Occurrence
 from .khilaf import SitedKhilaf, vocalised_word
 
 #: Raa and the lam of the divine name are heavy only under the conditions
@@ -95,8 +95,7 @@ class Emphasis:
             # heavy; a partial one (idgham_mutajanisayn_naqis) still has one.
             return None
         return Verdict(
-            Occurrence(mint(Rule.TAFKHEEM, at), Rule.TAFKHEEM,
-                       Participants(at)),
+            Occurrence(mint(Rule.TAFKHEEM, at), Rule.TAFKHEEM, (at,)),
             tuple(effects),
         )
 

@@ -5,12 +5,13 @@ import pytest
 
 from quranic_phonemizer.model.address import Script
 from quranic_phonemizer.model.canon import Rule
+from quranic_phonemizer.model.inscription import SilenceReason
 from quranic_phonemizer.orthography.write import pen_for
 from quranic_phonemizer.phonemize import edges as ed
 from quranic_phonemizer.phonemize import nodes as nd
 from quranic_phonemizer.phonemize.assemble import Assembled, assemble
 from quranic_phonemizer.phonemize.pairing import alignment
-from quranic_phonemizer.phonemize.session import phonemize_request
+from quranic_phonemizer.session import phonemize_request
 
 #: Chosen for the fact-vocabulary and rule families they exercise:
 #: mergers, tanween's three outcomes, tafkheem, madd, qalqala, waqf, wasl,
@@ -154,7 +155,7 @@ def test_the_silence_instances_are_the_tail_of_the_rules(hafs, pen, alphabet,
     a = _assembled(hafs, pen, alphabet, f"{surah}:{ayah}")
     at = [
         i for i, r in enumerate(a.rules)
-        if r.rule is Rule.ORTHOGRAPHIC_SILENCE
+        if r.rule is SilenceReason.ORTHOGRAPHIC
     ]
     assert at == list(range(len(a.rules) - len(at), len(a.rules)))
 

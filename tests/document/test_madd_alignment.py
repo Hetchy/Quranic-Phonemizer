@@ -29,21 +29,21 @@ def test_an_ordinary_mid_word_long_vowel_takes_madd_tabii(packed, hafs) -> None:
     )
     plan = BoundaryPlan((Junction.JOIN,) * (len(score.words) - 1) + (Junction.EDGE,))
     performance = perform(score, HAFS, plan)
-    rules = {o.rule for o in performance.occurrences if o.parts.source == long_vowel.id}
+    rules = {o.rule for o in performance.occurrences if long_vowel.id in o.subjects}
     assert Rule.MADD_TABII in rules
 
 
 def test_a_stopped_pausal_alif_takes_madd_tabii_over_its_own_realization(
     packed, hafs, alphabet
 ) -> None:
-    """Word 21 here, `أَنَا۠`: `WaqfEnding` realizes the long vowel;
+    """Word 21 here, `أَنَا۠`: `PausalAlif` realizes the long vowel;
     `madd_tabii` only names its length, so the token does not double."""
     score = score_for(packed, hafs, 2, 258)
     alif = score.words[20].slots[-1]
     plan = _stopped_on(score, 21)
     performance = perform(score, HAFS, plan)
 
-    rules = {o.rule for o in performance.occurrences if o.parts.source == alif.id}
+    rules = {o.rule for o in performance.occurrences if alif.id in o.subjects}
     assert Rule.MADD_TABII in rules
 
     hosts = [
@@ -56,6 +56,21 @@ def test_a_stopped_pausal_alif_takes_madd_tabii_over_its_own_realization(
     assert word == "ʔana:"
 
 
+def test_madd_tabii_names_the_vowel_it_lengthens_and_nothing_else() -> None:
+    """20:1, `طه`: the rule holds the alif for two counts and says nothing
+    about the taa before it, so its edge names one sound of the two."""
+    from quranic_phonemizer import Phonemizer
+    from quranic_phonemizer.phonemize import edges as ed
+
+    result = Phonemizer().phonemize("20:1")
+    named = {
+        m.sound for m in result.modifiers
+        if result.rules[m.by].rule is Rule.MADD_TABII
+        and isinstance(m, ed.Classifies)
+    }
+    assert named == {1, 3}  # tˤ a: h a: -- the two alifs, neither consonant
+
+
 def test_a_stopped_final_glide_takes_madd_tabii_over_its_own_consonant(
     packed, hafs
 ) -> None:
@@ -66,7 +81,7 @@ def test_a_stopped_final_glide_takes_madd_tabii_over_its_own_consonant(
     plan = _stopped_on(score, 1)
     performance = perform(score, HAFS, plan)
 
-    rules = {o.rule for o in performance.occurrences if o.parts.source == waw.id}
+    rules = {o.rule for o in performance.occurrences if waw.id in o.subjects}
     assert Rule.MADD_TABII in rules
 
     merge = next(

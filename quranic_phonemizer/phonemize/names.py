@@ -3,69 +3,34 @@
 """
 from __future__ import annotations
 
-from ..api import PACKAGES, UnknownRiwayah, recitation
-from ..model.address import KhilafId, Option, Riwayah, Script, VariantSelection
-from ..model.canon import Rule
+from ..api import PACKAGES, recitation
+from ..model.address import (
+    KhilafId,
+    Option,
+    Riwayah,
+    Script,
+    VariantSelection,
+    check_riwayah,
+)
+from ..model.definitions import RULE_DEFINITIONS, SILENCE_DEFINITIONS
 
 #: Hafs is Uthmani by default; a second riwayah adds its own row.
 DEFAULT_SCRIPT: dict[Riwayah, Script] = {Riwayah.HAFS: Script.UTHMANI}
-
-#: `identifier` is the model's own `Rule.value`. Two boundary rules --
-#: `wasl_start`/`wasl_elision`, and `pausal_alif`, are real, minted
-#: rules and are included as the model spells them.
-RULE_NAMES: dict[Rule, tuple[str, str]] = {
-    Rule.IZHAR: ("Izhar", "إظهار"),
-    Rule.IKHFAA_HAQIQI: ("Ikhfaa Haqiqi", "إخفاء حقيقي"),
-    Rule.IQLAB: ("Iqlab", "إقلاب"),
-    Rule.IDGHAM_BI_GHUNNAH: ("Idgham bi-Ghunnah", "إدغام بغنة"),
-    Rule.IDGHAM_BILA_GHUNNAH: ("Idgham bila-Ghunnah", "إدغام بلا غنة"),
-    Rule.GHUNNAH_MUSHADDADAH: ("Ghunnah Mushaddadah", "غنة مشددة"),
-    Rule.IZHAR_SHAFAWI: ("Izhar Shafawi", "إظهار شفوي"),
-    Rule.IKHFAA_SHAFAWI: ("Ikhfaa Shafawi", "إخفاء شفوي"),
-    Rule.IDGHAM_SHAFAWI: ("Idgham Shafawi", "إدغام شفوي"),
-    Rule.IDGHAM_MUTAMATHILAYN: ("Idgham Mutamathilayn", "إدغام متماثلين"),
-    Rule.IDGHAM_MUTAQARIBAYN: ("Idgham Mutaqaribayn", "إدغام متقاربين"),
-    Rule.IDGHAM_MUTAJANISAYN_KAMIL: ("Idgham Mutajanisayn Kamil", "إدغام متجانسين كامل"),
-    Rule.IDGHAM_MUTAJANISAYN_NAQIS: ("Idgham Mutajanisayn Naqis", "إدغام متجانسين ناقص"),
-    Rule.LAM_SHAMSIYYAH: ("Lam Shamsiyyah", "لام شمسية"),
-    Rule.LAM_QAMARIYYAH: ("Lam Qamariyyah", "لام قمرية"),
-    Rule.QALQALA_SUGHRA: ("Qalqala Sughra", "قلقلة صغرى"),
-    Rule.QALQALA_KUBRA: ("Qalqala Kubra", "قلقلة كبرى"),
-    Rule.QALQALA_AKBAR: ("Qalqala Akbar", "قلقلة أكبر"),
-    Rule.TAFKHEEM: ("Tafkheem", "تفخيم"),
-    Rule.TARQEEQ: ("Tarqeeq", "ترقيق"),
-    Rule.IMALA: ("Imala", "إمالة"),
-    Rule.TASHIL: ("Tashil", "تسهيل"),
-    Rule.ISHMAM: ("Ishmam", "إشمام"),
-    Rule.MADD_TABII: ("Madd Tabii", "مد طبيعي"),
-    Rule.MADD_WAJIB_MUTTASIL: ("Madd Wajib Muttasil", "مد واجب متصل"),
-    Rule.MADD_JAIZ_MUNFASIL: ("Madd Jaiz Munfasil", "مد جائز منفصل"),
-    Rule.MADD_LAZIM: ("Madd Lazim", "مد لازم"),
-    Rule.MADD_ARID_LIL_SUKUN: ("Madd Arid lil-Sukun", "مد عارض للسكون"),
-    Rule.MADD_LEEN: ("Madd Leen", "مد لين"),
-    Rule.IWAD: ("Iwad", "عوض"),
-    Rule.IBDAL_HAMZA: ("Ibdal Hamza", "إبدال الهمزة"),
-    Rule.WASL_ELISION: ("Hamza Wasl Elision", "حذف همزة الوصل"),
-    Rule.WASL_START: ("Hamza Wasl Start", "همزة الوصل عند الابتداء"),
-    Rule.ILTIQA_KASRA: ("Iltiqa Kasra", "كسر التقاء الساكنين"),
-    Rule.ILTIQA_SHORTENING: ("Iltiqa Shortening", "قصر عند التقاء الساكنين"),
-    Rule.PAUSAL_SUKUN: ("Pausal Sukun", "سكون الوقف"),
-    Rule.TAA_MARBUTA_PAUSAL: ("Taa Marbuta at a Pause", "تاء مربوطة عند الوقف"),
-    Rule.PAUSAL_ALIF: ("Pausal Alif", "ألف الوقف"),
-    Rule.FAKK_IDGHAM: ("Fakk Idgham", "فك الإدغام"),
-    Rule.ORTHOGRAPHIC_SILENCE: ("Orthographic Silence", "حرف لا ينطق به"),
-}
 
 
 def supported_riwayat() -> tuple[str, ...]:
     return tuple(sorted(r.value for r in PACKAGES))
 
 
-def tajweed_rules(riwayah: str) -> tuple[tuple[str, str, str], ...]:
+def tajweed_rules(riwayah: str) -> tuple[tuple[str, str, str, str], ...]:
+    """One row per identifier a result can publish -- every rule, then the
+    silence reasons: identifier, English name, Arabic name, summary."""
     check_riwayah(riwayah)
     return tuple(
-        (rule.value, english, arabic)
-        for rule, (english, arabic) in RULE_NAMES.items()
+        (identifier.value, *definition)
+        for identifier, definition in (
+            *RULE_DEFINITIONS.items(), *SILENCE_DEFINITIONS.items()
+        )
     )
 
 
@@ -98,25 +63,8 @@ def to_selection(variants: dict | None) -> VariantSelection:
     return VariantSelection(tuple(options))
 
 
-def check_riwayah(riwayah: str) -> Riwayah:
-    try:
-        name = Riwayah(riwayah)
-    except ValueError:
-        raise UnknownRiwayah(
-            f"{riwayah!r} is not a riwayah; this build ships "
-            f"{[r.value for r in PACKAGES]}"
-        ) from None
-    if name not in PACKAGES:
-        raise UnknownRiwayah(
-            f"{riwayah!r} is not packaged; this build ships "
-            f"{[r.value for r in PACKAGES]}"
-        )
-    return name
-
-
 __all__ = [
     "DEFAULT_SCRIPT",
-    "RULE_NAMES",
     "available_variants",
     "check_riwayah",
     "resolved_variant",

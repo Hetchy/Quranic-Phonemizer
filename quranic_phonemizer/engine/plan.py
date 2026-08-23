@@ -11,6 +11,7 @@ from typing import TypeAlias
 
 from ..model.address import OccurrenceId, SlotId
 from ..model.canon import Rule
+from ..model.inscription import SilenceReason
 from ..model.performance import Aspect, Length, Occurrence, Side, Sound
 
 
@@ -79,7 +80,17 @@ class Relength:
     length: Length
 
 
-Effect: TypeAlias = Realize | MergeInto | Silence | Insert | Recolour | Relength
+@dataclass(frozen=True, slots=True)
+class Classify:
+    """Attach an occurrence to an existing sound of the named aspect."""
+
+    slot: SlotId
+    aspect: Aspect
+
+
+Effect: TypeAlias = (
+    Realize | MergeInto | Silence | Insert | Recolour | Relength | Classify
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -110,9 +121,15 @@ _RULE_SLOT_STRIDE = 1_000_000
 #: Separates two classifiers that legitimately declare the same `Rule` on
 #: the same slot (different aspects) -- rule plus slot alone is not unique.
 _VARIANT_STRIDE = 100_000_000
+_RULE_INDEX: dict[Rule | SilenceReason, int] = {
+    rule: index for index, rule in enumerate(Rule)
+}
+_RULE_INDEX.update(
+    {reason: len(Rule) + i for i, reason in enumerate(SilenceReason)}
+)
 
 
-def mint(rule: Rule, at: SlotId, variant: int = 0) -> OccurrenceId:
+def mint(rule: Rule | SilenceReason, at: SlotId, variant: int = 0) -> OccurrenceId:
     """Mint a stable occurrence id from rule, slot, and variant.
 
     `variant` is a small integer, not the classifier's identity -- ids must
@@ -120,7 +137,7 @@ def mint(rule: Rule, at: SlotId, variant: int = 0) -> OccurrenceId:
     """
     ordinal = (
         variant * _VARIANT_STRIDE
-        + list(Rule).index(rule) * _RULE_SLOT_STRIDE
+        + _RULE_INDEX[rule] * _RULE_SLOT_STRIDE
         + at.ordinal
     )
     return OccurrenceId(at.verse, ordinal)
@@ -138,6 +155,9 @@ class Plan:
     _keys: dict[tuple[Phase, tuple], tuple[OccurrenceId, Rule]] = field(
         default_factory=dict
     )
+    _removed: set[tuple[SlotId, Aspect]] = field(default_factory=set)
+    _voweled: set[SlotId] = field(default_factory=set)
+    _lengthened: set[SlotId] = field(default_factory=set)
 
     def record(self, phase: Phase, verdict: Verdict) -> None:
         for effect in verdict.effects:
@@ -152,6 +172,12 @@ class Plan:
                     f"found bug, not a precedence question."
                 )
             self._keys[key] = (verdict.occurrence.id, verdict.occurrence.rule)
+            if isinstance(effect, (MergeInto, Silence)):
+                self._removed.add((effect.slot, effect.aspect))
+            elif isinstance(effect, Realize) and effect.aspect is Aspect.VOWEL:
+                self._voweled.add(effect.slot)
+            elif isinstance(effect, Relength) and effect.length is Length.LONG:
+                self._lengthened.add(effect.slot)
         self.entries.append((phase, verdict))
 
     def effects(self, phase: Phase | None = None):
@@ -160,9 +186,16 @@ class Plan:
                 yield from verdict.effects
 
     def merged_away(self, slot: SlotId, aspect: Aspect) -> bool:
-        return any(
-            isinstance(effect, (MergeInto, Silence))
-            and effect.slot == slot
-            and effect.aspect is aspect
-            for effect in self.effects()
-        )
+        return (slot, aspect) in self._removed
+
+    def voweled(self, slot: SlotId) -> bool:
+        """Has an earlier phase given this slot a vowel it did not have?
+
+        A rule that asks the Score alone still reads a repaired sakin as sakin.
+        """
+        return slot in self._voweled
+
+    def relengthened_long(self, slot: SlotId) -> bool:
+        """Has an earlier phase drawn this slot's vowel out to a long one
+        the Score does not carry?"""
+        return slot in self._lengthened

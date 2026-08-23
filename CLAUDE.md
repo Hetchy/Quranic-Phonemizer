@@ -29,6 +29,8 @@ reads, and what is actually pronounced under a boundary plan.
   contract and `docs/conformance.md` for known corpus-gate residue.
 - `docs/variants.md` is the cross-riwayah selector contract;
   `docs/hafs/research/` contains the Hafs domain notes.
+- Use `docs/performance.md` for reproducible benchmarks, profiling findings,
+  full-Quran resource measurements, and large-batch guidance.
 - `docs/warsh/status.md` tracks the active Warsh implementation state;
   `docs/warsh/test-audit.md` records the current-suite audit;
   `docs/warsh/test-refactor-plan.md` owns the target test tree and harness;

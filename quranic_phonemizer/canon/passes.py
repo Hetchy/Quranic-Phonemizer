@@ -38,6 +38,27 @@ def word_of(reading: Reading, draft) -> int:
     which imports this module rather than the other way round."""
     return reading.clusters[draft.cluster].word if draft.cluster >= 0 else -1
 
+
+def word_spans(reading: Reading, drafts) -> list[list[_Draft]]:
+    """Drafts grouped by source word, preserving their canonical order."""
+    spans: list[list[_Draft]] = [[] for _ in reading.words]
+    for draft in drafts:
+        word = word_of(reading, draft)
+        if word >= 0:
+            spans[word].append(draft)
+    return spans
+
+
+def word_bounds(reading: Reading) -> tuple[tuple[int, int], ...]:
+    """Half-open cluster bounds grouped by source word."""
+    bounds = [[-1, -1] for _ in reading.words]
+    for index, cluster in enumerate(reading.clusters):
+        span = bounds[cluster.word]
+        if span[0] < 0:
+            span[0] = index
+        span[1] = index + 1
+    return tuple((lo, hi) for lo, hi in bounds)
+
 # The scribe is in the signature because a pass may *create* slots -- spelling
 # `الٓمٓصٓ` turns three into seven -- and every slot must trace to a grapheme.
 # The selection is, because a khilaf can put a different vowel in the Score.
@@ -71,8 +92,21 @@ def apply_ledger(reading: Reading, drafts, ledger: Ledger, track) -> None:
         _check_skeleton(reading, drafts, ordinal, supply.skeleton)
         # A Ledger supply is authored, not written by any script: it never
         # evidences a glyph, so no scribe is passed.
-        set_fact(drafts[ordinal], drafts, supply.fact, supply.value, Target.HERE)
+        target = (
+            _word_tail(reading, drafts, ordinal)
+            if supply.fact is SlotFact.SAKT
+            else ordinal
+        )
+        set_fact(drafts[target], drafts, supply.fact, supply.value, Target.HERE)
         track.from_ledger += 1
+
+
+def _word_tail(reading: Reading, drafts, ordinal: int) -> int:
+    word = word_of(reading, drafts[ordinal])
+    return max(
+        i for i, draft in enumerate(drafts)
+        if word_of(reading, draft) == word
+    )
 
 
 def _check_witnesses(reading: Reading, drafts, ledger: Ledger) -> None:
@@ -135,14 +169,17 @@ def _ordinal(reading: Reading, drafts, ref) -> int | None:
     return span[ref.index] if 0 <= ref.index < len(span) else None
 
 
-def _check_skeleton(reading: Reading, drafts, ordinal: int, claimed: str) -> None:
+def _check_skeleton(
+    reading: Reading, drafts, ordinal: int, claimed: str | tuple[str, ...]
+) -> None:
     """The mandatory `skeleton` is what catches ordinal drift. Without it a
     Ledger entry silently starts describing a different slot."""
     word = word_of(reading, drafts[ordinal])
     actual = "".join(
         ABJAD[d.letter.value] for d in drafts if word_of(reading, d) == word
     )
-    if actual != claimed:
+    expected = (claimed,) if isinstance(claimed, str) else claimed
+    if actual not in expected:
         raise LedgerAddressError(
             f"{reading.verse} slot {ordinal}: ledger entry claims skeleton "
             f"{claimed!r} but the word is {actual!r}. The ordinal has "
@@ -159,8 +196,7 @@ def _apply_allah_lexeme(
     lend its last slot to the next word's opening lam.
     """
     del scribe, selection
-    for word_index in range(len(reading.words)):
-        span = [d for d in drafts if word_of(reading, d) == word_index]
+    for span in word_spans(reading, drafts):
         letters = [d.letter for d in span]
         nuclei = [d.nucleus for d in span]
         onsets = [d.onset for d in span]
@@ -179,8 +215,7 @@ def _apply_joined_particles(
     joins and over roots alike, so no script writes which one this is.
     """
     del scribe, selection
-    for word_index in range(len(reading.words)):
-        span = [d for d in drafts if word_of(reading, d) == word_index]
+    for span in word_spans(reading, drafts):
         if not span:
             continue
         letters = [d.letter for d in span]
@@ -203,10 +238,7 @@ def connect_plural_meem(
     behind it, so the meem is voweled to keep two of them from meeting.
     """
     del lexicon, scribe, selection
-    spans = [
-        [d for d in drafts if word_of(reading, d) == word]
-        for word in range(len(reading.words))
-    ]
+    spans = word_spans(reading, drafts)
     for index, span in enumerate(spans[:-1]):
         following = spans[index + 1]
         if not following or following[0].onset is not Onset.WASL:

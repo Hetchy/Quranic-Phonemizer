@@ -15,7 +15,8 @@ from ..model.canon import (
     SlotOrigin,
 )
 from ..model.inscription import VOWEL_FACTS, SlotFact
-from .derive import Target
+from . import derive
+from .derive import Absent, Shows, Target
 
 #: Never serialised and never compared across builds -- only a key while one
 #: verse is being drafted, so a process-wide counter is enough.
@@ -38,6 +39,8 @@ class _Draft:
     it onto the `ScoreWord`."""
 
     annotations: frozenset[Annotation] = frozenset()
+    spelling_run: int | None = None
+    spelled_letter: CanonLetter | None = None
 
     uid: int = field(default_factory=lambda: next(_uid))
     """Identity that survives being moved, split or dropped, which `id()` did
@@ -94,6 +97,21 @@ def stray_letter_offsets(rows, used_offset: int) -> frozenset[int]:
         row.offset for row in rows
         if row.fact is SlotFact.LETTER and row.value is not None
         and row.offset != used_offset
+    )
+
+
+def decorated_offsets(rows, context, own: int, evidenced) -> list[int]:
+    """Every offset a cluster written but not a slot decorates: its own, a
+    stray letter mark, and a nucleus row supplying no fact -- the dagger of
+    `مَجْر۪ىٰهَا`, whose length the imala mark had already given."""
+    shown = {
+        row.offset if row.offset >= 0 else context.cluster.offset
+        for row in rows
+        if row.fact in VOWEL_FACTS and row.value is None
+        and isinstance(derive.resolve(row.derivation, context), (Shows, Absent))
+    }
+    return sorted(
+        {own, *stray_letter_offsets(rows, own)} | (shown - set(evidenced))
     )
 
 

@@ -30,6 +30,7 @@ from ..model.performance import (
 from .classifier import RuleSet
 from .neighbourhood import Neighbourhood
 from .plan import (
+    Classify,
     Insert,
     Length,
     MergeInto,
@@ -42,27 +43,31 @@ from .plan import (
     SoundFeature,
 )
 
-#: Which aspect a `CLASSIFICATION_ONLY` rule's `Classifies` edge names.
-#: `ishmam` names the letter it rides, not the vowel it rounds for -- that
-#: vowel is the one thing it does not sound.
+#: Which aspect a rule's `Classifies` edge names.
+#: `ishmam` names the noon whose rounding is shown by the preceding mark.
 _CLASSIFIES_ASPECT: dict[Rule, Aspect] = {
     Rule.TARQEEQ: Aspect.CONSONANT,
     Rule.ISHMAM: Aspect.CONSONANT,
     Rule.GHUNNAH_MUSHADDADAH: Aspect.CONSONANT,
     Rule.TASHIL: Aspect.CONSONANT,
-    Rule.WASL_START: Aspect.CONSONANT,
+    Rule.HAMZA_WASL_FATHA: Aspect.CONSONANT,
+    Rule.HAMZA_WASL_KASRA: Aspect.CONSONANT,
+    Rule.HAMZA_WASL_DAMMA: Aspect.CONSONANT,
     Rule.IDGHAM_MUTAJANISAYN_NAQIS: Aspect.CONSONANT,
     Rule.IZHAR: Aspect.CONSONANT,
     Rule.IZHAR_SHAFAWI: Aspect.CONSONANT,
     Rule.LAM_QAMARIYYAH: Aspect.CONSONANT,
     Rule.IMALA: Aspect.VOWEL,
-    Rule.MADD_WAJIB_MUTTASIL: Aspect.VOWEL,
-    Rule.MADD_JAIZ_MUNFASIL: Aspect.VOWEL,
+    Rule.MADD_BADAL: Aspect.VOWEL,
+    Rule.MADD_SILAH: Aspect.VOWEL,
+    Rule.MADD_MUTTASIL: Aspect.VOWEL,
+    Rule.MADD_MUNFASIL: Aspect.VOWEL,
     Rule.MADD_LAZIM: Aspect.VOWEL,
-    Rule.MADD_ARID_LIL_SUKUN: Aspect.VOWEL,
+    Rule.MADD_ARID_LISSUKUN: Aspect.VOWEL,
+    Rule.MADD_TABII: Aspect.VOWEL,
+    Rule.IBDAL_HAMZA: Aspect.VOWEL,
     #: The waw or yaa this rule names has no vowel; it classifies the consonant.
     Rule.MADD_LEEN: Aspect.CONSONANT,
-    Rule.FAKK_IDGHAM: Aspect.CONSONANT,
 }
 
 class MaterialisationError(AssertionError):
@@ -287,16 +292,29 @@ def _modifiers_for(occurrence: Occurrence, effects, hosted) -> list[Modifier]:
             sound_id = hosted.get((effect.slot, Aspect.VOWEL))
             if sound_id is not None:
                 out.append(SetsLength(sound_id, occurrence.id, effect.length))
-    if not effects and occurrence.rule in CLASSIFICATION_ONLY:
-        aspect = _CLASSIFIES_ASPECT.get(occurrence.rule)
-        source_sound = None if aspect is None else hosted.get(
-            (occurrence.parts.source, aspect)
-        )
-        if source_sound is None and occurrence.rule is Rule.MADD_LAZIM:
-            source_sound = hosted.get((occurrence.parts.source, Aspect.CONSONANT))
-        if source_sound is not None:
-            out.append(Classifies(source_sound, occurrence.id))
+        elif isinstance(effect, Classify):
+            sound_id = hosted.get((effect.slot, effect.aspect))
+            if sound_id is not None:
+                out.append(Classifies(sound_id, occurrence.id))
+    aspect = _CLASSIFIES_ASPECT.get(occurrence.rule)
+    if aspect is not None and _names_its_sound(occurrence, effects, aspect):
+        for subject in occurrence.subjects:
+            sound_id = hosted.get((subject, aspect))
+            if sound_id is not None:
+                out.append(Classifies(sound_id, occurrence.id))
     return out
+
+
+def _names_its_sound(occurrence: Occurrence, effects, aspect: Aspect) -> bool:
+    """A rule names a sound it leaves alone, or the single one it realizes."""
+    if not effects:
+        return occurrence.rule in CLASSIFICATION_ONLY
+    if len(effects) != 1 or not isinstance(effects[0], Realize):
+        return False
+    return (
+        effects[0].slot in occurrence.subjects
+        and effects[0].aspect is aspect
+    )
 
 
 def _colours(plan: Plan) -> dict[tuple[SlotId, Aspect], dict[SoundFeature, bool]]:

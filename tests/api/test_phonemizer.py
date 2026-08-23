@@ -6,11 +6,14 @@ functions are checked over a small sample.
 from __future__ import annotations
 
 import dataclasses
+import gc
 
 import pytest
 
 from quranic_phonemizer import Phonemizer, PhonemizeResult
 from quranic_phonemizer import supported_riwayat, tajweed_rules
+from quranic_phonemizer.model.canon import Rule
+from quranic_phonemizer.model.inscription import SilenceReason
 from quranic_phonemizer.phonemize import edges as ed
 
 
@@ -19,24 +22,55 @@ def test_the_contracts_own_example_runs():
     assert r.phonemes()[:12] == (
         "ʔ", "a", "lˤlˤ", "aˤ:", "h", "u", "l", "a:", "ʔ", "i", "l", "a:",
     )
-    assert r.rules and r.spellings and r.attributions and r.modifiers
+    assert (len(r.rules), len(r.spellings), len(r.attributions), len(r.modifiers)) == (
+        85, 474, 295, 71,
+    )
 
 
-def test_rule_host_is_published_only_for_a_merger():
-    """`host` is the second participant only where two units share one
-    sound. A trigger unit is not a host."""
+def _units_a_rule_acted_on(r) -> dict[int, set[int]]:
+    """Per rule index, the units its own edges name, read off the published
+    arrays alone: a modifier names a sound, so it reaches that sound's unit."""
+    units_of_sound: dict[int, set[int]] = {}
+    for a in r.attributions:
+        if isinstance(a, ed.Hosts):
+            units_of_sound.setdefault(a.sound, set()).add(a.unit)
+    out: dict[int, set[int]] = {}
+    for a in r.attributions:
+        if a.by is not None:
+            out.setdefault(a.by, set()).add(a.unit)
+    for m in r.modifiers:
+        out.setdefault(m.by, set()).update(units_of_sound.get(m.sound, ()))
+    return out
+
+
+def test_a_rule_publishes_only_a_unit_its_own_edges_name():
+    """`host` is the unit beside the source that the rule itself acted on, so
+    a consumer can reproduce it from the edges. A unit a rule only read to
+    decide -- the letter a madd is classified against -- is not published."""
     r = Phonemizer().phonemize("2:255")
+    acted_on = _units_a_rule_acted_on(r)
+    for i, rule in enumerate(r.rules):
+        if rule.host is not None:
+            assert rule.host in acted_on[i], rule.rule.value
     merger_by = {
         a.by for a in r.attributions
         if isinstance(a, ed.MergedInto) and a.by is not None
     }
-    for i, rule in enumerate(r.rules):
-        if rule.host is not None:
-            assert i in merger_by
-    non_mergers = [i for i, rule in enumerate(r.rules)
-                   if rule.rule.value == "madd_tabii"]
-    assert non_mergers
-    assert all(r.rules[i].host is None for i in non_mergers)
+    assert merger_by and all(r.rules[i].host is not None for i in merger_by)
+    classifying = [i for i, rule in enumerate(r.rules)
+                   if rule.rule.value == "madd_munfasil"]
+    assert classifying
+    assert all(r.rules[i].host is None for i in classifying)
+
+
+def test_an_ibdal_publishes_the_hamza_it_softened():
+    """Started on, `ٱئْتُونِى` reads its quiescent hamza as the madd the kasra
+    before it opens. That hamza is the rule's host, so a consumer drawing the
+    letter can name what happened to it."""
+    r = Phonemizer().phonemize("46:4:18")
+    ibdal = [rule for rule in r.rules if rule.rule.value == "ibdal_hamza"]
+    assert len(ibdal) == 1
+    assert ibdal[0].host is not None and ibdal[0].host != ibdal[0].source
 
 
 def test_the_document_is_its_sixteen_members_and_nothing_else():
@@ -134,14 +168,35 @@ def test_module_functions_answer_without_an_instance():
     assert supported_riwayat() == ("hafs",)
     rules = tajweed_rules("hafs")
     identifiers = {row[0] for row in rules}
-    assert "ikhfaa_haqiqi" in identifiers
-    for identifier, english, arabic in rules:
+    assert identifiers == (
+        {rule.value for rule in Rule} | {reason.value for reason in SilenceReason}
+    )
+    for identifier, english, arabic, summary in rules:
         assert identifier and english and arabic
+        assert summary.endswith(".") and len(summary.split()) >= 5
 
 
 def test_a_bare_phonemizer_is_hafs_uthmani():
     r = Phonemizer().phonemize("1:1")
     assert (r.riwayah, r.script) == ("hafs", "uthmani")
+
+
+def test_suspended_gc_preserves_output_and_restores_enabled_state():
+    phonemizer = Phonemizer()
+    expected = phonemizer.phonemize("1")
+    assert gc.isenabled()
+    assert phonemizer.phonemize("1", suspend_gc=True) == expected
+    assert gc.isenabled()
+
+
+def test_suspended_gc_preserves_a_disabled_state_on_failure():
+    gc.disable()
+    try:
+        with pytest.raises(ValueError):
+            Phonemizer().phonemize("not-a-ref", suspend_gc=True)
+        assert not gc.isenabled()
+    finally:
+        gc.enable()
 
 
 def test_the_retired_projections_are_gone():
