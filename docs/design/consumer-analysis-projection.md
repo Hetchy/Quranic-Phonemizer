@@ -677,6 +677,9 @@ CellBoundary orders every boundary-owned column at that exact boundary.
 - When waqf cancels a cross-word noon/meem rule, the recovered izhar or
   izhar_shafawi sukun is composed into that consonant's main column with
   status=replaced. A renderer does not synthesize the pausal mark.
+- Pausal sukun recovery considers only the stopped word's last
+  consonant-owning column. An internal sakin consonant never gains another
+  sukun merely because the word stops later.
 - A unit that pairs with the base letter it rides for the same sound takes a
   smaller column with that tier and attached_to_column_id rather than a main
   one. The mini seen of a seen/saad khilaf is the only Hafs case. Where the

@@ -83,6 +83,24 @@ def clean_structural_marks(word: CellWord) -> CellWord:
     ))
 
 
+def _owns_consonant(col: CellColumn, facts: AnalysisFacts) -> bool:
+    return col.tier is CellTier.MAIN and any(
+        isinstance(facts.sounds[sound.value].value, Consonant)
+        for sound in col.owned_sound_ids
+    )
+
+
+def _needs_pausal_sukun(col, facts, slot_of_unit, pausal) -> bool:
+    slots = [slot_of_unit[unit.value] for unit in col.source_unit_ids
+             if unit.value in slot_of_unit]
+    return any(
+        slot in pausal or facts.slots[
+            facts.slot_index[slot]
+        ].nucleus.stopped.form is VowelForm.ABSENT
+        for slot in slots
+    )
+
+
 def fold_pausal_sukun(word: CellWord, facts: AnalysisFacts,
                       slot_of_unit, pen: Pen) -> CellWord:
     """Put a stopped consonant's recovered sukun in its native letter cell."""
@@ -93,27 +111,19 @@ def fold_pausal_sukun(word: CellWord, facts: AnalysisFacts,
         and facts.occurrences[edge.by].boundary is not None
         for slot in edge.slots
     }
-    candidates = []
-    for col in word.columns:
-        slots = [slot_of_unit[unit.value] for unit in col.source_unit_ids
-                 if unit.value in slot_of_unit]
-        absent = any(
-            slot in pausal or facts.slots[
-                facts.slot_index[slot]
-            ].nucleus.stopped.form is VowelForm.ABSENT
-            for slot in slots
-        )
-        consonant = any(isinstance(facts.sounds[s.value].value, Consonant)
-                        for s in col.owned_sound_ids)
-        if col.tier is CellTier.MAIN and consonant and absent:
-            candidates.append(col.id)
-    final = candidates[-1] if stopped and candidates else None
+    consonants = [col for col in word.columns if _owns_consonant(col, facts)]
+    final = consonants[-1] if stopped and consonants else None
+    if final is not None and not _needs_pausal_sukun(
+        final, facts, slot_of_unit, pausal
+    ):
+        final = None
     return replace(word, columns=tuple(
         replace(
             col, text=col.text + pen.role("sukun"),
             status=(CellStatus.REPLACED
                     if col.status is CellStatus.PRESENT else col.status),
-        ) if col.id == final and not col.text.endswith(pen.role("sukun"))
+        ) if final is not None and col.id == final.id
+        and not col.text.endswith(pen.role("sukun"))
         else col for col in word.columns
     ))
 

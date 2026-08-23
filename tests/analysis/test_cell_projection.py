@@ -330,6 +330,21 @@ def test_a_stopped_consonant_recovers_sukun_on_its_letter(
     assert column.status is CellStatus.REPLACED
 
 
+def test_an_internal_mini_noon_does_not_gain_pausal_sukun(hafs, pen):
+    ref = "21:88"
+    session = phonemize_request(hafs, ref, stop_refs=["21:88:7"])
+    kw = dict(ref=ref, riwayah="hafs", script="uthmani", variant={})
+    bundle = build_bundle(session, **kw)
+    view = build_cell_view(session, spelling="transformed", pen=pen, **kw)
+    word_id = next(w.id for w in bundle.words if w.ref == "21:88:7")
+    word = next(w for w in view.words if w.word_id == word_id)
+    mini_noon = next(c for c in word.columns if "ۨ" in c.text)
+
+    assert mini_noon.text == "ـۨ"
+    assert mini_noon.status is CellStatus.PRESENT
+    assert all(not c.text.endswith(pen.role("sukun")) for c in word.columns)
+
+
 def test_lam_shamsiyyah_is_only_on_the_silent_lam(hafs, pen):
     _, bundle, view = _build(hafs, pen, "1:1")
     occurrence = next(o for o in bundle.rule_occurrences if o.rule_id.value == "lam_shamsiyyah")
@@ -400,19 +415,23 @@ def test_every_stopped_consonant_in_the_corpus_projects_its_sukun(hafs, pen):
                 for slot in edge.slots
             }
             for word in view.words:
-                candidates = [
+                consonants = [
                     col for col in word.columns
                     if col.role is CellRole.LETTER and any(
                         isinstance(facts.sounds[s.value].value, Consonant)
                         for s in col.owned_sound_ids
-                    ) and any(
-                        slot_of[u.value] in pausal or facts.slots[
-                            facts.slot_index[slot_of[u.value]]
-                        ].nucleus.stopped.form is VowelForm.ABSENT
-                        for u in col.source_unit_ids if u.value in slot_of
                     )
                 ]
-                if candidates:
-                    assert candidates[-1].text.endswith(pen.role("sukun")), (
-                        ref, word.word_id, candidates[-1]
+                if not consonants:
+                    continue
+                final = consonants[-1]
+                needs_sukun = any(
+                    slot_of[u.value] in pausal or facts.slots[
+                        facts.slot_index[slot_of[u.value]]
+                    ].nucleus.stopped.form is VowelForm.ABSENT
+                    for u in final.source_unit_ids if u.value in slot_of
+                )
+                if needs_sukun:
+                    assert final.text.endswith(pen.role("sukun")), (
+                        ref, word.word_id, final
                     )
