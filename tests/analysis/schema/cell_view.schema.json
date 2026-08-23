@@ -18,12 +18,58 @@
             "$ref": "#/$defs/CellColumn"
           },
           "type": "array"
+        },
+        "exclusive_group": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sounds": {
+          "items": {
+            "$ref": "#/$defs/CellSound"
+          },
+          "type": "array"
+        },
+        "state": {
+          "anyOf": [
+            {
+              "enum": [
+                "start",
+                "join",
+                "sakt",
+                "stop"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "verse_end": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
         "boundary_id",
         "bridges",
-        "columns"
+        "columns",
+        "exclusive_group",
+        "sounds",
+        "state",
+        "verse_end"
       ],
       "type": "object"
     },
@@ -265,6 +311,43 @@
       ],
       "type": "object"
     },
+    "CellGroup": {
+      "additionalProperties": false,
+      "properties": {
+        "column_ids": {
+          "items": {
+            "type": "integer",
+            "x-ref": "CellColumn"
+          },
+          "type": "array"
+        },
+        "key": {
+          "type": "integer",
+          "x-ref": "CellColumn"
+        },
+        "kind": {
+          "enum": [
+            "base",
+            "vowel"
+          ],
+          "type": "string"
+        },
+        "sound_ids": {
+          "items": {
+            "type": "integer",
+            "x-ref": "Sound"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "column_ids",
+        "key",
+        "kind",
+        "sound_ids"
+      ],
+      "type": "object"
+    },
     "CellSound": {
       "additionalProperties": false,
       "properties": {
@@ -325,6 +408,12 @@
           },
           "type": "array"
         },
+        "groups": {
+          "items": {
+            "$ref": "#/$defs/CellGroup"
+          },
+          "type": "array"
+        },
         "sounds": {
           "items": {
             "$ref": "#/$defs/CellSound"
@@ -338,6 +427,7 @@
       },
       "required": [
         "columns",
+        "groups",
         "sounds",
         "word_id"
       ],

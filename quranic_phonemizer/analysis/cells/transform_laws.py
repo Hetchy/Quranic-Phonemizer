@@ -38,17 +38,17 @@ def _check_inserted(col: CellColumn, units: int) -> None:
 
 def _check_replaced_dropped(col: CellColumn, source: SourceView) -> None:
     _require(
-        len(col.source_unit_ids) == 1,
-        f"{col.status.value} column {col.id.value} spans not one source unit",
+        bool(col.source_unit_ids),
+        f"{col.status.value} column {col.id.value} spans no source unit",
     )
-    unit = source.units[col.source_unit_ids[0].value]
+    units = [source.units[uid.value] for uid in col.source_unit_ids]
     _require(
-        col.source_character_ids == unit.character_ids,
+        col.source_character_ids == tuple(c for unit in units for c in unit.character_ids),
         f"{col.status.value} column {col.id.value} loses its source characters",
     )
     if col.status is CellStatus.DROPPED:
         _require(
-            col.text == unit.text,
+            col.text == "".join(unit.text for unit in units),
             f"dropped column {col.id.value} loses its source text",
         )
 

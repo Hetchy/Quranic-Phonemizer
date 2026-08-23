@@ -8,11 +8,14 @@ from __future__ import annotations
 from dataclasses import replace
 
 from ...render.alphabet import packaged_alphabet
+from ...model.inscription import StopAdvice
+from ...model.performance import Aspect, Vowel
+from ...model.canon import Quality
 from ...session import Session
 from ..build import build_bundle
 from ..dtos import Boundary, Merger
 from ..facts import analyse
-from ..ids import CellColumnId
+from ..ids import CellColumnId, OccurrenceId, SoundId
 from ..inscription import inscribe
 from ..source import build_source_view
 from ..source_dtos import Character, CharacterKind, MergerPlacement, SourceView
@@ -25,6 +28,7 @@ from .dtos import (
     CellBridge,
     CellColumn,
     CellRole,
+    CellSide,
     CellStatus,
     CellTier,
     CellSound,
@@ -32,6 +36,7 @@ from .dtos import (
     CellWord,
 )
 from .transform import transform_words
+from .projection import project_words
 from .transform_laws import validate_transformed
 from .view_laws import validate_cell_view
 
@@ -60,7 +65,16 @@ def _extract_merger_sounds(
             )
         cells.remove(cell)
         shared[merger.id.value] = cell
-    out = tuple(replace(w, sounds=tuple(held[w.word_id.value])) for w in words)
+    remaining = {
+        w.word_id.value: {s.sound_id for s in held[w.word_id.value]}
+        for w in words
+    }
+    out = tuple(replace(
+        w, sounds=tuple(held[w.word_id.value]),
+        groups=tuple(replace(g, sound_ids=tuple(
+            s for s in g.sound_ids if s in remaining[w.word_id.value]
+        )) for g in w.groups),
+    ) for w in words)
     return out, shared
 
 
@@ -126,9 +140,11 @@ def _boundaries(
             _bridge(merger, placement_of[merger.id.value], column_of_unit,
                     shared[merger.id.value])
         )
+    exclusive = _exclusive_groups(bundle.boundaries)
+    words = {word.id.value: word for word in bundle.words}
     out: list[CellBoundary] = []
     for boundary in bundle.boundaries:
-        if boundary.before is None or boundary.after is None:
+        if boundary.before is None:
             continue
         column = _stop_sign_column(_boundary_signs(boundary, source), next_id)
         next_id += 1
@@ -136,8 +152,113 @@ def _boundaries(
             boundary_id=boundary.id,
             columns=(column,),
             bridges=tuple(bridges.get(boundary.id.value, ())),
+            state=boundary.state,
+            verse_end=_verse_end(boundary, words),
+            exclusive_group=exclusive.get(boundary.id.value),
         ))
     return tuple(out)
+
+
+def _ayah(ref: str) -> int:
+    return int(ref.split(":", 2)[1])
+
+
+def _verse_end(boundary: Boundary, words) -> int | None:
+    if boundary.before is None:
+        return None
+    before = words[boundary.before.value]
+    if boundary.after is None:
+        return _ayah(before.ref)
+    after = words[boundary.after.value]
+    return _ayah(before.ref) if _ayah(before.ref) != _ayah(after.ref) else None
+
+
+def _exclusive_groups(boundaries: tuple[Boundary, ...]) -> dict[int, int]:
+    pending = None
+    group = 0
+    out: dict[int, int] = {}
+    for boundary in boundaries:
+        if boundary.stop_advice is not StopAdvice.EITHER_STOP:
+            continue
+        if pending is None:
+            pending = boundary.id.value
+            continue
+        out[pending] = group
+        out[boundary.id.value] = group
+        pending = None
+        group += 1
+    return out
+
+
+_VOWEL_ROLE = {Quality.A: "fatha", Quality.U: "damma", Quality.I: "kasra"}
+
+
+def _boundary_column(new_id, owner, sound, occurrence, value, pen):
+    anchor = owner.source_unit_ids[0] if owner.source_unit_ids else owner.anchor_unit_id
+    return CellColumn(
+        id=CellColumnId(new_id), role=CellRole.HARAKA,
+        text=pen.role(_VOWEL_ROLE[value.quality]),
+        source_character_ids=(), source_unit_ids=(),
+        tier=CellTier.BELOW if value.quality is Quality.I else CellTier.ABOVE,
+        attached_to_column_id=None, status=CellStatus.INSERTED,
+        rule_occurrence_ids=(OccurrenceId(occurrence),), silence=None,
+        variant_id=None, variant_choice=None, owned_sound_ids=(SoundId(sound),),
+        presented_sound_ids=(), anchor_unit_id=anchor, side=CellSide.AFTER,
+    )
+
+
+def _boundary_hosted(facts, bundle):
+    boundary_of = {
+        occ.id.value: occ.boundary_ids[0]
+        for occ in bundle.rule_occurrences if occ.boundary_ids
+    }
+    boundaries = {b.id: b for b in bundle.boundaries}
+    return [
+        edge for edge in facts.hosts
+        if edge.by in boundary_of and edge.aspect is Aspect.VOWEL
+        and isinstance(facts.sounds[edge.sound].value, Vowel)
+        and not facts.sounds[edge.sound].value.long
+        and boundaries[boundary_of[edge.by]].before is not None
+        and facts.word_of_slot[edge.slots[0].ordinal]
+            == boundaries[boundary_of[edge.by]].before.value
+    ], boundary_of
+
+
+def _move_boundary_sounds(words, boundaries, facts, bundle, pen):
+    hosted, boundary_of = _boundary_hosted(facts, bundle)
+    next_id = 1 + max(
+        c.id.value
+        for c in (
+            *(c for w in words for c in w.columns),
+            *(c for b in boundaries for c in b.columns),
+        )
+    )
+    for edge in hosted:
+        owner = next(c for w in words for c in w.columns
+                     if SoundId(edge.sound) in c.owned_sound_ids)
+        cell = next(c for w in words for c in w.sounds
+                    if c.sound_id.value == edge.sound)
+        boundary_id = boundary_of[edge.by]
+        column = _boundary_column(
+            next_id, owner, edge.sound, edge.by, facts.sounds[edge.sound].value, pen
+        )
+        next_id += 1
+        words = tuple(replace(w,
+            columns=tuple(replace(c,
+                owned_sound_ids=tuple(s for s in c.owned_sound_ids if s.value != edge.sound),
+                presented_sound_ids=tuple(s for s in c.presented_sound_ids if s.value != edge.sound),
+                rule_occurrence_ids=tuple(o for o in c.rule_occurrence_ids if o.value != edge.by),
+            ) if c.id == owner.id else c for c in w.columns),
+            sounds=tuple(s for s in w.sounds if s.sound_id.value != edge.sound),
+            groups=tuple(replace(g, sound_ids=tuple(
+                s for s in g.sound_ids if s.value != edge.sound
+            )) for g in w.groups),
+        ) for w in words)
+        boundaries = tuple(replace(b,
+            columns=(*b.columns, column),
+            sounds=(*b.sounds, replace(cell, column_ids=(column.id,))),
+        ) if b.boundary_id == boundary_id else b for b in boundaries)
+    return words, boundaries
 
 
 def build_cell_view(
@@ -170,12 +291,17 @@ def build_cell_view(
             words, session, source, pen, extra_phonemes=extra_phonemes,
             facts=facts, insc=insc,
         )
+        words = project_words(words, facts, source, insc, pen)
     placement_of = {p.merger_id.value: p for p in source.merger_placements}
     column_of_unit = _column_of_unit(words)
     words, shared = _extract_merger_sounds(words, bundle.mergers)
     boundaries = _boundaries(
         bundle, source, placement_of, column_of_unit, shared, next_column_id(words)
     )
+    if spelling == "transformed":
+        words, boundaries = _move_boundary_sounds(
+            words, boundaries, facts, bundle, pen
+        )
     view = CellView(words=words, boundaries=boundaries)
     validate_cell_view(view, bundle, source)
     if spelling == "transformed":

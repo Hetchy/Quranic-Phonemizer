@@ -50,6 +50,13 @@ def test_a_quiescent_noon_merges_with_a_hum_into_each_letter(
     assert r.rules_on_sound(last, r.sounds(last)[0]) == {"idgham_bi_ghunnah"}
 
 
+@for_each_riwayah(Site(hafs=("3:74", (3, 4))), isolated=3)
+def test_a_stop_reclassifies_a_noon_after_cancelling_cross_word_idgham(r):
+    assert r.phonemes(3) == "man"
+    assert "idgham_bi_ghunnah" not in r.rules_on_char(3, "ن")
+    assert r.rules_on_sound(3, "n") == {"izhar"}
+
+
 @pytest.mark.parametrize(
     ("ref", "words", "expected"), TANWEEN_ACROSS_A_BOUNDARY
 )

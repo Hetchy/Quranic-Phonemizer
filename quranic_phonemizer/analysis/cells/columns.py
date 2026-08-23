@@ -116,6 +116,9 @@ def _role(unit: LetterUnit, reading: _Reading) -> CellRole:
     if unit.kind is LetterUnitKind.TANWEEN:
         return CellRole.TANWEEN
     carries = any(s.value in reading.long_vowel_orders for s in unit.owned_sound_ids)
+    carries = carries and not any(
+        s.value in reading.consonant_orders for s in unit.owned_sound_ids
+    )
     return CellRole.MADD if carries else CellRole.LETTER
 
 

@@ -1,9 +1,7 @@
 # Consumer analysis projection
 
-Status: accepted implementation direction, with the small open decisions in
-section 21 still to be closed by fixtures.
-
-Target baseline: riwayah-agnostic-refactor at 789a459.
+Status: implemented native contract; corpus and consumer fixtures enforce the
+normative laws below.
 
 This document is the implementation plan for replacing the current public
 graph and its alignment, respelling, and derived-label projections. It also
@@ -589,12 +587,8 @@ The two spellings are:
 There is no promise that concatenating transformed columns produces a
 general-purpose text string.
 
-A column's status names what the reading did with the rasm, and takes the
-shard vocabulary's word for it so an adapter renames nothing: present,
-inserted, replaced, dropped, plus gap, which the shard has no equivalent for.
-Sharing the word does not mean sharing every answer -- 14.1 records the sukun,
-which the shard calls dropped and this contract calls present, because nothing
-was dropped: the mark is written and read as the absence of a vowel.
+A column's status names what the reading did with the rasm, using the wire
+vocabulary directly: present, inserted, replaced, dropped, plus gap.
 
 ### 9.1 Shape
 
@@ -607,12 +601,22 @@ CellWord
   word_id
   columns: CellColumn[]
   sounds: CellSound[]
+  groups: CellGroup[]
 
 CellBoundary
   boundary_id
   columns: CellColumn[]
   sounds: CellSound[]
   bridges: CellBridge[]
+  state
+  verse_end
+  exclusive_group
+
+CellGroup
+  key
+  kind = base | vowel
+  column_ids[]
+  sound_ids[]
 
 CellColumn
   id
@@ -645,16 +649,12 @@ CellBridge
 ~~~
 
 The public cell DTO is nested in render order so a website can render it
-without rebuilding lookup maps. IDs remain only where alignment or a bridge
-crosses nested ownership. A private normalized index may exist inside the
-package.
-
-There is no grouping level between a word and its columns. A column carries
-its own attachment (tier plus attached_to_column_id) and its own sound
-participation, and CellSound.column_ids carries the alignment, so a group would
-only restate what those already say. A renderer that wants a box around a
-letter and its marks draws it from attachment, which the producer supplies;
-it does not infer one.
+without rebuilding domain relationships. IDs remain only where alignment or a
+bridge crosses nested ownership. CellGroup is the producer's explicit visual
+partition: every transformed word column and word-owned sound belongs to
+exactly one group. A base group binds a letter to its riding marks; a vowel
+group binds a long-vowel quality to its carrier. The key is one of the group's
+columns and remains stable across boundary plans through source-unit identity.
 
 CellBoundary orders every boundary-owned column at that exact boundary.
 
@@ -668,9 +668,12 @@ CellBoundary orders every boundary-owned column at that exact boundary.
   as a consonant, role=madd when it reads it as a long-vowel carrier. Full
   alif, waw and yaa carriers, small waw and yaa, and the dagger alif all take
   role=madd on that test; the mini noon of 21:88 takes role=letter.
-- Haraka, sukun, and tanween take separate smaller columns. Above/below
+- Haraka and tanween take separate smaller columns. Above/below
   tier and attached_to_column_id identify the exact main column they ride;
   attachment is stated, never guessed from adjacency.
+- Source spelling retains a sukun unit. Transformed spelling composes its text
+  and provenance into the host main column, so a renderer never hides or
+  relocates a sukun satellite.
 - A unit that pairs with the base letter it rides for the same sound takes a
   smaller column with that tier and attached_to_column_id rather than a main
   one. The mini seen of a seen/saad khilaf is the only Hafs case. Where the
@@ -706,7 +709,8 @@ CellBoundary orders every boundary-owned column at that exact boundary.
   empty role=gap, status=gap column anchored to a unit/side or boundary. It has
   empty source provenance and no owned/presented sound; CellSound references
   it only for alignment. This does not invent a source glyph or ownership.
-- Every internal CellBoundary carries one role=stop_sign column. Its text is
+- Every after-word CellBoundary, including the final boundary, carries one
+  role=stop_sign column. Its text is
   the exact written sign when the boundary has one and empty when it does not,
   so a consumer renders the pause control from the column and never reads a
   sign back out of word text. The column owns no sound. A frontend paints the
@@ -723,13 +727,17 @@ CellBoundary orders every boundary-owned column at that exact boundary.
   co-highlighting.
 - Carrier-seat handling is settled by the producer. Frontends never inspect
   codepoints to repair the rows.
+- Boundary state, verse-end number, and muanaqah exclusive-group identity are
+  copied onto CellBoundary. Consumers do not derive them from sign text or
+  word references.
 
-The producer does not publish a glyph choice. Open tanween follows from the
+The producer does not publish these two glyph choices. Open tanween follows from the
 occurrence already on the tanween unit -- it is open under idgham, ikhfaa, and
 iqlab and stacked otherwise -- and the iqlab meem follows the same way, whether
 a script writes it as a mini meem beside the noon or splits a tanween into a
-haraka plus a mini meem. Both are the script's own convention over facts the
-result already states, so neither earns a field or a column role.
+haraka plus a mini meem. Both are visual conventions over facts the result
+already states, so neither earns a field or a column role. They are the only
+rule-id-dependent transforms owned by the renderer.
 
 This is not the codepoint inference principle 2 forbids. A consumer must not
 work out that a rule applies; here the producer has already said which rule
@@ -826,8 +834,10 @@ rather than renumbering the ones after it.
 20. Every lexical source character of an included word appears in exactly one
     column's source_character_ids, and columns are in render order. Every
     LetterUnit of an included word has exactly one column.
-20a. Every internal boundary of an included passage has exactly one
-    role=stop_sign column, which owns no sound.
+20a. Every after-word boundary of an included passage, including the final
+    boundary, has exactly one role=stop_sign column, which owns no sound.
+20b. Every transformed word column and word-owned sound belongs to exactly one
+    CellGroup, and each group's key is one of its own columns.
 21. Above/below attachment resolves to an exact main column in the same
     CellWord or CellBoundary.
 21a. A riding column's attached_to_column_id is the column of the unit its
@@ -838,9 +848,10 @@ rather than renumbering the ones after it.
     CellWord, one CellBoundary, or one CellBridge.
 23. A non-gap CellSound's columns are exactly the columns that own or present
     its sound. A gap CellSound is the only exception to that agreement.
-23a. A column's rule_occurrence_ids are exactly the source RulePlacement
-    occurrences whose unit_ids intersect that column's source_unit_ids. A
-    column with no source units carries none.
+23a. A column's rule_occurrence_ids are exactly the occurrences whose typed
+    attribution or modifier edge targets what that column owns or presents.
+    Inserted carriers and boundary vowels carry those same native occurrences;
+    a renderer never propagates rules from CellSound.
 23b. A CellSound's rule_occurrence_ids are exactly its Sound's
     rule_occurrence_ids.
 23c. A column's silence is exactly the silence of its source unit where it has

@@ -8,6 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import StrEnum
 
+from ..dtos import BoundaryState
 from ..ids import (
     BoundaryId,
     CellColumnId,
@@ -55,6 +56,13 @@ class CellSide(StrEnum):
     AFTER = "after"
 
 
+class CellGroupKind(StrEnum):
+    """The visual relation that makes several columns one rendered group."""
+
+    BASE = "base"
+    VOWEL = "vowel"
+
+
 @dataclass(frozen=True, slots=True)
 class CellColumn:
     id: CellColumnId
@@ -83,10 +91,21 @@ class CellSound:
 
 
 @dataclass(frozen=True, slots=True)
+class CellGroup:
+    """One producer-decided grapheme group, keyed by its main column."""
+
+    key: CellColumnId
+    kind: CellGroupKind
+    column_ids: tuple[CellColumnId, ...]
+    sound_ids: tuple[SoundId, ...]
+
+
+@dataclass(frozen=True, slots=True)
 class CellWord:
     word_id: WordId
     columns: tuple[CellColumn, ...]
     sounds: tuple[CellSound, ...]
+    groups: tuple[CellGroup, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -109,6 +128,10 @@ class CellBoundary:
     boundary_id: BoundaryId
     columns: tuple[CellColumn, ...]
     bridges: tuple[CellBridge, ...]
+    sounds: tuple[CellSound, ...] = ()
+    state: BoundaryState | None = None
+    verse_end: int | None = None
+    exclusive_group: int | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -121,6 +144,8 @@ __all__ = [
     "CellBoundary",
     "CellBridge",
     "CellColumn",
+    "CellGroup",
+    "CellGroupKind",
     "CellRole",
     "CellSide",
     "CellSound",

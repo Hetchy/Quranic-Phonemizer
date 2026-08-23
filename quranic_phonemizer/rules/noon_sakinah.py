@@ -22,7 +22,7 @@ from ..model.address import BoundaryPlan, Junction, KhilafId, SlotId
 from ..model.canon import CanonLetter as L
 from ..model.canon import Rule, SlotOrigin
 from ..model.performance import Aspect, Consonant, Occurrence
-from .ownership import is_quiescent
+from .ownership import is_performed_quiescent, is_quiescent
 from .khilaf import DEFAULT_NASAL_PLACE, nasal_place
 from .tables import Followers
 
@@ -44,8 +44,10 @@ class NoonSakinah:
         slot = near.slot(at)
         # A repair that broke a meeting of two quiescent letters leaves this one
         # voweled, and a voweled letter is not a sakin at all.
-        if not is_quiescent(slot) or plan.voweled(at):
+        if not is_performed_quiescent(slot, plan, at):
             return None
+        word = near.word_of(at)
+        stopped = word is not None and boundaries.stopped_on(word) and near.last_of_word(at)
         opening = self._opening_wasl(near, at, boundaries)
         if opening is not None:
             choice = self.opening_wasl.choose(near.score.selection)
@@ -54,7 +56,9 @@ class NoonSakinah:
             return _merge(Rule.IDGHAM_BI_GHUNNAH, at, opening, ghunnah=True)
         following = near.after(at)
         if following is None:
-            if slot.origin is SlotOrigin.SPELLED and near.last_of_word(at):
+            if stopped or (
+                slot.origin is SlotOrigin.SPELLED and near.last_of_word(at)
+            ):
                 # The noon closing a disjoined-letter opening takes its own
                 # plain articulation rather than reaching into the next word.
                 return _classification(Rule.IZHAR, at, None)

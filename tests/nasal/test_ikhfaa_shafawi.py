@@ -19,3 +19,4 @@ def test_a_stop_after_the_meem_undoes_the_hiding_at_the_lips(r):
     # هُم
     assert r.phonemes(10) == "hum"
     assert "ikhfaa_shafawi" not in r.rules_on_char(10, "م")
+    assert r.rules_on_sound(10, "m") == {"izhar_shafawi"}

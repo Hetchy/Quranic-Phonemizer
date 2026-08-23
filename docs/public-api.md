@@ -182,6 +182,13 @@ same `rules` array published on the result.
 
 ## Schema stability
 
+The native analysis documents use the integer `schema_version` stamped at the
+top of each wire document. A change to a wire record or its meaning requires a
+version bump. The `@quranic-phonemizer/cells` package major equals the native
+schema version it reads, so package 1.x accepts native schema 1 and throws on a
+mismatch. The rule catalogue returned by `tajweed_rules()` is additive metadata
+outside that versioned document contract.
+
 The canonical JSON-shaped representation is defined in
 `quranic_phonemizer/phonemize/schema.py`. Its tagged unions and indices are
 validated by `schema_checks.py` and the tests under `tests/schema/`.

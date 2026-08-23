@@ -2,6 +2,14 @@ from __future__ import annotations
 
 from tests.support import Site, for_each_riwayah
 
+HUMU = Site(hafs=("8:4", (2,)))
+
+
+@for_each_riwayah(HUMU, isolated=2)
+def test_a_stop_makes_a_final_voweled_meem_clear(r):
+    assert r.phonemes(2) == "hum"
+    assert r.rules_on_sound(2, "m") == {"izhar_shafawi"}
+
 ALHAMDU = Site(hafs=("1:2", (1,)))
 ANAMTA = Site(hafs=("1:7", (3,)))
 AMTHALAHUM = Site(hafs=("47:3", (18,)))

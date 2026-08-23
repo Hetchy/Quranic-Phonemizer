@@ -32,6 +32,10 @@ _TANWEEN_ROLE = {
 #: script has no mark that says otherwise.
 _BASE = {Quality.E: Quality.A}
 
+#: Imala's inclined long vowel uses the ya carrier even though the Score writes
+#: the authored imala mark through its ordinary a-vowel spelling.
+_PERFORMED_BASE = {Quality.E: Quality.I}
+
 #: Onsets and qualities a script may name outright.
 TASHIL = "tashil"
 IMALA = "imala"
@@ -83,6 +87,20 @@ class Pen:
             raise WriteError(f"no scalar has role {role!r} in this script")
         return scalar
 
+    def short_vowel(self, quality: Quality) -> str:
+        """Write the ordinary short mark for a vowel quality."""
+        return self.role(_SHORT_ROLE[_BASE.get(quality, quality)])
+
+    def performed_carrier(self, quality: Quality) -> tuple[CanonLetter, str]:
+        """Return the letter identity and glyph carrying a performed vowel."""
+        letter = CARRIER_OF[_PERFORMED_BASE.get(quality, quality)]
+        return letter, self.carriers.get(letter) or self.letter(letter)
+
+    def seated_hamza(self, quality: Quality) -> str:
+        """Write a started hamza on an alif seat in this script."""
+        seat = self.roles.get("hamza_below" if quality is Quality.I else "hamza_above")
+        return seat or self.letter(CanonLetter.HAMZA)
+
 
 def pen_for(inventory: Inventory, names: dict | None = None) -> Pen:
     """Invert an inventory. Ambiguity resolves to the first scalar declared
@@ -107,8 +125,24 @@ def pen_for(inventory: Inventory, names: dict | None = None) -> Pen:
     for scalar, mark in inventory.marks.items():
         if mark.role and (mark.fact is not None or mark.decorates is not None):
             roles.setdefault(mark.role, scalar)
+    _hamza_seats(inventory, letters, roles)
     return Pen(letters=letters, roles=roles, onsets=onsets,
                carriers=carriers, names=names or {})
+
+
+def _hamza_seats(inventory: Inventory, letters, roles) -> None:
+    """Add display spellings for hamza-on-alif from the script inventory."""
+    hamzas = {
+        scalar for scalar, entry in inventory.letters.items()
+        if entry.letter is CanonLetter.HAMZA
+    }
+    alif = letters.get(CanonLetter.ALIF, "")
+    above = "أ" if "أ" in hamzas else alif + ("ٔ" if "ٔ" in inventory.combining_hamza else "")
+    below = "إ" if "إ" in hamzas else alif + ("ٕ" if "ٕ" in inventory.combining_hamza else "")
+    if above:
+        roles["hamza_above"] = above
+    if below:
+        roles["hamza_below"] = below
 
 
 def write_verse(score: Score, pen: Pen) -> tuple[str, ...]:

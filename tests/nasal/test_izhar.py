@@ -34,6 +34,8 @@ TANWEEN_ACROSS_A_BOUNDARY = [
     ("19:3", (4, 5), ("nida:ʔan", "xaˤfijja:")),     # نِدَآءً خَفِيًّا
 ]
 
+NAHNU = Site(hafs=("12:3", (1,)))
+
 
 #: One site per tanween mark this file's table reaches, to say which
 #: character the rule is read off.
@@ -50,6 +52,12 @@ def test_every_throat_letter_keeps_a_written_noon_clear(ref, word, expected):
     assert r.phonemes(word) == expected
     assert "izhar" in r.rules_on_char(word, "ن")
     assert r.rules_on_sound(word, "n") == {"izhar"}
+
+
+@for_each_riwayah(NAHNU, isolated=1)
+def test_a_stop_makes_a_final_voweled_noon_clear(r):
+    assert r.phonemes(1) == "naħn"
+    assert r.rules_on_sound(1, "n") == {"izhar"}
 
 
 @pytest.mark.parametrize(("ref", "words", "expected"), NOON_ACROSS_A_BOUNDARY)

@@ -20,6 +20,7 @@ def test_a_stop_after_the_meem_undoes_the_merger(r):
     # قُلُوبِهِم
     assert r.phonemes(2) == "qulu:bihim"
     assert "idgham_shafawi" not in r.rules_on_char(2, "م")
+    assert r.rules_on_sound(2, "m") == {"izhar_shafawi"}
 
 
 @for_each_riwayah(AHWAAHUM, ibtidaa=13, wasl=13)

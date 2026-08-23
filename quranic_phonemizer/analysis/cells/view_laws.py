@@ -29,17 +29,18 @@ def _all_columns(view: CellView) -> dict[int, object]:
 def _all_cells(view: CellView) -> list[CellSound]:
     cells: list[CellSound] = [c for word in view.words for c in word.sounds]
     for boundary in view.boundaries:
+        cells.extend(boundary.sounds)
         cells.extend(bridge.sound for bridge in boundary.bridges)
     return cells
 
 
 def _check_stop_signs(view: CellView, bundle: AnalysisBundle) -> None:
-    internal = {
+    after_words = {
         b.id.value for b in bundle.boundaries
-        if b.before is not None and b.after is not None
+        if b.before is not None
     }
     got = {cb.boundary_id.value for cb in view.boundaries}
-    _require(got == internal, "the cell boundaries are not the internal boundaries")
+    _require(got == after_words, "the cell boundaries are not the after-word boundaries")
     for cb in view.boundaries:
         signs = [c for c in cb.columns if c.role is CellRole.STOP_SIGN]
         _require(len(signs) == 1, "an internal boundary has not one stop-sign column")
@@ -178,6 +179,28 @@ def _check_closure(view: CellView, bundle: AnalysisBundle) -> None:
                 _require(cid.value in columns, "a bridge endpoint is an unknown column")
 
 
+def _check_groups(view: CellView) -> None:
+    if not any(word.groups for word in view.words):
+        return
+    for word in view.words:
+        columns = {column.id for column in word.columns}
+        sounds = {sound.sound_id for sound in word.sounds}
+        claimed_columns = [item for group in word.groups for item in group.column_ids]
+        claimed_sounds = [item for group in word.groups for item in group.sound_ids]
+        _require(
+            set(claimed_columns) == columns and len(claimed_columns) == len(columns),
+            "the groups do not partition a word's columns",
+        )
+        _require(
+            set(claimed_sounds) == sounds and len(claimed_sounds) == len(sounds),
+            "the groups do not partition a word's sounds",
+        )
+        _require(
+            all(group.key in group.column_ids for group in word.groups),
+            "a group key is not one of its columns",
+        )
+
+
 def validate_cell_view(
     view: CellView, bundle: AnalysisBundle, source: SourceView
 ) -> None:
@@ -186,6 +209,7 @@ def validate_cell_view(
     _check_no_iltiqa_bridge(view, bundle)
     _check_bridges(view, bundle, source)
     _check_closure(view, bundle)
+    _check_groups(view)
 
 
 __all__ = ["validate_cell_view"]

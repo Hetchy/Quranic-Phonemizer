@@ -1,7 +1,7 @@
 """The nested cell view: words, between-word boundaries, and merger bridges.
 
 The view laws run in every boundary state and both scripts: one stop-sign per
-internal boundary, one cell per sound, sound bridges, no iltiqa bridge, closure.
+after-word boundary, one cell per sound, sound bridges, no iltiqa bridge, closure.
 """
 from __future__ import annotations
 
@@ -26,6 +26,7 @@ from quranic_phonemizer.analysis.dtos import BoundaryState
 from quranic_phonemizer.analysis.ids import CellColumnId, LetterUnitId, SoundId
 from quranic_phonemizer.analysis.source import build_source_view
 from quranic_phonemizer.model.address import Script, VerseRef
+from quranic_phonemizer.orthography.write import pen_for
 from quranic_phonemizer.session import phonemize_request
 from quranic_phonemizer.session.boundaries import resolve_boundaries
 from quranic_phonemizer.session.core import Session
@@ -76,6 +77,7 @@ def _columns(view: CellView) -> dict[int, CellColumn]:
 def _all_cells(view: CellView):
     cells = [c for w in view.words for c in w.sounds]
     for b in view.boundaries:
+        cells.extend(b.sounds)
         cells.extend(br.sound for br in b.bridges)
     return cells
 
@@ -102,13 +104,13 @@ def _boundary_signs(source, boundary_id):
 
 
 @pytest.mark.parametrize(("ref", "kwargs"), SITES)
-def test_every_internal_boundary_has_one_stop_sign(hafs, ref, kwargs):
+def test_every_after_word_boundary_has_one_stop_sign(hafs, ref, kwargs):
     view, bundle, source = _build(hafs, ref, kwargs)
-    internal = {
+    after_word = {
         b.id.value: b for b in bundle.boundaries
-        if b.before is not None and b.after is not None
+        if b.before is not None
     }
-    assert {cb.boundary_id.value for cb in view.boundaries} == set(internal)
+    assert {cb.boundary_id.value for cb in view.boundaries} == set(after_word)
     for cb in view.boundaries:
         signs = [c for c in cb.columns if c.role.value == "stop_sign"]
         assert len(signs) == 1
@@ -362,19 +364,24 @@ def test_law_26_in_isolation_rejects_an_inserted_bridge_endpoint(hafs):
 
 
 def test_law_26_bites_a_bridge_over_the_real_host_owned_iltiqa(hafs):
-    """The iltiqa fatha at 3:1-3:2 is a host word's own sound on the join, not a
-    merger. A bridge fabricated over that boundary and sound is rejected by law 26
-    itself, before law 25 would catch it as a stray bridge."""
+    """The iltiqa vowel lives on its boundary but is never a merger bridge."""
     from quranic_phonemizer.analysis.ids import MergerId
 
-    view, bundle, _ = _build(hafs, "3:1-3:2", {})
+    ref = "3:1-3:2"
+    session = phonemize_request(hafs, ref)
+    kw = dict(ref=ref, riwayah="hafs", script="uthmani", variant={})
+    bundle = build_bundle(session, **kw)
+    view = build_cell_view(
+        session, **kw, spelling="transformed",
+        pen=pen_for(hafs.inventory(Script.UTHMANI)),
+    )
     occ = next(
         o for o in bundle.rule_occurrences if o.rule_id.value == "iltiqa_haraka"
     )
     assert occ.boundary_ids and occ.sound_ids
     boundary_id = occ.boundary_ids[0]
-    host = next(w for w in view.words for c in w.sounds if c.sound_id == occ.sound_ids[0])
-    cell = next(c for c in host.sounds if c.sound_id == occ.sound_ids[0])
+    boundary = next(b for b in view.boundaries if b.boundary_id == boundary_id)
+    cell = next(c for c in boundary.sounds if c.sound_id == occ.sound_ids[0])
     bridge = CellBridge(
         merger_id=MergerId(0),
         before_column_ids=cell.column_ids,

@@ -78,15 +78,16 @@ def test_the_transformed_laws_hold(hafs, pen, ref, kwargs):
     validate_transformed(view, source, session.performance.selection)
 
 
-def test_no_inserted_column_arises_in_hafs(hafs, pen):
-    """Hafs mints no insertion, so the transformed view over the sites carries
-    no inserted column and the facts hold none."""
+def test_visual_insertions_do_not_invent_performance_insertions(hafs, pen):
+    """A transformed view may supply visual columns without changing facts."""
+    inserted = 0
     for ref, kwargs in SITES:
         view, _, session = _build(hafs, pen, ref, kwargs)
-        assert not [
-            c for c in _columns(view) if c.status is CellStatus.INSERTED
-        ]
+        inserted += sum(
+            c.status is CellStatus.INSERTED for c in _columns(view)
+        )
         assert not analyse(session, packaged_alphabet()).insertions
+    assert inserted > 0
 
 
 # ---- the concrete cases the laws exercise ----
@@ -95,19 +96,21 @@ def test_the_ibdal_started_prosthetic_hamza_is_replaced(hafs, pen):
     """Started, the prosthetic hamza of ٱئْتُونِى sounds where the rasm writes a
     silent connector, so its column is replaced with the performed hamza; the
     lexical hamza the ibdal silences is dropped, keeping its source text."""
-    from quranic_phonemizer.model.canon import CanonLetter
-
     view, source, _ = _build(hafs, pen, "46:4:18", {})
     columns = {c.source_unit_ids[0].value: c
                for c in _columns(view) if c.source_unit_ids}
     prosthetic = columns[0]
     assert prosthetic.status is CellStatus.REPLACED
-    assert prosthetic.text == pen.letter(CanonLetter.HAMZA)
+    assert prosthetic.text == pen.seated_hamza(Quality.I)
     assert prosthetic.text != source.units[0].text
     assert prosthetic.source_unit_ids == (LetterUnitId(0),)
     lexical = columns[1]
     assert lexical.status is CellStatus.DROPPED
-    assert lexical.text == source.units[1].text
+    assert lexical.text == source.units[1].text + source.units[2].text
+    assert lexical.source_unit_ids == (LetterUnitId(1), LetterUnitId(2))
+    helping = next(c for c in _columns(view) if not c.source_character_ids)
+    assert helping.text == pen.short_vowel(Quality.I)
+    assert helping.status is CellStatus.INSERTED
 
 
 def test_a_silent_alif_is_dropped(hafs, pen):
@@ -127,12 +130,12 @@ def test_a_silent_alif_is_dropped(hafs, pen):
 
 def test_the_taa_marbuta_at_waqf_is_read_as_a_haa(hafs, pen):
     """Stopped on, a taa marbuta is performed as a haa, a letter mismatch that
-    replaces the column with the performed haa from the pen."""
+    replaces the column with the performed haa and its pausal sukun."""
     from quranic_phonemizer.model.canon import CanonLetter
 
     view, _, _ = _build(hafs, pen, "2:3", {"stop_refs": [f"2:3:{w}" for w in range(1, 6)]})
-    haa = [c for c in _columns(view)
-           if c.status is CellStatus.REPLACED and c.text == pen.letter(CanonLetter.HEH)]
+    haa = [c for c in _columns(view) if c.status is CellStatus.REPLACED
+           and c.text == pen.letter(CanonLetter.HEH) + pen.role("sukun")]
     assert haa
 
 
@@ -296,8 +299,7 @@ def _indopak_session(hafs, sources, surah, ayah, stop_refs=()):
 @pytest.mark.slow
 def test_the_transformed_laws_hold_over_the_whole_corpus(hafs, packed, sources):
     """Build the transformed view for every verse joined and stopped after each
-    internal word, in both scripts, and hold laws 29, 30, 31. No inserted column
-    arises in Hafs, and a replaced column does; both facts are asserted."""
+    internal word, in both scripts, and hold the transformed cell laws."""
     info = packed.surah_info
     pens = {s: pen_for(hafs.inventory(s)) for s in Script}
     replaced = inserted = checked = 0
@@ -330,4 +332,4 @@ def test_the_transformed_laws_hold_over_the_whole_corpus(hafs, packed, sources):
                 checked += 1
     assert checked > 24000
     assert replaced > 0
-    assert inserted == 0
+    assert inserted > 0

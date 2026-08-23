@@ -10,7 +10,7 @@ from ..model.canon import CanonLetter as L
 from ..model.canon import Onset, Rule, SlotOrigin
 from ..model.performance import Aspect, Consonant, Occurrence
 from .lam_shamsiyyah import ArticleShape
-from .ownership import is_quiescent
+from .ownership import is_performed_quiescent
 from .khilaf import nasal_place
 from .tables import Followers
 
@@ -87,14 +87,17 @@ class MeemSakinah:
         self, near: Neighbourhood, plan: Plan, at: SlotId,
         boundaries: BoundaryPlan,
     ) -> Verdict | None:
-        del boundaries  # `near` already refuses to look across a junction
         slot = near.slot(at)
         # A repaired meeting leaves this one voweled, and so not a sakin at all.
-        if not is_quiescent(slot) or plan.voweled(at):
+        if not is_performed_quiescent(slot, plan, at):
             return None
+        word = near.word_of(at)
+        stopped = word is not None and boundaries.stopped_on(word) and near.last_of_word(at)
         following = near.after(at)
         if following is None:
-            if slot.origin is SlotOrigin.SPELLED and near.last_of_word(at):
+            if stopped or (
+                slot.origin is SlotOrigin.SPELLED and near.last_of_word(at)
+            ):
                 # The meem closing a disjoined-letter opening takes its own
                 # plain articulation rather than reaching into the next word.
                 return _verdict(Rule.IZHAR_SHAFAWI, at, (), ())
@@ -103,22 +106,7 @@ class MeemSakinah:
         match self.followers.of(following.letter):
             case Rule.IKHFAA_SHAFAWI:
                 # Hidden with ghunnah, not replaced.
-                return _verdict(
-                    Rule.IKHFAA_SHAFAWI, at, (following.id,),
-                    (
-                        Realize(
-                            at,
-                            Aspect.CONSONANT,
-                            Consonant(
-                                nasal_place(
-                                    near.score.selection,
-                                    KhilafId.IKHFAA_SHAFAWI_NASAL,
-                                ),
-                                ghunnah=True,
-                            ),
-                        ),
-                    ),
-                )
+                return _ikhfaa_verdict(near, at, following.id)
             case Rule.IDGHAM_SHAFAWI:
                 return _verdict(
                     Rule.IDGHAM_SHAFAWI, at, (),
@@ -140,3 +128,9 @@ def _verdict(rule: Rule, at: SlotId, context: tuple, effects: tuple) -> Verdict:
     """`context` holds a following letter the rule read and left alone; the
     idgham realizes the one it names, so its second unit is an effect."""
     return Verdict(Occurrence(mint(rule, at), rule, (at,), context), effects)
+
+
+def _ikhfaa_verdict(near: Neighbourhood, at: SlotId, following: SlotId) -> Verdict:
+    letter = nasal_place(near.score.selection, KhilafId.IKHFAA_SHAFAWI_NASAL)
+    effect = Realize(at, Aspect.CONSONANT, Consonant(letter, ghunnah=True))
+    return _verdict(Rule.IKHFAA_SHAFAWI, at, (following,), (effect,))
