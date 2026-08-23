@@ -53,10 +53,13 @@ def _is_replaced(cons: Consonant, slot) -> bool:
 
 
 def _transform_letter(col: CellColumn, cons: Consonant, slot, pen: Pen) -> CellColumn:
-    if not _is_replaced(cons, slot):
+    shadda = pen.role("shadda")
+    lost_shadda = shadda in col.text and not cons.geminate
+    if not _is_replaced(cons, slot) and not lost_shadda:
         return col
+    text = _consonant_spelling(cons, pen) if _is_replaced(cons, slot) else col.text.replace(shadda, "")
     return replace(
-        col, status=CellStatus.REPLACED, text=_consonant_spelling(cons, pen)
+        col, status=CellStatus.REPLACED, text=text
     )
 
 

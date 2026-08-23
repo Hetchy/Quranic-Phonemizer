@@ -3,9 +3,9 @@ from __future__ import annotations
 
 from dataclasses import replace
 
-from ...model.canon import Quality
+from ...model.canon import Annotation, Quality
 from ...model.inscription import GlyphKind
-from ...model.performance import Aspect, Consonant, Vowel
+from ...model.performance import Aspect, Vowel
 from ...orthography.write import Pen
 from ..attributions import Hosted, Insertion, Merged, Silenced
 from ..facts import AnalysisFacts
@@ -28,7 +28,7 @@ from .projection_marks import (
     MAQSURA,
     clean_structural_marks,
     fold_maqsura_daggers,
-    recover_nasal_sukun,
+    fold_pausal_sukun,
     transform_plain_madd,
 )
 
@@ -56,43 +56,6 @@ def _fold_sukun(word: CellWord) -> CellWord:
     return replace(word, columns=columns)
 
 
-def _pausal_slots(facts: AnalysisFacts) -> set[object]:
-    return {
-        slot
-        for edge in facts.silences
-        if edge.aspect is Aspect.VOWEL
-        and edge.by is not None
-        and facts.occurrences[edge.by].boundary is not None
-        for slot in edge.slots
-    }
-
-
-def _fold_pausal_sukun(word: CellWord, facts: AnalysisFacts,
-                       slot_of_unit, pen: Pen) -> CellWord:
-    pausal = _pausal_slots(facts)
-    columns = []
-    for col in word.columns:
-        slots = {
-            slot_of_unit[unit.value] for unit in col.source_unit_ids
-            if unit.value in slot_of_unit
-        }
-        consonantal = any(isinstance(facts.sounds[sound.value].value, Consonant)
-                          for sound in col.owned_sound_ids)
-        if (
-            col.tier is CellTier.MAIN
-            and slots & pausal
-            and consonantal
-            and not col.text.endswith(pen.role("sukun"))
-        ):
-            status = (
-                CellStatus.REPLACED
-                if col.status is CellStatus.PRESENT else col.status
-            )
-            col = replace(col, text=col.text + pen.role("sukun"), status=status)
-        columns.append(col)
-    return replace(word, columns=tuple(columns))
-
-
 def _slot_of_columns(source: SourceView, insc: InscriptionFacts) -> dict[int, object]:
     return {
         unit.id.value: insc.slot_of[min(c.value for c in unit.character_ids)]
@@ -108,11 +71,11 @@ def _has_maddah(col: CellColumn, insc: InscriptionFacts) -> bool:
 
 
 def _inserted_carrier(new_id: int, seat: CellColumn, sound: SoundId,
-                      value: Vowel, pen: Pen) -> CellColumn:
+                      text: str) -> CellColumn:
     anchor = seat.source_unit_ids[0] if seat.source_unit_ids else seat.anchor_unit_id
     return CellColumn(
         id=CellColumnId(new_id), role=CellRole.MADD,
-        text=pen.performed_carrier(value.quality)[1],
+        text=text,
         source_character_ids=(), source_unit_ids=(),
         tier=CellTier.MAIN, attached_to_column_id=None,
         status=CellStatus.INSERTED, rule_occurrence_ids=(), silence=None,
@@ -140,7 +103,7 @@ def _move_sound(seat: CellColumn, carrier: CellColumn,
 
 
 def _candidate_carrier(
-    columns, start, target, sound, facts, slot_of_unit, text, insc
+    columns, start, target, sound, value, facts, slot_of_unit, text, insc
 ):
     for index in range(start + 1, len(columns)):
         col = columns[index]
@@ -159,9 +122,18 @@ def _candidate_carrier(
                 col.status is CellStatus.DROPPED or sound in col.presented_sound_ids
             )
         )
+        ibdal_source = any(
+            slot_id in edge.slots and edge.by is not None
+            and facts.occurrences[edge.by].rule.value == "ibdal_hamza"
+            for edge in facts.silences
+        )
+        maqsura_a = value.quality is Quality.A and col.text == MAQSURA
         if target_presenter or (
             col.status is CellStatus.DROPPED
-            and (col.text == text or GlyphKind.SMALL_VOWEL in kinds)
+            and (
+                col.text == text or GlyphKind.SMALL_VOWEL in kinds
+                or ibdal_source or maqsura_a
+            )
         ):
             return index
     return None
@@ -179,7 +151,7 @@ def _ensure_carriers(word: CellWord, facts: AnalysisFacts, insc: InscriptionFact
         span = [columns[by_id[c.value]] for c in cell.column_ids]
         existing = next((c for c in span if c.role is CellRole.MADD), None)
         if existing is not None:
-            if value.quality is Quality.I and existing.text == MAQSURA:
+            if value.quality is Quality.A and existing.text == MAQSURA:
                 changed = replace(
                     existing, text=existing.text + DAGGER_ALIF,
                     status=CellStatus.REPLACED,
@@ -192,11 +164,22 @@ def _ensure_carriers(word: CellWord, facts: AnalysisFacts, insc: InscriptionFact
         at = by_id[seat.id.value]
         target, text = pen.performed_carrier(value.quality)
         candidate = _candidate_carrier(
-            columns, at, target, cell.sound_id, facts, slot_of_unit,
+            columns, at, target, cell.sound_id, value, facts, slot_of_unit,
             text, insc,
         )
         if candidate is None:
-            carrier = _inserted_carrier(next_id, seat, cell.sound_id, value, pen)
+            slot_id = (
+                slot_of_unit.get(seat.source_unit_ids[0].value)
+                if seat.source_unit_ids else None
+            )
+            slot = None if slot_id is None else facts.slots[facts.slot_index[slot_id]]
+            inserted_text = (
+                DAGGER_ALIF if slot is not None
+                and Annotation.DIVINE_NAME in slot.annotations else text
+            )
+            carrier = _inserted_carrier(
+                next_id, seat, cell.sound_id, inserted_text
+            )
             next_id += 1
             columns.insert(at + 1, carrier)
         else:
@@ -210,10 +193,23 @@ def _ensure_carriers(word: CellWord, facts: AnalysisFacts, insc: InscriptionFact
                 if sound != cell.sound_id
             ),
         )
-        if was_dropped and value.quality is Quality.I and carrier.text == MAQSURA:
+        carrier_slot = (
+            slot_of_unit.get(carrier.source_unit_ids[0].value)
+            if carrier.source_unit_ids else None
+        )
+        ibdal_source = carrier_slot is not None and any(
+            carrier_slot in edge.slots and edge.by is not None
+            and facts.occurrences[edge.by].rule.value == "ibdal_hamza"
+            for edge in facts.silences
+        )
+        if was_dropped and value.quality is Quality.A and carrier.text == MAQSURA:
             carrier = replace(
                 carrier, text=carrier.text + DAGGER_ALIF,
                 status=CellStatus.REPLACED,
+            )
+        elif was_dropped and ibdal_source:
+            carrier = replace(
+                carrier, text=text, status=CellStatus.REPLACED,
             )
         if seat.role is CellRole.TANWEEN:
             seat = replace(
@@ -263,9 +259,11 @@ def _place_rules(words: tuple[CellWord, ...], facts: AnalysisFacts,
         if edge.by is None:
             continue
         rule = facts.occurrences[edge.by].rule.value
+        if isinstance(edge, Merged) and rule.startswith("madd_"):
+            continue
         if (
             isinstance(edge, Hosted) and (edge.by, edge.sound) in merged
-            and not rule.startswith("idgham_")
+            and not rule.startswith(("idgham_", "madd_"))
         ):
             continue
         occurrence = OccurrenceId(edge.by)
@@ -378,7 +376,7 @@ def project_words(words: tuple[CellWord, ...], facts: AnalysisFacts,
     out = tuple(_fold_sukun(word) for word in out)
     slot_of_unit = _slot_of_columns(source, insc)
     out = tuple(
-        _fold_pausal_sukun(word, facts, slot_of_unit, pen) for word in out
+        fold_pausal_sukun(word, facts, slot_of_unit, pen) for word in out
     )
     next_id = next_column_id(out)
     carried = []
@@ -388,7 +386,6 @@ def project_words(words: tuple[CellWord, ...], facts: AnalysisFacts,
         )
         carried.append(projected)
     out = _place_rules(tuple(carried), facts, slot_of_unit)
-    out = recover_nasal_sukun(out, facts, pen)
     out = transform_plain_madd(out, facts)
     out = _visual_statuses(out, facts)
     return tuple(replace(word, groups=_groups(word, facts)) for word in out)

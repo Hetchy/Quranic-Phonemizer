@@ -6,9 +6,11 @@ import pytest
 from quranic_phonemizer.analysis.build import build_bundle
 from quranic_phonemizer.analysis.cells import CellRole, CellStatus, build_cell_view
 from quranic_phonemizer.analysis.facts import analyse
+from quranic_phonemizer.analysis.inscription import inscribe
+from quranic_phonemizer.analysis.source import build_source_view
 from quranic_phonemizer.model.address import Script
-from quranic_phonemizer.model.canon import Quality
-from quranic_phonemizer.model.performance import Consonant, Vowel
+from quranic_phonemizer.model.canon import Quality, VowelForm
+from quranic_phonemizer.model.performance import Aspect, Consonant, Vowel
 from quranic_phonemizer.orthography.write import pen_for
 from quranic_phonemizer.render.alphabet import packaged_alphabet
 from quranic_phonemizer.session import phonemize_request
@@ -165,13 +167,53 @@ def test_a_maqsura_and_its_dagger_are_one_native_carrier_cell(hafs, pen, ref):
     assert all(c.text != "ٰ" for c in word.columns)
 
 
-def test_a_bare_maqsura_revived_at_a_stop_gains_a_transformed_dagger(hafs, pen):
-    session = phonemize_request(hafs, "2:11:6-2:11:7", stop_refs=["2:11:6"])
-    kw = dict(ref="2:11:6-2:11:7", riwayah="hafs", script="uthmani", variant={})
-    view = build_cell_view(session, spelling="transformed", pen=pen, **kw)
+def test_a_long_i_maqsura_never_gains_a_dagger_alif(hafs, pen):
+    _, _, view = _build(hafs, pen, "2:11:6")  # فِى
     carrier = next(c for c in view.words[0].columns if c.role is CellRole.MADD)
+    assert carrier.text == "ى"
+    assert carrier.status is CellStatus.PRESENT
+
+
+def test_madd_iwad_reuses_a_maqsura_as_a_transformed_dagger_carrier(hafs, pen):
+    _, _, view = _build(hafs, pen, "2:2:6")  # هُدًى
+    word = view.words[0]
+    carrier = next(c for c in word.columns if c.role is CellRole.MADD)
     assert carrier.text == "ىٰ"
     assert carrier.status is CellStatus.REPLACED
+    assert carrier.source_character_ids
+    assert not any(
+        c.status is CellStatus.INSERTED and c.role is CellRole.MADD
+        for c in word.columns
+    )
+
+
+def test_ibdal_hamza_reuses_the_source_hamza_as_a_replacement(hafs, pen):
+    _, _, view = _build(hafs, pen, "46:4:18")
+    word = view.words[0]
+    carrier = next(c for c in word.columns if c.role is CellRole.MADD)
+    assert carrier.text == pen.performed_carrier(Quality.I)[1]
+    assert carrier.status is CellStatus.REPLACED
+    assert carrier.source_character_ids
+    assert not any(
+        c.status is CellStatus.INSERTED and c.role is CellRole.MADD
+        for c in word.columns
+    )
+
+
+def test_divine_name_inserts_a_dagger_not_a_full_alif(hafs, pen):
+    _, _, view = _build(hafs, pen, "2:15:1")
+    inserted = [
+        c for c in view.words[0].columns
+        if c.status is CellStatus.INSERTED and c.role is CellRole.MADD
+    ]
+    assert [c.text for c in inserted] == ["ٰ"]
+
+
+def test_starting_on_a_shaddad_letter_removes_the_shadda(hafs, pen):
+    _, _, view = _build(hafs, pen, "57:28:11")
+    first = view.words[0].columns[0]
+    assert first.text == "ر"
+    assert first.status is CellStatus.REPLACED
 
 
 def test_stopping_a_munfasil_removes_its_maddah_as_a_transformation(hafs, pen):
@@ -196,6 +238,20 @@ def test_a_stopped_glide_reuses_its_written_carrier(hafs, pen, ref, carrier_text
     assert carriers[0].source_character_ids
 
 
+@pytest.mark.parametrize("ref", ["2:29:1", "2:70:8"])
+def test_a_stopped_glides_madd_rule_is_only_on_its_carrier(hafs, pen, ref):
+    _, bundle, view = _build(hafs, pen, ref)
+    occurrence = next(
+        o for o in bundle.rule_occurrences if o.rule_id.value == "madd_tabii"
+    )
+    named = [
+        c for c in view.words[0].columns
+        if occurrence.id in c.rule_occurrence_ids
+    ]
+    assert len(named) == 1
+    assert named[0].role is CellRole.MADD
+
+
 @pytest.mark.parametrize(("ref", "before", "after", "rule"), [
     ("3:74:3-3:74:4", "ن", "ي", "idgham_bi_ghunnah"),
     ("2:10:2-2:10:3", "م", "م", "idgham_shafawi"),
@@ -218,24 +274,25 @@ def test_a_cross_word_merger_marks_both_active_letters(
     assert occurrence.id in second.rule_occurrence_ids
 
 
-@pytest.mark.parametrize(("ref", "stop", "letter", "rule"), [
-    ("3:74:3-3:74:4", "3:74:3", "ن", "izhar"),
-    ("2:56:3-2:56:4", "2:56:3", "ن", "izhar"),
-    ("2:10:2-2:10:3", "2:10:2", "م", "izhar_shafawi"),
-    ("2:8:10-2:8:11", "2:8:10", "م", "izhar_shafawi"),
+@pytest.mark.parametrize(("ref", "stop", "letter"), [
+    ("3:74:3-3:74:4", "3:74:3", "ن"),
+    ("2:10:2-2:10:3", "2:10:2", "م"),
+    ("2:61:57-2:61:58", "2:61:57", "و"),
+    ("2:16:7-2:16:8", "2:16:7", "ت"),
+    ("23:118:1-23:118:2", "23:118:1", "ل"),
+    ("2:256:5-2:256:6", "2:256:5", "د"),
+    ("2:19:14", "2:19:14", "ق"),
+    ("2:19:7", "2:19:7", "د"),
 ])
-def test_a_cancelled_cross_word_nasal_rule_recovers_sukun_on_its_letter(
-    hafs, pen, ref, stop, letter, rule
+def test_a_stopped_consonant_recovers_sukun_on_its_letter(
+    hafs, pen, ref, stop, letter
 ):
     session = phonemize_request(hafs, ref, stop_refs=[stop])
     kw = dict(ref=ref, riwayah="hafs", script="uthmani", variant={})
-    bundle = build_bundle(session, **kw)
     view = build_cell_view(session, spelling="transformed", pen=pen, **kw)
-    occurrence = next(o for o in bundle.rule_occurrences if o.rule_id.value == rule)
     column = next(c for c in view.words[0].columns if letter in c.text)
     assert column.text.endswith(pen.role("sukun"))
     assert column.status is CellStatus.REPLACED
-    assert occurrence.id in column.rule_occurrence_ids
 
 
 def test_lam_shamsiyyah_is_only_on_the_silent_lam(hafs, pen):
@@ -265,3 +322,46 @@ def test_iltiqa_sound_and_column_live_on_the_boundary(hafs, pen):
         s.sound_id not in occurrence.sound_ids
         for word in view.words for s in word.sounds
     )
+
+
+@pytest.mark.slow
+def test_every_stopped_consonant_in_the_corpus_projects_its_sukun(hafs, pen):
+    """Audit every word, including every cancelled cross-word rule and qalqala."""
+    for surah in range(1, 115):
+        for ayah in range(1, len(hafs.corpus.surah_info[str(surah)]) + 1):
+            ref = f"{surah}:{ayah}"
+            draft = phonemize_request(hafs, ref)
+            stops = [str(word.location) for word in draft.score.words[:-1]]
+            session = phonemize_request(hafs, ref, stop_refs=stops)
+            kw = dict(ref=ref, riwayah="hafs", script="uthmani", variant={})
+            view = build_cell_view(session, spelling="transformed", pen=pen, **kw)
+            facts = analyse(session, packaged_alphabet())
+            source = build_source_view(session)
+            written = inscribe(session)
+            slot_of = {
+                unit.id.value: written.slot_of[min(c.value for c in unit.character_ids)]
+                for unit in source.units if unit.character_ids
+            }
+            pausal = {
+                slot for edge in facts.silences
+                if edge.aspect is Aspect.VOWEL and edge.by is not None
+                and facts.occurrences[edge.by].boundary is not None
+                for slot in edge.slots
+            }
+            for word in view.words:
+                candidates = [
+                    col for col in word.columns
+                    if col.role is CellRole.LETTER and any(
+                        isinstance(facts.sounds[s.value].value, Consonant)
+                        for s in col.owned_sound_ids
+                    ) and any(
+                        slot_of[u.value] in pausal or facts.slots[
+                            facts.slot_index[slot_of[u.value]]
+                        ].nucleus.stopped.form is VowelForm.ABSENT
+                        for u in col.source_unit_ids if u.value in slot_of
+                    )
+                ]
+                if candidates:
+                    assert candidates[-1].text.endswith(pen.role("sukun")), (
+                        ref, word.word_id, candidates[-1]
+                    )

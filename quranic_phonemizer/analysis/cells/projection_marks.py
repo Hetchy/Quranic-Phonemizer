@@ -3,7 +3,9 @@ from __future__ import annotations
 
 from dataclasses import replace
 
-from ...model.performance import Consonant
+from ...model.address import Junction
+from ...model.canon import VowelForm
+from ...model.performance import Aspect, Consonant
 from ...orthography.write import Pen
 from ..facts import AnalysisFacts
 from ..ids import CellColumnId
@@ -77,29 +79,46 @@ def clean_structural_marks(word: CellWord) -> CellWord:
     ))
 
 
+def fold_pausal_sukun(word: CellWord, facts: AnalysisFacts,
+                      slot_of_unit, pen: Pen) -> CellWord:
+    """Put a stopped consonant's recovered sukun in its native letter cell."""
+    stopped = facts.junctions[word.word_id.value] in {Junction.STOP, Junction.EDGE}
+    pausal = {
+        slot for edge in facts.silences
+        if edge.aspect is Aspect.VOWEL and edge.by is not None
+        and facts.occurrences[edge.by].boundary is not None
+        for slot in edge.slots
+    }
+    candidates = []
+    for col in word.columns:
+        slots = [slot_of_unit[unit.value] for unit in col.source_unit_ids
+                 if unit.value in slot_of_unit]
+        absent = any(
+            slot in pausal or facts.slots[
+                facts.slot_index[slot]
+            ].nucleus.stopped.form is VowelForm.ABSENT
+            for slot in slots
+        )
+        consonant = any(isinstance(facts.sounds[s.value].value, Consonant)
+                        for s in col.owned_sound_ids)
+        if col.tier is CellTier.MAIN and consonant and absent:
+            candidates.append(col.id)
+    final = candidates[-1] if stopped and candidates else None
+    return replace(word, columns=tuple(
+        replace(
+            col, text=col.text + pen.role("sukun"),
+            status=(CellStatus.REPLACED
+                    if col.status is CellStatus.PRESENT else col.status),
+        ) if col.id == final and not col.text.endswith(pen.role("sukun"))
+        else col for col in word.columns
+    ))
+
+
 def _rule_names(col: CellColumn, facts: AnalysisFacts) -> set[str]:
     return {
         facts.occurrences[occurrence.value].rule.value
         for occurrence in col.rule_occurrence_ids
     }
-
-
-def recover_nasal_sukun(words, facts: AnalysisFacts, pen: Pen):
-    """Show the sukun reclaimed when waqf cancels a cross-word nasal rule."""
-    rules = {"izhar", "izhar_shafawi"}
-    return tuple(replace(word, columns=tuple(
-        replace(
-            col, text=col.text + pen.role("sukun"),
-            status=(CellStatus.REPLACED
-                    if col.status is CellStatus.PRESENT else col.status),
-        ) if (
-            col.tier is CellTier.MAIN and col.role is CellRole.LETTER
-            and not col.text.endswith(pen.role("sukun"))
-            and bool(_rule_names(col, facts) & rules)
-            and any(isinstance(facts.sounds[s.value].value, Consonant)
-                    for s in col.owned_sound_ids)
-        ) else col for col in word.columns
-    )) for word in words)
 
 
 def transform_plain_madd(words, facts: AnalysisFacts):
@@ -123,6 +142,6 @@ __all__ = [
     "MAQSURA",
     "clean_structural_marks",
     "fold_maqsura_daggers",
-    "recover_nasal_sukun",
+    "fold_pausal_sukun",
     "transform_plain_madd",
 ]

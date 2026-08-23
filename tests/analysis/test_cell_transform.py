@@ -11,6 +11,7 @@ from types import SimpleNamespace
 import pytest
 
 from quranic_phonemizer.analysis.cells import (
+    CellRole,
     CellSide,
     CellStatus,
     CellValidationError,
@@ -94,8 +95,9 @@ def test_visual_insertions_do_not_invent_performance_insertions(hafs, pen):
 
 def test_the_ibdal_started_prosthetic_hamza_is_replaced(hafs, pen):
     """Started, the prosthetic hamza of ٱئْتُونِى sounds where the rasm writes a
-    silent connector, so its column is replaced with the performed hamza; the
-    lexical hamza the ibdal silences is dropped, keeping its source text."""
+    silent connector, so its column is replaced with the performed hamza. The
+    lexical hamza becomes the long-vowel carrier in place: a replacement with
+    source provenance, not a dropped cell beside an insertion."""
     view, source, _ = _build(hafs, pen, "46:4:18", {})
     columns = {c.source_unit_ids[0].value: c
                for c in _columns(view) if c.source_unit_ids}
@@ -105,8 +107,9 @@ def test_the_ibdal_started_prosthetic_hamza_is_replaced(hafs, pen):
     assert prosthetic.text != source.units[0].text
     assert prosthetic.source_unit_ids == (LetterUnitId(0),)
     lexical = columns[1]
-    assert lexical.status is CellStatus.DROPPED
-    assert lexical.text == source.units[1].text + source.units[2].text
+    assert lexical.status is CellStatus.REPLACED
+    assert lexical.role is CellRole.MADD
+    assert lexical.text == pen.performed_carrier(Quality.I)[1]
     assert lexical.source_unit_ids == (LetterUnitId(1), LetterUnitId(2))
     helping = next(c for c in _columns(view) if not c.source_character_ids)
     assert helping.text == pen.short_vowel(Quality.I)
