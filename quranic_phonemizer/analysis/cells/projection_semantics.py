@@ -3,7 +3,10 @@ from __future__ import annotations
 
 from dataclasses import replace
 
+from ...model.performance import Vowel
+from ..attributions import Recoloured
 from ..facts import AnalysisFacts
+from ..ids import OccurrenceId
 from .dtos import CellRole, CellStatus, CellTier, CellWord
 
 
@@ -49,4 +52,25 @@ def preserve_semantic_cells(
     return tuple(out)
 
 
-__all__ = ["preserve_semantic_cells"]
+def separate_tanween_vowel_colours(
+    words: tuple[CellWord, ...], facts: AnalysisFacts
+) -> tuple[CellWord, ...]:
+    """Keep vowel colouring on the sound, not the composite tanween glyph."""
+    vowel_colours = {
+        OccurrenceId(modifier.by)
+        for modifier in facts.modifiers
+        if isinstance(modifier, Recoloured)
+        and isinstance(facts.sounds[modifier.sound].value, Vowel)
+    }
+    if not vowel_colours:
+        return words
+    return tuple(replace(word, columns=tuple(
+        replace(column, rule_occurrence_ids=tuple(
+            occurrence for occurrence in column.rule_occurrence_ids
+            if occurrence not in vowel_colours
+        )) if column.role is CellRole.TANWEEN else column
+        for column in word.columns
+    )) for word in words)
+
+
+__all__ = ["preserve_semantic_cells", "separate_tanween_vowel_colours"]

@@ -378,6 +378,33 @@ def test_ishmam_keeps_the_fatha_visible_and_names_the_noon(hafs, pen):
     assert all("۫" not in c.text for c in word.columns)
 
 
+def test_tanween_keeps_vowel_colour_on_its_sound_not_its_glyph(hafs, pen):
+    _, bundle, view = _build(hafs, pen, "4:1")
+    word_id = next(word.id for word in bundle.words if word.ref == "4:1:16")
+    word = next(word for word in view.words if word.word_id == word_id)
+    tafkheem = next(
+        occurrence for occurrence in bundle.rule_occurrences
+        if occurrence.rule_id.value == "tafkheem"
+        and word_id in occurrence.word_ids
+        and len(occurrence.sound_ids) == 2
+    )
+    idgham = next(
+        occurrence for occurrence in bundle.rule_occurrences
+        if occurrence.rule_id.value == "idgham_bi_ghunnah"
+        and word_id in occurrence.word_ids
+    )
+    tanween = next(column for column in word.columns if column.role is CellRole.TANWEEN)
+    vowel = next(
+        sound
+        for sound in word.sounds
+        if tanween.id in sound.column_ids and sound.sound_id in tafkheem.sound_ids
+    )
+
+    assert tafkheem.id not in tanween.rule_occurrence_ids
+    assert tafkheem.id in vowel.rule_occurrence_ids
+    assert idgham.id in tanween.rule_occurrence_ids
+
+
 def test_iltiqa_sound_and_column_live_on_the_boundary(hafs, pen):
     _, bundle, view = _build(hafs, pen, "3:1-3:2")
     occurrence = next(o for o in bundle.rule_occurrences if o.rule_id.value == "iltiqa_haraka")
