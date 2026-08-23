@@ -31,6 +31,7 @@ from .projection_marks import (
     fold_pausal_sukun,
     transform_plain_madd,
 )
+from .projection_semantics import preserve_semantic_cells
 
 
 def _fold_sukun(word: CellWord) -> CellWord:
@@ -349,6 +350,16 @@ def _groups(word: CellWord, facts: AnalysisFacts) -> tuple[CellGroup, ...]:
         groups.append(CellGroup(
             carrier.id, CellGroupKind.VOWEL, ids, _group_sound_ids(word, set(ids))
         ))
+    for carrier in (
+        c for c in word.columns
+        if c.role is CellRole.MADD and c.id not in claimed
+    ):
+        ids = (*attached.get(carrier.id, ()), carrier.id)
+        claimed.update(ids)
+        groups.append(CellGroup(
+            carrier.id, CellGroupKind.VOWEL, ids,
+            _group_sound_ids(word, set(ids)),
+        ))
     for main in (c for c in word.columns if c.tier is CellTier.MAIN):
         if main.id in claimed:
             continue
@@ -388,6 +399,7 @@ def project_words(words: tuple[CellWord, ...], facts: AnalysisFacts,
     out = _place_rules(tuple(carried), facts, slot_of_unit)
     out = transform_plain_madd(out, facts)
     out = _visual_statuses(out, facts)
+    out = preserve_semantic_cells(out, facts)
     return tuple(replace(word, groups=_groups(word, facts)) for word in out)
 
 

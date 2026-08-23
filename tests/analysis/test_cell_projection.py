@@ -252,6 +252,41 @@ def test_a_stopped_glides_madd_rule_is_only_on_its_carrier(hafs, pen, ref):
     assert named[0].role is CellRole.MADD
 
 
+def test_stopped_silah_keeps_its_dropped_haraka_with_the_carrier(hafs, pen):
+    session = phonemize_request(
+        hafs, "11:64:1-11:64:3", stop_refs=["11:64:2"]
+    )
+    kw = dict(
+        ref="11:64:1-11:64:3", riwayah="hafs", script="uthmani", variant={}
+    )
+    bundle = build_bundle(session, **kw)
+    view = build_cell_view(session, spelling="transformed", pen=pen, **kw)
+    occurrence = next(
+        o for o in bundle.rule_occurrences
+        if o.rule_id.value == "waqf_silah_drop"
+    )
+    word_id = next(w.id for w in bundle.words if w.ref == "11:64:2")
+    word = next(w for w in view.words if w.word_id == word_id)
+    columns = {column.id: column for column in word.columns}
+    haraka = next(
+        column for column in word.columns
+        if occurrence.id in column.rule_occurrence_ids
+        and column.role is CellRole.HARAKA
+    )
+    carrier = next(
+        column for column in word.columns
+        if column.text == "ۦ"
+    )
+    group = next(g for g in word.groups if carrier.id in g.column_ids)
+
+    assert group.kind.value == "vowel"
+    assert group.column_ids == (haraka.id, carrier.id)
+    assert haraka.attached_to_column_id == carrier.id
+    assert columns[carrier.id].role is CellRole.MADD
+    assert all(columns[column].status is CellStatus.DROPPED
+               for column in group.column_ids)
+
+
 @pytest.mark.parametrize(("ref", "before", "after", "rule"), [
     ("3:74:3-3:74:4", "ن", "ي", "idgham_bi_ghunnah"),
     ("2:10:2-2:10:3", "م", "م", "idgham_shafawi"),
@@ -303,6 +338,7 @@ def test_lam_shamsiyyah_is_only_on_the_silent_lam(hafs, pen):
     assert len(named) == 1
     assert named[0].text.startswith("ل")
     assert not named[0].owned_sound_ids and named[0].presented_sound_ids
+    assert named[0].silence == occurrence.id
 
 
 def test_muqattaat_letters_remain_base_cells_with_folded_maddah(hafs, pen):
