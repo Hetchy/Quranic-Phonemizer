@@ -36,14 +36,14 @@ class LetterUnitKind(StrEnum):
 
 
 class LiteralSilence(StrEnum):
-    """The one silence no rule accounts for: a letter the script writes and the
-    reading never says."""
+    """A written letter left unsaid without a performance rule."""
 
     ORTHOGRAPHIC = "orthographic_silence"
+    VARIANT = "variant_silence"
 
 
 #: A unit is silent for a reason, and the reason is either the occurrence that
-#: silenced it or the literal orthographic; never both, never invented.
+#: silenced it or a literal source/variant reason; never both, never invented.
 Silence = OccurrenceId | LiteralSilence | None
 
 

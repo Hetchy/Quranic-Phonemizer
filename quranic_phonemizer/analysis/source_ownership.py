@@ -60,6 +60,17 @@ def _paired_owner(facts, tok, insc, slot: SlotId, base: int) -> int:
     return base if base_letter is _slot_letter(facts, slot) else marks[0]
 
 
+def _variant_pair_units(tok: Tokenization) -> frozenset[int]:
+    pairs: set[int] = set()
+    for index, unit in enumerate(tok.units):
+        if unit.written_on_anchor is None:
+            continue
+        base = tok.unit_of_anchor.get(unit.written_on_anchor)
+        if base is not None:
+            pairs.update((base, index))
+    return frozenset(pairs)
+
+
 def _unit_at(facts, tok, insc, slot: SlotId, aspect: Aspect, sound: int) -> int | None:
     if aspect is Aspect.VOWEL:
         return _vowel_unit(facts, tok, slot, sound)
@@ -130,6 +141,7 @@ def ownership(
     sounding = set(owner.values()) | {u for us in presenters.values() for u in us}
     silenced_by = _silenced_units(facts, tok)
     shortened = _shortened_units(facts, tok, insc)
+    variant_pairs = _variant_pair_units(tok)
     silence: dict[int, Silence] = {}
     for index, unit in enumerate(tok.units):
         if index in sounding:
@@ -137,7 +149,12 @@ def ownership(
         elif unit.kind is LetterUnitKind.LETTER:
             silence[index] = (
                 silenced_by[index] if index in silenced_by
-                else shortened.get(index, LiteralSilence.ORTHOGRAPHIC)
+                else shortened.get(
+                    index,
+                    LiteralSilence.VARIANT
+                    if index in variant_pairs
+                    else LiteralSilence.ORTHOGRAPHIC,
+                )
             )
         else:
             silence[index] = None

@@ -302,6 +302,7 @@ def test_the_seen_sad_pair_is_two_columns_carrying_the_variant_on_both(hafs):
         assert riding.attached_to_column_id == base.id
         dropped = next(c for c in pair if c.status is CellStatus.DROPPED)
         assert dropped_text in dropped.text
+        assert dropped.silence is LiteralSilence.VARIANT
         present = next(c for c in pair if c.status is CellStatus.PRESENT)
         assert present.silence is None
 
