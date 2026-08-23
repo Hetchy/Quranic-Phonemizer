@@ -3,7 +3,8 @@ from __future__ import annotations
 
 from dataclasses import asdict
 
-from quranic_phonemizer.phonemize import edges as ed
+from quranic_phonemizer.analysis.ids import CharacterId
+from quranic_phonemizer.analysis.source_dtos import LiteralSilence
 
 from .case import CaseRun, RuleExpectation, resolve
 from .reading import reading
@@ -47,39 +48,56 @@ def _expected_words(value, words: tuple[int, ...], alphabet):
     return tuple(parse_phonemes(word, alphabet) for word in value)
 
 
-def _rules_for_glyph(assembled, glyph: int) -> frozenset[int]:
-    units = {
-        edge.unit for edge in assembled.spellings
-        if getattr(edge, "glyph", None) == glyph and getattr(edge, "unit", None) is not None
-    }
-    reached = {
-        index for index, rule in enumerate(assembled.rules)
-        if rule.source in units or rule.host in units
-    }
-    reached.update(
-        rule for target, rule in assembled.orthographic_silence.items() if target == glyph
+RuleKey = tuple[str, int | str]
+
+
+def _columns(result):
+    columns = [column for word in result._cells.words for column in word.columns]
+    columns.extend(
+        column for boundary in result._cells.boundaries for column in boundary.columns
     )
-    return frozenset(reached)
+    return tuple(columns)
 
 
-def _rules_for_sound(assembled, sound: int) -> frozenset[int]:
-    reached = {
-        edge.by for edge in assembled.attributions
-        if isinstance(edge, (ed.Hosts, ed.MergedInto))
-        and edge.sound == sound and edge.by is not None
+def _rules_for_glyph(result, glyph: int) -> frozenset[RuleKey]:
+    character = CharacterId(glyph)
+    columns = tuple(
+        column for column in _columns(result)
+        if character in column.source_character_ids
+    )
+    if len(columns) != 1:
+        raise LookupError(
+            f"source character {glyph} reaches {len(columns)} transformed columns"
+        )
+    column = columns[0]
+    reached: set[RuleKey] = {
+        ("occurrence", occurrence.value)
+        for occurrence in column.rule_occurrence_ids
     }
-    reached.update(edge.by for edge in assembled.modifiers if edge.sound == sound)
+    if isinstance(column.silence, LiteralSilence):
+        reached.add(("literal", column.silence.value))
     return frozenset(reached)
 
 
-def _names(assembled, rules: frozenset[int]) -> frozenset[str]:
-    return frozenset(assembled.rules[index].rule.value for index in rules)
+def _rules_for_sound(result, sound: int) -> frozenset[RuleKey]:
+    return frozenset(
+        ("occurrence", occurrence.value)
+        for occurrence in result._bundle.sounds[sound].rule_occurrence_ids
+    )
+
+
+def _names(result, rules: frozenset[RuleKey]) -> frozenset[str]:
+    return frozenset(
+        value if kind == "literal"
+        else result._bundle.rule_occurrences[value].rule_id.value
+        for kind, value in rules
+    )
 
 
 def _assert_rule_map(actual, expected: dict[str, RuleExpectation], *, absent: bool):
     for selector, wanted in expected.items():
         indices = actual(selector)
-        names = _names(actual.assembled, indices)
+        names = _names(actual.result, indices)
         if absent:
             overlap = names & wanted.rules
             assert not overlap, f"{selector}: unexpectedly has {sorted(overlap)}"
@@ -93,20 +111,22 @@ def _assert_rule_map(actual, expected: dict[str, RuleExpectation], *, absent: bo
 class _Targets:
     def __init__(self, result, words: tuple[int, ...], *, sound: bool):
         self.result = result
-        self.assembled = result._assembled
         self.words = words
         self.sound = sound
         self.selected: dict[str, int] = {}
 
-    def __call__(self, selector: str) -> frozenset[int]:
+    def __call__(self, selector: str) -> frozenset[RuleKey]:
         if self.sound:
             target = resolve_sound(
-                self.assembled, self.result._sound_word, self.words, selector
+                self.result._assembled,
+                self.result._sound_word,
+                self.words,
+                selector,
             )
-            rules = _rules_for_sound(self.assembled, target)
+            rules = _rules_for_sound(self.result, target)
         else:
-            target = resolve_glyph(self.assembled, self.words, selector)
-            rules = _rules_for_glyph(self.assembled, target)
+            target = resolve_glyph(self.result._assembled, self.words, selector)
+            rules = _rules_for_glyph(self.result, target)
         self.selected[selector] = target
         return rules
 
@@ -136,14 +156,14 @@ def _assert_connected(char_targets: _Targets, sound_targets: _Targets, char_map,
         connected_pairs: set[tuple[str, str]] = set()
         for char_selector, sound_selector in pairs:
             char_rule_indices = _rules_for_glyph(
-                char_targets.assembled, char_targets.selected[char_selector]
+                char_targets.result, char_targets.selected[char_selector]
             )
             sound_rule_indices = _rules_for_sound(
-                sound_targets.assembled, sound_targets.selected[sound_selector]
+                sound_targets.result, sound_targets.selected[sound_selector]
             )
             connected = {
                 index for index in char_rule_indices & sound_rule_indices
-                if char_targets.assembled.rules[index].rule.value == name
+                if _names(char_targets.result, frozenset((index,))) == {name}
             }
             if connected:
                 connected_pairs.add((char_selector, sound_selector))
@@ -186,16 +206,9 @@ def assert_case(run: CaseRun) -> None:
     if all_rules is not None:
         focused = {word - 1 for word in words}
         actual = frozenset(
-            instance.rule.value
-            for instance in result._assembled.rules
-            if (
-                instance.source is not None
-                and result._assembled.units[instance.source].word in focused
-            )
-            or (
-                instance.host is not None
-                and result._assembled.units[instance.host].word in focused
-            )
+            occurrence.rule_id.value
+            for occurrence in result._bundle.rule_occurrences
+            if focused & {word.value for word in occurrence.word_ids}
         )
         assert actual == all_rules.rules
 

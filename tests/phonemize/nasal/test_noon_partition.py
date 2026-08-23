@@ -43,8 +43,7 @@ def test_tanwin_and_written_noon_use_the_same_classifier(packed, hafs):
     named = {
         slot
         for occurrence in performance.occurrences
-        for slot in (occurrence.parts.source, occurrence.parts.host)
-        if slot is not None
+        for slot in occurrence.subjects
     }
     assert Rule.IDGHAM_BILA_GHUNNAH in {
         occurrence.rule for occurrence in performance.occurrences
@@ -65,7 +64,7 @@ def test_no_noon_family_crosses_an_explicit_stop(packed, hafs):
         for slot in word.slots
     }
     for occurrence in performance.occurrences:
-        participants = (occurrence.parts.source, occurrence.parts.host)
+        participants = (*occurrence.subjects, *occurrence.context)
         words = {
             word_of[slot]
             for slot in participants

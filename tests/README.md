@@ -17,8 +17,8 @@ StateCase(
         "joined": Expect(
             read=through(),
             phonemes=("ʔ i ŋ", "t a ŋ sˤ u rˤ u:"),
-            char_rules={"ن[1]": R("ikhfaa_haqiqi")},
-            sound_rules={"ŋ[1]": R("ikhfaa_haqiqi")},
+            char_rules={"ن[1]": R("ikhfaa")},
+            sound_rules={"ŋ[1]": R("ikhfaa")},
         ),
         "stopped": Expect(
             read=explicit(ibtidaa=4, waqf=(4, 5)),
@@ -91,8 +91,8 @@ sequence-aware; it is not a global Unicode alias table.
 Use compact source and sound maps:
 
 ```python
-char_rules={"ن": R("ikhfaa_haqiqi")}
-sound_rules={"ŋ": R("ikhfaa_haqiqi", "tafkheem")}
+char_rules={"ن": R("ikhfaa")}
+sound_rules={"ŋ": R("ikhfaa", "tafkheem")}
 ```
 
 When the same rule is present in both maps, `assert_case()` requires one

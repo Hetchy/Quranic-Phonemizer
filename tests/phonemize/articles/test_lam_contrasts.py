@@ -20,8 +20,7 @@ CASES = (
         site=Site(hafs=("7:26", (10, 11))),
         read=through(),
         phonemes=("w a l i b a: s u", "tt a q Q w a:"),
-        char_rules={"ل[2]": R("lam_shamsiyyah"),
-                    "ت": R("lam_shamsiyyah")},
+        char_rules={"ل[2]": R("lam_shamsiyyah")},
         sound_rules={"tt": R("lam_shamsiyyah")},
     ),
     # ٱلَّيْلِ
@@ -39,8 +38,7 @@ CASES = (
         site=Site(hafs=("6:143", (10,))),
         read=isolated(),
         phonemes="ʔ a: ðð a k a rˤ aˤ j n",
-        char_rules={"ل": R("lam_shamsiyyah"),
-                    "ذ": R("lam_shamsiyyah")},
+        char_rules={"ل": R("lam_shamsiyyah")},
         sound_rules={"ðð": R("lam_shamsiyyah")},
     ),
 )

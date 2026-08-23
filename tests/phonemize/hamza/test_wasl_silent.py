@@ -13,8 +13,8 @@ def elision(
     indopak_alif: str,
 ) -> Case:
     source = pick(
-        hafs_uthmani={"ٱ": R("wasl_elision")},
-        hafs_indopak={indopak_alif: R("wasl_elision")},
+        hafs_uthmani={"ٱ": R("hamza_wasl_silent")},
+        hafs_indopak={indopak_alif: R("hamza_wasl_silent")},
     )
     silent = pick(
         hafs_uthmani=("ٱ",),
@@ -50,5 +50,5 @@ CASES = (
 
 
 @pytest.mark.parametrize("run", case_runs(CASES))
-def test_wasl_elision(run):
+def test_hamza_wasl_silent(run):
     assert_case(run)

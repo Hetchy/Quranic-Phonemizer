@@ -35,11 +35,9 @@ CASES = (
                 phonemes=("q u l u: b i h i m", "m a rˤ aˤ dˤ"),
                 char_rules={
                     "م[1]": R("izhar_shafawi"),
-                    "م[2]": R("fakk_idgham"),
                 },
                 sound_rules={
                     "m[1]": R("izhar_shafawi"),
-                    "m[2]": R("fakk_idgham"),
                 },
                 absent_char_rules={"م[1]": R("idgham_shafawi"),
                                    "م[2]": R("idgham_shafawi")},

@@ -120,7 +120,7 @@ _GLYPH_SELECTORS: dict[str, GlyphPredicate] = {
         a.glyphs[g].kind is not nd.GlyphKind.HARAKA
         and (_quality(a, g, Quality.I) or _length(a, g, Quality.I))
     ),
-    "@mini_meem": lambda a, g: a.glyphs[g].char == "ۢ",
+    "@mini_meem": lambda a, g: a.glyphs[g].char in {"ۢ", "ۭ"},
     "@round_zero": lambda a, g: a.glyphs[g].char == "۟",
     "@rectangular_zero": lambda a, g: a.glyphs[g].char == "۠",
     "@imala_mark": lambda a, g: a.glyphs[g].char in {"۪", "ٖ"},

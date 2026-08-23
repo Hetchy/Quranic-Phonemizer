@@ -17,10 +17,10 @@ from tests.support import (
 def _case(name: str, ref: str, word: int, joined: str, stopped: str, ending: str):
     return StateCase(id=name, site=Site(hafs=(ref, (word,))), states={
         "joined": Expect(read=joining(), phonemes=joined,
-                         absent_char_rules={"ة": R("taa_marbuta_pausal")}),
+                         absent_char_rules={"ة": R("waqf_taa_marbuta")}),
         "stopped": Expect(read=isolated(), phonemes=stopped,
-                          char_rules={"ة": R("taa_marbuta_pausal")},
-                          sound_rules={"h": R("taa_marbuta_pausal")},
+                          char_rules={"ة": R("waqf_taa_marbuta")},
+                          sound_rules={"h": R("waqf_taa_marbuta")},
                           silent=(ending,)),
     })
 

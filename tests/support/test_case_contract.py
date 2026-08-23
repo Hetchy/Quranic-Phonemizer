@@ -3,7 +3,7 @@ from __future__ import annotations
 import pytest
 
 from quranic_phonemizer.api import alphabet
-from quranic_phonemizer.model.address import Script, VariantSelection
+from quranic_phonemizer.model.address import Junction, Script, VariantSelection
 
 from tests.support import (
     Case,
@@ -19,6 +19,7 @@ from tests.support import (
     isolated,
     joining,
     parse_phonemes,
+    plan_for,
     pick,
     reading,
     registered_selectors,
@@ -73,6 +74,19 @@ def test_boundary_intents_use_the_focused_span():
         "ibtidaa": 7,
         "waqf": 8,
     }
+
+
+def test_authored_sakt_survives_continuation_but_not_an_explicit_stop():
+    assert plan_for(3, wasl=2, sakt_after=(2,)).junctions == (
+        Junction.JOIN,
+        Junction.SAKT,
+        Junction.EDGE,
+    )
+    assert plan_for(3, waqf=2, sakt_after=(2,)).junctions == (
+        Junction.JOIN,
+        Junction.STOP,
+        Junction.EDGE,
+    )
 
 
 def test_isolated_rejects_a_multiword_focus():
@@ -159,9 +173,9 @@ def test_one_case_asserts_phonemes_and_connected_rule_reach():
         site=Site(hafs=("3:163", (3,))),
         read=isolated(),
         phonemes="ʕ i ŋ d Q",
-        all_rules=R("ikhfaa_haqiqi", "qalqala_kubra", "pausal_sukun"),
-        char_rules={"ن": R("ikhfaa_haqiqi")},
-        sound_rules={"ŋ": R("ikhfaa_haqiqi")},
+        all_rules=R("ikhfaa", "qalqala_kubra", "waqf_diacritic_drop"),
+        char_rules={"ن": R("ikhfaa")},
+        sound_rules={"ŋ": R("ikhfaa")},
     )
     for param in case_runs((case,)):
         assert_case(param.values[0])

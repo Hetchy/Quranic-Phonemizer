@@ -23,7 +23,7 @@ CASES = (
         phonemes="ʔ a ñ a: s",
         char_rules={
             "ل": R("lam_shamsiyyah"),
-            "ن": R("ghunnah_mushaddadah", "lam_shamsiyyah"),
+            "ن": R("ghunnah_mushaddadah"),
         },
         sound_rules={"ñ": R("ghunnah_mushaddadah", "lam_shamsiyyah")},
     ),

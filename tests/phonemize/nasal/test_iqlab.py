@@ -14,6 +14,7 @@ from tests.support import (
     case_runs,
     explicit,
     isolated,
+    pick,
     through,
 )
 
@@ -63,7 +64,10 @@ CASES = (
         site=Site(hafs=("2:18", (1, 2))),
         read=through(),
         phonemes=("sˤ u m̃ u ŋ", "b u k m"),
-        char_rules={"@dammatan[1]": R("iqlab")},
+        char_rules=pick(
+            hafs_uthmani={"@dammatan[1]": R("iqlab")},
+            hafs_indopak={"@mini_meem": R("iqlab")},
+        ),
         sound_rules={"ŋ": R("iqlab")},
     ),
     # ذُرِّيَّةً بَعْضُهَا
@@ -72,7 +76,10 @@ CASES = (
         site=Site(hafs=("3:34", (1, 2))),
         read=through(),
         phonemes=("ð u rr i jj a t a ŋ", "b a ʕ dˤ u h a:"),
-        char_rules={"@fathatan": R("iqlab")},
+        char_rules=pick(
+            hafs_uthmani={"@fathatan": R("iqlab")},
+            hafs_indopak={"@mini_meem": R("iqlab")},
+        ),
         sound_rules={"ŋ": R("iqlab")},
     ),
     # كَافِرٍ بِهِۦ
@@ -81,7 +88,10 @@ CASES = (
         site=Site(hafs=("2:41", (10, 11))),
         read=through(),
         phonemes=("k a: f i r i ŋ", "b i h"),
-        char_rules={"@kasratan": R("iqlab")},
+        char_rules=pick(
+            hafs_uthmani={"@kasratan": R("iqlab")},
+            hafs_indopak={"@mini_meem": R("iqlab")},
+        ),
         sound_rules={"ŋ": R("iqlab")},
     ),
     # قُصُورًا بَلْ
@@ -90,7 +100,10 @@ CASES = (
         site=Site(hafs=("25:10", (17, 18))),
         read=explicit(ibtidaa=17, wasl=17, waqf=18),
         phonemes=("q u sˤ u: rˤ aˤ ŋ", "b a l"),
-        char_rules={"@fathatan": R("iqlab")},
+        char_rules=pick(
+            hafs_uthmani={"@fathatan": R("iqlab")},
+            hafs_indopak={"@fathatan": R("iqlab")},
+        ),
         sound_rules={"ŋ": R("iqlab")},
     ),
 )

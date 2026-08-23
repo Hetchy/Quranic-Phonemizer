@@ -25,7 +25,7 @@ CASES = (
                 read=joining(),
                 phonemes=pick(
                     hafs_uthmani="ʕ i w a ʒ a:",
-                    hafs_indopak="ʕ i w a ʒ a ŋ",
+                    hafs_indopak="ʕ i w a ʒ a n",
                 ),
             ),
             "stopped": Expect(

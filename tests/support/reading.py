@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import json
 from collections import defaultdict
-from functools import lru_cache
+from functools import cached_property, lru_cache
 from pathlib import Path
 
+from quranic_phonemizer.analysis.build import build_bundle
+from quranic_phonemizer.analysis.cells import build_cell_view
 from quranic_phonemizer.api import alphabet as load_alphabet
 from quranic_phonemizer.api import recitation
 from quranic_phonemizer.model.address import (
@@ -117,7 +119,8 @@ class Reading:
     """What one call produced, addressed by the word numbers of the verse."""
 
     def __init__(
-        self, riwayah, script, built, performance, words, assembled,
+        self, riwayah, script, built, performance, words, assembled, bundle,
+        cell_session, cell_metadata,
         *, uses_extra_phonemes: bool,
     ):
         self.riwayah = riwayah
@@ -131,6 +134,9 @@ class Reading:
             performance, built.score, _alphabet()
         )
         self._assembled = assembled
+        self._bundle = bundle
+        self._cell_session = cell_session
+        self._cell_metadata = cell_metadata
         self._uses_extra_phonemes = uses_extra_phonemes
         self._assembled_phonemes = (
             assembled_phonemes(assembled, by="word") if uses_extra_phonemes else None
@@ -139,6 +145,15 @@ class Reading:
 
     def _slots(self, word: int) -> frozenset:
         return frozenset(slot.id for slot in self.score.words[word - 1].slots)
+
+    @cached_property
+    def _cells(self):
+        return build_cell_view(
+            self._cell_session,
+            spelling="transformed",
+            pen=_pen(Riwayah(self.riwayah), self.script),
+            **self._cell_metadata,
+        )
 
     def text(self, word: int) -> str:
         return self._text[word]
@@ -258,15 +273,26 @@ class Reading:
         return per_riwayah[self.riwayah]
 
 
-def _assembled_for(name, script, built, plan, performance, words, extra):
+def _projections_for(
+    name, script, built, plan, performance, words, extra, *, ref, selection
+):
     session = PhonemizeSession(
         locations=tuple(location for location, _ in words),
         score=built.score, inscription=built.inscription,
         boundaries=plan, performance=performance,
     )
-    return assemble(
+    assembled = assemble(
         session, _pen(name, script), _alphabet(), extra_phonemes=extra
     )
+    metadata = dict(
+        ref=ref,
+        riwayah=name.value,
+        script=script.value,
+        variant={option.khilaf.value: option.name for option in selection.options},
+        extra_phonemes=extra,
+    )
+    bundle = build_bundle(session, **metadata)
+    return assembled, bundle, session, metadata
 
 
 def reading(
@@ -292,13 +318,28 @@ def reading(
     built = recitation_.build(
         recitation_.read(script, address.verse, words), selection=selection
     )
-    plan = plan_for(len(words), **boundary)
+    plan = plan_for(
+        len(words),
+        sakt_after=tuple(
+            index for index, word in enumerate(built.score.words, start=1)
+            if word.sakt_after
+        ),
+        **boundary,
+    )
     performance = recitation_.perform(built.score, plan, selection=selection)
-    assembled = _assembled_for(
+    extra = (
+        frozenset({"emphatic_fatha"})
+        if extra_phonemes is None
+        else frozenset(extra_phonemes)
+    )
+    assembled, bundle, cell_session, cell_metadata = _projections_for(
         name, script, built, plan, performance, words,
-        frozenset() if extra_phonemes is None else frozenset(extra_phonemes),
+        extra,
+        ref=f"{address.verse.surah}:{address.verse.ayah}",
+        selection=selection,
     )
     return Reading(
-        riwayah, script, built, performance, words, assembled,
+        riwayah, script, built, performance, words, assembled, bundle,
+        cell_session, cell_metadata,
         uses_extra_phonemes=extra_phonemes is not None,
     )

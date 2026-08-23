@@ -8,17 +8,33 @@ from tests.support import Case, R, Site, assert_case, case_runs, isolated, pick,
 REPLACEMENT_RULES = R("ibdal_hamza", "madd_badal", "madd_tabii")
 
 
-def _started(case_id: str, ref: str, word: int, phonemes: str, root: str) -> Case:
+def _started(
+    case_id: str,
+    ref: str,
+    word: int,
+    phonemes: str,
+    root: str,
+    indopak_carrier: str,
+    replacement_sound: str,
+) -> Case:
+    wasl_rule = {
+        "i:": "hamza_wasl_kasra",
+        "u:": "hamza_wasl_damma",
+    }[phonemes.split()[1]]
     return Case(
         id=case_id,
         site=Site(hafs=(ref, (word,))),
         read=isolated(),
         phonemes=phonemes,
         char_rules=pick(
-            hafs_uthmani={"ٱ": R("wasl_start"), root: REPLACEMENT_RULES},
-            hafs_indopak={"ا": R("wasl_start"), "@hamza_mark": REPLACEMENT_RULES},
+            hafs_uthmani={"ٱ": R(wasl_rule), root: REPLACEMENT_RULES},
+            hafs_indopak={
+                "ا": R(wasl_rule),
+                "@hamza_mark": R("ibdal_hamza"),
+                indopak_carrier: REPLACEMENT_RULES,
+            },
         ),
-        sound_rules={"ʔ": R("wasl_start"), phonemes.split()[1]: REPLACEMENT_RULES},
+        sound_rules={"ʔ": R(wasl_rule), replacement_sound: REPLACEMENT_RULES},
     )
 
 
@@ -36,8 +52,8 @@ def _joined(
         read=through(),
         phonemes=phonemes,
         char_rules=pick(
-            hafs_uthmani={f"ٱ{wasl}": R("wasl_elision")},
-            hafs_indopak={f"ا{wasl}": R("wasl_elision")},
+            hafs_uthmani={f"ٱ{wasl}": R("hamza_wasl_silent")},
+            hafs_indopak={f"ا{wasl}": R("hamza_wasl_silent")},
         ),
         absent_char_rules=pick(
             hafs_uthmani={root: R("ibdal_hamza")},
@@ -48,21 +64,23 @@ def _joined(
 
 CASES = (
     # ٱئْتُونِى
-    _started("iti-start", "46:4", 18, "ʔ i: t u: n i:", "ئ"),
+    _started(
+        "iti-start", "46:4", 18, "ʔ i: t u: n i:", "ئ", "ي[1]", "i:[1]"
+    ),
     # ٱلْمَلِكُ ٱئْتُونِى
     _joined(
         "iti-joined", "12:50", (2, 3),
         ("ʔ a l m a l i k u", "ʔ t u: n i:"), "ئ",
     ),
     # ٱئْذَن
-    _started("ithan-start", "9:49", 4, "ʔ i: ð a n", "ئ"),
+    _started("ithan-start", "9:49", 4, "ʔ i: ð a n", "ئ", "ي", "i:"),
     # يَقُولُ ٱئْذَن
     _joined(
         "ithan-joined", "9:49", (3, 4),
         ("j a q u: l u", "ʔ ð a n"), "ئ", wasl="",
     ),
     # ٱؤْتُمِنَ
-    _started("utumin-start", "2:283", 16, "ʔ u: t u m i n", "ؤ"),
+    _started("utumin-start", "2:283", 16, "ʔ u: t u m i n", "ؤ", "و", "u:"),
     # ٱلَّذِى ٱؤْتُمِنَ
     _joined(
         "utumin-joined", "2:283", (15, 16),

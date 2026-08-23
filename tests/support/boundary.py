@@ -25,10 +25,14 @@ def plan_for(
     waqf=None,
     ibtidaa=None,
     isolated=None,
+    sakt_after=(),
 ) -> BoundaryPlan:
-    """Every word joined, then a stop wherever an argument asks for one."""
+    """Join by default, preserve authored sakt, then apply requested stops."""
     junctions = [Junction.JOIN] * words
     junctions[-1] = Junction.EDGE
+    for word in _requested(sakt_after):
+        if word < words:
+            junctions[word - 1] = Junction.SAKT
 
     def stop_after(word: int) -> None:
         if word < words:
@@ -44,7 +48,7 @@ def plan_for(
             raise UnreachableWasl(
                 f"word {word} has nothing after it to join into"
             )
-        if junctions[word - 1] is not Junction.JOIN:
+        if junctions[word - 1] not in (Junction.JOIN, Junction.SAKT):
             raise UnreachableWasl(
                 f"word {word} is asked to join forward and to stop"
             )

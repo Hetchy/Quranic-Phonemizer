@@ -11,23 +11,53 @@ from tests.support import (
     case_runs,
     isolated,
     joining,
+    pick,
 )
 
 
-def _case(name: str, ref: str, word: int, joined: str, stopped: str, ending: str | None,
-          base: str):
+def _case(
+    name: str,
+    ref: str,
+    word: int,
+    joined: str,
+    stopped: str,
+    ending: str,
+    base: str,
+    *,
+    indopak_ending: str | None = None,
+):
+    del base
+    endings = (
+        {ending: R("waqf_diacritic_drop")}
+        if indopak_ending is None
+        else pick(
+            hafs_uthmani={ending: R("waqf_diacritic_drop")},
+            hafs_indopak={indopak_ending: R("waqf_diacritic_drop")},
+        )
+    )
+    silent = (
+        (ending,)
+        if indopak_ending is None
+        else pick(
+            hafs_uthmani=(ending,),
+            hafs_indopak=(indopak_ending,),
+        )
+    )
     return StateCase(id=name, site=Site(hafs=(ref, (word,))), states={
         "joined": Expect(read=joining(), phonemes=joined,
-                         absent_char_rules={base: R("pausal_sukun")}),
+                         absent_char_rules=endings),
         "stopped": Expect(read=isolated(), phonemes=stopped,
-                          char_rules={base: R("pausal_sukun")},
-                          silent=(ending,) if ending else ()),
+                          char_rules=endings,
+                          silent=silent),
     })
 
 
 CASES = (
     # ذَٰلِكَ
-    _case("fatha", "2:2", 1, "ð a: l i k a", "ð a: l i k", None, "ك"),
+    _case(
+        "fatha", "2:2", 1, "ð a: l i k a", "ð a: l i k", "@fatha[2]", "ك",
+        indopak_ending="@fatha",
+    ),
     # ٱلْكِتَابُ
     _case("damma", "2:2", 2, "ʔ a l k i t a: b u", "ʔ a l k i t a: b Q",
           "@damma", "ب"),

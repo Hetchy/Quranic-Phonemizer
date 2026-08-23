@@ -24,8 +24,8 @@ CASES = (
         site=Site(hafs=("61:10", (7, 8))),
         read=through(),
         phonemes=("t i ʒ a: rˤ aˤ t i ŋ", "t u ŋ ʒ i: k u m"),
-        char_rules={"@kasratan": R("ikhfaa_haqiqi"), "ن": R("ikhfaa_haqiqi")},
-        sound_rules={"ŋ[1]": R("ikhfaa_haqiqi"), "ŋ[2]": R("ikhfaa_haqiqi")},
+        char_rules={"@kasratan": R("ikhfaa"), "ن": R("ikhfaa")},
+        sound_rules={"ŋ[1]": R("ikhfaa"), "ŋ[2]": R("ikhfaa")},
     ),
     # إِنسٌ قَبْلَهُم
     Case(
@@ -33,10 +33,10 @@ CASES = (
         site=Site(hafs=("55:74", (3, 4))),
         read=through(),
         phonemes=("ʔ i ŋ s u ŋ", "q aˤ b Q l a h u m"),
-        char_rules={"ن": R("ikhfaa_haqiqi"), "@dammatan": R("ikhfaa_haqiqi")},
+        char_rules={"ن": R("ikhfaa"), "@dammatan": R("ikhfaa")},
         sound_rules={
-            "ŋ[1]": R("ikhfaa_haqiqi"),
-            "ŋ[2]": R("ikhfaa_haqiqi", "tafkheem"),
+            "ŋ[1]": R("ikhfaa"),
+            "ŋ[2]": R("ikhfaa", "tafkheem"),
         },
     ),
     # بِقَدَرٍ فَأَنشَرْنَا
@@ -45,8 +45,8 @@ CASES = (
         site=Site(hafs=("43:11", (6, 7))),
         read=through(),
         phonemes=("b i q aˤ d a r i ŋ", "f a ʔ a ŋ ʃ a rˤ n a:"),
-        char_rules={"@kasratan": R("ikhfaa_haqiqi"), "ن[1]": R("ikhfaa_haqiqi")},
-        sound_rules={"ŋ[1]": R("ikhfaa_haqiqi"), "ŋ[2]": R("ikhfaa_haqiqi")},
+        char_rules={"@kasratan": R("ikhfaa"), "ن[1]": R("ikhfaa")},
+        sound_rules={"ŋ[1]": R("ikhfaa"), "ŋ[2]": R("ikhfaa")},
     ),
     # أَندَادًا ذَلِكَ
     Case(
@@ -54,8 +54,8 @@ CASES = (
         site=Site(hafs=("41:9", (11, 12))),
         read=through(),
         phonemes=("ʔ a ŋ d a: d a ŋ", "ð a: l i k"),
-        char_rules={"ن": R("ikhfaa_haqiqi"), "@fathatan": R("ikhfaa_haqiqi")},
-        sound_rules={"ŋ[1]": R("ikhfaa_haqiqi"), "ŋ[2]": R("ikhfaa_haqiqi")},
+        char_rules={"ن": R("ikhfaa"), "@fathatan": R("ikhfaa")},
+        sound_rules={"ŋ[1]": R("ikhfaa"), "ŋ[2]": R("ikhfaa")},
     ),
     # مَعِيشَةً ضَنكًا
     Case(
@@ -63,10 +63,10 @@ CASES = (
         site=Site(hafs=("20:124", (7, 8))),
         read=through(),
         phonemes=("m a ʕ i: ʃ a t a ŋ", "dˤ aˤ ŋ k a:"),
-        char_rules={"@fathatan[1]": R("ikhfaa_haqiqi"), "ن": R("ikhfaa_haqiqi")},
+        char_rules={"@fathatan[1]": R("ikhfaa"), "ن": R("ikhfaa")},
         sound_rules={
-            "ŋ[1]": R("ikhfaa_haqiqi", "tafkheem"),
-            "ŋ[2]": R("ikhfaa_haqiqi"),
+            "ŋ[1]": R("ikhfaa", "tafkheem"),
+            "ŋ[2]": R("ikhfaa"),
         },
     ),
     # حِينَئِذٍ تَنظُرُونَ
@@ -75,10 +75,10 @@ CASES = (
         site=Site(hafs=("56:84", (2, 3))),
         read=through(),
         phonemes=("ħ i: n a ʔ i ð i ŋ", "t a ŋ ðˤ u rˤ u: n"),
-        char_rules={"@kasratan": R("ikhfaa_haqiqi"), "ن[2]": R("ikhfaa_haqiqi")},
+        char_rules={"@kasratan": R("ikhfaa"), "ن[2]": R("ikhfaa")},
         sound_rules={
-            "ŋ[1]": R("ikhfaa_haqiqi"),
-            "ŋ[2]": R("ikhfaa_haqiqi", "tafkheem"),
+            "ŋ[1]": R("ikhfaa"),
+            "ŋ[2]": R("ikhfaa", "tafkheem"),
         },
     ),
     # مَيِّتٍ فَأَنزَلْنَا
@@ -87,8 +87,8 @@ CASES = (
         site=Site(hafs=("7:57", (16, 17))),
         read=through(),
         phonemes=("m a jj i t i ŋ", "f a ʔ a ŋ z a l n a:"),
-        char_rules={"@kasratan": R("ikhfaa_haqiqi"), "ن[1]": R("ikhfaa_haqiqi")},
-        sound_rules={"ŋ[1]": R("ikhfaa_haqiqi"), "ŋ[2]": R("ikhfaa_haqiqi")},
+        char_rules={"@kasratan": R("ikhfaa"), "ن[1]": R("ikhfaa")},
+        sound_rules={"ŋ[1]": R("ikhfaa"), "ŋ[2]": R("ikhfaa")},
     ),
     # قِنطَارًا فَلَا
     Case(
@@ -96,10 +96,10 @@ CASES = (
         site=Site(hafs=("4:20", (9, 10))),
         read=through(),
         phonemes=("q i ŋ tˤ aˤ: rˤ aˤ ŋ", "f a l a:"),
-        char_rules={"ن": R("ikhfaa_haqiqi"), "@fathatan": R("ikhfaa_haqiqi")},
+        char_rules={"ن": R("ikhfaa"), "@fathatan": R("ikhfaa")},
         sound_rules={
-            "ŋ[1]": R("ikhfaa_haqiqi", "tafkheem"),
-            "ŋ[2]": R("ikhfaa_haqiqi"),
+            "ŋ[1]": R("ikhfaa", "tafkheem"),
+            "ŋ[2]": R("ikhfaa"),
         },
     ),
     # إِن تَنصُرُوا
@@ -110,18 +110,18 @@ CASES = (
             "joined": Expect(
                 read=through(),
                 phonemes=("ʔ i ŋ", "t a ŋ sˤ u rˤ u:"),
-                char_rules={"ن[1]": R("ikhfaa_haqiqi"), "ن[2]": R("ikhfaa_haqiqi")},
+                char_rules={"ن[1]": R("ikhfaa"), "ن[2]": R("ikhfaa")},
                 sound_rules={
-                    "ŋ[1]": R("ikhfaa_haqiqi"),
-                    "ŋ[2]": R("ikhfaa_haqiqi", "tafkheem"),
+                    "ŋ[1]": R("ikhfaa"),
+                    "ŋ[2]": R("ikhfaa", "tafkheem"),
                 },
             ),
             "stopped": Expect(
                 read=explicit(ibtidaa=4, waqf=(4, 5)),
                 phonemes=("ʔ i n", "t a ŋ sˤ u rˤ u:"),
-                char_rules={"ن[1]": R("izhar"), "ن[2]": R("ikhfaa_haqiqi")},
-                sound_rules={"n": R("izhar"), "ŋ": R("ikhfaa_haqiqi", "tafkheem")},
-                absent_char_rules={"ن[1]": R("ikhfaa_haqiqi")},
+                char_rules={"ن[1]": R("izhar"), "ن[2]": R("ikhfaa")},
+                sound_rules={"n": R("izhar"), "ŋ": R("ikhfaa", "tafkheem")},
+                absent_char_rules={"ن[1]": R("ikhfaa")},
             ),
         },
     ),
@@ -131,8 +131,8 @@ CASES = (
         site=Site(hafs=("2:178", (13,))),
         read=isolated(),
         phonemes="w a l ʔ u ŋ θ a:",
-        char_rules={"ن": R("ikhfaa_haqiqi")},
-        sound_rules={"ŋ": R("ikhfaa_haqiqi")},
+        char_rules={"ن": R("ikhfaa")},
+        sound_rules={"ŋ": R("ikhfaa")},
     ),
     # نُـۨجِى
     Case(
@@ -140,8 +140,8 @@ CASES = (
         site=Site(hafs=("21:88", (7,))),
         read=isolated(),
         phonemes="n u ŋ ʒ i:",
-        char_rules={"@small_noon": R("ikhfaa_haqiqi")},
-        sound_rules={"ŋ": R("ikhfaa_haqiqi")},
+        char_rules={"@small_noon": R("ikhfaa")},
+        sound_rules={"ŋ": R("ikhfaa")},
     ),
     # حِينٍ فَتَلَقَّىٰ
     Case(
@@ -149,8 +149,8 @@ CASES = (
         site=Site(hafs=("2:36", (19,))),
         read=joining(),
         phonemes="ħ i: n i ŋ",
-        char_rules={"@kasratan": R("ikhfaa_haqiqi")},
-        sound_rules={"ŋ": R("ikhfaa_haqiqi")},
+        char_rules={"@kasratan": R("ikhfaa")},
+        sound_rules={"ŋ": R("ikhfaa")},
     ),
     # مَنضُودٍ
     StateCase(
@@ -160,15 +160,15 @@ CASES = (
             "plain-render": Expect(
                 read=isolated(),
                 phonemes="m a ŋ dˤ u: d Q",
-                char_rules={"ن": R("ikhfaa_haqiqi")},
-                sound_rules={"ŋ": R("ikhfaa_haqiqi", "tafkheem")},
+                char_rules={"ن": R("ikhfaa")},
+                sound_rules={"ŋ": R("ikhfaa", "tafkheem")},
                 extra_phonemes=(),
             ),
             "emphatic-render": Expect(
                 read=isolated(),
                 phonemes="m a ŋˤ dˤ u: d Q",
-                char_rules={"ن": R("ikhfaa_haqiqi")},
-                sound_rules={"ŋˤ": R("ikhfaa_haqiqi", "tafkheem")},
+                char_rules={"ن": R("ikhfaa")},
+                sound_rules={"ŋˤ": R("ikhfaa", "tafkheem")},
                 extra_phonemes=("emphatic_ikhfaa",),
             ),
         },
@@ -177,5 +177,5 @@ CASES = (
 
 
 @pytest.mark.parametrize("run", case_runs(CASES))
-def test_ikhfaa_haqiqi(run):
+def test_ikhfaa(run):
     assert_case(run)

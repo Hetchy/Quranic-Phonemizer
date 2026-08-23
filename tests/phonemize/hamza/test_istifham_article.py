@@ -12,6 +12,7 @@ from tests.support import (
     assert_case,
     case_runs,
     isolated,
+    pick,
     selected,
 )
 
@@ -42,6 +43,8 @@ def _case(
     ibdal: str,
     tashil: str,
     madd_sound: str,
+    indopak_ibdal_source: str,
+    indopak_tashil_source: str,
 ) -> VariantCase:
     site, _ = target
     return VariantCase(
@@ -52,13 +55,22 @@ def _case(
             "madd_lazim": Expect(
                 read=isolated(),
                 phonemes=ibdal,
-                char_rules={"ا": R("ibdal_hamza", "madd_lazim")},
-                sound_rules={madd_sound: R("ibdal_hamza", "madd_lazim")},
+                char_rules=pick(
+                    hafs_uthmani={"ا": R(
+                        "ibdal_hamza", "madd_badal", "madd_lazim")},
+                    hafs_indopak={indopak_ibdal_source: R(
+                        "ibdal_hamza", "madd_badal", "madd_lazim")},
+                ),
+                sound_rules={madd_sound: R(
+                    "ibdal_hamza", "madd_badal", "madd_lazim")},
             ),
             "tasheel": Expect(
                 read=isolated(),
                 phonemes=tashil,
-                char_rules={"ا": R("tashil")},
+                char_rules=pick(
+                    hafs_uthmani={"ا": R("tashil")},
+                    hafs_indopak={indopak_tashil_source: R("tashil")},
+                ),
                 sound_rules={"ʔ̞": R("tashil")},
                 extra_phonemes=("tashil", "emphatic_fatha"),
             ),
@@ -70,13 +82,16 @@ def _case(
 CASES = (
     # ءَآلذَّكَرَيْنِ
     _case("dhakarayn", DHAKARAYN,
-          "ʔ a: ðð a k a rˤ aˤ j n", "ʔ a ʔ̞ a ðð a k a rˤ aˤ j n", "a:"),
+          "ʔ a: ðð a k a rˤ aˤ j n", "ʔ a ʔ̞ a ðð a k a rˤ aˤ j n",
+          "a:", "@dagger_alif", "ا"),
     # ءَآلْـَٰٔنَ
     _case("alan", ALAN,
-          "ʔ a: l ʔ a: n", "ʔ a ʔ̞ a l ʔ a: n", "a:[1]"),
+          "ʔ a: l ʔ a: n", "ʔ a ʔ̞ a l ʔ a: n",
+          "a:[1]", "@dagger_alif[1]", "@hamza_mark"),
     # ءَآللَّهُ
     _case("allah", ALLAH,
-          "ʔ a: lˤlˤ aˤ: h", "ʔ a ʔ̞ a lˤlˤ aˤ: h", "a:"),
+          "ʔ a: lˤlˤ aˤ: h", "ʔ a ʔ̞ a lˤlˤ aˤ: h",
+          "a:", "@dagger_alif[1]", "@dagger_alif[1]"),
 )
 
 REGISTER_CASES = tuple(
