@@ -405,7 +405,10 @@ def test_all_six_madd_lazim_sites_take_either_canonical_structure(
     eased = eased_reading.score.words[word - 1].slots
     assert eased[0].nucleus.is_short and eased[1].onset is Onset.TASHIL
     assert Rule.MADD_LAZIM in _rules(long_reading)
+    assert "ibdal_hamza" in long_reading.rules_on_char(word, "ا")
+    assert "ibdal_hamza" in long_reading.rules_on_sound(word, "a:")
     assert Rule.TASHIL in _rules(eased_reading)
+    assert Rule.IBDAL_HAMZA not in _rules(eased_reading)
     assert Rule.MADD_LAZIM not in _rules(eased_reading)
 
 

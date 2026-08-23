@@ -25,6 +25,7 @@ from ...rules.madd import (
     IltiqaShortening,
     MaddBadal,
     MaddClass,
+    MaddLazimIbdal,
     MaddLeen,
     MaddSilah,
     PausalGlide,
@@ -45,6 +46,7 @@ from .resources import khilaf, lexicon, rule_tables
 def _build() -> RuleSet:
     tables = rule_tables()
     choices = khilaf()
+    madd_tasheel = choices.definition(KhilafId.MADD_LAZIM_TASHEEL)
     weight = Weight(always_heavy=tables.always_heavy, raa=choices.raa)
     article = ArticleShape(
         prefixes=tables.proclitics,
@@ -74,7 +76,9 @@ def _build() -> RuleSet:
                        article=article),
             ),
             Phase.LENGTH: (
-                PausalGlide(), IltiqaShortening(), MaddClass(), MaddLeen(),
+                PausalGlide(), IltiqaShortening(),
+                MaddLazimIbdal(madd_tasheel.locations, madd_tasheel.default),
+                MaddClass(), MaddLeen(),
                 MaddBadal(), MaddSilah(), IwadLength(),
             ),
             Phase.COLOUR: (

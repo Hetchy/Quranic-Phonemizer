@@ -367,6 +367,7 @@ CLASSIFICATION_ONLY: frozenset[Rule] = frozenset(
         Rule.MADD_LAZIM,
         Rule.MADD_ARID_LISSUKUN,
         Rule.MADD_LEEN,
+        Rule.IBDAL_HAMZA,
         Rule.IMALA,
         Rule.TASHIL,
         Rule.ISHMAM,

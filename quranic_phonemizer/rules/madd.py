@@ -18,7 +18,7 @@ from ..engine.plan import (
     Verdict,
     mint,
 )
-from ..model.address import BoundaryPlan, Junction, SlotId
+from ..model.address import BoundaryPlan, Junction, KhilafId, Location, SlotId
 from ..model.canon import Annotation
 from ..model.canon import CanonLetter as L
 from ..model.canon import Onset, Quality, Rule, SlotOrigin, VowelForm
@@ -26,6 +26,33 @@ from ..model.performance import Aspect, Occurrence, Vowel
 
 #: Which glide lengthens which vowel.
 GLIDE_OF = {Quality.U: L.WAW, Quality.I: L.YA}
+
+
+@dataclass(frozen=True, slots=True)
+class MaddLazimIbdal:
+    """Name the hamza replaced by the long alif at madd-tasheel sites."""
+
+    locations: frozenset[Location]
+    default: str
+    khilaf: KhilafId = KhilafId.MADD_LAZIM_TASHEEL
+    rule: Rule = Rule.IBDAL_HAMZA
+    phase: Phase = Phase.LENGTH
+    triggers: frozenset = frozenset({VowelForm.LONG})
+
+    def look(
+        self, near: Neighbourhood, plan: Plan, at: SlotId,
+        boundaries: BoundaryPlan,
+    ) -> Verdict | None:
+        del plan, boundaries
+        word = near.word_of(at)
+        if word is None or not near.first_of_word(at):
+            return None
+        if near.score.words[word].location not in self.locations:
+            return None
+        chosen = near.score.selection.chosen(self.khilaf) or self.default
+        if chosen != "madd_lazim":
+            return None
+        return _classify(Rule.IBDAL_HAMZA, at, None)
 
 
 @dataclass(frozen=True, slots=True)
