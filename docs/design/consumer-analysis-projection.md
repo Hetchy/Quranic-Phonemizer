@@ -674,6 +674,9 @@ CellBoundary orders every boundary-owned column at that exact boundary.
 - Source spelling retains a sukun unit. Transformed spelling composes its text
   and provenance into the host main column, so a renderer never hides or
   relocates a sukun satellite.
+- When waqf cancels a cross-word noon/meem rule, the recovered izhar or
+  izhar_shafawi sukun is composed into that consonant's main column with
+  status=replaced. A renderer does not synthesize the pausal mark.
 - A unit that pairs with the base letter it rides for the same sound takes a
   smaller column with that tier and attached_to_column_id rather than a main
   one. The mini seen of a seen/saad khilaf is the only Hafs case. Where the
@@ -688,6 +691,12 @@ CellBoundary orders every boundary-owned column at that exact boundary.
   and a tatweel seat are composed directly into their main column text. They
   never open their own columns, and the rules placed on them underline the
   main column by law 23a.
+- A maqsura followed by its dagger and optional maddah is one main carrier
+  column with their combined text and provenance. If a stopped reading revives
+  a bare maqsura whose length had yielded to a following wasl, transformed
+  spelling adds the dagger and uses status=replaced.
+- A munfasil that waqf reclassifies as madd_tabii removes its source maddah in
+  transformed spelling and uses status=replaced.
 - Long-vowel quality and carrier occupy separate columns, and one CellSound
   spans both: the carrier column owns the sound, the haraka column presents
   it. This is the corpus's commonest shape by a wide margin.
@@ -719,6 +728,9 @@ CellBoundary orders every boundary-owned column at that exact boundary.
   out of the word box it is written inside.
 - Iltiqa insertion is an ordered boundary-owned column between two CellWords.
 - A genuine idgham or other merger uses CellBridge with the shared CellSound.
+- Every idgham merger occurrence is placed on both endpoint columns. Its
+  contributor stays active as the bridge sound's presenter rather than being
+  emitted as a dropped/silent letter.
 - CellBridge uses plural column endpoints because one merger can span the
   contributor's and the host's columns on each side.
 - A merger's one CellSound lives inside its boundary's CellBridge, not

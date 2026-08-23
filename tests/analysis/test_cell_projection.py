@@ -151,8 +151,91 @@ def test_imala_uses_its_written_ya_carrier(hafs, pen):
     columns = {c.id: c for c in view.words[0].columns}
     carrier = next(columns[c] for c in group.column_ids if columns[c].role is CellRole.MADD)
     assert group.kind.value == "vowel"
-    assert carrier.text == pen.performed_carrier(Quality.E)[1]
+    assert carrier.text == pen.performed_carrier(Quality.E)[1] + "ٰ"
     assert carrier.source_character_ids
+
+
+@pytest.mark.parametrize("ref", ["2:5:2", "11:41:6"])
+def test_a_maqsura_and_its_dagger_are_one_native_carrier_cell(hafs, pen, ref):
+    _, _, view = _build(hafs, pen, ref)
+    word = view.words[0]
+    carriers = [c for c in word.columns if "ىٰ" in c.text]
+    assert len(carriers) == 1
+    assert carriers[0].role is CellRole.MADD
+    assert all(c.text != "ٰ" for c in word.columns)
+
+
+def test_a_bare_maqsura_revived_at_a_stop_gains_a_transformed_dagger(hafs, pen):
+    session = phonemize_request(hafs, "2:11:6-2:11:7", stop_refs=["2:11:6"])
+    kw = dict(ref="2:11:6-2:11:7", riwayah="hafs", script="uthmani", variant={})
+    view = build_cell_view(session, spelling="transformed", pen=pen, **kw)
+    carrier = next(c for c in view.words[0].columns if c.role is CellRole.MADD)
+    assert carrier.text == "ىٰ"
+    assert carrier.status is CellStatus.REPLACED
+
+
+def test_stopping_a_munfasil_removes_its_maddah_as_a_transformation(hafs, pen):
+    session = phonemize_request(hafs, "2:4:3-2:4:4", stop_refs=["2:4:3"])
+    kw = dict(ref="2:4:3-2:4:4", riwayah="hafs", script="uthmani", variant={})
+    view = build_cell_view(session, spelling="transformed", pen=pen, **kw)
+    carrier = next(c for c in view.words[0].columns if c.role is CellRole.MADD)
+    assert carrier.text == "ا"
+    assert carrier.status is CellStatus.REPLACED
+
+
+@pytest.mark.parametrize(("ref", "carrier_text"), [
+    ("2:29:1", "و"),
+    ("2:70:8", "ى"),
+])
+def test_a_stopped_glide_reuses_its_written_carrier(hafs, pen, ref, carrier_text):
+    _, _, view = _build(hafs, pen, ref)
+    carriers = [c for c in view.words[0].columns if c.role is CellRole.MADD]
+    assert [(c.text, c.status) for c in carriers] == [
+        (carrier_text, CellStatus.PRESENT)
+    ]
+    assert carriers[0].source_character_ids
+
+
+@pytest.mark.parametrize(("ref", "before", "after", "rule"), [
+    ("3:74:3-3:74:4", "ن", "ي", "idgham_bi_ghunnah"),
+    ("2:10:2-2:10:3", "م", "م", "idgham_shafawi"),
+    ("2:16:7-2:16:8", "ت", "ت", "idgham_mutamathilayn"),
+    ("23:118:1-23:118:2", "ل", "ر", "idgham_mutaqaribayn"),
+    ("2:256:5-2:256:6", "د", "ت", "idgham_mutajanisayn_kamil"),
+])
+def test_a_cross_word_merger_marks_both_active_letters(
+    hafs, pen, ref, before, after, rule
+):
+    session = phonemize_request(hafs, ref, stop_refs=[])
+    kw = dict(ref=ref, riwayah="hafs", script="uthmani", variant={})
+    bundle = build_bundle(session, **kw)
+    view = build_cell_view(session, spelling="transformed", pen=pen, **kw)
+    occurrence = next(o for o in bundle.rule_occurrences if o.rule_id.value == rule)
+    first = next(c for c in view.words[0].columns if before in c.text)
+    second = next(c for c in view.words[1].columns if after in c.text)
+    assert first.status is CellStatus.PRESENT and first.silence is None
+    assert occurrence.id in first.rule_occurrence_ids
+    assert occurrence.id in second.rule_occurrence_ids
+
+
+@pytest.mark.parametrize(("ref", "stop", "letter", "rule"), [
+    ("3:74:3-3:74:4", "3:74:3", "ن", "izhar"),
+    ("2:56:3-2:56:4", "2:56:3", "ن", "izhar"),
+    ("2:10:2-2:10:3", "2:10:2", "م", "izhar_shafawi"),
+    ("2:8:10-2:8:11", "2:8:10", "م", "izhar_shafawi"),
+])
+def test_a_cancelled_cross_word_nasal_rule_recovers_sukun_on_its_letter(
+    hafs, pen, ref, stop, letter, rule
+):
+    session = phonemize_request(hafs, ref, stop_refs=[stop])
+    kw = dict(ref=ref, riwayah="hafs", script="uthmani", variant={})
+    bundle = build_bundle(session, **kw)
+    view = build_cell_view(session, spelling="transformed", pen=pen, **kw)
+    occurrence = next(o for o in bundle.rule_occurrences if o.rule_id.value == rule)
+    column = next(c for c in view.words[0].columns if letter in c.text)
+    assert column.text.endswith(pen.role("sukun"))
+    assert column.status is CellStatus.REPLACED
+    assert occurrence.id in column.rule_occurrence_ids
 
 
 def test_lam_shamsiyyah_is_only_on_the_silent_lam(hafs, pen):

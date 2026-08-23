@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from dataclasses import replace
 
+from ...model.canon import Quality
 from ...model.inscription import GlyphKind
 from ...model.performance import Aspect, Consonant, Vowel
 from ...orthography.write import Pen
@@ -22,20 +23,25 @@ from .dtos import (
     CellTier,
     CellWord,
 )
+from .projection_marks import (
+    DAGGER_ALIF,
+    MAQSURA,
+    clean_structural_marks,
+    fold_maqsura_daggers,
+    recover_nasal_sukun,
+    transform_plain_madd,
+)
 
 
 def _fold_sukun(word: CellWord) -> CellWord:
-    hosts = {
-        c.id.value: c for c in word.columns if c.tier is CellTier.MAIN
-    }
+    hosts = {c.id.value: c for c in word.columns if c.tier is CellTier.MAIN}
     folded: dict[int, CellColumn] = {}
     removed: set[int] = set()
     for mark in word.columns:
         if mark.role is not CellRole.SUKUN or mark.attached_to_column_id is None:
             continue
         host = folded.get(mark.attached_to_column_id.value) or hosts[mark.attached_to_column_id.value]
-        folded[host.id.value] = replace(
-            host,
+        folded[host.id.value] = replace(host,
             text=host.text + mark.text,
             source_character_ids=(*host.source_character_ids, *mark.source_character_ids),
             source_unit_ids=(*host.source_unit_ids, *mark.source_unit_ids),
@@ -70,10 +76,8 @@ def _fold_pausal_sukun(word: CellWord, facts: AnalysisFacts,
             slot_of_unit[unit.value] for unit in col.source_unit_ids
             if unit.value in slot_of_unit
         }
-        consonantal = any(
-            isinstance(facts.sounds[sound.value].value, Consonant)
-            for sound in col.owned_sound_ids
-        )
+        consonantal = any(isinstance(facts.sounds[sound.value].value, Consonant)
+                          for sound in col.owned_sound_ids)
         if (
             col.tier is CellTier.MAIN
             and slots & pausal
@@ -103,16 +107,13 @@ def _has_maddah(col: CellColumn, insc: InscriptionFacts) -> bool:
     )
 
 
-def _carrier_text(value: Vowel, pen: Pen) -> str:
-    return pen.performed_carrier(value.quality)[1]
-
-
 def _inserted_carrier(new_id: int, seat: CellColumn, sound: SoundId,
                       value: Vowel, pen: Pen) -> CellColumn:
     anchor = seat.source_unit_ids[0] if seat.source_unit_ids else seat.anchor_unit_id
     return CellColumn(
         id=CellColumnId(new_id), role=CellRole.MADD,
-        text=_carrier_text(value, pen), source_character_ids=(), source_unit_ids=(),
+        text=pen.performed_carrier(value.quality)[1],
+        source_character_ids=(), source_unit_ids=(),
         tier=CellTier.MAIN, attached_to_column_id=None,
         status=CellStatus.INSERTED, rule_occurrence_ids=(), silence=None,
         variant_id=seat.variant_id, variant_choice=seat.variant_choice,
@@ -139,24 +140,28 @@ def _move_sound(seat: CellColumn, carrier: CellColumn,
 
 
 def _candidate_carrier(
-    columns, start, target, facts, slot_of_unit, text, insc
+    columns, start, target, sound, facts, slot_of_unit, text, insc
 ):
     for index in range(start + 1, len(columns)):
         col = columns[index]
         if any(not isinstance(facts.sounds[s.value].value, Vowel)
                for s in col.owned_sound_ids):
             break
-        if col.status is not CellStatus.DROPPED or not col.source_unit_ids:
+        if not col.source_unit_ids:
             continue
         slot_id = slot_of_unit.get(col.source_unit_ids[0].value)
         if slot_id is None:
             continue
         slot = facts.slots[facts.slot_index[slot_id]]
         kinds = {insc.glyphs[c.value].kind for c in col.source_character_ids}
-        if (
-            slot.letter is target
-            or col.text == text
-            or GlyphKind.SMALL_VOWEL in kinds
+        target_presenter = (
+            slot.letter is target and (
+                col.status is CellStatus.DROPPED or sound in col.presented_sound_ids
+            )
+        )
+        if target_presenter or (
+            col.status is CellStatus.DROPPED
+            and (col.text == text or GlyphKind.SMALL_VOWEL in kinds)
         ):
             return index
     return None
@@ -172,7 +177,14 @@ def _ensure_carriers(word: CellWord, facts: AnalysisFacts, insc: InscriptionFact
             continue
         by_id = {c.id.value: i for i, c in enumerate(columns)}
         span = [columns[by_id[c.value]] for c in cell.column_ids]
-        if any(c.role is CellRole.MADD for c in span):
+        existing = next((c for c in span if c.role is CellRole.MADD), None)
+        if existing is not None:
+            if value.quality is Quality.I and existing.text == MAQSURA:
+                changed = replace(
+                    existing, text=existing.text + DAGGER_ALIF,
+                    status=CellStatus.REPLACED,
+                )
+                columns[by_id[existing.id.value]] = changed
             continue
         seat = span[0]
         if _has_maddah(seat, insc):
@@ -180,7 +192,7 @@ def _ensure_carriers(word: CellWord, facts: AnalysisFacts, insc: InscriptionFact
         at = by_id[seat.id.value]
         target, text = pen.performed_carrier(value.quality)
         candidate = _candidate_carrier(
-            columns, at, target, facts, slot_of_unit,
+            columns, at, target, cell.sound_id, facts, slot_of_unit,
             text, insc,
         )
         if candidate is None:
@@ -189,7 +201,20 @@ def _ensure_carriers(word: CellWord, facts: AnalysisFacts, insc: InscriptionFact
             columns.insert(at + 1, carrier)
         else:
             carrier = columns[candidate]
+        was_dropped = carrier.status is CellStatus.DROPPED
         seat, carrier = _move_sound(seat, carrier, cell.sound_id)
+        carrier = replace(
+            carrier,
+            presented_sound_ids=tuple(
+                sound for sound in carrier.presented_sound_ids
+                if sound != cell.sound_id
+            ),
+        )
+        if was_dropped and value.quality is Quality.I and carrier.text == MAQSURA:
+            carrier = replace(
+                carrier, text=carrier.text + DAGGER_ALIF,
+                status=CellStatus.REPLACED,
+            )
         if seat.role is CellRole.TANWEEN:
             seat = replace(
                 seat, role=CellRole.HARAKA,
@@ -237,7 +262,11 @@ def _place_rules(words: tuple[CellWord, ...], facts: AnalysisFacts,
     for edge in facts.attributions:
         if edge.by is None:
             continue
-        if isinstance(edge, Hosted) and (edge.by, edge.sound) in merged:
+        rule = facts.occurrences[edge.by].rule.value
+        if (
+            isinstance(edge, Hosted) and (edge.by, edge.sound) in merged
+            and not rule.startswith("idgham_")
+        ):
             continue
         occurrence = OccurrenceId(edge.by)
         if isinstance(edge, Merged):
@@ -268,19 +297,22 @@ def _visual_statuses(words, facts):
     }
     merged = {
         edge.sound: edge.by for edge in facts.attributions
-        if isinstance(edge, Merged)
+        if isinstance(edge, Merged) and edge.by is not None
+        and facts.occurrences[edge.by].rule.value.startswith("idgham_")
     }
     out = []
     for word in words:
         columns = []
         for col in word.columns:
+            merger_source = any(s.value in merged for s in col.presented_sound_ids)
+            if merger_source:
+                columns.append(replace(
+                    col, status=CellStatus.PRESENT, silence=None
+                ))
+                continue
             cause = next((o for o in col.rule_occurrence_ids if o.value in silenced), None)
-            if cause is None and not col.owned_sound_ids:
-                cause = next((OccurrenceId(merged[s.value])
-                              for s in col.presented_sound_ids if s.value in merged), None)
             empty = not col.owned_sound_ids and not col.presented_sound_ids
-            merger_source = cause is not None and not col.owned_sound_ids
-            if cause is not None and (empty or merger_source):
+            if cause is not None and empty:
                 col = replace(col, status=CellStatus.DROPPED, silence=cause)
             columns.append(col)
         out.append(replace(word, columns=tuple(columns)))
@@ -341,7 +373,9 @@ def project_words(words: tuple[CellWord, ...], facts: AnalysisFacts,
                   source: SourceView, insc: InscriptionFacts,
                   pen: Pen) -> tuple[CellWord, ...]:
     """Fold marks, supply carriers, place rules, and state every visual group."""
-    out = tuple(_fold_sukun(word) for word in words)
+    out = tuple(clean_structural_marks(word) for word in words)
+    out = tuple(fold_maqsura_daggers(word) for word in out)
+    out = tuple(_fold_sukun(word) for word in out)
     slot_of_unit = _slot_of_columns(source, insc)
     out = tuple(
         _fold_pausal_sukun(word, facts, slot_of_unit, pen) for word in out
@@ -354,6 +388,8 @@ def project_words(words: tuple[CellWord, ...], facts: AnalysisFacts,
         )
         carried.append(projected)
     out = _place_rules(tuple(carried), facts, slot_of_unit)
+    out = recover_nasal_sukun(out, facts, pen)
+    out = transform_plain_madd(out, facts)
     out = _visual_statuses(out, facts)
     return tuple(replace(word, groups=_groups(word, facts)) for word in out)
 
