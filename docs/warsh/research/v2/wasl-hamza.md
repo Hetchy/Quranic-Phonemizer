@@ -20,7 +20,8 @@ decisions ([wasl positions and start vowels](https://www.islamweb.net/ar/library
 
 The Warsh `article_ibtidaa` choice is the closed start exception. Its `hamza`
 face follows the ordinary article A-start. Its `lam` face begins directly on
-the vowel-bearing lam and emits neither `wasl_start` nor `wasl_elision` for the
+the vowel-bearing lam and emits neither `hamza_wasl_fatha` nor
+`hamza_wasl_silent` for the
 omitted prosthetic onset. At internal-naql articles, the deleted qata remains
 deleted under both faces. The exact scope remains in `docs/variants.md` and
 the naql ownership is specified in [`naql.md`](naql.md).
@@ -68,7 +69,7 @@ The first row is deliberately adversarial: its printed kasra-like sequence
 still starts the article with A. Likewise, the five selected `ائتوني` forms use
 different visible initial sequences even though all have the same I start.
 The `/Q/` releases in `ادخلوا` and `ابن` are independently owned by
-ordinary `qalqala_sughra`; they are not part of `wasl_start`.
+ordinary `qalqala_sughra`; they are not part of any hamza-wasl start rule.
 The source convention may attest the result after derivation; it never drives
 the rule. The sequence ownership and rejection policy are defined in
 [`script-projection.md`](script-projection.md).
@@ -80,9 +81,9 @@ sound to make the boundary result unambiguous.
 
 | State | Canonical action | Example result | Rules and attribution |
 | --- | --- | --- | --- |
-| Ibtidaa | Realize the prosthetic hamza with its derived A, I, or U nucleus. | Starting `اِ۬لْحَمْدُ`: `ʔ a l ...` | `wasl_start` classifies the onset and reaches the complete source sequence that spells the wasl unit. The helping nucleus is canonical content, not a second classified sound. |
-| Wasl | Silence both the prosthetic onset and its helping nucleus. | Joining `... اِ۬لْحَمْدُ`: `... l ...` | `wasl_elision` reaches the silenced onset, nucleus, and source sequence. The exposed first sakin is then handled by `iltiqa_haraka` or `iltiqa_shortening` on the preceding word when required. |
-| Stop before word | Finish the preceding word normally. If the requested range continues after the stop, start the following word by its ibtidaa result. | `... # ʔ a l ...` | No `wasl_elision` spans the stop. The included following word emits `wasl_start`; only a word outside the requested utterance is unperformed. |
+| Ibtidaa | Realize the prosthetic hamza with its derived A, I, or U nucleus. | Starting `اِ۬لْحَمْدُ`: `ʔ a l ...` | Emit exactly one of `hamza_wasl_fatha`, `hamza_wasl_kasra`, or `hamza_wasl_damma`; this example emits `hamza_wasl_fatha`. The occurrence classifies `/ʔ/`, while its ID records the helping-vowel quality. |
+| Wasl | Silence both the prosthetic onset and its helping nucleus. | Joining `... اِ۬لْحَمْدُ`: `... l ...` | `hamza_wasl_silent` reaches the silenced wasl unit. The exposed first sakin is then handled by `iltiqa_haraka` or `iltiqa_shortening` on the preceding word when required. |
+| Stop before word | Finish the preceding word normally. If the requested range continues after the stop, start the following word by its ibtidaa result. | `... # ʔ a l ...` | No `hamza_wasl_silent` spans the stop. The included following word emits the A-, I-, or U-specific start rule; only a word outside the requested utterance is unperformed. |
 
 An utterance request that starts at a mid-passage WASL word uses the ibtidaa
 row even if the word is not the first word of its ayah. Array position and a
@@ -120,11 +121,12 @@ one `ائذن`, and one `اؤتمن`. Five of the fourteen are `ائتوني`.
 
 The start produces one result vowel with three independent facts:
 
-- `wasl_start` classifies the realized prosthetic onset;
-- `ibdal_hamza` reaches the result sound and both source units responsible for
-  the wasl-plus-qata transformation; and
-- `madd_tabii` reaches the same result sound and responsible source
-  characters because the result is structurally a long carrier. The same
+- `hamza_wasl_kasra` or `hamza_wasl_damma` classifies the realized prosthetic
+  `/ʔ/`, according to the start quality;
+- `ibdal_hamza` names the second, replaced qata as its source and the wasl
+  slot carrying the replacement long as its host; and
+- `madd_tabii` reaches the result sound because the result is structurally a
+  long carrier. The same
   vowel also receives `madd_badal`: its semantic origin is the replaced qata
   hamza. These overlapping classifications encode different facts and neither
   carries a recitation count.
@@ -137,7 +139,7 @@ at source 10:79:2-3 continues through a U replacement
 `السَّمَٰوَٰتِ ائتوني` at source 46:3:17-18 uses an I replacement
 (`... t i: t u: n i:`), and `اَ۬لذِے اؤتمن` at source 2:282:15-16 has the
 documented joined I result (`... ð i: t u m i n a`). Those outcomes and their
-source ownership are specified in
+  source ownership are specified in
 [`single-hamza.md`](single-hamza.md). They are not naql: no qata vowel is
 transferred to a preceding sakin host.
 

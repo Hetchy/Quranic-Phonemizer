@@ -7,7 +7,7 @@ second `قَوَارِيراٗ` shares the same Warsh tanwin behavior as the fir
 though it is not a separate heading in the traditional seven.
 
 There is no `seven_alifs` rule ID. Canonical projection authors the appropriate
-joined/stopped shape; existing madd, iwad, noon, and boundary rules classify
+joined/stopped shape; existing madd, `madd_iwad`, noon, and boundary rules classify
 the result.
 
 ## Exact Warsh matrix
@@ -19,9 +19,9 @@ the result.
 | `اِ۬لظُّنُونَاۖ` | Source/canonical `33:10`, word 16 | Final `/a:/` | Final `/a:/` |
 | `اَ۬لرَّسُولَاۖ` | Source/canonical `33:66`, word 11 | Final `/a:/` | Final `/a:/` |
 | `اَ۬لسَّبِيلَاۖ` | Source/canonical `33:67`, word 8 | Final `/a:/` | Final `/a:/` |
-| `سَلَٰسِلاٗ` | Source/canonical `76:4`, word 4 | Fathatan; the noon enters the ordinary next-onset rule | `/a:/` from `iwad` |
-| first `قَوَارِيراٗۖ` | Source/canonical `76:15`, word 8 | Fathatan; the noon enters the ordinary next-onset rule | `/a:/` from `iwad` |
-| related second `قَوَارِيراٗ` | Source/canonical `76:16`, word 1 | Fathatan; the noon enters the ordinary next-onset rule | `/a:/` from `iwad` |
+| `سَلَٰسِلاٗ` | Source/canonical `76:4`, word 4 | Fathatan; the noon enters the ordinary next-onset rule | `/a:/` with `madd_iwad + madd_tabii` |
+| first `قَوَارِيراٗۖ` | Source/canonical `76:15`, word 8 | Fathatan; the noon enters the ordinary next-onset rule | `/a:/` with `madd_iwad + madd_tabii` |
+| related second `قَوَارِيراٗ` | Source/canonical `76:16`, word 1 | Fathatan; the noon enters the ordinary next-onset rule | `/a:/` with `madd_iwad + madd_tabii` |
 
 The three Ahzab forms are retained by Nafi in both wasl and waqf
 ([qiraat source for all three](https://quranpedia.net/ayahs/33/10/1/349)).
@@ -68,7 +68,7 @@ wasl:                         ... ʔ a n a: ʔ a x u: k a
 ibtidaa at Ana and continue:  ʔ a n a: ʔ a x u: k a
 
 waqf on Ana in either case:   ʔ a n a:
-rule on final long A          madd_jaiz_munfasil in joined rows;
+rule on final long A          madd_munfasil in joined rows;
                                madd_tabii at waqf
 ```
 
@@ -134,7 +134,7 @@ retains it as the same `madd_tabii` vowel.
 ## Salasila and both Qawarira
 
 These are not pausal-alif shapes in Warsh. They have ordinary fathatan in
-wasl and ordinary `iwad` in waqf. Nafi's two-Qawarira reading is explicitly
+wasl and `madd_iwad + madd_tabii` in waqf. Nafi's two-Qawarira reading is explicitly
 both-token tanwin, not only a decision on the verse-final first token
 ([classical qiraat summary](https://quranpedia.net/book/438/1/479)).
 
@@ -148,20 +148,21 @@ boundary                                  canonical tanwin   performed wasl
 The `+` marks the canonical word boundary; it is not a rendered token.
 
 The first and third boundaries receive `idgham_bi_ghunnah`; the verse-crossing
-qaf boundary receives `ikhfaa_haqiqi`. The sequences above use the default
+qaf boundary receives `ikhfaa`. The sequences above use the default
 light face of `raa_fathatan` for the final raa in both Qawarira words. A
 different selected raa face does not change the tanwin shape or the identity
-of `iwad`, but it does color the raa-dependent A. Short A from fathatan in
-wasl and long A created by `iwad` at waqf are emphatic under a heavy raa and
+of `madd_iwad`, but it does color the raa-dependent A. Short A from fathatan in
+wasl and long A created by `madd_iwad` at waqf are emphatic under a heavy raa and
 plain under a light raa unless another cause supplies emphasis. See
 [`../../../variants.md`](../../../variants.md). Waqf on any of the three words
-produces final `/a:/` with `iwad`; the stop-created vowel does not also receive
-`madd_tabii`.
+produces final `/a:/` with `madd_iwad + madd_tabii`: the first rule names the
+fathatan exchange and the second names the resulting ordinary long.
 
 The tanwin source and affected nasal/next onset expose the relevant shared
-noon rule. At waqf the fathatan, base vowel, and final alif witnesses expose
-one `iwad` occurrence, while only `/a:/` receives `iwad` through
-`rules_on_sound()`.
+noon rule. At waqf the core `madd_iwad` occurrence names the nunation as source
+and the base vowel it lengthens as host. The transformed vowel/carrier cells
+and `/a:/` sound carry both `madd_iwad` and `madd_tabii`; the composite tanwin
+column does not receive raa coloring merely because that A is emphatic.
 
 ## Ownership and acceptance checks
 
@@ -169,12 +170,13 @@ one `iwad` occurrence, while only `/a:/` receives `iwad` through
   ordinary fathatan, and Ana's qata-A/U retained long.
 - The Warsh adapter binds these facts by canonical identity and boundary. A
   final alif or pause mark is evidence, not a sufficient classifier.
-- Existing `pausal_alif`, `madd_tabii`, `madd_jaiz_munfasil`, `iwad`,
-  `idgham_bi_ghunnah`, and `ikhfaa_haqiqi` rules own the performed results.
+- Existing `pausal_alif`, `madd_tabii`, `madd_munfasil`, `madd_iwad`,
+  `idgham_bi_ghunnah`, and `ikhfaa` rules own the performed results.
 - Tests cover all eight table rows, all 12 retained Ana boundaries, all three
   qata-I boundaries, ordinary Ana before a consonant and wasl onset, and all
   wasl/waqf/ibtidaa states.
 - Sound and character assertions distinguish joined `pausal_alif`, stopped
-  `madd_tabii`, retained `madd_jaiz_munfasil`, and tanwin-created `iwad`.
+  `madd_tabii`, retained `madd_munfasil`, and tanwin-created
+  `madd_iwad + madd_tabii`.
 - No seven-alifs rule, Warsh variant, duration option, or second-Qawarira
   omission is acceptable.

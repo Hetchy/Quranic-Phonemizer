@@ -87,7 +87,8 @@ For `قَدْ أَفْلَحَ`, the boundary outcomes are:
 | Ibtidaa at `أفلح` | `ʔ a f l a ħ a` | Restore the full qata onset and its A nucleus; no naql. |
 
 Qata restoration is mandatory outside the joined boundary. Treating the
-selected initial plain alif as WASL would incorrectly emit `wasl_start`, lose
+selected initial plain alif as WASL would incorrectly emit a hamza-wasl start
+rule, lose
 the qata on ibtidaa, and apply the wrong collision logic.
 
 ## Definite-article naql
@@ -115,8 +116,8 @@ For `اِ۬لَارْضِ`, source 2:10:7, canonical 2:11:7:
 
 | State | Relevant sequence | Named rules |
 | --- | --- | --- |
-| Joined from a preceding word | `... l a rˤ dˤ i` | `naql` on lam/A/qata, plus `wasl_elision` on the article's genuine initial WASL unit. |
-| Ibtidaa, `article_ibtidaa=hamza` | `ʔ a l a rˤ dˤ i` | `wasl_start` plus the same internal `naql`. |
+| Joined from a preceding word | `... l a rˤ dˤ i` | `naql` on lam/A/qata, plus `hamza_wasl_silent` on the article's genuine initial WASL unit. |
+| Ibtidaa, `article_ibtidaa=hamza` | `ʔ a l a rˤ dˤ i` | `hamza_wasl_fatha` plus the same internal `naql`. |
 | Ibtidaa, `article_ibtidaa=lam` | `l a rˤ dˤ i` | The start omits the article WASL unit; internal `naql` remains. |
 | Waqf on the word | `... l a rˤ dˤ Q` | Internal `naql` remains; ordinary qalqala owns `/Q/` on the final dad. |
 
@@ -134,8 +135,8 @@ state ([Al-Wafi](https://islamweb.net/ar/library/content/245/18/)). Its actual
 joined context `رِداٗ يُصَدِّقْنِےٓۖ`, source and canonical 28:34:9-10, is
 `r i d a j̃ u sˤ aˤ dd i q Q n i:`: ordinary tanwin-to-yaa idgham owns
 `/j̃/`, and ordinary qalqala owns `/Q/` on the sakin qaf. Complete waqf is
-`r i d a:`, where ordinary iwad owns the pausal length. Both states emit
-`naql`; the waqf state additionally emits `iwad`.
+`r i d a:`, where `madd_iwad + madd_tabii` own the pausal long. Both states
+emit `naql`; the waqf state additionally emits those two madd rules.
 
 The selected source already writes the transformed form with no visible
 hamza. Authored Warsh data supplies the latent qata responsibility so the
@@ -160,12 +161,12 @@ restores ordinary haa/qata behavior. Its public independence from
 
 ## Rule reach and source evidence
 
-Every `naql` occurrence reaches:
-
-- the latent or explicit qata unit and its source spelling;
-- the host consonant or nunation unit and its source spelling;
-- the transferred A, U, or I sound; and
-- any source haraka or deletion sign only as attestation.
+Every `naql` occurrence names the latent or explicit qata as the transformed
+source and the preceding consonant or nunation as its host. It reaches the
+transferred A, U, or I sound. Source and transformed views place it on the
+visible host vowel and the silenced/replaced qata units according to their
+actual sound ownership or silence; a source haraka or deletion sign remains
+attestation inside its owning unit rather than becoming an extra rule target.
 
 The selected mushaf may draw the deleted qata with the same general kind of
 small stroke used near hamzat al-wasl. Classical dabt explicitly distinguishes

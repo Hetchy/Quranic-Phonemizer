@@ -140,7 +140,7 @@ repeated here.
 | `raa_ashiratukum` | `وَعَشِيرَتُكُمْ`, 9:24 | 1 | All states |
 | `raa_wizraka` | `وِزْرَكَ`, 94:2 | 1 | All states |
 | `raa_dhikraka` | `ذِكْرَكَ`, 94:4 | 1 | All states |
-| `raa_wizra_ukhra_wasl` | `وِزْرَ أُخْرَى` at 6:164, 17:15, 35:18, 39:7, 53:38 | 5 | Wasl across the boundary only |
+| `raa_wizra_ukhra` | `وِزْرَ أُخْرَى` at 6:164, 17:15, 35:18, 39:7, 53:38 | 5 | Wasl across the boundary only |
 | `raa_ijrami` | `إِجْرَامِے`, 11:35 | 1 | All states |
 | `raa_hidhrakum` | `حِذْرَكُمْ`, 4:71 and 4:102 | 2 | All states |
 | `raa_ibrah_kibrahu` | Six `عِبْرَة` sites plus `كِبْرَهُ`, listed below | 7 | All states |
@@ -174,7 +174,7 @@ The exact `raa_ibrah_kibrahu` register is `عِبْرَة` or `لَعِبْرَ�
 owner intentionally collapses narrower route subpatterns; its seven-member
 coordinate set must remain explicit.
 
-For `raa_wizra_ukhra_wasl`, stopping on `وِزْرَ` is fixed light and starting at
+For `raa_wizra_ukhra`, stopping on `وِزْرَ` is fixed light and starting at
 `أُخْرَى` has no target raa. The inclination choice in `أُخْرَى` is independent.
 For `raa_hasirat_suduruhum`, stopping on `حَصِرَتْ` is fixed light and starting
 at `صُدُورُهُمْ` has no target raa.
@@ -221,8 +221,8 @@ The light raa sound is `r`; the emphatic raa sound is `rˤ`. The selected weight
 adds `tarqeeq` or `tafkheem` to both the raa sound and its source character.
 
 When that raa determines its A nucleus, the same rule occurrence reaches the
-vowel sound and every source unit that realizes it. This includes fatha,
-fathatan, a lexical carrier, and a stop-created `iwad` carrier:
+vowel sound. This includes A written with fatha or fathatan, lexical long A,
+and stop-created long A from `madd_iwad`:
 
 - light raa produces plain `a` or `a:`;
 - heavy raa produces emphatic `aˤ` or `aˤ:`; and
@@ -281,8 +281,10 @@ canonical facts and authored registers, never from the source's visual marks.
 - Assert the 255 and 837 systematic counts after excluding every named owner.
 - Assert every finite subtotal and reject duplicate ownership of one raa.
 - Test both weight outcomes at the sound and source-character projections.
-- Test dependent short A, carrier A, and iwad A recoloring in both directions,
-  and retain any independently emphatic neighboring vowel.
+- Test dependent short A, carrier A, and `madd_iwad` A recoloring in both
+  directions, and retain any independently emphatic neighboring vowel. In the
+  transformed cell view, place coloring on the rendered vowel/carrier column,
+  never on the composite tanwin column.
 - For each pausal owner, test joined, full waqf, and ibtidaa. For each
   cross-word owner, also test stopping after word one and starting at word two.
 - Test the negative members explicitly: `مِصْراٗ`, `قِطْراٗ`, both

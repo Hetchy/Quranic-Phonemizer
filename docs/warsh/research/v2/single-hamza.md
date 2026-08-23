@@ -102,7 +102,7 @@ tokens:
 | `النسيء` | 1 | `اَ۬لنَّسِيُّ`, source and canonical 9:37:2 | Moving yaa assimilates with the lexical yaa: `... s i jj u`; `ibdal_hamza`, no replacement madd. |
 | `لئلا` | 3 | Source 2:149:15, 4:164:4, and 57:28:1; canonical 2:150:15, 4:165:4, and 57:29:1 | Moving yaa with A: `l i j a ll a:`; `ibdal_hamza`, no replacement madd. |
 | `لأهب` | 1 | `لِاَهَبَ`, source 19:18:6, canonical 19:19:6 | Moving yaa with A: `l i j a h a b a`; `ibdal_hamza`, no replacement madd. |
-| `منسأته` | 1 | `مِنسَاتَهُۥۖ فَلَمَّا`, source and canonical 34:14:13-14 | Joined pure A carrier: `m i ŋ s a: t a h u: f a ...`; ordinary ikhfa owns `/ŋ/`, while `ibdal_hamza` plus `madd_tabii` own the replacement A-long. The final `/u:/` and its madd are the independent pronominal-haa silah. |
+| `منسأته` | 1 | `مِنسَاتَهُۥۖ فَلَمَّا`, source and canonical 34:14:13-14 | Joined pure A carrier: `m i ŋ s a: t a h u: f a ...`; ordinary ikhfa owns `/ŋ/`, while `ibdal_hamza` plus `madd_tabii` own the replacement A-long. The final `/u:/` independently has `madd_silah + madd_tabii`. |
 | `يأجوج` and `مأجوج` | 4 | Source 18:90:5-6 and 21:95:4-5; canonical 18:94:5-6 and 21:96:4-5 | Pure A carriers: `j a: ʒ u: ʒ a` and `m a: ʒ u: ʒ a` at 18:94; the two 21:96 forms end in `/u/` instead. Each replacement has `ibdal_hamza` plus `madd_tabii`. |
 
 Al-Wafi gives `بئر`, every `بئس`, the three `ذئب` sites, `لئلا`, and
@@ -150,9 +150,9 @@ For selected `هَآنتُمْ`, source 3:65:1, the relevant results are:
 | --- | --- | --- |
 | Hadhf | `h a ʔ̞ a ŋ t u m` | Separator alif is absent; `tashil` remains on the eased hamza. |
 | Ibdal | `h a: ŋ t u m` | Hamza becomes a pure A carrier before the fixed sakin noon; `ibdal_hamza` plus `madd_lazim`. |
-| Ithbat | `h a: ʔ̞ a ŋ t u m` | Separator alif remains with `madd_jaiz_munfasil`; `tashil` reaches the eased hamza. |
+| Ithbat | `h a: ʔ̞ a ŋ t u m` | Separator alif remains with `madd_munfasil`; `tashil` reaches the eased hamza. |
 
-All three rows also carry ordinary `ikhfaa_haqiqi` on `ŋ`, because the sakin
+All three rows also carry ordinary `ikhfaa` on `ŋ`, because the sakin
 noon of `أنتم` precedes taa. That rule and its source reach are unchanged by
 the hamza face. In the ithbat row, the long belongs to the graphically joined
 alerting particle `ها`, so the ordinary madd owner is munfasil rather than
@@ -198,11 +198,13 @@ Projection creates no ghost hamza for these four forms. They emit no `isqat`,
 
 ## Rule reach and machine data
 
-Every `ibdal_hamza` occurrence reaches the replacement sound and the source
-hamza or authored source units responsible for it. When the result is a long
-carrier, its effective madd occurrence reaches that same result sound and
-responsible source units. A moving waw or yaa receives `ibdal_hamza` but no
-invented madd.
+Every `ibdal_hamza` occurrence names the replaced hamza or authored latent
+hamza as its source and the replacement carrier or consonant as its host. It
+reaches the replacement sound. When the result is a long carrier, its effective
+madd occurrence independently reaches that same result sound. Visible source
+and cell placements follow sound ownership and silence rather than tagging all
+predicate context. A moving waw or yaa receives `ibdal_hamza` but no invented
+madd.
 
 Every `tashil` occurrence reaches the eased onset and responsible source
 hamza even when the extra token is disabled. Its following A, U, or I remains

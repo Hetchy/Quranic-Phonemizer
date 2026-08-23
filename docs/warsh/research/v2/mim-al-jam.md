@@ -15,13 +15,13 @@ performed result.
 
 | Following onset and state | Canonical ending | Named rules |
 | --- | --- | --- |
-| Qata, joined in wasl | `/m u:/` | `madd_jaiz_munfasil` on `/u:/` |
+| Qata, joined in wasl | `/m u:/` | `madd_munfasil` on `/u:/` |
 | Qata, ibtidaa at the host and continue | `/m u:/` | Same as wasl |
 | Waqf on the host | `/m/` | No final vowel and no madd |
-| Wasl onset, joined | `/m u/` | `iltiqa_haraka` on `/u/`; the next onset has `wasl_elision` |
+| Wasl onset, joined | `/m u/` | `iltiqa_haraka` on `/u/`; the next onset has `hamza_wasl_silent` |
 | Moving non-qata onset, joined | `/m/` | No repair and no madd |
 
-The long before qata is `madd_jaiz_munfasil`, not a new mim-specific madd and
+The long before qata is `madd_munfasil`, not a new mim-specific madd and
 not `madd_tabii`. Habous includes mim al-jam' among the sources of Warsh
 munfasil ([Habous, muttasil and munfasil](https://www.habous.gov.ma/%D8%A8%D8%B1%D9%86%D8%A7%D9%85%D8%AC-%D8%A7%D9%84%D8%AA%D8%B9%D9%84%D9%8A%D9%85-%D8%A7%D9%84%D8%B9%D8%AA%D9%8A%D9%82-%D8%A7%D9%84%D8%B1%D8%A6%D9%8A%D8%B3%D9%8A%D8%A9/1703-%D8%A7%D9%84%D9%85%D8%B1%D8%AD%D9%84%D8%A9-%D8%A7%D9%84%D8%A3%D9%88%D9%84%D9%89/%D8%A7%D9%84%D8%AA%D8%AC%D9%88%D9%8A%D8%AF/%D8%A7%D9%84%D8%AA%D8%AC%D9%88%D9%8A%D8%AF-%D8%A7%D9%84%D8%A3%D9%88%D9%84%D9%89-%D8%A5%D8%B9%D8%AF%D8%A7%D8%AF%D9%8A-%D8%B9%D8%AA%D9%8A%D9%82/17848-%D8%A7%D9%84%D8%AA%D8%AC%D9%88%D9%8A%D8%AF-%D8%A8%D8%A7%D8%A8-%D8%A7%D9%84%D9%80%D9%85%D8%AF-%D9%88%D8%A7%D9%84%D9%82%D8%B5%D8%B1-%D8%A7%D9%84%D9%80%D9%85%D8%AF-%D8%A7%D9%84%D9%85%D8%AA%D8%B5%D9%84-%D9%88%D8%A7%D9%84%D9%80%D9%85%D9%86%D9%81%D8%B5%D9%84.html)).
 Its received count does not alter the `/u:/` token.
@@ -35,8 +35,8 @@ Selected source `60:1:24-26`, canonical `60:1`, is
 
 ```text
 state                         relevant tokens             rules
-wasl                          ... k u m u: ʔ i ŋ k ...    madd_jaiz_munfasil on u:
-ibtidaa at رَبِّكُمُۥٓ and join  rˤ aˤ bb i k u m u: ...  madd_jaiz_munfasil on u:
+wasl                          ... k u m u: ʔ i ŋ k ...    madd_munfasil on u:
+ibtidaa at رَبِّكُمُۥٓ and join  rˤ aˤ bb i k u m u: ...  madd_munfasil on u:
 waqf on رَبِّكُمُۥٓ             rˤ aˤ bb i k u m          no madd
 ibtidaa at إِن                  ʔ i ŋ k ...             no host mim
 ```
@@ -54,7 +54,7 @@ Selected source `2:9:4-5`, canonical `2:10`, is
 ```text
 wasl:       ... h u m u lˤlˤ aˤ: h u
              iltiqa_haraka on the short u
-             wasl_elision on the article onset
+             hamza_wasl_silent on the article onset
 waqf:       ... h u m
 ibtidaa at اَ۬للَّهُ:  ʔ a lˤlˤ aˤ: h u
 ```
@@ -77,20 +77,21 @@ No final U is inserted on the mim in either line.
 
 At a qata boundary:
 
-- `rules_on_sound()` exposes `madd_jaiz_munfasil` on `/u:/` only. Neither
-  `/m/` nor the following `/ʔ/` sound receives the madd rule.
-- `rules_on_char()` exposes that occurrence on the plural-suffix mim, its
-  damma and carrier witnesses, and the following qata source unit. The last is
-  the causal boundary participant, not a lengthened sound.
-- At waqf the joined carrier is absent and none of those units exposes a madd
-  occurrence for this boundary.
+- `madd_munfasil` reaches `/u:/` only. Neither `/m/` nor the following `/ʔ/`
+  sound receives the madd rule.
+- Source and cell placements follow ownership of that long vowel. The plural-
+  mim vowel/carrier units receive it; the following qata is trigger-only
+  context and does not receive the madd rule merely because it caused the
+  classification.
+- At waqf the joined carrier is absent and no madd occurrence is emitted for
+  this boundary.
 
-At a wasl-onset boundary, `iltiqa_haraka` classifies only short `/u/` through
-`rules_on_sound()`. The plural mim is its source owner and exposes the rule
-through `rules_on_char()` together with any written damma witness; the mim
-consonant sound is not classified. `wasl_elision` separately reaches the
-following wasl source unit. The rules remain distinct even when the rendered
-boundary is compact.
+At a wasl-onset boundary, `iltiqa_haraka` classifies only short `/u/`. The
+transformed view puts that sound and its rule on an inserted boundary-vowel
+column; the plural-mim base column and consonant sound do not receive it. The
+core occurrence still names the plural-mim slot as the repaired subject.
+`hamza_wasl_silent` separately reaches the following wasl source unit. The
+rules remain distinct even when the rendered boundary is compact.
 
 ## Structural ownership
 
@@ -119,7 +120,7 @@ recorded in the [Warsh corpus README](../../../../corpus_sources/warsh/README.md
   word.
 - Test qata with A and I, and include a qata-U case when selecting the corpus
   fixture set.
-- Assert `/u:/` plus `madd_jaiz_munfasil` before qata, short `/u/` plus
+- Assert `/u:/` plus `madd_munfasil` before qata, short `/u/` plus
   `iltiqa_haraka` before wasl, and no added vowel before another moving onset.
 - Assert waqf removes the joined-only vowel completely.
 - Assert sound and character rule reach, the 888-site reconciliation, and the

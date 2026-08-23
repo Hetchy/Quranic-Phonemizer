@@ -97,15 +97,15 @@ The sequences below show the affected span only.
 
 | Quality | Selected source and refs | Wasl sequence | Rules |
 | --- | --- | --- | --- |
-| A | `وَمِنَ اَ۬لنَّاسِ`, source 2:7:1-2, canonical 2:8:1-2 | `... m i n a ñ a: ...` | `iltiqa_haraka` classifies only A; the noon owns it in the character projection. `wasl_elision` and the ordinary article/noon rules remain separate. |
-| I | `وَإِذِ اِ۪سْتَسْق۪ىٰ`, source 2:59:1-2, canonical 2:60:1-2 | `w a ʔ i ð i s t ...` | `iltiqa_haraka` classifies only I; dhal owns it in the character projection. `wasl_elision` remains separate. The omitted final nucleus follows its independent inclination selection. |
-| U | `قُلُ اُ۟دْعُواْ`, source and canonical 7:195:20-21 | `q u l u d Q ʕ u:` | `iltiqa_haraka` classifies only U; lam owns it in the character projection. Ordinary qalqala owns `/Q/`, and `wasl_elision` remains separate. |
-| U on tanwin | `بَعْضٍۖ اُ۟نظُرْ`, source 6:66:21-22, canonical 6:65:21-22 | `... dˤ i n u ŋˤ ðˤ u rˤ` | `iltiqa_haraka` classifies only U; the nunation unit owns it in the character projection. The following emphatic `ikhfaa_haqiqi`, ordinary raa tafkheem, and `wasl_elision` remain separate. |
+| A | `وَمِنَ اَ۬لنَّاسِ`, source 2:7:1-2, canonical 2:8:1-2 | `... m i n a ñ a: ...` | `iltiqa_haraka` classifies only A. Its transformed vowel column is inserted at the boundary; `hamza_wasl_silent` and the ordinary article/noon rules remain separate. |
+| I | `وَإِذِ اِ۪سْتَسْق۪ىٰ`, source 2:59:1-2, canonical 2:60:1-2 | `w a ʔ i ð i s t ...` | `iltiqa_haraka` classifies only I. Its transformed vowel column is inserted at the boundary; `hamza_wasl_silent` remains separate. The omitted final nucleus follows its independent inclination selection. |
+| U | `قُلُ اُ۟دْعُواْ`, source and canonical 7:195:20-21 | `q u l u d Q ʕ u:` | `iltiqa_haraka` classifies only U. Its transformed vowel column is inserted at the boundary. Ordinary qalqala owns `/Q/`, and `hamza_wasl_silent` remains separate. |
+| U on tanwin | `بَعْضٍۖ اُ۟نظُرْ`, source 6:66:21-22, canonical 6:65:21-22 | `... dˤ i n u ŋˤ ðˤ u rˤ` | `iltiqa_haraka` classifies only U. Its transformed vowel column is inserted at the boundary. The following emphatic `ikhfaa`, ordinary raa tafkheem, and `hamza_wasl_silent` remain separate. |
 
 For any row, a complete stop after the first word suppresses
 `iltiqa_haraka`; the first word receives its ordinary waqf result. If the
 requested range continues after that stop, the second word is a new ibtidaa
-and realizes its WASL onset and helping vowel with `wasl_start`, so the U
+and realizes its WASL onset and helping vowel with `hamza_wasl_damma`, so the U
 example begins `ʔ u d Q ʕ u:`. Ordinary qalqala still owns `/Q/`. Only a
 following word outside the requested
 utterance is unperformed. Neither case emits a repair on the preceding word.
@@ -115,15 +115,16 @@ utterance is unperformed. Neither case emits a repair on the preceding word.
 The public rule is `iltiqa_haraka`, not `iltiqa_kasra`. Its result vowel holds
 A, I, or U; the rule name does not encode one quality.
 
-One occurrence classifies only the realized short A, I, or U through
-`rules_on_sound()`. It does not classify the repaired consonant or noon sound.
-The canonical host slot, including the nunation slot for tanwin, is the source
-owner; `rules_on_char()` exposes the rule on the owning consonant or tanwin
-spelling and on a written linking-haraka witness where present. The witness
-attests the derived result and never selects it.
+One occurrence classifies only the realized short A, I, or U sound. It does
+not classify the repaired consonant or noon sound. The core occurrence names
+the repaired slot, including the nunation slot for tanwin, as its subject and
+the following wasl slot as trigger context. In the transformed cell view the
+performed vowel is an inserted boundary column carrying `iltiqa_haraka`; the
+base consonant or tanwin column does not carry that rule. A written linking-
+haraka witness remains source evidence and never selects the result.
 
-The next word's WASL unit is trigger context, not a host participant of
-`iltiqa_haraka`; it receives its separate `wasl_elision` occurrence. The two
+The next word's WASL unit is trigger context, not an affected participant of
+`iltiqa_haraka`; it receives its separate `hamza_wasl_silent` occurrence. The two
 rules must not be collapsed, because a caller can start on the next word
 without a host repair.
 

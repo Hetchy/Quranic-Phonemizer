@@ -24,9 +24,8 @@ single lam and `lˤlˤ` for a geminated lam. Do not add a separate
 
 A `taghliz` or lam-`tarqeeq` occurrence reaches the lam sound and source lam.
 When the owned lam determines its A nucleus, the same occurrence also reaches
-that vowel sound and every source unit that realizes it. This includes short A
-from fatha or fathatan, lexical long A from a carrier, and stop-created long A
-from `iwad`:
+that vowel sound. This includes short A from fatha or fathatan, lexical long A
+from a carrier, and stop-created long A from `madd_iwad`:
 
 - light lam has plain `a` or `a:`;
 - emphatic lam has `aˤ` or `aˤ:`; and
@@ -228,8 +227,11 @@ following span:     m̃ i n ħ a ...
 The alif after the first sad in `فِصَالاً` stays emphatic in both outcomes. It
 is colored by sad, not by the later target lam. Conversely, the target lam's A
 changes with the selected lam weight: it is short from fathatan in joined
-speech and long from `iwad` at waqf. The weight occurrence and `iwad` therefore
-overlap on the pausal vowel without changing each other's rule identity.
+speech and long from `madd_iwad` at waqf. The weight occurrence,
+`madd_iwad`, and `madd_tabii` therefore overlap on the pausal sound without
+changing each other's rule identity. In transformed cells the color occurrence
+is placed on the rendered vowel/carrier column, not on the composite tanwin
+column; that tanwin column retains only its own noon/boundary rules.
 The sakin taa in `مَطْلَعِ` independently emits `qalqala_sughra` on `Q`.
 `صَلْصَٰلٖ` has no A nucleus on the target first lam, so its `taghliz`
 occurrence reaches only that lam sound and source lam. Its tanwin merges into
@@ -264,8 +266,9 @@ performance.
 - The coupled owner can produce only the two compatible pairs and preserves the
   caller's selected value while a boundary masks it.
 - Both source and canonical refs are asserted for every finite member.
-- Every light/heavy test checks the lam sound and source lam plus any dependent
-  short A, carrier A, or iwad A sound and source witnesses.
+- Every light/heavy test checks the lam sound and the dependent short A,
+  carrier A, or `madd_iwad` A sound. Cell assertions put coloring on the
+  rendered vowel/carrier and never on a composite tanwin column.
 - Removing the lam's coloring cause does not erase emphasis owned by the
   preceding sad, taa, zhaa, or another independent owner.
 - `طَالَ` is never admitted to `lam_final_waqf`; Salsal owns only its first lam.

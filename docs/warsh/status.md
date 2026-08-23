@@ -24,8 +24,8 @@ validation may still correct a concluded decision.
 | Variant design | Concluded | Public scopes, values, defaults, registers, and interactions are recorded in [`../variants.md`](../variants.md) |
 | Phoneme and rule vocabulary | Concluded | Required additions and reused sound primitives identified; not implemented |
 | Cross-riwayah variant audit | Concluded | Shared IDs and riwayah-specific defaults and site scopes are recorded in [`../variants.md`](../variants.md) |
-| Test organization | Complete | Tests are organized by semantic owner, the compact case harness is active, duplicate Hafs coverage is reduced, and non-phonemization contracts are separated; no Warsh fixture has been added |
-| Canonical and model changes | Not started | Required foundation work is listed below |
+| Test organization | In progress | The semantic harness/tree and the RAR projection suites coexist after the branch sync; duplicate legacy coverage and ownership assertions are being reconciled before Warsh fixtures are added |
+| Canonical and model changes | In progress | The full RAR projection and shared rule catalogue are merged; the Warsh-only model additions remain below |
 | Warsh corpus integration | Not started | No production corpus package, adapter, or address normalization exists |
 | Warsh rules | Not started | No Warsh classifier set or authored exception data exists |
 | Full-corpus conformance | Not started | No end-to-end Warsh output exists to validate |
@@ -68,8 +68,9 @@ validation may still correct a concluded decision.
   marks may attest a reading but do not decide a tajweed rule.
 - Wasl, waqf, and ibtidaa remain explicit boundary states.
 - Closed lexical exceptions belong in reviewed authored data.
-- Where a rule affects both performed sound and written source, its public
-  occurrence must reach both.
+- Rule occurrences name acted-on units, sounds actually classified or changed,
+  and visible source/cell placements derived from ownership. Trigger-only
+  context must not be copied onto unrelated characters.
 - Every eventual Hafs-Warsh phoneme difference must be attributable to a
   canonical text difference, a named rule, or a selected variant.
 
@@ -85,13 +86,16 @@ validation may still correct a concluded decision.
 - Taghliz is distinct from generic tafkheem and uses the existing emphatic
   single-lam sound `/lˤ/`. Gemination remains independent.
 - Existing light and heavy raa sounds are sufficient.
-- Ibdal and the resulting madd classification apply to the replacement sound
-  and the responsible source character or characters.
+- Ibdal names the replaced hamza as source and the replacement unit as host;
+  the replacement sound independently receives every applicable madd rule.
 - Naql does not require a new phoneme. Isqat receives no runtime rule of its
   own.
-- The refined rule vocabulary adds `taqlil`, `taghliz`, `naql`,
-  `madd_badal`, `madd_leen_mahmuz`, and `iltiqa_haraka`; `imala` classifies
-  kubra, and `iltiqa_haraka` replaces the I-only `iltiqa_kasra` name.
+- RAR already supplies `madd_badal`, `madd_iwad`, `madd_silah`, and the general
+  `iltiqa_haraka`. Warsh adds `taqlil`, `taghliz`, `naql`, and
+  `madd_leen_mahmuz`; `imala` classifies kubra.
+- Badal, iwad, and silah are additive identities: Warsh badal also carries its
+  effective madd, a stopped fathatan has `madd_iwad + madd_tabii`, and pronoun
+  silah has `madd_silah` plus `madd_tabii` or `madd_munfasil`.
 - `Rule` remains a global semantic vocabulary, but every riwayah binds its own
   `RuleSet`. Each classifier declares the complete set of rule IDs it can
   emit, and `tajweed_rules(riwayah)` is derived from those bound emitted sets.
@@ -106,18 +110,19 @@ The selected-script and address-provenance contract is in
 
 ## Required model work
 
-None of this work has started. These are implementation recommendations, not
-claims about the current runtime.
+RAR completed the shared projection and much of the Hafs-side rule foundation.
+The remaining items are the Warsh-specific extensions or general seams that a
+second riwayah now requires.
 
 1. Represent taqlil and imala kubra as distinct typed vowel qualities rather
    than overloading `Quality.E`.
 2. Make kubra's collapsed rendering riwayah-owned: Hafs falls back to `/i/`,
    while Warsh falls back to taqlil.
-3. Classify madd from the effective structure after transformations such as
-   ibdal.
-4. Project applicable ibdal, madd, and other rule occurrences onto both
-   performed sounds and source characters.
-5. Resolve selector-driven raa and lam weight before colouring the following
+3. Bind the existing effective madd machinery to Warsh transformations and
+   preserve the complete additive rule set on each long sound.
+4. Emit Warsh occurrences through RAR's source/host, sound, SourceView, and
+   CellView contracts without tagging trigger-only characters.
+5. Resolve selector-driven raa and lam weight before coloring the following
    fatha or alif, and project that causal choice onto sound and source.
 6. Preserve exact inclination in recited spelling independently of whether an
    extra phoneme rendering is enabled.
@@ -139,28 +144,24 @@ claims about the current runtime.
 
 ## Test work
 
-The Hafs test reorganization and compact semantic harness are complete. The
-audit remains in [`test-audit.md`](test-audit.md), the target and acceptance
-contract in [`test-refactor-plan.md`](test-refactor-plan.md), and Warsh file
-ownership in [`warsh-test-placement.md`](warsh-test-placement.md). Remaining
-test work begins with the adapter baseline:
+The compact semantic harness and target tree exist, and the full RAR suites are
+now merged beside them. Reconciliation is still in progress: the old RAR test
+locations retained during conflict resolution must be folded into the semantic
+tree, projection-aware expectations must replace the pre-RAR character rules,
+and fully spelled muqattaat coverage must remain intact. The audit remains in
+[`test-audit.md`](test-audit.md), the target and acceptance contract in
+[`test-refactor-plan.md`](test-refactor-plan.md), and Warsh file ownership in
+[`warsh-test-placement.md`](warsh-test-placement.md).
 
 - extend vetted shared cases to Warsh after source projection exists;
 - preserve executable inventories of every researched exception; and
 - implement new Warsh fixed behavior before adding public variants last.
 
-Correct Hafs ownership specifications intentionally expose current runtime
-gaps in incomplete-idgham host reach, started ibdal and effective madd reach,
-iltiqa-haraka source reach, istifham-article hamza transformation reach, iwad
-carrier reach, and complete muqattaat rule reach. These expectations must not
-be weakened to restore a green suite; the corresponding model/rule verticals
-own the repairs.
-
-The target tree has 466 fixed/default phonemization review cases and 72 final
-variant behavior cases. The generic API contract covers all 71 selector
-metadata rows; `tamanna_noon` intentionally has no new behavior case. Actual
-pytest collection expands semantic rows by state, riwayah, script, and exact
-occurrence.
+RAR is authoritative for current source/host semantics, cell placement,
+overlapping madd identities, and fully spelled muqattaat. Reconciled tests must
+preserve those behaviors while retaining compact domain-reviewable cases. The
+pre-merge case counts remain planning inputs, not completion evidence; task
+completion requires recounting the final collected semantic tree.
 
 ## Delivery sequence
 

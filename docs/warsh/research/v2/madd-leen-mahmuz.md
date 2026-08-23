@@ -36,13 +36,13 @@ whether the hamza follows in the middle or at the end of the word
 
 One occurrence has the following reach:
 
-- `rules_on_sound()` contains `madd_leen_mahmuz` on the `/w/` or `/j/` glide
-  only. The preceding vowel and following `/ʔ/` are conditions, not the sound
-  being lengthened.
-- `rules_on_char()` contains the same occurrence on the sakin waw or yaa and
-  the following hamza source units. The preceding fatha is a predicate, not an
-  occurrence participant. This preserves the target and causal span even when
-  the script uses a composite hamza scalar.
+- The occurrence classifies the `/w/` or `/j/` glide only. The preceding vowel
+  and following `/ʔ/` are conditions, not sounds being lengthened.
+- Source and cell placements put it on the sakin waw or yaa that owns the
+  glide. The preceding fatha and following hamza are trigger-only context and
+  do not receive the rule merely because they establish the predicate. The
+  core classifier still inspects them through canonical structure, including
+  when the script uses a composite hamza scalar.
 - A waqf rule on the word ending remains a separate occurrence. It does not
   replace or duplicate the leen-mahmuz occurrence.
 
@@ -90,14 +90,14 @@ two-count long vowel ([focused source](https://quranpedia.net/book/436/1/83)).
 
 | Selected source ref | Canonical ref | Exact selected text | Required result |
 | --- | --- | --- | --- |
-| `18:57:19` | `18:58` | `مَوْئِلاٗۖ` | The `/w/` has no `madd_leen_mahmuz` in any state. When joined into the following `وَتِلْكَ`, the span is `/m a w ʔ i l a w̃ a .../`: ordinary tanwin-to-waw idgham owns `/w̃/`. Waqf is `/m a w ʔ i l a:/`, with `iwad` only on the final `/a:/`. |
+| `18:57:19` | `18:58` | `مَوْئِلاٗۖ` | The `/w/` has no `madd_leen_mahmuz` in any state. When joined into the following `وَتِلْكَ`, the span is `/m a w ʔ i l a w̃ a .../`: ordinary tanwin-to-waw idgham owns `/w̃/`. Waqf is `/m a w ʔ i l a:/`, with `madd_iwad + madd_tabii` on the final `/a:/`. |
 | `81:8:2` | `81:8` | `اَ۬لْمَوْءُۥدَةُ` | The first `/w/` has no `madd_leen_mahmuz`. The second waw represents `/u:/` and independently receives `madd_badal` plus `madd_tabii`. |
 
 For `اَ۬لْمَوْءُۥدَةُ`, the relevant started sequence is
 `/ʔ a l m a w ʔ u: d a t u/`; at waqf its ending changes according to the
 shared taa-marbuta rule, while the two waw decisions remain unchanged. No
-source unit in the excluded fatha-waw-hamza span may expose
-`madd_leen_mahmuz` through `rules_on_char()`.
+source unit or transformed cell in the excluded fatha-waw-hamza span may carry
+`madd_leen_mahmuz`.
 
 These are classifier exclusions only. They are not variants and they do not
 remove the independently valid badal classification from the second waw of

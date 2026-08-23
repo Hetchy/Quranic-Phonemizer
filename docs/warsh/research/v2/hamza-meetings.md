@@ -72,7 +72,7 @@ At a site whose next segment is moving, the ibdal-created long receives
 an incidental result of the selected two-hamza face, not the lexical badal
 origin classified in [`madd-badal.md`](madd-badal.md).
 
-The following sakin noon is independently `ikhfaa_haqiqi` before dhal and
+The following sakin noon is independently `ikhfaa` before dhal and
 renders as `ŋ`; the sakin raa after fatha is independently `tafkheem` and
 renders as `rˤ`. Neither ordinary rule belongs to the hamza face.
 
@@ -103,7 +103,7 @@ outside the hamza meeting follows its independent boundary rule.
 
 The held noon in `أَئِنَّكُمْ` independently emits
 `ghunnah_mushaddadah`. The hidden noon in `اَ۟نزِلَ` independently emits
-`ikhfaa_haqiqi`. At `اَوْ۟نَبِّئُكُم بِخَيْرٖ`, ordinary `ikhfaa_shafawi`
+`ikhfaa`. At `اَوْ۟نَبِّئُكُم بِخَيْرٖ`, ordinary `ikhfaa_shafawi`
 owns the displayed default-open `/ŋ/`; the shared closed face renders `/m̃/`
 instead. Those ordinary rules do not extend the reach of `tashil`.
 
@@ -145,14 +145,15 @@ The four triple-hamza sites are:
 
 They have fixed `ʔ a ʔ̞ a: ...`: the first interrogative qata remains full,
 the second explicit qata emits `tashil`, and the existing following long A
-keeps its semantic `madd_badal`. Do not emit `ibdal_hamza` for that already
-lexical badal carrier. Al-Wafi distinguishes these fixed forms from the
+keeps `madd_badal + madd_tabii`. Do not emit `ibdal_hamza` for that already
+lexical badal carrier. Badal names its origin and tabii names its ordinary
+effective context. Al-Wafi distinguishes these fixed forms from the
 ordinary open-second-hamza choice
 ([source](https://www.islamweb.net/ar/library/content/245/14/)).
 
 For a full ordinary-context check, `أَءَامَنتُم` continues as
 `ʔ a ʔ̞ a: m a ŋ t u m ...`: the sakin noon independently emits
-`ikhfaa_haqiqi` before taa. `أَءَالِهَتُنَا` continues as
+`ikhfaa` before taa. `أَءَالِهَتُنَا` continues as
 `ʔ a ʔ̞ a: l i h a t u n a: ...`.
 
 ## Across-word structural matrix
@@ -260,11 +261,12 @@ The `yaa` face is a consonantal replacement, not a duration choice.
 ## Rule reach and test ownership
 
 For every meeting, the first qata remains independently aligned to its sound
-and source. `tashil` reaches the eased second onset and second source hamza.
-`ibdal_hamza` reaches the replacement sound and second source hamza. When
-ibdal creates a long carrier, the effective madd rule reaches the same result
-sound and responsible source characters. A moving waw or yaa receives no
-invented madd.
+and source. `tashil` reaches the eased second onset. `ibdal_hamza` names the
+second, replaced hamza as its source and the replacement carrier or consonant
+as its host. When ibdal creates a long carrier, the effective madd rule reaches
+the same result sound. Visible unit and cell placements follow sound ownership
+and silence; trigger-only neighboring letters are not tagged. A moving waw or
+yaa receives no invented madd.
 
 Machine data must own all 60 one-word and 156 across-word rows with source
 ref, canonical ref, first and second qualities, boundary scope, structural

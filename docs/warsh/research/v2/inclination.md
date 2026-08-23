@@ -273,11 +273,12 @@ The two Haa renderings above must have identical typed quality and identical
 
 ## Rule and source reach
 
-For `taqlil` or `imala`, the same occurrence reaches:
-
-- the target vowel sound;
-- the responsible fatha and carrier/alif source units; and
-- an inclination witness such as U+06EA when the selected sequence has one.
+For `taqlil` or `imala`, the occurrence classifies the target vowel sound. The
+core subject is the slot whose nucleus changed. Source placement follows the
+unit that owns that sound; transformed cells place the occurrence on the
+vowel/carrier columns presenting it. An inclination witness such as U+06EA
+stays provenance inside its owning unit and does not become an extra rule
+participant.
 
 The witness only attests the independently classified result. A mark with no
 matching domain target is an adapter validation error; a domain target without

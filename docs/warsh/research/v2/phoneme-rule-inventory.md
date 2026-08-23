@@ -123,15 +123,17 @@ lam:
 When a raa or lam is the cause of emphasis on its A nucleus, that vowel follows
 the effective consonant result regardless of how the boundary state realizes
 it. The nucleus may be short A from fatha or fathatan, lexical long A from a
-carrier, or stop-created long A from `iwad`. Tafkheem or taghliz adds the
+carrier, or stop-created long A from `madd_iwad`. Tafkheem or taghliz adds the
 owner's emphasis cause; tarqiq removes only that owner's cause. The A becomes
 plain only when no independent isti'la consonant or other owner still requires
 emphasis.
 
 The consonant weight and dependent-vowel coloring are two sound targets of one
-occurrence. It reaches the consonant sound and source consonant, the A-vowel
-sound, and every source unit responsible for that realized A, including fatha,
-fathatan, a carrier/alif, or an iwad witness as applicable. This directional
+occurrence. It reaches the consonant sound and the dependent A-vowel sound.
+The source view places it on units that own those sounds, while the transformed
+cell view places it on the consonant and rendered vowel/carrier columns. A
+composite tanwin column retains its noon rule but does not receive a vowel-
+color occurrence merely because its A sound is colored. This directional
 propagation does not recolor an unrelated vowel before the consonant.
 
 Lam uses `taghliz`; `tafkheem` remains the raa/general emphasis name. The
@@ -143,8 +145,10 @@ geminated `lˤlˤ` token.
 ## Rule vocabulary
 
 The following rules are the Warsh-specific additions or semantic refinements
-to the shared rule vocabulary. One identifier has one meaning across every
-riwayah that binds it.
+to the shared rule vocabulary. `madd_badal` and `iltiqa_haraka` already exist
+in the shared RAR catalogue; the Warsh package reuses them. The other rows are
+new global identifiers which only the Warsh rule set binds. One identifier has
+one meaning across every riwayah that binds it.
 
 | Rule ID | Kind | Classified or changed sound |
 | --- | --- | --- |
@@ -166,10 +170,12 @@ The following existing shared identifiers retain their established meaning:
 - `ibdal_hamza` names replacement of a hamza by a vowel carrier or moving
   consonant;
 - `tafkheem` and `tarqeeq` classify the effective raa/general weight;
-- `madd_tabii`, `madd_wajib_muttasil`, `madd_jaiz_munfasil`, `madd_lazim`,
-  `madd_arid_lil_sukun`, `madd_leen`, and `iwad` keep their shared meanings;
-- `wasl_start`, `wasl_elision`, and `iltiqa_shortening` keep their shared
-  boundary meanings; and
+- `madd_tabii`, `madd_muttasil`, `madd_munfasil`, `madd_lazim`,
+  `madd_arid_lissukun`, `madd_leen`, `madd_iwad`, `madd_badal`, and
+  `madd_silah` keep their shared meanings;
+- `hamza_wasl_fatha`, `hamza_wasl_kasra`, and `hamza_wasl_damma` name the
+  three start vowels separately; `hamza_wasl_silent` names the joined
+  deletion; and `iltiqa_shortening` keeps its shared boundary meaning; and
 - the shared noon, meem, idgham, article, qalqala, pausal, and taa-marbuta
   rules are not renamed for Warsh.
 
@@ -185,22 +191,26 @@ There is no `fath`, `kubra`, `isqat`, `mim_al_jam`, `yaa_zawaid`, or
 
 ## Rule reach
 
-A rule is not correct merely because its identifier appears. Its occurrence
-must reach every sound and source unit that explains the transformation.
+A rule is not correct merely because its identifier appears. The core
+occurrence names its acted-on source unit and, when applicable, a second unit
+the rule itself acts on. Trigger-only context remains private. The analysis
+projection then publishes the sounds actually classified or changed and
+places the occurrence on visible units and cells from sound ownership and
+silence, rather than copying every core participant onto every glyph.
 
 | Rule | Required reach |
 | --- | --- |
-| `taqlil`, `imala` | The vowel sound, fatha, carrier/alif, and any source inclination witness. |
-| `taghliz` | The lam sound and source lam; its dependent A-vowel sound and the fatha, fathatan, carrier, or iwad source units that realize it. |
-| `tafkheem`, `tarqeeq` on raa | The raa sound and source raa; its dependent A-vowel sound and the fatha, fathatan, carrier, or iwad source units that realize it. |
-| `tarqeeq` on an owned lam choice | The lam sound and source lam; its dependent A-vowel sound and the fatha, fathatan, carrier, or iwad source units that realize it. Ordinary unowned light lam emits no `tarqeeq`. |
+| `taqlil`, `imala` | The vowel sound and its visible vowel/carrier cells; an inclination witness stays provenance inside the owning unit rather than becoming an independent rule target. |
+| `taghliz` | The lam sound and its dependent A-vowel sound. Transformed cells place the occurrence on the lam and vowel/carrier columns, but not on a composite tanwin column. |
+| `tafkheem`, `tarqeeq` on raa | The raa sound and its dependent A-vowel sound. Transformed cells place the occurrence on the raa and vowel/carrier columns, but not on a composite tanwin column. |
+| `tarqeeq` on an owned lam choice | The lam and dependent A sounds and their transformed columns. Ordinary unowned light lam emits no `tarqeeq`. |
 | `tashil` | The eased consonant sound and the responsible hamza source, even when rendered as plain `ʔ`. |
 | `ibdal_hamza` | The replacement vowel or consonant sound and every source unit that creates or selects it: the replaced hamza or replacement spelling, plus the realized wasl unit or immediately preceding vowel witness when that context determines the result. |
 | `madd_badal` | The resulting long-vowel sound, its carrier or replacement source, and the source hamza provenance that makes it badal. A transformed hamza does not remove that reach. |
 | Effective madd after ibdal or on a badal carrier | The resulting long-vowel sound and the same source units that own the created carrier, plus any further causal unit required by the effective classification, such as the following fixed sukun for `madd_lazim`. |
 | `madd_leen_mahmuz` | The target sakin `/w/` or `/j/` sound; the target waw/yaa and following hamza source units. The preceding fatha is a predicate only. |
 | `naql` | The source qata unit, the preceding host consonant or nunation, the transferred vowel sound, and their source glyphs. |
-| `iltiqa_haraka` | Only the realized A, I, or U vowel through `rules_on_sound()`. The repaired consonant or nunation is the source owner and exposes the rule through `rules_on_char()`, together with a written linking-haraka witness where present; its base consonant sound is not classified. |
+| `iltiqa_haraka` | Only the inserted A, I, or U sound. Its transformed column and sound cell live on the boundary; the preceding consonant or nunation sound and base column do not receive the rule. The core occurrence still names the repaired slot as its subject and the wasl slot as private trigger context. |
 
 A pure ibdal-created long vowel normally carries both `ibdal_hamza` and
 `madd_tabii`. A fixed following sukun instead produces `madd_lazim`. When the
@@ -221,6 +231,28 @@ long nuclei: that would miss an ibdal-created long. Conversely, a qata slot
 consumed or silenced by the transformation cannot independently trigger a
 second madd. `madd_badal` uses semantic provenance in addition to this
 effective shape, so origin and current context remain independent classifiers.
+
+### Additive madd identities
+
+The RAR catalogue separates why a vowel exists from the context that determines
+its effective madd. Tests therefore assert the complete rule set on a long
+sound, not merely one acceptable madd label:
+
+- an ordinary Warsh badal has `madd_badal` plus its effective madd, normally
+  `madd_tabii`, but possibly `madd_lazim`, `madd_muttasil`, or
+  `madd_arid_lissukun` as the performed context requires;
+- a stopped fathatan replacement has `madd_iwad + madd_tabii`;
+- a joined pronoun-haa length has `madd_silah + madd_tabii`, or
+  `madd_silah + madd_munfasil` before a qata hamza; and
+- a general ibdal-created carrier has `ibdal_hamza` plus its effective madd,
+  but receives `madd_badal` only when semantic badal origin is independently
+  established.
+
+This overlap is retained for Warsh. `madd_badal`, `madd_iwad`, and
+`madd_silah` classify semantic origin or boundary shape; the companion madd
+classifies effective structure. Warsh count rules may give badal a non-tabii
+duration, but counts are outside the sound model, so `madd_tabii` here does
+not assert a two-count performance or erase badal identity.
 
 ## Riwayah-scoped rule sets
 
@@ -248,7 +280,7 @@ canonical-color classifier may emit `imala`, `tashil`, or `ishmam`; their
 declared sets make all of those IDs visible to the catalogue. The generic
 naql classifier can be reusable code, but only the
 Warsh package binds it with the al-Azraq matcher and exception data. Shared
-`madd_jaiz_munfasil` remains one classifier identity even when Warsh-specific
+`madd_munfasil` remains one classifier identity even when Warsh-specific
 mim-al-jam data creates additional qualifying vowels.
 
 Riwayah-scoped binding is also the ownership boundary for defaults and optional
