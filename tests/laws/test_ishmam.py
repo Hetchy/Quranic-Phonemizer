@@ -1,7 +1,7 @@
 """`تَأْمَ۫نَّا` at 12:11 is the only ishmam in this reading.
 
-The lips round on a letter that is otherwise said as written, so the rule
-names a sound it does not make and owns none of its own.
+The written mark follows the meem, but the rounding belongs to the noon. The
+rule names a sound it does not make and owns none of its own.
 """
 from __future__ import annotations
 
@@ -27,16 +27,16 @@ def test_the_ishmam_names_one_letter_and_reads_nothing_beside_it(r):
     # تَأْمَ۫نَّا
     assert r.phonemes(6) == "taʔmaña:"
     occurrence = _the_ishmam(r)
-    assert occurrence.subjects == (r.score.words[5].slots[2].id,)
+    assert occurrence.subjects == (r.score.words[5].slots[3].id,)
     assert occurrence.context == ()
     assert occurrence.boundary is None
-    assert r.source_of("ishmam") == "م"
+    assert r.source_of("ishmam") == "ن"
     assert r.host_of("ishmam") is None
 
 
 @for_each_riwayah(TAMANNA, isolated=6)
 def test_the_ishmam_classifies_the_consonant_and_owns_no_sound(r):
-    """Its only edge is a classification, so a consumer drawing the meem can
+    """Its only edge is a classification, so a consumer drawing the noon can
     name the rule without the reading crediting it with the sound."""
     # تَأْمَ۫نَّا
     occurrence = _the_ishmam(r)
@@ -50,7 +50,7 @@ def test_the_ishmam_classifies_the_consonant_and_owns_no_sound(r):
     ]
     assert len(modifiers) == 1
     assert isinstance(modifiers[0], pf.Classifies)
-    assert r.rules_on_sound(6, "m") == {"ishmam"}
+    assert "ishmam" in r.rules_on_sound(6, "ñ")
 
 
 @for_each_riwayah(TAMANNA, ibtidaa=6, wasl=6)
@@ -58,4 +58,5 @@ def test_the_rounding_holds_whichever_way_the_word_is_read(r):
     """It is a fact of the word, not of the junction after it."""
     # تَأْمَ۫نَّا
     assert r.phonemes(6) == "taʔmaña:"
-    assert "ishmam" in r.rules_on_char(6, "۫")
+    assert "ishmam" in r.rules_on_char(6, "ن")
+    assert "ishmam" not in r.rules_on_char(6, "۫")

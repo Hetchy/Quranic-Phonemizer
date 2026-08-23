@@ -15,6 +15,7 @@ DAGGER_ALIF = "ٰ"
 MADD_SIGN = "ٓ"
 MAQSURA = "ى"
 TATWEEL = "ـ"
+ISHMAM_MARK = "۫"
 
 
 def _merged_carrier(base: CellColumn, mark: CellColumn) -> CellColumn:
@@ -71,10 +72,13 @@ def fold_maqsura_daggers(word: CellWord) -> CellWord:
 
 
 def clean_structural_marks(word: CellWord) -> CellWord:
-    """A tatweel positions source ink; it is not a standalone rendered mark."""
+    """Remove source positioning and evidence marks from rendered cell ink."""
     return replace(word, columns=tuple(
-        replace(col, text=col.text.replace(TATWEEL, ""))
-        if col.role in {CellRole.HARAKA, CellRole.TANWEEN} else col
+        replace(col, text=(
+            col.text.replace(TATWEEL, "")
+            if col.role in {CellRole.HARAKA, CellRole.TANWEEN} else col.text
+        ).replace(ISHMAM_MARK, ""))
+        if TATWEEL in col.text or ISHMAM_MARK in col.text else col
         for col in word.columns
     ))
 

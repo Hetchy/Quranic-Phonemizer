@@ -43,8 +43,7 @@ from .plan import (
 )
 
 #: Which aspect a rule's `Classifies` edge names.
-#: `ishmam` names the letter it rides, not the vowel it rounds for -- that
-#: vowel is the one thing it does not sound.
+#: `ishmam` names the noon whose rounding is shown by the preceding mark.
 _CLASSIFIES_ASPECT: dict[Rule, Aspect] = {
     Rule.TARQEEQ: Aspect.CONSONANT,
     Rule.ISHMAM: Aspect.CONSONANT,

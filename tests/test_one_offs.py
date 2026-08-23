@@ -31,7 +31,8 @@ def test_the_inclining_toggle_defaults_off():
 def test_the_one_ishmam_in_the_corpus(r):
     # تَأْمَ۫نَّا
     assert r.phonemes(6) == "taʔmaña:"
-    assert "ishmam" in r.rules_on_char(6, "۫")
+    assert "ishmam" in r.rules_on_char(6, "ن")
+    assert "ishmam" not in r.rules_on_char(6, "۫")
 
 
 @for_each_riwayah(AAJAMIYY, isolated=9)

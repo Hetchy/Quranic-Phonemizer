@@ -348,6 +348,21 @@ def test_muqattaat_letters_remain_base_cells_with_folded_maddah(hafs, pen):
     assert any("ٓ" in c.text for c in columns)
 
 
+def test_ishmam_keeps_the_fatha_visible_and_names_the_noon(hafs, pen):
+    _, bundle, view = _build(hafs, pen, "12:11")
+    occurrence = next(o for o in bundle.rule_occurrences if o.rule_id.value == "ishmam")
+    word_id = next(w.id for w in bundle.words if w.ref == "12:11:6")
+    word = next(w for w in view.words if w.word_id == word_id)
+    meem = next(c for c in word.columns if c.text == "م")
+    fatha = next(c for c in word.columns if c.attached_to_column_id == meem.id)
+    noon = next(c for c in word.columns if c.text.startswith("ن"))
+
+    assert fatha.text == "َ"
+    assert occurrence.id not in fatha.rule_occurrence_ids
+    assert occurrence.id in noon.rule_occurrence_ids
+    assert all("۫" not in c.text for c in word.columns)
+
+
 def test_iltiqa_sound_and_column_live_on_the_boundary(hafs, pen):
     _, bundle, view = _build(hafs, pen, "3:1-3:2")
     occurrence = next(o for o in bundle.rule_occurrences if o.rule_id.value == "iltiqa_haraka")

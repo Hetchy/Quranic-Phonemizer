@@ -687,10 +687,12 @@ CellBoundary orders every boundary-owned column at that exact boundary.
   writes no mark there is no second column and no pair: the variant changes the
   single main column's phoneme and leaves every letter column as it stands.
   Uthmani reads that second shape at 88:22:3.
-- Shadda, maddah, the silence mark, the pausal zero, imala, ishmam, tashil,
-  and a tatweel seat are composed directly into their main column text. They
-  never open their own columns, and the rules placed on them underline the
-  main column by law 23a.
+- Shadda, maddah, the silence mark, the pausal zero, imala, tashil, and a
+  tatweel seat are composed directly into their host column text. They never
+  open their own columns.
+- The authored ishmam mark remains source provenance but is omitted from cell
+  text, leaving the meem's ordinary fatha visible. The ishmam occurrence names
+  and marks the following noon.
 - A maqsura followed by its dagger and optional maddah is one main carrier
   column with their combined text and provenance. If a stopped reading revives
   a bare maqsura whose length had yielded to a following wasl, transformed
