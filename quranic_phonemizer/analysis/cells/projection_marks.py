@@ -4,7 +4,7 @@ from __future__ import annotations
 from dataclasses import replace
 
 from ...model.address import Junction
-from ...model.canon import VowelForm
+from ...model.canon import CanonLetter, VowelForm
 from ...model.performance import Aspect, Consonant
 from ...orthography.write import Pen
 from ..facts import AnalysisFacts
@@ -101,6 +101,27 @@ def _needs_pausal_sukun(col, facts, slot_of_unit, pausal) -> bool:
     )
 
 
+def _pausal_consonant_text(word, col, facts, slot_of_unit, pen) -> str:
+    indices = [
+        facts.slot_index[slot_of_unit[unit.value]]
+        for unit in col.source_unit_ids if unit.value in slot_of_unit
+    ]
+    hamza = next(
+        (index for index in indices
+         if facts.slots[index].letter is CanonLetter.HAMZA),
+        None,
+    )
+    if hamza is None:
+        return col.text
+    previous = hamza - 1
+    quality = None
+    if previous >= 0 and facts.word_of_slot[previous] == word.word_id.value:
+        state = facts.slots[previous].nucleus.stopped
+        if state.form is VowelForm.SHORT:
+            quality = state.quality
+    return pen.pausal_hamza(quality)
+
+
 def fold_pausal_sukun(word: CellWord, facts: AnalysisFacts,
                       slot_of_unit, pen: Pen) -> CellWord:
     """Put a stopped consonant's recovered sukun in its native letter cell."""
@@ -119,7 +140,11 @@ def fold_pausal_sukun(word: CellWord, facts: AnalysisFacts,
         final = None
     return replace(word, columns=tuple(
         replace(
-            col, text=col.text + pen.role("sukun"),
+            col,
+            text=(
+                _pausal_consonant_text(word, col, facts, slot_of_unit, pen)
+                + pen.role("sukun")
+            ),
             status=(CellStatus.REPLACED
                     if col.status is CellStatus.PRESENT else col.status),
         ) if final is not None and col.id == final.id

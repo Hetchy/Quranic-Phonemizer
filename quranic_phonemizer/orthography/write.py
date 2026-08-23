@@ -101,6 +101,16 @@ class Pen:
         seat = self.roles.get("hamza_below" if quality is Quality.I else "hamza_above")
         return seat or self.letter(CanonLetter.HAMZA)
 
+    def pausal_hamza(self, previous: Quality | None) -> str:
+        """Write a sakin final hamza on the seat licensed before it."""
+        role = {
+            Quality.A: "hamza_above",
+            Quality.E: "hamza_above",
+            Quality.U: "hamza_waw",
+            Quality.I: "hamza_yaa",
+        }.get(previous)
+        return self.roles.get(role, self.letter(CanonLetter.HAMZA))
+
 
 def pen_for(inventory: Inventory, names: dict | None = None) -> Pen:
     """Invert an inventory. Ambiguity resolves to the first scalar declared
@@ -131,18 +141,36 @@ def pen_for(inventory: Inventory, names: dict | None = None) -> Pen:
 
 
 def _hamza_seats(inventory: Inventory, letters, roles) -> None:
-    """Add display spellings for hamza-on-alif from the script inventory."""
+    """Add the script's display spellings for every hamza seat."""
     hamzas = {
         scalar for scalar, entry in inventory.letters.items()
         if entry.letter is CanonLetter.HAMZA
     }
+    joiner = "\u034f" if "\u034f" in inventory.marks else ""
+    above_mark = (joiner + "\u0654" + joiner
+                  if "\u0654" in inventory.combining_hamza else "")
+    below_mark = (joiner + "\u0655" + joiner
+                  if "\u0655" in inventory.combining_hamza else "")
     alif = letters.get(CanonLetter.ALIF, "")
-    above = "أ" if "أ" in hamzas else alif + ("ٔ" if "ٔ" in inventory.combining_hamza else "")
-    below = "إ" if "إ" in hamzas else alif + ("ٕ" if "ٕ" in inventory.combining_hamza else "")
+    waw = letters.get(CanonLetter.WAW, "")
+    yaa = letters.get(CanonLetter.YA, "")
+    def seat(precomposed, base, mark):
+        if precomposed in hamzas:
+            return precomposed
+        return base + mark if base and mark else ""
+
+    above = seat("أ", alif, above_mark)
+    below = seat("إ", alif, below_mark)
+    on_waw = seat("ؤ", waw, above_mark)
+    on_yaa = seat("ئ", yaa, above_mark)
     if above:
         roles["hamza_above"] = above
     if below:
         roles["hamza_below"] = below
+    if on_waw:
+        roles["hamza_waw"] = on_waw
+    if on_yaa:
+        roles["hamza_yaa"] = on_yaa
 
 
 def write_verse(score: Score, pen: Pen) -> tuple[str, ...]:

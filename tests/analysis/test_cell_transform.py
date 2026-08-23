@@ -142,6 +142,30 @@ def test_the_taa_marbuta_at_waqf_is_read_as_a_haa(hafs, pen):
     assert haa
 
 
+@pytest.mark.parametrize(("ref", "expected"), [
+    ("78:2:2", "أْ"),
+    ("10:4:8", "أْ"),
+    ("5:29:12", "ءْ"),
+    ("10:15:24", "ءْ"),
+    ("5:29:4", "ءْ"),
+    ("2:166:2", "أْ"),
+    ("55:22:3", "ؤْ"),
+    ("2:15:2", "ئْ"),
+])
+def test_a_pausal_hamza_uses_the_preceding_vowels_seat(
+    hafs, pen, ref, expected
+):
+    view, _, _ = _build(hafs, pen, ref, {})
+    hamza = [c for c in view.words[0].columns if c.text == expected][-1]
+    assert hamza.status is CellStatus.REPLACED
+
+
+def test_a_joined_hamza_keeps_its_written_seat(hafs, pen):
+    view, _, _ = _build(hafs, pen, "78:2:2-78:2:3", {})
+    assert any(c.text == "إ" and c.status is CellStatus.PRESENT
+               for c in view.words[0].columns)
+
+
 def test_the_source_spelling_is_unchanged(hafs, pen):
     """The transformed view is additive: the default source spelling is what it
     was, column for column."""
