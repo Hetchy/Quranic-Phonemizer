@@ -76,7 +76,7 @@ Gemination (shaddah) is represented by repeating the phoneme to create new disti
 | **Rule** | **Phoneme** |
 |:---:|:---:|
 | Iqlab | `ŋ` |
-| Ikhfaa Haqiqi | `ŋ` |
+| Ikhfaa | `ŋ` |
 | Ikhfaa Shafawi | `ŋ` |
 | Idgham bi-Ghunnah | `ñ` / `m̃` / `j̃` / `w̃` |
 | Idgham Shafawi | `m̃` |
@@ -368,7 +368,7 @@ for identifier, english, arabic, summary in tajweed_rules("hafs")[:3]:
 
 ```
 izhar | Izhar | إظهار | A quiescent noon or tanween keeps its own sound before a throat letter.
-ikhfaa | Ikhfaa Haqiqi | إخفاء حقيقي | A quiescent noon or tanween is hidden as a hum held at the following letter's place.
+ikhfaa | Ikhfaa | إخفاء | A quiescent noon or tanween is hidden as a hum held at the following letter's place.
 iqlab | Iqlab | إقلاب | A quiescent noon or tanween becomes a hummed meem before baa.
 ```
 

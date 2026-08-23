@@ -14,7 +14,7 @@ RULE_DEFINITIONS: dict[Rule, tuple[str, str, str]] = {
         "A quiescent noon or tanween keeps its own sound before a throat letter.",
     ),
     Rule.IKHFAA: (
-        "Ikhfaa Haqiqi", "إخفاء حقيقي",
+        "Ikhfaa", "إخفاء",
         "A quiescent noon or tanween is hidden as a hum held at the following letter's place.",
     ),
     Rule.IQLAB: (
@@ -118,7 +118,7 @@ RULE_DEFINITIONS: dict[Rule, tuple[str, str, str]] = {
         "A long vowel is extended before a letter the reading keeps quiescent.",
     ),
     Rule.MADD_ARID_LISSUKUN: (
-        "Madd Arid lil-Sukun", "مد عارض للسكون",
+        "Madd Arid Lissukun", "مد عارض للسكون",
         "A long vowel is extended before a letter the stop makes quiescent.",
     ),
     Rule.MADD_LEEN: (
@@ -126,7 +126,7 @@ RULE_DEFINITIONS: dict[Rule, tuple[str, str, str]] = {
         "A waw or yaa after a fatha is extended before a letter the stop makes quiescent.",
     ),
     Rule.MADD_IWAD: (
-        "Iwad", "عوض",
+        "Madd Iwad", "مد عوض",
         "A fathatan stopped on is exchanged for a long aa.",
     ),
     Rule.MADD_BADAL: (
@@ -142,7 +142,7 @@ RULE_DEFINITIONS: dict[Rule, tuple[str, str, str]] = {
         "Started on, a prosthetic hamza lengthens its vowel over the quiescent hamza after it.",
     ),
     Rule.HAMZA_WASL_SILENT: (
-        "Hamza Wasl Elision", "حذف همزة الوصل",
+        "Hamza Wasl Silent", "حذف همزة الوصل",
         "A prosthetic hamza is not sounded when the word before it is joined to it.",
     ),
     Rule.HAMZA_WASL_FATHA: (
