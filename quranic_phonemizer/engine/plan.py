@@ -80,7 +80,17 @@ class Relength:
     length: Length
 
 
-Effect: TypeAlias = Realize | MergeInto | Silence | Insert | Recolour | Relength
+@dataclass(frozen=True, slots=True)
+class Classify:
+    """Attach an occurrence to an existing sound of the named aspect."""
+
+    slot: SlotId
+    aspect: Aspect
+
+
+Effect: TypeAlias = (
+    Realize | MergeInto | Silence | Insert | Recolour | Relength | Classify
+)
 
 
 @dataclass(frozen=True, slots=True)

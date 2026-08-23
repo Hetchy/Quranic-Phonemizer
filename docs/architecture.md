@@ -199,7 +199,11 @@ exact characters and letter units with their sound ownership and silence,
 `highlight_groups` folds continuous-text highlight ranges, and the cell
 builders under `analysis/cells/` nest one column per source unit into word and
 boundary rows, with a transformed spelling that draws the recited delta from
-the pen.
+the pen. A disjoint-letter opening keeps its compact source view, while its
+transformed cell word contains ordinary flat cells spelling each letter name.
+`CellRun` spans separate those names and an intra-word `CellBridge` declares a
+merger across two runs; renderers only add spacing and draw those declared
+relations.
 
 Each surface validates itself on every build: the laws modules run inside the
 builders, not only in tests. [`quranic_phonemizer/analysis/schema/`](../quranic_phonemizer/analysis/schema/)

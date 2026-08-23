@@ -126,14 +126,20 @@ def _check_mergers(
     bundle: AnalysisBundle, word_ids, boundary_ids, sound_ids, occ_ids
 ) -> None:
     for merger in bundle.mergers:
-        _require(merger.boundary_id in boundary_ids, "merger names a missing boundary")
         _require(merger.before_word_id in word_ids and merger.after_word_id in word_ids,
                  "merger names a missing word")
         _require(merger.sound_id in sound_ids, "merger names a missing sound")
         before, after = merger.before_word_id.value, merger.after_word_id.value
-        _require(abs(before - after) == 1, "merger does not cross one boundary")
-        _require(merger.boundary_id == ids.BoundaryId(max(before, after)),
-                 "merger boundary is not the crossed one")
+        if before == after:
+            _require(merger.boundary_id is None,
+                     "an intra-word merger names a boundary")
+        else:
+            _require(merger.boundary_id in boundary_ids,
+                     "merger names a missing boundary")
+            _require(abs(before - after) == 1,
+                     "merger does not cross one boundary")
+            _require(merger.boundary_id == ids.BoundaryId(max(before, after)),
+                     "merger boundary is not the crossed one")
         for occ in merger.rule_occurrence_ids:
             _require(occ in occ_ids, "merger names a missing occurrence")
 

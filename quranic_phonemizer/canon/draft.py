@@ -39,6 +39,8 @@ class _Draft:
     it onto the `ScoreWord`."""
 
     annotations: frozenset[Annotation] = frozenset()
+    spelling_run: int | None = None
+    spelled_letter: CanonLetter | None = None
 
     uid: int = field(default_factory=lambda: next(_uid))
     """Identity that survives being moved, split or dropped, which `id()` did

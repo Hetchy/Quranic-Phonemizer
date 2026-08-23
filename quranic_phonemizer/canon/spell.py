@@ -159,6 +159,7 @@ def _spelled(clusters, names: Muqattaat) -> list | None:
     but these letters are named, not read, so that absorption does not apply.
     """
     out: list[_Draft] = []
+    run = 0
     for index, cluster in clusters:
         if cluster.letter is None:
             continue
@@ -174,6 +175,9 @@ def _spelled(clusters, names: Muqattaat) -> list | None:
                     nucleus=nucleus,
                     cluster=index,
                     origin=SlotOrigin.SPELLED,
+                    spelling_run=run,
+                    spelled_letter=cluster.letter,
                 )
             )
+        run += 1
     return out or None

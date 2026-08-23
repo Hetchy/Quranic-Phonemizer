@@ -200,6 +200,12 @@
             }
           ]
         },
+        "slot_ids": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
         "source_character_ids": {
           "items": {
             "type": "integer",
@@ -284,6 +290,7 @@
         "rule_occurrence_ids",
         "side",
         "silence",
+        "slot_ids",
         "source_character_ids",
         "source_unit_ids",
         "status",
@@ -302,7 +309,7 @@
           "$ref": "#/$defs/CellView"
         },
         "schema_version": {
-          "const": 1,
+          "const": 2,
           "type": "integer"
         }
       },
@@ -348,6 +355,33 @@
         "sound_ids"
       ],
       "type": "object"
+    },
+    "CellRun": {
+      "additionalProperties": false,
+      "properties": {
+        "column_ids": {
+          "items": {
+            "type": "integer",
+            "x-ref": "CellColumn"
+          },
+          "type": "array"
+        },
+        "id": {
+          "type": "integer",
+          "x-ref": "CellRun"
+        },
+        "source_unit_id": {
+          "type": "integer",
+          "x-ref": "LetterUnit"
+        }
+      },
+      "required": [
+        "column_ids",
+        "id",
+        "source_unit_id"
+      ],
+      "type": "object",
+      "x-record": "CellRun"
     },
     "CellSound": {
       "additionalProperties": false,
@@ -403,6 +437,12 @@
     "CellWord": {
       "additionalProperties": false,
       "properties": {
+        "bridges": {
+          "items": {
+            "$ref": "#/$defs/CellBridge"
+          },
+          "type": "array"
+        },
         "columns": {
           "items": {
             "$ref": "#/$defs/CellColumn"
@@ -412,6 +452,12 @@
         "groups": {
           "items": {
             "$ref": "#/$defs/CellGroup"
+          },
+          "type": "array"
+        },
+        "runs": {
+          "items": {
+            "$ref": "#/$defs/CellRun"
           },
           "type": "array"
         },
@@ -427,8 +473,10 @@
         }
       },
       "required": [
+        "bridges",
         "columns",
         "groups",
+        "runs",
         "sounds",
         "word_id"
       ],

@@ -184,10 +184,12 @@ same `rules` array published on the result.
 
 The native analysis documents use the integer `schema_version` stamped at the
 top of each wire document. A change to a wire record or its meaning requires a
-version bump. The `@quranic-phonemizer/cells` package major equals the native
-schema version it reads, so package 1.x accepts native schema 1 and throws on a
-mismatch. The rule catalogue returned by `tajweed_rules()` is additive metadata
-outside that versioned document contract.
+version bump. Native schema 2 adds canonical slot provenance, flat named-letter
+runs, and intra-word merger bridges to the cell document. The
+`@quranic-phonemizer/cells` package major equals the native schema version it
+reads, so package 2.x accepts native schema 2 and throws on a mismatch. The rule
+catalogue returned by `tajweed_rules()` is additive metadata outside that
+versioned document contract.
 
 The canonical JSON-shaped representation is defined in
 `quranic_phonemizer/phonemize/schema.py`. Its tagged unions and indices are

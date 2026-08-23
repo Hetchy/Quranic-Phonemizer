@@ -5,6 +5,7 @@ from dataclasses import dataclass
 
 from ..engine.neighbourhood import Neighbourhood
 from ..engine.plan import (
+    Classify,
     Length,
     MergeInto,
     Phase,
@@ -341,9 +342,8 @@ class MaddLeen:
         if following is None:
             return None
         if following.nucleus.is_silent:
-            # `عٓ` spells out as a leen before a sakin the Score holds for
-            # good, so the length is obligatory rather than the stop's.
-            return _classify(Rule.MADD_LAZIM, at, following.id)
+            # `عٓ` has a permanent sakin, so its length is obligatory.
+            return _classify(Rule.MADD_LAZIM, at, following.id, Aspect.CONSONANT)
         if not _stop_makes_quiescent(near, following, boundaries, plan):
             # Only the letter the stop actually silences counts.
             return None
@@ -374,8 +374,10 @@ def _stop_makes_quiescent(
     return plan.merged_away(slot.id, Aspect.VOWEL)
 
 
-def _classify(rule: Rule, at: SlotId, other: SlotId | None) -> Verdict:
-    return Verdict(Occurrence(mint(rule, at), rule, (at,), _context(other)), ())
+def _classify(rule: Rule, at: SlotId, other: SlotId | None,
+              aspect: Aspect | None = None) -> Verdict:
+    effects = () if aspect is None else (Classify(at, aspect),)
+    return Verdict(Occurrence(mint(rule, at), rule, (at,), _context(other)), effects)
 
 
 def _context(other: SlotId | None) -> tuple[SlotId, ...]:

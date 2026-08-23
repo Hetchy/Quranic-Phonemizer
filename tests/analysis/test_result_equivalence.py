@@ -16,7 +16,6 @@ from quranic_phonemizer.analysis.ids import SoundId
 from quranic_phonemizer.analysis.laws import ValidationError, validate
 from quranic_phonemizer.analysis.result import build_result
 from quranic_phonemizer.model.address import Script
-from quranic_phonemizer.model.performance import effect_targets
 from quranic_phonemizer.orthography.write import pen_for
 from quranic_phonemizer.phonemize import edges as ed
 from quranic_phonemizer.phonemize.assemble import assemble
@@ -154,7 +153,6 @@ def test_occurrences_agree_in_words_boundaries_and_sounds(
 ):
     session, legacy, native = _both(hafs, pen, alphabet, ref, kwargs)
     word_of = tuple(unit.word for unit in legacy.units)
-    targets = effect_targets(session.performance)
     per_sound = [set() for _ in legacy.sounds]
     for edge in legacy.attributions:
         sound = getattr(edge, "sound", None)
@@ -185,10 +183,10 @@ def test_mergers_agree_over_boundary_words_and_sound(hafs, pen, alphabet, ref, k
             m.sound_id.value,
             tuple(o.value for o in m.rule_occurrence_ids),
         )
-        for m in native.mergers
+        for m in native.mergers if m.boundary_id is not None
     )
     assert native_mergers == _legacy_mergers(legacy)
-    for merger in native.mergers:
+    for merger in (m for m in native.mergers if m.boundary_id is not None):
         crossed = max(merger.before_word_id.value, merger.after_word_id.value)
         assert merger.boundary_id.value == crossed
 
@@ -247,7 +245,7 @@ def test_an_iltiqa_is_not_a_merger_and_names_its_boundary(hafs, pen, alphabet):
         if occ.rule_id.value == "iltiqa_haraka"
     ]
     assert iltiqa and all(occ.boundary_ids for occ in iltiqa)
-    assert not native.mergers
+    assert not any(m.boundary_id is not None for m in native.mergers)
 
 
 def test_the_equivalence_bites(hafs, pen, alphabet):
@@ -288,4 +286,3 @@ def test_the_written_signs_are_exercised(hafs, pen, alphabet):
         _, _, native = _both(hafs, pen, alphabet, ref, kwargs)
         total += sum(1 for b in native.boundaries if b.stop_sign)
     assert total > 0
-

@@ -76,6 +76,7 @@ def _columns(view: CellView) -> dict[int, CellColumn]:
 
 def _all_cells(view: CellView):
     cells = [c for w in view.words for c in w.sounds]
+    cells.extend(bridge.sound for w in view.words for bridge in w.bridges)
     for b in view.boundaries:
         cells.extend(b.sounds)
         cells.extend(br.sound for br in b.bridges)
@@ -145,7 +146,7 @@ def test_a_cross_word_merger_sound_lives_in_the_bridge_not_the_host_word(hafs):
     view, bundle, _ = _build(hafs, "36:52-36:53", {})
     columns = _columns(view)
     assert bundle.mergers
-    for merger in bundle.mergers:
+    for merger in (m for m in bundle.mergers if m.boundary_id is not None):
         host = next(w for w in view.words if w.word_id == merger.after_word_id)
         assert merger.sound_id not in {c.sound_id for c in host.sounds}
         bridge = next(
@@ -229,8 +230,19 @@ def test_an_iltiqa_boundary_carries_no_bridge(hafs):
     """The connecting vowel of the meem into the divine name is an insertion,
     not a merger, so its boundary carries no bridge."""
     view, bundle, _ = _build(hafs, "3:1-3:2", {})
-    assert not bundle.mergers
+    assert not any(m.boundary_id is not None for m in bundle.mergers)
     assert all(not cb.bridges for cb in view.boundaries)
+
+
+def test_a_spelled_name_merger_lives_inside_its_word(hafs):
+    view, bundle, _ = _build(hafs, "2:1", {})
+    mergers = [m for m in bundle.mergers if m.boundary_id is None]
+    assert len(mergers) == 1
+    bridge = view.words[0].bridges[0]
+    merger = mergers[0]
+    assert bridge.merger_id == merger.id
+    assert bridge.sound.sound_id == merger.sound_id
+    assert bridge.before_column_ids and bridge.after_column_ids
 
 
 # ---- each law bites under its own violation ----

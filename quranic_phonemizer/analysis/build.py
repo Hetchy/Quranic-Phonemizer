@@ -172,7 +172,7 @@ def _build_occurrences(
 
 
 def _build_mergers(
-    facts: AnalysisFacts, sound_word: dict[int, int]
+    session: Session, facts: AnalysisFacts, sound_word: dict[int, int]
 ) -> tuple[Merger, ...]:
     hosts: dict[int, Hosted] = {
         edge.sound: edge
@@ -183,7 +183,7 @@ def _build_mergers(
     for merged in facts.merges:
         before = _word_of(facts, merged.slots[0])
         after = sound_word[merged.sound]
-        if before == after:
+        if before == after and not session.score.words[before].spelling_runs:
             continue
         occs = {merged.by}
         host = hosts.get(merged.sound)
@@ -191,7 +191,10 @@ def _build_mergers(
             occs.add(host.by)
         out.append(Merger(
             id=ids.MergerId(len(out)),
-            boundary_id=ids.BoundaryId(max(before, after)),
+            boundary_id=(
+                None if before == after
+                else ids.BoundaryId(max(before, after))
+            ),
             before_word_id=ids.WordId(before),
             after_word_id=ids.WordId(after),
             sound_id=ids.SoundId(merged.sound),
@@ -234,7 +237,7 @@ def build_bundle(
         boundaries=_build_boundaries(session, facts, _boundary_signs(session, insc)),
         sounds=_build_sounds(facts, sound_word, sound_occ),
         rule_occurrences=_build_occurrences(facts, sound_occ),
-        mergers=_build_mergers(facts, sound_word),
+        mergers=_build_mergers(session, facts, sound_word),
     )
 
 

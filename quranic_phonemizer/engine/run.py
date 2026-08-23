@@ -30,6 +30,7 @@ from ..model.performance import (
 from .classifier import RuleSet
 from .neighbourhood import Neighbourhood
 from .plan import (
+    Classify,
     Insert,
     Length,
     MergeInto,
@@ -291,6 +292,10 @@ def _modifiers_for(occurrence: Occurrence, effects, hosted) -> list[Modifier]:
             sound_id = hosted.get((effect.slot, Aspect.VOWEL))
             if sound_id is not None:
                 out.append(SetsLength(sound_id, occurrence.id, effect.length))
+        elif isinstance(effect, Classify):
+            sound_id = hosted.get((effect.slot, effect.aspect))
+            if sound_id is not None:
+                out.append(Classifies(sound_id, occurrence.id))
     aspect = _CLASSIFIES_ASPECT.get(occurrence.rule)
     if aspect is not None and _names_its_sound(occurrence, effects, aspect):
         for subject in occurrence.subjects:

@@ -28,6 +28,8 @@ def _all_columns(view: CellView) -> dict[int, object]:
 
 def _all_cells(view: CellView) -> list[CellSound]:
     cells: list[CellSound] = [c for word in view.words for c in word.sounds]
+    for word in view.words:
+        cells.extend(bridge.sound for bridge in word.bridges)
     for boundary in view.boundaries:
         cells.extend(boundary.sounds)
         cells.extend(bridge.sound for bridge in boundary.bridges)
@@ -73,6 +75,8 @@ def _placement_columns(
 def _mergers_at(bundle: AnalysisBundle) -> dict[int, set[int]]:
     out: dict[int, set[int]] = {}
     for merger in bundle.mergers:
+        if merger.boundary_id is None:
+            continue
         out.setdefault(merger.boundary_id.value, set()).add(merger.id.value)
     return out
 
@@ -98,6 +102,53 @@ def _check_one_bridge(
     )
 
 
+def _check_internal_bridge(bridge, merger, columns, rules) -> None:
+    _require(bridge.sound.sound_id == merger.sound_id,
+             "a word bridge owns another sound")
+    _require(
+        all(merger.sound_id in columns[c.value].presented_sound_ids
+            for c in bridge.before_column_ids),
+        "a word bridge contributor does not present its sound",
+    )
+    _require(
+        all(merger.sound_id in columns[c.value].owned_sound_ids
+            for c in bridge.after_column_ids),
+        "a word bridge host does not own its sound",
+    )
+    _require(
+        set(bridge.sound.column_ids) == {
+            *bridge.before_column_ids, *bridge.after_column_ids
+        },
+        "a word bridge sound does not span its endpoints",
+    )
+    _require(
+        bridge.sound.rule_occurrence_ids == rules[merger.sound_id.value],
+        "a word bridge sound's rules are not its sound's",
+    )
+
+
+def _check_word_bridges(view, bundle, mergers, columns, rules) -> None:
+    internal = {
+        word: {m.id.value for m in bundle.mergers
+               if m.boundary_id is None and m.before_word_id.value == word}
+        for word in range(len(bundle.words))
+    }
+    for word in view.words:
+        seen: set[int] = set()
+        for bridge in word.bridges:
+            merger = mergers.get(bridge.merger_id.value)
+            _require(merger is not None, "a word bridge resolves to no merger")
+            _require(merger.boundary_id is None, "a word bridge names a boundary")
+            _require(merger.before_word_id == word.word_id,
+                     "a word bridge sits in another word")
+            _require(bridge.merger_id.value not in seen,
+                     "an intra-word merger has two bridges")
+            seen.add(bridge.merger_id.value)
+            _check_internal_bridge(bridge, merger, columns, rules)
+        _require(seen == internal[word.word_id.value],
+                 "a word's bridges are not its internal mergers")
+
+
 def _check_bridges(
     view: CellView, bundle: AnalysisBundle, source: SourceView
 ) -> None:
@@ -109,6 +160,7 @@ def _check_bridges(
         u.value: c.id.value
         for w in view.words for c in w.columns for u in c.source_unit_ids
     }
+    columns = _all_columns(view)
     for cb in view.boundaries:
         seen: set[int] = set()
         for bridge in cb.bridges:
@@ -123,6 +175,7 @@ def _check_bridges(
             )
         _require(seen == at.get(cb.boundary_id.value, set()),
                  "a boundary's bridges are not its mergers")
+    _check_word_bridges(view, bundle, mergers, columns, rules)
 
 
 def _iltiqa_binds(bundle: AnalysisBundle) -> tuple[set[int], set[int]]:
@@ -177,6 +230,13 @@ def _check_closure(view: CellView, bundle: AnalysisBundle) -> None:
             _require(bridge.merger_id.value in mergers, "a bridge names an unknown merger")
             for cid in (*bridge.before_column_ids, *bridge.after_column_ids):
                 _require(cid.value in columns, "a bridge endpoint is an unknown column")
+    for word in view.words:
+        for bridge in word.bridges:
+            _require(bridge.merger_id.value in mergers,
+                     "a word bridge names an unknown merger")
+            for cid in (*bridge.before_column_ids, *bridge.after_column_ids):
+                _require(cid.value in columns,
+                         "a word bridge endpoint is an unknown column")
 
 
 def _check_groups(view: CellView) -> None:

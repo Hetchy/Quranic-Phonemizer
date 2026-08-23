@@ -12,6 +12,8 @@ from ..dtos import BoundaryState
 from ..ids import (
     BoundaryId,
     CellColumnId,
+    CellRunId,
+    CanonicalSlotId,
     CharacterId,
     LetterUnitId,
     MergerId,
@@ -81,6 +83,7 @@ class CellColumn:
     presented_sound_ids: tuple[SoundId, ...]
     anchor_unit_id: LetterUnitId | None
     side: CellSide | None
+    slot_ids: tuple[CanonicalSlotId, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -101,23 +104,32 @@ class CellGroup:
 
 
 @dataclass(frozen=True, slots=True)
-class CellWord:
-    word_id: WordId
-    columns: tuple[CellColumn, ...]
-    sounds: tuple[CellSound, ...]
-    groups: tuple[CellGroup, ...] = ()
+class CellRun:
+    """One named-letter span over a flat word cell row."""
+
+    id: CellRunId
+    source_unit_id: LetterUnitId
+    column_ids: tuple[CellColumnId, ...]
 
 
 @dataclass(frozen=True, slots=True)
 class CellBridge:
-    """A cross-word merger's shared sound, rendered once between the words. Its
-    endpoints are the contributor's presenter columns and the host's owner
-    columns, so a renderer co-highlights both sides of the join."""
+    """A merger's shared sound, rendered once across its two endpoints."""
 
     merger_id: MergerId
     before_column_ids: tuple[CellColumnId, ...]
     after_column_ids: tuple[CellColumnId, ...]
     sound: CellSound
+
+
+@dataclass(frozen=True, slots=True)
+class CellWord:
+    word_id: WordId
+    columns: tuple[CellColumn, ...]
+    sounds: tuple[CellSound, ...]
+    groups: tuple[CellGroup, ...] = ()
+    runs: tuple[CellRun, ...] = ()
+    bridges: tuple[CellBridge, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -147,6 +159,7 @@ __all__ = [
     "CellGroup",
     "CellGroupKind",
     "CellRole",
+    "CellRun",
     "CellSide",
     "CellSound",
     "CellStatus",

@@ -20,6 +20,7 @@ from ..source_dtos import LetterUnit, LetterUnitKind, SourceView
 from .align import build_cell_sounds
 from .dtos import CellColumn, CellRole, CellStatus, CellTier, CellWord
 from .laws import validate_cell_columns, validate_cell_sounds
+from .spelled import expand_spelled_words
 
 
 @dataclass(frozen=True, slots=True)
@@ -244,6 +245,7 @@ def build_cell_words(
     view: SourceView | None = None,
     facts: AnalysisFacts | None = None,
     insc: InscriptionFacts | None = None,
+    pen=None,
 ) -> tuple[CellWord, ...]:
     if facts is None:
         facts = analyse(
@@ -257,6 +259,9 @@ def build_cell_words(
     words = build_cell_sounds(_words(view, reading), bundle.sounds)
     validate_cell_columns(words, view, reading.slot_of_unit)
     validate_cell_sounds(words, bundle.sounds)
+    if pen is not None:
+        words = expand_spelled_words(words, facts, bundle, session.score, pen)
+        validate_cell_sounds(words, bundle.sounds)
     return words
 
 

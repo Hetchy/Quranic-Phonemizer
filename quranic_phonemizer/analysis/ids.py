@@ -10,7 +10,7 @@ from dataclasses import dataclass
 #: Bumped when a DTO field or a role, status, state, or tier value is added,
 #: removed, or changes meaning. A rule joining or leaving the catalogue does
 #: not bump it.
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
 
 @dataclass(frozen=True, slots=True, order=True)
@@ -59,6 +59,16 @@ class CellColumnId:
 
 
 @dataclass(frozen=True, slots=True, order=True)
+class CellRunId:
+    value: int
+
+
+@dataclass(frozen=True, slots=True, order=True)
+class CanonicalSlotId:
+    value: str
+
+
+@dataclass(frozen=True, slots=True, order=True)
 class RuleId:
     """The stable rule identifier a `RuleDefinition` and every occurrence that
     cites it share. Its value is the model rule name."""
@@ -70,6 +80,8 @@ __all__ = [
     "SCHEMA_VERSION",
     "BoundaryId",
     "CellColumnId",
+    "CellRunId",
+    "CanonicalSlotId",
     "CharacterId",
     "HighlightId",
     "LetterUnitId",

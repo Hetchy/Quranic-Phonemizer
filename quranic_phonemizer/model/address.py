@@ -75,6 +75,17 @@ class SlotId:
 
 
 @dataclass(frozen=True, slots=True, order=True)
+class SpellingRunId:
+    """A named-letter run within one Quran word."""
+
+    location: Location
+    ordinal: int
+
+    def __str__(self) -> str:
+        return f"{self.location}~{self.ordinal}"
+
+
+@dataclass(frozen=True, slots=True, order=True)
 class GraphemeId:
     """Position-ordered: `offset` is the codepoint index within the verse."""
 

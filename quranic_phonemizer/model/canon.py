@@ -8,7 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import StrEnum
 
-from .address import Location, Riwayah, SlotId, VariantSelection
+from .address import Location, Riwayah, SlotId, SpellingRunId, VariantSelection
 
 
 class CanonLetter(StrEnum):
@@ -252,10 +252,20 @@ class Slot:
 
 
 @dataclass(frozen=True, slots=True)
+class SpellingRun:
+    """The canonical slots that spell one compact muqattaat letter."""
+
+    id: SpellingRunId
+    source_letter: CanonLetter
+    slot_ids: tuple[SlotId, ...]
+
+
+@dataclass(frozen=True, slots=True)
 class ScoreWord:
     location: Location
     slots: tuple[Slot, ...]
     sakt_after: bool = False
+    spelling_runs: tuple[SpellingRun, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)

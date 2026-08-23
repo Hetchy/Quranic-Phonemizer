@@ -356,11 +356,14 @@ def test_lam_shamsiyyah_is_only_on_the_silent_lam(hafs, pen):
     assert named[0].silence == occurrence.id
 
 
-def test_muqattaat_letters_remain_base_cells_with_folded_maddah(hafs, pen):
+def test_muqattaat_expand_to_flat_named_letter_runs(hafs, pen):
     _, _, view = _build(hafs, pen, "3:1")
-    columns = view.words[0].columns
-    assert all(c.role is CellRole.LETTER for c in columns)
-    assert any("ٓ" in c.text for c in columns)
+    word = view.words[0]
+    columns = {column.id: column for column in word.columns}
+    assert tuple(
+        "".join(columns[item].text for item in run.column_ids)
+        for run in word.runs
+    ) == ("أَلِفْ", "لَآم", "مِّيٓمْ")
 
 
 def test_ishmam_keeps_the_fatha_visible_and_names_the_noon(hafs, pen):

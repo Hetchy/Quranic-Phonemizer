@@ -71,7 +71,7 @@ class RuleOccurrence:
 @dataclass(frozen=True, slots=True)
 class Merger:
     id: MergerId
-    boundary_id: BoundaryId
+    boundary_id: BoundaryId | None
     before_word_id: WordId
     after_word_id: WordId
     sound_id: SoundId
