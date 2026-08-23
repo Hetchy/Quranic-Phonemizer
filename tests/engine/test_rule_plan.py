@@ -16,7 +16,6 @@ from quranic_phonemizer.model.performance import (
     Hosts,
     MergedInto,
     Occurrence,
-    Participants,
 )
 from quranic_phonemizer.riwayat.hafs import rule_tables
 from quranic_phonemizer.rules.noon_sakinah import NoonSakinah
@@ -60,18 +59,18 @@ def test_classification_only_rules_still_name_their_sound(packed, hafs):
 def test_conflicting_effects_name_the_existing_rule():
     plan = Plan()
     slot = SlotId(VerseRef(1, 1), 0)
-    sounds = (Consonant(CanonLetter.NOON),)
-    for rule in (Rule.IKHFAA_HAQIQI, Rule.IQLAB):
+    sound = Consonant(CanonLetter.NOON)
+    for rule in (Rule.IKHFAA, Rule.IQLAB):
         occurrence = Occurrence(
-            OccurrenceId(slot.verse, hash(rule) % 1000), rule, Participants(slot)
+            OccurrenceId(slot.verse, hash(rule) % 1000), rule, (slot,)
         )
         verdict = Verdict(
-            occurrence, (Realize(slot, Aspect.CONSONANT, sounds),)
+            occurrence, (Realize(slot, Aspect.CONSONANT, sound),)
         )
-        if rule is Rule.IKHFAA_HAQIQI:
+        if rule is Rule.IKHFAA:
             plan.record(Phase.MERGE, verdict)
         else:
-            with pytest.raises(ConflictError, match="ikhfaa_haqiqi"):
+            with pytest.raises(ConflictError, match="ikhfaa"):
                 plan.record(Phase.MERGE, verdict)
 
 

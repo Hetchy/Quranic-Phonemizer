@@ -23,7 +23,6 @@ MERGER_RULES = frozenset({
     "idgham_mutamathilayn",
     "idgham_mutaqaribayn",
     "idgham_shafawi",
-    "lam_shamsiyyah",
 })
 
 Problem = tuple[Path, int, str]

@@ -94,10 +94,8 @@ def test_visual_insertions_do_not_invent_performance_insertions(hafs, pen):
 # ---- the concrete cases the laws exercise ----
 
 def test_the_ibdal_started_prosthetic_hamza_is_replaced(hafs, pen):
-    """Started, the prosthetic hamza of ٱئْتُونِى sounds where the rasm writes a
-    silent connector, so its column is replaced with the performed hamza. The
-    lexical hamza becomes the long-vowel carrier in place: a replacement with
-    source provenance, not a dropped cell beside an insertion."""
+    """In ٱئْتُونِى, the started connector and ibdal carrier both replace
+    source columns instead of appearing beside dropped ones."""
     view, source, _ = _build(hafs, pen, "46:4:18", {})
     columns = {c.source_unit_ids[0].value: c
                for c in _columns(view) if c.source_unit_ids}

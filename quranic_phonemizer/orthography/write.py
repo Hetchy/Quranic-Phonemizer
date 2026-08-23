@@ -68,6 +68,7 @@ class Pen:
     """The scalar that lengthens a vowel, as opposed to the one that spells
     the same letter as a consonant -- `dagger_host` scalars can do either.
     """
+    hamza_seats: dict[str, str] = field(default_factory=dict)
     names: dict[tuple, CanonLetter] = field(default_factory=dict)
     """What each letter's spoken name spells, reversed. Injected, because the
     table it comes from belongs to the reading and not to the script."""
@@ -98,18 +99,20 @@ class Pen:
 
     def seated_hamza(self, quality: Quality) -> str:
         """Write a started hamza on an alif seat in this script."""
-        seat = self.roles.get("hamza_below" if quality is Quality.I else "hamza_above")
+        seat = self.hamza_seats.get(
+            "below" if quality is Quality.I else "above"
+        )
         return seat or self.letter(CanonLetter.HAMZA)
 
     def pausal_hamza(self, previous: Quality | None) -> str:
         """Write a sakin final hamza on the seat licensed before it."""
-        role = {
-            Quality.A: "hamza_above",
-            Quality.E: "hamza_above",
-            Quality.U: "hamza_waw",
-            Quality.I: "hamza_yaa",
+        seat = {
+            Quality.A: "above",
+            Quality.E: "above",
+            Quality.U: "waw",
+            Quality.I: "yaa",
         }.get(previous)
-        return self.roles.get(role, self.letter(CanonLetter.HAMZA))
+        return self.hamza_seats.get(seat, self.letter(CanonLetter.HAMZA))
 
 
 def pen_for(inventory: Inventory, names: dict | None = None) -> Pen:
@@ -135,13 +138,13 @@ def pen_for(inventory: Inventory, names: dict | None = None) -> Pen:
     for scalar, mark in inventory.marks.items():
         if mark.role and (mark.fact is not None or mark.decorates is not None):
             roles.setdefault(mark.role, scalar)
-    _hamza_seats(inventory, letters, roles)
+    hamza_seats = _hamza_seats(inventory, letters)
     return Pen(letters=letters, roles=roles, onsets=onsets,
-               carriers=carriers, names=names or {})
+               carriers=carriers, hamza_seats=hamza_seats, names=names or {})
 
 
-def _hamza_seats(inventory: Inventory, letters, roles) -> None:
-    """Add the script's display spellings for every hamza seat."""
+def _hamza_seats(inventory: Inventory, letters) -> dict[str, str]:
+    """Build the script's display spellings for every hamza seat."""
     hamzas = {
         scalar for scalar, entry in inventory.letters.items()
         if entry.letter is CanonLetter.HAMZA
@@ -163,14 +166,12 @@ def _hamza_seats(inventory: Inventory, letters, roles) -> None:
     below = seat("إ", alif, below_mark)
     on_waw = seat("ؤ", waw, above_mark)
     on_yaa = seat("ئ", yaa, above_mark)
-    if above:
-        roles["hamza_above"] = above
-    if below:
-        roles["hamza_below"] = below
-    if on_waw:
-        roles["hamza_waw"] = on_waw
-    if on_yaa:
-        roles["hamza_yaa"] = on_yaa
+    return {
+        name: value for name, value in (
+            ("above", above), ("below", below),
+            ("waw", on_waw), ("yaa", on_yaa),
+        ) if value
+    }
 
 
 def write_verse(score: Score, pen: Pen) -> tuple[str, ...]:

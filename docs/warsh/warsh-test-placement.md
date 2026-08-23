@@ -46,7 +46,7 @@ or harness contract, in `test-refactor-plan.md`. Counts are logical review
 cases. `V` marks a case added only in the final selector phase.
 
 ```text
-tests/phonemize/                               # 538 cases total
+tests/phonemize/                               # 507 cases: 435 fixed + 72V
   articles/                                   # 21
     test_lam_qamariyyah.py                    # 8
     test_lam_shamsiyyah.py                    # 9
@@ -54,47 +54,47 @@ tests/phonemize/                               # 538 cases total
 
   assimilation/                              # 29: 27 fixed + 2V
     test_mutamathilayn.py                     # 10
-    test_mutaqaribayn.py                      # 4
-    test_mutajanisayn_kamil.py                # 9
+    test_mutaqaribayn.py                      # 3
+    test_mutajanisayn_kamil.py                # 10
     test_mutajanisayn_naqis.py                # 4
     test_hafs_idgham_choices.py               # 2V
 
-  emphasis/                                   # 99: 64 fixed + 35V
+  emphasis/                                   # 97: 62 fixed + 35V
     test_istilaa.py                           # 12
     test_hafs_seen_sad.py                     # 4V
-    test_raa.py                               # 8: 2 fixed + 6V
+    test_raa.py                               # 6V
     test_hafs_raa.py                          # 19
     test_warsh_raa.py                         # 31: 11 fixed + 20V
     test_allah_lam.py                         # 8
     test_warsh_lam_taghliz.py                 # 17: 12 fixed + 5V
 
-  hamza/                                      # 116: 102 fixed + 14V
+  hamza/                                      # 104: 90 fixed + 14V
     test_wasl_start.py                        # 14
     test_hafs_alism_ibtidaa.py                # 1V
-    test_wasl_elision.py                      # 8
-    test_iltiqa.py                            # 10
+    test_wasl_silent.py                       # 3
+    test_iltiqa.py                            # 11
     test_warsh_iltiqa.py                      # 4
-    test_seats.py                             # 8
-    test_ibdal.py                             # 8
-    test_tashil.py                            # 5
+    test_seats.py                             # 5
+    test_ibdal.py                             # 6
+    test_tashil.py                            # 2
     test_warsh_naql.py                        # 16: 14 fixed + 2V
     test_warsh_single_hamza.py                # 15: 13 fixed + 2V
     test_istifham_article.py                  # 3V
     test_warsh_hamza_meetings.py              # 24: 18 fixed + 6V
 
-  nasal/                                      # 61: 59 fixed + 2V
+  nasal/                                      # 57: 55 fixed + 2V
     test_ghunnah_mushaddadah.py               # 3
-    test_idgham_bi_ghunnah.py                 # 7
+    test_idgham_bi_ghunnah.py                 # 6
     test_idgham_bila_ghunnah.py               # 4
-    test_idgham_shafawi.py                    # 3
-    test_ikhfaa_haqiqi.py                     # 12
-    test_ikhfaa_shafawi.py                    # 4: 3 fixed + 1V
-    test_iqlab.py                             # 7: 6 fixed + 1V
+    test_idgham_shafawi.py                    # 2
+    test_ikhfaa.py                            # 13
+    test_ikhfaa_shafawi.py                    # 2: 1 fixed + 1V
+    test_iqlab.py                             # 6: 5 fixed + 1V
     test_izhar.py                             # 12
     test_izhar_shafawi.py                     # 5
     test_noon_partition.py                    # 4
 
-  vowels/                                     # 161: 149 fixed + 12V
+  vowels/                                     # 147: 135 fixed + 12V
     inclination/                              # 49: 40 fixed + 9V
       test_quality.py                         # 6
       test_hafs_inclination.py                # 2
@@ -102,13 +102,13 @@ tests/phonemize/                               # 538 cases total
       test_warsh_inclination_classification.py # 14
       test_warsh_inclination_coloring.py      # 7
 
-    madd/                                     # 77
-      test_tabii.py                           # 8
-      test_muttasil.py                        # 4
+    madd/                                     # 63
+      test_tabii.py                           # 3
+      test_muttasil.py                        # 2
       test_munfasil.py                        # 5
-      test_lazim.py                           # 6
-      test_arid.py                            # 5
-      test_leen.py                            # 6
+      test_lazim.py                           # 2
+      test_arid.py                            # 4
+      test_leen.py                            # 4
       test_iwad.py                            # 4
       test_haa_silah.py                       # 5
       test_warsh_badal.py                     # 12
@@ -125,13 +125,13 @@ tests/phonemize/                               # 538 cases total
 
   test_muqattaat.py                           # 15: 14 fixed + 1V
   test_hafs_muqattaat.py                      # 1V
-  test_qalqala.py                             # 14
+  test_qalqala.py                             # 13
   test_sakt.py                                # 5V
-  test_silent_letters.py                      # 11
+  test_silent_letters.py                      # 13
   test_taa_marbuta.py                         # 5
 ```
 
-The ownership splits do not duplicate test volume. The final budget is 466
+The ownership splits do not duplicate test volume. The final budget is 435
 fixed/default and 72 selector cases. Multiple lexical forms of one selector
 may require separate semantic rows even though the API metadata is one entry.
 
@@ -156,13 +156,10 @@ Ordinary mutamathilayn, mutaqaribayn, and mutajanisayn are shared laws and
 retain unprefixed files. Clean Warsh rows can extend them as soon as the
 adapter produces the same canonical participants.
 
-There is no standalone fakk-al-idgham file. The Arabic expression is valid
-but broader than this test concern and is easily confused with intra-word
-morphological unpacking. The test state is named `ibtidaa-on-host`: starting
-on word two masks the cross-word merger and realizes its host once. That state
-belongs beside the joined state in each owning idgham file. The public
-`fakk_idgham` attribution is asserted there where applicable, without another
-case table or test owner.
+There is no standalone fakk-al-idgham file and no `fakk_idgham` rule. The test
+state is named `ibtidaa-on-host`: starting on word two makes the cross-word
+merger unavailable and realizes its host once. That state belongs beside the
+joined state and asserts the single host sound plus absence of the merger.
 
 The Hafs choices at `ارْكَب مَّعَنَا` and `يَلْهَث ذَّلِكَ` are not generic
 mutajanisayn examples. They move to `test_hafs_idgham_choices.py`, where the
@@ -198,7 +195,7 @@ the resulting quality or length classification only.
 
 - `test_wasl_start.py` owns the shared A/I/U derivation algorithm and a vetted
   riwayah-specific lexical input where necessary.
-- `test_wasl_elision.py` owns the shared started-versus-joined onset behavior.
+- `test_wasl_silent.py` owns the shared started-versus-joined onset behavior.
 - `test_iltiqa.py` owns shared shortening and ordinary A/I repair after wasl
   elision. `test_warsh_iltiqa.py` owns the Warsh U-over-I register and its
   exact exclusions.
@@ -352,7 +349,7 @@ tests/conformance/                         # 116 cases total
 Only Hafs currently has two supported scripts, so script agreement remains a
 21-case Hafs gate. Warsh source-to-canonical agreement belongs in the adapter
 alignment file, not in a fake second-script conformance matrix. The whole
-planned logical suite is therefore 1,415 cases.
+planned logical suite is therefore 1,384 cases.
 
 `test_rule_coverage.py` remains shared. It verifies that the `Rule` vocabulary
 is global, every classifier declares its complete `emits` set, each riwayah
@@ -410,7 +407,7 @@ into a mixed-domain catch-all.
 | `emphasis/test_raa.py` | Exercise shared sound/reach and shared selectors only | Fixed shared rows first; selector rows last | Foundation, then variants |
 | `emphasis/test_allah_lam.py` | Exercise heavy, light, and context-conditioned divine-name lam | Shared rows or clean substitutes | Adapter baseline |
 | `hamza/test_wasl_start.py` | Cover the same morphology algorithm using Warsh lexical input | Separate row for a lexical reading difference; pick only the local expected vowel | Adapter baseline after alignment |
-| `hamza/test_wasl_elision.py` | Cover ordinary joined elision | Shared rows where the canonical onset is WASL | Adapter baseline |
+| `hamza/test_wasl_silent.py` | Cover ordinary joined elision | Shared rows where the canonical onset is WASL | Adapter baseline |
 | `hamza/test_iltiqa.py` | Cover shared shortening and ordinary repair | Shared rows for identical shape; Warsh U cases excluded | Wasl/iltiqa vertical |
 | `hamza/test_seats.py` | Verify shared canonical hamza-seat semantics | Source selectors may differ; canonical assertion stays shared | Adapter baseline |
 | `hamza/test_ibdal.py` | Verify generic transformation primitives independent of classifier | Small typed fixtures, not a corpus sweep | RuleSet/hamza foundation |
@@ -486,7 +483,7 @@ table so a domain reviewer never has to reconstruct the text from coordinates.
 | --- | --- | --- |
 | Corpus and projection | Shared safe rows listed above | `adapter/test_warsh_*`, schema roundtrip |
 | RuleSet foundation | Existing shared semantic rows | rule coverage, model vocabulary, API rules |
-| Wasl | `hamza/test_wasl_start.py`, `test_wasl_elision.py` | adapter wasl projections |
+| Wasl | `hamza/test_wasl_start.py`, `test_wasl_silent.py` | adapter wasl projections |
 | Iltiqa | `hamza/test_iltiqa.py`, `test_warsh_iltiqa.py` | effective-state engine tests |
 | Naql | `hamza/test_warsh_naql.py` | register and source-attribution tests |
 | Single hamza | generic ibdal/tashil plus `test_warsh_single_hamza.py` | effective madd and adapter source tests |

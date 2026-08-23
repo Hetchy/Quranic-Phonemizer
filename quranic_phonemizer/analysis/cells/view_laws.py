@@ -160,6 +160,10 @@ def _check_bridges(
         u.value: c.id.value
         for w in view.words for c in w.columns for u in c.source_unit_ids
     }
+    for word in view.words:
+        for column in word.columns:
+            if column.anchor_unit_id is not None:
+                column_of_unit[column.anchor_unit_id.value] = column.id.value
     columns = _all_columns(view)
     for cb in view.boundaries:
         seen: set[int] = set()

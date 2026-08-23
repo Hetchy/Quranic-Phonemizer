@@ -50,6 +50,13 @@ class Scribe:
             if row != (offset, subject.uid, fact)
         ]
 
+    def evidence_offsets(self, subject, fact: SlotFact) -> tuple[int, ...]:
+        """The source offsets currently spelling one draft fact."""
+        return tuple(
+            offset for offset, uid, existing in self.evidences
+            if uid == subject.uid and existing is fact
+        )
+
     def decoration(self, offset: int, subject) -> None:
         if offset >= 0 and subject is not None:
             self.decorates.append((offset, subject.uid))

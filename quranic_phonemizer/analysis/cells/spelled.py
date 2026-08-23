@@ -173,19 +173,38 @@ def _slot_columns(
     return out, next_id
 
 
-def _align(word: CellWord, bundle: AnalysisBundle) -> CellWord:
-    cells = []
-    for sound in (s for s in bundle.sounds if s.word_id == word.word_id):
-        columns = tuple(
-            column.id for column in word.columns
-            if sound.id in (*column.owned_sound_ids, *column.presented_sound_ids)
-        )
-        if not columns:
-            raise ValueError(
-                f"spelled word {word.word_id.value} leaves sound {sound.id.value} unaligned"
+def _realign(
+    words: tuple[CellWord, ...], bundle: AnalysisBundle,
+) -> tuple[CellWord, ...]:
+    """Align sound spans across the full row, including cross-word mergers."""
+    spans: dict[int, list[CellColumnId]] = {}
+    for word in words:
+        for column in word.columns:
+            for sound in (*column.owned_sound_ids, *column.presented_sound_ids):
+                spans.setdefault(sound.value, []).append(column.id)
+    existing = {
+        cell.sound_id.value: cell
+        for word in words
+        for cell in word.sounds
+    }
+    by_word: dict[int, list[CellSound]] = {}
+    for sound in bundle.sounds:
+        columns = spans.get(sound.id.value)
+        if columns:
+            cell = CellSound(
+                sound.id, tuple(columns), sound.rule_occurrence_ids
             )
-        cells.append(CellSound(sound.id, columns, sound.rule_occurrence_ids))
-    return replace(word, sounds=tuple(cells))
+        else:
+            cell = existing.get(sound.id.value)
+            if cell is None:
+                raise ValueError(
+                    f"spelled word {sound.word_id.value} leaves sound "
+                    f"{sound.id.value} unaligned"
+                )
+        by_word.setdefault(sound.word_id.value, []).append(cell)
+    return tuple(replace(
+        word, sounds=tuple(by_word.get(word.word_id.value, ()))
+    ) for word in words)
 
 
 def expand_spelled_words(
@@ -230,10 +249,10 @@ def expand_spelled_words(
                 tuple(run_columns),
             ))
             next_run_id += 1
-        out.append(_align(replace(
+        out.append(replace(
             word, columns=tuple(columns), sounds=(), runs=tuple(runs)
-        ), bundle))
-    return tuple(out)
+        ))
+    return _realign(tuple(out), bundle)
 
 
 __all__ = ["expand_spelled_words"]

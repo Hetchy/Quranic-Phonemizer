@@ -61,3 +61,11 @@ def test_nested_and_duplicate_scalar_selections_are_rejected():
 def test_invalid_scalar_choice_is_rejected_before_phonemizing():
     with pytest.raises(ValueError, match="not an option"):
         Phonemizer(variants={"daaf_haraka": "kasra"})
+
+
+def test_selecting_one_variant_leaves_other_defaults_unchanged():
+    result = Phonemizer(
+        variants={"iqlab_nasal": "bilabial"}
+    ).phonemize("1:1")
+    assert result.variant["iqlab_nasal"] == "bilabial"
+    assert result.variant["ikhfaa_shafawi_nasal"] == "assimilated"

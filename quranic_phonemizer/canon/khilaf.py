@@ -95,30 +95,50 @@ def _apply_madd(site, location, span, drafts, reading, scribe, selection) -> Non
     if chosen != "tasheel":
         _invalid(site.khilaf, chosen, ("madd_lazim", "tasheel"))
     first = span[0]
+    length_offsets = scribe.evidence_offsets(first, SlotFact.VOWEL_LENGTH)
+    quality_offsets = scribe.evidence_offsets(first, SlotFact.VOWEL_QUALITY)
+    cluster, source_offset = _tashil_source(
+        reading, first, length_offsets, quality_offsets
+    )
     first.nucleus = Nucleus.short(Quality.A)
     eased = _Draft(
         letter=CanonLetter.HAMZA,
         onset=Onset.TASHIL,
         nucleus=Nucleus.short(Quality.A),
         origin=SlotOrigin.WRITTEN,
-        cluster=_tashil_cluster(reading, first),
+        cluster=cluster,
         onset_declared=True,
         nucleus_declared=True,
     )
     drafts.insert(drafts.index(first) + 1, eased)
-    offset = reading.clusters[eased.cluster].offset
-    scribe.withdraw_evidence(offset, first, SlotFact.VOWEL_LENGTH)
-    scribe.evidence(offset, eased, SlotFact.LETTER)
+    for offset in length_offsets:
+        scribe.withdraw_evidence(offset, first, SlotFact.VOWEL_LENGTH)
+    if not quality_offsets and length_offsets:
+        scribe.evidence(length_offsets[0], first, SlotFact.VOWEL_QUALITY)
+    scribe.evidence(source_offset, eased, SlotFact.LETTER)
 
 
-def _tashil_cluster(reading, first) -> int:
+def _tashil_source(
+    reading, first, length_offsets, quality_offsets,
+) -> tuple[int, int]:
+    """Locate the written second hamza, including compact script forms."""
+    own_offset = (
+        length_offsets[0]
+        if length_offsets
+        else quality_offsets[0]
+        if quality_offsets
+        else reading.clusters[first.cluster].offset
+    )
     following = first.cluster + 1
     if following >= len(reading.clusters):
-        return first.cluster
+        return first.cluster, own_offset
     cluster = reading.clusters[following]
-    if cluster.word != reading.clusters[first.cluster].word:
-        return first.cluster
-    return following
+    if (
+        cluster.word == reading.clusters[first.cluster].word
+        and cluster.seat
+    ):
+        return following, cluster.offset
+    return first.cluster, own_offset
 
 
 def _chosen(khilaf, chosen, options):

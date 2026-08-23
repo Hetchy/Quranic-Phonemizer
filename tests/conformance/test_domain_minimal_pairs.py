@@ -1,4 +1,4 @@
-"""Pairs the rasm writes the same way and a reciter reads apart.
+"""Domain minimal pairs the rasm writes alike and a reciter reads apart.
 
 A rule that widens far enough to swallow its pair fails here, by name,
 rather than moving a percentage somewhere.

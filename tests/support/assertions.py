@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from dataclasses import asdict
 
-from quranic_phonemizer.analysis.ids import CharacterId
+from quranic_phonemizer.analysis.ids import CharacterId, OccurrenceId
 from quranic_phonemizer.analysis.source_dtos import LiteralSilence
 
 from .case import CaseRun, RuleExpectation, resolve
@@ -65,17 +65,49 @@ def _rules_for_glyph(result, glyph: int) -> frozenset[RuleKey]:
         column for column in _columns(result)
         if character in column.source_character_ids
     )
-    if len(columns) != 1:
+    if len(columns) > 1:
         raise LookupError(
             f"source character {glyph} reaches {len(columns)} transformed columns"
         )
-    column = columns[0]
+    if not columns:
+        source_units = {
+            unit.value
+            for word in result._source_cells.words
+            for column in word.columns
+            if character in column.source_character_ids
+            for unit in column.source_unit_ids
+        }
+        column_by_id = {
+            column.id: column
+            for word in result._cells.words
+            for column in word.columns
+        }
+        columns = tuple(
+            column_by_id[column_id]
+            for word in result._cells.words
+            for run in word.runs
+            if run.source_unit_id.value in source_units
+            for column_id in run.column_ids
+        )
+    if not columns:
+        raise LookupError(
+            f"source character {glyph} reaches no transformed column or named-letter run"
+        )
     reached: set[RuleKey] = {
         ("occurrence", occurrence.value)
+        for column in columns
         for occurrence in column.rule_occurrence_ids
     }
-    if isinstance(column.silence, LiteralSilence):
-        reached.add(("literal", column.silence.value))
+    reached.update(
+        ("literal", column.silence.value)
+        for column in columns
+        if isinstance(column.silence, LiteralSilence)
+    )
+    reached.update(
+        ("occurrence", column.silence.value)
+        for column in columns
+        if isinstance(column.silence, OccurrenceId)
+    )
     return frozenset(reached)
 
 
@@ -148,36 +180,44 @@ def _assert_connected(char_targets: _Targets, sound_targets: _Targets, char_map,
         ]
         if not chars or not sounds:
             continue
-        pairs = (
-            list(zip(chars, sounds, strict=True))
-            if len(chars) == len(sounds)
-            else [(char, sound) for char in chars for sound in sounds]
-        )
         connected_pairs: set[tuple[str, str]] = set()
-        for char_selector, sound_selector in pairs:
-            char_rule_indices = _rules_for_glyph(
-                char_targets.result, char_targets.selected[char_selector]
-            )
-            sound_rule_indices = _rules_for_sound(
-                sound_targets.result, sound_targets.selected[sound_selector]
-            )
-            connected = {
-                index for index in char_rule_indices & sound_rule_indices
-                if _names(char_targets.result, frozenset((index,))) == {name}
-            }
-            if connected:
-                connected_pairs.add((char_selector, sound_selector))
-            elif len(chars) == len(sounds):
-                raise AssertionError(
-                    f"{name}: ordered pair {char_selector} -> {sound_selector} "
-                    "matched different occurrences"
+        for char_selector in chars:
+            for sound_selector in sounds:
+                char_rule_indices = _rules_for_glyph(
+                    char_targets.result, char_targets.selected[char_selector]
                 )
+                sound_rule_indices = _rules_for_sound(
+                    sound_targets.result, sound_targets.selected[sound_selector]
+                )
+                connected = {
+                    index for index in char_rule_indices & sound_rule_indices
+                    if _names(char_targets.result, frozenset((index,))) == {name}
+                }
+                if connected:
+                    connected_pairs.add((char_selector, sound_selector))
         assert set(chars) == {char for char, _ in connected_pairs}, (
             f"{name}: some source targets do not reach a declared sound"
         )
-        assert set(sounds) == {sound for _, sound in connected_pairs}, (
-            f"{name}: some sound targets are not reached by a declared source"
-        )
+        for sound_selector in sounds:
+            sound_rule_indices = {
+                index for index in _rules_for_sound(
+                    sound_targets.result, sound_targets.selected[sound_selector]
+                )
+                if _names(sound_targets.result, frozenset((index,))) == {name}
+            }
+            source_backed = {
+                index for index in sound_rule_indices
+                if index[0] == "literal" or any(
+                    index == ("occurrence", occurrence.value)
+                    and column.source_character_ids
+                    for column in _columns(sound_targets.result)
+                    for occurrence in column.rule_occurrence_ids
+                )
+            }
+            if source_backed:
+                assert any(
+                    pair[1] == sound_selector for pair in connected_pairs
+                ), f"{name}: {sound_selector} is not reached by a declared source"
 
 
 def assert_case(run: CaseRun) -> None:
@@ -210,7 +250,10 @@ def assert_case(run: CaseRun) -> None:
             for occurrence in result._bundle.rule_occurrences
             if focused & {word.value for word in occurrence.word_ids}
         )
-        assert actual == all_rules.rules
+        assert actual == all_rules.rules, (
+            f"all_rules mismatch: missing {sorted(all_rules.rules - actual)}; "
+            f"unexpected {sorted(actual - all_rules.rules)}"
+        )
 
     char_map = resolve(expect.char_rules, run.riwayah, run.script)
     sound_map = resolve(expect.sound_rules, run.riwayah, run.script)

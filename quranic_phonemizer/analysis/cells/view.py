@@ -43,10 +43,15 @@ from .view_laws import validate_cell_view
 
 
 def _column_of_unit(words: tuple[CellWord, ...]) -> dict[int, CellColumnId]:
-    return {
+    out = {
         unit.value: col.id
         for word in words for col in word.columns for unit in col.source_unit_ids
     }
+    for word in words:
+        for column in word.columns:
+            if column.anchor_unit_id is not None:
+                out[column.anchor_unit_id.value] = column.id
+    return out
 
 
 def _extract_merger_sounds(

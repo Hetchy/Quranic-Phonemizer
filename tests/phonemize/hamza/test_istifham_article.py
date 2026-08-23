@@ -87,7 +87,7 @@ CASES = (
     # ءَآلْـَٰٔنَ
     _case("alan", ALAN,
           "ʔ a: l ʔ a: n", "ʔ a ʔ̞ a l ʔ a: n",
-          "a:[1]", "@dagger_alif[1]", "@hamza_mark"),
+          "a:[1]", "@dagger_alif[1]", "@dagger_alif[1]"),
     # ءَآللَّهُ
     _case("allah", ALLAH,
           "ʔ a: lˤlˤ aˤ: h", "ʔ a ʔ̞ a lˤlˤ aˤ: h",

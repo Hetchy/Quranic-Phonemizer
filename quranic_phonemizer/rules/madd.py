@@ -16,14 +16,12 @@ from ..engine.plan import (
     mint,
 )
 from ..model.address import BoundaryPlan, Junction, KhilafId, Location, SlotId
-from ..model.canon import Annotation
-from ..model.canon import CanonLetter as L
+from ..model.canon import Annotation, CanonLetter as L
 from ..model.canon import Onset, Quality, Rule, SlotOrigin, VowelForm
 from ..model.performance import Aspect, Occurrence, Vowel
 
 #: Which glide lengthens which vowel.
 GLIDE_OF = {Quality.U: L.WAW, Quality.I: L.YA}
-
 
 @dataclass(frozen=True, slots=True)
 class MaddLazimIbdal:
@@ -50,7 +48,6 @@ class MaddLazimIbdal:
         if chosen != "madd_lazim":
             return None
         return _classify(Rule.IBDAL_HAMZA, at, None)
-
 
 @dataclass(frozen=True, slots=True)
 class PausalGlide:
@@ -90,7 +87,7 @@ class PausalGlide:
                 (at,),
             ),
             (
-                # Realizes the merged sound itself, so both halves share one occurrence.
+                # The merged sound lets both halves share one occurrence.
                 Realize(
                     before.id,
                     Aspect.VOWEL,
@@ -179,9 +176,13 @@ def _madd_of(
     final = bool(slots) and slots[-1].id == at
 
     if final and boundaries.stopped_on(word):
-        # Nothing follows inside the word and the stop ends it; a silah's stopped form is absent rather than long, and takes no instance.
+        # A stopped silah is absent rather than long and takes no instance.
         return None if slot.nucleus.is_silah else (Rule.MADD_TABII, None)
     if final and boundaries.after(word) is Junction.SAKT:
+        return (Rule.MADD_TABII, None)
+    if final and all(item.spelled for item in slots):
+        # A named-letter opening is insulated from the next word, while a
+        # final long vowel in its name still carries its natural madd.
         return (Rule.MADD_TABII, None)
 
     following = near.after(at)
@@ -207,7 +208,7 @@ def _in_context(
 ) -> tuple[Rule, SlotId | None]:
     """The outcome the letter after a long vowel decides."""
     if following.letter is L.HAMZA:
-        # Muttasil in the same word, munfasil across a boundary -- and a particle the rasm joined is a boundary the writing does not show.
+        # Muttasil within a word, munfasil across a semantic boundary.
         rule = (
             Rule.MADD_MUNFASIL
             if final or Annotation.JOINED_PARTICLE in slot.annotations
@@ -216,11 +217,11 @@ def _in_context(
         return (rule, following.id)
 
     if _opens_on_a_sakin(following) and _still_a_sakin(plan, following):
-        # A sakin already in the Score is permanent -- a written sukun in `الٓمٓ`, the first half of the shadda in `ٱلضَّآلِّينَ`. Lazim.
+        # A Score sakin is permanent: a sukun or first half of a shadda.
         return (Rule.MADD_LAZIM, following.id)
 
     if _stop_makes_quiescent(near, following, boundaries, plan):
-        # Voweled in the Score, sakin only because the stop lands here -- aridah lissukun, same shape as lazim.
+        # Voweled in the Score, sakin only because the stop lands here.
         return (Rule.MADD_ARID_LISSUKUN, following.id)
     # None of the five special outcomes: an ordinary long vowel.
     return (Rule.MADD_TABII, following.id)
@@ -261,9 +262,8 @@ class MaddClass:
 
 @dataclass(frozen=True, slots=True)
 class MaddBadal:
-    """A long vowel on a hamza -- written, or drawn out by the ibdal a start
-    performs -- standing in for a second hamza. It names the length rather
-    than producing it, so a contextual madd may name the same vowel beside it."""
+    """A long vowel on a hamza standing in for a second hamza. It names the
+    length, so a contextual madd may name the same vowel beside it."""
 
     rule: Rule = Rule.MADD_BADAL
     phase: Phase = Phase.LENGTH

@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from quranic_phonemizer import tajweed_rules
 
-from tests.hardcase.registry import RULE_FIXTURES
+from tests.hardcase.registry import FixtureRef, RULE_FIXTURES
 
 
 def _catalogued() -> set[str]:
@@ -31,4 +31,5 @@ def test_every_registered_fixture_is_a_nonempty_tuple_of_cases():
     for rule, fixtures in RULE_FIXTURES.items():
         assert isinstance(fixtures, tuple), rule
         assert fixtures, rule
-        assert all(callable(fixture) for fixture in fixtures), rule
+        assert all(isinstance(fixture, FixtureRef) for fixture in fixtures), rule
+        assert all(fixture.source.startswith("tests/") for fixture in fixtures), rule

@@ -47,10 +47,7 @@ class NoonSakinah:
         if not is_performed_quiescent(slot, plan, at):
             return None
         word = near.word_of(at)
-        clear = word is not None and near.last_of_word(at) and (
-            boundaries.stopped_on(word)
-            or boundaries.after(word) is Junction.SAKT
-        )
+        clear = _clear_at_boundary(near, at, boundaries)
         opening = self._opening_wasl(near, at, boundaries)
         if opening is not None:
             choice = self.opening_wasl.choose(near.score.selection)
@@ -105,6 +102,13 @@ class NoonSakinah:
         if following is None or following.letter is not L.WAW:
             return None
         return following
+
+
+def _clear_at_boundary(near, at, boundaries) -> bool:
+    word = near.word_of(at)
+    return word is not None and near.last_of_word(at) and (
+        boundaries.stopped_on(word) or boundaries.after(word) is Junction.SAKT
+    )
 
 
 def _between_names(slot, following) -> bool:

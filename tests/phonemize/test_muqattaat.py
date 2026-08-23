@@ -70,7 +70,8 @@ CASES = (
          phonemes="tˤ aˤ: h a:", all_rules=R("madd_tabii", "tafkheem"),
          char_rules={"ط": R("madd_tabii", "tafkheem"),
                      "ه": R("madd_tabii")},
-         sound_rules={"tˤ": R("tafkheem"), "aˤ:": R("madd_tabii", "tafkheem")}),
+         sound_rules={"tˤ": R("tafkheem"), "aˤ:": R("madd_tabii", "tafkheem"),
+                      "a:": R("madd_tabii")}),
     # طسم
     Case(id="taa-seen-meem", site=Site(hafs=("26:1", (1,))), read=joining(),
          phonemes="tˤ aˤ: s i: m̃ i: m",

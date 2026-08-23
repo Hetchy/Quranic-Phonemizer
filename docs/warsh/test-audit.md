@@ -91,9 +91,9 @@ without a boundary or waqf bucket:
 | `articles/` | `lam_shamsiyyah`, `lam_qamariyyah`, and article/non-article contrasts |
 | `assimilation/` | `idgham_mutamathilayn`, `idgham_mutaqaribayn`, both `idgham_mutajanisayn` forms, and ibtidaa recovery from a cross-word merger |
 | `emphasis/` | `tafkheem`, `tarqeeq`, `taghliz`, raa weight, lam weight, and dependent A coloring including fathatan and iwad |
-| `hamza/` | `wasl_start`, `wasl_elision`, `iltiqa_haraka`, `iltiqa_shortening`, `ibdal_hamza`, `tashil`, `naql`, hamza seats, and hamza meetings |
-| `nasal/` | `izhar`, `ikhfaa_haqiqi`, `iqlab`, noon idgham, the three shafawi rules, and `ghunnah_mushaddadah` |
-| `vowels/` | `iwad`, `pausal_sukun`, `pausal_alif`, ordinary vowel quality, final glides, joined-only vowels, and seven alifs |
+| `hamza/` | `hamza_wasl_*`, `iltiqa_haraka`, `iltiqa_shortening`, `ibdal_hamza`, `tashil`, `naql`, hamza seats, and hamza meetings |
+| `nasal/` | `izhar`, `ikhfaa`, `iqlab`, noon idgham, the three shafawi rules, and `ghunnah_mushaddadah` |
+| `vowels/` | `madd_iwad`, `waqf_diacritic_drop`, `pausal_alif`, ordinary vowel quality, final glides, joined-only vowels, and seven alifs |
 | `vowels/inclination/` | `imala`, `taqlil`, their exact vowel quality, coupled consonant coloring, and site classification |
 | `vowels/madd/` | every structural madd class, `madd_badal`, and `madd_leen_mahmuz` |
 | root focused files | qalqala, muqattaat, sakt, silent written letters, Tamanna ishmam, and `taa_marbuta_pausal` |
@@ -113,11 +113,11 @@ asserted `iltiqa_haraka` occurrence still reaches only the inserted vowel; the
 host consonant or nunation slot is source ownership, not a classified
 consonant sound.
 
-## Baseline
+## Pre-refactor baseline
 
 - 67 Python test files contain 491 top-level test functions.
 - Parameterization expands them to 1,340 collected cases.
-- The fast gate currently reports 1,336 passed and 4 skipped.
+- The fast gate reported 1,336 passed and 4 skipped.
 - There are 80 Python files under `tests/` after helpers and package markers
   are included, plus 2 Markdown files.
 - No current test is marked `engine_bug`; that marker appears only in the
@@ -130,9 +130,10 @@ python -m pytest --collect-only -q
 python tools/gates.py --fast
 ```
 
-The same commands must give 1,340 collected and 1,336 passed / 4 skipped after
-the mechanical move. `git diff --exit-code -- tests/snapshots` must also stay
-clean.
+Those counts are the input audit, not a permanent target: deliberate duplicate
+removal and the RAR merge change collection. The completed refactor must have
+clean collection and gates, while `git diff --exit-code -- tests/snapshots`
+stays clean.
 
 ## Domain-review and test-style audit
 
@@ -213,8 +214,8 @@ pytest.param(
         site=Site(hafs=("2:42", (7,))),
         read=isolated(),
         phonemes="w a ʔ a ŋ t u m",
-        char_rules={"ن": R("ikhfaa_haqiqi")},
-        sound_rules={"ŋ": R("ikhfaa_haqiqi")},
+        char_rules={"ن": R("ikhfaa")},
+        sound_rules={"ŋ": R("ikhfaa")},
     ),
     id="taa",
 )
@@ -226,7 +227,7 @@ occurrences with the same rule ID do not satisfy the case. Multiple rules stay
 on the same sound line:
 
 ```python
-sound_rules={"ŋ": R("ikhfaa_haqiqi", "tafkheem")}
+sound_rules={"ŋ": R("ikhfaa", "tafkheem")}
 ```
 
 For a multiword `Site`, `phonemes` is a tuple in declared word order and
@@ -287,7 +288,7 @@ comment still shows the complete selected text naturally:
 
 ```python
 # حَيَّةٌ تَسْعَىٰ
-char_rules={"@dammatan": R("ikhfaa_haqiqi")}
+char_rules={"@dammatan": R("ikhfaa")}
 ```
 
 The registry belongs in `tests/support/selectors.py`. Each entry is a typed
@@ -386,7 +387,7 @@ collected case is accounted for by its file row.
 | `adjacent/test_mutajanisayn_naqis.py` | 4 | Focused incomplete-merger sound and retained emphasis. | `phonemize/assimilation/test_mutajanisayn_naqis.py` |
 | `adjacent/test_mutamathilayn.py` | 12 | Cross-word and internal mergers, stop reversal, qalqala suppression. | `phonemize/assimilation/test_mutamathilayn.py` |
 | `adjacent/test_mutaqaribayn.py` | 4 | Lam-to-raa, qaf-to-kaf, and stop reversal. | `phonemize/assimilation/test_mutaqaribayn.py` |
-| `boundary/test_hamza_wasl_elision.py` | 14 | Article, verb, noun, and divine-name elision with sound and source reach. | `phonemize/hamza/test_wasl_elision.py` |
+| `boundary/test_hamza_wasl_elision.py` | 14 | Article, verb, noun, and divine-name elision with sound and source reach. | `phonemize/hamza/test_wasl_silent.py` |
 | `boundary/test_hamza_wasl_start.py` | 18 | A/I/U start vowel classes and lexical contrasts. | `phonemize/hamza/test_wasl_start.py` |
 | `boundary/test_ibdal_hamza.py` | 6 | Started silent-root-hamza replacement and joined countercases. | `phonemize/hamza/test_ibdal.py` |
 | `boundary/test_iltiqa_shortening.py` | 21 | Madd shortening, consonant repair, tanwin repair, and negative cases caused by joined wasl hamza. | `phonemize/hamza/test_iltiqa.py` |
@@ -394,7 +395,7 @@ collected case is accounted for by its file row.
 | `nasal/test_idgham_bi_ghunnah.py` | 21 | Noon/tanwin, every host, letter-name and verse-seam coverage. | `phonemize/nasal/test_idgham_bi_ghunnah.py` |
 | `nasal/test_idgham_bila_ghunnah.py` | 6 | Lam/raa hosts, noon/tanwin, stop and verse-seam coverage. | `phonemize/nasal/test_idgham_bila_ghunnah.py` |
 | `nasal/test_idgham_shafawi.py` | 3 | Meem merger, stop reversal, and verse seam. | `phonemize/nasal/test_idgham_shafawi.py` |
-| `nasal/test_ikhfaa_haqiqi.py` | 36 | Exhaustive follower letters, noon/tanwin, seam, ownership, optional token. | `phonemize/nasal/test_ikhfaa_haqiqi.py` |
+| `nasal/test_ikhfaa.py` | 36 | Exhaustive follower letters, noon/tanwin, seam, ownership, optional token. | `phonemize/nasal/test_ikhfaa.py` |
 | `nasal/test_ikhfaa_shafawi.py` | 2 | Meem-before-baa and stop reversal. | `phonemize/nasal/test_ikhfaa_shafawi.py` |
 | `nasal/test_iqlab.py` | 13 | Noon/tanwin, internal/cross-word/seam and character ownership. | `phonemize/nasal/test_iqlab.py` |
 | `nasal/test_izhar.py` | 22 | Exhaustive throat letters, noon/tanwin and verse seam. | `phonemize/nasal/test_izhar.py` |
@@ -414,7 +415,7 @@ collected case is accounted for by its file row.
 | `test_qalqala.py` | 19 | Every letter and degree, negative cases, boundary and token toggle. | `phonemize/test_qalqala.py` |
 | `test_rasm.py` | 25 | Strong pronunciation tests for silent written letters, hamza seats, and vowel carriers. | Split between `phonemize/test_silent_letters.py`, `phonemize/hamza/test_seats.py`, and `phonemize/vowels/test_written_carriers.py`; keep low-level projection fixtures in `adapter/`. |
 | `test_one_offs.py` | 10 | Catch-all mixing inclination, ishmam, tashil, sakt, small noon and seat handling. | Delete after the case-level split below. |
-| `test_khilaf.py` | 87 | Public catalogue and unrelated selector behavior in one file. | Do not touch until the final variant phase; then split catalogue to `api/test_variants.py` and behavior beside each semantic owner. |
+| `test_khilaf.py` | 87 | Public catalogue and unrelated selector behavior in one file. | Keep catalogue validation in `api/test_variants.py`; move behavior beside each semantic owner and delete the duplicate catch-all. |
 
 ### `test_one_offs.py` case split
 
@@ -424,7 +425,7 @@ collected case is accounted for by its file row.
 | Tamanna ishmam | No phonemization behavior case; generated selector metadata only |
 | Aajamiyy tashil and its extra token | `phonemize/hamza/test_tashil.py` |
 | Man Raq, Bal Ran, and Maliyah sakt | `phonemize/test_sakt.py` |
-| Nunji small noon | semantic assertion in `phonemize/nasal/test_ikhfaa_haqiqi.py`; source-sequence fixture in `adapter/` |
+| Nunji small noon | semantic assertion in `phonemize/nasal/test_ikhfaa.py`; source-sequence fixture in `adapter/` |
 | Iddaratum dagger/seat behavior | semantic assertion in `phonemize/hamza/test_seats.py`; seat projection in `adapter/test_hamza_seats.py` |
 
 ## Current `laws/` disposition
@@ -440,7 +441,7 @@ document, API, schema, conformance, and ordinary phonemization behavior.
 | `laws/test_build_contract.py` | 8 | Canon builder inputs, draft identity, edge withdrawal, replacement spans. | `engine/test_canon_build.py` |
 | `laws/test_continuous_assembly.py` | 8 | Public request boundaries mixed with window assembly. | Request cases to `api/test_requests.py`; window privacy/equivalence to `engine/test_windowing.py`. |
 | `laws/test_extra_phonemes.py` | 7 | Public token toggles and graph invariance. | `api/test_extra_phonemes.py` |
-| `laws/test_fakk_idgham.py` | 3 | A named classification and joined/started countercase. | Fold the started state and attribution into the owning idgham state matrices; no standalone target file. |
+| `laws/test_fakk_idgham.py` | 3 | Joined/started merger countercases under an obsolete label. | Fold the started state into the owning idgham matrices; assert the host sound and absence of merger, with no `fakk_idgham` rule. |
 | `laws/test_inscription_hygiene.py` | 8 | Grapheme/spelling relation invariants and source projection edge cases. | `adapter/test_inscription.py` |
 | `laws/test_madd_tabii.py` | 3 | Exact tabii classification over ordinary and boundary-created lengths. | `phonemize/vowels/madd/test_tabii.py` |
 | `laws/test_minimal_pairs.py` | 19 | Valuable semantic contrasts, but no single conformance responsibility. | Dissolve into the semantic owners listed below. |

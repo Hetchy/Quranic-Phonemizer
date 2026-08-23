@@ -155,6 +155,14 @@ class Reading:
             **self._cell_metadata,
         )
 
+    @cached_property
+    def _source_cells(self):
+        return build_cell_view(
+            self._cell_session,
+            spelling="source",
+            **self._cell_metadata,
+        )
+
     def text(self, word: int) -> str:
         return self._text[word]
 

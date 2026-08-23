@@ -115,7 +115,7 @@ _GLYPH_SELECTORS: dict[str, GlyphPredicate] = {
     and _letter(a, g, CanonLetter.NOON),
     "@small_waw": lambda a, g: a.glyphs[g].kind is not nd.GlyphKind.HARAKA
     and (_quality(a, g, Quality.U) or _length(a, g, Quality.U)),
-    "@small_yaa": lambda a, g: a.glyphs[g].char == "ۦ"
+    "@small_yaa": lambda a, g: a.glyphs[g].char in {"ۦ", "ۧ"}
     or (
         a.glyphs[g].kind is not nd.GlyphKind.HARAKA
         and (_quality(a, g, Quality.I) or _length(a, g, Quality.I))

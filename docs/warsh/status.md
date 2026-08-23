@@ -24,7 +24,7 @@ validation may still correct a concluded decision.
 | Variant design | Concluded | Public scopes, values, defaults, registers, and interactions are recorded in [`../variants.md`](../variants.md) |
 | Phoneme and rule vocabulary | Concluded | Required additions and reused sound primitives identified; not implemented |
 | Cross-riwayah variant audit | Concluded | Shared IDs and riwayah-specific defaults and site scopes are recorded in [`../variants.md`](../variants.md) |
-| Test organization | In progress | The semantic harness/tree and the RAR projection suites coexist after the branch sync; duplicate legacy coverage and ownership assertions are being reconciled before Warsh fixtures are added |
+| Test organization | Concluded | Compact semantic tree, projection-aware ownership, RAR reconciliation, coverage registry, and duplicate removal are complete; Warsh fixtures can extend these owners |
 | Canonical and model changes | In progress | The full RAR projection and shared rule catalogue are merged; the Warsh-only model additions remain below |
 | Warsh corpus integration | Not started | No production corpus package, adapter, or address normalization exists |
 | Warsh rules | Not started | No Warsh classifier set or authored exception data exists |
@@ -144,11 +144,11 @@ second riwayah now requires.
 
 ## Test work
 
-The compact semantic harness and target tree exist, and the full RAR suites are
-now merged beside them. Reconciliation is still in progress: the old RAR test
-locations retained during conflict resolution must be folded into the semantic
-tree, projection-aware expectations must replace the pre-RAR character rules,
-and fully spelled muqattaat coverage must remain intact. The audit remains in
+The compact semantic harness, target tree, and full RAR projection suites are
+reconciled. Hand-authored phonemization behavior has one owner under
+`tests/phonemize/`; domain minimal pairs live under conformance, public variant
+metadata under API, and fully spelled muqattaat retain complete phoneme and
+rule assertions. The audit remains in
 [`test-audit.md`](test-audit.md), the target and acceptance contract in
 [`test-refactor-plan.md`](test-refactor-plan.md), and Warsh file ownership in
 [`warsh-test-placement.md`](warsh-test-placement.md).

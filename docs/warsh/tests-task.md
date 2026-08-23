@@ -72,14 +72,12 @@ restate these contracts inside implementation PRs.
 
 ## Starting checkpoint
 
-The semantic refactor runs every declared packaged riwayah and every shipped
-script, so pytest collection is intentionally larger than the historical
-single-script baseline. Preserve byte-identical Hafs snapshots. Corrected
-ownership specifications currently expose runtime gaps in
-`test_mutajanisayn_naqis.py`, `test_ibdal.py`, `test_iltiqa.py`,
-`test_istifham_article.py`, `test_muqattaat.py`, and `test_iwad.py`. Do not
-weaken those expectations to make the checkpoint green; turn each owning file
-green in the corresponding foundation/rule vertical.
+The Hafs semantic refactor and RAR projection reconciliation are green. All
+hand-authored phonemization cases live under `tests/phonemize/`; the old
+`adjacent`, `boundary`, `nasal`, `waqf`, root madd/muqattaat/one-off, and giant
+khilaf behavior suites are gone. `tests/api/test_variants.py` owns only the
+generic catalogue and selection contract. Preserve byte-identical Hafs
+snapshots and the reconciled source/sound ownership while adding Warsh.
 
 Run while working:
 
