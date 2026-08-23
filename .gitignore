@@ -9,6 +9,7 @@ test.ipynb
 .windsurf
 .vscode
 .cursor
+.playwright-mcp/
 .venv*
 .claude/settings.local.json
 

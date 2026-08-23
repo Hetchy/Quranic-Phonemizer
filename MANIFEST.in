@@ -5,6 +5,7 @@ recursive-include quranic_phonemizer/data *.json *.yaml *.bin
 prune docs
 prune .claude
 prune .github
+prune .playwright-mcp
 prune tests
 prune tools
 prune research
