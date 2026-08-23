@@ -1010,15 +1010,15 @@ for its own sake.
 
 madd_badal remains first-class:
 
-- ordinary badal emits madd_badal alone. It names the same two harakat
-  madd_tabii names, so the two are mutually exclusive and never co-occur;
+- ordinary badal emits madd_badal plus madd_tabii. Badal names the cause and
+  tabii names its natural two-harakat length;
 - if another cause determines a contextual length, badal remains present and
   the contextual madd names the length;
 - no sughra/kubra teaching layer is added.
 
-A consumer that does not teach badal separately may fold madd_badal into
-madd_tabii for presentation. The producer does not fold it, because the two
-name different causes of the same length.
+A consumer that does not teach badal separately may hide madd_badal and keep
+madd_tabii for presentation. The producer keeps both because they name the
+cause and length separately.
 
 madd_iwad names the fathatan-to-long-aa transformation and co-occurs with
 madd_tabii for the resulting natural length.
@@ -1048,8 +1048,8 @@ At ibtidaa before a quiescent lexical hamza:
 - ibdal_hamza targets the following lexical hamza that is replaced/silenced;
 - the starting vowel is lengthened with the matching quality, and that length
   is madd_badal: a hamza followed by a long vowel of its own quality is exactly
-  what badal names, so the occurrence pair is ibdal_hamza plus madd_badal,
-  without madd_tabii, under the ordinary badal rule of 11.2;
+  what badal names, so the occurrences are ibdal_hamza, madd_badal, and
+  madd_tabii, under the ordinary badal rule of 11.2;
 - visible letter and sound placements record both effects without claiming
   that hamzat-wasl itself was the replaced hamza.
 

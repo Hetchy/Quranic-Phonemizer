@@ -1132,7 +1132,37 @@ Add a dual-ended range control for verse length in words.
 - Verse length is a static corpus fact and does not change with the boundary plan.
 - The filter is applied before sorting and pagination.
 
-### 12.4 Additional precomputed metrics
+### 12.4 Very advanced boundary comparison
+
+Later research-oriented search may compare two boundary plans directly.
+
+- **Boundary delta:** find occurrences created, removed, or reclassified between plan A and plan B, such as Raa Tafkheem → Tarqeeq or Qalqala Sughra → Kubra.
+- **Boundary stability:** find occurrences whose rule and classification remain unchanged under all available plans, or only under a selected set of plans.
+
+These are comparisons between performed states, not new Tajweed rule targets.
+
+### 12.5 Very advanced cross-rule location relationships
+
+Compound AND clauses may later be narrowed by where their matching occurrences relate to one another:
+
+- same affected unit, using a shared phoneme or source character anchor;
+- same word;
+- same ordered pair of words, especially for cross-word rules.
+
+These refinements operate across exact rule targets. They are substantially later than ordinary verse-level AND because they require compatible occurrence anchors and explicit relationship semantics.
+
+### 12.6 Distribution and density exploration
+
+Allow a selected exact rule or facet to be explored by:
+
+- occurrence and matching-verse distribution by Surah;
+- normalized density within each Surah, preferably occurrences per 1,000 words;
+- comparison with the same rule or facet's global corpus density, such as “1.8× the Quran-wide density”;
+- optional aggregation by Makki versus Madani classification.
+
+Raw counts must remain visible beside normalized density so a small Surah is not made to look disproportionately important. Makki/Madani classification must come from an explicit, versioned metadata source.
+
+### 12.7 Additional precomputed metrics
 
 To support these filters without runtime corpus work, the index should include or cheaply derive:
 
@@ -1142,7 +1172,11 @@ To support these filters without runtime corpus work, the index should include o
 - target/facet occurrence count per verse and scenario;
 - maximum matching occurrence count in any one word;
 - per-word occurrence counts for targets whose scope permits this metric;
-- per-clause verse bitmaps for compound queries.
+- per-clause verse bitmaps for compound queries;
+- performed rule/classification state by boundary scenario for delta and stability queries;
+- source-character, phoneme, word, and ordered word-pair anchors for cross-rule relationships;
+- per-Surah word totals, verse totals, target/facet counts, and global density baselines;
+- versioned Makki/Madani metadata where that exploration is enabled.
 
 The static artifact should expose these as immutable numeric columns or compact side indexes. The server should calculate slider bounds from the already-filtered result set, not scan the original Quran text.
 
@@ -1167,6 +1201,7 @@ Current pending items:
 8. Finalize the web API's pagination, caching, and deployment details after latency measurements.
 9. Define the aggregate occurrence count and default sorting metric for compound AND queries.
 10. Confirm whether the per-word multiplicity filter requires an explicit single-word scope restriction for every target that supports both scopes.
+11. Select and version the Makki/Madani metadata source before exposing that distribution grouping.
 
 ## 14. Definition of done for the search feature
 

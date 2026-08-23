@@ -49,7 +49,7 @@ from tests.boundary.test_hamza_wasl_start import (
 from tests.boundary.test_ibdal_hamza import (
     test_a_quiescent_hamza_becomes_a_length_when_started_on as ibdal_started,
     test_the_ibdal_names_the_hamza_it_replaced as ibdal_subject,
-    test_the_ibdal_length_is_a_badal_with_no_plain_madd_beside_it
+    test_the_ibdal_length_is_both_badal_and_tabii
     as ibdal_alone,
 )
 from tests.boundary.test_iltiqa_insertions import (
@@ -160,9 +160,9 @@ from tests.waqf.test_variant_silence import (
 from tests.waqf.test_madd_badal import (
     test_a_badal_before_a_permanent_sakin_keeps_the_madd_that_holds_it
     as badal_contextual,
-    test_a_long_vowel_on_a_hamza_is_a_badal_and_not_a_plain_madd
+    test_a_long_vowel_on_a_hamza_is_both_badal_and_tabii
     as badal_ordinary,
-    test_the_plainest_badal_names_the_length_with_no_madd_beside_it
+    test_the_plainest_badal_keeps_the_plain_madd_beside_it
     as badal_plain,
 )
 from tests.waqf.test_madd_iwad import (

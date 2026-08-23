@@ -78,7 +78,7 @@ def _build() -> RuleSet:
             Phase.LENGTH: (
                 PausalGlide(), IltiqaShortening(),
                 MaddLazimIbdal(madd_tasheel.locations, madd_tasheel.default),
-                MaddClass(), MaddLeen(),
+                MaddClass(), MaddClass(additive_arid=True), MaddLeen(),
                 MaddBadal(), MaddSilah(), IwadLength(),
             ),
             Phase.COLOUR: (

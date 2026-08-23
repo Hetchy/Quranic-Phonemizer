@@ -39,7 +39,9 @@ def test_a_long_vowel_before_a_hamza_in_the_same_word(r):
     # سَوَآءٌ
     assert r.phonemes(4) == "sawa:ʔ"
     assert "madd_muttasil" in r.rules_on_char(4, "ا")
-    assert r.rules_on_sound(4, "a:") == {"madd_muttasil"}
+    assert r.rules_on_sound(4, "a:") == {
+        "madd_arid_lissukun", "madd_muttasil",
+    }
 
 
 @for_each_riwayah(BIMA_UNZILA, ibtidaa=3, waqf=4)

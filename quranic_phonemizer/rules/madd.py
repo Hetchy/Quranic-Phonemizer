@@ -1,8 +1,4 @@
-"""Length at the edges: the glide that becomes the vowel before it.
-
-`هُوَ` at a stop: the fatha drops and the waw merges into the damma before
-it, so the word ends long. A final yaa after a kasra does the same.
-"""
+"""Madd classification and pausal lengthening."""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -231,31 +227,36 @@ def _in_context(
 
 @dataclass(frozen=True, slots=True)
 class MaddClass:
-    """Which madd this long vowel is -- six outcomes, one classifier.
-
-    A plain length on a hamza is `MaddBadal`'s instead; the five
-    contextual outcomes are named here whatever letter carries them.
-    """
+    """Name plain or contextual length independently of `MaddBadal`."""
 
     rule: Rule = Rule.MADD_LAZIM
     phase: Phase = Phase.LENGTH
-    triggers: frozenset = frozenset({VowelForm.LONG})
+    triggers: frozenset = frozenset({VowelForm.LONG, Onset.WASL})
+    additive_arid: bool = False
 
     def look(
         self, near: Neighbourhood, plan: Plan, at: SlotId,
         boundaries: BoundaryPlan,
     ) -> Verdict | None:
+        slot = near.slot(at)
+        if not self.additive_arid and slot is not None and plan.relengthened_long(at):
+            return _tabii(slot, at, None)
         found = _madd_of(near, plan, at, boundaries)
+        if self.additive_arid:
+            if found is None or found[0] is not Rule.MADD_MUTTASIL:
+                return None
+            following = near.slot(found[1])
+            if following is None or not _stop_makes_quiescent(
+                near, following, boundaries, plan
+            ):
+                return None
+            return _classify(Rule.MADD_ARID_LISSUKUN, at, following.id)
         if found is None:
             return None
         rule, other = found
         if rule is not Rule.MADD_TABII:
             return _classify(rule, at, other)
-        slot = near.slot(at)
-        if slot.letter is L.HAMZA:
-            return None
         return _tabii(slot, at, other)
-
 
 @dataclass(frozen=True, slots=True)
 class MaddBadal:
