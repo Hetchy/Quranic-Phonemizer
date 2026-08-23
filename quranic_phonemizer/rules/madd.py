@@ -18,7 +18,7 @@ from ..engine.plan import (
     Verdict,
     mint,
 )
-from ..model.address import BoundaryPlan, SlotId
+from ..model.address import BoundaryPlan, Junction, SlotId
 from ..model.canon import Annotation
 from ..model.canon import CanonLetter as L
 from ..model.canon import Onset, Quality, Rule, SlotOrigin, VowelForm
@@ -157,6 +157,8 @@ def _madd_of(
     if final and boundaries.stopped_on(word):
         # Nothing follows inside the word and the stop ends it; a silah's stopped form is absent rather than long, and takes no instance.
         return None if slot.nucleus.is_silah else (Rule.MADD_TABII, None)
+    if final and boundaries.after(word) is Junction.SAKT:
+        return (Rule.MADD_TABII, None)
 
     following = near.after(at)
     if following is None:

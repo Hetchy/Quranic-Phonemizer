@@ -47,7 +47,10 @@ class NoonSakinah:
         if not is_performed_quiescent(slot, plan, at):
             return None
         word = near.word_of(at)
-        stopped = word is not None and boundaries.stopped_on(word) and near.last_of_word(at)
+        clear = word is not None and near.last_of_word(at) and (
+            boundaries.stopped_on(word)
+            or boundaries.after(word) is Junction.SAKT
+        )
         opening = self._opening_wasl(near, at, boundaries)
         if opening is not None:
             choice = self.opening_wasl.choose(near.score.selection)
@@ -56,7 +59,7 @@ class NoonSakinah:
             return _merge(Rule.IDGHAM_BI_GHUNNAH, at, opening, ghunnah=True)
         following = near.after(at)
         if following is None:
-            if stopped or (
+            if clear or (
                 slot.origin is SlotOrigin.SPELLED and near.last_of_word(at)
             ):
                 # The noon closing a disjoined-letter opening takes its own

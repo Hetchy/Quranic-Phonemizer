@@ -8,6 +8,10 @@ from __future__ import annotations
 import pytest
 
 from quranic_phonemizer import Phonemizer
+from quranic_phonemizer.api import recitation
+from quranic_phonemizer.model.address import Riwayah
+from quranic_phonemizer.model.canon import Rule
+from quranic_phonemizer.session import phonemize_request
 
 from tests.support import Site, reading
 
@@ -77,6 +81,25 @@ def test_iwaja_carries_the_first_authored_sakt():
     assert held.sakt_after
     assert not held.is_stopped_on
     assert "".join(result.phonemes("word")[word - 1]) == "ʕiwaʒa:"
+
+
+@pytest.mark.parametrize(
+    ("ref", "word", "rule"),
+    [
+        ("18:1", 11, Rule.MADD_TABII),
+        ("36:52", 6, Rule.MADD_TABII),
+        ("75:27", 2, Rule.IZHAR),
+    ],
+)
+def test_sakt_keeps_the_local_rule_on_its_final_sound(ref, word, rule):
+    session = phonemize_request(
+        recitation(Riwayah.HAFS), f"{ref}-{_next_verse(ref)}", stop_refs=[]
+    )
+    slots = {slot.id for slot in session.score.words[word - 1].slots}
+    assert rule in {
+        occurrence.rule for occurrence in session.performance.occurrences
+        if set(occurrence.subjects) & slots
+    }
 
 
 def test_a_stop_asked_for_at_a_sakt_word_is_a_stop():

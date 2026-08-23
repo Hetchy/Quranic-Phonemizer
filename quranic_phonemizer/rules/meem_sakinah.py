@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 
 from ..engine.neighbourhood import Neighbourhood
 from ..engine.plan import MergeInto, Phase, Plan, Realize, Verdict, mint
-from ..model.address import BoundaryPlan, KhilafId, SlotId
+from ..model.address import BoundaryPlan, Junction, KhilafId, SlotId
 from ..model.canon import CanonLetter as L
 from ..model.canon import Onset, Rule, SlotOrigin
 from ..model.performance import Aspect, Consonant, Occurrence
@@ -92,10 +92,13 @@ class MeemSakinah:
         if not is_performed_quiescent(slot, plan, at):
             return None
         word = near.word_of(at)
-        stopped = word is not None and boundaries.stopped_on(word) and near.last_of_word(at)
+        clear = word is not None and near.last_of_word(at) and (
+            boundaries.stopped_on(word)
+            or boundaries.after(word) is Junction.SAKT
+        )
         following = near.after(at)
         if following is None:
-            if stopped or (
+            if clear or (
                 slot.origin is SlotOrigin.SPELLED and near.last_of_word(at)
             ):
                 # The meem closing a disjoined-letter opening takes its own
