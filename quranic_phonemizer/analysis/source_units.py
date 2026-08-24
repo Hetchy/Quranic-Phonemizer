@@ -17,6 +17,8 @@ from .inscription import (
     Witnessed,
     sakt_seen_glyphs,
 )
+from .derivations import decoration_targets, open_vowel_units, silent_groups
+from .facts import AnalysisFacts
 
 from .source_dtos import LetterUnitKind
 
@@ -90,12 +92,15 @@ def _kind_of(glyph, seen_marks: frozenset[int]) -> LetterUnitKind:
     return _OPENING_KINDS[glyph.kind]
 
 
-def _draft_openers(insc, seen_marks, sakt_words):
+def _draft_openers(insc, seen_marks, sakt_words, folded):
     """One draft per opening glyph, in source order."""
     drafts: list[UnitDraft] = []
     unit_of_anchor: dict[int, int] = {}
     for glyph in insc.glyphs:
-        if glyph.word is None or not _opens(glyph, seen_marks, sakt_words):
+        if (
+            glyph.word is None or glyph.source_index in folded
+            or not _opens(glyph, seen_marks, sakt_words)
+        ):
             continue
         unit_of_anchor[glyph.source_index] = len(drafts)
         drafts.append(UnitDraft(
@@ -127,7 +132,14 @@ def _slot_roles(insc, unit_of_anchor, anchors_of_slot) -> Roles:
         if edge.fact is SlotFact.LETTER:
             letter.setdefault(edge.slot, unit)
         elif edge.fact in _VOWEL_POSITION_FACTS:
-            vowel.setdefault(edge.slot, unit)
+            if (
+                edge.fact is SlotFact.VOWEL_QUALITY
+                and edge.slot in vowel
+                and insc.glyphs[edge.glyph].kind is GlyphKind.SMALL_VOWEL
+            ):
+                carrier.setdefault(edge.slot, unit)
+            else:
+                vowel.setdefault(edge.slot, unit)
     _carriers(insc, unit_of_anchor, anchors_of_slot, carrier)
     return Roles(letter, vowel, carrier)
 
@@ -141,9 +153,28 @@ def _carriers(insc, unit_of_anchor, anchors_of_slot, carrier):
         if edge.glyph in unit_of_anchor:
             carrier.setdefault(edge.slot, unit_of_anchor[edge.glyph])
             continue
+        decorated = _decorating_opener(insc, unit_of_anchor, edge.glyph, edge.slot)
+        if decorated is not None:
+            carrier.setdefault(edge.slot, decorated)
+            continue
         base = _nearest_opener(anchors_of_slot, edge.glyph, edge.slot, before=True)
         if base is not None:
             carrier.setdefault(edge.slot, base)
+
+
+def _decorating_opener(insc, unit_of_anchor, glyph, slot):
+    """A small written carrier following a tatweel length witness."""
+    if insc.glyphs[glyph].kind is not GlyphKind.TATWEEL:
+        return None
+    candidates = {
+        edge.glyph for edge in insc.spellings
+        if isinstance(edge, Decorated) and edge.slot == slot and edge.glyph > glyph
+    }
+    return next(
+        (unit_of_anchor[index] for index in sorted(candidates)
+         if index in unit_of_anchor),
+        None,
+    )
 
 
 def _anchors_of_slot(drafts, unit_of_anchor):
@@ -166,10 +197,12 @@ def _nearest_opener(anchors_of_slot, glyph_index, slot, *, before):
     return best_unit
 
 
-def _fold_target(index, slot, facts, witnessed, anchors_of_slot, roles):
+def _fold_target(index, slot, facts, witnessed, anchors_of_slot, roles, forced):
     """The unit a non-opening glyph joins. A gemination witness or an onset
     joins the base letter; every other mark joins the opener it sits on, or the
     unit answering its slot where a muqattaat name is one glyph."""
+    if index in forced:
+        return forced[index]
     consonant = index in witnessed or SlotFact.ONSET in facts.get(index, set())
     if consonant and slot in roles.letter:
         return roles.letter[slot]
@@ -183,16 +216,100 @@ def _fold_target(index, slot, facts, witnessed, anchors_of_slot, roles):
     return None
 
 
-def tokenize(insc: InscriptionFacts, sakt_words: frozenset[int]) -> Tokenization:
-    facts = _facts_by_glyph(insc)
+def _decorated_base_before(insc, facts, decorated, glyph, slot) -> bool:
+    for index in range(glyph - 1, -1, -1):
+        if insc.slot_of.get(index) != slot:
+            break
+        if (
+            insc.glyphs[index].kind is GlyphKind.BASE
+            and index in decorated and not facts.get(index)
+        ):
+            return True
+    return False
+
+
+def _folded_length_openers(insc, facts, analysis) -> frozenset[int]:
+    """A small length mark joins an otherwise factless rasm carrier."""
+    decorated = {
+        edge.glyph for edge in insc.spellings if isinstance(edge, Decorated)
+    }
+    folded: set[int] = set()
+    for edge in insc.spellings:
+        if not (
+            isinstance(edge, Supplied)
+            and edge.fact is SlotFact.VOWEL_LENGTH
+            and insc.glyphs[edge.glyph].kind is GlyphKind.SMALL_VOWEL
+        ):
+            continue
+        if _decorated_base_before(
+            insc, facts, decorated, edge.glyph, edge.slot
+        ):
+            folded.add(edge.glyph)
+    targets = decoration_targets(insc)
+    open_vowels = open_vowel_units(analysis)
+    for glyph, slot in targets.items():
+        if (
+            slot in open_vowels
+            and insc.glyphs[glyph].kind is GlyphKind.SMALL_VOWEL
+            and _decorated_base_before(insc, facts, decorated, glyph, slot)
+        ):
+            folded.add(glyph)
+    return frozenset(folded)
+
+
+def _semantic_carriers(facts, insc, unit_of_anchor, drafts, roles):
+    """Bind an unwitnessed written carrier to the long vowel it displays."""
+    open_vowels = open_vowel_units(facts)
+    targets = decoration_targets(insc)
+    silent = {
+        glyph for group in silent_groups(insc, open_vowels, targets)
+        for glyph in group
+    }
+    for glyph, slot in targets.items():
+        unit = unit_of_anchor.get(glyph)
+        if (
+            slot in open_vowels and glyph not in silent and unit is not None
+            and drafts[unit].kind is LetterUnitKind.LETTER
+        ):
+            roles.carrier.setdefault(slot, unit)
+            drafts[unit].slot = slot
+
+
+def _silence_sign_hosts(insc, unit_of_anchor) -> dict[int, int]:
+    """A written silence sign joins the preceding source letter it marks."""
+    out: dict[int, int] = {}
+    for glyph in insc.glyphs:
+        if glyph.kind is not GlyphKind.SILENCE_SIGN:
+            continue
+        anchors = [
+            anchor for anchor in unit_of_anchor
+            if anchor < glyph.source_index
+            and insc.glyphs[anchor].word == glyph.word
+        ]
+        if anchors:
+            out[glyph.source_index] = unit_of_anchor[max(anchors)]
+    return out
+
+
+def tokenize(
+    insc: InscriptionFacts,
+    sakt_words: frozenset[int],
+    facts: AnalysisFacts,
+) -> Tokenization:
+    glyph_facts = _facts_by_glyph(insc)
     seen_marks = _seen_marks(insc)
     witnessed = frozenset(
         e.glyph for e in insc.spellings if isinstance(e, Witnessed)
     )
     sakt_seen = sakt_seen_glyphs(insc, sakt_words)
-    drafts, unit_of_anchor = _draft_openers(insc, seen_marks, sakt_words)
+    folded = _folded_length_openers(insc, glyph_facts, facts)
+    drafts, unit_of_anchor = _draft_openers(
+        insc, seen_marks, sakt_words, folded
+    )
     anchors_of_slot = _anchors_of_slot(drafts, unit_of_anchor)
     roles = _slot_roles(insc, unit_of_anchor, anchors_of_slot)
+    _semantic_carriers(facts, insc, unit_of_anchor, drafts, roles)
+    forced = _silence_sign_hosts(insc, unit_of_anchor)
 
     unit_of_glyph = dict(unit_of_anchor)
     for glyph in insc.glyphs:
@@ -200,8 +317,8 @@ def tokenize(insc: InscriptionFacts, sakt_words: frozenset[int]) -> Tokenization
         if glyph.word is None or index in unit_of_anchor or index in sakt_seen:
             continue
         target = _fold_target(
-            index, insc.slot_of.get(index), facts, witnessed,
-            anchors_of_slot, roles,
+            index, insc.slot_of.get(index), glyph_facts, witnessed,
+            anchors_of_slot, roles, forced,
         )
         if target is not None:
             drafts[target].glyphs.append(index)

@@ -76,6 +76,8 @@ def _spelt_lengths(glyphs, spellings) -> dict[int, int]:
 def _writes_nothing(glyph, index, target, open_vowels, spelt) -> bool:
     """Either the target seats no long vowel, or a glyph before this one
     already wrote that length and this is the rasm beside it."""
+    if glyph.kind is nd.GlyphKind.SILENCE_SIGN:
+        return True
     if target not in open_vowels:
         return True
     written = spelt.get(target)

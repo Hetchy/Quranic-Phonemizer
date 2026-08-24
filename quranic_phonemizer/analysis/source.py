@@ -143,7 +143,7 @@ def build_source_view(
     sakt_words = frozenset(
         i for i, word in enumerate(session.score.words) if word.sakt_after
     )
-    tok = tokenize(insc, sakt_words)
+    tok = tokenize(insc, sakt_words, facts)
     own = ownership(facts, tok, insc)
     plc = placements(own, bundle.sounds, bundle.rule_occurrences, bundle.mergers)
 

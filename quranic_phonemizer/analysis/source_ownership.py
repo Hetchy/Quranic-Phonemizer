@@ -9,9 +9,14 @@ from collections import defaultdict
 from dataclasses import dataclass
 
 from ..model.address import SlotId
-from ..model.canon import ABJAD, CanonLetter
+from ..model.canon import ABJAD, CanonLetter, Rule
 from ..model.performance import Aspect, Vowel
-from .derivations import shortened_carriers
+from .derivations import (
+    decoration_targets,
+    open_vowel_units,
+    shortened_carriers,
+    silent_groups,
+)
 from .facts import AnalysisFacts
 from .inscription import InscriptionFacts
 from .source_dtos import LetterUnitKind, LiteralSilence, Silence
@@ -28,15 +33,20 @@ class Ownership:
     silence: dict[int, Silence]
 
 
+class OwnershipError(ValueError):
+    """A written letter has no sound and no native silence derivation."""
+
+
 def _is_long(facts: AnalysisFacts, sound: int) -> bool:
     value = facts.sounds[sound].value
     return isinstance(value, Vowel) and value.long
 
 
-def _vowel_unit(facts, tok: Tokenization, slot: SlotId, sound: int) -> int | None:
+def _vowel_unit(facts, tok: Tokenization, carriers,
+                slot: SlotId, sound: int) -> int | None:
     roles = tok.roles
-    if _is_long(facts, sound) and slot in roles.carrier:
-        return roles.carrier[slot]
+    if _is_long(facts, sound) and slot in carriers:
+        return carriers[slot]
     if slot in roles.vowel:
         return roles.vowel[slot]
     return roles.letter.get(slot)
@@ -71,37 +81,47 @@ def _variant_pair_units(tok: Tokenization) -> frozenset[int]:
     return frozenset(pairs)
 
 
-def _unit_at(facts, tok, insc, slot: SlotId, aspect: Aspect, sound: int) -> int | None:
+def _unit_at(facts, tok, insc, carriers,
+             slot: SlotId, aspect: Aspect, sound: int) -> int | None:
     if aspect is Aspect.VOWEL:
-        return _vowel_unit(facts, tok, slot, sound)
+        return _vowel_unit(facts, tok, carriers, slot, sound)
     # A tanween's own noon has no letter of its own; its unit is the tanween.
     base = tok.roles.letter.get(slot, tok.roles.vowel.get(slot))
     return None if base is None else _paired_owner(facts, tok, insc, slot, base)
 
 
-def _present_carrier_vowel(facts, tok, slot, sound, owner, presenters):
+def _present_carrier_vowel(
+    facts, tok, carriers, slot, sound, owner, presenters
+):
     """A carrier-owned long vowel lights its haraka with it. Where the carrier
     is the haraka itself -- a length on a seat, not a letter -- it owns alone."""
-    if not _is_long(facts, sound) or slot not in tok.roles.carrier:
+    if not _is_long(facts, sound) or slot not in carriers:
         return
     vowel = tok.roles.vowel.get(slot)
-    if owner == tok.roles.carrier[slot] and vowel is not None and vowel != owner:
+    if owner == carriers[slot] and vowel is not None and vowel != owner:
         presenters[sound].add(vowel)
 
 
-def _owners_and_presenters(facts, tok, insc):
+def _owners_and_presenters(facts, tok, insc, carriers):
     owner: dict[int, int] = {}
     presenters: dict[int, set[int]] = defaultdict(set)
     for edge in facts.hosts:
-        unit = _unit_at(facts, tok, insc, edge.slots[0], edge.aspect, edge.sound)
+        unit = _unit_at(
+            facts, tok, insc, carriers,
+            edge.slots[0], edge.aspect, edge.sound,
+        )
         if unit is not None:
             owner[edge.sound] = unit
             if edge.aspect is Aspect.VOWEL:
                 _present_carrier_vowel(
-                    facts, tok, edge.slots[0], edge.sound, unit, presenters
+                    facts, tok, carriers, edge.slots[0], edge.sound,
+                    unit, presenters,
                 )
     for edge in facts.insertions:
-        unit = _unit_at(facts, tok, insc, edge.anchor[0], edge.aspect, edge.sound)
+        unit = _unit_at(
+            facts, tok, insc, carriers,
+            edge.anchor[0], edge.aspect, edge.sound,
+        )
         if unit is not None:
             owner.setdefault(edge.sound, unit)
     for edge in facts.merges:
@@ -120,6 +140,10 @@ def _silenced_units(facts, tok) -> dict[int, int]:
         unit = tok.roles.letter.get(edge.slots[0])
         if edge.aspect is Aspect.VOWEL:
             unit = tok.roles.vowel.get(edge.slots[0], unit)
+            if facts.occurrences[edge.by].rule is Rule.WAQF_SILAH_DROP:
+                carrier = tok.roles.carrier.get(edge.slots[0])
+                if carrier is not None:
+                    out.setdefault(carrier, edge.by)
         if unit is not None:
             out.setdefault(unit, edge.by)
     return out
@@ -134,28 +158,49 @@ def _shortened_units(facts, tok, insc) -> dict[int, int]:
     }
 
 
+def _orthographic_units(facts, tok, insc) -> frozenset[int]:
+    groups = silent_groups(
+        insc, open_vowel_units(facts), decoration_targets(insc)
+    )
+    return frozenset(
+        tok.unit_of_glyph[glyph]
+        for group in groups for glyph in group
+        if glyph in tok.unit_of_glyph
+    )
+
+
+def _unclassified(index, unit, insc):
+    text = "".join(insc.glyphs[glyph].char for glyph in unit.glyphs)
+    raise OwnershipError(
+        f"letter unit {index} {text!r} has no sound or silence derivation"
+    )
+
+
 def ownership(
     facts: AnalysisFacts, tok: Tokenization, insc: InscriptionFacts
 ) -> Ownership:
-    owner, presenters = _owners_and_presenters(facts, tok, insc)
+    carriers = tok.roles.carrier
+    owner, presenters = _owners_and_presenters(facts, tok, insc, carriers)
     sounding = set(owner.values()) | {u for us in presenters.values() for u in us}
     silenced_by = _silenced_units(facts, tok)
     shortened = _shortened_units(facts, tok, insc)
     variant_pairs = _variant_pair_units(tok)
+    orthographic = _orthographic_units(facts, tok, insc)
     silence: dict[int, Silence] = {}
     for index, unit in enumerate(tok.units):
         if index in sounding:
             silence[index] = None
         elif unit.kind is LetterUnitKind.LETTER:
-            silence[index] = (
-                silenced_by[index] if index in silenced_by
-                else shortened.get(
-                    index,
-                    LiteralSilence.VARIANT
-                    if index in variant_pairs
-                    else LiteralSilence.ORTHOGRAPHIC,
-                )
-            )
+            if index in silenced_by:
+                silence[index] = silenced_by[index]
+            elif index in shortened:
+                silence[index] = shortened[index]
+            elif index in variant_pairs:
+                silence[index] = LiteralSilence.VARIANT
+            elif index in orthographic:
+                silence[index] = LiteralSilence.ORTHOGRAPHIC
+            else:
+                _unclassified(index, unit, insc)
         else:
             silence[index] = None
     return Ownership(
@@ -165,4 +210,4 @@ def ownership(
     )
 
 
-__all__ = ["Ownership", "ownership"]
+__all__ = ["Ownership", "OwnershipError", "ownership"]

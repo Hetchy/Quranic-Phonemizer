@@ -8,7 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from ...model.address import Option, SlotId
-from ...model.performance import Consonant, Quality, Vowel
+from ...model.performance import Aspect, Consonant, Quality, Vowel
 from ...render.alphabet import packaged_alphabet
 from ...session import Session
 from ..dtos import AnalysisBundle
@@ -60,6 +60,11 @@ def _reading(view: SourceView, facts: AnalysisFacts, insc: InscriptionFacts,
     owner = {
         s.value: unit.id.value for unit in view.units for s in unit.owned_sound_ids
     }
+    for edge in (*facts.hosts, *facts.insertions):
+        if edge.aspect is not Aspect.VOWEL or edge.sound not in owner:
+            continue
+        slot = edge.slots[0] if hasattr(edge, "slots") else edge.anchor[0]
+        slot_of_unit[owner[edge.sound]] = slot
     main = tuple(
         unit.id.value for unit in view.units
         if unit.kind is LetterUnitKind.LETTER and unit.written_on_unit_id is None

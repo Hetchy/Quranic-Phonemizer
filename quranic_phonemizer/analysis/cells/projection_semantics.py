@@ -37,11 +37,15 @@ def preserve_semantic_cells(
                 continue
             if not _has_rule(column, "waqf_silah_drop", facts):
                 continue
+            occurrence = next(
+                one for one in column.rule_occurrence_ids
+                if facts.occurrences[one.value].rule.value == "waqf_silah_drop"
+            )
             carrier_at = next((
                 index for index in range(at + 1, len(columns))
                 if columns[index].tier is CellTier.MAIN
                 and columns[index].status is CellStatus.DROPPED
-                and columns[index].silence == "orthographic_silence"
+                and columns[index].silence == occurrence
             ), None)
             if carrier_at is None:
                 continue

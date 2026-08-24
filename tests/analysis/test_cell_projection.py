@@ -35,6 +35,16 @@ def test_sukun_is_folded_into_its_main_letter(hafs, pen):
     assert any(c.tier.value == "main" and "ْ" in c.text for w in view.words for c in w.columns)
 
 
+def test_tanween_keeps_the_vowel_slot_it_is_written_on(hafs, pen):
+    _, _, view = _build(hafs, pen, "2:29")
+    tanween = next(
+        column for word in view.words for column in word.columns
+        if column.role is CellRole.TANWEEN and column.text == "ٍ"
+    )
+
+    assert tanween.attached_to_column_id is not None
+
+
 @pytest.mark.parametrize("ref", ["1:1:1", "2:10:3"])
 def test_a_pausal_sukun_changes_the_final_consonant_cell(hafs, pen, ref):
     session, _, view = _build(hafs, pen, ref)
@@ -252,12 +262,18 @@ def test_a_stopped_glides_madd_rule_is_only_on_its_carrier(hafs, pen, ref):
     assert named[0].role is CellRole.MADD
 
 
-def test_stopped_silah_keeps_its_dropped_haraka_with_the_carrier(hafs, pen):
+@pytest.mark.parametrize(("ref", "stopped", "carrier_text"), [
+    ("11:64:1-11:64:3", "11:64:2", "ۦ"),
+    ("2:17:8-2:17:10", "2:17:9", "ۥ"),
+])
+def test_stopped_silah_keeps_its_dropped_haraka_with_the_carrier(
+    hafs, pen, ref, stopped, carrier_text
+):
     session = phonemize_request(
-        hafs, "11:64:1-11:64:3", stop_refs=["11:64:2"]
+        hafs, ref, stop_refs=[stopped]
     )
     kw = dict(
-        ref="11:64:1-11:64:3", riwayah="hafs", script="uthmani", variant={}
+        ref=ref, riwayah="hafs", script="uthmani", variant={}
     )
     bundle = build_bundle(session, **kw)
     view = build_cell_view(session, spelling="transformed", pen=pen, **kw)
@@ -265,7 +281,7 @@ def test_stopped_silah_keeps_its_dropped_haraka_with_the_carrier(hafs, pen):
         o for o in bundle.rule_occurrences
         if o.rule_id.value == "waqf_silah_drop"
     )
-    word_id = next(w.id for w in bundle.words if w.ref == "11:64:2")
+    word_id = next(w.id for w in bundle.words if w.ref == stopped)
     word = next(w for w in view.words if w.word_id == word_id)
     columns = {column.id: column for column in word.columns}
     haraka = next(
@@ -275,7 +291,7 @@ def test_stopped_silah_keeps_its_dropped_haraka_with_the_carrier(hafs, pen):
     )
     carrier = next(
         column for column in word.columns
-        if column.text == "ۦ"
+        if column.text == carrier_text
     )
     group = next(g for g in word.groups if carrier.id in g.column_ids)
 
@@ -285,6 +301,11 @@ def test_stopped_silah_keeps_its_dropped_haraka_with_the_carrier(hafs, pen):
     assert columns[carrier.id].role is CellRole.MADD
     assert all(columns[column].status is CellStatus.DROPPED
                for column in group.column_ids)
+    assert all(
+        columns[column].silence == occurrence.id
+        for column in group.column_ids
+    )
+    assert occurrence.id in columns[carrier.id].rule_occurrence_ids
 
 
 @pytest.mark.parametrize(("ref", "before", "after", "rule"), [

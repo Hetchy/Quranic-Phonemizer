@@ -7,7 +7,7 @@ from ...model.canon import Annotation, Quality
 from ...model.inscription import GlyphKind
 from ...model.performance import Aspect, Vowel
 from ...orthography.write import Pen
-from ..attributions import Hosted, Insertion, Merged, Recoloured, Silenced
+from ..attributions import Hosted, Insertion, Merged, Silenced
 from ..facts import AnalysisFacts
 from ..ids import CellColumnId, OccurrenceId, SoundId
 from ..inscription import InscriptionFacts
@@ -183,6 +183,26 @@ def _adjust_carrier(carrier, value, text, facts, slot_of_unit, was_dropped):
     return carrier
 
 
+def _transform_existing_carrier(columns, by_id, span, existing, value, pen):
+    if (
+        value.quality in {Quality.A, Quality.E}
+        and existing.text == MAQSURA
+    ):
+        columns[by_id[existing.id.value]] = replace(
+            existing, text=existing.text + DAGGER_ALIF,
+            status=CellStatus.REPLACED,
+        )
+    for column in span:
+        if column.role is not CellRole.TANWEEN:
+            continue
+        columns[by_id[column.id.value]] = replace(
+            column,
+            role=CellRole.HARAKA,
+            text=pen.short_vowel(value.quality),
+            status=CellStatus.REPLACED,
+        )
+
+
 def _ensure_one_carrier(
     columns, sounds, sound_index, cell, value, facts, insc,
     slot_of_unit, pen, next_id,
@@ -191,11 +211,9 @@ def _ensure_one_carrier(
     span = [columns[by_id[column.value]] for column in cell.column_ids]
     existing = next((c for c in span if c.role is CellRole.MADD), None)
     if existing is not None:
-        if value.quality is Quality.A and existing.text == MAQSURA:
-            columns[by_id[existing.id.value]] = replace(
-                existing, text=existing.text + DAGGER_ALIF,
-                status=CellStatus.REPLACED,
-            )
+        _transform_existing_carrier(
+            columns, by_id, span, existing, value, pen
+        )
         return next_id
     seat = span[0]
     if _has_maddah(seat, insc):
@@ -254,7 +272,9 @@ def _silenced_targets(columns, edge, slot_of_unit):
     )
     slots = set(edge.slots)
     return [
-        col for col in columns if col.role in roles and any(
+        col for col in columns if (
+            col.role in roles or col.silence == OccurrenceId(edge.by)
+        ) and any(
             slot_of_unit.get(unit.value) in slots for unit in col.source_unit_ids
         )
     ]
@@ -296,10 +316,6 @@ def _place_rules(words: tuple[CellWord, ...], facts: AnalysisFacts,
     for modifier in facts.modifiers:
         occurrence = OccurrenceId(modifier.by)
         targets = _column_targets(words, modifier.sound)
-        if isinstance(modifier, Recoloured):
-            targets.extend(_column_targets(
-                words, modifier.sound, presenters=True
-            ))
         for col in targets:
             if occurrence not in placed[col.id.value]:
                 placed[col.id.value].append(occurrence)
