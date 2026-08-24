@@ -368,13 +368,19 @@ def test_an_internal_mini_noon_does_not_gain_pausal_sukun(hafs, pen):
 
 def test_lam_shamsiyyah_is_only_on_the_silent_lam(hafs, pen):
     _, bundle, view = _build(hafs, pen, "1:1")
-    occurrence = next(o for o in bundle.rule_occurrences if o.rule_id.value == "lam_shamsiyyah")
+    occurrences = [
+        item for item in bundle.rule_occurrences
+        if item.rule_id.value == "lam_shamsiyyah"
+    ]
+    rules = {item.id: item.rule_id.value for item in bundle.rule_occurrences}
     columns = [c for w in view.words for c in w.columns]
-    named = [c for c in columns if occurrence.id in c.rule_occurrence_ids]
-    assert len(named) == 1
-    assert named[0].text.startswith("ل")
-    assert not named[0].owned_sound_ids and named[0].presented_sound_ids
-    assert named[0].silence == occurrence.id
+    for occurrence in occurrences:
+        named = [c for c in columns if occurrence.id in c.rule_occurrence_ids]
+        assert len(named) == 1
+        assert named[0].text.startswith("ل")
+        assert not named[0].owned_sound_ids and named[0].presented_sound_ids
+        assert named[0].silence == occurrence.id
+        assert [rules[item] for item in named[0].rule_occurrence_ids] == ["lam_shamsiyyah"]
 
 
 def test_muqattaat_expand_to_flat_named_letter_runs(hafs, pen):

@@ -315,10 +315,11 @@ def _place_rules(words: tuple[CellWord, ...], facts: AnalysisFacts,
                 placed[col.id.value].append(occurrence)
     for modifier in facts.modifiers:
         occurrence = OccurrenceId(modifier.by)
-        targets = [
-            *_column_targets(words, modifier.sound),
-            *_column_targets(words, modifier.sound, presenters=True),
-        ]
+        targets = _column_targets(words, modifier.sound)
+        if isinstance(facts.sounds[modifier.sound].value, Vowel):
+            targets.extend(_column_targets(
+                words, modifier.sound, presenters=True
+            ))
         for col in targets:
             if occurrence not in placed[col.id.value]:
                 placed[col.id.value].append(occurrence)
