@@ -316,17 +316,19 @@ def test_a_unit_dropped_from_every_group_fails_coverage(hafs):
 
 
 def test_a_silent_only_group_fails(hafs):
-    """A folded silent unit hoisted into its own group, carrying a sound no unit
-    in it owns, has no sounding presenter and is rejected."""
-    bundle, view, groups = _built(hafs, "2:5:3", {"stop_refs": ["2:5:3"]})
+    """A silent unit split from its native group cannot carry its sound."""
+    bundle, view, groups = _built(hafs, "1:1", {})
     pair = next(
         g for g in groups
-        if len(g.unit_ids) == 2
-        and not view.units[g.unit_ids[-1].value].owned_sound_ids
+        if len(g.unit_ids) > 1
+        and any(view.units[unit.value].silence is not None for unit in g.unit_ids)
     )
-    owner_id, silent_id = pair.unit_ids[0], pair.unit_ids[1]
+    silent_id = next(
+        unit for unit in pair.unit_ids
+        if view.units[unit.value].silence is not None
+    )
+    owner_ids = tuple(unit for unit in pair.unit_ids if unit != silent_id)
     silent = view.units[silent_id.value]
-    owner = view.units[owner_id.value]
     silent_only = HighlightGroup(
         id=ids.HighlightId(0),
         unit_ids=(silent_id,),
@@ -334,7 +336,10 @@ def test_a_silent_only_group_fails(hafs):
         sound_ids=pair.sound_ids,
     )
     stripped = HighlightGroup(
-        id=ids.HighlightId(0), unit_ids=(owner_id,), ranges=owner.ranges,
+        id=ids.HighlightId(0), unit_ids=owner_ids,
+        ranges=tuple(
+            span for unit in owner_ids for span in view.units[unit.value].ranges
+        ),
         sound_ids=(),
     )
     rest = [g for g in groups if g is not pair] + [silent_only, stripped]
