@@ -37,7 +37,7 @@ from .dtos import (
 )
 from .transform import transform_words
 from .projection import project_words
-from .projection_semantics import separate_tanween_vowel_colours
+from .projection_semantics import keep_madd_rules_on_carriers, separate_tanween_vowel_colours
 from .transform_laws import validate_transformed
 from .view_laws import validate_cell_view
 
@@ -376,6 +376,7 @@ def build_cell_view(
         )
         words = project_words(words, facts, source, insc, pen)
     words = separate_tanween_vowel_colours(words, facts)
+    words = keep_madd_rules_on_carriers(words, facts)
     placement_of = {p.merger_id.value: p for p in source.merger_placements}
     column_of_unit = _column_of_unit(words)
     words, shared = _extract_merger_sounds(words, bundle.mergers)

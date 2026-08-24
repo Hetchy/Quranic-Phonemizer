@@ -262,6 +262,21 @@ def test_a_stopped_glides_madd_rule_is_only_on_its_carrier(hafs, pen, ref):
     assert named[0].role is CellRole.MADD
 
 
+def test_a_performed_madd_rule_is_only_on_its_carrier(hafs, pen):
+    _, bundle, view = _build(hafs, pen, "1:1")
+    occurrences = {
+        occurrence.id for occurrence in bundle.rule_occurrences
+        if occurrence.rule_id.value == "madd_tabii"
+    }
+    named = [
+        column for word in view.words for column in word.columns
+        if occurrences.intersection(column.rule_occurrence_ids)
+    ]
+
+    assert named
+    assert all(column.role is CellRole.MADD for column in named)
+
+
 @pytest.mark.parametrize(("ref", "stopped", "carrier_text"), [
     ("11:64:1-11:64:3", "11:64:2", "ۦ"),
     ("2:17:8-2:17:10", "2:17:9", "ۥ"),

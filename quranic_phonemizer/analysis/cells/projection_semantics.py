@@ -77,4 +77,30 @@ def separate_tanween_vowel_colours(
     )) for word in words)
 
 
-__all__ = ["preserve_semantic_cells", "separate_tanween_vowel_colours"]
+def keep_madd_rules_on_carriers(
+    words: tuple[CellWord, ...], facts: AnalysisFacts
+) -> tuple[CellWord, ...]:
+    """Name a performed madd on its carrier rather than its vowel mark."""
+    out = []
+    for word in words:
+        carrier_rules = {
+            occurrence
+            for column in word.columns if column.role is CellRole.MADD
+            for occurrence in column.rule_occurrence_ids
+            if facts.occurrences[occurrence.value].rule.value.startswith("madd_")
+        }
+        out.append(replace(word, columns=tuple(
+            replace(column, rule_occurrence_ids=tuple(
+                occurrence for occurrence in column.rule_occurrence_ids
+                if occurrence not in carrier_rules
+            )) if column.role is not CellRole.MADD else column
+            for column in word.columns
+        )))
+    return tuple(out)
+
+
+__all__ = [
+    "keep_madd_rules_on_carriers",
+    "preserve_semantic_cells",
+    "separate_tanween_vowel_colours",
+]
