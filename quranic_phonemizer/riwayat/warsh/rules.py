@@ -28,8 +28,18 @@ from ...rules.meem_sakinah import GhunnahMushaddadah, MeemSakinah
 from ...rules.noon_sakinah import IkhfaaWeight, NoonSakinah
 from ...rules.qalqala import Qalqala
 from ...rules.tafkheem import Emphasis, Weight
-from ...rules.wasl import SpelledBeforeWasl, TanweenBeforeWasl, WaslHamza
+from ...model.canon import Quality
+from ...rules.wasl import (
+    SoftenedHamza,
+    SpelledBeforeWasl,
+    TanweenBeforeWasl,
+    WaslHamza,
+)
 from .resources import khilaf, lexicon, rule_tables
+
+#: Warsh repairs a collision with damm when the elided word starts on an
+#: original damm; the shared kasra and fatha defaults stand elsewhere.
+_DAMM_START_REPAIR = {Quality.U: Quality.U}
 
 
 def _article(tables) -> ArticleShape:
@@ -47,8 +57,9 @@ def _build() -> RuleSet:
         {
             Phase.BOUNDARY: (
                 WaslHamza(),
-                SpelledBeforeWasl(),
-                TanweenBeforeWasl(),
+                SoftenedHamza(),
+                SpelledBeforeWasl(repairs=_DAMM_START_REPAIR),
+                TanweenBeforeWasl(repairs=_DAMM_START_REPAIR),
                 TanweenDrop(),
                 TanweenIwad(),
                 WaqfHarakaDrop(yaa=khilaf().yaa),

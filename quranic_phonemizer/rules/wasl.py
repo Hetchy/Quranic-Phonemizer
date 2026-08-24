@@ -5,7 +5,8 @@ these are the only rules that may ask where the reciter starts.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from collections.abc import Mapping
+from dataclasses import dataclass, field
 
 from ..engine.neighbourhood import Neighbourhood
 from ..engine.plan import (
@@ -128,6 +129,9 @@ class TanweenBeforeWasl:
     phase: Phase = Phase.BOUNDARY
     triggers: frozenset = frozenset({CanonLetter.NOON})
     emits: frozenset = frozenset({Rule.ILTIQA_HARAKA})
+    repairs: Mapping[Quality, Quality] = field(default_factory=dict)
+    """Repair vowel by the following word's start quality; the riwayah binds
+    its table -- Warsh copies an original damm -- and kasra stays the default."""
 
     def look(
         self, near: Neighbourhood, plan: Plan, at: SlotId,
@@ -143,12 +147,13 @@ class TanweenBeforeWasl:
         following = near.after(at)
         if following is None or following.onset is not Onset.WASL:
             return None
+        quality = self.repairs.get(following.nucleus.quality, Quality.I)
         return Verdict(
             Occurrence(
                 mint(Rule.ILTIQA_HARAKA, at), Rule.ILTIQA_HARAKA, (at,),
                 (following.id,), boundary=word,
             ),
-            (Realize(at, Aspect.VOWEL, Vowel(Quality.I)),),
+            (Realize(at, Aspect.VOWEL, Vowel(quality)),),
         )
 
 
@@ -166,6 +171,8 @@ class SpelledBeforeWasl:
     phase: Phase = Phase.BOUNDARY
     triggers: frozenset = frozenset({VowelForm.ABSENT})
     emits: frozenset = frozenset({Rule.ILTIQA_HARAKA})
+    repairs: Mapping[Quality, Quality] = field(default_factory=dict)
+    """Same shape as `TanweenBeforeWasl.repairs`; fatha stays the default."""
 
     def look(
         self, near: Neighbourhood, plan: Plan, at: SlotId,
@@ -185,12 +192,13 @@ class SpelledBeforeWasl:
         following = near.raw_after(at)
         if following is None or following.onset is not Onset.WASL:
             return None
+        quality = self.repairs.get(following.nucleus.quality, Quality.A)
         return Verdict(
             Occurrence(
                 mint(Rule.ILTIQA_HARAKA, at), Rule.ILTIQA_HARAKA, (at,),
                 (following.id,), boundary=word,
             ),
-            (Realize(at, Aspect.VOWEL, Vowel(Quality.A)),),
+            (Realize(at, Aspect.VOWEL, Vowel(quality)),),
         )
 
 
