@@ -20,7 +20,7 @@ from quranic_phonemizer.analysis.source_laws import (
     SourceValidationError,
     validate_source_view,
 )
-from quranic_phonemizer.model.address import Location, Script, VerseRef
+from quranic_phonemizer.model.address import Script, VerseRef
 from quranic_phonemizer.session import phonemize_request
 from quranic_phonemizer.session.boundaries import resolve_boundaries
 from quranic_phonemizer.session.core import Session
@@ -278,3 +278,37 @@ def test_a_written_carrier_owns_its_long_vowel_and_the_haraka_presents_it(hafs):
     owned = carrier.owned_sound_ids[0]
     presenters = [u for u in view.units if owned in u.presented_sound_ids]
     assert presenters and all(u.kind is LetterUnitKind.HARAKA for u in presenters)
+
+
+@pytest.mark.parametrize(("ref", "word_ref", "carrier_text"), [
+    ("17:7", "17:7:12", "ۥٓ"),
+    ("2:3", "2:3:5", "وٰ"),
+    ("2:124", "2:124:3", "ۧ"),
+])
+def test_a_written_display_carrier_owns_its_vowel(
+    hafs, ref, word_ref, carrier_text
+):
+    _, bundle, view = _both(hafs, ref, {})
+    word = next(word for word in bundle.words if word.ref == word_ref)
+    carrier = next(
+        unit for unit in view.units
+        if unit.word_id == word.id and unit.text == carrier_text
+    )
+
+    assert carrier.owned_sound_ids
+    assert carrier.silence is None
+
+
+def test_a_decoration_only_dagger_is_explicitly_silent(hafs):
+    _, bundle, view = _both(hafs, "2:72", {})
+    word = next(word for word in bundle.words if word.ref == "2:72:4")
+    units = [unit for unit in view.units if unit.word_id == word.id]
+    dagger = next(
+        unit for unit in units
+        if unit.text == "ٰ" and not unit.owned_sound_ids
+    )
+    hamza = next(unit for unit in units if unit.text == "ٔ")
+
+    assert dagger.silence is LiteralSilence.ORTHOGRAPHIC
+    assert hamza.owned_sound_ids
+    assert hamza.silence is None

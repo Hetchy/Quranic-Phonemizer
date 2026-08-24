@@ -86,6 +86,8 @@ def _spelt_lengths(inscription: InscriptionFacts) -> dict[SlotId, int]:
 
 
 def _writes_nothing(glyph, index, target, open_vowels, spelt) -> bool:
+    if glyph.kind is GlyphKind.SILENCE_SIGN:
+        return True
     if target not in open_vowels:
         return True
     written = spelt.get(target)

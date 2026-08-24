@@ -106,6 +106,14 @@ def test_a_purely_orthographic_alif_keeps_the_literal_silence(hafs):
     assert carrier.silence is LiteralSilence.ORTHOGRAPHIC
 
 
+def test_a_round_zero_after_tanween_stays_with_its_alif(hafs):
+    view = _view(hafs, "4:176:8")
+    carrier = _unit_of(view, ROUND_ZERO)
+
+    assert carrier.text == PAUSAL_ALIF + ROUND_ZERO
+    assert carrier.silence is LiteralSilence.ORTHOGRAPHIC
+
+
 def test_the_imala_mark_folds_into_the_letter_it_qualifies(hafs):
     """The mark supplies a vowel quality yet mints no unit; the raa carries it."""
     view = _view(hafs, "11:41")
