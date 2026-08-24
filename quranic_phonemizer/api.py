@@ -31,18 +31,10 @@ from .model.performance import Performance
 from .orthography.adapter import Reading, ScriptAdapter
 from .orthography.inventory import Inventory
 from .render.alphabet import Alphabet, load_alphabet
-from .riwayat import hafs, warsh
+from .riwayat import PACKAGES, ruleset_for
 from .riwayat.khilaf import Khilaf
 
 DATA = Path(__file__).resolve().parent / "data"
-
-#: Every riwayah this build ships. Adding one is one row plus its package.
-PACKAGES = {Riwayah.HAFS: hafs, Riwayah.WARSH: warsh}
-
-#: `Riwayah` is the closed vocabulary the gates check against; a member with
-#: no package here would pass them and fail late, so refuse to load instead.
-if set(PACKAGES) != set(Riwayah):
-    raise RuntimeError("every Riwayah member needs a package in PACKAGES")
 
 
 @dataclass(frozen=True, slots=True)
@@ -136,3 +128,6 @@ def alphabet(notation: str = "ipa") -> Alphabet:
     """The output notation. Shared across riwayat: it names sounds, not
     readings, so it is not part of a `Recitation`."""
     return load_alphabet(DATA / "render" / f"{notation}.yaml")
+
+
+__all__ = ["PACKAGES", "Recitation", "alphabet", "recitation", "ruleset_for"]

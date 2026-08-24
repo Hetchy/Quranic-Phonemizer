@@ -32,6 +32,9 @@ class Classifier(Protocol):
     rule: Rule
     phase: Phase
     triggers: Trigger
+    emits: frozenset[Rule]
+    """Every rule this classifier can put in a `Verdict`. Grouped classifiers
+    declare the whole set; a table-driven one derives it from its table."""
 
     def look(
         self,
@@ -55,9 +58,12 @@ class RuleSet:
     def for_phase(self, phase: Phase) -> tuple[Classifier, ...]:
         return self.phases.get(phase, ())
 
-    def rules(self) -> frozenset[Rule]:
-        return frozenset(
-            classifier.rule
-            for classifiers in self.phases.values()
-            for classifier in classifiers
+    def emitted(self) -> frozenset[Rule]:
+        """The union of every bound classifier's declared emitted set."""
+        return frozenset().union(
+            *(
+                classifier.emits
+                for classifiers in self.phases.values()
+                for classifier in classifiers
+            )
         )

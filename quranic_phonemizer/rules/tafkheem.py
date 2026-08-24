@@ -66,6 +66,7 @@ class Emphasis:
     rule: Rule = Rule.TAFKHEEM
     phase: Phase = Phase.COLOUR
     triggers: frozenset = field(default=frozenset())
+    emits: frozenset = frozenset({Rule.TAFKHEEM})
 
     def __post_init__(self) -> None:
         object.__setattr__(

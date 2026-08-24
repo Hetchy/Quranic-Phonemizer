@@ -53,6 +53,7 @@ class WaqfHarakaDrop:
     rule: Rule = Rule.WAQF_DIACRITIC_DROP
     phase: Phase = Phase.BOUNDARY
     triggers: frozenset = frozenset()
+    emits: frozenset = frozenset({Rule.WAQF_DIACRITIC_DROP})
 
     def look(
         self, near: Neighbourhood, plan: Plan, at: SlotId,
@@ -83,6 +84,7 @@ class WaqfSilahDrop:
     rule: Rule = Rule.WAQF_SILAH_DROP
     phase: Phase = Phase.BOUNDARY
     triggers: frozenset = frozenset()
+    emits: frozenset = frozenset({Rule.WAQF_SILAH_DROP})
 
     def look(
         self, near: Neighbourhood, plan: Plan, at: SlotId,
@@ -111,6 +113,7 @@ class DroppedGlide:
 
     yaa: SitedKhilaf = field(default_factory=SitedKhilaf)
     rule: SilenceReason = SilenceReason.VARIANT
+    emits: frozenset = frozenset()
     phase: Phase = Phase.BOUNDARY
     triggers: frozenset = frozenset({Onset.GLIDE})
 
@@ -143,6 +146,7 @@ class PausalAlif:
     rule: Rule = Rule.PAUSAL_ALIF
     phase: Phase = Phase.BOUNDARY
     triggers: frozenset = frozenset({VowelForm.LONG})
+    emits: frozenset = frozenset({Rule.PAUSAL_ALIF})
 
     def look(
         self, near: Neighbourhood, plan: Plan, at: SlotId,
@@ -178,6 +182,7 @@ class TanweenDrop:
     rule: Rule = Rule.WAQF_DIACRITIC_DROP
     phase: Phase = Phase.BOUNDARY
     triggers: frozenset = frozenset({CanonLetter.NOON})
+    emits: frozenset = frozenset({Rule.WAQF_DIACRITIC_DROP})
 
     def look(
         self, near: Neighbourhood, plan: Plan, at: SlotId,
@@ -204,6 +209,7 @@ class TanweenIwad:
     rule: Rule = Rule.MADD_IWAD
     phase: Phase = Phase.BOUNDARY
     triggers: frozenset = frozenset({CanonLetter.NOON})
+    emits: frozenset = frozenset({Rule.MADD_IWAD})
 
     def look(
         self, near: Neighbourhood, plan: Plan, at: SlotId,
@@ -236,6 +242,7 @@ class IwadLength:
     rule: Rule = Rule.MADD_TABII
     phase: Phase = Phase.LENGTH
     triggers: frozenset = frozenset({CanonLetter.NOON})
+    emits: frozenset = frozenset({Rule.MADD_TABII})
 
     def look(
         self, near: Neighbourhood, plan: Plan, at: SlotId,
@@ -261,6 +268,7 @@ class TaaMarbutaAtWaqf:
     rule: Rule = Rule.WAQF_TAA_MARBUTA
     phase: Phase = Phase.BOUNDARY
     triggers: frozenset = frozenset({CanonLetter.TAA_MARBUTA})
+    emits: frozenset = frozenset({Rule.WAQF_TAA_MARBUTA})
 
     def look(
         self, near: Neighbourhood, plan: Plan, at: SlotId,

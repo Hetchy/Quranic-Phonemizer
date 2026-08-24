@@ -10,8 +10,14 @@ import pytest
 from quranic_phonemizer.engine.boundary_plan import all_join
 from quranic_phonemizer.engine.plan import ConflictError
 from quranic_phonemizer.engine.run import perform
-from quranic_phonemizer.model.address import BoundaryPlan, Junction
+from quranic_phonemizer.model.address import BoundaryPlan, Junction, Riwayah
 from quranic_phonemizer.model.canon import Rule
+from quranic_phonemizer.model.definitions import (
+    RULE_DEFINITIONS,
+    SILENCE_DEFINITIONS,
+)
+from quranic_phonemizer.phonemize.names import tajweed_rules
+from quranic_phonemizer.riwayat import ruleset_for
 from quranic_phonemizer.riwayat.hafs import HAFS
 
 from conftest import score_for
@@ -89,6 +95,36 @@ def test_the_deferred_list_does_not_rot(packed, hafs):
         fired |= _fired(packed, hafs, surah, ayah)
     stale = sorted(rule.value for rule in DEFERRED & fired)
     assert not stale, f"listed as deferred but firing: {stale}"
+
+
+@pytest.mark.parametrize("riwayah", list(Riwayah))
+def test_nominal_rule_is_declared_emitted(riwayah):
+    """A classifier whose nominal `rule` is a `Rule` must list it in `emits`;
+    the nominal identifier is what dispatch and displays lean on."""
+    for classifiers in ruleset_for(riwayah).phases.values():
+        for classifier in classifiers:
+            if isinstance(classifier.rule, Rule):
+                assert classifier.rule in classifier.emits, type(classifier)
+
+
+@pytest.mark.parametrize("riwayah", list(Riwayah))
+def test_tajweed_rules_is_the_emitted_union_plus_silences(riwayah):
+    """The public catalogue is derived from the bound classifiers' declared
+    sets: a rule no classifier declares is absent, silences always show."""
+    published = {row[0] for row in tajweed_rules(riwayah.value)}
+    emitted = {rule.value for rule in ruleset_for(riwayah).emitted()}
+    silences = {identifier.value for identifier in SILENCE_DEFINITIONS}
+    assert published == emitted | silences
+    assert emitted <= {identifier.value for identifier in RULE_DEFINITIONS}
+
+
+def test_fired_rules_stay_inside_the_declared_sets(packed, hafs):
+    """Falsifier: a classifier producing a rule it does not declare."""
+    fired: set[Rule] = set()
+    for surah, ayah in SAMPLE:
+        fired |= _fired(packed, hafs, surah, ayah)
+    undeclared = sorted(rule.value for rule in fired - HAFS.emitted())
+    assert not undeclared, f"produced but not declared: {undeclared}"
 
 
 @pytest.mark.parametrize(("surah", "ayah"), SAMPLE)

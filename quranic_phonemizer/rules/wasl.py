@@ -48,6 +48,7 @@ class WaslHamza:
     rule: Rule = Rule.HAMZA_WASL_SILENT
     phase: Phase = Phase.BOUNDARY
     triggers: frozenset = frozenset({Onset.WASL})
+    emits: frozenset = frozenset(_START_OF.values()) | {Rule.HAMZA_WASL_SILENT}
 
     def look(
         self, near: Neighbourhood, plan: Plan, at: SlotId,
@@ -84,6 +85,7 @@ class SoftenedHamza:
     rule: Rule = Rule.IBDAL_HAMZA
     phase: Phase = Phase.BOUNDARY
     triggers: frozenset = frozenset({Onset.WASL})
+    emits: frozenset = frozenset({Rule.IBDAL_HAMZA})
 
     def look(
         self, near: Neighbourhood, plan: Plan, at: SlotId,
@@ -125,6 +127,7 @@ class TanweenBeforeWasl:
     rule: Rule = Rule.ILTIQA_HARAKA
     phase: Phase = Phase.BOUNDARY
     triggers: frozenset = frozenset({CanonLetter.NOON})
+    emits: frozenset = frozenset({Rule.ILTIQA_HARAKA})
 
     def look(
         self, near: Neighbourhood, plan: Plan, at: SlotId,
@@ -162,6 +165,7 @@ class SpelledBeforeWasl:
     rule: Rule = Rule.ILTIQA_HARAKA
     phase: Phase = Phase.BOUNDARY
     triggers: frozenset = frozenset({VowelForm.ABSENT})
+    emits: frozenset = frozenset({Rule.ILTIQA_HARAKA})
 
     def look(
         self, near: Neighbourhood, plan: Plan, at: SlotId,

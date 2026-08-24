@@ -73,6 +73,7 @@ class ArticleLam:
     rule: Rule = Rule.LAM_SHAMSIYYAH
     phase: Phase = Phase.MERGE
     triggers: frozenset = frozenset({L.LAM})
+    emits: frozenset = frozenset({Rule.LAM_SHAMSIYYAH, Rule.LAM_QAMARIYYAH})
 
     def look(
         self, near: Neighbourhood, plan: Plan, at: SlotId,

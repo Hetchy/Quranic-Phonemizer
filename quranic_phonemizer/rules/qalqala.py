@@ -29,6 +29,7 @@ class Qalqala:
     rule: Rule = Rule.QALQALA_SUGHRA
     phase: Phase = Phase.RELEASE
     triggers: frozenset = field(default=frozenset())
+    emits: frozenset = frozenset(_DEGREE_OF_RULE)
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "triggers", frozenset(self.letters))

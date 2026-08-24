@@ -24,7 +24,7 @@ from ..model.canon import Rule, SlotOrigin
 from ..model.performance import Aspect, Consonant, Occurrence
 from .ownership import is_performed_quiescent, is_quiescent
 from .khilaf import DEFAULT_NASAL_PLACE, nasal_place
-from .tables import Followers
+from .tables import NOON_OUTCOMES, Followers
 
 
 @dataclass(frozen=True, slots=True)
@@ -36,6 +36,7 @@ class NoonSakinah:
     rule: Rule = Rule.IKHFAA
     phase: Phase = Phase.MERGE
     triggers: frozenset = field(default=frozenset({L.NOON}))
+    emits: frozenset = NOON_OUTCOMES | {Rule.IKHFAA}
 
     def look(
         self, near: Neighbourhood, plan: Plan, at: SlotId,
@@ -168,6 +169,7 @@ class IkhfaaWeight:
     rule: Rule = Rule.TAFKHEEM
     phase: Phase = Phase.COLOUR
     triggers: frozenset = field(default=frozenset({L.NOON}))
+    emits: frozenset = frozenset({Rule.TAFKHEEM})
 
     def look(
         self, near: Neighbourhood, plan: Plan, at: SlotId,

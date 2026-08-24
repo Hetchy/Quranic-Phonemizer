@@ -40,9 +40,10 @@ ALLOWED: dict[str, set[str]] = {
     # the request layers and nothing of the projection above it.
     "session": {"canon", "corpus", "engine", "model"},
     # The native projection's facts. It reimplements what it needs and reads
-    # only the resolved request, the model, the notation, and the pen -- no
-    # edge to the public assembler above it.
-    "analysis": {"model", "orthography", "render", "session"},
+    # only the resolved request, the model, the notation, the pen, and the
+    # riwayah registry for the per-reading rule catalogue -- no edge to the
+    # public assembler above it.
+    "analysis": {"model", "orthography", "render", "riwayat", "session"},
     # Above `api`: it imports the assembled bundle rather than re-deriving
     # it. It reaches the request layers through `session` now, so it keeps no
     # direct canon, corpus or engine edge -- a declared edge nothing exercises
