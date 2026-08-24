@@ -7,7 +7,7 @@ from ...model.canon import Annotation, Quality
 from ...model.inscription import GlyphKind
 from ...model.performance import Aspect, Vowel
 from ...orthography.write import Pen
-from ..attributions import Hosted, Insertion, Merged, Silenced
+from ..attributions import Hosted, Insertion, Merged, Recoloured, Silenced
 from ..facts import AnalysisFacts
 from ..ids import CellColumnId, OccurrenceId, SoundId
 from ..inscription import InscriptionFacts
@@ -316,6 +316,10 @@ def _place_rules(words: tuple[CellWord, ...], facts: AnalysisFacts,
     for modifier in facts.modifiers:
         occurrence = OccurrenceId(modifier.by)
         targets = _column_targets(words, modifier.sound)
+        if isinstance(modifier, Recoloured):
+            targets.extend(_column_targets(
+                words, modifier.sound, presenters=True
+            ))
         for col in targets:
             if occurrence not in placed[col.id.value]:
                 placed[col.id.value].append(occurrence)

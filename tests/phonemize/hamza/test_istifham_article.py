@@ -83,7 +83,7 @@ CASES = (
     # ءَآلذَّكَرَيْنِ
     _case("dhakarayn", DHAKARAYN,
           "ʔ a: ðð a k a rˤ aˤ j n", "ʔ a ʔ̞ a ðð a k a rˤ aˤ j n",
-          "a:", "@dagger_alif", "ا"),
+          "a:", "ا", "ا"),
     # ءَآلْـَٰٔنَ
     _case("alan", ALAN,
           "ʔ a: l ʔ a: n", "ʔ a ʔ̞ a l ʔ a: n",

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from tests.support import Case, R, Site, assert_case, case_runs, isolated, pick
+from tests.support import Case, R, Site, assert_case, case_runs, isolated
 
 
 CASES = (
@@ -12,10 +12,7 @@ CASES = (
         site=Site(hafs=("11:41", (6,))),
         read=isolated(),
         phonemes="m a ʒ Q r i: h a:",
-        char_rules=pick(
-            hafs_uthmani={"ى": R("imala")},
-            hafs_indopak={"@imala_mark": R("imala")},
-        ),
+        char_rules={"ى": R("imala")},
         sound_rules={"i:": R("imala")},
         extra_phonemes=(),
     ),
@@ -25,10 +22,7 @@ CASES = (
         site=Site(hafs=("11:41", (6,))),
         read=isolated(),
         phonemes="m a ʒ Q r e: h a:",
-        char_rules=pick(
-            hafs_uthmani={"ى": R("imala")},
-            hafs_indopak={"@imala_mark": R("imala")},
-        ),
+        char_rules={"ى": R("imala")},
         sound_rules={"e:": R("imala")},
         extra_phonemes=("imala",),
     ),

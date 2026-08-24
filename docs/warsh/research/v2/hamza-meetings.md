@@ -145,9 +145,8 @@ The four triple-hamza sites are:
 
 They have fixed `ʔ a ʔ̞ a: ...`: the first interrogative qata remains full,
 the second explicit qata emits `tashil`, and the existing following long A
-keeps `madd_badal + madd_tabii`. Do not emit `ibdal_hamza` for that already
-lexical badal carrier. Badal names its origin and tabii names its ordinary
-effective context. Al-Wafi distinguishes these fixed forms from the
+keeps `madd_badal` without `madd_tabii`. Do not emit `ibdal_hamza` for that
+already lexical badal carrier. Al-Wafi distinguishes these fixed forms from the
 ordinary open-second-hamza choice
 ([source](https://www.islamweb.net/ar/library/content/245/14/)).
 
@@ -190,8 +189,9 @@ structural madd on the same result sound and responsible source characters. It
 does not acquire `madd_badal` merely from the meeting. Independently existing
 badal origin is preserved, however. At the unique U+U site, the second word's
 lexical waw carrier remains `madd_badal`: under ibdal it fuses with the created
-carrier and the resulting `/u:/` has `ibdal_hamza`, `madd_badal`, and the
-effective madd; under tashil it remains the long `/u:/` after the eased onset.
+carrier and the resulting `/u:/` has `ibdal_hamza`, `madd_badal`, and
+`madd_muttasil`; under tashil it remains the muttasil `/u:/` after the eased
+onset.
 Tashil emits `tashil` on that onset even when it renders as plain `ʔ`.
 In the A+A row, the selected context continues as `احَدٞ مِّنكُم`; ordinary
 tanwin-to-meem idgham owns `/m̃/`. The ellipsis crops the sequence after that
@@ -231,8 +231,8 @@ and `جَآءَ ا۟لَ فِرْعَوْنَ`, source and canonical 54:41:2-3
 
 Ibdal removes the second onset and canonicalizes the adjacent A carriers to
 the sequence `... ʔ a: l ...`. That one long A result after the first qata has
-`ibdal_hamza`, retains
-the lexical carrier's `madd_badal`, and receives its effective madd rule.
+`ibdal_hamza` and retains the lexical carrier's `madd_badal` without
+`madd_tabii`.
 Tashil keeps `... ʔ a ʔ̞ a: l ...`, with `tashil` on the eased onset and
 `madd_badal` on the lexical long A. Count-dependent duration correlations do
 not create additional phoneme outcomes or selectors.

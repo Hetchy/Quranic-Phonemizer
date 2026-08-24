@@ -169,6 +169,20 @@ def _orthographic_units(facts, tok, insc) -> frozenset[int]:
     )
 
 
+def _orthographic_seats(tok: Tokenization) -> frozenset[int]:
+    """A rasm seat stays silent when another unit writes the slot's letter."""
+    letters = set(tok.roles.letter.values())
+    vowels = set(tok.roles.vowel.values())
+    carriers = set(tok.roles.carrier.values())
+    return frozenset(
+        index for index, unit in enumerate(tok.units)
+        if unit.kind is LetterUnitKind.LETTER
+        and unit.slot is not None
+        and tok.roles.letter.get(unit.slot) is not None
+        and index not in letters | vowels | carriers
+    )
+
+
 def _unclassified(index, unit, insc):
     text = "".join(insc.glyphs[glyph].char for glyph in unit.glyphs)
     raise OwnershipError(
@@ -186,6 +200,7 @@ def ownership(
     shortened = _shortened_units(facts, tok, insc)
     variant_pairs = _variant_pair_units(tok)
     orthographic = _orthographic_units(facts, tok, insc)
+    seats = _orthographic_seats(tok)
     silence: dict[int, Silence] = {}
     for index, unit in enumerate(tok.units):
         if index in sounding:
@@ -197,7 +212,7 @@ def ownership(
                 silence[index] = shortened[index]
             elif index in variant_pairs:
                 silence[index] = LiteralSilence.VARIANT
-            elif index in orthographic:
+            elif index in orthographic or index in seats:
                 silence[index] = LiteralSilence.ORTHOGRAPHIC
             else:
                 _unclassified(index, unit, insc)

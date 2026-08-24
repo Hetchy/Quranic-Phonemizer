@@ -42,7 +42,7 @@ validation may still correct a concluded decision.
 | [`naql.md`](research/v2/naql.md) | General, article, lexical, and boundary-specific naql |
 | [`hamza-meetings.md`](research/v2/hamza-meetings.md) | One-word and two-word hamza meetings and their fixed exceptions |
 | [`madd-counts.md`](research/v2/madd-counts.md) | Received duration facts that remain outside the runtime length model |
-| [`madd-badal.md`](research/v2/madd-badal.md) | Badal origin, effective madd overlap, and duration-only exceptions |
+| [`madd-badal.md`](research/v2/madd-badal.md) | Badal identity, its lazim or muttasil combinations, and duration-only exceptions |
 | [`madd-leen-mahmuz.md`](research/v2/madd-leen-mahmuz.md) | Structural leen-mahmuz classification and its exact exclusions |
 | [`mim-al-jam.md`](research/v2/mim-al-jam.md) | Joined mim shape before qata and its madd consequences |
 | [`yaa-zawaid.md`](research/v2/yaa-zawaid.md) | Joined-only and consonantal added-yaa facts |

@@ -179,7 +179,7 @@ def _seat_unit(unit: LetterUnit, reading: _Reading) -> int | None:
             continue
         owner = reading.owner_of_sound.get(sound.value)
         if owner is not None:
-            return owner
+            return _followed_to_main(owner, reading)
     return _main_of_slot(unit.id.value, reading)
 
 

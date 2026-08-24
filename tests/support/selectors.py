@@ -6,6 +6,7 @@ import unicodedata
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 
+from quranic_phonemizer.analysis.cells.dtos import CellRole, CellStatus
 from quranic_phonemizer.model.canon import CanonLetter, Quality, VowelForm
 from quranic_phonemizer.phonemize import edges as ed
 from quranic_phonemizer.phonemize import nodes as nd
@@ -179,6 +180,69 @@ def resolve_glyph(assembled, words: Iterable[int], value: str) -> int:
         if glyph.word in focused and predicate(assembled, index)
     )
     return _choose(selector, candidates, "source targets")
+
+
+def _bare(value: str) -> str:
+    return "".join(
+        char for char in unicodedata.normalize("NFD", value)
+        if not unicodedata.category(char).startswith("M")
+    )
+
+
+_CELL_SELECTORS = {
+    "@fatha": lambda column: column.role is CellRole.HARAKA and "َ" in column.text,
+    "@damma": lambda column: column.role is CellRole.HARAKA and "ُ" in column.text,
+    "@kasra": lambda column: column.role is CellRole.HARAKA and "ِ" in column.text,
+    "@madd": lambda column: column.role is CellRole.MADD,
+}
+
+
+def resolve_cell(view, words: Iterable[int], value: str) -> int:
+    """Resolve a scoped selector against the transformed cell projection."""
+    if "/" not in value:
+        raise SelectorError(f"{value!r} is not a transformed-cell selector")
+    scope, cell_value = value.split("/", 1)
+    selector = parse_selector(cell_value)
+    focused = {word - 1 for word in words}
+    candidates = []
+    for word in view.words:
+        if word.word_id.value not in focused:
+            continue
+        columns = {column.id: column for column in word.columns}
+        if scope == "@inserted":
+            scopes = (tuple(
+                column for column in word.columns
+                if column.status is CellStatus.INSERTED
+            ),)
+        elif scope.startswith("@"):
+            raise SelectorError(f"unknown transformed-cell scope {scope!r}")
+        else:
+            scopes = tuple(
+                tuple(columns[column] for column in run.column_ids)
+                for run in word.runs
+                if _bare("".join(columns[column].text for column in run.column_ids))
+                == _bare(scope)
+            )
+        for scope_columns in scopes:
+            predicate = _CELL_SELECTORS.get(selector.name)
+            if selector.name.startswith("@") and predicate is None:
+                raise SelectorError(
+                    f"unknown transformed-cell selector {selector.name!r}"
+                )
+            if predicate is None:
+                predicate = lambda column: _bare(column.text) == selector.name
+            candidates.extend(
+                column.id.value for column in scope_columns if predicate(column)
+            )
+    return _choose(selector, tuple(candidates), "transformed cells")
+
+
+def resolve_spelled_cell(view, words: Iterable[int], value: str) -> int:
+    """Resolve ``named-letter/cell`` inside an expanded muqattaat run."""
+    scope = value.split("/", 1)[0]
+    if scope.startswith("@"):
+        raise SelectorError(f"{value!r} is not a spelled-cell selector")
+    return resolve_cell(view, words, value)
 
 
 def resolve_sound(assembled, sound_words: dict[int, int], words: Iterable[int], value: str) -> int:

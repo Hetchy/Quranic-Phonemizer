@@ -125,10 +125,8 @@ The start produces one result vowel with three independent facts:
   `/ʔ/`, according to the start quality;
 - `ibdal_hamza` names the second, replaced qata as its source and the wasl
   slot carrying the replacement long as its host; and
-- `madd_tabii` reaches the result sound because the result is structurally a
-  long carrier. The same
-  vowel also receives `madd_badal`: its semantic origin is the replaced qata
-  hamza. These overlapping classifications encode different facts and neither
+- `madd_badal` reaches the result sound because its semantic origin is the
+  replaced qata hamza. It does not also receive `madd_tabii`; neither rule
   carries a recitation count.
 
 In joined speech the wasl onset still elides. Warsh then applies the connected

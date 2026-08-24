@@ -623,8 +623,17 @@ All selectors remain strings.
 
 - A plain string is a visible grapheme cluster or exact sound token.
 - An `@name` is a registered semantic source selector.
+- A `named-letter/cell` string selects one transformed cell inside a fully
+  spelled muqattaat run. The run and literal cell are matched without Arabic
+  combining marks; `@fatha`, `@damma`, `@kasra`, and `@madd` select cell roles.
+- An `@inserted/cell` string selects an inserted transformed cell that has no
+  source glyph, such as the iwad alif created after final hamza.
 - A one-based `[n]` suffix is allowed only when the unsuffixed target is
   ambiguous inside the focused span.
+
+For example, `لام/@madd` names the alif carrier in the spelled name of lam,
+`ميم/م[2]` names the terminal meem rather than the compact source glyph, and
+`@inserted/ا` names a created iwad carrier rather than the source tanwin.
 
 The initial registry is:
 
@@ -679,8 +688,8 @@ consonant sound is not classified by `iltiqa_haraka`.
 4. unique literal, registered selector, and sound resolution;
 5. `[n]` only when the unsuffixed target is ambiguous;
 6. connected char/sound reach for a shared rule ID;
-7. both written participants for every merger assertion, with hidden
-   muqattaat terminals represented only by their result sound and written host;
+7. both participating cells for every merger assertion, including expanded
+   muqattaat source and host cells;
 8. literal ordinary alif, waw, yaa, and wasl alif rather than semantic aliases;
 9. a readable `pytest.param` ID and immediately adjacent Arabic comment;
 10. no raw subtle combining-mark mapping keys;
@@ -800,8 +809,8 @@ inputs agree.
 - unique targets never carry an occurrence suffix;
 - subtle marks use the reviewed selector registry;
 - repeated glyphs/sounds are addressed exactly, never unioned accidentally;
-- every merger assertion names both written participants; a hidden muqattaat
-  terminal names only its result sound and written host;
+- every merger assertion names both participating cells; muqattaat mergers
+  name their expanded source and host cells;
 - state matrices replace repeated joined/stopped bodies;
 - case tables contain Arabic, site, state, full phonemes, char reach, sound
   reach, and readable IDs together; and

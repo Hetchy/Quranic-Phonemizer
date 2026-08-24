@@ -44,19 +44,32 @@ CASES = (
                           ),
                           sound_rules={"a:": R("madd_iwad", "madd_tabii")}),
     }),
+    # مَآءً فَأَخْرَجَ
+    StateCase(id="fathatan-after-hamza", site=Site(hafs=("2:22", (11,))), states={
+        "joined": Expect(
+            read=joining(), phonemes="m a: ʔ a ŋ",
+            char_rules={"ا": R("madd_muttasil"),
+                        "@fathatan": R("ikhfaa")},
+            sound_rules={"a:": R("madd_muttasil"),
+                         "ŋ": R("ikhfaa")},
+        ),
+        "stopped": Expect(
+            read=isolated(), phonemes="m a: ʔ a:",
+            char_rules={"ا": R("madd_muttasil"),
+                        "@inserted/ا": R("madd_iwad", "madd_tabii")},
+            sound_rules={"a:[1]": R("madd_muttasil"),
+                         "a:[2]": R("madd_iwad", "madd_tabii")},
+        ),
+    }),
     # غَفُورٌ حَلِيمٌ
     StateCase(id="dammatan-negative", site=Site(hafs=("2:225", (13,))), states={
-        "joined": Expect(read=joining(), phonemes="ɣ aˤ f u: rˤ u n",
-                         absent_char_rules={"@dammatan": R("madd_iwad")}),
-        "stopped": Expect(read=isolated(), phonemes="ɣ aˤ f u: rˤ",
-                          absent_char_rules={"@dammatan": R("madd_iwad")}),
+        "joined": Expect(read=joining(), phonemes="ɣ aˤ f u: rˤ u n"),
+        "stopped": Expect(read=isolated(), phonemes="ɣ aˤ f u: rˤ"),
     }),
     # لِقَوْمٍ آخَرِينَ
     StateCase(id="kasratan-negative", site=Site(hafs=("5:41", (23,))), states={
-        "joined": Expect(read=joining(), phonemes="l i q aˤ w m i n",
-                         absent_char_rules={"@kasratan": R("madd_iwad")}),
-        "stopped": Expect(read=isolated(), phonemes="l i q aˤ w m",
-                          absent_char_rules={"@kasratan": R("madd_iwad")}),
+        "joined": Expect(read=joining(), phonemes="l i q aˤ w m i n"),
+        "stopped": Expect(read=isolated(), phonemes="l i q aˤ w m"),
     }),
 )
 

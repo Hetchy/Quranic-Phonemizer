@@ -33,12 +33,13 @@ def _vowel_groups(word, facts, by_id, attached, claimed) -> list[CellGroup]:
             by_id[column] for column in sound.column_ids
             if by_id[column].role is CellRole.MADD
         ), None)
-        quality = [
-            column for column in sound.column_ids
-            if by_id[column].tier is not CellTier.MAIN
-        ]
         if carrier is None:
             continue
+        quality = [
+            column for column in sound.column_ids
+            if column != carrier.id
+            and by_id[column].tier is not CellTier.MAIN
+        ]
         ids = tuple((*quality, carrier.id, *[
             column for column in attached.get(carrier.id, ())
             if column not in quality

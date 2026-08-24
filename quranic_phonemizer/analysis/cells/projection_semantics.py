@@ -17,6 +17,22 @@ def _has_rule(column, rule: str, facts: AnalysisFacts) -> bool:
     )
 
 
+def _occurrence_for(column, rule: str, facts: AnalysisFacts) -> OccurrenceId | None:
+    candidates = list(column.rule_occurrence_ids)
+    if isinstance(column.silence, OccurrenceId):
+        candidates.append(column.silence)
+    return next((
+        occurrence for occurrence in candidates
+        if facts.occurrences[occurrence.value].rule.value == rule
+    ), None)
+
+
+def _with_occurrence(column, occurrence: OccurrenceId):
+    return replace(column, rule_occurrence_ids=tuple(dict.fromkeys(
+        (*column.rule_occurrence_ids, occurrence)
+    )))
+
+
 def preserve_semantic_cells(
     words: tuple[CellWord, ...], facts: AnalysisFacts
 ) -> tuple[CellWord, ...]:
@@ -35,12 +51,17 @@ def preserve_semantic_cells(
                 )
                 columns[at] = replace(column, silence=occurrence)
                 continue
-            if not _has_rule(column, "waqf_silah_drop", facts):
+            occurrence = _occurrence_for(column, "waqf_silah_drop", facts)
+            if occurrence is None:
                 continue
-            occurrence = next(
-                one for one in column.rule_occurrence_ids
-                if facts.occurrences[one.value].rule.value == "waqf_silah_drop"
-            )
+            if (
+                column.silence == occurrence
+                and column.role is not CellRole.HARAKA
+            ):
+                columns[at] = replace(
+                    _with_occurrence(column, occurrence), role=CellRole.MADD
+                )
+                continue
             carrier_at = next((
                 index for index in range(at + 1, len(columns))
                 if columns[index].tier is CellTier.MAIN
@@ -49,7 +70,10 @@ def preserve_semantic_cells(
             ), None)
             if carrier_at is None:
                 continue
-            carrier = replace(columns[carrier_at], role=CellRole.MADD)
+            carrier = replace(
+                _with_occurrence(columns[carrier_at], occurrence),
+                role=CellRole.MADD,
+            )
             columns[at] = replace(column, attached_to_column_id=carrier.id)
             columns[carrier_at] = carrier
         out.append(replace(word, columns=tuple(columns)))

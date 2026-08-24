@@ -8,7 +8,7 @@ from quranic_phonemizer.analysis.source_dtos import LiteralSilence
 
 from .case import CaseRun, RuleExpectation, resolve
 from .reading import reading
-from .selectors import resolve_glyph, resolve_sound
+from .selectors import resolve_cell, resolve_glyph, resolve_sound
 
 
 def _known_tokens(alphabet) -> frozenset[str]:
@@ -118,6 +118,21 @@ def _rules_for_sound(result, sound: int) -> frozenset[RuleKey]:
     )
 
 
+def _rules_for_column(result, column_id: int) -> frozenset[RuleKey]:
+    column = next(
+        column for column in _columns(result) if column.id.value == column_id
+    )
+    reached = {
+        ("occurrence", occurrence.value)
+        for occurrence in column.rule_occurrence_ids
+    }
+    if isinstance(column.silence, LiteralSilence):
+        reached.add(("literal", column.silence.value))
+    elif isinstance(column.silence, OccurrenceId):
+        reached.add(("occurrence", column.silence.value))
+    return frozenset(reached)
+
+
 def _names(result, rules: frozenset[RuleKey]) -> frozenset[str]:
     return frozenset(
         value if kind == "literal"
@@ -145,7 +160,7 @@ class _Targets:
         self.result = result
         self.words = words
         self.sound = sound
-        self.selected: dict[str, int] = {}
+        self.selected: dict[str, frozenset[RuleKey]] = {}
 
     def __call__(self, selector: str) -> frozenset[RuleKey]:
         if self.sound:
@@ -157,9 +172,13 @@ class _Targets:
             )
             rules = _rules_for_sound(self.result, target)
         else:
-            target = resolve_glyph(self.result._assembled, self.words, selector)
-            rules = _rules_for_glyph(self.result, target)
-        self.selected[selector] = target
+            if "/" in selector:
+                target = resolve_cell(self.result._cells, self.words, selector)
+                rules = _rules_for_column(self.result, target)
+            else:
+                target = resolve_glyph(self.result._assembled, self.words, selector)
+                rules = _rules_for_glyph(self.result, target)
+        self.selected[selector] = rules
         return rules
 
 
@@ -183,12 +202,8 @@ def _assert_connected(char_targets: _Targets, sound_targets: _Targets, char_map,
         connected_pairs: set[tuple[str, str]] = set()
         for char_selector in chars:
             for sound_selector in sounds:
-                char_rule_indices = _rules_for_glyph(
-                    char_targets.result, char_targets.selected[char_selector]
-                )
-                sound_rule_indices = _rules_for_sound(
-                    sound_targets.result, sound_targets.selected[sound_selector]
-                )
+                char_rule_indices = char_targets.selected[char_selector]
+                sound_rule_indices = sound_targets.selected[sound_selector]
                 connected = {
                     index for index in char_rule_indices & sound_rule_indices
                     if _names(char_targets.result, frozenset((index,))) == {name}
@@ -200,9 +215,7 @@ def _assert_connected(char_targets: _Targets, sound_targets: _Targets, char_map,
         )
         for sound_selector in sounds:
             sound_rule_indices = {
-                index for index in _rules_for_sound(
-                    sound_targets.result, sound_targets.selected[sound_selector]
-                )
+                index for index in sound_targets.selected[sound_selector]
                 if _names(sound_targets.result, frozenset((index,))) == {name}
             }
             source_backed = {

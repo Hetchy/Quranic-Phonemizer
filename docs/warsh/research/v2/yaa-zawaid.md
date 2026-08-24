@@ -12,9 +12,8 @@ For Warsh through al-Azraq the selected register contains 47 sites:
 - one, `ءَات۪يٰنِۦَ` at canonical `27:36`, produces joined-only `/j a/` and is
   absent at waqf; and
 - among the 46 long-vowel sites, 10 precede hamzat qata and receive
-  `madd_munfasil`; the other 36 receive `madd_tabii`. Row 7 also
-  receives the independent `madd_badal` origin classification because its
-  joined yaa follows hamza.
+  `madd_munfasil`, 35 receive `madd_tabii`, and row 7 receives `madd_badal`
+  because its joined yaa follows hamza.
 
 The classical chapter specifically records the open Warsh yaa in
 `فَمَآ ءَات۪يٰنِۦَ اَ۬للَّهُ` and the deletion on stopping
@@ -89,7 +88,7 @@ at waqf ([Al-Wafi, complete transmitted inventory](https://www.islamweb.net/ar/l
 | 4 | `11:46:12` | `11:46` | `تَسْـَٔلَنِّۦ` | `/i:/`, `madd_tabii` |
 | 5 | `11:105:2` | `11:105` | `يَاتِۦ` | `/i:/`, `madd_tabii` |
 | 6 | `14:17:10` | `14:14` | `وَعِيدِۦۖ` | `/i:/`, `madd_tabii` |
-| 7 | `14:42:9` | `14:40` | `دُعَآءِۦۖ` | `/i:/`, `madd_badal + madd_tabii` |
+| 7 | `14:42:9` | `14:40` | `دُعَآءِۦۖ` | `/i:/`, `madd_badal` |
 | 8 | `17:62:8` | `17:62` | `اَخَّرْتَنِۦٓ` | `/i:/`, `madd_munfasil` |
 | 9 | `17:97:5` | `17:97` | `اَ۬لْمُهْتَدِۦۖ` | `/i:/`, `madd_tabii` |
 | 10 | `18:17:27` | `18:17` | `اَ۬لْمُهْتَدِۦۖ` | `/i:/`, `madd_tabii` |
@@ -136,8 +135,7 @@ The ten `madd_munfasil` rows are 1, 8, 15, 23, 24, 31, 34, 37,
 using the small-yaa scalar alone as a madd classifier.
 
 Row 7 is the sole joined yaa-zawaid carrier immediately after hamza. It keeps
-`madd_badal` alongside its effective `madd_tabii`; the two tags classify
-origin and effective context separately
+`madd_badal` without `madd_tabii`
 ([Al-Nashr lists `دُعَائِي` among after-hamza carriers](https://islamweb.net/ar/library/content/70/99/%D9%81%D8%B5%D9%84-%D9%81%D9%8A-%D9%88%D9%82%D9%88%D8%B9-%D8%AD%D8%B1%D9%81-%D8%A7%D9%84%D9%85%D8%AF-%D8%A8%D8%B9%D8%AF-%D8%A7%D9%84%D9%87%D9%85%D8%B2)).
 
 ## Sound and character attribution
@@ -147,10 +145,8 @@ For an ordinary joined site:
 - the authored boundary slot produces `/i:/` in wasl or joined ibtidaa and
   produces no sound at waqf;
 - the result sound receives exactly one effective madd rule:
-  `madd_munfasil` before qata, otherwise `madd_tabii`;
-- row 7 additionally places the independent `madd_badal` origin occurrence on
-  `/i:/`; its core occurrence and source projection retain the after-hamza
-  origin;
+  `madd_munfasil` before qata, `madd_badal` at row 7, otherwise `madd_tabii`;
+- row 7's core occurrence and source projection retain the after-hamza origin;
 - source and cell placements put the madd occurrence on the small-yaa and
   carrier/maddah units that own or present `/i:/`. For munfasil the following
   qata is trigger-only context and is not tagged merely because it caused the
@@ -177,9 +173,8 @@ plus vowel shape; forcing it into a vowel nucleus would lose `/j/`.
 Acceptance requires:
 
 - an exact 47-row register and corpus reconciliation;
-- 46 joined `/i:/` sites split into exactly 36 `madd_tabii` and 10
-  `madd_munfasil` sites;
-- `madd_badal + madd_tabii` together on row 7;
+- 46 joined `/i:/` sites split into exactly 35 `madd_tabii`, 10
+  `madd_munfasil`, and one `madd_badal` site;
 - the single `/j a/` site with no madd;
 - complete wasl, waqf, and ibtidaa assertions, including starting at the next
   word;

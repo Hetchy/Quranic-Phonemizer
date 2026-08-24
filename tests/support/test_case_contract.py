@@ -26,7 +26,12 @@ from tests.support import (
     through,
 )
 from tests.support.case import resolve
-from tests.support.selectors import resolve_glyph, resolve_sound
+from tests.support.selectors import (
+    resolve_cell,
+    resolve_glyph,
+    resolve_sound,
+    resolve_spelled_cell,
+)
 
 
 def test_phoneme_strings_are_tokenized_by_one_ascii_space():
@@ -136,6 +141,39 @@ def test_a_raw_combining_mark_is_rejected_as_a_selector():
     result = reading(Site(hafs=("4:48", (19,))), isolated=19)
     with pytest.raises(SelectorError, match="registered @selector"):
         resolve_glyph(result._assembled, (19,), "ً")
+
+
+def test_a_spelled_cell_selector_targets_the_expanded_named_letter():
+    result = reading(Site(hafs=("2:1", (1,))), ibtidaa=1, wasl=1)
+    target = resolve_spelled_cell(result._cells, (1,), "لام/@madd")
+    column = next(
+        column for column in result._cells.words[0].columns
+        if column.id.value == target
+    )
+    assert column.text == "آ"
+
+
+def test_an_ambiguous_spelled_letter_requires_an_occurrence_suffix():
+    result = reading(Site(hafs=("2:1", (1,))), ibtidaa=1, wasl=1)
+    with pytest.raises(SelectorError, match=r"add \[n\]"):
+        resolve_spelled_cell(result._cells, (1,), "ميم/م")
+    target = resolve_spelled_cell(result._cells, (1,), "ميم/م[2]")
+    column = next(
+        column for column in result._cells.words[0].columns
+        if column.id.value == target
+    )
+    assert column.text == "مْ"
+
+
+def test_an_inserted_cell_selector_has_no_source_glyph():
+    result = reading(Site(hafs=("2:22", (11,))), isolated=11)
+    target = resolve_cell(result._cells, (11,), "@inserted/ا")
+    column = next(
+        column for word in result._cells.words for column in word.columns
+        if column.id.value == target
+    )
+    assert column.text == "ا"
+    assert not column.source_character_ids
 
 
 def test_unknown_semantic_selectors_fail_loudly():

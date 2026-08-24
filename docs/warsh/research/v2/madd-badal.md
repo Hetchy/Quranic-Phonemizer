@@ -18,28 +18,26 @@ The ordinary example is `ءَادَمَ`, selected source `2:30:2`, canonical
 ```text
 source text:     ءَادَمَ
 target tokens:   ʔ a: d a m a
-target rules:    madd_badal + madd_tabii on a:
+target rules:    madd_badal on a:
 ```
 
 Stopping on the word removes its final short vowel but does not change the
 initial long: `ʔ a: d a m`. Starting at the word produces the same initial
 `ʔ a:`. The duration face never changes these tokens.
 
-`madd_badal` is an origin classification, while `madd_tabii`,
-`madd_arid_lissukun`, or another madd rule describes the effective context.
-They therefore coexist on one vowel under the shared RAR model. In
-`إِسْرَآءِيلَ`, for example, the I-long after hamza is badal; if waqf makes
-the final lam sakin, that same long also has the effective arid classification.
-Warsh's badal count may differ from the count normally associated with the
-companion rule, but duration is outside the phonemizer. Al-Nashr distinguishes
-the after-hamza origin from the contextual and route restrictions
+For Warsh, ordinary badal is the effective madd classification and does not
+also receive `madd_tabii` or `madd_arid_lissukun`. It overlaps only where an
+independent fixed sukun or same-word hamza also establishes `madd_lazim` or
+`madd_muttasil`. Duration remains outside the phonemizer. Al-Nashr
+distinguishes the after-hamza origin from the contextual and route restrictions
 ([Al-Nashr, madd after hamza](https://islamweb.net/ar/library/content/70/99/%D9%81%D8%B5%D9%84-%D9%81%D9%8A-%D9%88%D9%82%D9%88%D8%B9-%D8%AD%D8%B1%D9%81-%D8%A7%D9%84%D9%85%D8%AF-%D8%A8%D8%B9%D8%AF-%D8%A7%D9%84%D9%87%D9%85%D8%B2)).
 
 ## Attribution
 
 For a realized hamza plus carrier:
 
-- the long-vowel sound receives `madd_badal` and its effective madd rule;
+- the long-vowel sound receives `madd_badal`, plus `madd_lazim` or
+  `madd_muttasil` only when independently applicable;
 - the core `madd_badal` occurrence names the long carrier as its subject;
 - source and transformed views place the occurrence on the visible units and
   cells that own or present that long sound; and
@@ -47,7 +45,7 @@ For a realized hamza plus carrier:
   the lengthened sound. Hamza provenance remains available from canonical
   adjacency and the occurrence's source slot rather than by tagging `/ʔ/`.
 
-When the hamza is transformed, the transformation occurrence and both madd
+When the hamza is transformed, the transformation and applicable madd
 occurrences retain their own identities. `ibdal_hamza` names the replaced
 hamza as its source and the carrier it creates or lengthens as its host. The
 result sound exposes all applicable rules; visible placements follow sound
@@ -92,15 +90,15 @@ Al-Nashr confirms the same underlying distinctions
 
 | Closed family | Selected-script example | Domain count fact | Runtime classification |
 | --- | --- | --- | --- |
-| `إِسْرَآءِيلَ`, wherever it occurs | Source `2:39:2`, canonical `2:40` | The I-long after hamza is fixed at 2 in wasl. At a stop, an applicable pausal context may supply arid faces. | Keep `madd_badal`; add the effective madd rule. |
+| `إِسْرَآءِيلَ`, wherever it occurs | Source `2:39:2`, canonical `2:40` | The I-long after hamza is fixed at 2 in wasl. At a stop, the received duration faces do not change its rule identity. | Keep `madd_badal`. |
 | The inflectional family of `يُوَ۬اخِذُ` | Source `16:61:2`, canonical `16:61` | Fixed at 2. | Keep `madd_badal` on the after-hamza A-long. The hamza transformation is independently attributed. |
-| A sound consonant is sakin immediately before the hamza in the same word | `اِ۬لْقُرْءَانُ`, source `2:184:6`, canonical `2:185`; `اُ۬لظَّمْـَٔانُ`, `24:38:7`, canonical `24:39`; `مَسْـُٔولاٗۖ`, `17:34:17`, canonical `17:34`; `مَذْءُوماٗ`, `7:17:4`, canonical `7:18` | Fixed at 2 for the long after that hamza. The predicate is structural, not a four-word lookup. | Keep `madd_badal` plus the effective madd rule. |
-| A carrier after a realized hamzat wasl at ibtidaa | `اُ۪يتُونِے`, source/canonical `10:79:3`; `اِ۟وتُمِنَ`, source `2:282:16`, canonical `2:283:16` | Fixed at 2 in the started state. | Keep `madd_badal + madd_tabii + ibdal_hamza` at ibtidaa. Connected wasl is the different state specified below. |
+| A sound consonant is sakin immediately before the hamza in the same word | `اِ۬لْقُرْءَانُ`, source `2:184:6`, canonical `2:185`; `اُ۬لظَّمْـَٔانُ`, `24:38:7`, canonical `24:39`; `مَسْـُٔولاٗۖ`, `17:34:17`, canonical `17:34`; `مَذْءُوماٗ`, `7:17:4`, canonical `7:18` | Fixed at 2 for the long after that hamza. The predicate is structural, not a four-word lookup. | Keep `madd_badal`. |
+| A carrier after a realized hamzat wasl at ibtidaa | `اُ۪يتُونِے`, source/canonical `10:79:3`; `اِ۟وتُمِنَ`, source `2:282:16`, canonical `2:283:16` | Fixed at 2 in the started state. | Keep `madd_badal + ibdal_hamza` at ibtidaa. Connected wasl is the different state specified below. |
 | A fathatan stop creates an iwad alif after hamza | `هُزُؤاٗۖ`, source `18:55:18`, canonical `18:56` | The stop-created alif is fixed at 2. | This long is `madd_iwad + madd_tabii`, not `madd_badal`; the semantic badal carrier is absent. |
 
 The first-waw exclusion in `اَ۬لْمَوْءُۥدَةُ` does not suppress the second
 waw's badal. The first `/w/` has no `madd_leen_mahmuz`; the following `/u:/`
-still has all three received badal counts and receives `madd_badal` plus
+still has all three received badal counts and receives `madd_badal` without
 `madd_tabii` ([Al-Wafi, the two distinct waws](https://quranpedia.net/book/436/1/83)).
 
 ## Related start and lexical cases
@@ -116,7 +114,7 @@ the runtime:
 
   | State and selected source | Relevant result | Rules on replacement long |
   | --- | --- | --- |
-  | Ibtidaa at `اُ۪يتُونِے`, source/canonical `10:79:3` | `ʔ i: t u: n i:` | `ibdal_hamza + madd_badal + madd_tabii` on the first `/i:/`; `hamza_wasl_kasra` separately on `/ʔ/` |
+  | Ibtidaa at `اُ۪يتُونِے`, source/canonical `10:79:3` | `ʔ i: t u: n i:` | `ibdal_hamza + madd_badal` on the first `/i:/`; `hamza_wasl_kasra` separately on `/ʔ/` |
   | Joined `فِرْعَوْنُ اُ۪يتُونِے`, source/canonical `10:79:2-3` | `... n u: t u: n i:` | `ibdal_hamza + madd_tabii` on `/u:/`; no `madd_badal` |
   | Joined `اَ۬لسَّمَٰوَٰتِ اِ۪يتُونِے`, source `46:3:17-18`, canonical `46:4:17-18` | `... t i: t u: n i:` | `ibdal_hamza + madd_tabii` on `/i:/`; no `madd_badal` |
   | Waqf before the host | No host sound | No replacement occurrence; a later start uses the ibtidaa row |
@@ -124,7 +122,7 @@ the runtime:
   Stopping on the host after either a joined or started entry does not change
   its initial replacement. In a joined row, both the preceding vowel witness
   and root-hamza source unit expose `ibdal_hamza` and `madd_tabii`; in the
-  ibtidaa row, the wasl and root-hamza source units expose all three madd and
+  ibtidaa row, the wasl and root-hamza source units expose both badal and
   transformation facts. Al-Wafi calls the started realization the
   after-hamzat-wasl fixed-qasr family and explicitly derives its carrier by
   replacing the second, sakin hamza; the connected replacement follows the
@@ -148,7 +146,7 @@ No count or cross-count validator belongs in the phonemizer.
   sound model or variant API.
 - Tests cover realized, naql-changed, tashil-changed, and ibdal-changed badal;
   the three fixed-qasr classifier families; `madd_iwad + madd_tabii` as a non-badal
-  counterexample; the started triple classification versus connected
+  counterexample; the started badal classification versus connected
   `ibdal_hamza + madd_tabii` after hamzat-wasl elision; the second waw of
   `اَ۬لْمَوْءُۥدَةُ`; and wasl, waqf, and ibtidaa attribution on both sounds
   and characters.

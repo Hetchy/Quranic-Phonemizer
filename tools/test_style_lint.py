@@ -79,20 +79,43 @@ def _rules(node: ast.AST) -> frozenset[str]:
     )
 
 
-def _check_merger_sources(path: Path, node: ast.AST, out: list[Problem]) -> None:
-    for mapping in (item for item in ast.walk(node) if isinstance(item, ast.Dict)):
-        counts = {rule: 0 for rule in MERGER_RULES}
-        for value in mapping.values:
-            if value is None:
-                continue
-            for rule in _rules(value) & MERGER_RULES:
-                counts[rule] += 1
+def _merger_counts(
+    node: ast.AST, constants: dict[str, ast.AST]
+) -> tuple[dict[str, int], ...]:
+    if isinstance(node, ast.Name) and node.id in constants:
+        return _merger_counts(constants[node.id], constants)
+    if isinstance(node, ast.BinOp) and isinstance(node.op, ast.BitOr):
+        return tuple(
+            {rule: left[rule] + right[rule] for rule in MERGER_RULES}
+            for left in _merger_counts(node.left, constants)
+            for right in _merger_counts(node.right, constants)
+        )
+    if isinstance(node, ast.Call) and _name(node.func) == "pick":
+        return tuple(
+            counts
+            for keyword in node.keywords
+            for counts in _merger_counts(keyword.value, constants)
+        )
+    if not isinstance(node, ast.Dict):
+        return ()
+    counts = {rule: 0 for rule in MERGER_RULES}
+    for value in node.values:
+        if value is None:
+            continue
+        for rule in _rules(value) & MERGER_RULES:
+            counts[rule] += 1
+    return (counts,)
+
+
+def _check_merger_sources(
+    path: Path, node: ast.AST, constants: dict[str, ast.AST], out: list[Problem]
+) -> None:
+    for counts in _merger_counts(node, constants):
         for rule, count in counts.items():
-            hidden_muqattaat_source = "muqattaat" in path.name
-            if count == 1 and not hidden_muqattaat_source:
+            if count == 1:
                 out.append((
                     path,
-                    mapping.lineno,
+                    node.lineno,
                     f"{rule} needs both written source and host in char_rules",
                 ))
 
@@ -108,6 +131,11 @@ def check() -> list[Problem]:
         source = path.read_text(encoding="utf-8")
         lines = source.splitlines()
         tree = ast.parse(source)
+        constants = {
+            target.id: node.value
+            for node in tree.body if isinstance(node, ast.Assign)
+            for target in node.targets if isinstance(target, ast.Name)
+        }
         for alias in sorted(FORBIDDEN_SOURCE_ALIASES):
             if alias in source:
                 out.append((path, 1, f"use the literal carrier instead of {alias}"))
@@ -115,7 +143,7 @@ def check() -> list[Problem]:
             item for item in ast.walk(tree)
             if isinstance(item, ast.keyword) and item.arg == "char_rules"
         ):
-            _check_merger_sources(path, keyword.value, out)
+            _check_merger_sources(path, keyword.value, constants, out)
         cases = _cases(tree)
         names = {node.id for node in ast.walk(tree) if isinstance(node, ast.Name)}
         has_typed_cases = False

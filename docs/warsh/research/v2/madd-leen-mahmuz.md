@@ -73,7 +73,7 @@ The selected corpus contains exactly five sites:
 
 For every row the relevant wasl and ibtidaa span is `/s a w ʔ a:/` and the
 `/w/` receives `madd_leen_mahmuz`; the following long receives
-`madd_badal` plus its effective madd tag. Waqf changes only the word ending.
+`madd_badal` without `madd_tabii`. Waqf changes only the word ending.
 The phonemizer exposes no selector or count correlation for this family.
 
 The singular `سَوْءَةَ` is not in this special count family. Its two selected
@@ -91,7 +91,7 @@ two-count long vowel ([focused source](https://quranpedia.net/book/436/1/83)).
 | Selected source ref | Canonical ref | Exact selected text | Required result |
 | --- | --- | --- | --- |
 | `18:57:19` | `18:58` | `مَوْئِلاٗۖ` | The `/w/` has no `madd_leen_mahmuz` in any state. When joined into the following `وَتِلْكَ`, the span is `/m a w ʔ i l a w̃ a .../`: ordinary tanwin-to-waw idgham owns `/w̃/`. Waqf is `/m a w ʔ i l a:/`, with `madd_iwad + madd_tabii` on the final `/a:/`. |
-| `81:8:2` | `81:8` | `اَ۬لْمَوْءُۥدَةُ` | The first `/w/` has no `madd_leen_mahmuz`. The second waw represents `/u:/` and independently receives `madd_badal` plus `madd_tabii`. |
+| `81:8:2` | `81:8` | `اَ۬لْمَوْءُۥدَةُ` | The first `/w/` has no `madd_leen_mahmuz`. The second waw represents `/u:/` and independently receives `madd_badal` without `madd_tabii`. |
 
 For `اَ۬لْمَوْءُۥدَةُ`, the relevant started sequence is
 `/ʔ a l m a w ʔ u: d a t u/`; at waqf its ending changes according to the

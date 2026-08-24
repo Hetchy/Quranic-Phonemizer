@@ -214,11 +214,12 @@ silence, rather than copying every core participant onto every glyph.
 
 A pure ibdal-created long vowel normally carries both `ibdal_hamza` and
 `madd_tabii`. A fixed following sukun instead produces `madd_lazim`. When the
-long vowel is semantically badal, `madd_badal` also classifies it. These are
-independent facts on one sound, not mutually exclusive labels.
+long vowel is semantically badal, `madd_badal` replaces the ordinary
+`madd_tabii` classification; `madd_lazim` or `madd_muttasil` may still overlap
+when independently applicable.
 
 For the hamzat-wasl plus root-hamza family, ibtidaa therefore puts
-`ibdal_hamza`, `madd_badal`, and `madd_tabii` on the result sound and the
+`ibdal_hamza` and `madd_badal` on the result sound and the
 responsible wasl/root-hamza source units. Connected speech instead puts
 `ibdal_hamza` and `madd_tabii` on the result sound, the preceding vowel
 witness, and the root-hamza source; `madd_badal` is absent because the
@@ -234,13 +235,11 @@ effective shape, so origin and current context remain independent classifiers.
 
 ### Additive madd identities
 
-The RAR catalogue separates why a vowel exists from the context that determines
-its effective madd. Tests therefore assert the complete rule set on a long
-sound, not merely one acceptable madd label:
+Tests assert the complete rule set on a long sound, including the narrow
+contexts where independent madd classifications overlap:
 
-- an ordinary Warsh badal has `madd_badal` plus its effective madd, normally
-  `madd_tabii`, but possibly `madd_lazim`, `madd_muttasil`, or
-  `madd_arid_lissukun` as the performed context requires;
+- an ordinary Warsh badal has `madd_badal` without `madd_tabii` or
+  `madd_arid_lissukun`; only `madd_lazim` or `madd_muttasil` may overlap;
 - a stopped fathatan replacement has `madd_iwad + madd_tabii`;
 - a joined pronoun-haa length has `madd_silah + madd_tabii`, or
   `madd_silah + madd_munfasil` before a qata hamza; and
@@ -248,11 +247,8 @@ sound, not merely one acceptable madd label:
   but receives `madd_badal` only when semantic badal origin is independently
   established.
 
-This overlap is retained for Warsh. `madd_badal`, `madd_iwad`, and
-`madd_silah` classify semantic origin or boundary shape; the companion madd
-classifies effective structure. Warsh count rules may give badal a non-tabii
-duration, but counts are outside the sound model, so `madd_tabii` here does
-not assert a two-count performance or erase badal identity.
+Warsh badal therefore differs from the additive Hafs model. Its duration does
+not create a `madd_tabii` tag, and counts remain outside the sound model.
 
 ## Riwayah-scoped rule sets
 

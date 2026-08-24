@@ -25,12 +25,14 @@ CASES = (
             "izhar": Expect(
                 read=explicit(ibtidaa=1, wasl=1),
                 phonemes=("j a: s i: n", "w a l q u rˤ ʔ a: n i"),
+                char_rules={"سين/ن": R("izhar")},
                 sound_rules={"n[1]": R("izhar")},
             ),
             "idgham": Expect(
                 read=explicit(ibtidaa=1, wasl=1),
                 phonemes=("j a: s i:", "w̃ a l q u rˤ ʔ a: n i"),
-                char_rules={"و": R("idgham_bi_ghunnah")},
+                char_rules={"سين/ن": R("idgham_bi_ghunnah"),
+                            "و": R("idgham_bi_ghunnah")},
                 sound_rules={"w̃": R("idgham_bi_ghunnah")},
             ),
         },
@@ -38,8 +40,10 @@ CASES = (
         masked=Expect(
             read=explicit(ibtidaa=1, waqf=1),
             phonemes=("j a: s i: n", "w a l q u rˤ ʔ a: n i"),
+            char_rules={"سين/ن": R("izhar")},
             sound_rules={"n[1]": R("izhar")},
-            absent_char_rules={"و": R("idgham_bi_ghunnah")},
+            absent_char_rules={"سين/ن": R("idgham_bi_ghunnah"),
+                               "و": R("idgham_bi_ghunnah")},
         ),
     ),
 )

@@ -20,7 +20,7 @@ CASES = (
          char_rules=pick(
              hafs_uthmani={"و": R("madd_tabii"), "ى": R("madd_tabii")},
              hafs_indopak={"و": R("madd_tabii"),
-                           "@dagger_alif": R("madd_tabii")},
+                           "ي": R("madd_tabii")},
          ),
          sound_rules={"u:": R("madd_tabii"), "a:": R("madd_tabii")}),
 )

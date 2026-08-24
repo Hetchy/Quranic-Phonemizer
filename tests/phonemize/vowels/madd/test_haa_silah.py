@@ -27,7 +27,10 @@ CASES = (
                              "madd_silah", "madd_tabii")}),
         "stopped": Expect(read=isolated(), phonemes="l a h",
                           char_rules=pick(
-                              hafs_uthmani={"@damma": R("waqf_silah_drop")},
+                              hafs_uthmani={
+                                  "@damma": R("waqf_silah_drop"),
+                                  "@small_waw": R("waqf_silah_drop"),
+                              },
                               hafs_indopak={"@small_waw": R("waqf_silah_drop")},
                           ),
                           absent_char_rules={"@small_waw": R(
@@ -43,7 +46,10 @@ CASES = (
                              "madd_silah", "madd_tabii")}),
         "stopped": Expect(read=isolated(), phonemes="b i h",
                           char_rules=pick(
-                              hafs_uthmani={"@kasra[2]": R("waqf_silah_drop")},
+                              hafs_uthmani={
+                                  "@kasra[2]": R("waqf_silah_drop"),
+                                  "@small_yaa": R("waqf_silah_drop"),
+                              },
                               hafs_indopak={"@small_yaa": R("waqf_silah_drop")},
                           ),
                           absent_char_rules={"@small_yaa": R(

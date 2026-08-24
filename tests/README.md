@@ -79,6 +79,14 @@ Plain strings select a visible source glyph or exact sound token. Registered
 required only when the unsuffixed selector is ambiguous and is rejected when
 the target is unique.
 
+A `named-letter/cell` string selects a transformed cell inside a fully spelled
+muqattaat run. For example, `لام/@madd` selects the alif carrier in the spelled
+name of lam, while `ميم/م[2]` selects the final meem in the spelled name of
+meem. Arabic combining marks are ignored in the run and literal-cell names;
+`@fatha`, `@damma`, `@kasra`, and `@madd` select the corresponding cell role.
+The `@inserted/cell` scope selects a source-less transformed cell; for example,
+`@inserted/ا` names the iwad alif created after a final hamza.
+
 Ordinary alif, waw, yaa, and wasl alif are visible letters, so select their
 literal script forms, using `pick()` only when the shipped scripts differ.
 They never receive semantic aliases such as `@long_a` or `@wasl_alif`.
@@ -99,13 +107,12 @@ When the same rule is present in both maps, `assert_case()` requires one
 occurrence connecting those exact targets. It does not accept unrelated
 occurrences with the same rule ID.
 
-A merger reaches both written participating source letters: the assimilated
-source and its host. Its `char_rules` entry must therefore name both letters,
-while its `sound_rules` names the resulting geminate or the separately
-retained components of an incomplete merger. A hidden terminal consonant in
-a spelled muqattaat letter has no source glyph to name; that case names the
-written host and hidden result sound only. The style gate rejects other
-one-sided merger expectations.
+A merger reaches both participating cells: the assimilated source and its
+host. Its `char_rules` entry must therefore name both letters, while its
+`sound_rules` names the resulting geminate or the separately retained
+components of an incomplete merger. Muqattaat cases use `named-letter/cell`
+selectors to name both expanded endpoints. The style gate rejects one-sided
+merger expectations.
 
 ## Layout
 

@@ -12,7 +12,10 @@ CASES = (
         site=Site(hafs=("2:3", (5,))),
         read=isolated(),
         phonemes="ʔ a sˤsˤ aˤ l a: h",
-        char_rules={"@dagger_alif": R("madd_arid_lissukun")},
+        char_rules=pick(
+            hafs_uthmani={"@dagger_alif": R("madd_arid_lissukun")},
+            hafs_indopak={"و": R("madd_arid_lissukun")},
+        ),
         sound_rules={"a:": R("madd_arid_lissukun")},
     ),
     # ٱلزَّكَوٰةَ
@@ -21,7 +24,10 @@ CASES = (
         site=Site(hafs=("2:43", (4,))),
         read=isolated(),
         phonemes="ʔ a zz a k a: h",
-        char_rules={"@dagger_alif": R("madd_arid_lissukun")},
+        char_rules=pick(
+            hafs_uthmani={"@dagger_alif": R("madd_arid_lissukun")},
+            hafs_indopak={"و": R("madd_arid_lissukun")},
+        ),
         sound_rules={"a:": R("madd_arid_lissukun")},
     ),
     # ٱلْحَيَوٰةَ
@@ -30,7 +36,10 @@ CASES = (
         site=Site(hafs=("2:86", (4,))),
         read=isolated(),
         phonemes="ʔ a l ħ a j a: h",
-        char_rules={"@dagger_alif": R("madd_arid_lissukun")},
+        char_rules=pick(
+            hafs_uthmani={"@dagger_alif": R("madd_arid_lissukun")},
+            hafs_indopak={"و": R("madd_arid_lissukun")},
+        ),
         sound_rules={"a:": R("madd_arid_lissukun")},
     ),
     # صَلَوَٰتٌ
@@ -65,7 +74,10 @@ CASES = (
         site=Site(hafs=("2:51", (3,))),
         read=isolated(),
         phonemes="m u: s a:",
-        char_rules={"@dagger_alif": R("madd_tabii")},
+        char_rules=pick(
+            hafs_uthmani={"@dagger_alif": R("madd_tabii")},
+            hafs_indopak={"ي": R("madd_tabii")},
+        ),
         sound_rules={"a:": R("madd_tabii")},
     ),
     # فَٱدَّٰرَٰٔتُمْ

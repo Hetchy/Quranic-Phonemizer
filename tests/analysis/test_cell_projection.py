@@ -4,7 +4,12 @@ from __future__ import annotations
 import pytest
 
 from quranic_phonemizer.analysis.build import build_bundle
-from quranic_phonemizer.analysis.cells import CellRole, CellStatus, build_cell_view
+from quranic_phonemizer.analysis.cells import (
+    CellRole,
+    CellSide,
+    CellStatus,
+    build_cell_view,
+)
 from quranic_phonemizer.analysis.facts import analyse
 from quranic_phonemizer.analysis.inscription import inscribe
 from quranic_phonemizer.analysis.source import build_source_view
@@ -131,6 +136,24 @@ def test_madd_iwad_reuses_the_written_alif_and_replaces_tanween(hafs, pen):
     )
 
 
+def test_madd_iwad_inserts_an_alif_when_the_rasm_has_no_carrier(hafs, pen):
+    _, bundle, view = _build(hafs, pen, "2:22:11")
+    names = {
+        occurrence.id: occurrence.rule_id.value
+        for occurrence in bundle.rule_occurrences
+    }
+    carrier = next(
+        column for column in view.words[0].columns
+        if column.status is CellStatus.INSERTED
+        and column.role is CellRole.MADD
+    )
+    assert carrier.text == "ا"
+    assert not carrier.source_character_ids
+    assert {names[item] for item in carrier.rule_occurrence_ids} == {
+        "madd_iwad", "madd_tabii"
+    }
+
+
 def test_a_written_small_vowel_is_the_carrier_not_a_stray_cell(hafs, pen):
     session, bundle, view = _build(hafs, pen, "3:103:19")
     facts = analyse(session, packaged_alphabet())
@@ -148,6 +171,57 @@ def test_a_written_small_vowel_is_the_carrier_not_a_stray_cell(hafs, pen):
     assert not any(
         c.status is CellStatus.INSERTED and c.role is CellRole.MADD
         for c in word.columns
+    )
+
+
+def test_the_small_waw_with_maddah_is_the_muttasil_carrier(hafs, pen):
+    _, bundle, view = _build(hafs, pen, "17:7")
+    word_id = next(word.id for word in bundle.words if word.ref == "17:7:12")
+    word = next(word for word in view.words if word.word_id == word_id)
+    carrier = next(column for column in word.columns if column.text == "ۥٓ")
+    names = {
+        bundle.rule_occurrences[item.value].rule_id.value
+        for item in carrier.rule_occurrence_ids
+    }
+
+    assert carrier.role is CellRole.MADD
+    assert carrier.status is CellStatus.PRESENT
+    assert carrier.source_character_ids
+    assert names == {"madd_muttasil"}
+    assert not any(
+        column.status is CellStatus.INSERTED
+        and column.role is CellRole.MADD
+        for column in word.columns
+    )
+
+
+@pytest.mark.parametrize(("stop_refs", "rule"), [
+    ((), "madd_tabii"),
+    (("2:124:3",), "madd_arid_lissukun"),
+])
+def test_ibrahim_small_yaa_remains_the_i_carrier(
+    hafs, pen, stop_refs, rule
+):
+    session = phonemize_request(hafs, "2:124", stop_refs=stop_refs)
+    kw = dict(ref="2:124", riwayah="hafs", script="uthmani", variant={})
+    bundle = build_bundle(session, **kw)
+    view = build_cell_view(session, spelling="transformed", pen=pen, **kw)
+    word_id = next(word.id for word in bundle.words if word.ref == "2:124:3")
+    word = next(word for word in view.words if word.word_id == word_id)
+    carrier = next(column for column in word.columns if column.text == "ۧ")
+    names = {
+        bundle.rule_occurrences[item.value].rule_id.value
+        for item in carrier.rule_occurrence_ids
+    }
+
+    assert carrier.role is CellRole.MADD
+    assert carrier.status is CellStatus.PRESENT
+    assert carrier.source_character_ids
+    assert names == {rule}
+    assert not any(
+        column.status is CellStatus.INSERTED
+        and column.role is CellRole.MADD
+        for column in word.columns
     )
 
 
@@ -299,6 +373,7 @@ def test_stopped_silah_keeps_its_dropped_haraka_with_the_carrier(
     assert group.column_ids == (haraka.id, carrier.id)
     assert haraka.attached_to_column_id == carrier.id
     assert columns[carrier.id].role is CellRole.MADD
+    assert occurrence.id in carrier.rule_occurrence_ids
     assert all(columns[column].status is CellStatus.DROPPED
                for column in group.column_ids)
     assert all(
@@ -429,12 +504,29 @@ def test_tanween_keeps_vowel_colour_on_its_sound_not_its_glyph(hafs, pen):
     assert idgham.id in tanween.rule_occurrence_ids
 
 
-def test_iltiqa_sound_and_column_live_on_the_boundary(hafs, pen):
-    _, bundle, view = _build(hafs, pen, "3:1-3:2")
+@pytest.mark.parametrize(("ref", "mark"), [
+    ("3:1-3:2", "َ"),
+    ("2:61:30-2:61:31", "ِ"),
+])
+def test_iltiqa_sound_and_column_live_on_the_boundary(hafs, pen, ref, mark):
+    _, bundle, view = _build(hafs, pen, ref)
     occurrence = next(o for o in bundle.rule_occurrences if o.rule_id.value == "iltiqa_haraka")
     boundary = next(b for b in view.boundaries if b.boundary_id in occurrence.boundary_ids)
+    inserted = [
+        column for column in boundary.columns
+        if column.status is CellStatus.INSERTED
+    ]
+
     assert [s.sound_id for s in boundary.sounds] == list(occurrence.sound_ids)
-    assert any(c.status is CellStatus.INSERTED for c in boundary.columns)
+    assert len(inserted) == 1
+    assert inserted[0].text == mark
+    assert inserted[0].role is CellRole.HARAKA
+    assert not inserted[0].source_character_ids
+    assert not inserted[0].source_unit_ids
+    assert inserted[0].anchor_unit_id is not None
+    assert inserted[0].side is CellSide.AFTER
+    assert inserted[0].owned_sound_ids == occurrence.sound_ids
+    assert inserted[0].rule_occurrence_ids == (occurrence.id,)
     assert all(
         s.sound_id not in occurrence.sound_ids
         for word in view.words for s in word.sounds
