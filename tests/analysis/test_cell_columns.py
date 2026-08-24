@@ -252,6 +252,7 @@ def test_a_tatweel_seat_folds_into_one_column(hafs):
 
 
 def test_a_dagger_alif_is_madd_where_it_carries(hafs):
+    """A written dagger alif owns its long vowel in every lexical shape."""
     _, carrying, _ = _build(hafs, "18:38", {"stop_refs": ["18:38:1"]})
     carrier = next(
         c for c in _columns(carrying)
@@ -259,10 +260,9 @@ def test_a_dagger_alif_is_madd_where_it_carries(hafs):
     )
     assert carrier.status is CellStatus.PRESENT
 
-    _, dhalika, _ = _build(hafs, "2:2:1", {})
-    dhalika_carrier = next(c for c in _columns(dhalika) if c.text == _DAGGER)
-    assert dhalika_carrier.role is CellRole.MADD
-    assert dhalika_carrier.status is CellStatus.PRESENT
+    _, silent, _ = _build(hafs, "2:2:1", {})
+    dropped = next(c for c in _columns(silent) if c.text == _DAGGER)
+    assert dropped.role is CellRole.MADD and dropped.status is CellStatus.PRESENT
 
 
 def test_a_silent_rasm_alif_is_a_dropped_letter_by_orthography(hafs):

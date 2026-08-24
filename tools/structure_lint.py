@@ -79,7 +79,10 @@ PUBLIC_API = frozenset({
 SIDE_EFFECT = frozenset({"annotations"})
 
 #: Roles the inventory loader supplies rather than any file naming them.
-LOADER_ROLES = frozenset({"seat", "structural", "advice"})
+LOADER_ROLES = frozenset({
+    "seat", "structural", "advice",
+    "hamza_above", "hamza_below", "hamza_waw", "hamza_yaa",
+})
 
 #: The two callback protocols, by parameter names: `Classifier.look` and
 #: `LexemePass`. A protocol is the only thing that hands an implementation a

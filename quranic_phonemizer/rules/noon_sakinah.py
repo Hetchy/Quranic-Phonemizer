@@ -63,7 +63,9 @@ class NoonSakinah:
                 # plain articulation rather than reaching into the next word.
                 return _classification(Rule.IZHAR, at, None)
             return None
+        return self._classify(near, at, following)
 
+    def _classify(self, near, at, following):
         match self.followers.of(following.letter):
             case Rule.IZHAR:
                 return _classification(Rule.IZHAR, at, following.id)
