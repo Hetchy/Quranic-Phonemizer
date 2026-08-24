@@ -80,15 +80,15 @@ def _case(
 
 
 CASES = (
-    # ءَآلذَّكَرَيْنِ
+    # Hafs: ءَآلذَّكَرَيْنِ
     _case("dhakarayn", DHAKARAYN,
           "ʔ a: ðð a k a rˤ aˤ j n", "ʔ a ʔ̞ a ðð a k a rˤ aˤ j n",
           "a:", "ا", "ا"),
-    # ءَآلْـَٰٔنَ
+    # Hafs: ءَآلْـَٔـٰنَ
     _case("alan", ALAN,
           "ʔ a: l ʔ a: n", "ʔ a ʔ̞ a l ʔ a: n",
           "a:[1]", "@dagger_alif[1]", "@dagger_alif[1]"),
-    # ءَآللَّهُ
+    # Hafs: ءَآللَّهُ
     _case("allah", ALLAH,
           "ʔ a: lˤlˤ aˤ: h", "ʔ a ʔ̞ a lˤlˤ aˤ: h",
           "a:", "@dagger_alif[1]", "@dagger_alif[1]"),

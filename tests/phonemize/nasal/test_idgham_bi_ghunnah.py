@@ -18,7 +18,8 @@ from tests.support import (
 
 
 CASES = (
-    # مَن يَشَآءُ
+    # Hafs: مَن يَشَآءُ ۗ
+    # Warsh: مَنْ يَّشَآءُۖ
     Case(
         id="noon-yaa",
         site=Site.shared("3:74", (3, 4)),
@@ -28,7 +29,8 @@ CASES = (
                     "ي": R("idgham_bi_ghunnah")},
         sound_rules={"j̃": R("idgham_bi_ghunnah")},
     ),
-    # حَيَوٰةٌ يَـٰٓأُو۟لِى
+    # Hafs: حَيَوٰةٌ يَـٰٓأُو۟لِى
+    # Warsh: حَيَوٰةٞ يَٰٓأُوْلِے
     Case(
         id="dammatan-yaa",
         site=Site.shared("2:179", (4, 5)),
@@ -41,7 +43,8 @@ CASES = (
                     "ي[2]": R("idgham_bi_ghunnah")},
         sound_rules={"j̃": R("idgham_bi_ghunnah")},
     ),
-    # صِدِّيقًا نَّبِيًّا
+    # Hafs: صِدِّيقًا نَّبِيًّا
+    # Warsh: صِدِّيقاٗ نَّبِيٓـٔاً
     Case(
         id="fathatan-noon",
         site=Site.shared("19:41", (7, 8)),
@@ -54,7 +57,8 @@ CASES = (
                     "ن": R("idgham_bi_ghunnah")},
         sound_rules={"ñ": R("idgham_bi_ghunnah")},
     ),
-    # تَكُن مِّنَ
+    # Hafs: تَكُن مِّنَ
+    # Warsh: تَكُن مِّنَ
     StateCase(
         id="noon-meem-boundary",
         site=Site.shared("3:60", (5, 6)),
@@ -76,7 +80,8 @@ CASES = (
             ),
         },
     ),
-    # بَعْضٍ وَٱللَّهُ
+    # Hafs: بَعْضٍ ۗ وَٱللَّهُ
+    # Warsh: بَعْضٖۖ وَاللَّهُ
     Case(
         id="kasratan-waw",
         site=Site.shared("3:34", (4, 5)),
@@ -86,7 +91,8 @@ CASES = (
                     "و": R("idgham_bi_ghunnah")},
         sound_rules={"w̃": R("idgham_bi_ghunnah")},
     ),
-    # عَظِيمٌ وَمِنَ
+    # Hafs: عَظِيمٌ وَمِنَ
+    # Warsh: عَظِيمٞۖ وَمِنَ
     Case(
         id="verse-seam",
         site=Site.shared("2:7", (12, 13)),

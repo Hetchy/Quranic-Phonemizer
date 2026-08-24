@@ -34,42 +34,56 @@ def wasl_case(
 
 
 CASES = (
-    # ٱلْحَمْدُ
+    # Hafs: ٱلْحَمْدُ
+    # Warsh: اِ۬لْحَمْدُ
     wasl_case("article-qamariyyah", "1:2", 1, "ʔ a l ħ a m d Q"),
-    # ٱلنَّاسِ
+    # Hafs: ٱلنَّاسِ
+    # Warsh: اِ۬لنَّاسِ
     wasl_case("article-shamsiyyah", "114:1", 4, "ʔ a ñ a: s", indopak_alif="ا[1]"),
-    # ٱللَّهُ
+    # Hafs: ٱللَّهُ
+    # Warsh: اَ۬للَّهُ
     wasl_case("divine-name", "2:15", 1, "ʔ a lˤlˤ aˤ: h"),
-    # ٱدْخُلُوا
+    # Hafs: ٱدْخُلُوا۟
+    # Warsh: اَ۟دْخُلُواْ
     wasl_case(
         "verb-original-damma", "2:58", 3, "ʔ u d Q x u l u:",
         indopak_alif="ا[1]",
     ),
-    # ٱذْهَبْ
+    # Hafs: ٱذْهَبْ
+    # Warsh: اَ۪ذْهَبِ
     wasl_case("verb-kasra", "20:24", 1, "ʔ i ð h a b Q"),
-    # ٱلْتَقَى
+    # Hafs: ٱلْتَقَى
+    # Warsh: اَ۪لْتَقَى
     wasl_case("form-eight", "3:155", 6, "ʔ i l t a q aˤ:"),
-    # ٱمْشُوا
+    # Hafs: ٱمْشُوا۟
+    # Warsh: اِ۪مْشُواْ
     wasl_case("temporary-damma", "38:6", 5, "ʔ i m ʃ u:", indopak_alif="ا[1]"),
-    # ٱبْنَ
+    # Hafs: ٱبْنَ
+    # Warsh: اَ۪بْنَ
     wasl_case("ibn", "2:87", 11, "ʔ i b Q n"),
-    # ٱبْنَتَ
+    # Hafs: ٱبْنَتَ
+    # Warsh: اَ۪بْنَتَ
     wasl_case("ibnat", "66:12", 2, "ʔ i b Q n a t"),
-    # ٱمْرُؤٌ
+    # Hafs: ٱمْرُؤٌا۟
+    # Warsh: اِ۪مْرُؤٌاْ
     wasl_case(
         "imru", "4:176", 8, "ʔ i m rˤ u ʔ", "ʔ[1]",
         indopak_alif="ا[1]",
     ),
-    # ٱمْرَأَةٌ
+    # Hafs: ٱمْرَأَةٌ
+    # Warsh: اِ۪مْرَأَةٞ
     wasl_case(
         "imraah", "4:12", 56, "ʔ i m rˤ aˤ ʔ a h", "ʔ[1]",
         indopak_alif="ا[1]", warsh_alif="ا",
     ),
-    # ٱثْنَانِ
+    # Hafs: ٱثْنَانِ
+    # Warsh: اِ۪ثْنَٰنِ
     wasl_case("ithnan", "5:106", 12, "ʔ i θ n a: n"),
-    # ٱثْنَتَا
+    # Hafs: ٱثْنَتَا
+    # Warsh: اُ۪ثْنَتَا
     wasl_case("ithnata", "2:60", 11, "ʔ i θ n a t a:", indopak_alif="ا[1]"),
-    # ٱسْمُهُ
+    # Hafs: ٱسْمُهُۥ
+    # Warsh: اَ۪سْمُهُۥ
     wasl_case("ism", "2:114", 10, "ʔ i s m u h"),
 )
 

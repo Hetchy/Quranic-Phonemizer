@@ -20,7 +20,8 @@ from tests.support import (
 
 
 CASES = (
-    # يَنبَغِى
+    # Hafs: يَنبَغِى
+    # Warsh: يَنۢبَغِے
     Case(
         id="internal-noon",
         site=Site.shared("19:92", (2,)),
@@ -29,7 +30,7 @@ CASES = (
         char_rules={"ن": R("iqlab")},
         sound_rules={"ŋ": R("iqlab")},
     ),
-    # مِّن بَعْدِ
+    # Hafs: مِّن بَعْدِ
     VariantCase(
         id="written-noon-boundary",
         site=Site(hafs=("2:56", (3, 4))),
@@ -58,7 +59,8 @@ CASES = (
             absent_sound_rules={"n": R("iqlab")},
         ),
     ),
-    # صُمٌّ بُكْمٌ
+    # Hafs: صُمٌّ بُكْمٌ
+    # Warsh: صُمُّۢ بُكْمٌ
     Case(
         id="dammatan",
         site=Site.shared("2:18", (1, 2)),
@@ -71,7 +73,8 @@ CASES = (
         ),
         sound_rules={"ŋ": R("iqlab")},
     ),
-    # ذُرِّيَّةً بَعْضُهَا
+    # Hafs: ذُرِّيَّةً بَعْضُهَا
+    # Warsh: ذُرِّيَّةَۢ بَعْضُهَا
     Case(
         id="fathatan",
         site=Site.shared("3:34", (1, 2)),
@@ -84,7 +87,8 @@ CASES = (
         ),
         sound_rules={"ŋ": R("iqlab")},
     ),
-    # كَافِرٍ بِهِۦ
+    # Hafs: كَافِرٍ بِهِۦ ۖ
+    # Warsh: كَافِرِۢ بِهِۦۖ
     Case(
         id="kasratan",
         site=Site.shared("2:41", (10, 11)),
@@ -97,7 +101,8 @@ CASES = (
         ),
         sound_rules={"ŋ": R("iqlab")},
     ),
-    # قُصُورًا بَلْ
+    # Hafs: قُصُورًا بَلْ
+    # Warsh: قُصُوراَۢۖ بَلْ
     Case(
         id="verse-seam",
         site=Site.shared("25:10", (17, 18)),

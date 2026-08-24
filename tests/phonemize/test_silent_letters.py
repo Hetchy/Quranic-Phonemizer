@@ -6,7 +6,8 @@ from tests.support import Case, R, Site, assert_case, case_runs, isolated, pick
 
 
 CASES = (
-    # أُو۟لَـٰٓئِكَ
+    # Hafs: أُو۟لَـٰٓئِكَ
+    # Warsh: أُوْلَٰٓئِكَ
     Case(
         id="ulaika-waw",
         site=Site.shared("2:5", (1,)),
@@ -14,7 +15,8 @@ CASES = (
         phonemes="ʔ u l a: ʔ i k",
         char_rules={"و": R("orthographic_silence")},
     ),
-    # وَأُو۟لَـٰٓئِكَ
+    # Hafs: وَأُو۟لَـٰٓئِكَ
+    # Warsh: وَأُوْلَٰٓئِكَ
     Case(
         id="waulaika-waw",
         site=Site.shared("2:5", (6,)),
@@ -22,7 +24,8 @@ CASES = (
         phonemes="w a ʔ u l a: ʔ i k",
         char_rules={"و[2]": R("orthographic_silence")},
     ),
-    # خَلَقُوا۟
+    # Hafs: خَلَقُوا۟
+    # Warsh: خَلَقُواْ
     Case(
         id="plural-waw-long",
         site=Site.shared("46:4", (10,)),
@@ -30,7 +33,8 @@ CASES = (
         phonemes="x aˤ l a q u:",
         char_rules={"ا": R("orthographic_silence")},
     ),
-    # خَلَوْا۟
+    # Hafs: خَلَوْا۟
+    # Warsh: خَلَوِاْ
     Case(
         id="plural-waw-leen",
         site=Site.shared("2:14", (8,)),
@@ -38,7 +42,8 @@ CASES = (
         phonemes="x aˤ l a w",
         char_rules={"ا": R("orthographic_silence")},
     ),
-    # ٱشْتَرَوُا۟
+    # Hafs: ٱشْتَرَوُا۟
+    # Warsh: اَ۪شْتَرَوُاْ
     Case(
         id="plural-waw-short",
         site=Site.shared("2:16", (3,)),
@@ -50,7 +55,8 @@ CASES = (
             warsh_uthmani={"ا[2]": R("orthographic_silence")},
         ),
     ),
-    # مِا۟ئَةَ
+    # Hafs: مِا۟ئَةَ
+    # Warsh: مِاْئَةَ
     Case(
         id="miata-alif",
         site=Site.shared("2:259", (19,)),
@@ -58,7 +64,8 @@ CASES = (
         phonemes="m i ʔ a h",
         char_rules={"ا": R("orthographic_silence")},
     ),
-    # ٱلرِّبَوٰا۟
+    # Hafs: ٱلرِّبَوٰا۟ ۗ
+    # Warsh: اُ۬لرِّبَوٰاْۖ
     Case(
         id="arriba-final-alif",
         site=Site.shared("2:275", (20,)),
@@ -70,7 +77,8 @@ CASES = (
             warsh_uthmani={"ا[2]": R("orthographic_silence")},
         ),
     ),
-    # بِأَيْي۟دٍ
+    # Hafs: بِأَيْي۟دٍ
+    # Warsh: بِأَيَيْدٖۖ
     Case(
         id="biaydin-second-yaa",
         site=Site.shared("51:47", (3,)),
@@ -82,7 +90,8 @@ CASES = (
             warsh_uthmani={"ي[1]": R("orthographic_silence")},
         ),
     ),
-    # أَفَإِي۟ن
+    # Hafs: أَفَإِي۟ن
+    # Warsh: أَفَإِيْن
     Case(
         id="afain-yaa",
         site=Site.shared("3:144", (10,)),
@@ -94,7 +103,8 @@ CASES = (
             warsh_uthmani={"ي": R("orthographic_silence")},
         ),
     ),
-    # وَمَلَإِي۟هِۦ
+    # Hafs: وَمَلَإِي۟هِۦ
+    # Warsh: وَمَلَإِيْهِۦ
     Case(
         id="wamalaihi-yaa",
         site=Site.shared("7:103", (9,)),
@@ -106,7 +116,8 @@ CASES = (
             warsh_uthmani={"ي": R("orthographic_silence")},
         ),
     ),
-    # نَّبَإِى۟
+    # Hafs: نَّبَإِى۟
+    # Warsh: نَّبَإِےْ
     Case(
         id="nabai-final-yaa",
         site=Site.shared("6:34", (21,)),
@@ -118,7 +129,8 @@ CASES = (
             warsh_uthmani={"ے": R("orthographic_silence")},
         ),
     ),
-    # تَا۟يْـَٔسُوا۟
+    # Hafs: تَا۟يْـَٔسُوا۟
+    # Warsh: تَاْيْـَٔسُواْ
     Case(
         id="tayasu-alif",
         site=Site.shared("12:87", (8,)),
@@ -126,7 +138,8 @@ CASES = (
         phonemes="t a j ʔ a s u:",
         char_rules={"ا[1]": R("orthographic_silence")},
     ),
-    # يَا۟يْـَٔسِ
+    # Hafs: يَا۟يْـَٔسِ
+    # Warsh: يَاْيْـَٔسِ
     Case(
         id="yayasi-alif",
         site=Site.shared("13:31", (20,)),

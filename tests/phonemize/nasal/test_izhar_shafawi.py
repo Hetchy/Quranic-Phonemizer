@@ -6,7 +6,8 @@ from tests.support import Case, R, Site, assert_case, case_runs, isolated, joini
 
 
 CASES = (
-    # ٱلْحَمْدُ
+    # Hafs: ٱلْحَمْدُ
+    # Warsh: اِ۬لْحَمْدُ
     Case(
         id="before-dal",
         site=Site.shared("1:2", (1,)),
@@ -15,7 +16,8 @@ CASES = (
         char_rules={"م": R("izhar_shafawi")},
         sound_rules={"m": R("izhar_shafawi")},
     ),
-    # أَنْعَمْتَ
+    # Hafs: أَنْعَمْتَ
+    # Warsh: أَنْعَمْتَ
     Case(
         id="before-taa",
         site=Site.shared("1:7", (3,)),
@@ -24,7 +26,8 @@ CASES = (
         char_rules={"م": R("izhar_shafawi")},
         sound_rules={"m": R("izhar_shafawi")},
     ),
-    # أَمْثَالَهُمْ فَإِذَا
+    # Hafs: أَمْثَـٰلَهُمْ
+    # Warsh: أَمْثَٰلَهُمْۖ
     Case(
         id="verse-seam",
         site=Site.shared("47:3", (18,)),
@@ -33,7 +36,8 @@ CASES = (
         char_rules={"م[2]": R("izhar_shafawi")},
         sound_rules={"m[2]": R("izhar_shafawi")},
     ),
-    # مَرْيَمَ
+    # Hafs: مَرْيَمَ
+    # Warsh: مَرْيَمَ
     Case(
         id="pausal-meem-after-haraka",
         site=Site.shared("2:87", (12,)),
@@ -42,7 +46,8 @@ CASES = (
         char_rules={"م[2]": R("izhar_shafawi")},
         sound_rules={"m[2]": R("izhar_shafawi")},
     ),
-    # عَلِيمٌ
+    # Hafs: عَلِيمٌ
+    # Warsh: عَلِيمٞۖ
     Case(
         id="pausal-meem-after-tanwin",
         site=Site.shared("2:29", (19,)),

@@ -30,17 +30,21 @@ def _case(
 
 
 CASES = (
-    # بَعُوضَةً
+    # Hafs: بَعُوضَةً
+    # Warsh: بَعُوضَةٗ
     _case("fathatan", "2:26", 9, "b a ʕ u: dˤ aˤ t a ŋ", "b a ʕ u: dˤ aˤ h",
           "@fathatan"),
-    # سِنَةٌ
+    # Hafs: سِنَةٌ
+    # Warsh: سِنَةٞ
     _case("dammatan", "2:255", 10, "s i n a t u", "s i n a h", "@dammatan"),
-    # وَاحِدَةٍ
+    # Hafs: وَٰحِدَةٍ
+    # Warsh: وَٰحِدَةٖ
     _case("kasratan", "4:1", 9, "w a: ħ i d a t i", "w a: ħ i d a h",
           "@kasratan"),
-    # قُوَّةَ
+    # Hafs: قُوَّةَ
+    # Warsh: قُوَّةَ
     _case("fatha", "18:39", 10, "q u ww a t a", "q u ww a h", "@fatha[2]"),
-    # تِجَارَةً
+    # Hafs: تِجَـٰرَةً
     _case("fathatan-heavy-raa", "2:282", 99, "t i ʒ a: rˤ aˤ t a n",
           "t i ʒ a: rˤ aˤ h", "@fathatan", warsh=False),
 )

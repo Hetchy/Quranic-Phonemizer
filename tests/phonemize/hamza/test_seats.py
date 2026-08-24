@@ -6,35 +6,38 @@ from tests.support import Case, R, Site, assert_case, case_runs, isolated
 
 
 CASES = (
-    # وَلُؤْلُؤًا
+    # Hafs: وَلُؤْلُؤًا ۖ
+    # Warsh: وَلُؤْلُؤاٗۖ
     Case(
         id="waw-seat",
         site=Site.shared("22:23", (19,)),
         read=isolated(),
         phonemes="w a l u ʔ l u ʔ a:",
     ),
-    # يُؤْمِنُونَ
+    # Hafs: يُؤْمِنُونَ
     Case(
         id="sakin-hamza-waw-seat",
         site=Site(hafs=("2:3", (2,))),
         read=isolated(),
         phonemes="j u ʔ m i n u: n",
     ),
-    # يَأْكُلُونَ
+    # Hafs: يَأْكُلُونَ
     Case(
         id="sakin-hamza-alif-seat",
         site=Site(hafs=("2:275", (2,))),
         read=isolated(),
         phonemes="j a ʔ k u l u: n",
     ),
-    # خَاطِئَةٍ
+    # Hafs: خَاطِئَةٍ
+    # Warsh: خَاطِئَةٖۖ
     Case(
         id="moving-hamza-yaa-seat",
         site=Site.shared("96:16", (3,)),
         read=isolated(),
         phonemes="x aˤ: tˤ i ʔ a h",
     ),
-    # لِلْمَلَـٰٓئِكَةِ
+    # Hafs: لِلْمَلَـٰٓئِكَةِ
+    # Warsh: لِلْمَلَٰٓئِكَةِ
     Case(
         id="seat-after-madd",
         site=Site.shared("2:30", (4,)),

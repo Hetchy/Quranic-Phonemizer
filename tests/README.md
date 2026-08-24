@@ -9,7 +9,7 @@ Regular examples use `Case`, `StateCase`, or `VariantCase` and one
 parametrized assertion:
 
 ```python
-# إِن تَنصُرُوا
+# Hafs: إِن تَنصُرُوا
 StateCase(
     id="taa-sad-boundary",
     site=Site(hafs=("47:7", (4, 5))),
@@ -34,8 +34,27 @@ Every expected phoneme is an inventory token separated by exactly one ASCII
 space. Geminates such as `ll`, `ñ`, and `m̃` are one token. Qalqala release is
 separate from its consonant: `q Q`.
 
-Use one Arabic comment immediately before each case. Keep the full reviewed
-span, boundary state, phonemes, source reach, and sound reach together.
+Put an exact source block immediately before every semantic row, including a
+row created by a helper such as `wasl_case()` or `_pausal()`:
+
+```python
+# Hafs: وَبِٱلْيَوْمِ ٱلْـَٔاخِرِ
+# Warsh: وَبِالْيَوْمِ اِ۬لَاخِرِ
+Case(...)
+```
+
+Use one labeled line for a Hafs-only or Warsh-only site. Use both lines for a
+shared site, even when the displayed words happen to look the same. The text
+is the exact focused span from the packaged corpus, including its marks and
+reading-specific spelling; do not normalize it, transliterate it, or add a
+separate `Uthmani` line. Script-only differences remain in the relevant
+`pick()` maps and selectors. The comment block belongs to the tuple/helper
+invocation that creates the row, not to an inner expectation.
+
+The source-comment style gate recomputes these lines from the corpus and
+rejects missing, mislabeled, stale, or out-of-order text. Keep the full
+reviewed span, boundary state, phonemes, source reach, and sound reach
+together.
 
 `Case` owns one reading state. `StateCase` keeps several boundary states for
 one site together. `VariantCase` keeps the active values, default, and masked

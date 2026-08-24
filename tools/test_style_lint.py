@@ -2,7 +2,9 @@
 from __future__ import annotations
 
 import ast
+import importlib.util
 import re
+import sys
 from pathlib import Path
 
 
@@ -12,6 +14,7 @@ ARABIC = re.compile(r"[\u0600-\u06ff]")
 LEGACY_DIRS = frozenset({"adjacent", "boundary", "laws", "nasal", "tafkheem", "waqf"})
 CASE_BUILDERS = frozenset({"Case", "StateCase", "VariantCase"})
 ID_FIRST_BUILDERS = frozenset({"_case", "_pausal", "elision", "wasl_case"})
+SOURCE_BUILDERS = CASE_BUILDERS | ID_FIRST_BUILDERS | frozenset({"_started", "_joined"})
 FORBIDDEN_SOURCE_ALIASES = frozenset({
     "@long_a", "@long_i", "@long_u", "@wasl_alif",
 })
@@ -53,6 +56,93 @@ def _has_arabic_comment(lines: list[str], line: int) -> bool:
         return False
     previous = lines[line - 2].strip()
     return previous.startswith("#") and ARABIC.search(previous) is not None
+
+
+def _call_id(node: ast.expr) -> str | None:
+    if not isinstance(node, ast.Call):
+        return None
+    for keyword in node.keywords:
+        if keyword.arg in {"id", "name"} and isinstance(keyword.value, ast.Constant):
+            if isinstance(keyword.value.value, str):
+                return keyword.value.value
+    if node.args and isinstance(node.args[0], ast.Constant):
+        if isinstance(node.args[0].value, str):
+            return node.args[0].value
+    return None
+
+
+def _source_comment_block(lines: list[str], line: int) -> list[str]:
+    index = line - 2
+    block: list[str] = []
+    while index >= 0 and lines[index].strip().startswith("#"):
+        block.append(lines[index].strip()[1:].strip())
+        index -= 1
+    return list(reversed(block))
+
+
+def _source_text(site, riwayah: str) -> str:
+    from tests.support.reading import _through, _words, loaded
+    from quranic_phonemizer.model.address import Riwayah, Script
+
+    address = site.address(riwayah)
+    record = loaded(riwayah)
+    words = _words(record, Riwayah(riwayah), Script.UTHMANI, address.verse)
+    count = record.corpus.surah_info[str(address.verse.surah)][address.verse.ayah - 1]
+    if address.words and max(address.words) > count:
+        words = _through(record, Riwayah(riwayah), Script.UTHMANI, address.verse)
+    return " ".join(
+        text for index, (_, text) in enumerate(words, 1)
+        if not address.words or index in address.words
+    )
+
+
+def _source_comment_problems(
+    path: Path, tree: ast.Module, lines: list[str]
+) -> list[Problem]:
+    rows = _cases(tree)
+    targets = {
+        _call_id(row): row.lineno
+        for row in rows
+        if isinstance(row, ast.Call)
+        and _name(row.func).rsplit(".", 1)[-1] in SOURCE_BUILDERS
+        and _call_id(row) is not None
+    }
+    if not targets:
+        return []
+    sys.path.insert(0, str(ROOT))
+    try:
+        spec = importlib.util.spec_from_file_location(
+            f"source_comments_{abs(hash(path))}", path
+        )
+        if spec is None or spec.loader is None:
+            return [(path, 1, "cannot load semantic module for source comments")]
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+    except Exception as error:
+        return [(path, 1, f"source comment import failed: {error}")]
+    finally:
+        if sys.path and sys.path[0] == str(ROOT):
+            sys.path.pop(0)
+    cases = {case.id: case for case in getattr(module, "CASES", ())}
+    out: list[Problem] = []
+    for case_id, line in targets.items():
+        case = cases.get(case_id)
+        if case is None:
+            out.append((path, line, f"source comment has unknown case {case_id!r}"))
+            continue
+        expected = [
+            f"{riwayah.title()}: {_source_text(case.site, riwayah)}"
+            for riwayah in ("hafs", "warsh")
+            if riwayah in case.site.addresses
+        ]
+        actual = _source_comment_block(lines, line)
+        if actual != expected:
+            out.append((
+                path,
+                line,
+                f"source comments for {case_id!r} must be {expected!r}",
+            ))
+    return out
 
 
 def _fingerprint(node: ast.expr) -> str | None:
@@ -145,6 +235,7 @@ def check() -> list[Problem]:
         ):
             _check_merger_sources(path, keyword.value, constants, out)
         cases = _cases(tree)
+        out.extend(_source_comment_problems(path, tree, lines))
         names = {node.id for node in ast.walk(tree) if isinstance(node, ast.Name)}
         has_typed_cases = False
         for case in cases:

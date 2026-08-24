@@ -14,7 +14,7 @@ MUTLAQ = (
 
 
 CASES = (
-    # مِنْ أَحَدٍ حَتَّىٰ
+    # Hafs: مِنْ أَحَدٍ حَتَّىٰ
     Case(
         id="hamza-ha",
         site=Site(hafs=("2:102", (26, 27, 28))),
@@ -23,7 +23,8 @@ CASES = (
         char_rules={"ن": R("izhar"), "@kasratan": R("izhar")},
         sound_rules={"n[1]": R("izhar"), "n[2]": R("izhar")},
     ),
-    # مِنْهَا رَغَدًا حَيْثُ
+    # Hafs: مِنْهَا رَغَدًا حَيْثُ
+    # Warsh: مِنْهَا رَغَداً حَيْثُ
     Case(
         id="heh-ha",
         site=Site.shared("2:35", (8, 9, 10)),
@@ -32,7 +33,8 @@ CASES = (
         char_rules={"ن": R("izhar"), "@fathatan": R("izhar")},
         sound_rules={"n[1]": R("izhar"), "n[2]": R("izhar")},
     ),
-    # يَكُنْ غَنِيًّا أَوْ
+    # Hafs: يَكُنْ غَنِيًّا أَوْ
+    # Warsh: يَّكُنْ غَنِيّاً اَوْ
     Case(
         id="ghayn-hamza",
         site=Site.shared("4:135", (16, 17, 18)),
@@ -41,7 +43,8 @@ CASES = (
         char_rules={"ن[1]": R("izhar"), "@fathatan": R("izhar")},
         sound_rules={"n[1]": R("izhar"), "n[3]": R("izhar")},
     ),
-    # قِرَدَةً خَاسِئِينَ
+    # Hafs: قِرَدَةً خَـٰسِـِٔينَ
+    # Warsh: قِرَدَةً خَٰسِـِٕينَۖ
     Case(
         id="kha",
         site=Site.shared("2:65", (11, 12)),
@@ -50,7 +53,8 @@ CASES = (
         char_rules={"@fathatan": R("izhar")},
         sound_rules={"n[1]": R("izhar")},
     ),
-    # مِنْ عِلْمٍ
+    # Hafs: مِنْ عِلْمٍ
+    # Warsh: مِنْ عِلْمٍۖ
     Case(
         id="ayn",
         site=Site.shared("4:157", (27, 28)),
@@ -59,7 +63,8 @@ CASES = (
         char_rules={"ن": R("izhar")},
         sound_rules={"n": R("izhar")},
     ),
-    # شَىْءٍ عَلِيمٌ
+    # Hafs: شَىْءٍ عَلِيمٌ
+    # Warsh: شَےْءٍ عَلِيمٞۖ
     Case(
         id="kasratan",
         site=Site.shared("2:29", (18, 19)),
@@ -68,7 +73,8 @@ CASES = (
         char_rules={"@kasratan": R("izhar")},
         sound_rules={"n": R("izhar")},
     ),
-    # قَدِيرٌ أَلَمْ
+    # Hafs: قَدِيرٌ
+    # Warsh: قَدِيرٌۖ
     Case(
         id="verse-seam",
         site=Site.shared("2:106", (19,)),
@@ -77,7 +83,8 @@ CASES = (
         char_rules={"@dammatan": R("izhar")},
         sound_rules={"n": R("izhar")},
     ),
-    # ٱلدُّنْيَا
+    # Hafs: ٱلدُّنْيَا ۖ
+    # Warsh: اِ۬لدُّنْي۪اۖ
     Case(
         id="mutlaq-dunya",
         site=Site.shared("2:85", (38,)),
@@ -86,7 +93,8 @@ CASES = (
         char_rules={"ن": R("izhar")},
         sound_rules={"n": R("izhar")},
     ),
-    # بُنْيَانًا
+    # Hafs: بُنْيَـٰنًا
+    # Warsh: بُنْيَٰناٗ
     Case(
         id="mutlaq-bunyan",
         site=Site.shared("37:97", (4,)),
@@ -95,7 +103,8 @@ CASES = (
         char_rules={"ن[1]": R("izhar")},
         sound_rules={"n[1]": R("izhar")},
     ),
-    # قِنْوَانٌ
+    # Hafs: قِنْوَانٌ
+    # Warsh: قِنْوَانٞ
     Case(
         id="mutlaq-qinwan",
         site=Site.shared("6:99", (23,)),
@@ -104,7 +113,8 @@ CASES = (
         char_rules={"ن[1]": R("izhar")},
         sound_rules={"n[1]": R("izhar")},
     ),
-    # نَسْتَعِينُ
+    # Hafs: نَسْتَعِينُ
+    # Warsh: نَسْتَعِينُۖ
     Case(
         id="pausal-noon-after-haraka",
         site=Site.shared("1:5", (4,)),
@@ -113,7 +123,8 @@ CASES = (
         char_rules={"ن[2]": R("izhar")},
         sound_rules={"n[2]": R("izhar")},
     ),
-    # مُبِينٌ
+    # Hafs: مُبِينٌ
+    # Warsh: مُبِينٞۖ
     Case(
         id="pausal-noon-after-tanwin",
         site=Site.shared("37:113", (10,)),

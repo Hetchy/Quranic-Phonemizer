@@ -16,7 +16,8 @@ from tests.support import (
 
 
 CASES = (
-    # قُلُوبِهِم مَّرَضٌ
+    # Hafs: قُلُوبِهِم مَّرَضٌ
+    # Warsh: قُلُوبِهِم مَّرَضٞۖ
     StateCase(
         id="meem-meem-boundary",
         site=Site.shared("2:10", (2, 3)),
@@ -44,7 +45,8 @@ CASES = (
             ),
         },
     ),
-    # أَهْوَآءَهُم مَّثَلُ
+    # Hafs: أَهْوَآءَهُم مَّثَلُ
+    # Warsh: أَهْوَآءَهُمۖ مَّثَلُ
     Case(
         id="verse-seam",
         site=Site.shared("47:14", (13, 14)),

@@ -15,7 +15,8 @@ from tests.support import (
 
 
 CASES = (
-    # يَوْمِ
+    # Hafs: يَوْمِ
+    # Warsh: يَوْمِ
     StateCase(id="waw", site=Site.shared("1:4", (2,)), states={
         "joined": Expect(read=joining(), phonemes="j a w m i",
                          absent_char_rules={"و": R("madd_leen")}),
@@ -23,7 +24,8 @@ CASES = (
                           char_rules={"و": R("madd_leen")},
                           sound_rules={"w": R("madd_leen")}),
     }),
-    # قُرَيْشٍ
+    # Hafs: قُرَيْشٍ
+    # Warsh: قُرَيْشٍ
     StateCase(id="yaa", site=Site.shared("106:1", (2,)), states={
         "joined": Expect(read=joining(), phonemes="q u rˤ aˤ j ʃ i n",
                          absent_char_rules={"ي": R("madd_leen")}),
@@ -31,14 +33,16 @@ CASES = (
                           char_rules={"ي": R("madd_leen")},
                           sound_rules={"j": R("madd_leen")}),
     }),
-    # قَوْلِى
+    # Hafs: قَوْلِى
+    # Warsh: قَوْلِے
     StateCase(id="final-long-negative", site=Site.shared("20:28", (2,)), states={
         "joined": Expect(read=joining(), phonemes="q aˤ w l i:",
                          absent_char_rules={"و": R("madd_leen")}),
         "stopped": Expect(read=isolated(), phonemes="q aˤ w l i:",
                           absent_char_rules={"و": R("madd_leen")}),
     }),
-    # عَيْنًا
+    # Hafs: عَيْنًا ۖ
+    # Warsh: عَيْناٗۖ
     StateCase(id="iwad-negative", site=Site.shared("2:60", (13,)), states={
         "joined": Expect(read=joining(), phonemes="ʕ a j n a ŋ",
                          absent_char_rules={"ي": R("madd_leen")}),

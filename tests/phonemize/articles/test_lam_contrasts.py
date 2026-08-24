@@ -6,7 +6,8 @@ from tests.support import Case, R, Site, assert_case, case_runs, isolated, pick,
 
 
 CASES = (
-    # يَوْمَ ٱلْتَقَى
+    # Hafs: يَوْمَ ٱلْتَقَى
+    # Warsh: يَوْمَ اَ۪لْتَقَى
     Case(
         id="lexical-lam",
         site=Site.shared("3:155", (5, 6)),
@@ -14,7 +15,8 @@ CASES = (
         phonemes=("j a w m a", "l t a q aˤ:"),
         absent_char_rules={"ل": R("lam_shamsiyyah", "lam_qamariyyah")},
     ),
-    # وَلِبَاسُ ٱلتَّقْوَىٰ
+    # Hafs: وَلِبَاسُ ٱلتَّقْوَىٰ
+    # Warsh: وَلِبَاسَ اَ۬لتَّقْو۪ىٰۖ
     Case(
         id="article-lam",
         site=Site.shared("7:26", (10, 11)),
@@ -26,7 +28,8 @@ CASES = (
         char_rules={"ل[2]": R("lam_shamsiyyah")},
         sound_rules={"tt": R("lam_shamsiyyah")},
     ),
-    # ٱلَّيْلِ
+    # Hafs: ٱلَّيْلِ
+    # Warsh: اِ۬ليْلِ
     Case(
         id="one-lam-rasm",
         site=Site.shared("2:164", (7,)),

@@ -27,26 +27,34 @@ def _case(name: str, ref: str, word: int, joined: str, stopped: str,
 
 
 CASES = (
-    # هُوَ
+    # Hafs: هُوَ
+    # Warsh: هُوَ
     _case("waw", "2:29", 1, "h u w a", "h u:", "و", "u:"),
-    # هِىَ
+    # Hafs: هِىَ
+    # Warsh: هِيَ
     _case("yaa", "2:70", 8, "h i j a", "h i:", "@yaa", "i:"),
-    # يَعْفُوَا۟
+    # Hafs: يَعْفُوَا۟
+    # Warsh: يَعْفُوَاْ
     _case("yafuwa", "2:237", 18, "j a ʕ f u w a", "j a ʕ f u:", "و", "u:"),
-    # لِتَتْلُوَا۟
+    # Hafs: لِّتَتْلُوَا۟
+    # Warsh: لِّتَتْلُوَاْ
     _case("litatluwa", "13:30", 10, "l i t a t l u w a", "l i t a t l u:",
           "و", "u:"),
-    # نَدْعُوَا۟
+    # Hafs: نَّدْعُوَا۟
+    # Warsh: نَّدْعُوَاْ
     _case("naduwa", "18:14", 12, "n a d Q ʕ u w a", "n a d Q ʕ u:", "و", "u:"),
-    # أَتْلُوَا۟
+    # Hafs: أَتْلُوَا۟
+    # Warsh: اَتْلُوَاْ
     _case("atluwa", "27:92", 2, "ʔ a t l u w a", "ʔ a t l u:", "و", "u:"),
-    # لِيَرْبُوَا۟
+    # Hafs: لِّيَرْبُوَا۟
     _case("liyarbuwa", "30:39", 5, "l i j a rˤ b u w a", "l i j a rˤ b u:",
           "و", "u:", warsh=False),
-    # لِيَبْلُوَا۟
+    # Hafs: لِّيَبْلُوَا۟
+    # Warsh: لِّيَبْلُوَاْ
     _case("liyabluwa", "47:4", 28, "l i j a b Q l u w a", "l i j a b Q l u:",
           "و", "u:"),
-    # وَنَبْلُوَا۟
+    # Hafs: وَنَبْلُوَا۟
+    # Warsh: وَنَبْلُوَاْ
     _case("wanabluwa", "47:31", 7, "w a n a b Q l u w a", "w a n a b Q l u:",
           "و[2]", "u:"),
 )

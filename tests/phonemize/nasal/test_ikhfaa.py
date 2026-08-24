@@ -18,7 +18,8 @@ from tests.support import (
 
 
 CASES = (
-    # تِجَارَةٍ تُنجِيكُم
+    # Hafs: تِجَـٰرَةٍ تُنجِيكُم
+    # Warsh: تِجَٰرَةٖ تُنجِيكُم
     Case(
         id="taa-jeem",
         site=Site.shared("61:10", (7, 8)),
@@ -27,7 +28,8 @@ CASES = (
         char_rules={"@kasratan": R("ikhfaa"), "ن": R("ikhfaa")},
         sound_rules={"ŋ[1]": R("ikhfaa"), "ŋ[2]": R("ikhfaa")},
     ),
-    # إِنسٌ قَبْلَهُم
+    # Hafs: إِنسٌ قَبْلَهُمْ
+    # Warsh: إِنسٞ قَبْلَهُمْ
     Case(
         id="seen-qaf",
         site=Site.shared("55:74", (3, 4)),
@@ -39,7 +41,8 @@ CASES = (
             "ŋ[2]": R("ikhfaa", "tafkheem"),
         },
     ),
-    # بِقَدَرٍ فَأَنشَرْنَا
+    # Hafs: بِقَدَرٍ فَأَنشَرْنَا
+    # Warsh: بِقَدَرٖ فَأَنشَرْنَا
     Case(
         id="fa-sheen",
         site=Site.shared("43:11", (6, 7)),
@@ -48,7 +51,8 @@ CASES = (
         char_rules={"@kasratan": R("ikhfaa"), "ن[1]": R("ikhfaa")},
         sound_rules={"ŋ[1]": R("ikhfaa"), "ŋ[2]": R("ikhfaa")},
     ),
-    # أَندَادًا ذَلِكَ
+    # Hafs: أَندَادًا ۚ ذَٰلِكَ
+    # Warsh: أَندَاداٗۖ ذَٰلِكَ
     Case(
         id="dal-thal",
         site=Site.shared("41:9", (11, 12)),
@@ -57,7 +61,8 @@ CASES = (
         char_rules={"ن": R("ikhfaa"), "@fathatan": R("ikhfaa")},
         sound_rules={"ŋ[1]": R("ikhfaa"), "ŋ[2]": R("ikhfaa")},
     ),
-    # مَعِيشَةً ضَنكًا
+    # Hafs: مَعِيشَةً ضَنكًا
+    # Warsh: مَعِيشَةٗ ضَنكاٗ
     Case(
         id="dad-kaf",
         site=Site.shared("20:124", (7, 8)),
@@ -69,7 +74,8 @@ CASES = (
             "ŋ[2]": R("ikhfaa"),
         },
     ),
-    # حِينَئِذٍ تَنظُرُونَ
+    # Hafs: حِينَئِذٍ تَنظُرُونَ
+    # Warsh: حِينَئِذٖ تَنظُرُونَ
     Case(
         id="taa-zhaa",
         site=Site.shared("56:84", (2, 3)),
@@ -81,7 +87,8 @@ CASES = (
             "ŋ[2]": R("ikhfaa", "tafkheem"),
         },
     ),
-    # مَيِّتٍ فَأَنزَلْنَا
+    # Hafs: مَّيِّتٍ فَأَنزَلْنَا
+    # Warsh: مَّيِّتٖ فَأَنزَلْنَا
     Case(
         id="fa-zay",
         site=Site.shared("7:57", (16, 17)),
@@ -90,7 +97,8 @@ CASES = (
         char_rules={"@kasratan": R("ikhfaa"), "ن[1]": R("ikhfaa")},
         sound_rules={"ŋ[1]": R("ikhfaa"), "ŋ[2]": R("ikhfaa")},
     ),
-    # قِنطَارًا فَلَا
+    # Hafs: قِنطَارًا فَلَا
+    # Warsh: قِنطَاراٗ فَلَا
     Case(
         id="tah-fa",
         site=Site.shared("4:20", (9, 10)),
@@ -102,7 +110,8 @@ CASES = (
             "ŋ[2]": R("ikhfaa"),
         },
     ),
-    # إِن تَنصُرُوا
+    # Hafs: إِن تَنصُرُوا۟
+    # Warsh: إِن تَنصُرُواْ
     StateCase(
         id="taa-sad-boundary",
         site=Site.shared("47:7", (4, 5)),
@@ -125,7 +134,7 @@ CASES = (
             ),
         },
     ),
-    # وَٱلْأُنثَىٰ
+    # Hafs: وَٱلْأُنثَىٰ
     Case(
         id="tha",
         site=Site(hafs=("2:178", (13,))),
@@ -134,7 +143,8 @@ CASES = (
         char_rules={"ن": R("ikhfaa")},
         sound_rules={"ŋ": R("ikhfaa")},
     ),
-    # نُـۨجِى
+    # Hafs: نُـۨجِى
+    # Warsh: نُۨجِے
     Case(
         id="small-noon-jeem",
         site=Site.shared("21:88", (7,)),
@@ -143,7 +153,8 @@ CASES = (
         char_rules={"@small_noon": R("ikhfaa")},
         sound_rules={"ŋ": R("ikhfaa")},
     ),
-    # حِينٍ فَتَلَقَّىٰ
+    # Hafs: حِينٍ
+    # Warsh: حِينٖۖ
     Case(
         id="verse-seam",
         site=Site.shared("2:36", (19,)),
@@ -152,7 +163,8 @@ CASES = (
         char_rules={"@kasratan": R("ikhfaa")},
         sound_rules={"ŋ": R("ikhfaa")},
     ),
-    # مَنضُودٍ
+    # Hafs: مَّنضُودٍ
+    # Warsh: مَّنضُودٖ
     StateCase(
         id="emphatic-token",
         site=Site.shared("56:29", (2,)),

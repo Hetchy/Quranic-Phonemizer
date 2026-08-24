@@ -16,7 +16,8 @@ from tests.support import (
 
 
 CASES = (
-    # مِّن رَّبِّهِمْ
+    # Hafs: مِّن رَّبِّهِمْ ۖ
+    # Warsh: مِّن رَّبِّهِمْۖ
     Case(
         id="noon-raa",
         site=Site.shared("2:5", (4, 5)),
@@ -26,7 +27,8 @@ CASES = (
                     "ر": R("idgham_bila_ghunnah")},
         sound_rules={"rˤrˤ": R("idgham_bila_ghunnah", "tafkheem")},
     ),
-    # فَإِن لَّمْ
+    # Hafs: فَإِن لَّمْ
+    # Warsh: فَإِن لَّمْ
     StateCase(
         id="noon-lam-boundary",
         site=Site.shared("2:24", (1, 2)),
@@ -48,7 +50,8 @@ CASES = (
             ),
         },
     ),
-    # غَفُورٌ رَّحِيمٌ
+    # Hafs: غَفُورٌ رَّحِيمٌ
+    # Warsh: غَفُورٞ رَّحِيمٌۖ
     Case(
         id="tanwin-raa",
         site=Site.shared("2:173", (24, 25)),
@@ -58,7 +61,8 @@ CASES = (
                     "ر[2]": R("idgham_bila_ghunnah")},
         sound_rules={"rˤrˤ": R("idgham_bila_ghunnah", "tafkheem")},
     ),
-    # عَلِيمٌ لَّا
+    # Hafs: عَلِيمٌ لَّا
+    # Warsh: عَلِيمٞۖ لَّا
     Case(
         id="tanwin-lam-verse-seam",
         site=Site.shared("2:224", (14, 15)),

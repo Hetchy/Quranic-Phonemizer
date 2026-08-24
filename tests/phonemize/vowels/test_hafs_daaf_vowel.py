@@ -18,7 +18,7 @@ from tests.support import (
 DAAF = Site(hafs=("30:54", (5, 10, 17)))
 
 CASES = (
-    # ضَعْفٍ
+    # Hafs: ضَعْفٍ
     VariantCase(
         id="daaf-vowel",
         site=Site(hafs=("30:54", (5,))),

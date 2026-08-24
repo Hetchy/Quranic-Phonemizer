@@ -6,7 +6,8 @@ from tests.support import Case, R, Site, assert_case, case_runs, isolated, pick,
 
 
 CASES = (
-    # ٱللَّهِ
+    # Hafs: ٱللَّهِ
+    # Warsh: اَ۬للَّهُ
     Case(
         id="standalone-heavy",
         site=Site(hafs=("1:1", (2,)), warsh=("2:15", (1,))),
@@ -19,7 +20,8 @@ CASES = (
         ),
         sound_rules={"lˤlˤ": R("tafkheem"), "aˤ:": R("tafkheem")},
     ),
-    # ءَاللَّهُ
+    # Hafs: ءَآللَّهُ
+    # Warsh: آٰللَّهُ
     Case(
         id="interrogative-heavy",
         site=Site.shared("10:59", (14,)),
@@ -32,7 +34,8 @@ CASES = (
         ),
         sound_rules={"lˤlˤ": R("tafkheem"), "aˤ:": R("tafkheem")},
     ),
-    # ٱللَّهُمَّ
+    # Hafs: ٱللَّهُمَّ
+    # Warsh: اِ۬للَّهُمَّ
     Case(
         id="allahumma-heavy",
         site=Site.shared("3:26", (2,)),
@@ -45,7 +48,8 @@ CASES = (
         ),
         sound_rules={"lˤlˤ": R("tafkheem"), "aˤ:": R("tafkheem")},
     ),
-    # لِلَّهِ
+    # Hafs: لِلَّهِ
+    # Warsh: لِلهِ
     Case(
         id="li-prefix-light",
         site=Site.shared("1:2", (2,)),
@@ -54,7 +58,8 @@ CASES = (
         absent_char_rules={"ل[2]": R("tafkheem")},
         absent_sound_rules={"ll": R("tafkheem"), "a:": R("tafkheem")},
     ),
-    # بِٱللَّهِ
+    # Hafs: بِٱللَّهِ
+    # Warsh: بِاللَّهِ
     Case(
         id="bi-prefix-light",
         site=Site.shared("2:8", (6,)),
@@ -63,7 +68,8 @@ CASES = (
         absent_char_rules={"ل[2]": R("tafkheem")},
         absent_sound_rules={"ll": R("tafkheem"), "a:": R("tafkheem")},
     ),
-    # قَالَ ٱللَّهُ
+    # Hafs: قَالَ ٱللَّهُ
+    # Warsh: قَالَ اَ۬للَّهُ
     Case(
         id="joined-after-fatha",
         site=Site.shared("5:119", (1, 2)),
@@ -76,7 +82,8 @@ CASES = (
         ),
         sound_rules={"lˤlˤ": R("tafkheem"), "aˤ:[2]": R("tafkheem")},
     ),
-    # نَصْرُ ٱللَّهِ
+    # Hafs: نَصْرُ ٱللَّهِ
+    # Warsh: نَصْرُ اُ۬للَّهِ
     Case(
         id="joined-after-damma",
         site=Site.shared("110:1", (3, 4)),
@@ -89,7 +96,8 @@ CASES = (
         ),
         sound_rules={"lˤlˤ": R("tafkheem"), "aˤ:": R("tafkheem")},
     ),
-    # بِسْمِ ٱللَّهِ
+    # Hafs: بِسْمِ ٱللَّهِ
+    # Warsh: بِسْمِ اِ۬للَّهِ
     Case(
         id="joined-after-kasra",
         site=Site(hafs=("1:1", (1, 2)), warsh=("27:30", (5, 6))),
@@ -98,7 +106,8 @@ CASES = (
         absent_char_rules={"ل[2]": R("tafkheem")},
         absent_sound_rules={"ll": R("tafkheem"), "a:": R("tafkheem")},
     ),
-    # يُضْلِلْهُ
+    # Hafs: يُضْلِلْهُ
+    # Warsh: يُضْلِلْهُۖ
     Case(
         id="non-divine-lam-sequence",
         site=Site.shared("6:39", (11,)),

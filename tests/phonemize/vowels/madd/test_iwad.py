@@ -16,7 +16,7 @@ from tests.support import (
 
 
 CASES = (
-    # هُدًى مِّن
+    # Hafs: هُدًى
     StateCase(id="fathatan-maqsura", site=Site(hafs=("2:5", (3,))), states={
         "joined": Expect(read=joining(), phonemes="h u d a",
                          absent_char_rules=pick(
@@ -30,7 +30,8 @@ CASES = (
                           ),
                           sound_rules={"a:": R("madd_iwad", "madd_tabii")}),
     }),
-    # إِثْمًا عَظِيمًا
+    # Hafs: إِثْمًا
+    # Warsh: إِثْماً
     StateCase(id="fathatan-alif", site=Site.shared("4:48", (19,)), states={
         "joined": Expect(read=joining(), phonemes="ʔ i θ m a n",
                          absent_char_rules=pick(
@@ -46,7 +47,8 @@ CASES = (
                           ),
                           sound_rules={"a:": R("madd_iwad", "madd_tabii")}),
     }),
-    # مَآءً فَأَخْرَجَ
+    # Hafs: مَآءً
+    # Warsh: مَآءٗ
     StateCase(id="fathatan-after-hamza", site=Site.shared("2:22", (11,)), states={
         "joined": Expect(
             read=joining(), phonemes="m a: ʔ a ŋ",
@@ -63,12 +65,14 @@ CASES = (
                          "a:[2]": R("madd_iwad", "madd_tabii")},
         ),
     }),
-    # غَفُورٌ حَلِيمٌ
+    # Hafs: غَفُورٌ
+    # Warsh: غَفُورٌ
     StateCase(id="dammatan-negative", site=Site.shared("2:225", (13,)), states={
         "joined": Expect(read=joining(), phonemes="ɣ aˤ f u: rˤ u n"),
         "stopped": Expect(read=isolated(), phonemes="ɣ aˤ f u: rˤ"),
     }),
-    # لِقَوْمٍ آخَرِينَ
+    # Hafs: لِقَوْمٍ
+    # Warsh: لِقَوْمٍ
     StateCase(id="kasratan-negative", site=Site.shared("5:41", (23,)), states={
         "joined": Expect(read=joining(), phonemes="l i q aˤ w m i n"),
         "stopped": Expect(read=isolated(), phonemes="l i q aˤ w m"),

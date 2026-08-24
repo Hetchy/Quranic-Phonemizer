@@ -93,24 +93,24 @@ def _case(
 
 
 CASES = (
-    # فِرْقٍ
+    # Hafs: فِرْقٍ
     _case("firq", KhilafId.RAA_FIRQ_WASL, False,
           "f i rˤ q i ŋ", "f i r q i ŋ", "heavy", "f i rˤ q Q", "heavy"),
-    # ٱلْقِطْرِ
+    # Hafs: ٱلْقِطْرِ ۖ
     _case("alqitr", KhilafId.RAA_ALQITR_WAQF, True,
           "ʔ a l q i tˤ Q rˤ", "ʔ a l q i tˤ Q r", "light",
           "ʔ a l q i tˤ Q r i", "light"),
-    # مِصْرَ
+    # Hafs: مِصْرَ
     _case("misr", KhilafId.RAA_MISR_WAQF, True,
           "m i sˤ rˤ", "m i sˤ r", "heavy", "m i sˤ rˤ aˤ", "heavy"),
-    # وَنُذُرِ
+    # Hafs: وَنُذُرِ
     _case("wanuthur", KhilafId.RAA_NUTHUR_WAQF, True,
           "w a n u ð u rˤ", "w a n u ð u r", "heavy",
           "w a n u ð u r i", "light"),
-    # يَسْرِ
+    # Hafs: يَسْرِ
     _case("yasr", KhilafId.RAA_YASR_WAQF, True,
           "j a s rˤ", "j a s r", "light", "j a s r i", "light"),
-    # أَسْرِ
+    # Hafs: أَسْرِ
     _case("asr", KhilafId.RAA_ASR_WAQF, True,
           "ʔ a s rˤ", "ʔ a s r", "light", "ʔ a s r i", "light"),
 )
