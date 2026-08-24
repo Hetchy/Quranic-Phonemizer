@@ -165,7 +165,7 @@ def test_every_glyph_names_a_word_or_carries_no_word_at_all():
 
 
 def test_module_functions_answer_without_an_instance():
-    assert supported_riwayat() == ("hafs",)
+    assert supported_riwayat() == ("hafs", "warsh")
     rules = tajweed_rules("hafs")
     identifiers = {row[0] for row in rules}
     assert identifiers == (
@@ -174,6 +174,12 @@ def test_module_functions_answer_without_an_instance():
     for identifier, english, arabic, summary in rules:
         assert identifier and english and arabic
         assert summary.endswith(".") and len(summary.split()) >= 5
+
+
+def test_warsh_uses_its_default_uthmani_package():
+    result = Phonemizer(riwayah="warsh").phonemize("2:3")
+    assert (result.riwayah, result.script) == ("warsh", "uthmani")
+    assert result.words and result.phonemes()
 
 
 def test_a_bare_phonemizer_is_hafs_uthmani():

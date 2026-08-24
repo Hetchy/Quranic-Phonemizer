@@ -69,7 +69,9 @@ Occurrences, not letters or sounds, are counted.
 - A classification-only occurrence counts once.
 - Multiple occurrences in one word count multiple times.
 - Multiple occurrences in one verse count multiple times.
-- Cross-rule overlap is allowed. The same performed material may count under multiple exact rules, such as **Madd Tabii** and **Madd Badal**.
+- Cross-rule overlap is allowed. The same performed material may count under
+  multiple exact rules, such as **Madd Tabii** and **Madd Badal** in Hafs.
+  Riwayah-scoped classifiers still decide which combinations are valid.
 - Counts are scoped to the one target in the current query. Separate searches may return the same verse independently.
 
 ### 2.4 Result granularity

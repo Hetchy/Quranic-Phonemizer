@@ -79,6 +79,10 @@ class MarkEntry:
     saying something about the one before it."""
     advice: StopAdvice | None = None
     structural: bool = False
+    attests: bool = False
+    """The glyph witnesses the derived outcome anchored at its host slot."""
+    attach_to_previous: bool = False
+    """The scalar follows a carrier but evidences the preceding base."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -288,7 +292,7 @@ def _load_evidences(data: Any, path: Path, marks: dict[str, MarkEntry]) -> None:
             spec,
             {"fact", "cls"},
             name=where,
-            optional={"value", "derivation", "role", "omitted"},
+            optional={"value", "derivation", "role", "omitted", "attests"},
         )
         fact = _member(SlotFact, spec["fact"], where=where)
         has_value, has_derivation = "value" in spec, "derivation" in spec
@@ -305,6 +309,7 @@ def _load_evidences(data: Any, path: Path, marks: dict[str, MarkEntry]) -> None:
             value=_fact_value(fact, spec["value"], where=where) if has_value else None,
             derivation=str(spec["derivation"]) if has_derivation else None,
             omitted=bool(spec.get("omitted", False)),
+            attests=bool(spec.get("attests", False)),
         )
 
 
@@ -312,13 +317,17 @@ def _load_decorates(data: Any, path: Path, marks: dict[str, MarkEntry]) -> None:
     for char, spec in (data.get("decorates") or {}).items():
         where = f"{path} decorates[{char!r}]"
         require_keys(
-            spec, {"slot", "cls"}, name=where, optional={"role", "silences"}
+            spec,
+            {"slot", "cls"},
+            name=where,
+            optional={"role", "silences", "attests"},
         )
         marks[char] = MarkEntry(
             role=str(spec.get("role", f"decorates:{spec['slot']}")),
             cls=_member(GraphemeClass, spec["cls"], where=where),
             decorates=str(spec["slot"]),
             silences=bool(spec.get("silences", False)),
+            attests=bool(spec.get("attests", False)),
         )
 
 
@@ -337,5 +346,3 @@ def _load_structural(data: Any, path: Path, marks: dict[str, MarkEntry]) -> None
         marks[char] = MarkEntry(
             role="structural", cls=GraphemeClass.STRUCTURAL, structural=True
         )
-
-

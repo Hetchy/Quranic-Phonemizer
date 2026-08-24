@@ -14,7 +14,7 @@ from .canon.ledger import Ledger
 from .canon.lexicon import Lexicon
 from .canon.passes import LexemePass
 from .canon.spell import Muqattaat
-from .corpus import PackedCorpus
+from .corpus import Corpus
 from .engine.classifier import RuleSet
 from .engine.run import perform
 from .model.address import (
@@ -31,13 +31,13 @@ from .model.performance import Performance
 from .orthography.adapter import Reading, ScriptAdapter
 from .orthography.inventory import Inventory
 from .render.alphabet import Alphabet, load_alphabet
-from .riwayat import hafs
+from .riwayat import hafs, warsh
 from .riwayat.khilaf import Khilaf
 
 DATA = Path(__file__).resolve().parent / "data"
 
 #: Every riwayah this build ships. Adding one is one row plus its package.
-PACKAGES = {Riwayah.HAFS: hafs}
+PACKAGES = {Riwayah.HAFS: hafs, Riwayah.WARSH: warsh}
 
 #: `Riwayah` is the closed vocabulary the gates check against; a member with
 #: no package here would pass them and fail late, so refuse to load instead.
@@ -52,7 +52,7 @@ class Recitation:
     riwayah: Riwayah
     scripts: tuple[Script, ...]
     rules: RuleSet
-    corpus: PackedCorpus
+    corpus: Corpus
     khilaf: Khilaf
     muqattaat: Muqattaat
     lexicon: Lexicon
@@ -105,15 +105,8 @@ class Recitation:
         return perform(score, self.rules, boundaries, selection=selection)
 
     def words(self, verse: VerseRef) -> tuple[tuple[Location, str], ...]:
-        """The verse's words from the packed corpus, sized by `surah_info`."""
-        count = self.corpus.surah_info[str(verse.surah)][verse.ayah - 1]
-        return tuple(
-            (location, self.corpus.word(location))
-            for location in (
-                Location(verse.surah, verse.ayah, index)
-                for index in range(1, count + 1)
-            )
-        )
+        """The words this riwayah performs at one public verse address."""
+        return self.corpus.words(verse)
 
 
 def recitation(riwayah: Riwayah) -> Recitation:

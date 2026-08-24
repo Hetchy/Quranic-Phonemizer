@@ -1,0 +1,194 @@
+"""Reviewed sequence overrides for the selected King Fahd Warsh script."""
+
+from __future__ import annotations
+
+from dataclasses import replace
+
+from ...model.canon import CanonLetter, Nucleus, Onset, Quality
+from ...model.inscription import GraphemeClass, SlotFact
+from ...orthography.inventory import Inventory, LetterEntry, MarkEntry
+
+
+_HARAKA_TO_TANWIN = {
+    "َ": "fathatan",
+    "ُ": "dammatan",
+    "ِ": "kasratan",
+}
+_FATHATAN = frozenset({"ً", "ٗ"})
+_WASL_MARKS = frozenset({"۬", "۟", "۪"})
+
+
+def _release_combining_hamza_seats(inventory, text, entries) -> None:
+    for index, entry in enumerate(entries[:-2]):
+        if (
+            isinstance(entry, LetterEntry)
+            and entry.letter in {CanonLetter.WAW, CanonLetter.YA}
+            and text[index + 1] == "ْ"
+            and text[index + 2] in inventory.combining_hamza
+        ):
+            entries[index] = replace(entry, seat=False)
+
+
+def _wasl_sequence(text, entries) -> bool:
+    matched = (
+        len(text) >= 3
+        and text[0] == "ا"
+        and text[1] in _HARAKA_TO_TANWIN
+        and text[2] in _WASL_MARKS
+    )
+    if matched:
+        entries[0] = LetterEntry(CanonLetter.HAMZA, onset=Onset.WASL, seat=True)
+        entries[1] = MarkEntry(
+            role="wasl_vowel_hint",
+            cls=GraphemeClass.ANNOTATION,
+            fact=SlotFact.ONSET,
+            value=Onset.WASL,
+        )
+        entries[2] = MarkEntry(
+            role="wasl_sequence_mark",
+            cls=GraphemeClass.ANNOTATION,
+            fact=SlotFact.ONSET,
+            value=Onset.WASL,
+        )
+    return matched
+
+
+def _project_marked_fatha(text, entries, *, wasl: bool) -> None:
+    for index, char in enumerate(text):
+        if char == "۪" and not (wasl and index == 2):
+            entries[index] = MarkEntry(
+                role="fatha",
+                cls=GraphemeClass.ANNOTATION,
+                fact=SlotFact.VOWEL_QUALITY,
+                value=Nucleus.short(Quality.A),
+            )
+
+
+def _attach_reversed_fathatan(text, entries) -> None:
+    for index, char in enumerate(text[1:], start=1):
+        if char in _FATHATAN and text[index - 1] == "ا" and index > 1:
+            entries[index] = MarkEntry(
+                role="fathatan",
+                cls=GraphemeClass.TANWEEN,
+                fact=SlotFact.VOWEL_QUALITY,
+                derivation="tanween",
+                attach_to_previous=True,
+            )
+
+
+def _project_plural_alif_silence(text, entries) -> None:
+    for alif_index in range(1, len(text) - 1):
+        if text[alif_index:alif_index + 2] != "اْ":
+            continue
+        previous_base = next(
+            (
+                entry
+                for entry in reversed(entries[:alif_index])
+                if isinstance(entry, LetterEntry)
+            ),
+            None,
+        )
+        if previous_base is not None and previous_base.letter is CanonLetter.WAW:
+            entries[alif_index + 1] = MarkEntry(
+                role="silence_sign",
+                cls=GraphemeClass.HARAKA,
+                decorates="host",
+                silences=True,
+            )
+
+
+def _silence_mark(entries, index: int) -> None:
+    entries[index] = MarkEntry(
+        role="silence_sign",
+        cls=GraphemeClass.HARAKA,
+        decorates="host",
+        silences=True,
+    )
+
+
+def _consonantal_sukun(entries, index: int) -> None:
+    entries[index] = MarkEntry(
+        role="consonantal_sukun",
+        cls=GraphemeClass.HARAKA,
+        fact=SlotFact.VOWEL_ABSENCE,
+        value=Nucleus.silent(),
+    )
+
+
+def _project_orthographic_silence(text, entries) -> None:
+    """Project selected-script sukuns or harakas that mark rasm-only letters."""
+    for pattern, relative in (
+        ("أُوْلَ", 3),
+        ("مِاْئ", 3),
+        ("إِيْن", 3),
+        ("إِيْه", 3),
+        ("إِےْ", 3),
+        ("اْيْـٔ", 1),
+    ):
+        start = text.find(pattern)
+        if start >= 0:
+            _silence_mark(entries, start + relative)
+
+    # `بِأَيَيْدٖ`: the first written yaa is rasm-only; the following sakin
+    # yaa is the pronounced glide.
+    start = text.find("أَيَيْ")
+    if start >= 0:
+        _silence_mark(entries, start + 3)
+
+    for pattern, relative in (("ليْل", 2), ("اْيْـٔ", 3)):
+        start = text.find(pattern)
+        if start >= 0:
+            _consonantal_sukun(entries, start + relative)
+
+
+def _release_dagger_hamza_seats(text, entries) -> None:
+    for index, char in enumerate(text[:-2]):
+        if char == "ٰ" and text[index + 1] == "ء" and text[index + 2] == "ْ":
+            entries[index] = MarkEntry(
+                role="hamza_seat",
+                cls=GraphemeClass.SMALL_VOWEL,
+                decorates="host",
+            )
+
+
+def _project_composite_tanwin(text, entries) -> None:
+    for index, char in enumerate(text):
+        if char != "ۢ" or index == 0:
+            continue
+        previous = text[index - 1]
+        role = _HARAKA_TO_TANWIN.get(previous)
+        if role is not None:
+            behind_alif = index >= 2 and text[index - 2] == "ا"
+            entries[index - 1] = MarkEntry(
+                role=role,
+                cls=GraphemeClass.TANWEEN,
+                fact=SlotFact.VOWEL_QUALITY,
+                derivation="tanween",
+                attach_to_previous=behind_alif,
+            )
+            if behind_alif:
+                entries[index] = MarkEntry(
+                    role="mini_meem",
+                    cls=GraphemeClass.ANNOTATION,
+                    decorates="host",
+                    attests=True,
+                    attach_to_previous=True,
+                )
+
+
+def entries_for(inventory: Inventory, text: str):
+    """Return one classification per scalar without changing source text."""
+    entries = [inventory.classify(char) for char in text]
+    _release_combining_hamza_seats(inventory, text, entries)
+    wasl = _wasl_sequence(text, entries)
+    _project_marked_fatha(text, entries, wasl=wasl)
+    _attach_reversed_fathatan(text, entries)
+    _project_plural_alif_silence(text, entries)
+    _project_orthographic_silence(text, entries)
+    _release_dagger_hamza_seats(text, entries)
+    _project_composite_tanwin(text, entries)
+
+    return tuple(entries)
+
+
+__all__ = ["entries_for"]

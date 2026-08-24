@@ -1,0 +1,127 @@
+"""Warsh through al-Azraq: corpus, adapter, and shared package resources."""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from functools import lru_cache
+from pathlib import Path
+
+from ...canon import derive
+from ...canon.ledger import EMPTY as EMPTY_LEDGER
+from ...canon.ledger import Ledger
+from ...canon.lexicon import Lexicon, load_affixes, load_lexicon
+from ...canon.passes import LEXEME_PASSES
+from ...canon.spell import Muqattaat, load_muqattaat, spell_muqattaat
+from ...corpus import AlignedCorpus, load_aligned_corpus
+from ...model.address import Location, Riwayah, Script, VerseRef
+from ...orthography.adapter import Reading
+from ...orthography.cluster import read_verse
+from ...orthography.inventory import Inventory, load_inventory
+from ..khilaf import EMPTY as EMPTY_KHILAF
+from ..khilaf import Khilaf
+from ..tables import RuleTables, load_rule_tables
+from .sequence import entries_for
+
+RIWAYAH = Riwayah.WARSH
+SCRIPTS = (Script.UTHMANI,)
+ARTIFACT = "king-fahd-warsh-v2"
+DATA = Path(__file__).resolve().parents[2] / "data" / "riwayat" / "warsh"
+
+
+@dataclass(frozen=True, slots=True)
+class Adapter:
+    script: Script
+    inventory: Inventory
+    corpus: AlignedCorpus
+
+    def read(
+        self, verse: VerseRef, words: tuple[tuple[Location, str], ...]
+    ) -> Reading:
+        return read_verse(
+            self.inventory,
+            verse,
+            words,
+            entries_for=lambda text: entries_for(self.inventory, text),
+            sources_for=self.corpus.sources_for,
+        )
+
+
+@lru_cache(maxsize=None)
+def corpus() -> AlignedCorpus:
+    return load_aligned_corpus(
+        DATA / "corpus" / "alignment.jsonl.gz", artifact=ARTIFACT
+    )
+
+
+@lru_cache(maxsize=None)
+def _inventory(script: Script) -> Inventory:
+    return load_inventory(
+        DATA / "scripts" / f"{script.value}.yaml",
+        riwayah=RIWAYAH,
+        script=script,
+        derivations=frozenset(derive.registered()),
+        roles=derive.required_roles(),
+    )
+
+
+def script_adapter(script: Script) -> Adapter:
+    if script not in SCRIPTS:
+        raise ValueError(f"{RIWAYAH.value} is not packaged for {script.value}")
+    return Adapter(script, _inventory(script), corpus())
+
+
+def adapters_for(riwayah: Riwayah) -> dict[Script, Adapter]:
+    if riwayah is not RIWAYAH:
+        raise ValueError(f"{__name__} assembles {RIWAYAH.value}, not {riwayah.value}")
+    return {script: script_adapter(script) for script in SCRIPTS}
+
+
+@lru_cache(maxsize=None)
+def ledger() -> Ledger:
+    return EMPTY_LEDGER
+
+
+@lru_cache(maxsize=None)
+def lexicon() -> Lexicon:
+    path = DATA.parents[1] / "shared" / "lexicon.yaml"
+    affixes = load_affixes(DATA.parents[1] / "shared" / "morphology.yaml")
+    return load_lexicon(path, affixes=affixes)
+
+
+@lru_cache(maxsize=None)
+def rule_tables() -> RuleTables:
+    return load_rule_tables(DATA.parents[1] / "shared" / "rules.yaml")
+
+
+@lru_cache(maxsize=None)
+def khilaf() -> Khilaf:
+    return EMPTY_KHILAF
+
+
+@lru_cache(maxsize=None)
+def muqattaat() -> Muqattaat:
+    return load_muqattaat(DATA.parents[1] / "shared" / "muqattaat.yaml")
+
+
+@lru_cache(maxsize=None)
+def lexeme_passes() -> tuple:
+    return (
+        *LEXEME_PASSES,
+        spell_muqattaat(muqattaat(), vocalized_compact=True),
+    )
+
+
+__all__ = [
+    "ARTIFACT",
+    "RIWAYAH",
+    "SCRIPTS",
+    "adapters_for",
+    "corpus",
+    "khilaf",
+    "ledger",
+    "lexeme_passes",
+    "lexicon",
+    "muqattaat",
+    "rule_tables",
+    "script_adapter",
+]

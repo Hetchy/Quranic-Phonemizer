@@ -6,7 +6,7 @@ adds the one guard that needs the ledger: no clipping a verse it counts into.
 from __future__ import annotations
 
 from ..canon.ledger import Ledger, VerseSlot
-from ..corpus import PackedCorpus
+from ..corpus import Corpus
 from ..model.address import Location, VerseRef
 
 
@@ -15,7 +15,7 @@ class ClippedLedgerVerseError(ValueError):
 
 
 def resolve_words(
-    corpus: PackedCorpus, ledger: Ledger, ref: str
+    corpus: Corpus, ledger: Ledger, ref: str
 ) -> tuple[Location, ...]:
     """The words `ref` addresses, in reading order."""
     locations = corpus.locations(ref)
@@ -24,7 +24,7 @@ def resolve_words(
 
 
 def _guard_clipped_verses(
-    corpus: PackedCorpus, ledger: Ledger, locations: tuple[Location, ...]
+    corpus: Corpus, ledger: Ledger, locations: tuple[Location, ...]
 ) -> None:
     """A verse-scoped ordinal counts slots from the verse's first word, so a
     range keeping only part of that verse resolves it against the wrong slot.
@@ -37,8 +37,11 @@ def _guard_clipped_verses(
     for location in locations:
         kept[location.verse] = kept.get(location.verse, 0) + 1
     for verse in sorted(addressed & kept.keys()):
-        whole = corpus.surah_info[str(verse.surah)][verse.ayah - 1]
-        if kept[verse] != whole:
+        verse_locations = tuple(
+            location for location in locations if location.verse == verse
+        )
+        if not corpus.contains_full_verse(verse, verse_locations):
+            whole = len(corpus.words(verse))
             raise ClippedLedgerVerseError(
                 f"the range keeps {kept[verse]} of {verse}'s {whole} words, "
                 f"and the riwayah's ledger counts slots from that verse's "

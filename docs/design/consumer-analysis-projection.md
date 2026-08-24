@@ -1010,10 +1010,13 @@ for its own sake.
 
 madd_badal remains first-class:
 
-- ordinary badal emits madd_badal plus madd_tabii. Badal names the cause and
-  tabii names its natural two-harakat length;
+- ordinary Hafs badal emits madd_badal plus madd_tabii. Badal names the cause
+  and tabii names its natural two-harakat length;
+- ordinary Warsh badal emits madd_badal without madd_tabii;
 - if another cause determines a contextual length, badal remains present and
-  the contextual madd names the length;
+  the contextual madd names the length. In both Hafs and Warsh this includes
+  madd_arid_lissukun at a qualifying stop; Warsh may also overlap with
+  madd_lazim or madd_muttasil;
 - no sughra/kubra teaching layer is added.
 
 A consumer that does not teach badal separately may hide madd_badal and keep
@@ -1048,8 +1051,8 @@ At ibtidaa before a quiescent lexical hamza:
 - ibdal_hamza targets the following lexical hamza that is replaced/silenced;
 - the starting vowel is lengthened with the matching quality, and that length
   is madd_badal: a hamza followed by a long vowel of its own quality is exactly
-  what badal names, so the occurrences are ibdal_hamza, madd_badal, and
-  madd_tabii, under the ordinary badal rule of 11.2;
+  what badal names. The occurrences are ibdal_hamza and madd_badal, plus
+  madd_tabii only under the Hafs model described in 11.2;
 - visible letter and sound placements record both effects without claiming
   that hamzat-wasl itself was the replaced hamza.
 
@@ -1298,13 +1301,17 @@ Expected vocabulary translations include:
 | waqf_diacritic_drop with non-taa-marbuta madd_iwad | omit pausal_sukun; keep madd_iwad + madd_tabii |
 | waqf_silah_drop | pausal_sukun |
 | yaa_aatani_waqf=hadhf omitted yaa | place pausal_sukun on the omitted yaa's legacy cell from explicit variant provenance, then deduplicate within that cell's rules array |
-| ordinary madd_badal | madd_tabii |
+| ordinary madd_badal | madd_tabii for the frozen Hafs projection |
 | madd_badal + contextual madd | contextual madd only; suppress badal |
 | ordinary madd_silah + madd_tabii | madd_tabii |
 | madd_silah + madd_munfasil | exact madd_jaiz_munfasil v11 tag, without duplicate tabii |
 | pausal_alif at wasl | omitted |
 | pausal_alif at waqf | pausal_sukun |
 | native orthographic-silence state | orthographic_silence |
+
+The badal rows describe only the frozen-v11 compatibility view. The native
+result retains both `madd_badal` and its contextual madd occurrence, including
+`madd_arid_lissukun` at a qualifying stop.
 
 The adapter maps each native drop placement to its corresponding frozen-v11
 cell and de-duplicates only within that cell's rules array. It suppresses this

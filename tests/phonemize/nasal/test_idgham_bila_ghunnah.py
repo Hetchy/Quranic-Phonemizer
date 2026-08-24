@@ -16,20 +16,22 @@ from tests.support import (
 
 
 CASES = (
-    # مِّن رَّبِّهِمْ
+    # Hafs: مِّن رَّبِّهِمْ ۖ
+    # Warsh: مِّن رَّبِّهِمْۖ
     Case(
         id="noon-raa",
-        site=Site(hafs=("2:5", (4, 5))),
+        site=Site.shared("2:5", (4, 5)),
         read=through(),
         phonemes=("m i", "rˤrˤ aˤ bb i h i m"),
         char_rules={"ن": R("idgham_bila_ghunnah"),
                     "ر": R("idgham_bila_ghunnah")},
         sound_rules={"rˤrˤ": R("idgham_bila_ghunnah", "tafkheem")},
     ),
-    # فَإِن لَّمْ
+    # Hafs: فَإِن لَّمْ
+    # Warsh: فَإِن لَّمْ
     StateCase(
         id="noon-lam-boundary",
-        site=Site(hafs=("2:24", (1, 2))),
+        site=Site.shared("2:24", (1, 2)),
         states={
             "joined": Expect(
                 read=through(),
@@ -48,20 +50,22 @@ CASES = (
             ),
         },
     ),
-    # غَفُورٌ رَّحِيمٌ
+    # Hafs: غَفُورٌ رَّحِيمٌ
+    # Warsh: غَفُورٞ رَّحِيمٌۖ
     Case(
         id="tanwin-raa",
-        site=Site(hafs=("2:173", (24, 25))),
+        site=Site.shared("2:173", (24, 25)),
         read=through(),
         phonemes=("ɣ aˤ f u: rˤ u", "rˤrˤ aˤ ħ i: m"),
         char_rules={"@dammatan[1]": R("idgham_bila_ghunnah"),
                     "ر[2]": R("idgham_bila_ghunnah")},
         sound_rules={"rˤrˤ": R("idgham_bila_ghunnah", "tafkheem")},
     ),
-    # عَلِيمٌ لَّا
+    # Hafs: عَلِيمٌ لَّا
+    # Warsh: عَلِيمٞۖ لَّا
     Case(
         id="tanwin-lam-verse-seam",
-        site=Site(hafs=("2:224", (14, 15))),
+        site=Site.shared("2:224", (14, 15)),
         read=explicit(ibtidaa=14, wasl=14, waqf=15),
         phonemes=("ʕ a l i: m u", "ll a:"),
         char_rules={"@dammatan": R("idgham_bila_ghunnah"),

@@ -5,8 +5,9 @@ Both adapters run this same code; only their inventory differs.
 from __future__ import annotations
 
 import sys
+from collections.abc import Callable, Sequence
 
-from ..model.address import Location, VerseRef
+from ..model.address import Location, SourceGraphemeRef, VerseRef
 from ..model.canon import CanonLetter
 from ..model.inscription import Grapheme, GraphemeClass, SlotFact, StopAdvice
 from .adapter import Attestation, Cluster, Decoration, Evidence, Reading
@@ -20,12 +21,30 @@ def read_verse(
     inventory: Inventory,
     verse: VerseRef,
     words: tuple[tuple[Location, str], ...],
+    *,
+    entries_for: Callable[
+        [str], Sequence[LetterEntry | MarkEntry]
+    ] | None = None,
+    sources_for: Callable[
+        [Location, str], Sequence[SourceGraphemeRef | None]
+    ] | None = None,
 ) -> Reading:
     state = _ReadState(inventory, verse)
     for word_index, (location, text) in enumerate(words):
         state.begin_word(word_index)
-        for char in text:
-            state.consume(sys.intern(char))
+        entries = entries_for(text) if entries_for is not None else (None,) * len(text)
+        sources = (
+            sources_for(location, text)
+            if sources_for is not None
+            else (None,) * len(text)
+        )
+        if len(entries) != len(text) or len(sources) != len(text):
+            raise InventoryError(
+                f"{location}: sequence projection must return one entry and "
+                f"source reference per scalar"
+            )
+        for char, entry, source in zip(text, entries, sources, strict=True):
+            state.consume(sys.intern(char), entry=entry, source=source)
         state.end_word()
     return state.finish(tuple(location for location, _ in words))
 
@@ -48,12 +67,14 @@ class _ReadState:
         self.advice: list[StopAdvice | None] = []
         self._word_advice: StopAdvice | None = None
         self._word_start = 0
+        self._source: SourceGraphemeRef | None = None
 
     # -- word framing ------------------------------------------------------
     def begin_word(self, word_index: int) -> None:
         if self.offset:
             # The space between two words, on a par with one inside a word's
             # own text: both are structural glyphs, not silent bookkeeping.
+            self._source = None
             self._grapheme(" ", self.offset, GraphemeClass.STRUCTURAL)
             self.structural.append(self.offset)
             self.offset += 1
@@ -66,10 +87,17 @@ class _ReadState:
         self.advice.append(self._word_advice)
 
     # -- scalars -----------------------------------------------------------
-    def consume(self, char: str) -> None:
+    def consume(
+        self,
+        char: str,
+        *,
+        entry: LetterEntry | MarkEntry | None = None,
+        source: SourceGraphemeRef | None = None,
+    ) -> None:
         offset = self.offset
         self.offset += 1
-        entry = self.inventory.classify(char)
+        self._source = source
+        entry = entry or self.inventory.classify(char)
         if isinstance(entry, LetterEntry):
             self._letter(char, offset, entry)
         else:
@@ -117,13 +145,8 @@ class _ReadState:
         if entry.omitted:
             self._omitted_letter(char, offset, entry)
             return
-        if not self.clusters or len(self.clusters) <= self._word_start:
-            raise InventoryError(
-                f"{self.verse}: U+{ord(char):04X} {char!r} opens a word; a "
-                f"mark must be written on a base scalar"
-            )
+        index = self._mark_host(char, entry)
         self._grapheme(char, offset, entry.cls)
-        index = len(self.clusters) - 1
         self.clusters[index].marks.append(_mark_of(char, offset, entry))
 
         if char in self.inventory.combining_hamza:
@@ -139,6 +162,8 @@ class _ReadState:
             self.decorations.append(
                 Decoration(index, offset, entry.decorates, entry.silences)
             )
+            if entry.attests:
+                self.attestations.append(Attestation(index, offset))
             return
         if entry.fact is not None:
             self.evidence.append(
@@ -150,6 +175,20 @@ class _ReadState:
                     offset=offset,
                 )
             )
+
+    def _mark_host(self, char: str, entry: MarkEntry) -> int:
+        if not self.clusters or len(self.clusters) <= self._word_start:
+            raise InventoryError(
+                f"{self.verse}: U+{ord(char):04X} {char!r} opens a word; a "
+                f"mark must be written on a base scalar"
+            )
+        index = len(self.clusters) - (2 if entry.attach_to_previous else 1)
+        if index < self._word_start:
+            raise InventoryError(
+                f"{self.verse}: U+{ord(char):04X} {char!r} has no preceding "
+                f"base in its word"
+            )
+        return index
 
     def _release_dagger_seat(self, index: int) -> None:
         """A hamza drawn on a small alif rather than on a letter: the alif is
@@ -244,6 +283,7 @@ class _ReadState:
                 char=char,
                 cls=cls,
                 index=self.letter_index,
+                source=self._source,
             )
         )
 

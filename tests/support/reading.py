@@ -320,7 +320,12 @@ def reading(
     recitation_ = _recitation(name)
     address = site.address(riwayah)
     words = _words(recitation_, name, script, address.verse)
-    focused_past_verse = bool(address.words) and max(address.words) > len(words)
+    public_word_count = recitation_.corpus.surah_info[
+        str(address.verse.surah)
+    ][address.verse.ayah - 1]
+    focused_past_verse = (
+        bool(address.words) and max(address.words) > public_word_count
+    )
     if focused_past_verse or reaches_past(len(words), **boundary):
         words = _through(recitation_, name, script, address.verse)
     built = recitation_.build(

@@ -79,7 +79,10 @@ PUBLIC_API = frozenset({
 SIDE_EFFECT = frozenset({"annotations"})
 
 #: Roles the inventory loader supplies rather than any file naming them.
-LOADER_ROLES = frozenset({"seat", "structural", "advice"})
+LOADER_ROLES = frozenset({
+    "seat", "structural", "advice",
+    "hamza_above", "hamza_below", "hamza_waw", "hamza_yaa",
+})
 
 #: The two callback protocols, by parameter names: `Classifier.look` and
 #: `LexemePass`. A protocol is the only thing that hands an implementation a
@@ -403,6 +406,18 @@ def _declared_roles() -> set[str]:
     out: set[str] = set()
     for _, tree in _modules():
         for node in ast.walk(tree):
+            if (
+                isinstance(node, ast.Call)
+                and isinstance(node.func, ast.Name)
+                and node.func.id == "MarkEntry"
+            ):
+                out |= {
+                    str(keyword.value.value)
+                    for keyword in node.keywords
+                    if keyword.arg == "role"
+                    and isinstance(keyword.value, ast.Constant)
+                    and isinstance(keyword.value.value, str)
+                }
             if not (isinstance(node, ast.Call) and _is_register(node.func)):
                 continue
             for keyword in node.keywords:

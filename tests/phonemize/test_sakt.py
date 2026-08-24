@@ -16,7 +16,7 @@ from tests.support import (
 
 
 CASES = (
-    # عِوَجَاۜ قَيِّمًا
+    # Hafs: عِوَجَاۜ
     StateCase(
         id="iwaja-qayyima",
         site=Site(hafs=("18:1", (11,))),
@@ -34,7 +34,7 @@ CASES = (
             ),
         },
     ),
-    # مَرْقَدِنَاۜ هَذَا
+    # Hafs: مَّرْقَدِنَا ۜ ۗ
     StateCase(
         id="marqadina-hadha",
         site=Site(hafs=("36:52", (6,))),
@@ -43,7 +43,7 @@ CASES = (
             "stopped": Expect(read=isolated(), phonemes="m a rˤ q aˤ d i n a:"),
         },
     ),
-    # مَنْۜ رَاقٍ
+    # Hafs: مَنْ ۜ
     StateCase(
         id="man-raq",
         site=Site(hafs=("75:27", (2,))),
@@ -64,7 +64,7 @@ CASES = (
             ),
         },
     ),
-    # بَلْۜ رَانَ
+    # Hafs: بَلْ ۜ
     StateCase(
         id="bal-ran",
         site=Site(hafs=("83:14", (2,))),
@@ -81,7 +81,7 @@ CASES = (
             ),
         },
     ),
-    # مَالِيَهْۜ هَلَكَ
+    # Hafs: مَالِيَهْ ۜ
     StateCase(
         id="maliyah-halak",
         site=Site(hafs=("69:28", (4,))),

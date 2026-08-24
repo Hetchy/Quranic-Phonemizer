@@ -63,25 +63,25 @@ def _joined(
 
 
 CASES = (
-    # ٱئْتُونِى
+    # Hafs: ٱئْتُونِى
     _started(
         "iti-start", "46:4", 18, "ʔ i: t u: n i:", "ئ", "ي[1]", "i:[1]"
     ),
-    # ٱلْمَلِكُ ٱئْتُونِى
+    # Hafs: ٱلْمَلِكُ ٱئْتُونِى
     _joined(
         "iti-joined", "12:50", (2, 3),
         ("ʔ a l m a l i k u", "ʔ t u: n i:"), "ئ",
     ),
-    # ٱئْذَن
+    # Hafs: ٱئْذَن
     _started("ithan-start", "9:49", 4, "ʔ i: ð a n", "ئ", "ي", "i:"),
-    # يَقُولُ ٱئْذَن
+    # Hafs: يَقُولُ ٱئْذَن
     _joined(
         "ithan-joined", "9:49", (3, 4),
         ("j a q u: l u", "ʔ ð a n"), "ئ", wasl="",
     ),
-    # ٱؤْتُمِنَ
+    # Hafs: ٱؤْتُمِنَ
     _started("utumin-start", "2:283", 16, "ʔ u: t u m i n", "ؤ", "و", "u:"),
-    # ٱلَّذِى ٱؤْتُمِنَ
+    # Hafs: ٱلَّذِى ٱؤْتُمِنَ
     _joined(
         "utumin-joined", "2:283", (15, 16),
         ("ʔ a ll a ð i", "ʔ t u m i n"), "ؤ",

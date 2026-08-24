@@ -85,7 +85,7 @@ def lexicon() -> Lexicon:
     """The affixes are shared: which pronouns attach to a word, and which
     letters may stand before one, are facts about Arabic rather than about
     how this riwayah recites it."""
-    path = DATA / "lexicon.yaml"
+    path = DATA.parents[1] / "shared" / "lexicon.yaml"
     if not path.exists():
         return EMPTY_LEXICON
     affixes = load_affixes(DATA.parents[1] / "shared" / "morphology.yaml")

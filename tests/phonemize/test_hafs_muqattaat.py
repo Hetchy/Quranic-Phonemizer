@@ -16,7 +16,7 @@ from tests.support import (
 
 
 CASES = (
-    # يسٓ وَٱلْقُرْءَانِ
+    # Hafs: يسٓ وَٱلْقُرْءَانِ
     VariantCase(
         id="yaseen-wasl",
         site=Site(hafs=("36:1", (1, 2))),

@@ -18,7 +18,7 @@ from tests.support import (
 
 
 CASES = (
-    # هُم بِمُؤْمِنِينَ
+    # Hafs: هُم بِمُؤْمِنِينَ
     VariantCase(
         id="meem-before-baa-boundary",
         site=Site(hafs=("2:8", (10, 11))),
@@ -47,10 +47,11 @@ CASES = (
             absent_sound_rules={"m[1]": R("ikhfaa_shafawi")},
         ),
     ),
-    # ذَٰلِكُم بَلَآءٌ
+    # Hafs: ذَٰلِكُم بَلَآءٌ
+    # Warsh: ذَٰلِكُم بَلَآءٞ
     Case(
         id="second-pronominal-shape",
-        site=Site(hafs=("2:49", (14, 15))),
+        site=Site.shared("2:49", (14, 15)),
         read=through(),
         phonemes=("ð a: l i k u ŋ", "b a l a: ʔ"),
         char_rules={"م": R("ikhfaa_shafawi")},

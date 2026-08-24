@@ -33,6 +33,7 @@ def _case(
         else pick(
             hafs_uthmani={ending: R("waqf_diacritic_drop")},
             hafs_indopak={indopak_ending: R("waqf_diacritic_drop")},
+            warsh_uthmani={ending: R("waqf_diacritic_drop")},
         )
     )
     silent = (
@@ -41,9 +42,10 @@ def _case(
         else pick(
             hafs_uthmani=(ending,),
             hafs_indopak=(indopak_ending,),
+            warsh_uthmani=(ending,),
         )
     )
-    return StateCase(id=name, site=Site(hafs=(ref, (word,))), states={
+    return StateCase(id=name, site=Site.shared(ref, (word,)), states={
         "joined": Expect(read=joining(), phonemes=joined,
                          absent_char_rules=endings),
         "stopped": Expect(read=isolated(), phonemes=stopped,
@@ -53,15 +55,18 @@ def _case(
 
 
 CASES = (
-    # ذَٰلِكَ
+    # Hafs: ذَٰلِكَ
+    # Warsh: ذَٰلِكَ
     _case(
         "fatha", "2:2", 1, "ð a: l i k a", "ð a: l i k", "@fatha[2]", "ك",
         indopak_ending="@fatha",
     ),
-    # ٱلْكِتَابُ
+    # Hafs: ٱلْكِتَـٰبُ
+    # Warsh: اَ۬لْكِتَٰبُ
     _case("damma", "2:2", 2, "ʔ a l k i t a: b u", "ʔ a l k i t a: b Q",
           "@damma", "ب"),
-    # رَبِّ
+    # Hafs: رَبِّ
+    # Warsh: رَبِّ
     _case("kasra", "1:2", 3, "rˤ aˤ bb i", "rˤ aˤ bb Q", "@kasra", "ب"),
 )
 

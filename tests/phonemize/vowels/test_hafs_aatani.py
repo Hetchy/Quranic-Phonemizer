@@ -16,7 +16,7 @@ from tests.support import (
 
 
 CASES = (
-    # ءَاتَىٰنِۦَ
+    # Hafs: ءَاتَىٰنَِۧ
     VariantCase(
         id="aatani-waqf",
         site=Site(hafs=("27:36", (8,))),

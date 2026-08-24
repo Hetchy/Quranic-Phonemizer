@@ -215,8 +215,8 @@ silence, rather than copying every core participant onto every glyph.
 A pure ibdal-created long vowel normally carries both `ibdal_hamza` and
 `madd_tabii`. A fixed following sukun instead produces `madd_lazim`. When the
 long vowel is semantically badal, `madd_badal` replaces the ordinary
-`madd_tabii` classification; `madd_lazim` or `madd_muttasil` may still overlap
-when independently applicable.
+`madd_tabii` classification; `madd_arid_lissukun`, `madd_lazim`, or
+`madd_muttasil` may still overlap when independently applicable.
 
 For the hamzat-wasl plus root-hamza family, ibtidaa therefore puts
 `ibdal_hamza` and `madd_badal` on the result sound and the
@@ -238,8 +238,9 @@ effective shape, so origin and current context remain independent classifiers.
 Tests assert the complete rule set on a long sound, including the narrow
 contexts where independent madd classifications overlap:
 
-- an ordinary Warsh badal has `madd_badal` without `madd_tabii` or
-  `madd_arid_lissukun`; only `madd_lazim` or `madd_muttasil` may overlap;
+- an ordinary Warsh badal has `madd_badal` without `madd_tabii`; at waqf,
+  `madd_arid_lissukun` is added when the stop creates its context, and
+  `madd_lazim` or `madd_muttasil` may likewise overlap;
 - a stopped fathatan replacement has `madd_iwad + madd_tabii`;
 - a joined pronoun-haa length has `madd_silah + madd_tabii`, or
   `madd_silah + madd_munfasil` before a qata hamza; and

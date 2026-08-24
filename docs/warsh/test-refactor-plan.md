@@ -48,8 +48,8 @@ occurrence as a separate subcheck. A failure remains narrow even when the
 reviewer reads one compact row.
 
 `V` in the tree means a logical case added in the final variant phase. The
-fixed/default target is 435 cases. The final target is 507 cases, consisting
-of 435 fixed/default cases plus 72 semantic selector cases. The generic API
+fixed/default target is 436 cases. The final target is 508 cases, consisting
+of 436 fixed/default cases plus 72 semantic selector cases. The generic API
 contract covers the metadata of all 71 public selectors in `docs/variants.md`;
 per the explicit test-ownership decision, `tamanna_noon` does not get another
 phonemization behavior case.
@@ -76,14 +76,14 @@ tests/
   __init__.py
   conftest.py
 
-  phonemize/                                      # 507 cases: 435 fixed + 72V
+  phonemize/                                      # 508 cases: 436 fixed + 72V
     __init__.py
 
-    articles/                                     # 21 cases
+    articles/                                     # 20 cases
       __init__.py
       test_lam_qamariyyah.py                      # 8
       test_lam_shamsiyyah.py                      # 9
-      test_lam_contrasts.py                       # 4
+      test_lam_contrasts.py                       # 3
 
     assimilation/                                 # 29 cases: 27 fixed + 2V
       __init__.py
@@ -131,7 +131,7 @@ tests/
       test_izhar_shafawi.py                       # 5
       test_noon_partition.py                      # 4
 
-    vowels/                                       # 147 cases: 135 fixed + 12V
+    vowels/                                       # 149 cases: 137 fixed + 12V
       __init__.py
 
       inclination/                                # 49 cases: 40 fixed + 9V
@@ -142,17 +142,17 @@ tests/
         test_warsh_inclination_classification.py  # 14
         test_warsh_inclination_coloring.py        # 7
 
-      madd/                                       # 63 cases
+      madd/                                       # 65 cases
         __init__.py
         test_tabii.py                             # 3
         test_muttasil.py                          # 2
         test_munfasil.py                          # 5
         test_lazim.py                             # 2
-        test_arid.py                              # 4
+        test_arid.py                              # 5
         test_leen.py                              # 4
         test_iwad.py                              # 4
         test_haa_silah.py                         # 5
-        test_warsh_badal.py                       # 12
+        test_warsh_badal.py                       # 13
         test_warsh_leen_mahmuz.py                 # 8
         test_warsh_mim_al_jam.py                  # 7
         test_warsh_yaa_zawaid.py                  # 7
@@ -250,15 +250,15 @@ tests/
     warsh/                                        # added only after fixed conformance
 ```
 
-The whole final tree has a logical budget of 1,384 cases. That number is not
+The whole final tree has a logical budget of 1,385 cases. That number is not
 expected to equal pytest collection because semantic rows expand by state,
-riwayah, and script. The important totals for domain review are 435 fixed
-phonemization cases, 72 variant phonemization cases, and 507 final cases under
+riwayah, and script. The important totals for domain review are 436 fixed
+phonemization cases, 72 variant phonemization cases, and 508 final cases under
 `phonemize/`.
 
 ## Why these semantic counts are sufficient
 
-### Articles: 21 cases
+### Articles: 20 cases
 
 The current suite spends 30 rows on one article per row. A corpus set-cover
 over one- and two-word spans finds all 14 sun-letter hosts in 9 rows and all
@@ -273,9 +273,11 @@ Examples of dense rows are:
 - `ٱلْوَسْوَاسِ ٱلْخَنَّاسِ`, 114:4: waw and kha; and
 - `ٱلْبَلَدِ ٱلْأَمِينِ`, 95:3: baa and hamza.
 
-`test_lam_contrasts.py` keeps four negative/minimal contrasts: true article
-lam, lexical lam, the one-lam written form, and the interrogative/article
-shape. A dense positive table must not replace an overreach test.
+`test_lam_contrasts.py` keeps three negative/minimal contrasts: true article
+lam, lexical lam, and the one-lam written form. The interrogative/article
+shape is owned completely by `hamza/test_istifham_article.py`; repeating it
+here would add no independent assertion. A dense positive table must not
+replace an overreach test.
 
 ### Nasal families: 57 cases
 
@@ -426,7 +428,7 @@ ibdal tokens, 60 one-word meetings, 156 cross-word meetings, and other closed
 sets are independent data registers. Only distinct structural branches get
 full manual phoneme cases.
 
-### Vowels and madd: 147 cases
+### Vowels and madd: 149 cases
 
 `test_pausal_vowels.py`, `test_final_glides.py`, `test_iwad.py`, and
 `test_taa_marbuta.py` use state matrices. Joined and stopped outcomes remain
@@ -759,7 +761,7 @@ inputs agree.
 2. **Harness.** Add `Case`, `StateCase`, exact selectors, spaced phonemes,
    package-aware riwayah iteration, and style lint without changing behavior.
 3. **Semantic compaction.** Apply the coverage method folder by folder. Every
-   deletion must have a coverage-ledger entry. Reach the 435 fixed/default
+   deletion must have a coverage-ledger entry. Reach the 436 fixed/default
    case budget with equal or stronger coverage.
 4. **Warsh adapter.** Add source/public alignment, script projection,
    selector fixtures, smoke construction, and vetted shared semantic rows.

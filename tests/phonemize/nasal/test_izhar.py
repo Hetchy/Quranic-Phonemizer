@@ -14,7 +14,7 @@ MUTLAQ = (
 
 
 CASES = (
-    # مِنْ أَحَدٍ حَتَّىٰ
+    # Hafs: مِنْ أَحَدٍ حَتَّىٰ
     Case(
         id="hamza-ha",
         site=Site(hafs=("2:102", (26, 27, 28))),
@@ -23,100 +23,111 @@ CASES = (
         char_rules={"ن": R("izhar"), "@kasratan": R("izhar")},
         sound_rules={"n[1]": R("izhar"), "n[2]": R("izhar")},
     ),
-    # مِنْهَا رَغَدًا حَيْثُ
+    # Hafs: مِنْهَا رَغَدًا حَيْثُ
+    # Warsh: مِنْهَا رَغَداً حَيْثُ
     Case(
         id="heh-ha",
-        site=Site(hafs=("2:35", (8, 9, 10))),
+        site=Site.shared("2:35", (8, 9, 10)),
         read=through(),
         phonemes=("m i n h a:", "rˤ aˤ ɣ aˤ d a n", "ħ a j θ"),
         char_rules={"ن": R("izhar"), "@fathatan": R("izhar")},
         sound_rules={"n[1]": R("izhar"), "n[2]": R("izhar")},
     ),
-    # يَكُنْ غَنِيًّا أَوْ
+    # Hafs: يَكُنْ غَنِيًّا أَوْ
+    # Warsh: يَّكُنْ غَنِيّاً اَوْ
     Case(
         id="ghayn-hamza",
-        site=Site(hafs=("4:135", (16, 17, 18))),
+        site=Site.shared("4:135", (16, 17, 18)),
         read=through(),
         phonemes=("j a k u n", "ɣ aˤ n i jj a n", "ʔ a w"),
         char_rules={"ن[1]": R("izhar"), "@fathatan": R("izhar")},
         sound_rules={"n[1]": R("izhar"), "n[3]": R("izhar")},
     ),
-    # قِرَدَةً خَاسِئِينَ
+    # Hafs: قِرَدَةً خَـٰسِـِٔينَ
+    # Warsh: قِرَدَةً خَٰسِـِٕينَۖ
     Case(
         id="kha",
-        site=Site(hafs=("2:65", (11, 12))),
+        site=Site.shared("2:65", (11, 12)),
         read=through(),
         phonemes=("q i rˤ aˤ d a t a n", "x aˤ: s i ʔ i: n"),
         char_rules={"@fathatan": R("izhar")},
         sound_rules={"n[1]": R("izhar")},
     ),
-    # مِنْ عِلْمٍ
+    # Hafs: مِنْ عِلْمٍ
+    # Warsh: مِنْ عِلْمٍۖ
     Case(
         id="ayn",
-        site=Site(hafs=("4:157", (27, 28))),
+        site=Site.shared("4:157", (27, 28)),
         read=through(),
         phonemes=("m i n", "ʕ i l m"),
         char_rules={"ن": R("izhar")},
         sound_rules={"n": R("izhar")},
     ),
-    # شَىْءٍ عَلِيمٌ
+    # Hafs: شَىْءٍ عَلِيمٌ
+    # Warsh: شَےْءٍ عَلِيمٞۖ
     Case(
         id="kasratan",
-        site=Site(hafs=("2:29", (18, 19))),
+        site=Site.shared("2:29", (18, 19)),
         read=through(),
         phonemes=("ʃ a j ʔ i n", "ʕ a l i: m"),
         char_rules={"@kasratan": R("izhar")},
         sound_rules={"n": R("izhar")},
     ),
-    # قَدِيرٌ أَلَمْ
+    # Hafs: قَدِيرٌ
+    # Warsh: قَدِيرٌۖ
     Case(
         id="verse-seam",
-        site=Site(hafs=("2:106", (19,))),
+        site=Site.shared("2:106", (19,)),
         read=joining(),
         phonemes="q aˤ d i: rˤ u n",
         char_rules={"@dammatan": R("izhar")},
         sound_rules={"n": R("izhar")},
     ),
-    # ٱلدُّنْيَا
+    # Hafs: ٱلدُّنْيَا ۖ
+    # Warsh: اِ۬لدُّنْي۪اۖ
     Case(
         id="mutlaq-dunya",
-        site=Site(hafs=("2:85", (38,))),
+        site=Site.shared("2:85", (38,)),
         read=isolated(),
         phonemes="ʔ a dd u n j a:",
         char_rules={"ن": R("izhar")},
         sound_rules={"n": R("izhar")},
     ),
-    # بُنْيَانًا
+    # Hafs: بُنْيَـٰنًا
+    # Warsh: بُنْيَٰناٗ
     Case(
         id="mutlaq-bunyan",
-        site=Site(hafs=("37:97", (4,))),
+        site=Site.shared("37:97", (4,)),
         read=isolated(),
         phonemes="b u n j a: n a:",
         char_rules={"ن[1]": R("izhar")},
         sound_rules={"n[1]": R("izhar")},
     ),
-    # قِنْوَانٌ
+    # Hafs: قِنْوَانٌ
+    # Warsh: قِنْوَانٞ
     Case(
         id="mutlaq-qinwan",
-        site=Site(hafs=("6:99", (23,))),
+        site=Site.shared("6:99", (23,)),
         read=isolated(),
         phonemes="q i n w a: n",
         char_rules={"ن[1]": R("izhar")},
         sound_rules={"n[1]": R("izhar")},
     ),
-    # نَسْتَعِينُ
+    # Hafs: نَسْتَعِينُ
+    # Warsh: نَسْتَعِينُۖ
     Case(
         id="pausal-noon-after-haraka",
-        site=Site(hafs=("1:5", (4,))),
+        site=Site.shared("1:5", (4,)),
         read=isolated(),
         phonemes="n a s t a ʕ i: n",
         char_rules={"ن[2]": R("izhar")},
         sound_rules={"n[2]": R("izhar")},
     ),
-    # مُبِينٌ
+    # Hafs: مُبِينٌ
+    # Warsh: مُبِينٞۖ
     Case(
         id="pausal-noon-after-tanwin",
-        site=Site(hafs=("37:113", (10,))),
+        site=Site.shared("37:113", (10,)),
         read=isolated(),
         phonemes="m u b i: n",
         char_rules={"ن": R("izhar")},

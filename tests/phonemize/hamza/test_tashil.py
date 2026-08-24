@@ -6,7 +6,7 @@ from tests.support import Case, R, Site, assert_case, case_runs, isolated
 
 
 CASES = (
-    # ءَا۬عْجَمِىٌّ
+    # Hafs: ءَا۬عْجَمِىٌّ
     Case(
         id="aajamiyy-collapsed",
         site=Site(hafs=("41:44", (9,))),
@@ -16,7 +16,7 @@ CASES = (
         sound_rules={"ʔ[2]": R("tashil")},
         extra_phonemes=(),
     ),
-    # ءَا۬عْجَمِىٌّ
+    # Hafs: ءَا۬عْجَمِىٌّ
     Case(
         id="aajamiyy-rendered",
         site=Site(hafs=("41:44", (9,))),

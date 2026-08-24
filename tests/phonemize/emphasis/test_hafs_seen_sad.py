@@ -46,17 +46,17 @@ def _case(
 
 
 CASES = (
-    # يَبْصُطُ
+    # Hafs: وَيَبْصُۜطُ
     _case("yabsut", KhilafId.SEEN_SAD_YABSUT, "2:245", 14,
           "w a j a b Q s u tˤ Q", "w a j a b Q sˤ u tˤ Q", "seen"),
-    # بَصْطَةً
+    # Hafs: بَصْۜطَةً ۖ
     _case("bastah", KhilafId.SEEN_SAD_BASTAH, "7:69", 22,
           "b a s tˤ aˤ h", "b a sˤ tˤ aˤ h", "seen"),
-    # ٱلْمُصَيْطِرُونَ
+    # Hafs: ٱلْمُصَۣيْطِرُونَ
     _case("almusaytirun", KhilafId.SEEN_SAD_AL_MUSAYTIRUN, "52:37", 7,
           "ʔ a l m u s a j tˤ i rˤ u: n",
           "ʔ a l m u sˤ aˤ j tˤ i rˤ u: n", "saad"),
-    # بِمُصَيْطِرٍ
+    # Hafs: بِمُصَيْطِرٍ
     _case("bimusaytir", KhilafId.SEEN_SAD_BIMUSAYTIR, "88:22", 3,
           "b i m u s a j tˤ i r", "b i m u sˤ aˤ j tˤ i r", "saad"),
 )

@@ -6,46 +6,51 @@ from tests.support import Case, R, Site, assert_case, case_runs, isolated, joini
 
 
 CASES = (
-    # ٱلْحَمْدُ
+    # Hafs: ٱلْحَمْدُ
+    # Warsh: اِ۬لْحَمْدُ
     Case(
         id="before-dal",
-        site=Site(hafs=("1:2", (1,))),
+        site=Site.shared("1:2", (1,)),
         read=isolated(),
         phonemes="ʔ a l ħ a m d Q",
         char_rules={"م": R("izhar_shafawi")},
         sound_rules={"m": R("izhar_shafawi")},
     ),
-    # أَنْعَمْتَ
+    # Hafs: أَنْعَمْتَ
+    # Warsh: أَنْعَمْتَ
     Case(
         id="before-taa",
-        site=Site(hafs=("1:7", (3,))),
+        site=Site.shared("1:7", (3,)),
         read=isolated(),
         phonemes="ʔ a n ʕ a m t",
         char_rules={"م": R("izhar_shafawi")},
         sound_rules={"m": R("izhar_shafawi")},
     ),
-    # أَمْثَالَهُمْ فَإِذَا
+    # Hafs: أَمْثَـٰلَهُمْ
+    # Warsh: أَمْثَٰلَهُمْۖ
     Case(
         id="verse-seam",
-        site=Site(hafs=("47:3", (18,))),
+        site=Site.shared("47:3", (18,)),
         read=joining(),
         phonemes="ʔ a m θ a: l a h u m",
         char_rules={"م[2]": R("izhar_shafawi")},
         sound_rules={"m[2]": R("izhar_shafawi")},
     ),
-    # مَرْيَمَ
+    # Hafs: مَرْيَمَ
+    # Warsh: مَرْيَمَ
     Case(
         id="pausal-meem-after-haraka",
-        site=Site(hafs=("2:87", (12,))),
+        site=Site.shared("2:87", (12,)),
         read=isolated(),
         phonemes="m a rˤ j a m",
         char_rules={"م[2]": R("izhar_shafawi")},
         sound_rules={"m[2]": R("izhar_shafawi")},
     ),
-    # عَلِيمٌ
+    # Hafs: عَلِيمٌ
+    # Warsh: عَلِيمٞۖ
     Case(
         id="pausal-meem-after-tanwin",
-        site=Site(hafs=("2:29", (19,))),
+        site=Site.shared("2:29", (19,)),
         read=isolated(),
         phonemes="ʕ a l i: m",
         char_rules={"م": R("izhar_shafawi")},

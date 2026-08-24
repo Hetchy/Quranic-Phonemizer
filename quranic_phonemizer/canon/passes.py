@@ -187,6 +187,19 @@ def _check_skeleton(
         )
 
 
+def _apply_layl_lexeme(
+    reading: Reading, drafts, lexicon, scribe, selection
+) -> None:
+    del lexicon, scribe, selection
+    for span in word_spans(reading, drafts):
+        letters = [d.letter for d in span]
+        nuclei = [d.nucleus for d in span]
+        onsets = [d.onset for d in span]
+        for index in lexeme.unmarked_layl(letters, nuclei, onsets):
+            span[index].onset = Onset.GEMINATE
+            span[index].nucleus = Nucleus.short(Quality.A)
+
+
 def _apply_allah_lexeme(
     reading: Reading, drafts, lexicon, scribe, selection
 ) -> None:
@@ -200,6 +213,13 @@ def _apply_allah_lexeme(
         letters = [d.letter for d in span]
         nuclei = [d.nucleus for d in span]
         onsets = [d.onset for d in span]
+        for index in lexeme.contracted_divine_name(
+            letters, nuclei, onsets, lexicon
+        ):
+            span[index].onset = Onset.GEMINATE
+            span[index].nucleus = Nucleus.short(Quality.A)
+            onsets[index] = span[index].onset
+            nuclei[index] = span[index].nucleus
         for index in lexeme.divine_name(letters, nuclei, onsets, lexicon):
             span[index].annotations |= {Annotation.DIVINE_NAME}
         for index in lexeme.allah_long_a(letters, nuclei, onsets, lexicon):
@@ -273,10 +293,11 @@ def vocalised(span) -> str:
         )
     return "".join(out)
 
-#: The passes every riwayah runs, in order: two lexemes and one juncture. A
+#: The passes every riwayah runs, in order: lexemes then one juncture. A
 #: list rather than a hardcoded sequence in `build`, so a riwayah that reads
 #: a lexeme differently swaps the list instead of editing the builder.
 LEXEME_PASSES: tuple[LexemePass, ...] = (
+    _apply_layl_lexeme,
     _apply_allah_lexeme,
     _apply_joined_particles,
     connect_plural_meem,

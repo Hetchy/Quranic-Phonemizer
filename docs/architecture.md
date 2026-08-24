@@ -40,8 +40,8 @@ decorations; structural offsets; and per-word stop advice.
 
 The adapter extracts evidence but does not decide the canonical reading. A
 mark either carries a typed value or names a derivation that the canonical
-layer will run. Both shipped scripts use the same clustering code; their YAML
-inventories are the script-specific input.
+layer will run. Every shipped adapter uses the same clustering code; its YAML
+inventory and sequence projector are the script-specific input.
 
 ### Score: the canonical reading
 
@@ -220,24 +220,31 @@ Runtime resources are package data under
 what the data varies with:
 
 - `riwayat/hafs/corpus/` holds the packed source text and address metadata;
+- `riwayat/warsh/corpus/` holds the selected-source/public alignment;
 - `riwayat/hafs/scripts/` holds one total scalar inventory per shipped script;
+- `riwayat/warsh/scripts/` holds the King Fahd Warsh scalar inventory;
 - `riwayat/hafs/ledger.yaml` supplies authored canonical facts and script
   witnesses;
-- `riwayat/hafs/lexicon.yaml` holds canonical-skeleton lexical classes;
+- `shared/lexicon.yaml` holds canonical-skeleton Arabic lexical classes;
 - `riwayat/hafs/khilaf.yaml` defines the riwayah's selectable disagreements;
 - `shared/` holds morphology, rule letter tables, and letter-name spellings;
 - `render/ipa.yaml` holds the output alphabet shared across riwayat.
 
-[`quranic_phonemizer/corpus.py`](../quranic_phonemizer/corpus.py) owns packed corpus addressing and decoding. [`quranic_phonemizer/dataio.py`](../quranic_phonemizer/dataio.py) provides the strict YAML loader: duplicate keys, missing required keys, and unknown keys are errors at the relevant resource loaders.
+[`quranic_phonemizer/corpus.py`](../quranic_phonemizer/corpus.py) owns packed
+corpus decoding and aligned selected-source/public addressing. Aligned
+graphemes retain typed source-artifact locations while public lookup remains
+canonical. [`quranic_phonemizer/dataio.py`](../quranic_phonemizer/dataio.py)
+provides the strict YAML loader: duplicate keys, missing required keys, and
+unknown keys are errors at the relevant resource loaders.
 
-The current build packages Hafs with Uthmani and IndoPak scripts. The existing
-riwayah seam is explicit: `Riwayah` and `api.PACKAGES` enumerate shipped
-readings, while a package under `riwayat/` supplies resources, adapters,
-lexeme passes, and a bound `RuleSet`. The script seam is likewise explicit:
-`Script`, the riwayah's `SCRIPTS`, and a script inventory are closed lists;
-the shared adapter and builder consume their typed output. These are extension
-points in the current code, not evidence that another riwayah or script is
-already implemented.
+The current build packages Hafs with Uthmani and IndoPak scripts and the Warsh
+foundation with the selected King Fahd Uthmani script. The riwayah seam is
+explicit: `Riwayah` and `api.PACKAGES` enumerate shipped readings, while a
+package under `riwayat/` supplies resources, adapters, lexeme passes, and a
+bound `RuleSet`. The script seam is likewise explicit: `Script`, the
+riwayah's `SCRIPTS`, and a script inventory are closed lists; the shared
+adapter and builder consume their typed output. Warsh-specific classifiers
+and variant behavior remain separate implementation concerns.
 
 ## Enforced dependency direction
 

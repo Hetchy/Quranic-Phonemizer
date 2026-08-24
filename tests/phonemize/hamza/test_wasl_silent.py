@@ -11,18 +11,21 @@ def elision(
     words: tuple[int, int],
     phonemes: tuple[str, str],
     indopak_alif: str,
+    warsh_alif: str | None = None,
 ) -> Case:
     source = pick(
         hafs_uthmani={"ٱ": R("hamza_wasl_silent")},
         hafs_indopak={indopak_alif: R("hamza_wasl_silent")},
+        warsh_uthmani={warsh_alif or indopak_alif: R("hamza_wasl_silent")},
     )
     silent = pick(
         hafs_uthmani=("ٱ",),
         hafs_indopak=(indopak_alif,),
+        warsh_uthmani=(warsh_alif or indopak_alif,),
     )
     return Case(
         id=case_id,
-        site=Site(hafs=(ref, words)),
+        site=Site.shared(ref, words),
         read=through(),
         phonemes=phonemes,
         char_rules=source,
@@ -31,20 +34,23 @@ def elision(
 
 
 CASES = (
-    # ذَٰلِكَ ٱلْكِتَابُ
+    # Hafs: ذَٰلِكَ ٱلْكِتَـٰبُ
+    # Warsh: ذَٰلِكَ اَ۬لْكِتَٰبُ
     elision(
         "article", "2:2", (1, 2),
         ("ð a: l i k a", "l k i t a: b Q"), "ا",
     ),
-    # قَالَ ٱدْخُلُوا
+    # Hafs: قَالَ ٱدْخُلُوا۟
+    # Warsh: قَالَ اَ۟دْخُلُواْ
     elision(
         "verb", "7:38", (1, 2),
         ("q aˤ: l a", "d Q x u l u:"), "ا[2]",
     ),
-    # إِنَّ ٱبْنِى
+    # Hafs: إِنَّ ٱبْنِى
+    # Warsh: إِنَّ اَ۪بْنِے
     elision(
         "conventional-noun", "11:45", (6, 7),
-        ("ʔ i ñ a", "b Q n i:"), "ا[2]",
+        ("ʔ i ñ a", "b Q n i:"), "ا[2]", "ا",
     ),
 )
 

@@ -22,7 +22,7 @@ and route-dependent exceptions ([Al-Wafi, madd and qasr](https://islamweb.net/ar
 | `madd_lazim` | 6 | One long token with the lazim rule. | [Al-Wafi, madd before permanent sukun](https://islamweb.net/ar/library/content/245/13/%D8%A8%D8%A7%D8%A8-%D8%A7%D9%84%D9%85%D8%AF-%D9%88%D8%A7%D9%84%D9%82%D8%B5%D8%B1) |
 | `madd_arid_lissukun` | 2, 4, or 6 | One long token with the arid rule. | [Al-Nashr, route correlations at a stop](https://islamweb.net/ar/library/content/70/102/%D9%81%D8%B5%D9%84-%D9%81%D9%8A-%D9%82%D9%88%D8%A7%D8%B9%D8%AF-%D9%81%D9%8A-%D9%87%D8%B0%D8%A7-%D8%A7%D9%84%D8%A8%D8%A7%D8%A8-%D9%85%D9%87%D9%85%D8%A9) |
 | `madd_leen` at waqf | 2, 4, or 6 | The glide remains `/w/` or `/j/`; the rule records the pausal lengthening. | [Al-Wafi, ordinary leen at waqf](https://islamweb.net/ar/library/content/245/13/%D8%A8%D8%A7%D8%A8-%D8%A7%D9%84%D9%85%D8%AF-%D9%88%D8%A7%D9%84%D9%82%D8%B5%D8%B1) |
-| `madd_badal` | 2, 4, or 6 | The long token carries `madd_badal`; only an independently applicable lazim or muttasil classification overlaps it. | [Al-Nashr, madd after hamza](https://islamweb.net/ar/library/content/70/99/%D9%81%D8%B5%D9%84-%D9%81%D9%8A-%D9%88%D9%82%D9%88%D8%B9-%D8%AD%D8%B1%D9%81-%D8%A7%D9%84%D9%85%D8%AF-%D8%A8%D8%B9%D8%AF-%D8%A7%D9%84%D9%87%D9%85%D8%B2) |
+| `madd_badal` | 2, 4, or 6 | The long token carries `madd_badal`; independently applicable arid, lazim, or muttasil classifications overlap it. | [Al-Nashr, madd after hamza](https://islamweb.net/ar/library/content/70/99/%D9%81%D8%B5%D9%84-%D9%81%D9%8A-%D9%88%D9%82%D9%88%D8%B9-%D8%AD%D8%B1%D9%81-%D8%A7%D9%84%D9%85%D8%AF-%D8%A8%D8%B9%D8%AF-%D8%A7%D9%84%D9%87%D9%85%D8%B2), [route correlations at a stop](https://islamweb.net/ar/library/content/70/102/%D9%81%D8%B5%D9%84-%D9%81%D9%8A-%D9%82%D9%88%D8%A7%D8%B9%D8%AF-%D9%81%D9%8A-%D9%87%D8%B0%D8%A7-%D8%A7%D9%84%D8%A8%D8%A7%D8%A8-%D9%85%D9%87%D9%85%D8%A9) |
 | `madd_leen_mahmuz` | 4 or 6 | The same `/w/` or `/j/` token carries the leen-mahmuz rule in wasl and waqf. | [Al-Wafi, leen followed by hamza](https://islamweb.net/ar/library/content/245/13/%D8%A8%D8%A7%D8%A8-%D8%A7%D9%84%D9%85%D8%AF-%D9%88%D8%A7%D9%84%D9%82%D8%B5%D8%B1) |
 
 The five plural `سَوْءَات` sites are the closed combined exception. Their
@@ -50,7 +50,10 @@ leen-mahmuz, but the other authenticated al-Azraq faces remain domain facts
   replaced from the preceding pronounced vowel; that long has
   `ibdal_hamza + madd_tabii` without `madd_badal`.
 - Ordinary `ءَادَمَ` has only `madd_badal` on `/a:/`. A badal long overlaps
-  only with an independently applicable `madd_lazim` or `madd_muttasil`.
+  with independently applicable `madd_arid_lissukun`, `madd_lazim`, or
+  `madd_muttasil`. At waqf on `مَـَٔابٖۖ`, selected source `13:30:8`,
+  canonical `13:29:8`, `/a:/` therefore has
+  `madd_badal + madd_arid_lissukun`.
 - A stopped fathatan long has `madd_iwad + madd_tabii`; iwad names the
   exchange and tabii names the resulting ordinary long structure.
 - A joined pronoun-haa long has `madd_silah` plus `madd_tabii`, or

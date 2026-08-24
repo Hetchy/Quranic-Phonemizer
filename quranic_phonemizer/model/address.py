@@ -13,6 +13,7 @@ class Riwayah(StrEnum):
     """Closed. Supporting a riwayah needs code, fixtures and packaged data."""
 
     HAFS = "hafs"
+    WARSH = "warsh"
 
 
 class UnknownRiwayah(ValueError):
@@ -31,7 +32,7 @@ def check_riwayah(riwayah: str) -> Riwayah:
 
 
 class Script(StrEnum):
-    """Closed per riwayah. Both members below are *Hafs* scripts."""
+    """Closed script styles; each riwayah packages only the styles it owns."""
 
     UTHMANI = "uthmani"
     INDOPAK = "indopak"
@@ -44,6 +45,7 @@ class VerseRef:
 
     def __str__(self) -> str:
         return f"{self.surah}:{self.ayah}"
+
 
 @dataclass(frozen=True, slots=True, order=True)
 class Location:
@@ -59,6 +61,28 @@ class Location:
 
     def __str__(self) -> str:
         return f"{self.surah}:{self.ayah}:{self.word}"
+
+
+@dataclass(frozen=True, slots=True, order=True)
+class SourceLocation:
+    """A word address in one pinned source artifact, never a public ref."""
+
+    artifact: str
+    surah: int
+    ayah: int
+    word: int
+
+    def __str__(self) -> str:
+        return f"{self.artifact}:{self.surah}:{self.ayah}:{self.word}"
+
+
+@dataclass(frozen=True, slots=True, order=True)
+class SourceGraphemeRef:
+    """One scalar's offset inside its exact selected-source word."""
+
+    location: SourceLocation
+    offset: int
+
 
 @dataclass(frozen=True, slots=True, order=True)
 class SlotId:
