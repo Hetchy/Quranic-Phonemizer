@@ -4,9 +4,12 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from quranic_phonemizer.model.address import Location, Script
 from quranic_phonemizer.model.canon import CanonLetter, Nucleus, Onset, Quality
 from quranic_phonemizer.model.inscription import SlotFact
+from quranic_phonemizer.orthography.inventory import InventoryError
 from quranic_phonemizer.riwayat.warsh.resources import corpus, script_adapter
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -69,6 +72,16 @@ def test_a_bare_glide_after_the_wasl_sequence_is_the_silenced_qata_hamza():
 
     assert entry.text[3] == "ي"
     assert second.letter is CanonLetter.HAMZA
+
+
+def test_an_unreviewed_initial_alif_scalar_fails_projection():
+    # U+0671 is not a scalar of this source; a rewritten onset must fail
+    # rather than receive a best-effort start.
+    location = Location(1, 2, 1)
+    with pytest.raises(InventoryError):
+        script_adapter(Script.UTHMANI).read(
+            location.verse, ((location, "ٱلْحَمْدُ"),)
+        )
 
 
 def test_alternate_tanwin_supplies_the_same_canonical_nunation_fact():

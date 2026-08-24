@@ -82,6 +82,34 @@ assimilation, and these words have none.
 word, which is what proves the yaa is a consonant. Stopping gives `-ay`; the
 oracle's `-aa` is the nominative of a word standing in the genitive.
 
+## Warsh wasl and iltiqa registers
+
+`tests/conformance/test_warsh_registers.py` asserts the reviewed counts from
+`docs/warsh/research/v2/wasl-hamza.md` and `iltiqa.md`: the canonical start
+register (13,480 onsets, 11,982 A / 1,097 I / 401 U), the sixteen started
+silent-qata forms, the 38-row damm repair register, and the generated tanwin
+repair family (44 sites, 40 I / 4 U). The runtime start quality is supplied
+by the source wasl mark; the register test reconciles every supplied mark
+against the canonical derivation, whose closed disagreements are the passive
+`اَ۟سْتُحِقَّ` delta, the temporary-damm `اتقوا` family, the passive
+`اَ۟تُّبِعُواْ`, and the Warsh-only wasl readings of `اتبع` and `اسر`.
+
+Known residue deferred to later verticals:
+
+- Article words carrying internal naql (`وَالَارْضِ` and family) do not yet
+  project their wasl onset; the naql vertical owns them, and the canonical
+  register carries their count meanwhile.
+- The `التي` family is written without its geminate lam in this source and
+  currently reads a single lam; its start quality is already the article's A.
+- The joined outcomes of the sixteen silent-qata words use the connected
+  single-hamza chapter and land with that vertical; only their started forms
+  are asserted here.
+- The general 1,665-site `iltiqa_haraka` partition (770 A / 381 I / 514 U)
+  remains a documented research invariant. Its tanwin family and damm rows
+  are executable above; the lexical-host family is supplied per site by the
+  source linking haraka and still needs a morphology-backed generator to be
+  counted mechanically.
+
 ## Verse mode
 
 97.850% counts a word wrong when a sound merged across a boundary is credited
