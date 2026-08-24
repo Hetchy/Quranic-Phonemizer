@@ -103,13 +103,13 @@ class Pen:
 
     def pausal_hamza(self, previous: Quality | None) -> str:
         """Write a sakin final hamza on the seat licensed before it."""
-        role = {
+        seat_role = {
             Quality.A: "hamza_above",
             Quality.E: "hamza_above",
             Quality.U: "hamza_waw",
             Quality.I: "hamza_yaa",
         }.get(previous)
-        return self.roles.get(role, self.letter(CanonLetter.HAMZA))
+        return self.roles.get(seat_role, self.letter(CanonLetter.HAMZA))
 
 
 def pen_for(inventory: Inventory, names: dict | None = None) -> Pen:

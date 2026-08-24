@@ -9,13 +9,11 @@ from dataclasses import replace
 
 from ...render.alphabet import packaged_alphabet
 from ...model.inscription import StopAdvice
-from ...model.performance import Aspect, Vowel
-from ...model.canon import Quality
 from ...session import Session
 from ..build import build_bundle
 from ..dtos import Boundary, Merger
 from ..facts import analyse
-from ..ids import CellColumnId, OccurrenceId, SoundId
+from ..ids import CellColumnId
 from ..inscription import inscribe
 from ..source import build_source_view
 from ..source_dtos import Character, CharacterKind, MergerPlacement, SourceView
@@ -28,7 +26,6 @@ from .dtos import (
     CellBridge,
     CellColumn,
     CellRole,
-    CellSide,
     CellStatus,
     CellTier,
     CellSound,
@@ -36,6 +33,7 @@ from .dtos import (
     CellWord,
 )
 from .transform import transform_words
+from .boundary_hosting import move_boundary_sounds
 from .projection import project_words
 from .projection_semantics import keep_madd_rules_on_carriers, separate_tanween_vowel_colours
 from .transform_laws import validate_transformed
@@ -232,115 +230,20 @@ def _exclusive_groups(boundaries: tuple[Boundary, ...]) -> dict[int, int]:
     return out
 
 
-_VOWEL_ROLE = {Quality.A: "fatha", Quality.U: "damma", Quality.I: "kasra"}
-
-
-def _boundary_column(new_id, owner, sound, occurrence, value, pen):
-    anchor = owner.source_unit_ids[0] if owner.source_unit_ids else owner.anchor_unit_id
-    return CellColumn(
-        id=CellColumnId(new_id), role=CellRole.HARAKA,
-        text=pen.role(_VOWEL_ROLE[value.quality]),
-        source_character_ids=(), source_unit_ids=(),
-        tier=CellTier.BELOW if value.quality is Quality.I else CellTier.ABOVE,
-        attached_to_column_id=None, status=CellStatus.INSERTED,
-        rule_occurrence_ids=(OccurrenceId(occurrence),), silence=None,
-        variant_id=None, variant_choice=None, owned_sound_ids=(SoundId(sound),),
-        presented_sound_ids=(), anchor_unit_id=anchor, side=CellSide.AFTER,
+def _words(session, bundle, source, facts, insc, spelling, pen, extra_phonemes):
+    words = build_cell_words(
+        session, bundle=bundle, view=source, facts=facts, insc=insc,
+        pen=pen if spelling == "transformed" else None,
     )
-
-
-def _boundary_hosted(facts, bundle):
-    boundary_of = {
-        occ.id.value: occ.boundary_ids[0]
-        for occ in bundle.rule_occurrences if occ.boundary_ids
-    }
-    boundaries = {b.id: b for b in bundle.boundaries}
-    return [
-        edge for edge in facts.hosts
-        if edge.by in boundary_of and edge.aspect is Aspect.VOWEL
-        and isinstance(facts.sounds[edge.sound].value, Vowel)
-        and not facts.sounds[edge.sound].value.long
-        and boundaries[boundary_of[edge.by]].before is not None
-        and facts.word_of_slot[edge.slots[0].ordinal]
-            == boundaries[boundary_of[edge.by]].before.value
-    ], boundary_of
-
-
-def _remove_boundary_sound(word, owner, edge):
-    drop_owner = (
-        owner.status is CellStatus.INSERTED
-        and not owner.source_character_ids
-        and not owner.source_unit_ids
-        and owner.owned_sound_ids == (SoundId(edge.sound),)
+    if spelling != "transformed":
+        return words
+    if pen is None:
+        raise ValueError("the transformed spelling needs a pen")
+    words = transform_words(
+        words, session, source, pen, extra_phonemes=extra_phonemes,
+        facts=facts, insc=insc,
     )
-    columns = tuple(
-        replace(c,
-            owned_sound_ids=tuple(
-                s for s in c.owned_sound_ids if s.value != edge.sound
-            ),
-            presented_sound_ids=tuple(
-                s for s in c.presented_sound_ids if s.value != edge.sound
-            ),
-            rule_occurrence_ids=tuple(
-                o for o in c.rule_occurrence_ids if o.value != edge.by
-            ),
-        )
-        for c in word.columns if not (drop_owner and c.id == owner.id)
-    )
-    groups = tuple(
-        replace(group,
-            column_ids=(
-                tuple(c for c in group.column_ids if c != owner.id)
-                if drop_owner else group.column_ids
-            ),
-            sound_ids=tuple(
-                s for s in group.sound_ids if s.value != edge.sound
-            ),
-        )
-        for group in word.groups
-        if not drop_owner or group.column_ids != (owner.id,)
-    )
-    runs = tuple(
-        replace(run, column_ids=tuple(c for c in run.column_ids if c != owner.id))
-        if drop_owner else run
-        for run in word.runs
-    )
-    return replace(
-        word, columns=columns,
-        sounds=tuple(s for s in word.sounds if s.sound_id.value != edge.sound),
-        groups=groups, runs=runs,
-    )
-
-
-def _move_boundary_sounds(words, boundaries, facts, bundle, pen):
-    hosted, boundary_of = _boundary_hosted(facts, bundle)
-    next_id = 1 + max(
-        c.id.value
-        for c in (
-            *(c for w in words for c in w.columns),
-            *(c for b in boundaries for c in b.columns),
-        )
-    )
-    for edge in hosted:
-        owner = next(c for w in words for c in w.columns
-                     if SoundId(edge.sound) in c.owned_sound_ids)
-        cell = next(c for w in words for c in w.sounds
-                    if c.sound_id.value == edge.sound)
-        boundary_id = boundary_of[edge.by]
-        column = _boundary_column(
-            next_id, owner, edge.sound, edge.by, facts.sounds[edge.sound].value, pen
-        )
-        next_id += 1
-        words = tuple(
-            _remove_boundary_sound(w, owner, edge)
-            if owner in w.columns else w
-            for w in words
-        )
-        boundaries = tuple(replace(b,
-            columns=(*b.columns, column),
-            sounds=(*b.sounds, replace(cell, column_ids=(column.id,))),
-        ) if b.boundary_id == boundary_id else b for b in boundaries)
-    return words, boundaries
+    return project_words(words, facts, source, insc, pen)
 
 
 def build_cell_view(
@@ -363,18 +266,9 @@ def build_cell_view(
         extra_phonemes=extra_phonemes, facts=facts, insc=insc,
     )
     source = build_source_view(session, bundle=bundle, facts=facts, insc=insc)
-    words = build_cell_words(
-        session, bundle=bundle, view=source, facts=facts, insc=insc,
-        pen=pen if spelling == "transformed" else None,
+    words = _words(
+        session, bundle, source, facts, insc, spelling, pen, extra_phonemes
     )
-    if spelling == "transformed":
-        if pen is None:
-            raise ValueError("the transformed spelling needs a pen")
-        words = transform_words(
-            words, session, source, pen, extra_phonemes=extra_phonemes,
-            facts=facts, insc=insc,
-        )
-        words = project_words(words, facts, source, insc, pen)
     words = separate_tanween_vowel_colours(words, facts)
     words = keep_madd_rules_on_carriers(words, facts)
     placement_of = {p.merger_id.value: p for p in source.merger_placements}
@@ -395,7 +289,7 @@ def build_cell_view(
         ),
     )
     if spelling == "transformed":
-        words, boundaries = _move_boundary_sounds(
+        words, boundaries = move_boundary_sounds(
             words, boundaries, facts, bundle, pen
         )
     view = CellView(words=words, boundaries=boundaries)

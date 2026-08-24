@@ -47,10 +47,7 @@ class NoonSakinah:
         if not is_performed_quiescent(slot, plan, at):
             return None
         word = near.word_of(at)
-        clear = word is not None and near.last_of_word(at) and (
-            boundaries.stopped_on(word)
-            or boundaries.after(word) is Junction.SAKT
-        )
+        clear = self._clear_at_boundary(near, at, word, boundaries)
         opening = self._opening_wasl(near, at, boundaries)
         if opening is not None:
             choice = self.opening_wasl.choose(near.score.selection)
@@ -67,6 +64,13 @@ class NoonSakinah:
                 return _classification(Rule.IZHAR, at, None)
             return None
         return self._classify(near, at, following)
+
+    @staticmethod
+    def _clear_at_boundary(near, at, word, boundaries) -> bool:
+        return word is not None and near.last_of_word(at) and (
+            boundaries.stopped_on(word)
+            or boundaries.after(word) is Junction.SAKT
+        )
 
     def _classify(self, near, at, following):
         match self.followers.of(following.letter):
