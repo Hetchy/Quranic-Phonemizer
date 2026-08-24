@@ -226,6 +226,16 @@ def test_an_internal_stop_has_an_empty_stop_sign(hafs):
     assert sign.text == ""
 
 
+def test_a_clipped_range_end_is_not_a_verse_end(hafs):
+    view, _, _ = _build(hafs, "35:29:1-35:29:10", {})
+    assert view.boundaries[-1].verse_end is None
+
+
+def test_an_actual_verse_end_is_marked_in_a_clipped_range(hafs):
+    view, _, _ = _build(hafs, "35:29:10-35:29:16", {})
+    assert view.boundaries[-1].verse_end == 29
+
+
 def test_an_iltiqa_boundary_carries_no_bridge(hafs):
     """The connecting vowel of the meem into the divine name is an insertion,
     not a merger, so its boundary carries no bridge."""

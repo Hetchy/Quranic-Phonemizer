@@ -134,6 +134,7 @@ def _boundaries(
     column_of_unit: dict[int, CellColumnId],
     shared: dict[int, CellSound],
     next_id: int,
+    verse_ends: frozenset[str] | None,
 ) -> tuple[CellBoundary, ...]:
     bridges: dict[int, list[CellBridge]] = {}
     for merger in bundle.mergers:
@@ -156,7 +157,7 @@ def _boundaries(
             columns=(column,),
             bridges=tuple(bridges.get(boundary.id.value, ())),
             state=boundary.state,
-            verse_end=_verse_end(boundary, words),
+            verse_end=_verse_end(boundary, words, verse_ends),
             exclusive_group=exclusive.get(boundary.id.value),
         ))
     return tuple(out)
@@ -198,12 +199,18 @@ def _ayah(ref: str) -> int:
     return int(ref.split(":", 2)[1])
 
 
-def _verse_end(boundary: Boundary, words) -> int | None:
+def _verse_end(
+    boundary: Boundary, words, verse_ends: frozenset[str] | None
+) -> int | None:
     if boundary.before is None:
         return None
     before = words[boundary.before.value]
     if boundary.after is None:
-        return _ayah(before.ref)
+        return (
+            _ayah(before.ref)
+            if verse_ends is None or before.ref in verse_ends
+            else None
+        )
     after = words[boundary.after.value]
     return _ayah(before.ref) if _ayah(before.ref) != _ayah(after.ref) else None
 
@@ -374,7 +381,17 @@ def build_cell_view(
     words, shared = _extract_merger_sounds(words, bundle.mergers)
     words = _word_bridges(words, bundle.mergers, shared)
     boundaries = _boundaries(
-        bundle, source, placement_of, column_of_unit, shared, next_column_id(words)
+        bundle,
+        source,
+        placement_of,
+        column_of_unit,
+        shared,
+        next_column_id(words),
+        (
+            None
+            if session.verse_ends is None
+            else frozenset(str(location) for location in session.verse_ends)
+        ),
     )
     if spelling == "transformed":
         words, boundaries = _move_boundary_sounds(
