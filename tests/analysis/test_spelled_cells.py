@@ -89,6 +89,12 @@ def test_ain_has_only_madd_lazim_on_its_ya(hafs):
     assert all("madd_leen" not in rules for rules in tagged.values())
 
 
+def test_consecutive_openings_share_the_span_slot_space(hafs):
+    view, _ = _build(hafs, "42:1-42:2")
+    assert len(view.words) == 2
+    assert tuple(len(word.runs) for word in view.words) == (2, 3)
+
+
 def test_emphatic_fatha_and_its_carrier_receive_tafkheem(hafs):
     view, bundle = _build(hafs, "50:1")
     names = _rules(bundle)
