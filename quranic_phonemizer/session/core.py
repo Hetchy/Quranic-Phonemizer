@@ -37,6 +37,8 @@ class Session:
     letter_khilaf_sites: dict[Location, KhilafId] = field(default_factory=dict)
     """Where the reading's authored data sites a per-location letter khilaf,
     for a projection to tag; empty when a caller resolves without one."""
+    verse_ends: frozenset[Location] | None = None
+    """Actual corpus verse-final words touched by this request."""
 
 
 def phonemize_request(
@@ -70,4 +72,12 @@ def phonemize_request(
             site.location: site.khilaf
             for site in recitation.khilaf.canonical.letters
         },
+        verse_ends=frozenset(
+            Location(
+                verse.surah,
+                verse.ayah,
+                recitation.corpus.surah_info[str(verse.surah)][verse.ayah - 1],
+            )
+            for verse in {location.verse for location in locations}
+        ),
     )
