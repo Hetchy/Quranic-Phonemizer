@@ -42,6 +42,11 @@ CASES = (
              hafs_indopak={"@kasra[1]": R("iltiqa_shortening")},
          ),
          sound_rules={"i": R("iltiqa_shortening")}),
+    # Warsh: فِے اِ۬لسَّبْتِ
+    Case(id="long-i-warsh", site=Site(warsh=("2:65", (6, 7))), read=through(),
+         phonemes=("f i", "ss a b Q t"),
+         char_rules={"@kasra[1]": R("iltiqa_shortening")},
+         sound_rules={"i": R("iltiqa_shortening")}),
     # Hafs: قَالُوا۟ ٱدْعُ
     # Warsh: قَالُواْ اُ۟دْعُ
     Case(id="long-u", site=Site.shared("2:68", (1, 2)), read=through(),
@@ -58,6 +63,15 @@ CASES = (
                           phonemes=("w a ʕ a m i l u:", "ʔ a sˤsˤ aˤ: l i ħ a: t i"),
                           absent_char_rules={"و[2]": R("iltiqa_shortening")}),
     }),
+    # Hafs: وَمِنَ ٱلنَّاسِ
+    # Warsh: وَمِنَ اَ۬لنَّاسِ
+    Case(id="lexical-fatha-host", site=Site.shared("2:8", (1, 2)), read=through(),
+         phonemes=("w a m i n a", "ñ a: s"),
+         char_rules=pick(
+             hafs_uthmani={"ٱ": R("hamza_wasl_silent")},
+             hafs_indopak={"ا[1]": R("hamza_wasl_silent")},
+             warsh_uthmani={"ا[1]": R("hamza_wasl_silent")},
+         )),
     # Hafs: قُمِ ٱلَّيْلَ
     # Warsh: قُمِ اِ۬ليْلَ
     Case(id="meem-repair", site=Site.shared("73:2", (1, 2)), read=through(),
@@ -87,7 +101,8 @@ CASES = (
          phonemes=("j a w m a ʔ i ð i n i", "l ħ a qq Q"),
          sound_rules={"i[3]": R("iltiqa_haraka")}),
     # Hafs: أَنفُسَكُمُ ۖ ٱلْيَوْمَ
-    Case(id="plural-meem", site=Site(hafs=("6:93", (34, 35))), read=through(),
+    # Warsh: أَنفُسَكُمُۖ اُ۬لْيَوْمَ
+    Case(id="plural-meem", site=Site.shared("6:93", (34, 35)), read=through(),
          phonemes=("ʔ a ŋ f u s a k u m u", "l j a w m"),
          char_rules=_chars(None, None, "ا[2]")),
 )

@@ -5,6 +5,34 @@ import pytest
 from tests.support import Case, R, Site, assert_case, case_runs, isolated, pick
 
 
+def qata_start_case(
+    case_id: str,
+    ref: str,
+    word: int,
+    phonemes: str,
+    long_vowel: str,
+    warsh_carrier: str,
+) -> Case:
+    """Ibtidaa on a wasl onset followed by a silent qata hamza: the qata
+    hamza is replaced by a long vowel of the helping-vowel quality."""
+    start = "hamza_wasl_kasra" if long_vowel.startswith("i") else "hamza_wasl_damma"
+    return Case(
+        id=case_id,
+        site=Site.shared(ref, (word,)),
+        read=isolated(),
+        phonemes=phonemes,
+        char_rules=pick(
+            hafs_uthmani={
+                "ٱ": R(start),
+                "ئ" if warsh_carrier == "ي" else "ؤ": R("ibdal_hamza"),
+            },
+            hafs_indopak={"ا": R(start), "@hamza_mark": R("ibdal_hamza")},
+            warsh_uthmani={"ا": R(start), warsh_carrier: R("ibdal_hamza")},
+        ),
+        sound_rules={"ʔ": R(start), long_vowel: R("ibdal_hamza")},
+    )
+
+
 def wasl_case(
     case_id: str,
     ref: str,
@@ -85,6 +113,50 @@ CASES = (
     # Hafs: ٱسْمُهُۥ
     # Warsh: اَ۪سْمُهُۥ
     wasl_case("ism", "2:114", 10, "ʔ i s m u h"),
+    # Hafs: ٱسْتَحَقَّ
+    # Warsh: اَ۟سْتُحِقَّ
+    Case(
+        id="warsh-passive-delta",
+        site=Site.shared("5:107", (12,)),
+        read=isolated(),
+        phonemes=pick(
+            hafs="ʔ i s t a ħ a qq Q",
+            warsh="ʔ u s t u ħ i qq Q",
+        ),
+        char_rules=pick(
+            hafs_uthmani={"ٱ": R("hamza_wasl_kasra")},
+            hafs_indopak={"ا": R("hamza_wasl_kasra")},
+            warsh_uthmani={"ا": R("hamza_wasl_damma")},
+        ),
+        sound_rules=pick(
+            hafs={"ʔ": R("hamza_wasl_kasra")},
+            warsh={"ʔ": R("hamza_wasl_damma")},
+        ),
+    ),
+    # Warsh: اُ۪تَّقُواْ
+    Case(
+        id="temporary-damm-taqwa",
+        site=Site(warsh=("2:278", (4,))),
+        read=isolated(),
+        phonemes="ʔ i tt a q u:",
+        char_rules={"ا[1]": R("hamza_wasl_kasra")},
+        sound_rules={"ʔ": R("hamza_wasl_kasra")},
+    ),
+    # Hafs: ٱئْتُونِى
+    # Warsh: اُ۪يتُونِے
+    qata_start_case(
+        "silent-qata-iituni", "10:79", 3, "ʔ i: t u: n i:", "i:[1]", "ي",
+    ),
+    # Hafs: ٱئْذَن
+    # Warsh: اُ۪يذَن
+    qata_start_case(
+        "silent-qata-iidhan", "9:49", 4, "ʔ i: ð a n", "i:", "ي",
+    ),
+    # Hafs: ٱؤْتُمِنَ
+    # Warsh: اِ۟وتُمِنَ
+    qata_start_case(
+        "silent-qata-uutumina", "2:283", 16, "ʔ u: t u m i n", "u:", "و",
+    ),
 )
 
 
