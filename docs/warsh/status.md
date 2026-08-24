@@ -64,8 +64,18 @@ that a decision is ready to implement, not that its runtime vertical exists.
   modeled dimensions, each riwayah's complete default vector must remain a
   coherent popular baseline, even though arbitrary explicit overrides are
   accepted.
-- Script-specific sequences are normalized in `orthography/`. Raw Unicode
-  marks may attest a reading but do not decide a tajweed rule.
+- Warsh is single-script by decision: the King Fahd corpus is the only
+  supported Warsh script, and no second-script generality is required. A
+  reviewed mark-sequence family may therefore directly supply the canonical
+  fact it writes: wasl start quality, inclination-bearing vowel quality,
+  latent naql structure, joined-only slots, and pausal-alif shapes. Script-
+  specific sequences remain normalized in `orthography/`; rules still classify
+  canonical facts, an unreviewed sequence still fails projection, and the
+  research-derived predicates and register counts in `research/v2/` become
+  conformance reconciliation rather than required runtime derivations. Weights,
+  selector faces, and boundary-plan-dependent performance stay outside the
+  script: the corpus writes one default joined reading and carries no emphasis
+  marks.
 - Wasl, waqf, and ibtidaa remain explicit boundary states.
 - Closed lexical exceptions belong in reviewed authored data.
 - Rule occurrences name acted-on units, sounds actually classified or changed,
@@ -160,22 +170,33 @@ completion requires recounting the final collected semantic tree.
 ## Delivery sequence
 
 Exact PR boundaries may change, but each unit must remain independently
-reviewable:
+reviewable. Items 1 and 2 are complete; the remaining agreed grouping is:
 
-1. Audit and reorganize the existing tests.
+1. Audit and reorganize the existing tests. Complete.
 2. The Warsh source artifact, full source-to-canonical alignment, source
    provenance, script adapter, package, and vetted shared-rule tests form the
    completed foundation. No Warsh-specific classifier belongs to this unit.
-3. Complete the shared model foundations for inclination qualities,
-   riwayah-scoped emitted-rule declarations, rule attribution, effective madd
-   classification, and neutral joined-only longs.
-4. Add narrow fixed-rule vertical PRs, with failing cases first: inclination;
-   hamza, naql, ibdal, and tashil; raa; lam and taghliz; joined-only vowel
-   phenomena; madd classifications; and remaining lexical differences.
+3. Model foundation, one PR: classifier `emits` declarations and a
+   per-riwayah `tajweed_rules` derived from the bound sets; TAQLIL and KUBRA
+   as typed qualities with the riwayah-owned kubra fallback; the neutral
+   joined-only-long shape replacing `is_silah`. The `iltiqa_haraka` rename and
+   the public `tajweed_rules(riwayah)` entry point already exist.
+4. Vertical PRs, failing cases first, in dependency order:
+   wasl plus iltiqa (registers, U subregister, silent-qata starts);
+   naql; hamza core (generic ibdal/tashil primitives plus single hamza);
+   madd badal plus leen mahmuz; hamza meetings; joined-only and pausal shapes
+   (mim al-jam, yaa-zawaid, seven alifs in one mark-driven PR); inclination;
+   lam taghliz; raa. Inclination precedes lam taghliz, which precedes raa,
+   because of the coupled owner and the inclination-created light raa.
 5. Run full-corpus attribution and default-profile conformance checks for both
-   Hafs and Warsh.
+   Hafs and Warsh. This unit also owns two projection gates: the analysis cell
+   grid builds for every Warsh corpus word with no unowned sound, unknown
+   glyph, or orphan cell; and every retained Warsh scalar family reaches a
+   correct `analysis/cells` column, so the published result is directly
+   consumable by the phonemizer web inspector without further work.
 6. Add the public variant catalogue and selectable behavior last, colocated
-   with the semantic tests that own each phenomenon.
+   with the semantic tests that own each phenomenon, split into two or three
+   PRs by owner family rather than one catch-all.
 7. Merge completed workstreams into `feat/warsh-phonemizer`. Its eventual PR
    to `main` should give a high-level overview and link the constituent PRs.
 

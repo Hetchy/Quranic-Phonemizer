@@ -87,9 +87,15 @@ Projection answers only these questions:
    lexical unit?
 4. Which exact source glyphs own the resulting canonical fact?
 
-It does not answer whether a raa is light, whether a hamza undergoes naql,
-whether an alif is taqlil, or which madd classification applies. Those outcomes
-are derived from canonical content, boundaries, riwayah data, and variants.
+Because Warsh is single-script by decision, a reviewed sequence family may
+answer question 2 richly: it may supply the wasl start quality, an
+inclination-bearing nucleus quality, latent naql structure, a joined-only
+slot, or a pausal-alif shape directly, with the research-derived predicates
+and counts kept as conformance reconciliation. Projection still does not
+answer whether a raa or lam is light, which selector face applies, which madd
+classification applies, or any boundary-plan-dependent performance such as
+qata restoration or wasl elision. Those outcomes are derived from canonical
+content, boundaries, riwayah data, and variants.
 
 ## Projection classes
 
@@ -150,10 +156,12 @@ U+06EA is overloaded in this source:
 - a small residue has special contexts requiring explicit fixtures.
 
 It therefore never means `TAQLIL` or `KUBRA` by scalar identity. After the
-adapter has excluded the wasl sequence family, a reviewed vowel-quality
-sequence may evidence an inclination-bearing nucleus. The Warsh inclination
-classifier still decides fath, taqlil, or kubra from the domain class and
-authored data. The mark then validates and aligns to that decision.
+adapter has excluded the wasl sequence family and the explicit residue
+fixtures, a reviewed vowel-quality sequence supplies the inclination-bearing
+nucleus quality directly. Named registers, coupled owners, and public
+selectors still override or own their sites, and the domain predicates in
+[`inclination.md`](inclination.md) remain the conformance reconciliation for
+the supplied set.
 
 The v1 `imalah-classification.md` file classified every word containing U+06EA
 and is retained only as historical research. It is not a pronunciation
@@ -252,10 +260,10 @@ differences become ordinary canonical letters and vowels through projection;
 they do not require a prose patch table or a rule named after Hafs-versus-Warsh
 difference.
 
-Closed pronunciation facts not recoverable from the written sequence belong in
-Warsh authored data. The source spelling may attest them, but a second script
-for the same riwayah must be able to build the same Score without copying this
-source's Unicode conventions.
+Closed pronunciation facts not written by the source at all, such as raa and
+lam weights and selector faces, belong in Warsh authored data. No second Warsh
+script is planned, so the adapter may key its supplied facts to this source's
+reviewed Unicode conventions.
 
 ## Adapter acceptance checks
 
@@ -275,6 +283,10 @@ The Warsh adapter is complete only when all of the following hold:
 - every inclination, wasl, ibdal, tashil, naql, mim-al-jam, and yaa-zawaid
   witness reconciles with its domain register;
 - rebuilding a recited spelling never requires a rule to inspect source glyphs;
+- every retained scalar family projects into a correct `analysis/cells`
+  column, including alternate tanwin, small carriers, mini-mim, the U+06EA
+  families, and yeh barree, so the inspector cell grid needs no separate
+  mapping layer;
 - fixed lexical omissions create neither ghost units nor synthetic rules; and
 - an unsupported sequence fails with its source location and scalars instead of
   receiving a best-effort pronunciation.

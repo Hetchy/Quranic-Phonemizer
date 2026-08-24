@@ -138,8 +138,10 @@ without a host repair.
   vowel and owns that transformation; it emits no iltiqa rule.
 - A source stop sign does not suppress the repair. Only the explicit boundary
   plan does.
-- The alternate Warsh tanwin mark and a written A/I/U are projection evidence.
-  Neither may select the rule or its quality.
+- Under the single-script decision, the reviewed linking-haraka family may
+  supply the repair quality per site; the predicate, the 1,665 partition, and
+  the 38 U rows remain its conformance reconciliation. The repair itself stays
+  boundary-dependent: an explicit stop suppresses it regardless of the mark.
 
 Tests should derive the complete register, assert the 1,665 total and quality
 partition, assert all 38 U-over-I rows, and fail on any source attestation that

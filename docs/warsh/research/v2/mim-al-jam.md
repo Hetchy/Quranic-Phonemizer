@@ -108,10 +108,10 @@ lexical predicates. Before hamzat wasl the authored result is instead short
 `/u/`, so the long shape is not instantiated.
 
 The selected King Fahd snapshot spells 888 plural-mim qata sites with an
-ending equivalent to `مُۥٓ`. That mark is strong attestation but not the
-semantic predicate. The derived morphological set must reconcile exactly to
-those 888 source entries; a mismatch is an adapter or source-audit failure,
-not a reason to make a permanent 888-item rule table. Source provenance is
+ending equivalent to `مُۥٓ`. Under the single-script decision that reviewed
+small-carrier family supplies the joined-only slot directly; the morphological
+predicate remains the conformance reconciliation, and a mismatch with the 888
+source entries is an adapter or source-audit failure. Source provenance is
 recorded in the [Warsh corpus README](../../../../corpus_sources/warsh/README.md).
 
 ## Acceptance checks

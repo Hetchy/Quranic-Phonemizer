@@ -57,8 +57,12 @@ reads, and what is actually pronounced under a boundary plan.
   the tentative new-riwayah notes as an established abstraction.
 - Raw Unicode and script conventions stay in `orthography/`. Tajweed rules
   operate on canonical or performed structures, not script codepoints.
-- Source marks may attest a derived reading; they must not silently become the
-  rule that decides it. Genuine closed exceptions belong in authored data.
+- For a riwayah with one supported script, a reviewed mark-sequence family may
+  directly supply the canonical fact it writes; an unreviewed sequence fails
+  projection rather than being guessed. Research-derived predicates and counts
+  remain conformance reconciliation, not required runtime derivations. Hafs is
+  the deliberate two-script exception: its facts stay script-independent.
+  Genuine closed exceptions belong in authored data.
 - Phoneme strings belong in `render/`; other layers use typed model values.
 - Treat wasl, waqf, and ibtidaa as explicit boundary state. Never infer them
   from array position or mutate neighbouring words to simulate a join.

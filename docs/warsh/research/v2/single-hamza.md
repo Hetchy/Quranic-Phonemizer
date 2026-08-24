@@ -210,10 +210,14 @@ Every `tashil` occurrence reaches the eased onset and responsible source
 hamza even when the extra token is disabled. Its following A, U, or I remains
 an independent nucleus and is never folded into the eased consonant type.
 
-The regular morphology-backed ibdal register has no accepted aggregate total
-yet. Implementation must generate it from canonical root position, hamza
-quality, and effective left context, subtract the 25 iwaa exclusions, then
-reconcile it to source evidence. Tests must not freeze a count derived only
-from selected-script marks. Separately, authored data must assert the complete
-56 fixed-ibdal tokens, 34 Arayta tokens, four Ha-antum tokens, four Allai
-tokens, and four canonical-absence spellings above.
+Under the single-script decision, the selected script already writes the
+replacement carrier at word-internal regular ibdal sites, so projection
+supplies those results directly with authored latent-hamza provenance where
+attribution or badal origin needs it. The morphology predicate, the 25 iwaa
+exclusions, and their reconciliation remain the conformance check that the
+supplied set is complete and correct. Boundary-sensitive sites, such as the
+16 silent-qata starts whose joined result depends on the preceding performed
+vowel, keep their canonical latent structure because the script writes only
+one state. Separately, authored data must assert the complete 56 fixed-ibdal
+tokens, 34 Arayta tokens, four Ha-antum tokens, four Allai tokens, and four
+canonical-absence spellings above.

@@ -160,11 +160,12 @@ following article source independently receives `hamza_wasl_silent` when joined.
 ## Authored ownership and acceptance checks
 
 Yaa-zawaid are authored per riwayah, canonical ref, and boundary state. They
-cannot be inferred from shared morphology alone, and a small-yaa code point is
-only selected-script evidence. Canonical projection resolves each authored
-fact into a neutral joined-only slot; the ordinary madd classifier then sees
-the resulting long and next onset. There is no `yaa_zawaid` rule ID and no
-Warsh selector.
+cannot be inferred from shared morphology alone. Under the single-script
+decision the reviewed small-yaa family supplies each joined-only slot
+directly, and the 47-row register above is its conformance reconciliation.
+Canonical projection resolves each fact into a neutral joined-only slot; the
+ordinary madd classifier then sees the resulting long and next onset. There is
+no `yaa_zawaid` rule ID and no Warsh selector.
 
 The ordinary 46 sites may reuse the neutral `joined_only_long` model also used
 by other phenomena. The Naml site requires a distinct joined-only consonant

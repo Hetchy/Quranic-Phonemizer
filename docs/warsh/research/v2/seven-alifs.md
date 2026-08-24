@@ -168,8 +168,12 @@ column does not receive raa coloring merely because that A is emphatic.
 
 - Canonical authored facts own the four shapes: pausal long, lexical long,
   ordinary fathatan, and Ana's qata-A/U retained long.
-- The Warsh adapter binds these facts by canonical identity and boundary. A
-  final alif or pause mark is evidence, not a sufficient classifier.
+- Under the single-script decision the reviewed alif-mark families supply the
+  shapes directly where the script distinguishes them: plain retained alif,
+  alternate fathatan, madda-marked retained Ana, and the pausal-alif sign
+  family. The closed registers above are the conformance reconciliation, and
+  the joined/stopped alternation itself remains boundary behavior the written
+  form cannot express.
 - Existing `pausal_alif`, `madd_tabii`, `madd_munfasil`, `madd_iwad`,
   `idgham_bi_ghunnah`, and `ikhfaa` rules own the performed results.
 - Tests cover all eight table rows, all 12 retained Ana boundaries, all three

@@ -102,9 +102,10 @@ from the final Seen-noon wasl behavior
 A word-final eligible alif whose immediately preceding letter is raa is fixed
 taqlil, whether or not it is a verse head. `أَرَاكَهُمْ` at canonical 8:43 is
 the one named choice and is removed from the fixed set. The selected-script
-v1 extraction contains 157 fixed dhat-al-raa targets after that exclusion; the
-normative generator must reproduce the same 157 targets from canonical
-structure and the exception key, not from U+06EA
+v1 extraction contains 157 fixed dhat-al-raa targets after that exclusion.
+Under the single-script decision the reviewed inclination-mark family supplies
+these targets; the canonical predicate and the 157 count remain the
+conformance reconciliation of the supplied set
 ([Al-Wafi](https://www.islamweb.net/ar/library/content/245/28/)).
 
 ### Alif before a final kasra raa
@@ -295,14 +296,17 @@ they were fixed law.
 
 The normative Warsh package should own:
 
-1. structural predicates for dhat al-yaa, dhat al-raa, original final-raa
-   kasra, and the 11 verse-head surahs;
+1. mark-supplied default targets from the reviewed inclination sequence
+   families, with the structural predicates for dhat al-yaa, dhat al-raa,
+   original final-raa kasra, and the 11 verse-head surahs retained as
+   conformance reconciliation rather than runtime derivations;
 2. closed lexical keys and exact coordinate sets from this document and
-   `docs/variants.md`;
+   `docs/variants.md`, which override or own their sites regardless of marks;
 3. source-to-canonical coordinate fixtures for every closed set; and
 4. a generated audit export containing every classified target, its owner,
    effective state, typed quality, and source witness.
 
 Acceptance tests must reject overlap between owners, assert the fixed register
-subtotals above, reconcile every reviewed source witness, and prove that the
-same canonical facts can be rendered from a source without U+06EA.
+subtotals above, and reconcile every reviewed source witness against the
+predicates, so a corpus or importer defect cannot silently change a supplied
+quality.

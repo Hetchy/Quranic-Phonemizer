@@ -70,9 +70,11 @@ still starts the article with A. Likewise, the five selected `ائتوني` form
 different visible initial sequences even though all have the same I start.
 The `/Q/` releases in `ادخلوا` and `ابن` are independently owned by
 ordinary `qalqala_sughra`; they are not part of any hamza-wasl start rule.
-The source convention may attest the result after derivation; it never drives
-the rule. The sequence ownership and rejection policy are defined in
-[`script-projection.md`](script-projection.md).
+Under the single-script decision, the reviewed per-site register generated
+from these families supplies the start quality directly; the morphology
+derivation above is the domain evidence that vetted the register and remains
+its conformance reconciliation. The sequence ownership and rejection policy
+are defined in [`script-projection.md`](script-projection.md).
 
 ## Boundary matrix
 
@@ -174,7 +176,8 @@ every source mark. Tests must assert:
 3. the Warsh passive `اَ۟سْتُحِقَّ` delta;
 4. all 16 silent-qata starts, including all five `ائتوني` tokens;
 5. wasl, waqf-before, and ibtidaa for each quality; and
-6. that changing source marks cannot turn qata into wasl or select a rule.
+6. that an unreviewed source-mark change fails projection instead of turning
+   qata into wasl or selecting a new start quality.
 
 An unknown initial-alif sequence is a projection error with its source ref and
 scalars. It is never guessed from the visible haraka.

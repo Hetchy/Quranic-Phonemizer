@@ -174,6 +174,10 @@ the naql stroke from the wasl sign even though both indicate absence in joined
 speech ([Daleel al-Hayran](https://www.islamweb.net/ar/library/content/243/298/)).
 Projection must preserve that semantic distinction.
 
-No occurrence is inferred from that mark. The canonical host/qata relation,
-boundary plan, riwayah rule set, and exception data decide naql; the source
-mark validates the result.
+Under the single-script decision, the reviewed written-naql family supplies
+the latent qata, its transferred vowel, and the host relation; the canonical
+predicate and the 1,550/180/1,307 counts remain its conformance
+reconciliation. The boundary plan still decides performance: qata restoration
+at ibtidaa or across a stop is canonical behavior the written joined form
+cannot express, so the latent structure is mandatory regardless of how the
+fact was supplied.
