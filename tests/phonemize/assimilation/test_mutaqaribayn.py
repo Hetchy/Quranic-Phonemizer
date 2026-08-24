@@ -18,7 +18,7 @@ from tests.support import (
 
 CASES = (
     # وَقُل رَّبِّ
-    StateCase(id="qul-rabbi", site=Site(hafs=("23:118", (1, 2))), states={
+    StateCase(id="qul-rabbi", site=Site.shared("23:118", (1, 2)), states={
         "joined": Expect(read=through(), phonemes=("w a q u", "rˤrˤ aˤ bb Q"),
                          char_rules={"ل": R("idgham_mutaqaribayn"),
                                      "ر": R("idgham_mutaqaribayn")},
@@ -29,7 +29,7 @@ CASES = (
                                              "ر": R("idgham_mutaqaribayn")}),
     }),
     # بَل رَّفَعَهُ
-    StateCase(id="bal-rafah", site=Site(hafs=("4:158", (1, 2))), states={
+    StateCase(id="bal-rafah", site=Site.shared("4:158", (1, 2)), states={
         "joined": Expect(read=through(), phonemes=("b a", "rˤrˤ aˤ f a ʕ a h"),
                          char_rules={"ل": R("idgham_mutaqaribayn"),
                                      "ر": R("idgham_mutaqaribayn")},
@@ -40,7 +40,7 @@ CASES = (
                                              "ر": R("idgham_mutaqaribayn")}),
     }),
     # نَخْلُقكُّم
-    Case(id="nakhluqkum", site=Site(hafs=("77:20", (2,))), read=isolated(),
+    Case(id="nakhluqkum", site=Site.shared("77:20", (2,)), read=isolated(),
          phonemes="n a x l u kk u m",
          char_rules={"ق": R("idgham_mutaqaribayn"),
                      "ك": R("idgham_mutaqaribayn")},

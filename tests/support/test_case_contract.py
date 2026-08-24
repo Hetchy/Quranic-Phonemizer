@@ -58,6 +58,11 @@ def test_shared_site_reuses_one_canonical_address():
     assert site.address("hafs") == site.address("warsh")
 
 
+def test_declared_unshipped_riwayah_is_dormant_until_its_package_exists():
+    site = Site.shared("2:42", (7,), riwayat=("hafs", "future"))
+    assert site.shipped() == ("hafs",)
+
+
 def test_pick_requires_an_expectation_for_the_running_riwayah():
     value = pick(hafs="a", warsh="i")
     assert resolve(value, "hafs") == "a"

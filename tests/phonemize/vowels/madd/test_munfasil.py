@@ -7,11 +7,12 @@ from tests.support import Case, R, Site, assert_case, case_runs, joining, pick, 
 
 CASES = (
     # بِمَا أُنزِلَ
-    Case(id="between-words", site=Site(hafs=("2:4", (3, 4))), read=through(),
+    Case(id="between-words", site=Site.shared("2:4", (3, 4)), read=through(),
          phonemes=("b i m a:", "ʔ u ŋ z i l"),
          char_rules=pick(
              hafs_uthmani={"ا": R("madd_munfasil")},
              hafs_indopak={"ا[1]": R("madd_munfasil")},
+             warsh_uthmani={"ا": R("madd_munfasil")},
          ),
          sound_rules={"a:": R("madd_munfasil")}),
     # هَؤُلَاءِ

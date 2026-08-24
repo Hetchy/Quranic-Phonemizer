@@ -15,8 +15,9 @@ from tests.support import (
 
 
 def _case(name: str, ref: str, word: int, joined: str, stopped: str,
-          source: str, long: str):
-    return StateCase(id=name, site=Site(hafs=(ref, (word,))), states={
+          source: str, long: str, *, warsh: bool = True):
+    site = Site.shared(ref, (word,)) if warsh else Site(hafs=(ref, (word,)))
+    return StateCase(id=name, site=site, states={
         "joined": Expect(read=joining(), phonemes=joined,
                          absent_char_rules={source: R("madd_tabii")}),
         "stopped": Expect(read=isolated(), phonemes=stopped,
@@ -41,7 +42,7 @@ CASES = (
     _case("atluwa", "27:92", 2, "ʔ a t l u w a", "ʔ a t l u:", "و", "u:"),
     # لِيَرْبُوَا۟
     _case("liyarbuwa", "30:39", 5, "l i j a rˤ b u w a", "l i j a rˤ b u:",
-          "و", "u:"),
+          "و", "u:", warsh=False),
     # لِيَبْلُوَا۟
     _case("liyabluwa", "47:4", 28, "l i j a b Q l u w a", "l i j a b Q l u:",
           "و", "u:"),

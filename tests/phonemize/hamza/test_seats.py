@@ -9,7 +9,7 @@ CASES = (
     # وَلُؤْلُؤًا
     Case(
         id="waw-seat",
-        site=Site(hafs=("22:23", (19,))),
+        site=Site.shared("22:23", (19,)),
         read=isolated(),
         phonemes="w a l u ʔ l u ʔ a:",
     ),
@@ -30,14 +30,14 @@ CASES = (
     # خَاطِئَةٍ
     Case(
         id="moving-hamza-yaa-seat",
-        site=Site(hafs=("96:16", (3,))),
+        site=Site.shared("96:16", (3,)),
         read=isolated(),
         phonemes="x aˤ: tˤ i ʔ a h",
     ),
     # لِلْمَلَـٰٓئِكَةِ
     Case(
         id="seat-after-madd",
-        site=Site(hafs=("2:30", (4,))),
+        site=Site.shared("2:30", (4,)),
         read=isolated(),
         phonemes="l i l m a l a: ʔ i k a h",
     ),

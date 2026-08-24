@@ -25,7 +25,7 @@ CASES = (
     # خَلَقُوا۟
     Case(
         id="plural-waw-long",
-        site=Site(hafs=("46:4", (10,))),
+        site=Site.shared("46:4", (10,)),
         read=isolated(),
         phonemes="x aˤ l a q u:",
         char_rules={"ا": R("orthographic_silence")},
@@ -33,7 +33,7 @@ CASES = (
     # خَلَوْا۟
     Case(
         id="plural-waw-leen",
-        site=Site(hafs=("2:14", (8,))),
+        site=Site.shared("2:14", (8,)),
         read=isolated(),
         phonemes="x aˤ l a w",
         char_rules={"ا": R("orthographic_silence")},
@@ -41,12 +41,13 @@ CASES = (
     # ٱشْتَرَوُا۟
     Case(
         id="plural-waw-short",
-        site=Site(hafs=("2:16", (3,))),
+        site=Site.shared("2:16", (3,)),
         read=isolated(),
         phonemes="ʔ i ʃ t a rˤ aˤ w",
         char_rules=pick(
             hafs_uthmani={"ا": R("orthographic_silence")},
             hafs_indopak={"ا[2]": R("orthographic_silence")},
+            warsh_uthmani={"ا[2]": R("orthographic_silence")},
         ),
     ),
     # مِا۟ئَةَ
@@ -60,12 +61,13 @@ CASES = (
     # ٱلرِّبَوٰا۟
     Case(
         id="arriba-final-alif",
-        site=Site(hafs=("2:275", (20,))),
+        site=Site.shared("2:275", (20,)),
         read=isolated(),
         phonemes="ʔ a rr i b a:",
         char_rules=pick(
             hafs_uthmani={"ا": R("orthographic_silence")},
             hafs_indopak={},
+            warsh_uthmani={"ا[2]": R("orthographic_silence")},
         ),
     ),
     # بِأَيْي۟دٍ

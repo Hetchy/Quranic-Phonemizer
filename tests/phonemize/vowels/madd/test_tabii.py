@@ -7,11 +7,11 @@ from tests.support import Case, R, Site, assert_case, case_runs, isolated, joini
 
 CASES = (
     # بِمَا
-    Case(id="long-a", site=Site(hafs=("2:10", (10,))), read=isolated(),
+    Case(id="long-a", site=Site.shared("2:10", (10,)), read=isolated(),
          phonemes="b i m a:", char_rules={"ا": R("madd_tabii")},
          sound_rules={"a:": R("madd_tabii")}),
     # فِيهِ
-    Case(id="long-i", site=Site(hafs=("2:20", (9,))), read=joining(),
+    Case(id="long-i", site=Site.shared("2:20", (9,)), read=joining(),
          phonemes="f i: h i", char_rules={"ي": R("madd_tabii")},
          sound_rules={"i:": R("madd_tabii")}),
     # مُوسَىٰ

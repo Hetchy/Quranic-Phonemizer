@@ -50,7 +50,7 @@ CASES = (
     # ذَٰلِكُم بَلَآءٌ
     Case(
         id="second-pronominal-shape",
-        site=Site(hafs=("2:49", (14, 15))),
+        site=Site.shared("2:49", (14, 15)),
         read=through(),
         phonemes=("ð a: l i k u ŋ", "b a l a: ʔ"),
         char_rules={"م": R("ikhfaa_shafawi")},

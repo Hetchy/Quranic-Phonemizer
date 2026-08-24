@@ -4,7 +4,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from quranic_phonemizer.api import PACKAGES
-from quranic_phonemizer.model.address import Riwayah, VerseRef
+from quranic_phonemizer.model.address import VerseRef
 
 
 @dataclass(frozen=True, slots=True)
@@ -42,9 +42,10 @@ class Site:
 
     def shipped(self) -> tuple[str, ...]:
         """Declared riwayat this build can actually read, in declared order."""
+        shipped = {riwayah.value for riwayah in PACKAGES}
         return tuple(
             name for name in self.addresses
-            if Riwayah(name) in PACKAGES
+            if name in shipped
         )
 
     def address(self, riwayah: str) -> Address:

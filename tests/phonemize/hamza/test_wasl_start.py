@@ -12,6 +12,7 @@ def wasl_case(
     phonemes: str,
     hamza: str = "ʔ",
     indopak_alif: str = "ا",
+    warsh_alif: str | None = None,
 ) -> Case:
     rule = {
         "a": "hamza_wasl_fatha",
@@ -20,12 +21,13 @@ def wasl_case(
     }[phonemes.split()[1]]
     return Case(
         id=case_id,
-        site=Site(hafs=(ref, (word,))),
+        site=Site.shared(ref, (word,)),
         read=isolated(),
         phonemes=phonemes,
         char_rules=pick(
             hafs_uthmani={"ٱ": R(rule)},
             hafs_indopak={indopak_alif: R(rule)},
+            warsh_uthmani={warsh_alif or indopak_alif: R(rule)},
         ),
         sound_rules={hamza: R(rule)},
     )
@@ -61,7 +63,7 @@ CASES = (
     # ٱمْرَأَةٌ
     wasl_case(
         "imraah", "4:12", 56, "ʔ i m rˤ aˤ ʔ a h", "ʔ[1]",
-        indopak_alif="ا[1]",
+        indopak_alif="ا[1]", warsh_alif="ا",
     ),
     # ٱثْنَانِ
     wasl_case("ithnan", "5:106", 12, "ʔ i θ n a: n"),

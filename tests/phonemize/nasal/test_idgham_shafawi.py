@@ -19,7 +19,7 @@ CASES = (
     # قُلُوبِهِم مَّرَضٌ
     StateCase(
         id="meem-meem-boundary",
-        site=Site(hafs=("2:10", (2, 3))),
+        site=Site.shared("2:10", (2, 3)),
         states={
             "joined": Expect(
                 read=through(),
@@ -47,7 +47,7 @@ CASES = (
     # أَهْوَآءَهُم مَّثَلُ
     Case(
         id="verse-seam",
-        site=Site(hafs=("47:14", (13, 14))),
+        site=Site.shared("47:14", (13, 14)),
         read=explicit(ibtidaa=13, wasl=13, waqf=14),
         phonemes=("ʔ a h w a: ʔ a h u", "m̃ a θ a l"),
         char_rules={"م[1]": R("idgham_shafawi"),

@@ -2,14 +2,14 @@ from __future__ import annotations
 
 import pytest
 
-from tests.support import Case, R, Site, assert_case, case_runs, isolated, through
+from tests.support import Case, R, Site, assert_case, case_runs, isolated, pick, through
 
 
 CASES = (
     # يَوْمَ ٱلْتَقَى
     Case(
         id="lexical-lam",
-        site=Site(hafs=("3:155", (5, 6))),
+        site=Site.shared("3:155", (5, 6)),
         read=through(),
         phonemes=("j a w m a", "l t a q aˤ:"),
         absent_char_rules={"ل": R("lam_shamsiyyah", "lam_qamariyyah")},
@@ -17,9 +17,12 @@ CASES = (
     # وَلِبَاسُ ٱلتَّقْوَىٰ
     Case(
         id="article-lam",
-        site=Site(hafs=("7:26", (10, 11))),
+        site=Site.shared("7:26", (10, 11)),
         read=through(),
-        phonemes=("w a l i b a: s u", "tt a q Q w a:"),
+        phonemes=pick(
+            hafs=("w a l i b a: s u", "tt a q Q w a:"),
+            warsh=("w a l i b a: s a", "tt a q Q w a:"),
+        ),
         char_rules={"ل[2]": R("lam_shamsiyyah")},
         sound_rules={"tt": R("lam_shamsiyyah")},
     ),

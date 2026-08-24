@@ -12,6 +12,7 @@ from tests.support import (
     case_runs,
     explicit,
     isolated,
+    pick,
     through,
 )
 
@@ -20,7 +21,7 @@ CASES = (
     # مَن يَشَآءُ
     Case(
         id="noon-yaa",
-        site=Site(hafs=("3:74", (3, 4))),
+        site=Site.shared("3:74", (3, 4)),
         read=through(),
         phonemes=("m a", "j̃ a ʃ a: ʔ"),
         char_rules={"ن": R("idgham_bi_ghunnah"),
@@ -30,9 +31,12 @@ CASES = (
     # حَيَوٰةٌ يَـٰٓأُو۟لِى
     Case(
         id="dammatan-yaa",
-        site=Site(hafs=("2:179", (4, 5))),
+        site=Site.shared("2:179", (4, 5)),
         read=through(),
-        phonemes=("ħ a j a: t u", "j̃ a: ʔ u l i:"),
+        phonemes=pick(
+            hafs=("ħ a j a: t u", "j̃ a: ʔ u l i:"),
+            warsh=("ħ a j a: t u", "j̃ a: ʔ u: l i:"),
+        ),
         char_rules={"@dammatan": R("idgham_bi_ghunnah"),
                     "ي[2]": R("idgham_bi_ghunnah")},
         sound_rules={"j̃": R("idgham_bi_ghunnah")},
@@ -40,9 +44,12 @@ CASES = (
     # صِدِّيقًا نَّبِيًّا
     Case(
         id="fathatan-noon",
-        site=Site(hafs=("19:41", (7, 8))),
+        site=Site.shared("19:41", (7, 8)),
         read=through(),
-        phonemes=("sˤ i dd i: q aˤ", "ñ a b i jj a:"),
+        phonemes=pick(
+            hafs=("sˤ i dd i: q aˤ", "ñ a b i jj a:"),
+            warsh=("sˤ i dd i: q aˤ", "ñ a b i: ʔ a:"),
+        ),
         char_rules={"@fathatan[1]": R("idgham_bi_ghunnah"),
                     "ن": R("idgham_bi_ghunnah")},
         sound_rules={"ñ": R("idgham_bi_ghunnah")},
@@ -50,7 +57,7 @@ CASES = (
     # تَكُن مِّنَ
     StateCase(
         id="noon-meem-boundary",
-        site=Site(hafs=("3:60", (5, 6))),
+        site=Site.shared("3:60", (5, 6)),
         states={
             "joined": Expect(
                 read=through(),
@@ -72,7 +79,7 @@ CASES = (
     # بَعْضٍ وَٱللَّهُ
     Case(
         id="kasratan-waw",
-        site=Site(hafs=("3:34", (4, 5))),
+        site=Site.shared("3:34", (4, 5)),
         read=through(),
         phonemes=("b a ʕ dˤ i", "w̃ a lˤlˤ aˤ: h"),
         char_rules={"@kasratan": R("idgham_bi_ghunnah"),
@@ -82,7 +89,7 @@ CASES = (
     # عَظِيمٌ وَمِنَ
     Case(
         id="verse-seam",
-        site=Site(hafs=("2:7", (12, 13))),
+        site=Site.shared("2:7", (12, 13)),
         read=explicit(ibtidaa=12, wasl=12, waqf=13),
         phonemes=("ʕ a ðˤ i: m u", "w̃ a m i n"),
         char_rules={"@dammatan": R("idgham_bi_ghunnah"),
