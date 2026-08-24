@@ -75,8 +75,8 @@ def test_a_bare_glide_after_the_wasl_sequence_is_the_silenced_qata_hamza():
 
 
 def test_an_unreviewed_initial_alif_scalar_fails_projection():
-    # U+0671 is not a scalar of this source; a rewritten onset must fail
-    # rather than receive a best-effort start.
+    # An alif form this script never writes must fail rather than
+    # receive a best-effort start.
     location = Location(1, 2, 1)
     with pytest.raises(InventoryError):
         script_adapter(Script.UTHMANI).read(

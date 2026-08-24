@@ -1,10 +1,5 @@
-"""Warsh wasl and iltiqa registers.
-
-The King Fahd source supplies each start and repair; the canonical
-morphology derivation over the shared canonical text is the reconciliation
-for those supplied facts. Counts follow the reviewed registers in
-`docs/warsh/research/v2/wasl-hamza.md` and `iltiqa.md`.
-"""
+"""Warsh wasl and iltiqa registers: the source supplies each start and
+repair, and the canonical morphology derivation is their reconciliation."""
 from __future__ import annotations
 
 import json
