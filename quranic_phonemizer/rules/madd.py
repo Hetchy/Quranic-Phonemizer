@@ -68,7 +68,7 @@ class IltiqaShortening:
         slot, word = near.slot(at), near.word_of(at)
         if slot is None or word is None:
             return None
-        if not (slot.nucleus.is_long or slot.nucleus.is_silah):
+        if not (slot.nucleus.is_long or slot.nucleus.is_joined_only_long):
             return None
         slots = near.score.words[word].slots
         if not slots or slots[-1].id != at:
@@ -127,7 +127,7 @@ def _madd_of(
 
     if final and boundaries.stopped_on(word):
         # A stopped silah is absent rather than long and takes no instance.
-        return None if slot.nucleus.is_silah else (Rule.MADD_TABII, None)
+        return None if slot.nucleus.is_joined_only_long else (Rule.MADD_TABII, None)
     if final and boundaries.after(word) is Junction.SAKT:
         return (Rule.MADD_TABII, None)
     if final and all(item.spelled for item in slots):
@@ -257,7 +257,7 @@ class MaddSilah:
         boundaries: BoundaryPlan,
     ) -> Verdict | None:
         slot = near.slot(at)
-        if slot is None or not slot.nucleus.is_silah:
+        if slot is None or not slot.nucleus.is_joined_only_long:
             return None
         if _madd_of(near, plan, at, boundaries) is None:
             return None

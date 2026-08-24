@@ -277,7 +277,7 @@ def _nucleus(slot, pen: Pen) -> str:
             + (pen.carriers.get(carrier) or pen.letter(carrier))
             + pen.roles.get(MADD, "")
         )
-    if nucleus.is_silah:
+    if nucleus.is_joined_only_long:
         # One script spells the pronoun's vowel and its carrier in a
         # single mark; the other writes the vowel and then the carrier.
         composite, carrier = _SILAH_ROLES[quality]

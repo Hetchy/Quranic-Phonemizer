@@ -94,7 +94,7 @@ class WaqfSilahDrop:
         slot, word = near.slot(at), near.word_of(at)
         if slot is None or word is None or not boundaries.stopped_on(word):
             return None
-        if not slot.nucleus.is_silah or not _is_final_letter(near, at, word):
+        if not slot.nucleus.is_joined_only_long or not _is_final_letter(near, at, word):
             return None
         return Verdict(
             Occurrence(

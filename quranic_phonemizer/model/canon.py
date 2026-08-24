@@ -168,7 +168,9 @@ class Nucleus:
         )
 
     @property
-    def is_silah(self) -> bool:
+    def is_joined_only_long(self) -> bool:
+        """Long when joined to, absent at a stop: pronoun silah, and the
+        Warsh joined-only families that reuse the same shape."""
         return (
             self.joined.form is VowelForm.LONG
             and self.stopped.form is VowelForm.ABSENT
@@ -215,7 +217,7 @@ class Nucleus:
         return cls(state, state)
 
     @classmethod
-    def silah(cls, quality: Quality) -> Nucleus:
+    def joined_only_long(cls, quality: Quality) -> Nucleus:
         return cls(VowelState(VowelForm.LONG, quality), _ABSENT_STATE)
 
     @classmethod

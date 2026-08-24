@@ -207,10 +207,10 @@ def test_nucleus_union_covers_the_conditionality_table() -> None:
     silent = canon.Nucleus.silent()
     short = canon.Nucleus.short(canon.Quality.A)
     long = canon.Nucleus.long(canon.Quality.A)
-    silah = canon.Nucleus.silah(canon.Quality.A)
+    silah = canon.Nucleus.joined_only_long(canon.Quality.A)
     pausal_long = canon.Nucleus.pausal_long(canon.Quality.A)
     assert (silent.is_silent, short.is_short, long.is_long) == (True, True, True)
-    assert (silah.is_silah, pausal_long.is_pausal_long) == (True, True)
+    assert (silah.is_joined_only_long, pausal_long.is_pausal_long) == (True, True)
     assert canon.Onset.WASL and canon.Onset.GLIDE, "the two mirrors"
 
 
