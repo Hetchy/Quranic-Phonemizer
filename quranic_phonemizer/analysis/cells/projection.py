@@ -185,7 +185,7 @@ def _adjust_carrier(carrier, value, text, facts, slot_of_unit, was_dropped):
 
 def _transform_existing_carrier(columns, by_id, span, existing, value, pen):
     if (
-        value.quality in {Quality.A, Quality.E}
+        value.quality in {Quality.A, Quality.KUBRA, Quality.TAQLIL}
         and existing.text == MAQSURA
     ):
         columns[by_id[existing.id.value]] = replace(

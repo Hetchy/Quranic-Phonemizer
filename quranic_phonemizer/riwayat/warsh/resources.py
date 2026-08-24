@@ -14,6 +14,7 @@ from ...canon.passes import LEXEME_PASSES
 from ...canon.spell import Muqattaat, load_muqattaat, spell_muqattaat
 from ...corpus import AlignedCorpus, load_aligned_corpus
 from ...model.address import Location, Riwayah, Script, VerseRef
+from ...model.canon import Quality
 from ...orthography.adapter import Reading
 from ...orthography.cluster import read_verse
 from ...orthography.inventory import Inventory, load_inventory
@@ -24,6 +25,10 @@ from .sequence import entries_for
 
 RIWAYAH = Riwayah.WARSH
 SCRIPTS = (Script.UTHMANI,)
+
+#: Warsh collapses kubra to taqlil when the `imala` extra phoneme is not
+#: spent; ordinary taqlil is never gated.
+QUALITY_FALLBACKS = {Quality.KUBRA: Quality.TAQLIL}
 ARTIFACT = "king-fahd-warsh-v2"
 DATA = Path(__file__).resolve().parents[2] / "data" / "riwayat" / "warsh"
 

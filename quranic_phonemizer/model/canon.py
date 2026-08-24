@@ -77,12 +77,16 @@ class Onset(StrEnum):
 
 
 class Quality(StrEnum):
-    """The vowel letters. One character each, so a vocalised skeleton reads."""
+    """The vowel letters. One character each, so a vocalised skeleton reads.
+
+    TAQLIL and KUBRA are the two inclination grades: distinct typed
+    qualities, not renderings of one inclined vowel."""
 
     A = "a"
     U = "u"
     I = "i"
-    E = "e"
+    TAQLIL = "ɛ"
+    KUBRA = "e"
 
 
 #: The letter each quality lengthens into. A property of the canonical model,
