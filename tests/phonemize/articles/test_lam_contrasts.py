@@ -29,20 +29,11 @@ CASES = (
     # ٱلَّيْلِ
     Case(
         id="one-lam-rasm",
-        site=Site(hafs=("2:164", (7,))),
+        site=Site.shared("2:164", (7,)),
         read=isolated(),
         phonemes="ʔ a ll a j l",
         absent_char_rules={"ل[1]": R("lam_shamsiyyah")},
         absent_sound_rules={"ll": R("lam_shamsiyyah")},
-    ),
-    # ءَالذَّكَرَيْنِ
-    Case(
-        id="interrogative-article",
-        site=Site(hafs=("6:143", (10,))),
-        read=isolated(),
-        phonemes="ʔ a: ðð a k a rˤ aˤ j n",
-        char_rules={"ل": R("lam_shamsiyyah")},
-        sound_rules={"ðð": R("lam_shamsiyyah")},
     ),
 )
 

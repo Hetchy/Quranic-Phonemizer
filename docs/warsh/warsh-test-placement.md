@@ -46,11 +46,11 @@ or harness contract, in `test-refactor-plan.md`. Counts are logical review
 cases. `V` marks a case added only in the final selector phase.
 
 ```text
-tests/phonemize/                               # 507 cases: 435 fixed + 72V
-  articles/                                   # 21
+tests/phonemize/                               # 508 cases: 436 fixed + 72V
+  articles/                                   # 20
     test_lam_qamariyyah.py                    # 8
     test_lam_shamsiyyah.py                    # 9
-    test_lam_contrasts.py                     # 4
+    test_lam_contrasts.py                     # 3
 
   assimilation/                              # 29: 27 fixed + 2V
     test_mutamathilayn.py                     # 10
@@ -94,7 +94,7 @@ tests/phonemize/                               # 507 cases: 435 fixed + 72V
     test_izhar_shafawi.py                     # 5
     test_noon_partition.py                    # 4
 
-  vowels/                                     # 147: 135 fixed + 12V
+  vowels/                                     # 149: 137 fixed + 12V
     inclination/                              # 49: 40 fixed + 9V
       test_quality.py                         # 6
       test_hafs_inclination.py                # 2
@@ -102,16 +102,16 @@ tests/phonemize/                               # 507 cases: 435 fixed + 72V
       test_warsh_inclination_classification.py # 14
       test_warsh_inclination_coloring.py      # 7
 
-    madd/                                     # 63
+    madd/                                     # 65
       test_tabii.py                           # 3
       test_muttasil.py                        # 2
       test_munfasil.py                        # 5
       test_lazim.py                           # 2
-      test_arid.py                            # 4
+      test_arid.py                            # 5
       test_leen.py                            # 4
       test_iwad.py                            # 4
       test_haa_silah.py                       # 5
-      test_warsh_badal.py                     # 12
+      test_warsh_badal.py                     # 13
       test_warsh_leen_mahmuz.py               # 8
       test_warsh_mim_al_jam.py                # 7
       test_warsh_yaa_zawaid.py                # 7
@@ -131,7 +131,7 @@ tests/phonemize/                               # 507 cases: 435 fixed + 72V
   test_taa_marbuta.py                         # 5
 ```
 
-The ownership splits do not duplicate test volume. The final budget is 435
+The ownership splits do not duplicate test volume. The final budget is 436
 fixed/default and 72 selector cases. Multiple lexical forms of one selector
 may require separate semantic rows even though the API metadata is one entry.
 
@@ -349,7 +349,7 @@ tests/conformance/                         # 116 cases total
 Only Hafs currently has two supported scripts, so script agreement remains a
 21-case Hafs gate. Warsh source-to-canonical agreement belongs in the adapter
 alignment file, not in a fake second-script conformance matrix. The whole
-planned logical suite is therefore 1,384 cases.
+planned logical suite is therefore 1,385 cases.
 
 `test_rule_coverage.py` remains shared. It verifies that the `Rule` vocabulary
 is global, every classifier declares its complete `emits` set, each riwayah
@@ -398,7 +398,7 @@ into a mixed-domain catch-all.
 | --- | --- | --- | --- |
 | `articles/test_lam_qamariyyah.py` | Cover the same fourteen-letter partition with clean Warsh article sites | Reuse a shared site when clean; otherwise add a Warsh site row in the same trigger table | Adapter baseline |
 | `articles/test_lam_shamsiyyah.py` | Cover the same fourteen-letter partition and atomic gemination | Same method as qamariyyah | Adapter baseline |
-| `articles/test_lam_contrasts.py` | Recheck article, lexical lam, one-lam spelling, and interrogative contrast | Use a pick only for a small source selector difference | Adapter baseline where clean |
+| `articles/test_lam_contrasts.py` | Recheck article, lexical lam, and one-lam spelling | Use a pick only for a small source selector difference | Adapter baseline where clean |
 | `assimilation/test_mutamathilayn.py` | Cover the same source/host partitions | Shared row or clean Warsh substitute | Adapter baseline |
 | `assimilation/test_mutaqaribayn.py` | Cover the same ordinary source/host partitions | Shared row or clean Warsh substitute | Adapter baseline |
 | `assimilation/test_mutajanisayn_kamil.py` | Cover every shared complete-idgham branch | Shared row or clean Warsh substitute | Adapter baseline |
@@ -491,7 +491,7 @@ table so a domain reviewer never has to reconstruct the text from coordinates.
 | Mim al-jam | `vowels/madd/test_warsh_mim_al_jam.py` | joined-only model and iltiqa tests |
 | Yaa-zawaid | `vowels/madd/test_warsh_yaa_zawaid.py` | joined-only model and authored-register tests |
 | Seven alifs | `vowels/test_seven_alifs.py` | authored-register tests |
-| Madd badal | `vowels/madd/test_warsh_badal.py` | provenance/effective-state tests |
+| Madd badal | `vowels/madd/test_warsh_badal.py` | provenance/effective-state tests, including badal plus arid at waqf |
 | Madd leen mahmuz | `vowels/madd/test_warsh_leen_mahmuz.py` | register reconciliation |
 | Inclination | shared quality plus three `test_warsh_inclination*` files | render, register, coupling tests |
 | Raa | shared raa plus `test_warsh_raa.py` | authored-register tests |

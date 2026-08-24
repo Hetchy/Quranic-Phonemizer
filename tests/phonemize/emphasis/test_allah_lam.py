@@ -98,6 +98,13 @@ CASES = (
         absent_char_rules={"ل[2]": R("tafkheem")},
         absent_sound_rules={"ll": R("tafkheem"), "a:": R("tafkheem")},
     ),
+    # يُضْلِلْهُ
+    Case(
+        id="non-divine-lam-sequence",
+        site=Site.shared("6:39", (11,)),
+        read=isolated(),
+        phonemes="j u dˤ l i l h",
+    ),
 )
 
 

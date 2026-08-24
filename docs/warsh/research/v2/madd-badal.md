@@ -26,9 +26,10 @@ initial long: `ʔ a: d a m`. Starting at the word produces the same initial
 `ʔ a:`. The duration face never changes these tokens.
 
 For Warsh, ordinary badal is the effective madd classification and does not
-also receive `madd_tabii` or `madd_arid_lissukun`. It overlaps only where an
-independent fixed sukun or same-word hamza also establishes `madd_lazim` or
-`madd_muttasil`. Duration remains outside the phonemizer. Al-Nashr
+also receive `madd_tabii`. At waqf, it remains present when the following
+consonant's new sukun independently establishes `madd_arid_lissukun`; an
+independent fixed sukun or same-word hamza may likewise establish `madd_lazim`
+or `madd_muttasil`. Duration remains outside the phonemizer. Al-Nashr
 distinguishes the after-hamza origin from the contextual and route restrictions
 ([Al-Nashr, madd after hamza](https://islamweb.net/ar/library/content/70/99/%D9%81%D8%B5%D9%84-%D9%81%D9%8A-%D9%88%D9%82%D9%88%D8%B9-%D8%AD%D8%B1%D9%81-%D8%A7%D9%84%D9%85%D8%AF-%D8%A8%D8%B9%D8%AF-%D8%A7%D9%84%D9%87%D9%85%D8%B2)).
 
@@ -36,8 +37,8 @@ distinguishes the after-hamza origin from the contextual and route restrictions
 
 For a realized hamza plus carrier:
 
-- the long-vowel sound receives `madd_badal`, plus `madd_lazim` or
-  `madd_muttasil` only when independently applicable;
+- the long-vowel sound receives `madd_badal`, plus `madd_arid_lissukun`,
+  `madd_lazim`, or `madd_muttasil` when independently applicable;
 - the core `madd_badal` occurrence names the long carrier as its subject;
 - source and transformed views place the occurrence on the visible units and
   cells that own or present that long sound; and
@@ -51,6 +52,22 @@ hamza as its source and the carrier it creates or lengthens as its host. The
 result sound exposes all applicable rules; visible placements follow sound
 ownership, so tests must not demand that every rule be copied onto every
 source glyph participating in the derivation.
+
+The pausal overlap is visible in `مَـَٔابٖۖ`, selected source `13:30:8`,
+canonical `13:29:8`:
+
+```text
+source text:     مَـَٔابٖۖ
+target tokens:   m a ʔ a: b Q
+target rules:    madd_badal + madd_arid_lissukun on a:
+```
+
+The stop removes the final tanwin vowel and makes the ba sakin. That pausal
+context adds `madd_arid_lissukun`; it does not erase the carrier's badal
+origin. The same rule-set invariant applies to Hafs and Warsh. Al-Nashr treats
+badal and arid as simultaneous count causes whose received faces may be
+correlated by a route
+([Al-Nashr, route correlations at a stop](https://islamweb.net/ar/library/content/70/102/%D9%81%D8%B5%D9%84-%D9%81%D9%8A-%D9%82%D9%88%D8%A7%D8%B9%D8%AF-%D9%81%D9%8A-%D9%87%D8%B0%D8%A7-%D8%A7%D9%84%D8%A8%D8%A7%D8%A8-%D9%85%D9%87%D9%85%D8%A9)).
 
 ## Modified badal and general ibdal are different
 
@@ -145,6 +162,7 @@ No count or cross-count validator belongs in the phonemizer.
 - The duration exception families remain research data. They do not enter the
   sound model or variant API.
 - Tests cover realized, naql-changed, tashil-changed, and ibdal-changed badal;
+  pausal `madd_badal + madd_arid_lissukun`;
   the three fixed-qasr classifier families; `madd_iwad + madd_tabii` as a non-badal
   counterexample; the started badal classification versus connected
   `ibdal_hamza + madd_tabii` after hamzat-wasl elision; the second waw of

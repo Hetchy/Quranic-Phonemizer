@@ -2,14 +2,38 @@
 from __future__ import annotations
 
 import array
+import gzip
 import json
 import struct
 from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 from types import MappingProxyType
+from typing import TypeAlias
 
-from .model.address import Location
+from .model.address import (
+    Location,
+    SourceGraphemeRef,
+    SourceLocation,
+    VerseRef,
+)
+
+
+@dataclass(frozen=True, slots=True)
+class SourceWord:
+    location: SourceLocation
+    text: str
+
+
+@dataclass(frozen=True, slots=True)
+class AlignedWord:
+    location: Location
+    canonical: tuple[Location, ...]
+    sources: tuple[SourceWord, ...]
+
+    @property
+    def text(self) -> str:
+        return " ".join(source.text for source in self.sources)
 
 
 @dataclass(frozen=True, slots=True)
@@ -22,6 +46,21 @@ class PackedCorpus:
     def word(self, location: Location) -> str:
         index = self.verse_starts[(location.surah, location.ayah)] + location.word - 1
         return self.texts[self.word_indices[index]]
+
+    def words(self, verse: VerseRef) -> tuple[tuple[Location, str], ...]:
+        count = self.surah_info[str(verse.surah)][verse.ayah - 1]
+        return tuple(
+            (location, self.word(location))
+            for location in (
+                Location(verse.surah, verse.ayah, index)
+                for index in range(1, count + 1)
+            )
+        )
+
+    def contains_full_verse(
+        self, verse: VerseRef, locations: tuple[Location, ...]
+    ) -> bool:
+        return len(locations) == self.surah_info[str(verse.surah)][verse.ayah - 1]
 
     def locations(self, reference: str) -> tuple[Location, ...]:
         if "-" in reference:
@@ -65,6 +104,76 @@ class PackedCorpus:
         if not result:
             raise ValueError(f"Reference selects no words: {reference}")
         return tuple(result)
+
+
+@dataclass(frozen=True, slots=True)
+class AlignedCorpus:
+    """A corpus whose selected-source words are aligned to public locations."""
+
+    entries: Mapping[Location, AlignedWord]
+    canonical_to_runtime: Mapping[Location, Location]
+    by_verse: Mapping[VerseRef, tuple[Location, ...]]
+    surah_info: Mapping[str, tuple[int, ...]]
+
+    def word(self, location: Location) -> str:
+        try:
+            return self.entries[self.canonical_to_runtime[location]].text
+        except KeyError:
+            raise ValueError(f"{location} is absent in this riwayah") from None
+
+    def words(self, verse: VerseRef) -> tuple[tuple[Location, str], ...]:
+        return tuple(
+            (location, self.entries[location].text)
+            for location in self.by_verse.get(verse, ())
+        )
+
+    def contains_full_verse(
+        self, verse: VerseRef, locations: tuple[Location, ...]
+    ) -> bool:
+        return locations == self.by_verse.get(verse, ())
+
+    def locations(self, reference: str) -> tuple[Location, ...]:
+        if "-" in reference:
+            left, right = reference.split("-", 1)
+            start = _parse_endpoint(left.strip())
+            end = _parse_endpoint(right.strip())
+        else:
+            start = end = _parse_endpoint(reference)
+        if _depth(start) != _depth(end):
+            raise ValueError(
+                f"Reference endpoints are at different depths: {reference}"
+            )
+        low = _canonical_endpoint(start, end=False)
+        high = _canonical_endpoint(end, end=True)
+        if low > high:
+            raise ValueError(f"Reference starts after it ends: {reference}")
+        result: list[Location] = []
+        for canonical, runtime in self.canonical_to_runtime.items():
+            key = (canonical.surah, canonical.ayah, canonical.word)
+            if low <= key <= high and (not result or result[-1] != runtime):
+                result.append(runtime)
+        if not result:
+            raise ValueError(f"Reference selects no words: {reference}")
+        return tuple(result)
+
+    def sources_for(
+        self, location: Location, text: str
+    ) -> tuple[SourceGraphemeRef | None, ...]:
+        entry = self.entries[self.canonical_to_runtime[location]]
+        sources: list[SourceGraphemeRef | None] = []
+        for index, source in enumerate(entry.sources):
+            if index:
+                sources.append(None)
+            sources.extend(
+                SourceGraphemeRef(source.location, offset)
+                for offset in range(len(source.text))
+            )
+        if entry.text != text or len(sources) != len(text):
+            raise ValueError(f"{location}: aligned source text drifted")
+        return tuple(sources)
+
+
+Corpus: TypeAlias = PackedCorpus | AlignedCorpus
 
 
 def _parse_endpoint(value: str) -> tuple[int, int | None, int | None]:
@@ -142,3 +251,90 @@ def load_corpus(db_path: Path, info_path: Path) -> PackedCorpus:
         MappingProxyType(verse_starts),
         MappingProxyType(surah_info),
     )
+
+
+def load_aligned_corpus(path: Path, *, artifact: str) -> AlignedCorpus:
+    """Load the complete selected-source/public alignment artifact."""
+    entries: dict[Location, AlignedWord] = {}
+    canonical_to_runtime: dict[Location, Location] = {}
+    by_verse: dict[VerseRef, list[Location]] = {}
+    canonical_verses: dict[int, int] = {}
+    canonical_counts: dict[VerseRef, int] = {}
+    with gzip.open(path, "rt", encoding="utf-8") as source:
+        header = json.loads(source.readline())
+        if header != {"schema_version": 1, "artifact": artifact}:
+            raise ValueError(f"{path}: unexpected alignment header {header!r}")
+        for line_number, line in enumerate(source, start=2):
+            row = json.loads(line)
+            canonical = tuple(_location(value) for value in row["canonical"])
+            sources = tuple(
+                SourceWord(
+                    SourceLocation(artifact, *_parts(item["ref"])),
+                    item["text"],
+                )
+                for item in row["source"]
+            )
+            for location in canonical:
+                canonical_verses[location.surah] = max(
+                    canonical_verses.get(location.surah, 0), location.ayah
+                )
+                canonical_counts[location.verse] = max(
+                    canonical_counts.get(location.verse, 0), location.word
+                )
+            if not sources:
+                continue
+            _bind_aligned_word(
+                path, line_number, canonical, sources,
+                entries, canonical_to_runtime, by_verse,
+            )
+
+    ordered = dict(sorted(entries.items()))
+    frozen_by_verse = {
+        verse: tuple(sorted(locations)) for verse, locations in by_verse.items()
+    }
+    return AlignedCorpus(
+        MappingProxyType(ordered),
+        MappingProxyType(dict(sorted(canonical_to_runtime.items()))),
+        MappingProxyType(frozen_by_verse),
+        MappingProxyType(_surah_info(canonical_verses, canonical_counts)),
+    )
+
+
+def _bind_aligned_word(
+    path, line_number, canonical, sources,
+    entries, canonical_to_runtime, by_verse,
+) -> None:
+    if not canonical:
+        raise ValueError(f"{path}:{line_number}: source-only row")
+    public = canonical[0]
+    if public in entries:
+        raise ValueError(f"{path}:{line_number}: duplicate {public}")
+    for alias in canonical:
+        if alias in canonical_to_runtime:
+            raise ValueError(
+                f"{path}:{line_number}: duplicate canonical {alias}"
+            )
+        canonical_to_runtime[alias] = public
+    entries[public] = AlignedWord(public, canonical, sources)
+    by_verse.setdefault(public.verse, []).append(public)
+
+
+def _surah_info(canonical_verses, canonical_counts):
+    return {
+        str(surah): tuple(
+            canonical_counts.get(VerseRef(surah, ayah), 0)
+            for ayah in range(1, canonical_verses[surah] + 1)
+        )
+        for surah in sorted(canonical_verses)
+    }
+
+
+def _parts(value: str) -> tuple[int, int, int]:
+    parts = tuple(int(part) for part in value.split(":"))
+    if len(parts) != 3:
+        raise ValueError(f"expected a word ref, got {value!r}")
+    return parts
+
+
+def _location(value: str) -> Location:
+    return Location(*_parts(value))

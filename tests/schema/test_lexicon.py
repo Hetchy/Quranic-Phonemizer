@@ -24,14 +24,13 @@ SHARED = DATA.parents[1] / "shared"
 @pytest.fixture(scope="module")
 def lexicon():
     return load_lexicon(
-        DATA / "lexicon.yaml",
+        SHARED / "lexicon.yaml",
         affixes=load_affixes(SHARED / "morphology.yaml"),
     )
 
 
 def _text(name: str = "lexicon.yaml") -> str:
-    root = SHARED if name == "morphology.yaml" else DATA
-    return (root / name).read_text(encoding="utf-8")
+    return (SHARED / name).read_text(encoding="utf-8")
 
 
 def _load(tmp_path: Path, text: str):
@@ -129,6 +128,8 @@ def test_the_clitic_pronouns_are_shared_not_this_riwayah_s(lexicon):
     it would assert something false about every other riwayah."""
     assert (SHARED / "morphology.yaml").exists()
     assert not (DATA / "morphology.yaml").exists()
+    assert (SHARED / "lexicon.yaml").exists()
+    assert not (DATA / "lexicon.yaml").exists()
     assert lexicon.affixes.clitics and lexicon.affixes.proclitics
 
 

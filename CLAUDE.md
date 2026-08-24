@@ -32,6 +32,9 @@ reads, and what is actually pronounced under a boundary plan.
 - Use `docs/performance.md` for reproducible benchmarks, profiling findings,
   full-Quran resource measurements, and large-batch guidance.
 - `docs/warsh/status.md` tracks the active Warsh implementation state;
+  `docs/warsh/foundation-iteration-log.md` records adapter/test reconciliation;
+  `docs/warsh/foundation-test-reconciliation.md` records every promoted or
+  deferred Hafs-only semantic test row;
   `docs/warsh/test-audit.md` records the current-suite audit;
   `docs/warsh/test-refactor-plan.md` owns the target test tree and harness;
   `docs/warsh/warsh-test-placement.md` owns shared versus riwayah-specific

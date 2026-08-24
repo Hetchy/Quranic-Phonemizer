@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from tests.support import Case, R, Site, assert_case, case_runs, isolated
+from tests.support import Case, R, Site, assert_case, case_runs, isolated, pick
 
 
 CASES = (
@@ -23,6 +23,16 @@ CASES = (
     Case(id="iwad-negative", site=Site.shared("78:6", (4,)), read=isolated(),
          phonemes="m i h a: d a:",
          absent_char_rules={"@dagger_alif": R("madd_arid_lissukun")}),
+    # مَـَٔابٍ
+    Case(id="badal-overlap", site=Site(hafs=("13:29", (8,))), read=isolated(),
+         phonemes="m a ʔ a: b Q",
+         char_rules=pick(
+             hafs_uthmani={"ا": R("madd_badal", "madd_arid_lissukun")},
+             hafs_indopak={
+                 "@dagger_alif": R("madd_badal", "madd_arid_lissukun")
+             },
+         ),
+         sound_rules={"a:": R("madd_badal", "madd_arid_lissukun")}),
 )
 
 

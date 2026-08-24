@@ -17,15 +17,15 @@ from .passes import word_spans
 
 SCHEMA_VERSION = 1
 
-#: A vowel of the reading. Excludes the shadda, which records an assimilation
-#: between two letter names rather than a nucleus.
-HARAKAT = frozenset(
-    {"fatha", "damma", "kasra", "fathatan", "dammatan", "kasratan", "sukun"}
-)
-
 #: Letter, then an optional vowel: lowercase short, uppercase long, absent
 #: silent. The same notation the pausal lexemes are written in.
 _QUALITY = {"a": Quality.A, "u": Quality.U, "i": Quality.I}
+
+#: A vowel of the reading. Excludes the shadda, which can attest an
+#: assimilation between two compact letter names.
+HARAKAT = frozenset(
+    {"fatha", "damma", "kasra", "fathatan", "dammatan", "kasratan", "sukun"}
+)
 
 _LETTER_OF = {glyph: name for name, glyph in ABJAD.items()}
 
@@ -100,7 +100,7 @@ def _parse(spelled: str, path: Path):
             yield letter, Nucleus.silent()
 
 
-def spell_muqattaat(names: Muqattaat):
+def spell_muqattaat(names: Muqattaat, *, vocalized_compact: bool = False):
     """Build the pass. Bound by the riwayah like the other lexeme passes."""
 
     def apply(
@@ -114,7 +114,9 @@ def spell_muqattaat(names: Muqattaat):
         for index, cluster in enumerate(reading.clusters):
             cluster_spans[cluster.word].append((index, cluster))
         for word, clusters in enumerate(cluster_spans):
-            if not _is_muqattaat(clusters, names):
+            if not _is_muqattaat(
+                clusters, names, vocalized_compact=vocalized_compact
+            ):
                 continue
             span = draft_spans[word]
             if not span:
@@ -141,16 +143,28 @@ def spell_muqattaat(names: Muqattaat):
     return apply
 
 
-def _is_muqattaat(clusters, names: Muqattaat) -> bool:
-    """One of the named openings, voweled nowhere but its last letter. Read
-    from the clusters, where `ٱ` has not yet been given a helping vowel."""
+def _is_muqattaat(
+    clusters, names: Muqattaat, *, vocalized_compact: bool = False
+) -> bool:
+    """One of the closed named openings, read from its compact letters."""
     values = [cluster for _, cluster in clusters]
-    if not values or any(cluster.has(*HARAKAT) for cluster in values[:-1]):
+    if not values:
         return False
+    if any(cluster.has(*HARAKAT) for cluster in values[:-1]):
+        if not (
+            vocalized_compact
+            and any(cluster.has("madd") for cluster in values)
+        ):
+            return False
     skeleton = "".join(
         ABJAD[c.letter.value] for c in values if c.letter is not None
     )
-    return names.is_opening(skeleton)
+    candidates = (
+        (skeleton, "ا" + skeleton[1:])
+        if skeleton.startswith("ء")
+        else (skeleton,)
+    )
+    return any(names.is_opening(candidate) for candidate in candidates)
 
 
 def _spelled(clusters, names: Muqattaat) -> list | None:

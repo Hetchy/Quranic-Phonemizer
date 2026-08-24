@@ -311,7 +311,7 @@ def _rasm_outcome(context, cluster: Cluster, rows, track):
         return None
     if carried is not None:
         return carried
-    if cluster.has(*_VOWEL_ROLES):
+    if cluster.has(*_VOWEL_ROLES, "consonantal_sukun"):
         return None
     if lexeme.hamza_seat(context):
         # The seat spells no sound of its own; what it spells is the hamza

@@ -52,14 +52,14 @@ QAAF = {
 
 CASES = (
     # الم
-    Case(id="alif-lam-meem", site=Site(hafs=("2:1", (1,))), read=joining(),
+    Case(id="alif-lam-meem", site=Site.shared("2:1", (1,)), read=joining(),
          phonemes="ʔ a l i f l a: m̃ i: m",
          all_rules=R("idgham_shafawi", "izhar_shafawi", "madd_lazim"),
          char_rules=LAM_TO_MEEM,
          sound_rules={"a:": R("madd_lazim"), "m̃": R("idgham_shafawi"),
                       "i:": R("madd_lazim"), "m": R("izhar_shafawi")}),
     # المص
-    Case(id="alif-lam-meem-saad", site=Site(hafs=("7:1", (1,))), read=joining(),
+    Case(id="alif-lam-meem-saad", site=Site.shared("7:1", (1,)), read=joining(),
          phonemes="ʔ a l i f l a: m̃ i: m sˤ aˤ: d Q",
          all_rules=R("idgham_shafawi", "izhar_shafawi", "madd_lazim", "tafkheem", "qalqala_sughra"),
          char_rules=LAM_TO_MEEM | SAAD,
@@ -105,7 +105,7 @@ CASES = (
          sound_rules={"tˤ": R("tafkheem"), "aˤ:": R("madd_tabii", "tafkheem"),
                       "a:": R("madd_tabii")}),
     # طسم
-    Case(id="taa-seen-meem", site=Site(hafs=("26:1", (1,))), read=joining(),
+    Case(id="taa-seen-meem", site=Site.shared("26:1", (1,)), read=joining(),
          phonemes="tˤ aˤ: s i: m̃ i: m",
          all_rules=R("idgham_bi_ghunnah", "izhar_shafawi", "madd_tabii", "madd_lazim", "tafkheem"),
          char_rules=TAA | {
@@ -119,7 +119,7 @@ CASES = (
                       "i:[1]": R("madd_lazim"), "m̃": R("idgham_bi_ghunnah"),
                       "i:[2]": R("madd_lazim"), "m": R("izhar_shafawi")}),
     # طس
-    Case(id="taa-seen", site=Site(hafs=("27:1", (1,))), read=joining(),
+    Case(id="taa-seen", site=Site.shared("27:1", (1,)), read=joining(),
          phonemes="tˤ aˤ: s i: n",
          all_rules=R("izhar", "madd_tabii", "madd_lazim", "tafkheem"),
          char_rules=TAA | {
@@ -136,7 +136,7 @@ CASES = (
                      "سين/ن": R("izhar")},
          sound_rules={"a:": R("madd_tabii"), "i:": R("madd_lazim"), "n": R("izhar")}),
     # ص
-    Case(id="saad", site=Site(hafs=("38:1", (1,))), read=joining(),
+    Case(id="saad", site=Site.shared("38:1", (1,)), read=joining(),
          phonemes="sˤ aˤ: d Q", all_rules=R("madd_lazim", "tafkheem", "qalqala_sughra"),
          char_rules=SAAD,
          sound_rules={"sˤ": R("tafkheem"), "aˤ:": R("madd_lazim", "tafkheem"),
@@ -150,7 +150,7 @@ CASES = (
          sound_rules={"a:": R("madd_tabii"), "i:": R("madd_lazim"),
                       "m[2]": R("izhar_shafawi")}),
     # عسق
-    Case(id="ayn-seen-qaaf", site=Site(hafs=("42:2", (1,))), read=joining(),
+    Case(id="ayn-seen-qaaf", site=Site.shared("42:2", (1,)), read=joining(),
          phonemes="ʕ a j ŋ s i: ŋ q aˤ: f",
          all_rules=R("ikhfaa", "madd_lazim", "tafkheem"),
          char_rules={"عين/ي": R("madd_lazim"),
@@ -162,12 +162,12 @@ CASES = (
                       "ŋ[2]": R("ikhfaa", "tafkheem"),
                       "q": R("tafkheem"), "aˤ:": R("madd_lazim", "tafkheem")}),
     # ق
-    Case(id="qaaf", site=Site(hafs=("50:1", (1,))), read=joining(),
+    Case(id="qaaf", site=Site.shared("50:1", (1,)), read=joining(),
          phonemes="q aˤ: f", all_rules=R("madd_lazim", "tafkheem"),
          char_rules=QAAF,
          sound_rules={"q": R("tafkheem"), "aˤ:": R("madd_lazim", "tafkheem")}),
     # ن
-    Case(id="noon", site=Site(hafs=("68:1", (1,))), read=joining(),
+    Case(id="noon", site=Site.shared("68:1", (1,)), read=joining(),
          phonemes="n u: n", all_rules=R("izhar", "madd_lazim"),
          char_rules={"نون/@madd": R("madd_lazim"),
                      "نون/ن[2]": R("izhar")},

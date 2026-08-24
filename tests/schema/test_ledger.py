@@ -191,7 +191,7 @@ def test_rejects_a_ledger_authored_for_another_riwayah(tmp_path: Path) -> None:
     for another reading supplied its facts to this one."""
     path = tmp_path / "ledger.yaml"
     path.write_text("schema_version: 1\nriwayah: warsh\n", encoding="utf-8")
-    with pytest.raises(LedgerError, match="not a Riwayah"):
+    with pytest.raises(LedgerError, match="authored for warsh, loaded as hafs"):
         load_ledger(path, riwayah=Riwayah.HAFS)
 
 

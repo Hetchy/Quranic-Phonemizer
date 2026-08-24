@@ -9,7 +9,14 @@ from dataclasses import dataclass
 from enum import StrEnum
 from typing import TypeAlias
 
-from .address import GraphemeId, Location, Script, SlotId, VerseRef
+from .address import (
+    GraphemeId,
+    Location,
+    Script,
+    SlotId,
+    SourceGraphemeRef,
+    VerseRef,
+)
 
 
 class GraphemeClass(StrEnum):
@@ -38,6 +45,8 @@ class Grapheme:
     cls: GraphemeClass
     index: int
     """Ordinal within its word. The frozen baseline's `source_letter_index`."""
+    source: SourceGraphemeRef | None = None
+    """Exact external-source identity when public and source refs differ."""
 
 
 class SlotFact(StrEnum):

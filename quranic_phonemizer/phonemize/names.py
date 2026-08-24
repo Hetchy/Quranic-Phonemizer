@@ -15,7 +15,10 @@ from ..model.address import (
 from ..model.definitions import RULE_DEFINITIONS, SILENCE_DEFINITIONS
 
 #: Hafs is Uthmani by default; a second riwayah adds its own row.
-DEFAULT_SCRIPT: dict[Riwayah, Script] = {Riwayah.HAFS: Script.UTHMANI}
+DEFAULT_SCRIPT: dict[Riwayah, Script] = {
+    Riwayah.HAFS: Script.UTHMANI,
+    Riwayah.WARSH: Script.UTHMANI,
+}
 
 
 def supported_riwayat() -> tuple[str, ...]:

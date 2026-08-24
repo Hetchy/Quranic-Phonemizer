@@ -9,26 +9,26 @@
 > in `codepoint-audit.md`, and public contracts belong in their API
 > documentation. This is not a changelog or a domain specification.
 
-The Warsh runtime has not been implemented. The domain, variant, and phoneme
-audits are sufficiently complete to plan the work. A **concluded** research
-status means that a decision is ready to implement, not that runtime support
-exists. Authenticated corpus evidence, stronger primary sources, and executable
-validation may still correct a concluded decision.
+The Warsh foundation runtime is implemented: canonical/public alignment,
+selected-source provenance, the King Fahd Uthmani adapter, package composition,
+and the shared-rule baseline are executable. Warsh-specific rule verticals and
+variants are not part of that baseline. A **concluded** research status means
+that a decision is ready to implement, not that its runtime vertical exists.
 
 ## Current state
 
 | Workstream | State | Current result |
 | --- | --- | --- |
-| Source and codepoint audit | Concluded | Sequence-aware adapter requirements identified; runtime adapter not built |
+| Source and codepoint audit | Complete | All 62 retained scalars and the foundation sequence families are accepted and fixture-backed |
 | Warsh domain research | Concluded | Rule families, boundary behavior, and exception sets audited for implementation planning |
 | Variant design | Concluded | Public scopes, values, defaults, registers, and interactions are recorded in [`../variants.md`](../variants.md) |
 | Phoneme and rule vocabulary | Concluded | Required additions and reused sound primitives identified; not implemented |
 | Cross-riwayah variant audit | Concluded | Shared IDs and riwayah-specific defaults and site scopes are recorded in [`../variants.md`](../variants.md) |
 | Test organization | Concluded | Compact semantic tree, projection-aware ownership, RAR reconciliation, coverage registry, and duplicate removal are complete; Warsh fixtures can extend these owners |
-| Canonical and model changes | In progress | The full RAR projection and shared rule catalogue are merged; the Warsh-only model additions remain below |
-| Warsh corpus integration | Not started | No production corpus package, adapter, or address normalization exists |
-| Warsh rules | Not started | No Warsh classifier set or authored exception data exists |
-| Full-corpus conformance | Not started | No end-to-end Warsh output exists to validate |
+| Canonical and model changes | In progress | Source provenance and the shared package seam are complete; Warsh-only sound and rule additions remain below |
+| Warsh corpus integration | Complete | The pinned alignment covers 77,425 source words and 77,433 canonical words/spans with typed provenance |
+| Warsh rules | In progress | The shared-rule baseline is bound; Warsh-specific classifiers and authored registers remain unimplemented |
+| Full-corpus conformance | Not started | No Warsh-specific default-profile conformance baseline exists yet |
 
 ## V2 specification map
 
@@ -93,9 +93,12 @@ validation may still correct a concluded decision.
 - RAR already supplies `madd_badal`, `madd_iwad`, `madd_silah`, and the general
   `iltiqa_haraka`. Warsh adds `taqlil`, `taghliz`, `naql`, and
   `madd_leen_mahmuz`; `imala` classifies kubra.
-- Badal, iwad, and silah are additive identities: Warsh badal also carries its
-  effective madd, a stopped fathatan has `madd_iwad + madd_tabii`, and pronoun
-  silah has `madd_silah` plus `madd_tabii` or `madd_munfasil`.
+- Warsh badal replaces ordinary `madd_tabii`. In both Hafs and Warsh,
+  `madd_badal` remains present when waqf also establishes
+  `madd_arid_lissukun`; independently applicable `madd_lazim` or
+  `madd_muttasil` may overlap as well. A stopped fathatan has
+  `madd_iwad + madd_tabii`, and pronoun silah has `madd_silah` plus
+  `madd_tabii` or `madd_munfasil`.
 - `Rule` remains a global semantic vocabulary, but every riwayah binds its own
   `RuleSet`. Each classifier declares the complete set of rule IDs it can
   emit, and `tajweed_rules(riwayah)` is derived from those bound emitted sets.
@@ -129,18 +132,9 @@ second riwayah now requires.
 7. Replace the pronoun-specific `is_silah` model name with a neutral
    joined-only-long shape usable by pronoun silah, Warsh yaa zawaid, and mim
    al-jam'.
-8. Build a sequence-aware Warsh script adapter and checked transformation
-   manifest. Do not introduce universal scalar mappings for context-dependent
-   marks.
-9. Integrate a Warsh riwayah package through the existing composition boundary
-   and refine that tentative boundary only when real implementation evidence
-   requires it.
-10. Give every classifier a declared set of rule IDs it can emit. Build
+8. Give every classifier a declared set of rule IDs it can emit. Build
     `tajweed_rules(riwayah)` from the classifiers bound by that riwayah rather
     than from one nominal rule per classifier or from the global rule enum.
-11. Generate a complete source-to-canonical address alignment for the selected
-    Warsh artifact and preserve typed source provenance separately from public
-    canonical locations.
 
 ## Test work
 
@@ -153,7 +147,7 @@ rule assertions. The audit remains in
 [`test-refactor-plan.md`](test-refactor-plan.md), and Warsh file ownership in
 [`warsh-test-placement.md`](warsh-test-placement.md).
 
-- extend vetted shared cases to Warsh after source projection exists;
+- keep the vetted shared cases green for both packaged riwayat;
 - preserve executable inventories of every researched exception; and
 - implement new Warsh fixed behavior before adding public variants last.
 
@@ -169,9 +163,9 @@ Exact PR boundaries may change, but each unit must remain independently
 reviewable:
 
 1. Audit and reorganize the existing tests.
-2. Add the Warsh source artifact, full source-to-canonical alignment, minimal
-   source-provenance plumbing, script adapter, and vetted shared-rule tests.
-   Do not add a new Warsh tajweed classifier in this step.
+2. The Warsh source artifact, full source-to-canonical alignment, source
+   provenance, script adapter, package, and vetted shared-rule tests form the
+   completed foundation. No Warsh-specific classifier belongs to this unit.
 3. Complete the shared model foundations for inclination qualities,
    riwayah-scoped emitted-rule declarations, rule attribution, effective madd
    classification, and neutral joined-only longs.

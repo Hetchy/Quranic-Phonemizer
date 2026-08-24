@@ -1,8 +1,4 @@
-"""Lexical facts: the name of God, and the waw that is written but never said.
-
-Both are places where one script writes what the other leaves to knowledge,
-so both are derivations, never a `Script` consulted directly.
-"""
+"""Lexical facts recovered independently of a script's written detail."""
 from __future__ import annotations
 
 from ...model.canon import ABJAD, CanonLetter, Nucleus, Onset, Quality
@@ -11,6 +7,26 @@ from .vocabulary import Context
 #: The name is a lam before a haa, and the lam before it or the wasl hamza.
 ALLAH_TAIL = (CanonLetter.LAM, CanonLetter.HEH)
 ALLAH_HEAD = (CanonLetter.LAM, CanonLetter.HAMZA)
+CONTRACTED_ALLAH_PREFIXES = ((), (CanonLetter.FA,), (CanonLetter.WAW,))
+
+
+def contracted_divine_name(
+    letters: list[CanonLetter], nuclei: list, onsets: list, lexicon
+) -> list[int]:
+    """The second lam in `لله`, whose shadda and fatha are not always drawn."""
+    del onsets
+    out: list[int] = []
+    for index in range(1, len(letters) - 1):
+        if (
+            letters[index - 1:index + 2]
+            == [CanonLetter.LAM, CanonLetter.LAM, CanonLetter.HEH]
+            and tuple(letters[:index - 1]) in CONTRACTED_ALLAH_PREFIXES
+            and nuclei[index - 1].quality is Quality.I
+            and nuclei[index].is_silent
+            and lexicon.is_divine_name(_tail(letters, index))
+        ):
+            out.append(index)
+    return out
 
 
 def divine_name(
@@ -65,6 +81,26 @@ def allah_long_a(
 #: What the divine name's short `a` becomes. A value, not a transform: the
 #: only relengthening there is has one answer, and `Nucleus` is frozen.
 RELENGTHENED_A = Nucleus.long(Quality.A)
+
+
+def unmarked_layl(
+    letters: list[CanonLetter], nuclei: list, onsets: list
+) -> list[int]:
+    """The lexical lam of `al-layl` when its shadda and fatha are implicit."""
+    shape = (
+        CanonLetter.HAMZA,
+        CanonLetter.LAM,
+        CanonLetter.YA,
+        CanonLetter.LAM,
+    )
+    if (
+        tuple(letters) == shape
+        and onsets[0] is Onset.WASL
+        and nuclei[1].is_silent
+        and nuclei[2].is_silent
+    ):
+        return [1]
+    return []
 
 
 #: The two particles the rasm joins to the word behind them: the vocative

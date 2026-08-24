@@ -1,0 +1,87 @@
+# King Fahd Warsh scalar inventory. Sequence-sensitive overrides live in the
+# owning adapter; every retained scalar is nevertheless declared here.
+schema_version: 1
+script: uthmani
+riwayah: warsh
+
+letters:
+  "ب": BA
+  "ت": TA
+  "ث": THA
+  "ج": JEEM
+  "ح": HA
+  "خ": KHA
+  "د": DAL
+  "ذ": THAL
+  "ر": RA
+  "ز": ZAY
+  "س": SEEN
+  "ش": SHEEN
+  "ص": SAD
+  "ض": DAD
+  "ط": TAH
+  "ظ": ZAH
+  "ع": AIN
+  "غ": GHAIN
+  "ف": FA
+  "ق": QAF
+  "ك": KAF
+  "ل": LAM
+  "م": MEEM
+  "ن": NOON
+  "ه": HEH
+  "ة": TAA_MARBUTA
+  "ا": {letter: ALIF, seat: true}
+  "و": {letter: WAW, dagger_host: true, seat: true}
+  "ي": {letter: YA, seat: true}
+  "ى": {letter: YA, dagger_host: true, bare_rasm: true, seat: true}
+  "ے": {letter: YA, dagger_host: true, bare_rasm: true, seat: true}
+  "ء": HAMZA
+  "أ": HAMZA
+  "إ": HAMZA
+  "ؤ": HAMZA
+  "ئ": HAMZA
+
+seats: ["ـ"]
+combining_hamza: ["ٔ", "ٕ"]
+
+evidences:
+  "َ": {fact: VOWEL_QUALITY, cls: haraka, role: fatha,
+       value: {kind: Short, quality: A}}
+  "ُ": {fact: VOWEL_QUALITY, cls: haraka, role: damma,
+       value: {kind: Short, quality: U}}
+  "ِ": {fact: VOWEL_QUALITY, cls: haraka, role: kasra,
+       value: {kind: Short, quality: I}}
+  "ً": {fact: VOWEL_QUALITY, cls: tanween, role: fathatan,
+       derivation: tanween}
+  "ٌ": {fact: VOWEL_QUALITY, cls: tanween, role: dammatan,
+       derivation: tanween}
+  "ٍ": {fact: VOWEL_QUALITY, cls: tanween, role: kasratan,
+       derivation: tanween}
+  "ٗ": {fact: VOWEL_QUALITY, cls: tanween, role: fathatan,
+       derivation: tanween}
+  "ٞ": {fact: VOWEL_QUALITY, cls: tanween, role: dammatan,
+       derivation: tanween}
+  "ٖ": {fact: VOWEL_QUALITY, cls: tanween, role: kasratan,
+       derivation: tanween}
+  "ْ": {fact: VOWEL_ABSENCE, cls: haraka, role: sukun,
+       value: {kind: Silent}}
+  "ّ": {fact: ONSET, cls: shadda, role: shadda,
+       derivation: gemination}
+  "ٰ": {fact: VOWEL_LENGTH, cls: small_vowel, role: dagger,
+       derivation: length_a}
+  "ٔ": {fact: LETTER, cls: base, role: combining_hamza, value: HAMZA}
+  "ٕ": {fact: LETTER, cls: base, role: combining_hamza, value: HAMZA}
+  "ۥ": {fact: LETTER, cls: base, role: small_waw, value: WAW, omitted: true}
+  "ۦ": {fact: LETTER, cls: base, role: small_ya, value: YA, omitted: true}
+  "ۧ": {fact: LETTER, cls: base, role: small_ya, value: YA, omitted: true}
+  "ۨ": {fact: LETTER, cls: base, role: mini_noon, value: NOON, omitted: true}
+
+decorates:
+  "ٓ": {slot: long_nucleus, cls: madd_sign, role: madd}
+  "۟": {slot: host, cls: silence_sign, role: silence_sign, silences: true}
+  "۪": {slot: host, cls: annotation, role: marked_vowel}
+  "۬": {slot: host, cls: annotation, role: marked_hamza}
+  "ۢ": {slot: host, cls: annotation, role: mini_meem, attests: true}
+
+structural: [" ", "ۖ", "۩"]
