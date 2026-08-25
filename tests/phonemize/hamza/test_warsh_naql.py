@@ -22,9 +22,12 @@ CASES = (
         "joined": Expect(
             read=explicit(ibtidaa=1, wasl=2),
             phonemes=("q aˤ d a", "f l a ħ a"),
-            char_rules={"ا": R("naql"), "@fatha[2]": R("naql")},
+            char_rules={"ا": R("naql")},
             sound_rules={"a[1]": R("naql")},
-            absent_char_rules={"د": R("qalqala_sughra"), "ف": R("naql")},
+            absent_char_rules={
+                "د": R("qalqala_sughra"), "@fatha[2]": R("naql"),
+                "ف": R("naql"),
+            },
         ),
         "stopped-before": Expect(
             read=explicit(ibtidaa=1, waqf=(1, 2)),
@@ -50,15 +53,16 @@ CASES = (
         site=Site(warsh=("77:12", (2, 3))),
         read=explicit(ibtidaa=2, waqf=3),
         phonemes=("j a w m i n u", "ʒʒ i l a t"),
-        char_rules={"ا": R("naql"), "@round_zero": R("naql")},
+        char_rules={"ا": R("naql")},
         sound_rules={"u": R("naql")},
+        absent_char_rules={"@round_zero": R("naql")},
     ),
-    # Warsh: بَغَتِ
+    # Warsh: بَغَتِ اِحْد۪يٰهُمَا
     Case(
         id="feminine-taa",
-        site=Site(warsh=("49:9", (9,))),
+        site=Site(warsh=("49:9", (9, 10))),
         read=explicit(ibtidaa=9, waqf=10),
-        phonemes="b a ɣ aˤ t i",
+        phonemes=("b a ɣ aˤ t i", "ħ d a j a: h u m a:"),
         sound_rules={"i": R("naql")},
         absent_sound_rules={"t": R("naql")},
     ),
@@ -68,8 +72,9 @@ CASES = (
         site=Site(warsh=("6:151", (2, 3))),
         read=explicit(ibtidaa=2, wasl=3),
         phonemes=("t a ʕ a: l a w a", "t l u"),
-        char_rules={"ا[3]": R("naql"), "@fatha[4]": R("naql")},
+        char_rules={"ا[3]": R("naql")},
         sound_rules={"a[3]": R("naql")},
+        absent_char_rules={"@fatha[4]": R("naql")},
         absent_sound_rules={"w": R("naql")},
     ),
     # Warsh: اِ۬لَارْضِ

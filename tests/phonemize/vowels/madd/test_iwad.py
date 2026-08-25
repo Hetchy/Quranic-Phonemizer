@@ -71,11 +71,16 @@ CASES = (
         "joined": Expect(read=joining(), phonemes="ɣ aˤ f u: rˤ u n"),
         "stopped": Expect(read=isolated(), phonemes="ɣ aˤ f u: rˤ"),
     }),
-    # Hafs: قَوْمٍ
-    # Warsh: قَوْمٍ
-    StateCase(id="kasratan-negative", site=Site.shared("13:7", (14,)), states={
-        "joined": Expect(read=joining(), phonemes="q aˤ w m i n"),
-        "stopped": Expect(read=isolated(), phonemes="q aˤ w m"),
+    # Hafs: لِقَوْمٍ
+    # Warsh: لِقَوْمٍ
+    StateCase(id="kasratan-negative", site=Site.shared("5:41", (23,)), states={
+        "joined": Expect(
+            read=joining(),
+            phonemes=pick(
+                hafs="l i q aˤ w m i n", warsh="l i q aˤ w m i n a:"
+            ),
+        ),
+        "stopped": Expect(read=isolated(), phonemes="l i q aˤ w m"),
     }),
 )
 

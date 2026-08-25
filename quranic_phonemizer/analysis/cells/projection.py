@@ -319,7 +319,11 @@ def _place_rules(words: tuple[CellWord, ...], facts: AnalysisFacts,
         if isinstance(edge, Merged):
             targets = _column_targets(words, edge.sound, presenters=True)
         elif isinstance(edge, Silenced):
-            targets = _silenced_targets(columns, edge, slot_of_unit)
+            targets = (
+                []
+                if rule == Rule.NAQL.value and edge.aspect is Aspect.VOWEL
+                else _silenced_targets(columns, edge, slot_of_unit)
+            )
         elif isinstance(edge, (Hosted, Insertion)):
             targets = _column_targets(words, edge.sound)
         else:

@@ -141,12 +141,16 @@ def _silenced_units(facts, tok) -> dict[int, int]:
     for edge in facts.silences:
         if edge.by is None:
             continue
+        rule = facts.occurrences[edge.by].rule
         unit = tok.roles.letter.get(edge.slots[0])
         if edge.aspect is Aspect.VOWEL:
+            if rule is Rule.NAQL:
+                carrier = tok.roles.carrier.get(edge.slots[0])
+                if carrier is not None and carrier != unit:
+                    out.setdefault(carrier, edge.by)
+                continue
             unit = tok.roles.vowel.get(edge.slots[0], unit)
-            if facts.occurrences[edge.by].rule in (
-                Rule.WAQF_SILAH_DROP, Rule.NAQL,
-            ):
+            if rule is Rule.WAQF_SILAH_DROP:
                 carrier = tok.roles.carrier.get(edge.slots[0])
                 if carrier is not None:
                     out.setdefault(carrier, edge.by)

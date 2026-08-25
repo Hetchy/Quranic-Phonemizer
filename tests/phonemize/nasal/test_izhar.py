@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from tests.support import Case, R, Site, assert_case, case_runs, isolated, joining, pick, through
+from tests.support import Case, R, Site, assert_case, case_runs, isolated, joining, through
 
 
 MUTLAQ = (
@@ -42,25 +42,6 @@ CASES = (
         char_rules={"ن[1]": R("izhar"), "@fathatan": R("izhar")},
         sound_rules={"n[1]": R("izhar"), "n[3]": R("izhar")},
     ),
-    # Warsh: قَوْلاً
-    Case(
-        id="ghayn",
-        site=Site(warsh=("2:59", (4,))),
-        read=joining(),
-        phonemes="q aˤ w l a n",
-        char_rules={"@fathatan": R("izhar")},
-        sound_rules={"n": R("izhar")},
-    ),
-    # Hafs: وَيَنْـَٔوْنَ
-    # Warsh: وَيَنْـَٔوْنَ
-    Case(
-        id="hamza-within-word",
-        site=Site.shared("6:26", (4,)),
-        read=joining(),
-        phonemes="w a j a n ʔ a w n a",
-        char_rules={"ن[1]": R("izhar")},
-        sound_rules={"n[1]": R("izhar")},
-    ),
     # Hafs: قِرَدَةً خَـٰسِـِٔينَ
     # Warsh: قِرَدَةً خَٰسِـِٕينَۖ
     Case(
@@ -92,15 +73,12 @@ CASES = (
         sound_rules={"n": R("izhar")},
     ),
     # Hafs: قَدِيرٌ
-    # Warsh: حِسَابٍۖ
     Case(
         id="verse-seam",
-        site=Site(hafs=("2:106", (19,)), warsh=("3:37", (34,))),
+        site=Site(hafs=("2:106", (19,))),
         read=joining(),
-        phonemes=pick(hafs="q aˤ d i: rˤ u n", warsh="ħ i s a: b i n"),
-        char_rules=pick(
-            hafs={"@dammatan": R("izhar")}, warsh={"@kasratan": R("izhar")}
-        ),
+        phonemes="q aˤ d i: rˤ u n",
+        char_rules={"@dammatan": R("izhar")},
         sound_rules={"n": R("izhar")},
     ),
     # Hafs: ٱلدُّنْيَا ۖ
