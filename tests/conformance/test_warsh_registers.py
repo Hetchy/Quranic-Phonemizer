@@ -322,10 +322,8 @@ def _naql_boundaries():
 
 
 def test_the_naql_latent_register_reconciles_with_canonical_hosts():
-    """Every supplied latent qata stands after an eligible host: the written
-    moved haraka, a tanwin, or (at one edge) a spelled opening. The research
-    doc's 1,550/180 subtotals are not reproducible from the supplied
-    families; see docs/conformance.md."""
+    """Every supplied latent qata stands after an eligible host: a written
+    moved haraka, a tanwin, or one spelled opening at a verse edge."""
     within, edge = _naql_boundaries()
     assert sum(within.values()) == 1868
     assert within == Counter({
@@ -384,8 +382,8 @@ def test_a_full_hamza_after_a_sakin_verse_end_is_only_kitabiyah():
 
 
 def test_the_article_naql_register_is_the_documented_1307():
-    """1,283 written article alifs, 22 suppressed-alif prefix forms, and the
-    two interrogative tokens; the reviewed long bases cover 214 tokens."""
+    """Written article alifs, suppressed-alif prefix forms, and the two
+    interrogative tokens close the register with the reviewed long bases."""
     counts: Counter = Counter()
     longs = 0
     for location, entry in warsh_corpus().entries.items():

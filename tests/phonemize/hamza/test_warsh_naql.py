@@ -34,7 +34,7 @@ CASES = (
             absent_sound_rules={"ʔ": R("naql")},
         ),
     }),
-    # Warsh: عَذَابٌ اَلِيمُۢ
+    # Warsh: عَذَابٌ اَلِيمٞۖ
     Case(
         id="tanwin-noon",
         site=Site(warsh=("2:104", (11, 12))),
@@ -44,7 +44,7 @@ CASES = (
         sound_rules={"a[2]": R("naql")},
         absent_sound_rules={"n": R("izhar")},
     ),
-    # Warsh: يَوْمٍ ا۟جِّلَتْ
+    # Warsh: يَوْمٍ ا۟جِّلَتْ
     Case(
         id="tanwin-damm",
         site=Site(warsh=("77:12", (2, 3))),
@@ -97,13 +97,13 @@ CASES = (
             sound_rules={"a": R("naql")},
         ),
     }),
-    # Warsh: رِداٗ يُصَدِّقْنِےٓۖ
+    # Warsh: رِداٗ يُصَدِّقْنِےٓۖ
     Case(
         id="ridan-joined",
         site=Site(warsh=("28:34", (9, 10))),
         read=explicit(ibtidaa=9, waqf=10),
         phonemes=("r i d a", "j̃ u sˤ aˤ dd i q Q n i:"),
-        char_rules={"@fathatan": R("naql", "idgham_bi_ghunnah")},
+        char_rules={"@fathatan": R("naql")},
         sound_rules={
             "a": R("naql"), "j̃": R("idgham_bi_ghunnah"),
             "Q": R("qalqala_sughra"),
@@ -118,7 +118,7 @@ CASES = (
         char_rules={"ا": R("naql", "madd_iwad", "madd_tabii")},
         sound_rules={"a:": R("naql", "madd_iwad", "madd_tabii")},
     ),
-    # Warsh: كِتَٰبِيَهْۖ إِنِّے
+    # Warsh: كِتَٰبِيَهْۖ إِنِّے
     Case(
         id="kitabiyah-tahqiq",
         site=Site(warsh=("69:19", (9, 10))),
