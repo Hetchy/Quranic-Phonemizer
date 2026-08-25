@@ -18,6 +18,7 @@ from ...rules.boundary import (
 )
 from ...rules.idgham import Idgham
 from ...rules.lam_shamsiyyah import ArticleLam, ArticleShape
+from ...rules.lam import LamWeight
 from ...rules.madd import (
     IltiqaShortening,
     MaddClass,
@@ -45,6 +46,7 @@ from ...rules.wasl import (
 )
 from .resources import khilaf, lexicon, rule_tables
 from .hamza_meetings import meeting_rows, rows_by_target
+from .lam import PROFILE as LAM_PROFILE
 
 #: Warsh repairs a collision with damm when the elided word starts on an
 #: original damm; the shared kasra and fatha defaults stand elsewhere.
@@ -126,6 +128,7 @@ def _build() -> RuleSet:
                 IwadLength(),
             ),
             Phase.COLOUR: (
+                LamWeight(profile=LAM_PROFILE),
                 Emphasis(weight=weight),
                 Tarqeeq(weight=weight),
                 Inclination(),

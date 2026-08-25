@@ -347,7 +347,7 @@ class Rule(StrEnum):
     WAQF_SILAH_DROP = "waqf_silah_drop"
     WAQF_TAA_MARBUTA = "waqf_taa_marbuta"
     PAUSAL_ALIF = "pausal_alif"
-
+    TAGHLIZ = "taghliz"
 
 #: A prosthetic hamza started on, one rule per helping vowel.
 HAMZA_WASL_START: frozenset[Rule] = frozenset(

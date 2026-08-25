@@ -85,9 +85,13 @@ RULE_DEFINITIONS: dict[Rule, tuple[str, str, str]] = {
         "Tafkheem", "تفخيم",
         "The letter is sounded heavy, and a fatha on it with it.",
     ),
+    Rule.TAGHLIZ: (
+        "Taghliz", "تغليظ",
+        "A lam and its dependent open vowel are sounded heavy.",
+    ),
     Rule.TARQEEQ: (
         "Tarqeeq", "ترقيق",
-        "The raa is sounded light.",
+        "The letter is sounded light.",
     ),
     Rule.TAQLIL: (
         "Taqlil", "تقليل",

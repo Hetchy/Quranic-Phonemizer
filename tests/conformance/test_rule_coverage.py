@@ -62,7 +62,9 @@ SAMPLE = (
 #:
 #: `naql` is Warsh-only: no Hafs classifier emits it, and
 #: `test_naql_is_warsh_bound_and_fires` asserts the Warsh side.
-DEFERRED: set[Rule] = {Rule.NAQL, Rule.MADD_LEEN_MAHMUZ, Rule.TAQLIL}
+DEFERRED: set[Rule] = {
+    Rule.NAQL, Rule.MADD_LEEN_MAHMUZ, Rule.TAQLIL, Rule.TAGHLIZ,
+}
 
 
 def _fired(packed, hafs, surah, ayah):
