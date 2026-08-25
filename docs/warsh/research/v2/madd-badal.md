@@ -47,11 +47,13 @@ For a realized hamza plus carrier:
   adjacency and the occurrence's source slot rather than by tagging `/ʔ/`.
 
 When the hamza is transformed, the transformation and applicable madd
-occurrences retain their own identities. `ibdal_hamza` names the replaced
-hamza as its source and the carrier it creates or lengthens as its host. The
-result sound exposes all applicable rules; visible placements follow sound
-ownership, so tests must not demand that every rule be copied onto every
-source glyph participating in the derivation.
+occurrences retain their own identities. `ibdal_hamza` names the sound that
+replaces the hamza; `madd_badal` independently names the after-hamza long. In
+`يُوَ۬اخِذُ`, therefore, `/w/` receives `ibdal_hamza` while `/a:/`
+receives `madd_badal`. Where ibdal itself creates or lengthens a carrier, that
+long instead exposes `ibdal_hamza`. Visible placements follow sound ownership,
+so tests must not demand that every rule be copied onto every source glyph
+participating in the derivation.
 
 The pausal overlap is visible in `مَـَٔابٖۖ`, selected source `13:30:8`,
 canonical `13:29:8`:

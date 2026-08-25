@@ -37,7 +37,15 @@ class SuppliedIbdal:
         slot = near.slot(at)
         if slot is None or Annotation.IBDAL not in slot.annotations:
             return None
-        aspect = Aspect.VOWEL if slot.nucleus.is_long else Aspect.CONSONANT
+        # A BADAL long belongs to the carrier after the changed hamza.  When
+        # the selected-script projection folds both into one slot (as in
+        # `يُوَ۬اخِذُ`), ibdal still names the replacement consonant, not
+        # that following long vowel.
+        aspect = (
+            Aspect.CONSONANT
+            if Annotation.BADAL in slot.annotations
+            else Aspect.VOWEL if slot.nucleus.is_long else Aspect.CONSONANT
+        )
         return Verdict(
             Occurrence(mint(Rule.IBDAL_HAMZA, at), Rule.IBDAL_HAMZA, (at,)),
             (Classify(at, aspect),),

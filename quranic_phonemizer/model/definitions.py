@@ -131,7 +131,11 @@ RULE_DEFINITIONS: dict[Rule, tuple[str, str, str]] = {
     ),
     Rule.MADD_BADAL: (
         "Madd Badal", "مد بدل",
-        "A long vowel on a hamza stands in for a second hamza the reading does not say.",
+        "A long vowel keeps its after-hamza identity when that hamza is realized or changed.",
+    ),
+    Rule.MADD_LEEN_MAHMUZ: (
+        "Madd Leen Mahmuz", "مد اللين المهموز",
+        "A quiescent waw or yaa after fatha is extended before a hamza in the same word.",
     ),
     Rule.MADD_SILAH: (
         "Madd Silah", "مد صلة",

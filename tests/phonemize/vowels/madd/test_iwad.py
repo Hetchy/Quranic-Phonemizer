@@ -63,6 +63,7 @@ CASES = (
                         "@inserted/ا": R("madd_iwad", "madd_tabii")},
             sound_rules={"a:[1]": R("madd_muttasil"),
                          "a:[2]": R("madd_iwad", "madd_tabii")},
+            absent_sound_rules={"a:[2]": R("madd_badal")},
         ),
     }),
     # Hafs: غَفُورٌ
@@ -72,9 +73,9 @@ CASES = (
         "stopped": Expect(read=isolated(), phonemes="ɣ aˤ f u: rˤ"),
     }),
     # Hafs: لِقَوْمٍ
-    # Warsh: لِقَوْمٍ
-    StateCase(id="kasratan-negative", site=Site.shared("5:41", (23,)), states={
-        "joined": Expect(read=joining(), phonemes="l i q aˤ w m i n"),
+    # Warsh: لِقَوْمٖ
+    StateCase(id="kasratan-negative", site=Site.shared("2:118", (23,)), states={
+        "joined": Expect(read=joining(), phonemes="l i q aˤ w m i"),
         "stopped": Expect(read=isolated(), phonemes="l i q aˤ w m"),
     }),
 )

@@ -10,7 +10,6 @@ from enum import StrEnum
 
 from .address import Location, Riwayah, SlotId, SpellingRunId, VariantSelection
 
-
 class CanonLetter(StrEnum):
     """The 28 letters, plus HAMZA and TAA_MARBUTA.
 
@@ -119,6 +118,8 @@ class Annotation(StrEnum):
     lexical `ردءا`."""
     IBDAL = "ibdal"
     """This slot is the selected script's replacement for a lexical hamza."""
+    BADAL = "badal"
+    """This long retains an after-hamza origin after an independent change."""
 
 
 class VowelForm(StrEnum):
@@ -331,6 +332,7 @@ class Rule(StrEnum):
     MADD_LEEN = "madd_leen"
     MADD_IWAD = "madd_iwad"
     MADD_BADAL = "madd_badal"
+    MADD_LEEN_MAHMUZ = "madd_leen_mahmuz"
     MADD_SILAH = "madd_silah"
 
     IBDAL_HAMZA = "ibdal_hamza"
@@ -388,9 +390,8 @@ CLASSIFICATION_ONLY: frozenset[Rule] = frozenset(
         Rule.MADD_SILAH,
         Rule.MADD_MUTTASIL,
         Rule.MADD_MUNFASIL,
-        Rule.MADD_LAZIM,
-        Rule.MADD_ARID_LISSUKUN,
-        Rule.MADD_LEEN,
+        Rule.MADD_LAZIM, Rule.MADD_ARID_LISSUKUN,
+        Rule.MADD_LEEN, Rule.MADD_LEEN_MAHMUZ,
         Rule.IBDAL_HAMZA,
         Rule.IMALA,
         Rule.TASHIL,

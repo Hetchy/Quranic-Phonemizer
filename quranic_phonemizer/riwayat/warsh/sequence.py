@@ -141,6 +141,7 @@ def _project_orthographic_silence(text, entries) -> None:
         ("إِيْه", 3),
         ("إِےْ", 3),
         ("اْيْـٔ", 1),
+        ("اْےْء", 1),
     ):
         start = text.find(pattern)
         if start >= 0:
@@ -152,7 +153,11 @@ def _project_orthographic_silence(text, entries) -> None:
     if start >= 0:
         _silence_mark(entries, start + 3)
 
-    for pattern, relative in (("ليْل", 2), ("اْيْـٔ", 3)):
+    for pattern, relative in (
+        ("ليْل", 2),
+        ("اْيْـٔ", 3),
+        ("اْےْء", 3),
+    ):
         start = text.find(pattern)
         if start >= 0:
             _consonantal_sukun(entries, start + relative)
@@ -197,6 +202,7 @@ def _entries(inventory: Inventory, text: str) -> list:
     entries = [inventory.classify(char) for char in text]
     _release_combining_hamza_seats(inventory, text, entries)
     wasl = _wasl_sequence(text, entries)
+    naql_script.project_initial_badal(text, entries)
     naql_script.project_latent_qata(text, entries)
     naql_script.project_article_naql(text, entries)
     naql_script.project_verse_final_host(text, entries)

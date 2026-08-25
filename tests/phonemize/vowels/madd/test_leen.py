@@ -24,12 +24,12 @@ CASES = (
                           char_rules={"و": R("madd_leen")},
                           sound_rules={"w": R("madd_leen")}),
     }),
-    # Hafs: قُرَيْشٍ
-    # Warsh: قُرَيْشٍ
-    StateCase(id="yaa", site=Site.shared("106:1", (2,)), states={
-        "joined": Expect(read=joining(), phonemes="q u rˤ aˤ j ʃ i n",
+    # Hafs: بَيْنَ
+    # Warsh: بَيْنَ
+    StateCase(id="yaa", site=Site.shared("2:66", (4,)), states={
+        "joined": Expect(read=joining(), phonemes="b a j n a",
                          absent_char_rules={"ي": R("madd_leen")}),
-        "stopped": Expect(read=isolated(), phonemes="q u rˤ aˤ j ʃ",
+        "stopped": Expect(read=isolated(), phonemes="b a j n",
                           char_rules={"ي": R("madd_leen")},
                           sound_rules={"j": R("madd_leen")}),
     }),

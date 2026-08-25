@@ -155,13 +155,16 @@ def supply_single_hamza(reading, drafts, lexicon, scribe, selection) -> None:
     for word, (location, span) in enumerate(
         zip(reading.words, word_spans(reading, drafts))
     ):
-        family = fixed_ibdal_family(_word_text(reading, word))
+        text = _word_text(reading, word)
+        family = fixed_ibdal_family(text)
         if family is not None:
             _fixed_target(family, span).annotations |= {Annotation.IBDAL}
             continue
         index = supplied_ibdal().get(location)
         if index is not None:
             span[index].annotations |= {Annotation.IBDAL}
+            if "وَ۬ا" in text:
+                span[index].annotations |= {Annotation.BADAL}
 
 
 __all__ = [
