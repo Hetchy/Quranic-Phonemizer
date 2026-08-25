@@ -122,6 +122,8 @@ def _madd_of(
     slot, word = near.slot(at), near.word_of(at)
     if slot is None or word is None or not slot.nucleus.sounds_long:
         return None
+    if plan.merged_away(at, Aspect.VOWEL):
+        return None  # a vowel a boundary rule deleted has no length left
     slots = near.score.words[word].slots
     final = bool(slots) and slots[-1].id == at
 

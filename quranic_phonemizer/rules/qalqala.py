@@ -45,8 +45,9 @@ class Qalqala:
             return None  # an assimilated closure is held, never released
 
         # The echo needs a real closure: either canonically silent, or
-        # silenced by a BOUNDARY rule. A long final vowel is neither.
-        canonically = slot.nucleus.is_silent
+        # silenced by a BOUNDARY rule. A long final vowel is neither, and
+        # neither is a sakin an earlier repair or transfer has voweled.
+        canonically = slot.nucleus.is_silent and not plan.voweled(at)
         silenced = plan.merged_away(at, Aspect.VOWEL)
         if not (canonically or silenced):
             return None

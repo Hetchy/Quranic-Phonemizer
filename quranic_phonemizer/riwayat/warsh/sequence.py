@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import replace
 
 from ...model.canon import CanonLetter, Nucleus, Onset, Quality
 from ...model.inscription import GraphemeClass, SlotFact
 from ...orthography.inventory import Inventory, LetterEntry, MarkEntry
+from . import naql_script
 
 
 _HARAKA_TO_TANWIN = {
@@ -191,19 +193,38 @@ def _project_composite_tanwin(text, entries) -> None:
                 )
 
 
-def entries_for(inventory: Inventory, text: str):
-    """Return one classification per scalar without changing source text."""
+def _entries(inventory: Inventory, text: str) -> list:
     entries = [inventory.classify(char) for char in text]
     _release_combining_hamza_seats(inventory, text, entries)
     wasl = _wasl_sequence(text, entries)
+    naql_script.project_latent_qata(text, entries)
+    naql_script.project_article_naql(text, entries)
+    naql_script.project_verse_final_host(text, entries)
     _project_marked_fatha(text, entries, wasl=wasl)
     _attach_reversed_fathatan(text, entries)
     _project_plural_alif_silence(text, entries)
     _project_orthographic_silence(text, entries)
     _release_dagger_hamza_seats(text, entries)
     _project_composite_tanwin(text, entries)
+    return entries
 
-    return tuple(entries)
+
+def entries_for(inventory: Inventory, text: str):
+    """Return one classification per scalar without changing source text."""
+    return tuple(_entries(inventory, text))
 
 
-__all__ = ["entries_for"]
+def entries_for_words(inventory: Inventory, texts: Sequence[str]):
+    """Per-word classifications for one verse, with cross-word context: a
+    host's written moved haraka before a latent qata is a naql witness."""
+    prepared = [_entries(inventory, text) for text in texts]
+    for index in range(len(texts) - 1):
+        quality = naql_script.latent_qata_quality(texts[index + 1])
+        if quality is not None:
+            naql_script.demote_moved_haraka(
+                texts[index], prepared[index], quality
+            )
+    return tuple(tuple(entries) for entries in prepared)
+
+
+__all__ = ["entries_for", "entries_for_words"]

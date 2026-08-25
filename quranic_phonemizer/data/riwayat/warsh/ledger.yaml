@@ -1,0 +1,12 @@
+# Authored Warsh canonical facts the selected script cannot carry alone.
+#
+# Values are the closed canonical vocabulary only; see canon/ledger.py.
+schema_version: 1
+riwayah: warsh
+
+supplies:
+  # 28:34 `رِداٗ` - the one within-word lexical naql: the hamza of ردء is
+  # deleted in every state and its fatha stays on the dal. The written form
+  # is already transformed; this names the latent qata responsibility.
+  - {slot: "28:34:9#1", skeleton: "ردن", fact: TAJWEED_MARK, value: NAQL,
+     citation: "Warsh via al-Azraq; Al-Wafi on the fixed naql of رِدْءًا"}

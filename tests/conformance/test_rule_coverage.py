@@ -59,7 +59,10 @@ SAMPLE = (
 #: produced by some classifier in the corpus; a member here needs a reason,
 #: and `test_the_deferred_list_does_not_rot` fails once the reason no longer
 #: holds.
-DEFERRED: set[Rule] = set()
+#:
+#: `naql` is Warsh-only: no Hafs classifier emits it, and
+#: `test_naql_is_warsh_bound_and_fires` asserts the Warsh side.
+DEFERRED: set[Rule] = {Rule.NAQL}
 
 
 def _fired(packed, hafs, surah, ayah):
@@ -95,6 +98,26 @@ def test_the_deferred_list_does_not_rot(packed, hafs):
         fired |= _fired(packed, hafs, surah, ayah)
     stale = sorted(rule.value for rule in DEFERRED & fired)
     assert not stale, f"listed as deferred but firing: {stale}"
+
+
+def test_naql_is_warsh_bound_and_fires():
+    """The one Warsh-only rule: absent from the Hafs catalogue, present in
+    the Warsh one, and actually produced by the Warsh ruleset."""
+    from quranic_phonemizer.api import recitation
+    from quranic_phonemizer.model.address import Script, VerseRef
+    from quranic_phonemizer.riwayat.warsh.rules import WARSH
+
+    assert Rule.NAQL in WARSH.emitted()
+    assert Rule.NAQL not in ruleset_for(Riwayah.HAFS).emitted()
+
+    package = recitation(Riwayah.WARSH)
+    verse = VerseRef(23, 1)
+    words = package.words(verse)
+    built = package.build(package.read(Script.UTHMANI, verse, words))
+    plan = all_join(len(words))
+    fired = {o.rule for o in perform(built.score, WARSH, plan).occurrences}
+    assert Rule.NAQL in fired
+    assert fired <= WARSH.emitted()
 
 
 @pytest.mark.parametrize("riwayah", list(Riwayah))

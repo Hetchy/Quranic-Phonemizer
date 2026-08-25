@@ -141,6 +141,10 @@ RULE_DEFINITIONS: dict[Rule, tuple[str, str, str]] = {
         "Ibdal Hamza", "إبدال الهمزة",
         "Started on, a prosthetic hamza lengthens its vowel over the quiescent hamza after it.",
     ),
+    Rule.NAQL: (
+        "Naql", "نقل",
+        "A qata hamza's vowel moves to the quiescent letter before it and the hamza itself is not sounded.",
+    ),
     Rule.HAMZA_WASL_SILENT: (
         "Hamza Wasl Silent", "حذف همزة الوصل",
         "A prosthetic hamza is not sounded when the word before it is joined to it.",

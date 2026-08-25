@@ -166,12 +166,16 @@ def test_every_glyph_names_a_word_or_carries_no_word_at_all():
 
 def test_module_functions_answer_without_an_instance():
     assert supported_riwayat() == ("hafs", "warsh")
-    rules = tajweed_rules("hafs")
-    identifiers = {row[0] for row in rules}
-    assert identifiers == (
+    hafs_rules = tajweed_rules("hafs")
+    warsh_rules = tajweed_rules("warsh")
+    everything = (
         {rule.value for rule in Rule} | {reason.value for reason in SilenceReason}
     )
-    for identifier, english, arabic, summary in rules:
+    hafs_ids = {row[0] for row in hafs_rules}
+    warsh_ids = {row[0] for row in warsh_rules}
+    assert hafs_ids | warsh_ids == everything
+    assert "naql" in warsh_ids - hafs_ids
+    for identifier, english, arabic, summary in (*hafs_rules, *warsh_rules):
         assert identifier and english and arabic
         assert summary.endswith(".") and len(summary.split()) >= 5
 

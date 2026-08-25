@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from tests.support import Case, R, Site, assert_case, case_runs, isolated, joining, through
+from tests.support import Case, R, Site, assert_case, case_runs, isolated, joining, pick, through
 
 
 MUTLAQ = (
@@ -34,14 +34,32 @@ CASES = (
         sound_rules={"n[1]": R("izhar"), "n[2]": R("izhar")},
     ),
     # Hafs: يَكُنْ غَنِيًّا أَوْ
-    # Warsh: يَّكُنْ غَنِيّاً اَوْ
     Case(
         id="ghayn-hamza",
-        site=Site.shared("4:135", (16, 17, 18)),
+        site=Site(hafs=("4:135", (16, 17, 18))),
         read=through(),
         phonemes=("j a k u n", "ɣ aˤ n i jj a n", "ʔ a w"),
         char_rules={"ن[1]": R("izhar"), "@fathatan": R("izhar")},
         sound_rules={"n[1]": R("izhar"), "n[3]": R("izhar")},
+    ),
+    # Warsh: قَوْلاً
+    Case(
+        id="ghayn",
+        site=Site(warsh=("2:59", (4,))),
+        read=joining(),
+        phonemes="q aˤ w l a n",
+        char_rules={"@fathatan": R("izhar")},
+        sound_rules={"n": R("izhar")},
+    ),
+    # Hafs: وَيَنْـَٔوْنَ
+    # Warsh: وَيَنْـَٔوْنَ
+    Case(
+        id="hamza-within-word",
+        site=Site.shared("6:26", (4,)),
+        read=joining(),
+        phonemes="w a j a n ʔ a w n a",
+        char_rules={"ن[1]": R("izhar")},
+        sound_rules={"n[1]": R("izhar")},
     ),
     # Hafs: قِرَدَةً خَـٰسِـِٔينَ
     # Warsh: قِرَدَةً خَٰسِـِٕينَۖ
@@ -74,13 +92,15 @@ CASES = (
         sound_rules={"n": R("izhar")},
     ),
     # Hafs: قَدِيرٌ
-    # Warsh: قَدِيرٌۖ
+    # Warsh: حِسَابٍۖ
     Case(
         id="verse-seam",
-        site=Site.shared("2:106", (19,)),
+        site=Site(hafs=("2:106", (19,)), warsh=("3:37", (34,))),
         read=joining(),
-        phonemes="q aˤ d i: rˤ u n",
-        char_rules={"@dammatan": R("izhar")},
+        phonemes=pick(hafs="q aˤ d i: rˤ u n", warsh="ħ i s a: b i n"),
+        char_rules=pick(
+            hafs={"@dammatan": R("izhar")}, warsh={"@kasratan": R("izhar")}
+        ),
         sound_rules={"n": R("izhar")},
     ),
     # Hafs: ٱلدُّنْيَا ۖ
