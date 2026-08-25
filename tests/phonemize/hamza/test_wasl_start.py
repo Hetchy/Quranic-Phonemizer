@@ -27,9 +27,18 @@ def qata_start_case(
                 "ئ" if warsh_carrier == "ي" else "ؤ": R("ibdal_hamza"),
             },
             hafs_indopak={"ا": R(start), "@hamza_mark": R("ibdal_hamza")},
-            warsh_uthmani={"ا": R(start), warsh_carrier: R("ibdal_hamza")},
+            warsh_uthmani={
+                "ا": R(start),
+                warsh_carrier: R("ibdal_hamza", "madd_badal"),
+            },
         ),
-        sound_rules={"ʔ": R(start), long_vowel: R("ibdal_hamza")},
+        sound_rules=pick(
+            hafs={"ʔ": R(start), long_vowel: R("ibdal_hamza")},
+            warsh={
+                "ʔ": R(start),
+                long_vowel: R("ibdal_hamza", "madd_badal"),
+            },
+        ),
     )
 
 

@@ -253,10 +253,35 @@ def test_the_damm_stroke_after_a_bare_alif_is_the_qata_damm():
     ((6, 158, 23), Quality.I),
     ((10, 53, 5), Quality.I),
 ))
-def test_initial_badals_are_deferred_from_ordinary_naql(ref, quality):
-    entry, _ = _reading(ref)
+def test_initial_badals_project_a_long_qata_for_the_badal_vertical(ref, quality):
+    entry, reading = _reading(ref)
+    built = recitation(Riwayah.WARSH).build(reading)
+    first = next(
+        slot for slot in built.score.words[0].slots
+        if slot.letter is CanonLetter.HAMZA and slot.nucleus.is_long
+    )
+
     assert naql_script.latent_qata_badal_quality(entry.text) is quality
     assert naql_script.latent_qata_quality(entry.text) is None
+    assert first.letter is CanonLetter.HAMZA
+    assert first.nucleus.is_long
+    assert first.nucleus.quality is quality
+
+
+def test_the_yeh_barree_leen_bridge_keeps_only_the_glide():
+    location = Location(18, 23, 3)
+    text = json.loads(SOURCE.read_text(encoding="utf-8"))["18:24:3"]["text"]
+    reading = script_adapter(Script.UTHMANI).read(
+        location.verse, ((location, text),)
+    )
+    built = recitation(Riwayah.WARSH).build(reading)
+    lam, sheen, yaa, hamza, *_ = built.score.words[0].slots
+
+    assert "اْےْء" in text
+    assert sheen.letter is CanonLetter.SHEEN
+    assert sheen.nucleus == Nucleus.short(Quality.A)
+    assert yaa.letter is CanonLetter.YA and yaa.nucleus.is_silent
+    assert hamza.letter is CanonLetter.HAMZA
 
 
 def test_the_same_stroke_in_a_wasl_sequence_stays_the_start_quality():

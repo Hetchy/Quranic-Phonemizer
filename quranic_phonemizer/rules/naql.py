@@ -37,7 +37,7 @@ class Naql:
             return None
         if slot.letter is not CanonLetter.HAMZA or slot.onset is not Onset.PLAIN:
             return None
-        if slot.nucleus.is_silent or slot.nucleus.sounds_long:
+        if slot.nucleus.is_silent:
             return None
         if not near.first_of_word(at):
             return None
@@ -50,16 +50,20 @@ class Naql:
         if near.score.words[word].location in self.excluded:
             return None
         vowel = Vowel(slot.nucleus.quality)
+        effects = [
+            Realize(host.id, Aspect.VOWEL, vowel),
+            Silence(at, Aspect.CONSONANT),
+        ]
+        # A modified badal transfers the qata's quality but retains the long
+        # carrier whose after-hamza origin MaddBadal classifies independently.
+        if not slot.nucleus.sounds_long:
+            effects.append(Silence(at, Aspect.VOWEL))
         return Verdict(
             Occurrence(
                 mint(Rule.NAQL, at), Rule.NAQL, (at, host.id),
                 boundary=word - 1,
             ),
-            (
-                Realize(host.id, Aspect.VOWEL, vowel),
-                Silence(at, Aspect.CONSONANT),
-                Silence(at, Aspect.VOWEL),
-            ),
+            tuple(effects),
         )
 
 

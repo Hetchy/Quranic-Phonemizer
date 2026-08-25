@@ -87,6 +87,25 @@ def project_latent_qata(text: str, entries: list) -> None:
         )
 
 
+def project_initial_badal(text: str, entries: list) -> None:
+    """Restore the qata and long nucleus written by an initial badal shape."""
+    quality = latent_qata_badal_quality(text)
+    if quality is None:
+        return
+    entries[0] = LetterEntry(CanonLetter.HAMZA)
+    entries[1] = MarkEntry(
+        role=f"badal_{quality.name.lower()}",
+        cls=GraphemeClass.SMALL_VOWEL,
+        fact=SlotFact.VOWEL_QUALITY,
+        value=Nucleus.long(quality),
+    )
+    if quality in {Quality.U, Quality.I} and len(entries) > 2:
+        entries[2] = LetterEntry(
+            CanonLetter.WAW if quality is Quality.U else CanonLetter.YA,
+            dagger_host=True,
+        )
+
+
 def demote_moved_haraka(text: str, entries: list, quality: Quality) -> None:
     """The host's written final haraka is the naql witness, not its own
     canonical vowel: the underlying host stays sakin."""

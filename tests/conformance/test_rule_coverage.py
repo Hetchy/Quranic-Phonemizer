@@ -62,7 +62,7 @@ SAMPLE = (
 #:
 #: `naql` is Warsh-only: no Hafs classifier emits it, and
 #: `test_naql_is_warsh_bound_and_fires` asserts the Warsh side.
-DEFERRED: set[Rule] = {Rule.NAQL}
+DEFERRED: set[Rule] = {Rule.NAQL, Rule.MADD_LEEN_MAHMUZ}
 
 
 def _fired(packed, hafs, surah, ayah):
@@ -118,6 +118,27 @@ def test_naql_is_warsh_bound_and_fires():
     fired = {o.rule for o in perform(built.score, WARSH, plan).occurrences}
     assert Rule.NAQL in fired
     assert fired <= WARSH.emitted()
+
+
+def test_leen_mahmuz_is_warsh_bound_and_fires():
+    from quranic_phonemizer.api import recitation
+    from quranic_phonemizer.model.address import Script, VerseRef
+    from quranic_phonemizer.riwayat.warsh.rules import WARSH
+
+    assert Rule.MADD_LEEN_MAHMUZ in WARSH.emitted()
+    assert Rule.MADD_LEEN_MAHMUZ not in ruleset_for(Riwayah.HAFS).emitted()
+
+    package = recitation(Riwayah.WARSH)
+    verse = VerseRef(3, 49)
+    words = package.words(verse)
+    built = package.build(package.read(Script.UTHMANI, verse, words))
+    fired = {
+        occurrence.rule
+        for occurrence in perform(
+            built.score, WARSH, all_join(len(built.score.words))
+        ).occurrences
+    }
+    assert Rule.MADD_LEEN_MAHMUZ in fired
 
 
 @pytest.mark.parametrize("riwayah", list(Riwayah))

@@ -20,9 +20,11 @@ from ...rules.lam_shamsiyyah import ArticleLam, ArticleShape
 from ...rules.madd import (
     IltiqaShortening,
     MaddClass,
+    MaddBadal,
     MaddLeen,
     MaddSilah,
 )
+from ...rules.warsh_madd import MaddLeenMahmuz, StartedBadal
 from ...rules.pausal_glide import PausalGlide
 from ...rules.meem_sakinah import GhunnahMushaddadah, MeemSakinah
 from ...rules.naql import CarriedNaql, Naql
@@ -47,6 +49,13 @@ _DAMM_START_REPAIR = {Quality.U: Quality.U}
 #: The `كتابيه إني` boundary reads tahqiq by default: haa stays sakin and
 #: the qata is fully realized, so the general transfer must not claim it.
 _NAQL_TAHQIQ = frozenset({Location(69, 20, 1)})
+
+# Canonical locations of مَوْئِلا and الْمَوْءُودَة.  Only the first waw of
+# the latter can satisfy the leen predicate; its following long remains badal.
+_LEEN_MAHMUZ_EXCLUDED = frozenset({
+    Location(18, 58, 19),
+    Location(81, 8, 2),
+})
 
 
 def _article(tables) -> ArticleShape:
@@ -96,9 +105,12 @@ def _build() -> RuleSet:
             Phase.LENGTH: (
                 PausalGlide(),
                 IltiqaShortening(),
-                MaddClass(),
+                MaddClass(badal_is_effective=True),
                 MaddClass(additive_arid=True),
-                MaddLeen(),
+                MaddLeen(mahmuz_is_distinct=True),
+                MaddLeenMahmuz(excluded=_LEEN_MAHMUZ_EXCLUDED),
+                MaddBadal(),
+                StartedBadal(),
                 MaddSilah(),
                 IwadLength(),
             ),

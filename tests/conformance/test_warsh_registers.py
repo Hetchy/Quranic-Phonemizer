@@ -10,6 +10,7 @@ from pathlib import Path
 import pytest
 
 from quranic_phonemizer.api import recitation
+from quranic_phonemizer.engine.boundary_plan import all_join
 from quranic_phonemizer.model.address import Location, Riwayah, Script, VerseRef
 from quranic_phonemizer.model.canon import CanonLetter, Onset, Quality, Rule
 from quranic_phonemizer.phonemize.legacy_views import phonemes_by_word
@@ -32,6 +33,11 @@ HARAKA = {"َ": "A", "ُ": "U", "ِ": "I"}
 MARK_QUALITY = {"۬": "A", "۟": "U", "۪": "I"}
 TANWIN = set("ًٌٍٖٗٞ")
 STOP_SIGNS = "ۖۗۘۙۚۛۜ۩"
+
+LEEN_MAHMUZ_EXCLUSIONS = {"18:58:19", "81:8:2"}
+SAWAT = {
+    "7:20:10", "7:22:8", "7:26:8", "7:27:15", "20:121:5",
+}
 
 #: The one reviewed lexical start delta: Warsh reads the passive استحق.
 USTUHIQQA = "5:107:12"
@@ -518,14 +524,96 @@ def test_the_naql_latent_register_reconciles_with_canonical_hosts():
     }
 
 
-def test_the_227_initial_badals_are_deferred_from_ordinary_naql():
-    deferred = Counter(
+def test_the_227_initial_badals_have_the_reviewed_quality_register():
+    register = Counter(
         quality.name
         for entry in warsh_corpus().entries.values()
         if (quality := naql_script.latent_qata_badal_quality(entry.text))
         is not None
     )
-    assert deferred == Counter({"A": 177, "U": 47, "I": 3})
+    assert register == Counter({"A": 177, "U": 47, "I": 3})
+
+
+def test_the_selected_source_has_the_reviewed_304_leen_mahmuz_candidates():
+    raw = json.loads(WARSH_SOURCE.read_text(encoding="utf-8"))
+    families = {
+        "yaa_combining": ("ئْ", "يْـٔ"),
+        "yaa_barree": ("ےْء",),
+        "waw_bare": ("وْء",),
+        "waw_seated": ("وْئ",),
+    }
+    counts = Counter({
+        name: sum(
+            any(pattern in row["text"] for pattern in patterns)
+            for row in raw.values()
+        )
+        for name, patterns in families.items()
+    })
+    assert counts == Counter({
+        "yaa_combining": 84,
+        "yaa_barree": 202,
+        "waw_bare": 17,
+        "waw_seated": 1,
+    })
+    assert sum(counts.values()) == 304
+
+
+@pytest.mark.slow
+def test_the_canonical_leen_mahmuz_register_reconciles_to_302_emissions():
+    package = recitation(Riwayah.WARSH)
+    candidates: set[tuple[str, int]] = set()
+    emitted: set[tuple[str, int]] = set()
+    families = Counter()
+
+    for surah, counts in package.corpus.surah_info.items():
+        for ayah in range(1, len(counts) + 1):
+            verse = VerseRef(int(surah), ayah)
+            words = package.words(verse)
+            built = package.build(package.read(Script.UTHMANI, verse, words))
+            performance = package.perform(
+                built.score, all_join(len(built.score.words))
+            )
+            by_slot = {
+                slot.id: word.location
+                for word in built.score.words
+                for slot in word.slots
+            }
+            for word in built.score.words:
+                slots = word.slots
+                for index, slot in enumerate(slots[1:-1], 1):
+                    before, after = slots[index - 1], slots[index + 1]
+                    if not (
+                        slot.letter in {CanonLetter.WAW, CanonLetter.YA}
+                        and slot.nucleus.is_silent
+                        and before.nucleus.is_short
+                        and before.nucleus.quality is Quality.A
+                        and after.letter is CanonLetter.HAMZA
+                    ):
+                        continue
+                    key = (str(word.location), slot.id.ordinal)
+                    candidates.add(key)
+                    ref = str(word.location)
+                    if ref in LEEN_MAHMUZ_EXCLUSIONS:
+                        families["excluded"] += 1
+                    elif ref in SAWAT:
+                        families["sawat"] += 1
+                    else:
+                        families["ordinary"] += 1
+            emitted.update(
+                (str(by_slot[occurrence.subjects[0]]),
+                 occurrence.subjects[0].ordinal)
+                for occurrence in performance.occurrences
+                if occurrence.rule is Rule.MADD_LEEN_MAHMUZ
+            )
+
+    assert families == Counter({
+        "ordinary": 297,
+        "sawat": 5,
+        "excluded": 2,
+    })
+    assert len(candidates) == 304
+    assert len(emitted) == 302
+    assert emitted <= candidates
 
 
 def test_a_full_hamza_after_a_sakin_verse_end_is_only_kitabiyah():

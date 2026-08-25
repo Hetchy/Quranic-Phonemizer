@@ -5,20 +5,12 @@ from dataclasses import dataclass
 
 from ..engine.neighbourhood import Neighbourhood
 from ..engine.plan import (
-    Classify,
-    Length,
-    Phase,
-    Plan,
-    Realize,
-    Relength,
-    Verdict,
-    mint,
+    Classify, Length, Phase, Plan, Realize, Relength, Verdict, mint,
 )
 from ..model.address import BoundaryPlan, Junction, KhilafId, Location, SlotId
 from ..model.canon import Annotation, CanonLetter as L
 from ..model.canon import Onset, Quality, Rule, SlotOrigin, VowelForm
 from ..model.performance import Aspect, Occurrence, Vowel
-
 @dataclass(frozen=True, slots=True)
 class MaddLazimIbdal:
     """Name the hamza replaced by the long alif at madd-tasheel sites."""
@@ -191,6 +183,7 @@ class MaddClass:
     phase: Phase = Phase.LENGTH
     triggers: frozenset = frozenset({VowelForm.LONG, Onset.WASL})
     additive_arid: bool = False
+    badal_is_effective: bool = False
     emits: frozenset = frozenset({
         Rule.MADD_TABII, Rule.MADD_MUTTASIL, Rule.MADD_MUNFASIL,
         Rule.MADD_LAZIM, Rule.MADD_ARID_LISSUKUN,
@@ -202,6 +195,10 @@ class MaddClass:
     ) -> Verdict | None:
         slot = near.slot(at)
         if not self.additive_arid and slot is not None and plan.relengthened_long(at):
+            if self.badal_is_effective and _is_started_badal(
+                near, plan, slot, boundaries
+            ):
+                return None
             return _tabii(slot, at, None)
         found = _madd_of(near, plan, at, boundaries)
         if self.additive_arid:
@@ -216,6 +213,17 @@ class MaddClass:
         if found is None:
             return None
         rule, other = found
+        if (
+            self.badal_is_effective
+            and rule is Rule.MADD_TABII
+            and slot is not None
+            and (
+                slot.letter is L.HAMZA
+                or Annotation.BADAL in slot.annotations
+                or _is_started_badal(near, plan, slot, boundaries)
+            )
+        ):
+            return None
         if rule is not Rule.MADD_TABII:
             return _classify(rule, at, other)
         return _tabii(slot, at, other)
@@ -235,7 +243,10 @@ class MaddBadal:
         boundaries: BoundaryPlan,
     ) -> Verdict | None:
         slot = near.slot(at)
-        if slot is None or slot.letter is not L.HAMZA:
+        if slot is None or (
+            slot.letter is not L.HAMZA
+            and Annotation.BADAL not in slot.annotations
+        ):
             return None
         # the ibdal case: the plan carries a length the Score does not
         if _madd_of(near, plan, at, boundaries) is None and not plan.relengthened_long(at):
@@ -243,6 +254,24 @@ class MaddBadal:
         return Verdict(
             Occurrence(mint(Rule.MADD_BADAL, at), Rule.MADD_BADAL, (at,)), ()
         )
+
+
+def _is_started_badal(near, plan: Plan, slot, boundaries: BoundaryPlan) -> bool:
+    word = near.word_of(slot.id)
+    if (
+        word is None
+        or slot.onset is not Onset.WASL
+        or not boundaries.started_on(word)
+        or not near.first_of_word(slot.id)
+        or not plan.relengthened_long(slot.id)
+    ):
+        return False
+    root = near.after(slot.id)
+    return bool(
+        root is not None
+        and root.letter is L.HAMZA
+        and root.nucleus.is_silent
+    )
 
 
 @dataclass(frozen=True, slots=True)
@@ -281,6 +310,7 @@ class MaddLeen:
     """
 
     rule: Rule = Rule.MADD_LEEN
+    mahmuz_is_distinct: bool = False
     phase: Phase = Phase.LENGTH
     triggers: frozenset = frozenset({L.WAW, L.YA})
     emits: frozenset = frozenset({Rule.MADD_LEEN, Rule.MADD_LAZIM})
@@ -303,6 +333,8 @@ class MaddLeen:
             return None
         following = near.after(at)
         if following is None:
+            return None
+        if self.mahmuz_is_distinct and following.letter is L.HAMZA:
             return None
         if following.nucleus.is_silent:
             # `عٓ` has a permanent sakin, so its length is obligatory.
