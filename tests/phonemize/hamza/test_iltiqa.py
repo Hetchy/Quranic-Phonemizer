@@ -16,14 +16,11 @@ from tests.support import (
 )
 
 
-def _chars(source: str | None, rule: str | None, indopak_wasl: str = "ا"):
-    del indopak_wasl
-    rules = {} if source is None or rule is None else {source: R(rule)}
-
+def _wasl_chars(rule: str, hafs_indopak: str = "ا", warsh: str = "ا"):
     return pick(
-        hafs_uthmani=rules,
-        hafs_indopak=rules,
-        warsh_uthmani=rules,
+        hafs_uthmani={"ٱ": R(rule)},
+        hafs_indopak={hafs_indopak: R(rule)},
+        warsh_uthmani={warsh: R(rule)},
     )
 
 
@@ -32,32 +29,51 @@ CASES = (
     # Warsh: وَلَا اَ۬لضَّآلِّينَۖ
     Case(id="long-a", site=Site.shared("1:7", (8, 9)), read=through(),
          phonemes=("w a l a", "dˤdˤ aˤ: ll i: n"),
-         char_rules=_chars("@fatha[2]", "iltiqa_shortening", "ا[2]"),
+         char_rules={"ا[1]": R("iltiqa_shortening")},
+         absent_char_rules={"@fatha[2]": R("iltiqa_shortening")},
          sound_rules={"a[2]": R("iltiqa_shortening")}),
     # Hafs: فِى ٱلْأَرْضِ
     Case(id="long-i", site=Site(hafs=("2:11", (6, 7))), read=through(),
          phonemes=("f i", "l ʔ a rˤ dˤ"),
          char_rules=pick(
-             hafs_uthmani={"@kasra[1]": R("iltiqa_shortening")},
-             hafs_indopak={"@kasra[1]": R("iltiqa_shortening")},
+             hafs_uthmani={"ى": R("iltiqa_shortening")},
+             hafs_indopak={"ي": R("iltiqa_shortening")},
          ),
+         absent_char_rules={"@kasra[1]": R("iltiqa_shortening")},
+         sound_rules={"i": R("iltiqa_shortening")}),
+    # Warsh: فِے اِ۬لسَّبْتِ
+    Case(id="long-i-warsh", site=Site(warsh=("2:65", (6, 7))), read=through(),
+         phonemes=("f i", "ss a b Q t"),
+         char_rules={"ے": R("iltiqa_shortening")},
+         absent_char_rules={"@kasra[1]": R("iltiqa_shortening")},
          sound_rules={"i": R("iltiqa_shortening")}),
     # Hafs: قَالُوا۟ ٱدْعُ
     # Warsh: قَالُواْ اُ۟دْعُ
     Case(id="long-u", site=Site.shared("2:68", (1, 2)), read=through(),
          phonemes=("q aˤ: l u", "d Q ʕ"),
-         char_rules=_chars("@damma[1]", "iltiqa_shortening", "ا[3]"),
+         char_rules={"و": R("iltiqa_shortening")},
+         absent_char_rules={"@damma[1]": R("iltiqa_shortening")},
          sound_rules={"u": R("iltiqa_shortening")}),
     # Hafs: وَعَمِلُوا۟ ٱلصَّـٰلِحَـٰتِ
     # Warsh: وَعَمِلُواْ اُ۬لصَّٰلِحَٰتِ
     StateCase(id="plural-waw", site=Site.shared("2:25", (4, 5)), states={
         "joined": Expect(read=through(), phonemes=("w a ʕ a m i l u", "sˤsˤ aˤ: l i ħ a: t"),
-                         char_rules=_chars("@damma", "iltiqa_shortening", "ا[2]"),
+                         char_rules={"و[2]": R("iltiqa_shortening")},
+                         absent_char_rules={"@damma": R("iltiqa_shortening")},
                          sound_rules={"u": R("iltiqa_shortening")}),
         "stopped": Expect(read=explicit(ibtidaa=4, waqf=4),
                           phonemes=("w a ʕ a m i l u:", "ʔ a sˤsˤ aˤ: l i ħ a: t i"),
                           absent_char_rules={"و[2]": R("iltiqa_shortening")}),
     }),
+    # Hafs: وَمِنَ ٱلنَّاسِ
+    # Warsh: وَمِنَ اَ۬لنَّاسِ
+    Case(id="lexical-fatha-host", site=Site.shared("2:8", (1, 2)), read=through(),
+         phonemes=("w a m i n a", "ñ a: s"),
+         char_rules=pick(
+             hafs_uthmani={"ٱ": R("hamza_wasl_silent")},
+             hafs_indopak={"ا[1]": R("hamza_wasl_silent")},
+             warsh_uthmani={"ا[1]": R("hamza_wasl_silent")},
+         )),
     # Hafs: قُمِ ٱلَّيْلَ
     # Warsh: قُمِ اِ۬ليْلَ
     Case(id="meem-repair", site=Site.shared("73:2", (1, 2)), read=through(),
@@ -87,12 +103,87 @@ CASES = (
          phonemes=("j a w m a ʔ i ð i n i", "l ħ a qq Q"),
          sound_rules={"i[3]": R("iltiqa_haraka")}),
     # Hafs: أَنفُسَكُمُ ۖ ٱلْيَوْمَ
-    Case(id="plural-meem", site=Site(hafs=("6:93", (34, 35))), read=through(),
+    # Warsh: أَنفُسَكُمُۖ اُ۬لْيَوْمَ
+    Case(id="plural-meem", site=Site.shared("6:93", (34, 35)), read=through(),
          phonemes=("ʔ a ŋ f u s a k u m u", "l j a w m"),
-         char_rules=_chars(None, None, "ا[2]")),
+         char_rules={}),
 )
 
 
-@pytest.mark.parametrize("run", case_runs(CASES))
+WARSH_U_CONTRASTS = (
+    # Hafs: قُلِ ٱدْعُوا۟
+    # Warsh: قُلُ اُ۟دْعُواْ
+    StateCase(id="damm-copy-lexical", site=Site.shared("7:195", (20, 21)), states={
+        "joined": Expect(
+            read=through(),
+            phonemes=pick(
+                hafs=("q u l i", "d Q ʕ u:"),
+                warsh=("q u l u", "d Q ʕ u:"),
+            ),
+            char_rules=_wasl_chars("hamza_wasl_silent", "ا[1]", "ا[1]"),
+            silent=pick(
+                hafs_uthmani=("ٱ",),
+                hafs_indopak=("ا[1]",),
+                warsh_uthmani=("ا[1]",),
+            ),
+        ),
+        "restarted": Expect(
+            read=explicit(ibtidaa=20, waqf=(20, 21)),
+            phonemes=("q u l", "ʔ u d Q ʕ u:"),
+            char_rules=_wasl_chars("hamza_wasl_damma", "ا[1]", "ا[1]"),
+            sound_rules={"ʔ": R("hamza_wasl_damma")},
+            absent_char_rules=_wasl_chars(
+                "hamza_wasl_silent", "ا[1]", "ا[1]"
+            ),
+        ),
+    }),
+    # Hafs: بَعْضٍ ۗ ٱنظُرْ
+    # Warsh: بَعْضٍۖ اُ۟نظُرْ
+    StateCase(id="damm-copy-tanwin", site=Site.shared("6:65", (21, 22)), states={
+        "joined": Expect(
+            read=through(),
+            phonemes=pick(
+                hafs=("b a ʕ dˤ i n i", "ŋ ðˤ u rˤ"),
+                warsh=("b a ʕ dˤ i n u", "ŋ ðˤ u rˤ"),
+            ),
+            char_rules=_wasl_chars("hamza_wasl_silent"),
+            sound_rules=pick(
+                hafs={"i[2]": R("iltiqa_haraka")},
+                warsh={"u[1]": R("iltiqa_haraka")},
+            ),
+        ),
+        "stopped": Expect(
+            read=explicit(ibtidaa=21, waqf=(21, 22)),
+            phonemes=("b a ʕ dˤ", "ʔ u ŋ ðˤ u rˤ"),
+            char_rules=_wasl_chars("hamza_wasl_damma"),
+            sound_rules={"ʔ": R("hamza_wasl_damma")},
+            absent_sound_rules={"u[1]": R("iltiqa_haraka")},
+        ),
+    }),
+    # Hafs: أَنِ ٱتَّقُوا۟
+    # Warsh: أَنِ اِ۪تَّقُواْ
+    Case(
+        id="damm-needs-original-stem-vowel",
+        site=Site.shared("4:131", (16, 17)),
+        read=through(),
+        phonemes=("ʔ a n i", "tt a q u:"),
+        char_rules=_wasl_chars("hamza_wasl_silent", "ا[2]", "ا[1]"),
+    ),
+    # Hafs: وَقَالَتِ ٱخْرُجْ
+    # Warsh: وَقَالَتُ اُ۟خْرُجْ
+    Case(
+        id="damm-copy-feminine-taa",
+        site=Site.shared("12:31", (14, 15)),
+        read=through(),
+        phonemes=pick(
+            hafs=("w a q aˤ: l a t i", "x rˤ u ʒ Q"),
+            warsh=("w a q aˤ: l a t u", "x rˤ u ʒ Q"),
+        ),
+        char_rules=_wasl_chars("hamza_wasl_silent", "ا[2]", "ا[2]"),
+    ),
+)
+
+
+@pytest.mark.parametrize("run", case_runs((*CASES, *WARSH_U_CONTRASTS)))
 def test_iltiqa(run):
     assert_case(run)

@@ -15,7 +15,10 @@ _HARAKA_TO_TANWIN = {
     "ِ": "kasratan",
 }
 _FATHATAN = frozenset({"ً", "ٗ"})
-_WASL_MARKS = frozenset({"۬", "۟", "۪"})
+
+#: The reviewed wasl small marks. This source writes the linking vowel as an
+#: ordinary haraka on the alif, and the start quality as the small mark.
+_WASL_MARK_QUALITY = {"۬": Quality.A, "۟": Quality.U, "۪": Quality.I}
 
 
 def _release_combining_hamza_seats(inventory, text, entries) -> None:
@@ -34,23 +37,35 @@ def _wasl_sequence(text, entries) -> bool:
         len(text) >= 3
         and text[0] == "ا"
         and text[1] in _HARAKA_TO_TANWIN
-        and text[2] in _WASL_MARKS
+        and text[2] in _WASL_MARK_QUALITY
     )
     if matched:
         entries[0] = LetterEntry(CanonLetter.HAMZA, onset=Onset.WASL, seat=True)
         entries[1] = MarkEntry(
-            role="wasl_vowel_hint",
+            role="wasl_link_haraka",
             cls=GraphemeClass.ANNOTATION,
             fact=SlotFact.ONSET,
             value=Onset.WASL,
         )
         entries[2] = MarkEntry(
-            role="wasl_sequence_mark",
+            role="wasl_start_quality",
             cls=GraphemeClass.ANNOTATION,
-            fact=SlotFact.ONSET,
-            value=Onset.WASL,
+            fact=SlotFact.VOWEL_QUALITY,
+            value=Nucleus.short(_WASL_MARK_QUALITY[text[2]]),
         )
+        _silent_qata_hamza(text, entries)
     return matched
+
+
+def _silent_qata_hamza(text, entries) -> None:
+    """A bare waw or yaa right after the wasl sequence writes the silenced
+    qata hamza it replaces when the word is started on: the `ائتوني` family."""
+    if (
+        len(text) >= 5
+        and text[3] in "يو"
+        and isinstance(entries[4], LetterEntry)
+    ):
+        entries[3] = LetterEntry(CanonLetter.HAMZA)
 
 
 def _project_marked_fatha(text, entries, *, wasl: bool) -> None:

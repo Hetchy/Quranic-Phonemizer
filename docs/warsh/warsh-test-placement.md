@@ -72,8 +72,7 @@ tests/phonemize/                               # 508 cases: 436 fixed + 72V
     test_wasl_start.py                        # 14
     test_hafs_alism_ibtidaa.py                # 1V
     test_wasl_silent.py                       # 3
-    test_iltiqa.py                            # 11
-    test_warsh_iltiqa.py                      # 4
+    test_iltiqa.py                            # 15
     test_seats.py                             # 5
     test_ibdal.py                             # 6
     test_tashil.py                            # 2
@@ -197,8 +196,8 @@ the resulting quality or length classification only.
   riwayah-specific lexical input where necessary.
 - `test_wasl_silent.py` owns the shared started-versus-joined onset behavior.
 - `test_iltiqa.py` owns shared shortening and ordinary A/I repair after wasl
-  elision. `test_warsh_iltiqa.py` owns the Warsh U-over-I register and its
-  exact exclusions.
+  elision. Its separate Warsh U-over-I section runs the same boundaries under
+  Hafs so the different repairs and exact exclusions stay adjacent.
 - `test_ibdal.py` owns generic replacement shapes, effects, and reach.
   `test_tashil.py` owns the generic eased-hamza shape, A/U/I nucleus pairing,
   extra-token fallback, and reach.
@@ -408,7 +407,7 @@ into a mixed-domain catch-all.
 | `emphasis/test_allah_lam.py` | Exercise heavy, light, and context-conditioned divine-name lam | Shared rows or clean substitutes | Adapter baseline |
 | `hamza/test_wasl_start.py` | Cover the same morphology algorithm using Warsh lexical input | Separate row for a lexical reading difference; pick only the local expected vowel | Adapter baseline after alignment |
 | `hamza/test_wasl_silent.py` | Cover ordinary joined elision | Shared rows where the canonical onset is WASL | Adapter baseline |
-| `hamza/test_iltiqa.py` | Cover shared shortening and ordinary repair | Shared rows for identical shape; Warsh U cases excluded | Wasl/iltiqa vertical |
+| `hamza/test_iltiqa.py` | Cover shared shortening and ordinary repair | Shared rows plus adjacent Hafs/Warsh U-over-I contrasts | Wasl/iltiqa vertical |
 | `hamza/test_seats.py` | Verify shared canonical hamza-seat semantics | Source selectors may differ; canonical assertion stays shared | Adapter baseline |
 | `hamza/test_ibdal.py` | Verify generic transformation primitives independent of classifier | Small typed fixtures, not a corpus sweep | RuleSet/hamza foundation |
 | `hamza/test_tashil.py` | Verify eased onset plus A/U/I nucleus and rendering fallback | Small typed fixtures, not a corpus sweep | RuleSet/hamza foundation |
@@ -484,7 +483,7 @@ table so a domain reviewer never has to reconstruct the text from coordinates.
 | Corpus and projection | Shared safe rows listed above | `adapter/test_warsh_*`, schema roundtrip |
 | RuleSet foundation | Existing shared semantic rows | rule coverage, model vocabulary, API rules |
 | Wasl | `hamza/test_wasl_start.py`, `test_wasl_silent.py` | adapter wasl projections |
-| Iltiqa | `hamza/test_iltiqa.py`, `test_warsh_iltiqa.py` | effective-state engine tests |
+| Iltiqa | `hamza/test_iltiqa.py` | effective-state engine tests |
 | Naql | `hamza/test_warsh_naql.py` | register and source-attribution tests |
 | Single hamza | generic ibdal/tashil plus `test_warsh_single_hamza.py` | effective madd and adapter source tests |
 | Hamza meetings | `hamza/test_warsh_hamza_meetings.py` | effective madd and boundary plan tests |

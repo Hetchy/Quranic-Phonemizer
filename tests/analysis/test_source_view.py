@@ -178,6 +178,18 @@ def test_a_cross_word_merger_places_a_contributor(hafs):
     assert any(p.before_unit_ids for p in view.merger_placements)
 
 
+def test_iltiqa_shortening_is_placed_only_on_its_length_carrier(hafs):
+    _, bundle, view = _both(hafs, "2:11", {})
+    occurrence = next(
+        item for item in bundle.rule_occurrences
+        if item.rule_id.value == "iltiqa_shortening"
+    )
+    placement = view.rule_placements[occurrence.id.value]
+
+    texts = tuple(view.units[unit.value].text for unit in placement.unit_ids)
+    assert texts == ("ى",)
+
+
 def test_validation_rejects_a_double_owned_sound(hafs):
     _, bundle, view = _both(hafs, "2:255", {})
     validate_source_view(view, bundle)  # the honest view passes

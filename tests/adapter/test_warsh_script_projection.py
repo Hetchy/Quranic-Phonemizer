@@ -4,9 +4,12 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from quranic_phonemizer.model.address import Location, Script
-from quranic_phonemizer.model.canon import CanonLetter, Onset
+from quranic_phonemizer.model.canon import CanonLetter, Nucleus, Onset, Quality
 from quranic_phonemizer.model.inscription import SlotFact
+from quranic_phonemizer.orthography.inventory import InventoryError
 from quranic_phonemizer.riwayat.warsh.resources import corpus, script_adapter
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -47,10 +50,38 @@ def test_initial_alif_haraka_mark_is_one_wasl_sequence():
     assert entry.text.startswith("اِ۬")
     assert first.letter is CanonLetter.HAMZA and first.onset is Onset.WASL
     assert [mark.role for mark in first.marks[:2]] == [
-        "wasl_vowel_hint", "wasl_sequence_mark",
+        "wasl_link_haraka", "wasl_start_quality",
     ]
-    assert onset_offsets == {0, 1, 2}
+    assert onset_offsets == {0, 1}
     assert [grapheme.source.offset for grapheme in reading.graphemes[:3]] == [0, 1, 2]
+
+
+def test_the_wasl_mark_supplies_the_start_quality_over_the_visible_haraka():
+    # اِ۬لْحَمْدُ writes a kasra-shaped linking vowel, yet its mark starts the
+    # article with fatha; the haraka never becomes the start.
+    entry, reading = _reading((1, 2, 1))
+    quality = _evidence_at(reading, 2, SlotFact.VOWEL_QUALITY)
+
+    assert entry.text[1] == "ِ"
+    assert quality.value == Nucleus.short(Quality.A)
+
+
+def test_a_bare_glide_after_the_wasl_sequence_is_the_silenced_qata_hamza():
+    entry, reading = _reading((10, 79, 3))  # source 10:79:3 اُ۪يتُونِے
+    second = reading.clusters[1]
+
+    assert entry.text[3] == "ي"
+    assert second.letter is CanonLetter.HAMZA
+
+
+def test_an_unreviewed_initial_alif_scalar_fails_projection():
+    # An alif form this script never writes must fail rather than
+    # receive a best-effort start.
+    location = Location(1, 2, 1)
+    with pytest.raises(InventoryError):
+        script_adapter(Script.UTHMANI).read(
+            location.verse, ((location, "ٱلْحَمْدُ"),)
+        )
 
 
 def test_alternate_tanwin_supplies_the_same_canonical_nunation_fact():
