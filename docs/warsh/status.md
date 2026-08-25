@@ -23,7 +23,7 @@ complete tests before production code, then implement from projection upward.
 | 5 | Naql: general, article, lexical, and boundary-specific transfer | [`naql.md`](research/v2/naql.md) | **Complete** | [PR #62](https://github.com/Hetchy/Quranic-Phonemizer/pull/62) (merged) |
 | 6 | Hamza core: generic ibdal/tashil primitives and Warsh single hamza | [`single-hamza.md`](research/v2/single-hamza.md), [`phoneme-rule-inventory.md`](research/v2/phoneme-rule-inventory.md) | **Complete** | `feat/warsh-hamza-core`; variant-bearing `allai` deferred to order 14 |
 | 7 | Madd badal and leen mahmuz. Implements badal mughayar bin-naql tests deferred in #62 | [`madd-badal.md`](research/v2/madd-badal.md), [`madd-leen-mahmuz.md`](research/v2/madd-leen-mahmuz.md), [`madd-counts.md`](research/v2/madd-counts.md) | **Complete** | `feat/warsh-phonemizer`; see [`madd-iteration-log.md`](madd-iteration-log.md) |
-| 8 | Hamza meetings | [`hamza-meetings.md`](research/v2/hamza-meetings.md) | **Pending** | Follows madd badal and leen mahmuz |
+| 8 | Hamza meetings | [`hamza-meetings.md`](research/v2/hamza-meetings.md) | **In progress** | `feat/warsh-hamza-meetings` |
 | 9 | Joined-only and pausal shapes: mim al-jam, yaa zawaid, and seven alifs | [`mim-al-jam.md`](research/v2/mim-al-jam.md), [`yaa-zawaid.md`](research/v2/yaa-zawaid.md), [`seven-alifs.md`](research/v2/seven-alifs.md) | **Pending** | One mark-driven vertical, after hamza meetings |
 | 10 | Inclination: taqlil, kubra, fath, registers, and precedence | [`inclination.md`](research/v2/inclination.md) | **Pending** | Follows joined-only and pausal shapes |
 | 11 | Lam taghliz and its inclination coupling | [`lam-taghliz.md`](research/v2/lam-taghliz.md) | **Pending** | Follows inclination |

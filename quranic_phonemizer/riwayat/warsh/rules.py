@@ -31,6 +31,7 @@ from ...rules.naql import CarriedNaql, Naql
 from ...rules.noon_sakinah import IkhfaaWeight, NoonSakinah
 from ...rules.qalqala import Qalqala
 from ...rules.single_hamza import JoinedIbdal, SuppliedIbdal
+from ...rules.hamza_meetings import HamzaMeetingMadd, HamzaMeetings
 from ...rules.tafkheem import Emphasis, Weight
 from ...model.address import Location
 from ...model.canon import Quality
@@ -41,6 +42,7 @@ from ...rules.wasl import (
     WaslHamza,
 )
 from .resources import khilaf, lexicon, rule_tables
+from .hamza_meetings import meeting_rows, rows_by_target
 
 #: Warsh repairs a collision with damm when the elided word starts on an
 #: original damm; the shared kasra and fatha defaults stand elsewhere.
@@ -49,6 +51,9 @@ _DAMM_START_REPAIR = {Quality.U: Quality.U}
 #: The `كتابيه إني` boundary reads tahqiq by default: haa stays sakin and
 #: the qata is fully realized, so the general transfer must not claim it.
 _NAQL_TAHQIQ = frozenset({Location(69, 20, 1)})
+_HAMZA_MEETING_STARTS = frozenset(
+    row.canonical for row in meeting_rows() if row.scope != "one_word"
+)
 
 # Canonical locations of مَوْئِلا and الْمَوْءُودَة.  Only the first waw of
 # the latter can satisfy the leen predicate; its following long remains badal.
@@ -67,8 +72,9 @@ def _article(tables) -> ArticleShape:
 
 def _boundary() -> tuple:
     return (
-        Naql(excluded=_NAQL_TAHQIQ),
+        Naql(excluded=_NAQL_TAHQIQ | _HAMZA_MEETING_STARTS),
         CarriedNaql(),
+        HamzaMeetings(rows=rows_by_target()),
         SuppliedIbdal(),
         JoinedIbdal(),
         WaslHamza(),
@@ -105,6 +111,7 @@ def _build() -> RuleSet:
             Phase.LENGTH: (
                 PausalGlide(),
                 IltiqaShortening(),
+                HamzaMeetingMadd(),
                 MaddClass(badal_is_effective=True),
                 MaddClass(additive_arid=True),
                 MaddLeen(mahmuz_is_distinct=True),

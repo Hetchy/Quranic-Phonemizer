@@ -212,3 +212,13 @@ class Plan:
         """Has an earlier phase drawn this slot's vowel out to a long one
         the Score does not carry?"""
         return slot in self._lengthened
+
+    def hamza_meeting_length(self, slot: SlotId) -> bool:
+        """Whether ibdal fused the preceding qata vowel into this carrier."""
+        previous = SlotId(slot.verse, slot.ordinal - 1)
+        return any(
+            verdict.occurrence.rule is Rule.IBDAL_HAMZA
+            and Relength(slot, Length.LONG) in verdict.effects
+            and Silence(previous, Aspect.VOWEL) in verdict.effects
+            for _, verdict in self.entries
+        )
