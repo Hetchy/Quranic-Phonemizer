@@ -23,7 +23,7 @@ CASES = (
         read=through(),
         phonemes=pick(
             hafs=("w a l i b a: s u", "tt a q Q w a:"),
-            warsh=("w a l i b a: s a", "tt a q Q w a:"),
+            warsh=("w a l i b a: s a", "tt a q Q w ɛ:"),
         ),
         char_rules={"ل[2]": R("lam_shamsiyyah")},
         sound_rules={"tt": R("lam_shamsiyyah")},

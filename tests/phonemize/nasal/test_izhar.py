@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from tests.support import Case, R, Site, assert_case, case_runs, isolated, joining, through
+from tests.support import Case, R, Site, assert_case, case_runs, isolated, joining, pick, through
 
 
 MUTLAQ = (
@@ -87,7 +87,7 @@ CASES = (
         id="mutlaq-dunya",
         site=Site.shared("2:85", (38,)),
         read=isolated(),
-        phonemes="ʔ a dd u n j a:",
+        phonemes=pick(hafs="ʔ a dd u n j a:", warsh="ʔ a dd u n j ɛ:"),
         char_rules={"ن": R("izhar")},
         sound_rules={"n": R("izhar")},
     ),

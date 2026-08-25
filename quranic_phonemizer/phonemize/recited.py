@@ -10,7 +10,6 @@ from dataclasses import dataclass
 
 from ..model.address import SlotId, SoundId
 from ..model.canon import (
-    CARRIER_OF,
     HAMZA_WASL_START,
     CanonLetter,
     Rule,
@@ -38,14 +37,6 @@ from ..model.performance import (
 )
 from ..orthography.write import MADD, Pen, WriteError
 from . import nodes as nd
-
-#: Which role writes each short vowel quality. Kept local rather than
-#: imported: `orthography.write`'s own table is private to that module.
-_SHORT_ROLE = {"a": "fatha", "u": "damma", "i": "kasra"}
-
-#: The inclined vowel has no haraka, so it is written as the vowel it is
-#: read as. `render/ipa.yaml`'s `e` entry says the same.
-_BASE_QUALITY = {"e": "i"}
 
 #: A tanween noon these rules realize is left bare -- no sukun mark -- because
 #: bareness is what signals the assimilation; every other realization keeps
@@ -204,20 +195,16 @@ def _write_vowel(sound: Vowel, sound_id, slot_id, fact_glyphs, pen: Pen):
     """Length is already resolved on the sound, so no boundary check here.
     A long vowel is up to three glyphs: the haraka, the vowel letter, and the
     madd sign."""
-    quality = _BASE_QUALITY.get(sound.quality.value, sound.quality.value)
-    role = _SHORT_ROLE.get(quality)
-    if role is None:
-        raise WriteError(f"no haraka writes quality {sound.quality}")
     yield RenderGlyph(
-        pen.role(role), nd.GlyphKind.HARAKA,
+        pen.short_vowel(sound.quality), nd.GlyphKind.HARAKA,
         _fact_glyphs(fact_glyphs, slot_id, SlotFact.VOWEL_QUALITY),
         slot_id, sound_id,
     )
     if not sound.long:
         return
-    carrier = CARRIER_OF[quality]
+    carrier, carrier_text = pen.performed_carrier(sound.quality)
     yield RenderGlyph(
-        pen.carriers.get(carrier) or pen.letter(carrier), nd.GlyphKind.VOWEL_LETTER,
+        carrier_text, nd.GlyphKind.VOWEL_LETTER,
         _fact_glyphs(fact_glyphs, slot_id, SlotFact.VOWEL_LENGTH),
         slot_id, sound_id,
     )

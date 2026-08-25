@@ -76,7 +76,8 @@ class Phonemizer:
             selection=self._selection,
         )
         assembled = assemble(
-            session, self._pen, self._alphabet, extra_phonemes=self._extra
+            session, self._pen, self._alphabet, extra_phonemes=self._extra,
+            quality_fallbacks=self._recitation.quality_fallbacks,
         )
         return build_result(
             ref=ref, riwayah=self.riwayah, script=self._script.value,

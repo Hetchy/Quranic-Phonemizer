@@ -25,13 +25,17 @@ def sound_facts(
     order: tuple[SoundId, ...],
     alphabet: Alphabet,
     extra_phonemes: frozenset[str],
+    quality_fallbacks: dict | None = None,
 ) -> tuple[SoundFact, ...]:
     """The ordered sound ids resolved to their typed values and tokens."""
     by_id = dict(performance.sounds)
     return tuple(
         SoundFact(
             by_id[sound],
-            alphabet.token(by_id[sound], extra_phonemes=extra_phonemes),
+            alphabet.token(
+                by_id[sound], extra_phonemes=extra_phonemes,
+                quality_fallbacks=quality_fallbacks,
+            ),
         )
         for sound in order
     )

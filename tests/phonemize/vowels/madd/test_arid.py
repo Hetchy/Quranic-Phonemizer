@@ -21,7 +21,10 @@ CASES = (
     # Hafs: مُوسَىٰٓ
     # Warsh: مُوس۪ىٰٓ
     Case(id="final-long-negative", site=Site.shared("20:9", (4,)), read=isolated(),
-         phonemes="m u: s a:", absent_char_rules={"و": R("madd_arid_lissukun")}),
+         phonemes=pick(hafs="m u: s a:", warsh="m u: s ɛ:"),
+         char_rules=pick(hafs={}, warsh={"ى": R("taqlil", "madd_tabii")}),
+         sound_rules=pick(hafs={}, warsh={"ɛ:": R("taqlil", "madd_tabii")}),
+         absent_char_rules={"و": R("madd_arid_lissukun")}),
     # Hafs: مِهَـٰدًا
     # Warsh: مِهَٰداٗ
     Case(id="iwad-negative", site=Site.shared("78:6", (4,)), read=isolated(),

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from tests.support import Case, R, Site, assert_case, case_runs, through
+from tests.support import Case, R, Site, assert_case, case_runs, pick, through
 
 
 CASES = (
@@ -32,7 +32,10 @@ CASES = (
     # Hafs: ٱلْبَيِّنَـٰتِ وَٱلْهُدَىٰ
     # Warsh: اَ۬لْبَيِّنَٰتِ وَالْهُد۪ىٰ
     Case(id="baa-heh", site=Site.shared("2:159", (7, 8)), read=through(),
-         phonemes=("ʔ a l b a jj i n a: t i", "w a l h u d a:"),
+         phonemes=pick(
+             hafs=("ʔ a l b a jj i n a: t i", "w a l h u d a:"),
+             warsh=("ʔ a l b a jj i n a: t i", "w a l h u d ɛ:"),
+         ),
          char_rules={"ل[1]": R("lam_qamariyyah"), "ل[2]": R("lam_qamariyyah")},
          sound_rules={"l[1]": R("lam_qamariyyah"), "l[2]": R("lam_qamariyyah")}),
     # Hafs: ٱلْغَمَامِ وَٱلْمَلَـٰٓئِكَةُ

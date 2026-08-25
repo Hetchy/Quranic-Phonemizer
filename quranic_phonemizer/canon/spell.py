@@ -153,7 +153,10 @@ def _is_muqattaat(
     if any(cluster.has(*HARAKAT) for cluster in values[:-1]):
         if not (
             vocalized_compact
-            and any(cluster.has("madd") for cluster in values)
+            and any(
+                cluster.has("madd", "inclination_witness")
+                for cluster in values
+            )
         ):
             return False
     skeleton = "".join(

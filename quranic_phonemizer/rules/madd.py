@@ -83,6 +83,9 @@ class IltiqaShortening:
             return None
         if not _opens_on_a_sakin(following):
             return None
+        inclined = slot.nucleus.quality in {Quality.TAQLIL, Quality.KUBRA}
+        effect = (Realize(at, Aspect.VOWEL, Vowel(Quality.A))
+                  if inclined else Relength(at, Length.SHORT))
         return Verdict(
             Occurrence(
                 mint(Rule.ILTIQA_SHORTENING, at),
@@ -90,10 +93,8 @@ class IltiqaShortening:
                 (at,),
                 (following.id,),
             ),
-            (Relength(at, Length.SHORT),),
+            (effect,),
         )
-
-
 def _opens_on_a_sakin(slot) -> bool:
     """A geminate consonant is a sakin plus a voweled one, so `ٱلَّذِى` meets a
     preceding madd with a sakin exactly as a written sukun would."""

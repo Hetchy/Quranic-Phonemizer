@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from dataclasses import replace
 
-from ...model.canon import CARRIER_OF, CanonLetter
+from ...model.canon import CARRIER_OF, CanonLetter, Quality
 from ...model.performance import Aspect, Consonant
 from ...orthography.write import Pen
 from ..attributions import Hosted, Insertion, Merged
@@ -114,7 +114,11 @@ def _vowel_columns(
             slot, source_unit, owned=vowel, attached=base.id,
             status=CellStatus.INSERTED, rules=rules,
         )], next_id + 1
-    carrier_text = pen.letter(CARRIER_OF[quality])
+    performed = {
+        Quality.KUBRA: Quality.I,
+        Quality.TAQLIL: Quality.A,
+    }.get(quality, quality)
+    carrier_text = pen.letter(CARRIER_OF[performed])
     if "madd_lazim" in _rule_names(bundle, rules):
         carrier_text += pen.role("madd")
     carrier_id = CellColumnId(next_id + 1)

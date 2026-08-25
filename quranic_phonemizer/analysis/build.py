@@ -215,7 +215,12 @@ def build_bundle(
     insc: InscriptionFacts | None = None,
 ) -> AnalysisBundle:
     if facts is None:
-        facts = analyse(session, packaged_alphabet(), extra_phonemes=extra_phonemes)
+        from ..riwayat import quality_fallbacks_for
+
+        facts = analyse(
+            session, packaged_alphabet(), extra_phonemes=extra_phonemes,
+            quality_fallbacks=quality_fallbacks_for(riwayah),
+        )
     if insc is None:
         insc = inscribe(session)
 

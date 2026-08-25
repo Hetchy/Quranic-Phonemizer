@@ -317,9 +317,9 @@ class Rule(StrEnum):
     QALQALA_SUGHRA = "qalqala_sughra"
     QALQALA_KUBRA = "qalqala_kubra"
     QALQALA_AKBAR = "qalqala_akbar"
-
     TAFKHEEM = "tafkheem"
     TARQEEQ = "tarqeeq"
+    TAQLIL = "taqlil"
     IMALA = "imala"
     TASHIL = "tashil"
     ISHMAM = "ishmam"
@@ -393,7 +393,7 @@ CLASSIFICATION_ONLY: frozenset[Rule] = frozenset(
         Rule.MADD_LAZIM, Rule.MADD_ARID_LISSUKUN,
         Rule.MADD_LEEN, Rule.MADD_LEEN_MAHMUZ,
         Rule.IBDAL_HAMZA,
-        Rule.IMALA,
+        Rule.TAQLIL, Rule.IMALA,
         Rule.TASHIL,
         Rule.ISHMAM,
     }

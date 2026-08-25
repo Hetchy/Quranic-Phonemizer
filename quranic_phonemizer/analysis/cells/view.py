@@ -8,6 +8,7 @@ from __future__ import annotations
 from dataclasses import replace
 
 from ...render.alphabet import packaged_alphabet
+from ...riwayat import quality_fallbacks_for
 from ...model.inscription import StopAdvice
 from ...session import Session
 from ..build import build_bundle
@@ -264,16 +265,16 @@ def build_cell_view(
 ) -> CellView:
     if spelling not in ("source", "transformed"):
         raise ValueError(f"spelling must be 'source' or 'transformed', got {spelling!r}")
-    facts = analyse(session, packaged_alphabet(), extra_phonemes=extra_phonemes)
+    facts = analyse(session, packaged_alphabet(), extra_phonemes=extra_phonemes,
+                    quality_fallbacks=quality_fallbacks_for(riwayah))
     insc = inscribe(session)
     bundle = build_bundle(
         session, ref=ref, riwayah=riwayah, script=script, variant=variant,
         extra_phonemes=extra_phonemes, facts=facts, insc=insc,
     )
     source = build_source_view(session, bundle=bundle, facts=facts, insc=insc)
-    words = _words(
-        session, bundle, source, facts, insc, spelling, pen, extra_phonemes
-    )
+    words = _words(session, bundle, source, facts, insc, spelling, pen,
+                   extra_phonemes)
     words = separate_tanween_vowel_colours(words, facts)
     words = keep_madd_rules_on_carriers(words, facts)
     placement_of = {p.merger_id.value: p for p in source.merger_placements}

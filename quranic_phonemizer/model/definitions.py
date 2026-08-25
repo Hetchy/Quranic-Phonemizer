@@ -89,6 +89,10 @@ RULE_DEFINITIONS: dict[Rule, tuple[str, str, str]] = {
         "Tarqeeq", "ترقيق",
         "The raa is sounded light.",
     ),
+    Rule.TAQLIL: (
+        "Taqlil", "تقليل",
+        "An open vowel is inclined to the intermediate Warsh quality.",
+    ),
     Rule.IMALA: (
         "Imala", "إمالة",
         "A long aa is tilted towards a long ee.",

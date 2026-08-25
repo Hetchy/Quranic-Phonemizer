@@ -20,4 +20,11 @@ def ruleset_for(riwayah: Riwayah) -> RuleSet:
     return PACKAGES[riwayah].rules_for(riwayah)
 
 
-__all__ = ["PACKAGES", "hafs", "ruleset_for", "warsh"]
+def quality_fallbacks_for(riwayah: str | Riwayah) -> dict:
+    """Return the notation fallbacks owned by one shipped riwayah."""
+    return PACKAGES[Riwayah(riwayah)].QUALITY_FALLBACKS
+
+
+__all__ = [
+    "PACKAGES", "hafs", "quality_fallbacks_for", "ruleset_for", "warsh",
+]

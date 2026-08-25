@@ -253,8 +253,11 @@ def build_cell_words(
     pen=None,
 ) -> tuple[CellWord, ...]:
     if facts is None:
+        from ...riwayat import quality_fallbacks_for
+
         facts = analyse(
-            session, packaged_alphabet(), extra_phonemes=bundle.extra_phonemes
+            session, packaged_alphabet(), extra_phonemes=bundle.extra_phonemes,
+            quality_fallbacks=quality_fallbacks_for(bundle.riwayah),
         )
     if insc is None:
         insc = inscribe(session)

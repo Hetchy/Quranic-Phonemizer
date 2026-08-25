@@ -290,7 +290,8 @@ def _projections_for(
         boundaries=plan, performance=performance,
     )
     assembled = assemble(
-        session, _pen(name, script), _alphabet(), extra_phonemes=extra
+        session, _pen(name, script), _alphabet(), extra_phonemes=extra,
+        quality_fallbacks=_recitation(name).quality_fallbacks,
     )
     metadata = dict(
         ref=ref,
