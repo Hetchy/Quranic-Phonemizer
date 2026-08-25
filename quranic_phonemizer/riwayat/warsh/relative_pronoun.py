@@ -1,0 +1,81 @@
+"""Canonical projection for Warsh relative-pronoun spellings."""
+
+from __future__ import annotations
+
+import unicodedata
+
+from ...canon.passes import word_spans
+from ...model.canon import CanonLetter, Nucleus, Onset, Quality
+from ...model.inscription import SlotFact
+
+
+_IGNORED = frozenset("ـۥۦۧۨ")
+_FORMS = frozenset(
+    {
+        "الذين",
+        "الذے",
+        "الذن",
+        "والذين",
+        "والذے",
+        "بالذين",
+        "بالذے",
+        "فالذين",
+        "كالذين",
+        "كالذے",
+        "للذين",
+        "للذے",
+        "وبالذے",
+        "وللذين",
+    }
+)
+
+
+def _skeleton(text: str) -> str:
+    return "".join(
+        char
+        for char in text
+        if not unicodedata.combining(char) and char not in _IGNORED
+    )
+
+
+def relative_pronoun_form(text: str) -> bool:
+    """Whether the selected token is one reviewed relative-pronoun form."""
+    return _skeleton(text) in _FORMS
+
+
+def _word_text(reading, word: int) -> str:
+    offsets = {
+        cluster.offset for cluster in reading.clusters if cluster.word == word
+    }
+    offsets.update(
+        mark.offset
+        for cluster in reading.clusters
+        if cluster.word == word
+        for mark in cluster.marks
+    )
+    by_offset = {glyph.id.offset: glyph.char for glyph in reading.graphemes}
+    return "".join(by_offset[offset] for offset in sorted(offsets))
+
+
+def supply_relative_pronoun(reading, drafts, lexicon, scribe, selection) -> None:
+    """Restore the pronounced geminate lam omitted by the selected script."""
+    del lexicon, selection
+    for word, span in enumerate(word_spans(reading, drafts)):
+        if not relative_pronoun_form(_word_text(reading, word)):
+            continue
+        lam = next(
+            current
+            for current, following in zip(span, span[1:])
+            if current.letter is CanonLetter.LAM
+            and following.letter is CanonLetter.THAL
+        )
+        lam.onset = Onset.GEMINATE
+        lam.onset_declared = True
+        lam.nucleus = Nucleus.short(Quality.A)
+        lam.nucleus_declared = True
+        offset = scribe.evidence_offsets(lam, SlotFact.LETTER)[0]
+        scribe.evidence(offset, lam, SlotFact.ONSET)
+        scribe.evidence(offset, lam, SlotFact.VOWEL_QUALITY)
+
+
+__all__ = ["relative_pronoun_form", "supply_relative_pronoun"]

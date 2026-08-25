@@ -138,7 +138,7 @@ at source 10:79:2-3 continues through a U replacement
 (`... n u: t u: n i:`),
 `السَّمَٰوَٰتِ ائتوني` at source 46:3:17-18 uses an I replacement
 (`... t i: t u: n i:`), and `اَ۬لذِے اؤتمن` at source 2:282:15-16 has the
-documented joined I result (`... ð i: t u m i n a`). Those outcomes and their
+documented joined I result (`ʔ a ll a ð i: t u m i n a`). Those outcomes and their
   source ownership are specified in
 [`single-hamza.md`](single-hamza.md). They are not naql: no qata vowel is
 transferred to a preceding sakin host.

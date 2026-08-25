@@ -117,6 +117,8 @@ class Annotation(StrEnum):
     """This slot's vowel was carried from a qata hamza deleted after it, and
     the deletion holds in every boundary state: the article family and the
     lexical `ردءا`."""
+    IBDAL = "ibdal"
+    """This slot is the selected script's replacement for a lexical hamza."""
 
 
 class VowelForm(StrEnum):

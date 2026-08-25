@@ -83,7 +83,11 @@ plan so the seam is visible to the reviewer.
 ## Boundary intents
 
 - `isolated()` starts and stops on one focused word.
-- `joining()` starts on the focused span and joins its last word forward.
+- `joining()` starts on the focused span and joins its last word forward. Do
+  not use it for a hand-authored semantic row because that forward word is
+  absent from the reviewed output. To test a joined seam, include both words
+  in the `Site`, exact source comment, and expected phonemes, then use
+  `through()` or an equivalent explicit plan that joins inside the span.
 - `through()` starts on the first focused word and stops on the last.
 - `explicit()` handles an interior stop, cross-ayah seam, or other exact plan.
 
@@ -134,6 +138,11 @@ selectors to name both expanded endpoints. The style gate rejects one-sided
 merger expectations.
 
 ## Layout
+
+A semantic file owns one coherent rule or family and normally exposes one
+`CASES` collection. Keep representative morphological forms in semantic cases;
+put exhaustive token registers in conformance tests. Add another file only
+when a distinct domain owner would make the combined file misleading.
 
 - `phonemize/articles/`: article lam behavior.
 - `phonemize/assimilation/`: adjacent consonant mergers.

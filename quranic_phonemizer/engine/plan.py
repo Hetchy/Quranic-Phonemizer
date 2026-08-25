@@ -188,6 +188,19 @@ class Plan:
     def merged_away(self, slot: SlotId, aspect: Aspect) -> bool:
         return (slot, aspect) in self._removed
 
+    def removed_by(self, slot: SlotId, aspect: Aspect, rule: Rule) -> bool:
+        """Whether one named rule removed this aspect in an earlier phase."""
+        return any(
+            verdict.occurrence.rule is rule
+            and any(
+                isinstance(effect, (MergeInto, Silence))
+                and effect.slot == slot
+                and effect.aspect is aspect
+                for effect in verdict.effects
+            )
+            for _, verdict in self.entries
+        )
+
     def voweled(self, slot: SlotId) -> bool:
         """Has an earlier phase given this slot a vowel it did not have?
 

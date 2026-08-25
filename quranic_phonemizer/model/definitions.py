@@ -139,7 +139,7 @@ RULE_DEFINITIONS: dict[Rule, tuple[str, str, str]] = {
     ),
     Rule.IBDAL_HAMZA: (
         "Ibdal Hamza", "إبدال الهمزة",
-        "Started on, a prosthetic hamza lengthens its vowel over the quiescent hamza after it.",
+        "A hamza is replaced by its performed carrier or glide.",
     ),
     Rule.NAQL: (
         "Naql", "نقل",

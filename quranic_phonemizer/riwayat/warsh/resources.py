@@ -22,6 +22,8 @@ from ..khilaf import EMPTY as EMPTY_KHILAF
 from ..khilaf import Khilaf
 from ..tables import RuleTables, load_rule_tables
 from .sequence import entries_for_words
+from .relative_pronoun import supply_relative_pronoun
+from .single_hamza import supply_single_hamza
 
 RIWAYAH = Riwayah.WARSH
 SCRIPTS = (Script.UTHMANI,)
@@ -118,6 +120,8 @@ def muqattaat() -> Muqattaat:
 def lexeme_passes() -> tuple:
     return (
         *LEXEME_PASSES,
+        supply_relative_pronoun,
+        supply_single_hamza,
         spell_muqattaat(muqattaat(), vocalized_compact=True),
     )
 

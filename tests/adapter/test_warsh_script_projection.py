@@ -6,7 +6,8 @@ from pathlib import Path
 
 import pytest
 
-from quranic_phonemizer.model.address import Location, Script
+from quranic_phonemizer.api import recitation
+from quranic_phonemizer.model.address import Location, Riwayah, Script
 from quranic_phonemizer.model.canon import (
     Annotation,
     CanonLetter,
@@ -169,6 +170,53 @@ def test_yeh_barree_is_preserved_as_source_but_projects_to_yaa():
     assert reading.clusters[-1].letter is CanonLetter.YA
     assert barree.source.location == entry.sources[0].location
     assert barree.source.offset == entry.text.index("ے")
+
+
+def test_relative_pronoun_restores_the_unwritten_geminate_lam():
+    entry, reading = _reading((2, 283, 15))  # اِ۬لذِے
+    built = recitation(Riwayah.WARSH).build(reading)
+    wasl, lam, thal = built.score.words[0].slots
+
+    assert "ّ" not in entry.text
+    assert wasl.letter is CanonLetter.HAMZA and wasl.onset is Onset.WASL
+    assert lam.letter is CanonLetter.LAM and lam.onset is Onset.GEMINATE
+    assert lam.nucleus == Nucleus.short(Quality.A)
+    assert thal.letter is CanonLetter.THAL and thal.onset is Onset.PLAIN
+
+    lam_offset = entry.text.index("ل")
+    assert {
+        spelling.fact
+        for spelling in built.inscription.spellings
+        if getattr(spelling, "grapheme", None) is not None
+        and spelling.grapheme.offset == lam_offset
+    } >= {SlotFact.LETTER, SlotFact.ONSET, SlotFact.VOWEL_QUALITY}
+
+    hafs = recitation(Riwayah.HAFS)
+    hafs_word = hafs.words(Location(2, 283, 15).verse)[14]
+    hafs_built = hafs.build(
+        hafs.read(Script.UTHMANI, Location(2, 283, 15).verse, (hafs_word,))
+    )
+    assert [
+        (slot.letter, slot.onset, slot.nucleus)
+        for slot in built.score.words[0].slots
+    ] == [
+        (slot.letter, slot.onset, slot.nucleus)
+        for slot in hafs_built.score.words[0].slots
+    ]
+
+
+@pytest.mark.parametrize("ref", ((2, 79, 2), (2, 212, 2)))
+def test_prefixed_relative_pronoun_restores_its_second_lam(ref):
+    entry, reading = _reading(ref)
+    built = recitation(Riwayah.WARSH).build(reading)
+    first, relative, thal, *_ = built.score.words[0].slots
+
+    assert entry.text.count("ل") == 2
+    assert first.letter is CanonLetter.LAM and first.onset is Onset.PLAIN
+    assert relative.letter is CanonLetter.LAM
+    assert relative.onset is Onset.GEMINATE
+    assert relative.nucleus == Nucleus.short(Quality.A)
+    assert thal.letter is CanonLetter.THAL and thal.onset is Onset.PLAIN
 
 
 def _reading_pair(first: tuple[int, int, int], second: tuple[int, int, int]):

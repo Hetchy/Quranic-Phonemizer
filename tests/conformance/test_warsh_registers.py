@@ -11,9 +11,17 @@ import pytest
 
 from quranic_phonemizer.api import recitation
 from quranic_phonemizer.model.address import Location, Riwayah, Script, VerseRef
-from quranic_phonemizer.model.canon import Onset, Quality
+from quranic_phonemizer.model.canon import CanonLetter, Onset, Quality, Rule
 from quranic_phonemizer.phonemize.legacy_views import phonemes_by_word
 from quranic_phonemizer.riwayat.warsh import naql_script
+from quranic_phonemizer.riwayat.warsh.relative_pronoun import relative_pronoun_form
+from quranic_phonemizer.riwayat.warsh.single_hamza import (
+    authored_locations,
+    canonical_absence,
+    fixed_ibdal_counts,
+    fixed_ibdal_family,
+    supplied_ibdal,
+)
 from quranic_phonemizer.riwayat.warsh.resources import corpus as warsh_corpus
 from tests.support.boundary import plan_for
 
@@ -107,6 +115,9 @@ FAMILY_SIZES = {
     "aw": 3, "qad": 3, "lakin": 1, "feminine_taa": 1,
 }
 
+CANONICAL_ABSENCE = canonical_absence()
+TAHQIQ_EXCLUSIONS = tuple(sorted(authored_locations("tahqiq_exclusions")))
+
 
 def _skeleton(text: str) -> str:
     return "".join(char for char in text if char not in set("ًٌٍَُِّْٰ۪ٓ۟۬") | TANWIN | set(STOP_SIGNS))
@@ -157,6 +168,59 @@ def _read(riwayah: str, ref: str, words: tuple[int, ...], **boundary):
 
     by_word = phonemes_by_word(performance, built.score, alphabet())
     return tuple("".join(by_word[word - 1]) for word in words)
+
+
+@lru_cache(maxsize=1)
+def _derived_regular_single_hamza() -> dict[Location, int]:
+    """Reconcile selected supplies with the canonical single-hamza shape."""
+    hafs = recitation(Riwayah.HAFS)
+    warsh = recitation(Riwayah.WARSH)
+    register = {}
+    for surah_key, counts in sorted(
+        warsh.corpus.surah_info.items(), key=lambda item: int(item[0])
+    ):
+        surah = int(surah_key)
+        for ayah in range(1, len(counts) + 1):
+            verse = VerseRef(surah, ayah)
+            words = warsh.words(verse)
+            hafs_built = hafs.build(
+                hafs.read(Script.UTHMANI, verse, hafs.words(verse))
+            )
+            warsh_built = warsh.build(
+                warsh.read(Script.UTHMANI, verse, words)
+            )
+            for index, (hafs_word, warsh_word) in enumerate(
+                zip(hafs_built.score.words, warsh_built.score.words)
+            ):
+                location = words[index][0]
+                if fixed_ibdal_family(warsh_corpus().entries[location].text):
+                    continue
+                lost_hamza = sum(
+                    slot.letter is CanonLetter.HAMZA for slot in hafs_word.slots
+                ) > sum(
+                    slot.letter is CanonLetter.HAMZA for slot in warsh_word.slots
+                )
+                if not lost_hamza:
+                    continue
+                for slot_index, slot in enumerate(hafs_word.slots[1:], start=1):
+                    before = hafs_word.slots[slot_index - 1]
+                    if before.letter is CanonLetter.HAMZA:
+                        continue
+                    sakin = (
+                        slot.letter is CanonLetter.HAMZA
+                        and slot.nucleus.is_silent
+                        and not before.nucleus.is_silent
+                    )
+                    open_after_u = (
+                        slot.letter is CanonLetter.HAMZA
+                        and slot.nucleus.quality is Quality.A
+                        and before.nucleus.quality is Quality.U
+                    )
+                    if sakin or open_after_u:
+                        register[location] = (
+                            slot_index if open_after_u else slot_index - 1
+                        )
+    return register
 
 
 def test_the_canonical_start_register_counts():
@@ -220,6 +284,19 @@ def test_a_started_silent_qata_form_reads_the_replacement_long(ref, expected, st
 
 
 @pytest.mark.parametrize(
+    ("ref", "started", "state"), QATA_STARTS, ids=[row[0] for row in QATA_STARTS]
+)
+def test_a_joined_silent_qata_form_uses_the_preceding_vowel(ref, started, state):
+    word = int(ref.split(":")[2])
+    before, got = _read(
+        "warsh", ref, (word - 1, word), ibtidaa=word - 1, waqf=word + 1
+    )
+    assert before.endswith(":")
+    expected = started[3:-1] if state == "stopped" else started[3:]
+    assert got == expected
+
+
+@pytest.mark.parametrize(
     ("canonical", "source", "family"), DAMM_REPAIRS, ids=[row[0] for row in DAMM_REPAIRS]
 )
 def test_a_damm_repair_row_joins_on_damm(canonical, source, family):
@@ -233,6 +310,103 @@ def test_a_damm_repair_row_joins_on_damm(canonical, source, family):
 def test_the_damm_repair_register_is_the_documented_38():
     assert len(DAMM_REPAIRS) == 38
     assert Counter(family for *_, family in DAMM_REPAIRS) == Counter(FAMILY_SIZES)
+
+
+def test_relative_pronoun_projection_covers_only_its_selected_script_family():
+    relative = [
+        entry
+        for entry in warsh_corpus().entries.values()
+        if relative_pronoun_form(entry.text)
+    ]
+
+    assert len(relative) == 1385
+    assert not relative_pronoun_form(
+        warsh_corpus().entries[Location(12, 13, 10)].text
+    )
+
+
+def test_the_fixed_single_hamza_register_is_the_documented_56():
+    register = Counter(
+        family
+        for entry in warsh_corpus().entries.values()
+        if (family := fixed_ibdal_family(entry.text)) is not None
+    )
+    assert register == Counter(fixed_ibdal_counts())
+    assert register.total() == 56
+
+
+def test_the_regular_selected_single_hamza_register_is_closed():
+    register = supplied_ibdal()
+    assert len(register) == 918
+    assert Counter(register.values()) == Counter({0: 596, 2: 162, 1: 119, 3: 37, 4: 4})
+    assert not any(
+        fixed_ibdal_family(warsh_corpus().entries[location].text)
+        for location in register
+    )
+    assert register == _derived_regular_single_hamza()
+
+
+@pytest.mark.parametrize(("ref", "text"), CANONICAL_ABSENCE.items())
+def test_the_four_isqat_spellings_create_no_ghost_hamza(ref, text):
+    surah, ayah, word = ref.surah, ref.ayah, ref.word
+    entry = warsh_corpus().entries[ref]
+    assert entry.text == text
+
+    package = recitation(Riwayah.WARSH)
+    verse = VerseRef(surah, ayah)
+    words = package.words(verse)
+    built = package.build(package.read(Script.UTHMANI, verse, words))
+    slots = built.score.words[word - 1].slots
+    assert all(
+        slot.letter is not CanonLetter.HAMZA or slot.onset is Onset.WASL
+        for slot in slots
+    )
+    performance = package.perform(
+        built.score, plan_for(len(words), isolated=word)
+    )
+    ids = {slot.id for slot in slots}
+    assert not {
+        occurrence.rule
+        for occurrence in performance.occurrences
+        if ids & set(occurrence.subjects)
+    } & {Rule.IBDAL_HAMZA, Rule.TASHIL}
+
+
+def test_the_iwaa_tahqiq_exclusion_register_is_the_documented_25():
+    assert len(TAHQIQ_EXCLUSIONS) == 25
+    assert all(
+        any(char in "ءأإؤئٕٔ" for char in warsh_corpus().entries[ref].text)
+        for ref in TAHQIQ_EXCLUSIONS
+    )
+
+
+@pytest.mark.parametrize("ref", TAHQIQ_EXCLUSIONS)
+@pytest.mark.parametrize("state", ("isolated", "continued"))
+def test_every_iwaa_exclusion_keeps_tahqiq_in_each_boundary_state(ref, state):
+    package = recitation(Riwayah.WARSH)
+    verse = VerseRef(ref.surah, ref.ayah)
+    words = package.words(verse)
+    built = package.build(package.read(Script.UTHMANI, verse, words))
+    slots = built.score.words[ref.word - 1].slots
+    hamzas = {
+        slot.id for slot in slots
+        if slot.letter is CanonLetter.HAMZA and slot.onset is not Onset.WASL
+    }
+    assert hamzas
+
+    boundary = (
+        {"isolated": ref.word}
+        if state == "isolated"
+        else {"ibtidaa": ref.word, "waqf": ref.word + 1}
+    )
+    performance = package.perform(
+        built.score, plan_for(len(words), **boundary)
+    )
+    assert not {
+        occurrence.rule
+        for occurrence in performance.occurrences
+        if hamzas & set(occurrence.subjects)
+    } & {Rule.IBDAL_HAMZA, Rule.TASHIL}
 
 
 def test_the_tanwin_repair_register_is_generated_from_the_source():

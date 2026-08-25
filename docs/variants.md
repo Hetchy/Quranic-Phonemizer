@@ -167,6 +167,7 @@ the full qata hamza is restored and the selector is inactive.
 | `ha_antum` | `hadhf`, `ibdal`, `ithbat`; default `ithbat` | The four `هَٰأَنتُمْ` forms at 3:66, 3:119, 4:109, and 47:38; all states | Omits the separator alif with an eased hamza, replaces the hamza with alif, or retains the separator alif with an eased hamza. | [Al-Nashr, all three faces](https://islamweb.net/ar/library/content/70/111/) |
 | `hamza_kasr_yaa` | `ibdal`, `tashil`, `yaa`; default `ibdal` | `هَؤُلَاءِ إِن` at 2:31 and `ٱلْبِغَاءِ إِن` at 24:33; wasl only | Replaces or eases the second hamza, or realizes a consonantal yaa with kasra. The `yaa` value is not a long-vowel choice. | [Al-Wafi, the two exceptional boundaries](https://islamweb.net/ar/library/content/245/16/) |
 | `hamza_aimma` | `tashil`, `ibdal`; default `tashil` | All five `أَئِمَّة` tokens; all states | Eases the second hamza toward yaa, or replaces it with a moving yaa. | [Al-Nashr, the five forms](https://islamweb.net/ar/library/content/70/105/) |
+| `allai_waqf` | `tashil`, `ibdal_yaa`; default `tashil` | The four `اللائي` forms at 33:4, 58:2, and twice at 65:4; waqf only | `tashil` retains the eased kasra-bearing hamza with rawm; `ibdal_yaa` replaces it with a sakin yaa. In continuation, tashil is fixed and the deleted final yaa leaves a short kasra. The transmitted qasr/madd faces do not create additional values because duration counts are outside the sound-length model. | [Al-Wafi, continuation and three waqf faces](https://www.islamweb.net/ar/library/content/245/68/) |
 
 The closed hamza registers are:
 
@@ -283,8 +284,6 @@ The following distinctions are deliberately outside the variant API:
   junctions](https://www.islamweb.net/amp/ar/library/content/245/26/)
 - Taha is fixed imala kubra. [Al-Nashr, opening-letter
   inclination](https://www.islamweb.net/ar/library/content/70/169/)
-- `ٱللَّائِي` uses fixed tashil with its ordinary boundary behavior.
-  [Al-Nashr, the lexical form](https://islamweb.net/ar/library/content/70/111/)
 - The triple-hamza forms `أَءَالِهَتُنَا` and `أَءَامَنتُم`, and
   `ءَأَعْجَمِيٌّ`, use fixed tashil and are excluded from
   `hamza_dhat_fath`. [Al-Nashr, the fixed
