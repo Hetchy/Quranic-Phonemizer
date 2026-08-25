@@ -11,7 +11,7 @@ CASES = (
         id="one-word-open-before-sakin",
         site=Site(warsh=("2:6", (6,))),
         read=isolated(),
-        phonemes="ʔ a: ŋ ð a rˤ t a h u m u:",
+        phonemes="ʔ a: ŋ ð a rˤ t a h u m",
         char_rules={"ا": R("ibdal_hamza", "madd_lazim")},
         sound_rules={"a:": R("ibdal_hamza", "madd_lazim")},
         absent_sound_rules={"a:": R("madd_badal")},

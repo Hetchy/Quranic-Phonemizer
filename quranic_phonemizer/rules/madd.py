@@ -292,7 +292,11 @@ class MaddSilah:
         boundaries: BoundaryPlan,
     ) -> Verdict | None:
         slot = near.slot(at)
-        if slot is None or not slot.nucleus.is_joined_only_long:
+        if (
+            slot is None
+            or slot.letter is not L.HEH
+            or not slot.nucleus.is_joined_only_long
+        ):
             return None
         if _madd_of(near, plan, at, boundaries) is None:
             return None

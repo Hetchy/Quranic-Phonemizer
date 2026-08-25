@@ -9,6 +9,7 @@ from ...rules.annotation import CanonicalColour, Tarqeeq
 from ...rules.boundary import (
     DroppedGlide,
     IwadLength,
+    PausalAlif,
     TaaMarbutaAtWaqf,
     TanweenDrop,
     TanweenIwad,
@@ -36,6 +37,7 @@ from ...rules.tafkheem import Emphasis, Weight
 from ...model.address import Location
 from ...model.canon import Quality
 from ...rules.wasl import (
+    PluralMeemBeforeWasl,
     SoftenedHamza,
     SpelledBeforeWasl,
     TanweenBeforeWasl,
@@ -79,6 +81,8 @@ def _boundary() -> tuple:
         JoinedIbdal(),
         WaslHamza(),
         SoftenedHamza(),
+        PausalAlif(),
+        PluralMeemBeforeWasl(),
         SpelledBeforeWasl(repairs=_DAMM_START_REPAIR),
         TanweenBeforeWasl(repairs=_DAMM_START_REPAIR),
         TanweenDrop(),

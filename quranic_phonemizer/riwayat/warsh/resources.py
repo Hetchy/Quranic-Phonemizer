@@ -25,6 +25,7 @@ from .sequence import entries_for_words
 from .relative_pronoun import supply_relative_pronoun
 from .single_hamza import supply_single_hamza
 from .hamza_meetings import supply_hamza_meetings
+from .joined_pausal import supply_joined_pausal
 
 RIWAYAH = Riwayah.WARSH
 SCRIPTS = (Script.UTHMANI,)
@@ -124,6 +125,7 @@ def lexeme_passes() -> tuple:
         supply_relative_pronoun,
         supply_single_hamza,
         supply_hamza_meetings,
+        supply_joined_pausal,
         spell_muqattaat(muqattaat(), vocalized_compact=True),
     )
 
