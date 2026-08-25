@@ -22,7 +22,10 @@ class Placements:
 def _unit_occurrences(own: Ownership, sounds: tuple[Sound, ...]) -> dict[int, set[int]]:
     out: dict[int, set[int]] = defaultdict(set)
     for sound, unit in own.owner.items():
-        out[unit].update(o.value for o in sounds[sound].rule_occurrence_ids)
+        out[unit].update(
+            o.value for o in sounds[sound].rule_occurrence_ids
+            if o.value not in own.carrier_only
+        )
     for unit, silence in own.silence.items():
         if isinstance(silence, int):
             out[unit].add(silence)
