@@ -11,7 +11,11 @@ from tests.hardcase.registry import FixtureRef, RULE_FIXTURES
 
 
 def _catalogued() -> set[str]:
-    return {rule[0] for rule in tajweed_rules("hafs")}
+    return {
+        rule[0]
+        for riwayah in ("hafs", "warsh")
+        for rule in tajweed_rules(riwayah)
+    }
 
 
 def test_every_catalogued_rule_has_a_fixture():

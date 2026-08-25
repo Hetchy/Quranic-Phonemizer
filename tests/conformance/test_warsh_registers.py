@@ -10,9 +10,10 @@ from pathlib import Path
 import pytest
 
 from quranic_phonemizer.api import recitation
-from quranic_phonemizer.model.address import Riwayah, Script, VerseRef
-from quranic_phonemizer.model.canon import Onset
+from quranic_phonemizer.model.address import Location, Riwayah, Script, VerseRef
+from quranic_phonemizer.model.canon import Onset, Quality
 from quranic_phonemizer.phonemize.legacy_views import phonemes_by_word
+from quranic_phonemizer.riwayat.warsh import naql_script
 from quranic_phonemizer.riwayat.warsh.resources import corpus as warsh_corpus
 from tests.support.boundary import plan_for
 
@@ -262,3 +263,162 @@ def test_the_tanwin_repair_register_is_generated_from_the_source():
         source_ref for _, source_ref, family in DAMM_REPAIRS if family == "tanwin"
     }
     assert {ref for ref, quality in sites.items() if quality == "U"} == register_tanwin
+
+
+# ------------------------------------------------------------------ naql
+#: Host kinds a supplied latent qata may stand after; anything else is an
+#: unreviewed boundary.
+def _naql_family(text: str) -> str | None:
+    quality = naql_script.latent_qata_quality(text)
+    if quality is None:
+        return None
+    if text[1] == "\u06df":
+        return "damm_stroke"
+    return f"written_{quality.name}"
+
+
+def _naql_host_kind(text: str, quality: Quality) -> str:
+    text = "".join(char for char in text if char not in STOP_SIGNS)
+    index = len(text) - 1
+    while index > 0 and text[index] in "\u0627\u0652":
+        index -= 1
+    char = text[index]
+    if char in HARAKA:
+        moved = HARAKA[char] == ("A" if quality is Quality.A else quality.name)
+        return "moved_haraka" if moved else "mismatch"
+    if char in TANWIN:
+        return "tanwin"
+    if char == "\u0653":
+        return "spelled"
+    return "other"
+
+
+@lru_cache(maxsize=None)
+def _naql_boundaries():
+    by_verse: dict[tuple[int, int], dict[int, str]] = {}
+    for location, entry in warsh_corpus().entries.items():
+        by_verse.setdefault((location.surah, location.ayah), {})[
+            location.word
+        ] = entry.text
+    within: Counter = Counter()
+    edge: Counter = Counter()
+    for (surah, ayah), words in by_verse.items():
+        for word, text in words.items():
+            family = _naql_family(text)
+            if family is None:
+                continue
+            quality = naql_script.latent_qata_quality(text)
+            if word > 1:
+                within[(family, _naql_host_kind(words[word - 1], quality))] += 1
+            elif ayah > 1 and (surah, ayah - 1) in by_verse:
+                previous = by_verse[(surah, ayah - 1)]
+                host = previous[max(previous)]
+                edge[(family, _naql_host_kind(host, quality))] += 1
+            else:
+                edge[(family, "surah_start")] += 1
+    return within, edge
+
+
+def test_the_naql_latent_register_reconciles_with_canonical_hosts():
+    """Every supplied latent qata stands after an eligible host: a written
+    moved haraka, a tanwin, or one spelled opening at a verse edge."""
+    within, edge = _naql_boundaries()
+    assert sum(within.values()) == 1658
+    assert within == Counter({
+        ("written_A", "moved_haraka"): 752,
+        ("written_A", "tanwin"): 365,
+        ("written_I", "moved_haraka"): 173,
+        ("written_I", "tanwin"): 298,
+        ("written_U", "tanwin"): 1,
+        ("damm_stroke", "moved_haraka"): 46,
+        ("damm_stroke", "tanwin"): 23,
+    })
+    joinable = {key: count for key, count in edge.items() if key[1] != "surah_start"}
+    assert sum(joinable.values()) == 308
+    assert joinable == {
+        ("written_A", "tanwin"): 112,
+        ("written_A", "spelled"): 1,
+        ("written_I", "tanwin"): 192,
+        ("written_I", "moved_haraka"): 1,
+        ("damm_stroke", "tanwin"): 2,
+    }
+
+
+def test_the_227_initial_badals_are_deferred_from_ordinary_naql():
+    deferred = Counter(
+        quality.name
+        for entry in warsh_corpus().entries.values()
+        if (quality := naql_script.latent_qata_badal_quality(entry.text))
+        is not None
+    )
+    assert deferred == Counter({"A": 177, "U": 47, "I": 3})
+
+
+def test_a_full_hamza_after_a_sakin_verse_end_is_only_kitabiyah():
+    """The one adjacent-ayah boundary written with tahqiq: كتابيه إني."""
+    by_verse: dict[tuple[int, int], dict[int, str]] = {}
+    for location, entry in warsh_corpus().entries.items():
+        by_verse.setdefault((location.surah, location.ayah), {})[
+            location.word
+        ] = entry.text
+    tahqiq = set()
+    for (surah, ayah), words in by_verse.items():
+        first = words[1]
+        if ayah == 1 or first[0] not in "\u0621\u0623\u0625":
+            continue
+        previous = by_verse.get((surah, ayah - 1))
+        if previous is None:
+            continue
+        host = "".join(
+            char for char in previous[max(previous)] if char not in STOP_SIGNS
+        )
+        index = len(host) - 1
+        while index > 0 and host[index] in "\u0627\u0652":
+            index -= 1
+        # A sakin consonant ends bare once the plural alif and sukun are
+        # stripped; a madda or carrier there is a long vowel, not a host.
+        if host[index] not in HARAKA and host[index] not in TANWIN and (
+            host[index] not in "\u0653\u0670\u06e5\u06e6\u06d2"
+        ) and host.endswith("\u0652"):
+            tahqiq.add(Location(surah, ayah, 1))
+    assert tahqiq == {Location(69, 20, 1)}
+    assert warsh_corpus().entries[Location(69, 20, 1)].text.startswith("إ")
+
+
+def test_the_article_naql_register_is_the_documented_1307():
+    """Written article alifs, suppressed-alif prefix forms, and the two
+    interrogative tokens close the register with the reviewed long bases."""
+    counts: Counter = Counter()
+    longs = 0
+    for location, entry in warsh_corpus().entries.items():
+        text = "".join(char for char in entry.text if char not in STOP_SIGNS)
+        found = naql_script._article_lam(text)
+        if found is None:
+            continue
+        lam, wasl_alif = found
+        if lam + 2 >= len(text) or text[lam + 1] not in HARAKA:
+            continue
+        if text[lam + 2] not in "\u0627\u0670":
+            continue
+        if text.startswith("\u0621"):
+            kind = "interrogative"
+        elif text[0] == "\u0644" or text.startswith("\u0648\u064e\u0644"):
+            kind = "suppressed_alif"
+        elif wasl_alif is None:
+            kind = "written_alif"
+        else:
+            kind = "written_alif_prefixed"
+        counts[kind] += 1
+        if text[lam + 2] == "\u0670" or naql_script._skeleton(
+            text[lam + 3:]
+        ) in naql_script._LONG_BASES:
+            longs += 1
+    assert counts == Counter({
+        "written_alif": 955,
+        "written_alif_prefixed": 328,
+        "suppressed_alif": 22,
+        "interrogative": 2,
+    })
+    assert counts["written_alif"] + counts["written_alif_prefixed"] == 1283
+    assert sum(counts.values()) == 1307
+    assert longs == 214

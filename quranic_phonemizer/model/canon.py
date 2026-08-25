@@ -113,6 +113,10 @@ class Annotation(StrEnum):
     JOINED_PARTICLE = "joined_particle"
     """This slot ends a particle the rasm joined to the word after it, so
     what follows opens a word: `هَـٰٓؤُلَآءِ` is `ها` + `أولاء`."""
+    NAQL = "naql"
+    """This slot's vowel was carried from a qata hamza deleted after it, and
+    the deletion holds in every boundary state: the article family and the
+    lexical `ردءا`."""
 
 
 class VowelForm(StrEnum):
@@ -328,6 +332,7 @@ class Rule(StrEnum):
     MADD_SILAH = "madd_silah"
 
     IBDAL_HAMZA = "ibdal_hamza"
+    NAQL = "naql"
     HAMZA_WASL_SILENT = "hamza_wasl_silent"
     HAMZA_WASL_FATHA = "hamza_wasl_fatha"
     HAMZA_WASL_KASRA = "hamza_wasl_kasra"
@@ -370,6 +375,7 @@ ILTIQA_RULES: frozenset[Rule] = frozenset(
 #: a merger's two edges belong to one occurrence.
 CLASSIFICATION_ONLY: frozenset[Rule] = frozenset(
     {
+        Rule.NAQL,
         Rule.TARQEEQ,
         Rule.GHUNNAH_MUSHADDADAH,
         Rule.IDGHAM_MUTAJANISAYN_NAQIS,

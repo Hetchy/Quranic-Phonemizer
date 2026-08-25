@@ -7,9 +7,16 @@ from pathlib import Path
 import pytest
 
 from quranic_phonemizer.model.address import Location, Script
-from quranic_phonemizer.model.canon import CanonLetter, Nucleus, Onset, Quality
+from quranic_phonemizer.model.canon import (
+    Annotation,
+    CanonLetter,
+    Nucleus,
+    Onset,
+    Quality,
+)
 from quranic_phonemizer.model.inscription import SlotFact
 from quranic_phonemizer.orthography.inventory import InventoryError
+from quranic_phonemizer.riwayat.warsh import naql_script
 from quranic_phonemizer.riwayat.warsh.resources import corpus, script_adapter
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -162,3 +169,116 @@ def test_yeh_barree_is_preserved_as_source_but_projects_to_yaa():
     assert reading.clusters[-1].letter is CanonLetter.YA
     assert barree.source.location == entry.sources[0].location
     assert barree.source.offset == entry.text.index("ے")
+
+
+def _reading_pair(first: tuple[int, int, int], second: tuple[int, int, int]):
+    one, two = Location(*first), Location(*second)
+    entries = (corpus().entries[one], corpus().entries[two])
+    return entries, script_adapter(Script.UTHMANI).read(
+        one.verse, ((one, entries[0].text), (two, entries[1].text))
+    )
+
+
+def test_a_word_initial_bare_alif_haraka_supplies_the_latent_qata():
+    entry, reading = _reading((23, 1, 2))  # اَفْلَحَ
+    first = reading.clusters[0]
+    quality = _evidence_at(reading, 1, SlotFact.VOWEL_QUALITY)
+
+    assert entry.text[:2] == "اَ"
+    assert first.letter is CanonLetter.HAMZA and first.onset is None
+    assert quality.value == Nucleus.short(Quality.A)
+
+
+def test_the_damm_stroke_after_a_bare_alif_is_the_qata_damm():
+    entry, reading = _reading((77, 12, 3))  # ا۟جِّلَتْ
+    first = reading.clusters[0]
+    quality = _evidence_at(reading, 1, SlotFact.VOWEL_QUALITY)
+
+    assert entry.text[1] == "۟"
+    assert first.letter is CanonLetter.HAMZA and first.onset is None
+    assert quality.value == Nucleus.short(Quality.U)
+
+
+@pytest.mark.parametrize(("ref", "quality"), (
+    ((5, 41, 24), Quality.A),
+    ((2, 161, 7), Quality.U),
+    ((6, 158, 23), Quality.I),
+    ((10, 53, 5), Quality.I),
+))
+def test_initial_badals_are_deferred_from_ordinary_naql(ref, quality):
+    entry, _ = _reading(ref)
+    assert naql_script.latent_qata_badal_quality(entry.text) is quality
+    assert naql_script.latent_qata_quality(entry.text) is None
+
+
+def test_the_same_stroke_in_a_wasl_sequence_stays_the_start_quality():
+    entry, reading = _reading((7, 195, 21))  # اُ۟دْعُواْ
+    first = reading.clusters[0]
+    quality = _evidence_at(reading, 2, SlotFact.VOWEL_QUALITY)
+
+    assert entry.text[2] == "۟"
+    assert first.letter is CanonLetter.HAMZA and first.onset is Onset.WASL
+    assert quality.value == Nucleus.short(Quality.U)
+
+
+def test_the_eased_aal_spelling_is_not_claimed_by_the_latent_family():
+    entry, reading = _reading((15, 61, 3))  # جَآءَ ا۟لَ
+    assert entry.text.startswith("ا۟لَ")
+    assert not any(
+        row.offset == 1 and row.fact is SlotFact.VOWEL_QUALITY
+        for row in reading.evidence
+    )
+
+
+def test_the_moved_host_haraka_demotes_to_a_naql_witness():
+    (host, _), reading = _reading_pair((23, 1, 1), (23, 1, 2))  # قَدَ اَفْلَحَ
+    fatha = 3
+    decoration = next(row for row in reading.decorations if row.offset == fatha)
+
+    assert host.text[fatha] == "َ"
+    assert reading.clusters[decoration.cluster].letter is CanonLetter.DAL
+    assert not any(
+        row.offset == fatha and row.fact is SlotFact.VOWEL_QUALITY
+        for row in reading.evidence
+    )
+    assert any(row.offset == fatha for row in reading.attestations)
+
+
+def test_the_latent_qata_keeps_its_full_shape_for_restoration():
+    # The projection never bakes the joined outcome in: the qata's letter and
+    # vowel stay canonical, so ibtidaa and a stop before it restore the hamza.
+    _, reading = _reading_pair((23, 1, 1), (23, 1, 2))
+    qata = next(
+        cluster for cluster in reading.clusters if cluster.word == 1
+    )
+    assert qata.letter is CanonLetter.HAMZA
+    assert qata.mark("fatha") is not None
+
+
+def test_the_article_rasm_alif_supplies_the_carried_naql_annotation():
+    entry, reading = _reading((2, 11, 7))  # اِ۬لَارْضِ
+    alif = 5
+    annotation = _evidence_at(reading, alif, SlotFact.TAJWEED_MARK)
+
+    assert entry.text[alif] == "ا"
+    assert reading.clusters[annotation.cluster].letter is CanonLetter.LAM
+    assert annotation.value is Annotation.NAQL
+
+
+def test_a_long_article_base_supplies_its_length_on_the_lam():
+    entry, reading = _reading((2, 4, 10))  # وَبِالَاخِرَةِ
+    wasl = reading.clusters[2]
+    quality = _evidence_at(reading, 6, SlotFact.VOWEL_QUALITY)
+    annotation = _evidence_at(reading, 7, SlotFact.TAJWEED_MARK)
+
+    assert entry.text[4:8] == "الَا"
+    assert wasl.letter is CanonLetter.HAMZA and wasl.onset is Onset.WASL
+    assert quality.value == Nucleus.long(Quality.A)
+    assert annotation.value is Annotation.NAQL
+
+
+def test_an_ordinary_lam_alif_shape_is_not_an_article_naql():
+    entry, reading = _reading((20, 45, 1))  # قَالَا
+    assert not any(
+        row.fact is SlotFact.TAJWEED_MARK for row in reading.evidence
+    )

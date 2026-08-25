@@ -141,10 +141,17 @@ def test_sounds_agree_in_order_token_word_and_rules(hafs, pen, alphabet, ref, kw
 
 
 def test_rule_definition_inventory_equals_tajweed_rules():
+    """Each riwayah publishes an ordered slice of the one inventory, and the
+    two slices together cover the whole of it."""
     native = [
         (d.id.value, d.name, d.arabic_name, d.summary) for d in rule_definitions()
     ]
-    assert native == list(legacy_tajweed_rules("hafs"))
+    published = set()
+    for riwayah in ("hafs", "warsh"):
+        rows = list(legacy_tajweed_rules(riwayah))
+        assert [row for row in native if row in set(rows)] == rows
+        published.update(rows)
+    assert [row for row in native if row in published] == native
 
 
 @pytest.mark.parametrize(("ref", "kwargs"), SITES)
