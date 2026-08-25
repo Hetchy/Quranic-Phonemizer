@@ -28,8 +28,8 @@ from ...rules.madd import (
     MaddLazimIbdal,
     MaddLeen,
     MaddSilah,
-    PausalGlide,
 )
+from ...rules.pausal_glide import PausalGlide
 from ...rules.meem_sakinah import GhunnahMushaddadah, MeemSakinah
 from ...rules.noon_sakinah import IkhfaaWeight, NoonSakinah
 from ...rules.qalqala import Qalqala

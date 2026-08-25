@@ -17,6 +17,7 @@ from ...canon.lexicon import Lexicon, load_affixes, load_lexicon
 from ...canon.spell import Muqattaat, load_muqattaat
 from ...corpus import PackedCorpus, load_corpus
 from ...model.address import Location, Riwayah, Script, VerseRef
+from ...model.canon import Quality
 from ..khilaf import Khilaf, load_khilaf
 from ..tables import RuleTables, load_rule_tables
 from ...orthography.adapter import Reading
@@ -28,6 +29,10 @@ RIWAYAH = Riwayah.HAFS
 #: The scripts this riwayah is packaged for. Listed rather than taken from
 #: `Script`, so a script added for another riwayah does not appear here.
 SCRIPTS = (Script.UTHMANI, Script.INDOPAK)
+
+#: How a collapsed inclined vowel reads when the `imala` extra phoneme is
+#: not spent. The typed quality and rule are unchanged by the collapse.
+QUALITY_FALLBACKS = {Quality.KUBRA: Quality.I}
 
 DATA = Path(__file__).resolve().parents[2] / "data" / "riwayat" / "hafs"
 

@@ -3,7 +3,7 @@
 """
 from __future__ import annotations
 
-from ..api import PACKAGES, recitation
+from ..api import PACKAGES, recitation, ruleset_for
 from ..model.address import (
     KhilafId,
     Option,
@@ -26,14 +26,16 @@ def supported_riwayat() -> tuple[str, ...]:
 
 
 def tajweed_rules(riwayah: str) -> tuple[tuple[str, str, str, str], ...]:
-    """One row per identifier a result can publish -- every rule, then the
-    silence reasons: identifier, English name, Arabic name, summary."""
-    check_riwayah(riwayah)
+    """One row per identifier this reading can publish -- the rules its
+    bound classifiers declare, then the silence reasons: identifier,
+    English name, Arabic name, summary."""
+    bound = ruleset_for(check_riwayah(riwayah)).emitted()
     return tuple(
         (identifier.value, *definition)
         for identifier, definition in (
             *RULE_DEFINITIONS.items(), *SILENCE_DEFINITIONS.items()
         )
+        if identifier in bound or identifier not in RULE_DEFINITIONS
     )
 
 

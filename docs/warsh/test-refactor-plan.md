@@ -108,8 +108,7 @@ tests/
       test_wasl_start.py                          # 14
       test_hafs_alism_ibtidaa.py                  # 1V
       test_wasl_silent.py                         # 3
-      test_iltiqa.py                              # 11
-      test_warsh_iltiqa.py                        # 4
+      test_iltiqa.py                              # 15
       test_seats.py                               # 5
       test_ibdal.py                               # 6
       test_tashil.py                              # 2
@@ -404,8 +403,8 @@ The folder follows implementation ownership rather than source spelling:
   has its own final-phase file;
 - `test_wasl_silent.py` covers the shared joined-elision classes,
   including exact onset/nucleus reach and lexical-qata contrasts;
-- `test_iltiqa.py` covers shared shortening and ordinary A/I repair;
-  `test_warsh_iltiqa.py` owns the Warsh U register and its exclusions;
+- `test_iltiqa.py` covers shared shortening and ordinary A/I repair, then
+  compares the Warsh U register and its exclusions directly with Hafs;
 - `test_ibdal.py` and `test_tashil.py` prove the generic transformation,
   phoneme inventory, effective madd, extra-token behavior, and exact reach;
 - `test_warsh_single_hamza.py` owns the morphology-backed and lexical Warsh

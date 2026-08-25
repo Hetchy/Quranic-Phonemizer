@@ -237,7 +237,7 @@ def test_imala_uses_its_written_ya_carrier(hafs, pen):
     columns = {c.id: c for c in view.words[0].columns}
     carrier = next(columns[c] for c in group.column_ids if columns[c].role is CellRole.MADD)
     assert group.kind.value == "vowel"
-    assert carrier.text == pen.performed_carrier(Quality.E)[1] + "ٰ"
+    assert carrier.text == pen.performed_carrier(Quality.KUBRA)[1] + "ٰ"
     assert carrier.source_character_ids
 
 

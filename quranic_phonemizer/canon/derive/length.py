@@ -89,7 +89,7 @@ def carrier(context: Context) -> Outcome:
         if letter is CARRIER_OF[previous.quality]:
             # The pronoun haa's vowel is absent when the word is stopped on,
             # so the carrier the rasm omits there spells a conditional length.
-            length = Nucleus.silah if carries_silah(context) else Nucleus.long
+            length = Nucleus.joined_only_long if carries_silah(context) else Nucleus.long
             return Sets(SlotFact.VOWEL_LENGTH, length(previous.quality), Target.PREVIOUS)
         if (
             cluster.bare_rasm

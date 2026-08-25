@@ -1,5 +1,6 @@
 from .resources import (
     ARTIFACT,
+    QUALITY_FALLBACKS,
     RIWAYAH,
     SCRIPTS,
     adapters_for,
@@ -16,6 +17,7 @@ from .rules import WARSH, rules_for
 
 __all__ = [
     "ARTIFACT",
+    "QUALITY_FALLBACKS",
     "RIWAYAH",
     "SCRIPTS",
     "WARSH",

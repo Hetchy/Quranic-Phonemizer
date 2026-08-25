@@ -122,7 +122,7 @@ _NUCLEUS_KINDS = {
     "silent": Nucleus.silent,
     "short": Nucleus.short,
     "long": Nucleus.long,
-    "silah": Nucleus.silah,
+    "silah": Nucleus.joined_only_long,
     "pausallong": Nucleus.pausal_long,
 }
 

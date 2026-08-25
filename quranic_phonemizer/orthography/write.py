@@ -30,11 +30,11 @@ _TANWEEN_ROLE = {
 #: Imala and ishmam are colourings a reciter applies to an ordinary vowel,
 #: not vowels of their own, so they spell as their base quality wherever the
 #: script has no mark that says otherwise.
-_BASE = {Quality.E: Quality.A}
+_BASE = {Quality.KUBRA: Quality.A, Quality.TAQLIL: Quality.A}
 
 #: Imala's inclined long vowel uses the ya carrier even though the Score writes
 #: the authored imala mark through its ordinary a-vowel spelling.
-_PERFORMED_BASE = {Quality.E: Quality.I}
+_PERFORMED_BASE = {Quality.KUBRA: Quality.I, Quality.TAQLIL: Quality.A}
 
 #: Onsets and qualities a script may name outright.
 TASHIL = "tashil"
@@ -108,7 +108,8 @@ class Pen:
         """Write a sakin final hamza on the seat licensed before it."""
         seat = {
             Quality.A: "above",
-            Quality.E: "above",
+            Quality.KUBRA: "above",
+            Quality.TAQLIL: "above",
             Quality.U: "waw",
             Quality.I: "yaa",
         }.get(previous)
@@ -276,7 +277,7 @@ def _nucleus(slot, pen: Pen) -> str:
             + (pen.carriers.get(carrier) or pen.letter(carrier))
             + pen.roles.get(MADD, "")
         )
-    if nucleus.is_silah:
+    if nucleus.is_joined_only_long:
         # One script spells the pronoun's vowel and its carrier in a
         # single mark; the other writes the vowel and then the carrier.
         composite, carrier = _SILAH_ROLES[quality]

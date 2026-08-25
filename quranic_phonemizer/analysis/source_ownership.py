@@ -31,6 +31,10 @@ class Ownership:
     owner: dict[int, int]
     presenters: dict[int, frozenset[int]]
     silence: dict[int, Silence]
+    shortened: dict[int, int]
+    """Length-carrier unit -> occurrence that shortened it."""
+    carrier_only: frozenset[int]
+    """Shortening occurrences placed only on their written carrier."""
 
 
 class OwnershipError(ValueError):
@@ -137,10 +141,13 @@ def _silenced_units(facts, tok) -> dict[int, int]:
     for edge in facts.silences:
         if edge.by is None:
             continue
+        rule = facts.occurrences[edge.by].rule
         unit = tok.roles.letter.get(edge.slots[0])
         if edge.aspect is Aspect.VOWEL:
+            if rule is Rule.NAQL:
+                continue
             unit = tok.roles.vowel.get(edge.slots[0], unit)
-            if facts.occurrences[edge.by].rule is Rule.WAQF_SILAH_DROP:
+            if rule is Rule.WAQF_SILAH_DROP:
                 carrier = tok.roles.carrier.get(edge.slots[0])
                 if carrier is not None:
                     out.setdefault(carrier, edge.by)
@@ -222,6 +229,11 @@ def ownership(
         owner=owner,
         presenters={s: frozenset(u) for s, u in presenters.items()},
         silence=silence,
+        shortened=shortened,
+        carrier_only=frozenset(
+            occurrence for occurrence in shortened.values()
+            if facts.occurrences[occurrence].rule is Rule.ILTIQA_SHORTENING
+        ),
     )
 
 

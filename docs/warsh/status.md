@@ -128,9 +128,10 @@ The remaining items are the Warsh-specific extensions or general seams that a
 second riwayah now requires.
 
 1. Represent taqlil and imala kubra as distinct typed vowel qualities rather
-   than overloading `Quality.E`.
+   than overloading `Quality.E`. Done: `Quality.TAQLIL` and `Quality.KUBRA`.
 2. Make kubra's collapsed rendering riwayah-owned: Hafs falls back to `/i/`,
-   while Warsh falls back to taqlil.
+   while Warsh falls back to taqlil. Done: each package declares
+   `QUALITY_FALLBACKS` and the renderer takes the mapping as data.
 3. Bind the existing effective madd machinery to Warsh transformations and
    preserve the complete additive rule set on each long sound.
 4. Emit Warsh occurrences through RAR's source/host, sound, SourceView, and
@@ -141,10 +142,11 @@ second riwayah now requires.
    extra phoneme rendering is enabled.
 7. Replace the pronoun-specific `is_silah` model name with a neutral
    joined-only-long shape usable by pronoun silah, Warsh yaa zawaid, and mim
-   al-jam'.
+   al-jam'. Done: `Nucleus.joined_only_long`.
 8. Give every classifier a declared set of rule IDs it can emit. Build
     `tajweed_rules(riwayah)` from the classifiers bound by that riwayah rather
     than from one nominal rule per classifier or from the global rule enum.
+    Done: classifier `emits` sets and the derived catalogue.
 
 ## Test work
 

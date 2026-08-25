@@ -77,12 +77,16 @@ class Onset(StrEnum):
 
 
 class Quality(StrEnum):
-    """The vowel letters. One character each, so a vocalised skeleton reads."""
+    """The vowel letters. One character each, so a vocalised skeleton reads.
+
+    TAQLIL and KUBRA are the two inclination grades: distinct typed
+    qualities, not renderings of one inclined vowel."""
 
     A = "a"
     U = "u"
     I = "i"
-    E = "e"
+    TAQLIL = "ɛ"
+    KUBRA = "e"
 
 
 #: The letter each quality lengthens into. A property of the canonical model,
@@ -109,6 +113,10 @@ class Annotation(StrEnum):
     JOINED_PARTICLE = "joined_particle"
     """This slot ends a particle the rasm joined to the word after it, so
     what follows opens a word: `هَـٰٓؤُلَآءِ` is `ها` + `أولاء`."""
+    NAQL = "naql"
+    """This slot's vowel was carried from a qata hamza deleted after it, and
+    the deletion holds in every boundary state: the article family and the
+    lexical `ردءا`."""
 
 
 class VowelForm(StrEnum):
@@ -164,7 +172,9 @@ class Nucleus:
         )
 
     @property
-    def is_silah(self) -> bool:
+    def is_joined_only_long(self) -> bool:
+        """Long when joined to, absent at a stop: pronoun silah, and the
+        Warsh joined-only families that reuse the same shape."""
         return (
             self.joined.form is VowelForm.LONG
             and self.stopped.form is VowelForm.ABSENT
@@ -211,7 +221,7 @@ class Nucleus:
         return cls(state, state)
 
     @classmethod
-    def silah(cls, quality: Quality) -> Nucleus:
+    def joined_only_long(cls, quality: Quality) -> Nucleus:
         return cls(VowelState(VowelForm.LONG, quality), _ABSENT_STATE)
 
     @classmethod
@@ -322,6 +332,7 @@ class Rule(StrEnum):
     MADD_SILAH = "madd_silah"
 
     IBDAL_HAMZA = "ibdal_hamza"
+    NAQL = "naql"
     HAMZA_WASL_SILENT = "hamza_wasl_silent"
     HAMZA_WASL_FATHA = "hamza_wasl_fatha"
     HAMZA_WASL_KASRA = "hamza_wasl_kasra"
@@ -364,6 +375,7 @@ ILTIQA_RULES: frozenset[Rule] = frozenset(
 #: a merger's two edges belong to one occurrence.
 CLASSIFICATION_ONLY: frozenset[Rule] = frozenset(
     {
+        Rule.NAQL,
         Rule.TARQEEQ,
         Rule.GHUNNAH_MUSHADDADAH,
         Rule.IDGHAM_MUTAJANISAYN_NAQIS,

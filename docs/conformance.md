@@ -82,6 +82,68 @@ assimilation, and these words have none.
 word, which is what proves the yaa is a consonant. Stopping gives `-ay`; the
 oracle's `-aa` is the nominative of a word standing in the genitive.
 
+## Warsh wasl and iltiqa registers
+
+`tests/conformance/test_warsh_registers.py` asserts the reviewed counts from
+`docs/warsh/research/v2/wasl-hamza.md` and `iltiqa.md`: the canonical start
+register (13,480 onsets, 11,982 A / 1,097 I / 401 U), the sixteen started
+silent-qata forms, the 38-row damm repair register, and the generated tanwin
+repair family (44 sites, 40 I / 4 U). The runtime start quality is supplied
+by the source wasl mark; the register test reconciles every supplied mark
+against the canonical derivation, whose closed disagreements are the passive
+`اَ۟سْتُحِقَّ` delta, the temporary-damm `اتقوا` family, the passive
+`اَ۟تُّبِعُواْ`, and the Warsh-only wasl readings of `اتبع` and `اسر`.
+
+Known residue deferred to later verticals:
+
+- The `التي` family is written without its geminate lam in this source and
+  currently reads a single lam; its start quality is already the article's A.
+- The joined outcomes of the sixteen silent-qata words use the connected
+  single-hamza chapter and land with that vertical; only their started forms
+  are asserted here.
+- The general 1,665-site `iltiqa_haraka` partition (770 A / 381 I / 514 U)
+  remains a documented research invariant. Its tanwin family and damm rows
+  are executable above; the lexical-host family is supplied per site by the
+  source linking haraka and still needs a morphology-backed generator to be
+  counted mechanically.
+
+## Warsh naql registers
+
+The naql vertical cleared the earlier article residue: `وَالَارْضِ` and its
+family now project their wasl onset, the carried article vowel, and the
+`naql` annotation, so `hamza_wasl_silent`/`hamza_wasl_fatha` behave normally
+around the internal naql.
+
+`tests/conformance/test_warsh_registers.py` asserts the mechanical latent
+register generated from the supplied script families and canonical hosts:
+
+- 1,658 within-ayah short-qata boundaries, every one after a matching written
+  moved haraka or a tanwin host: 1,589 written-haraka forms (A/I/U) and
+  69 damm-stroke forms.
+- 308 adjacent-ayah short-qata edges: 306 tanwin-final hosts, the one written
+  moved haraka of `وَانْحَرِ` before 108:3, and one spelled-opening edge at
+  canonical 29:1 -> 29:2. Five further latent verse starts open a surah and
+  join nothing. The spelled-opening edge does not perform naql: a
+  disjoined-letter opening ends as it would at a pause, so `اَحَسِبَ` keeps
+  its restored qata even when the reader runs on.
+- The 227 initial badal forms (177 A, 47 U, and 3 I) are deferred to the
+  madd-badal vertical. Ordinary naql does not transfer their long nucleus.
+- The article register is exactly the documented 1,307: 1,283 written
+  article alifs (955 wasl-marked, 328 prefixed bare), 22 suppressed-alif
+  prefix forms, and the two interrogative tokens; the reviewed long bases
+  cover 214 tokens.
+- The one adjacent-ayah boundary written with a full qata after a sakin host
+  is `كِتَٰبِيَهْۖ إِنِّے`, matching the authored tahqiq-default exclusion.
+
+The research file's 1,550 within-ayah and 180 adjacent-ayah subtotals in
+`docs/warsh/research/v2/naql.md` are not reproducible from the supplied
+families under any principled cut; the mechanical totals above supersede
+them for conformance. Two more intentional deltas against that file's
+tables: dad is not a qalqala letter, so waqf on `اِ۬لَارْضِ` ends
+`l a rˤ dˤ` with no release; and the received `عَاداٗ اَ۬لُّاول۪ىٰ` junction
+stays outside both the article family and the tanwin repair register until
+its idgham-with-naql face is implemented.
+
 ## Verse mode
 
 97.850% counts a word wrong when a sound merged across a boundary is credited

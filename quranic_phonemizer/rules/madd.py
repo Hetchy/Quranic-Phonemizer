@@ -7,7 +7,6 @@ from ..engine.neighbourhood import Neighbourhood
 from ..engine.plan import (
     Classify,
     Length,
-    MergeInto,
     Phase,
     Plan,
     Realize,
@@ -20,9 +19,6 @@ from ..model.canon import Annotation, CanonLetter as L
 from ..model.canon import Onset, Quality, Rule, SlotOrigin, VowelForm
 from ..model.performance import Aspect, Occurrence, Vowel
 
-#: Which glide lengthens which vowel.
-GLIDE_OF = {Quality.U: L.WAW, Quality.I: L.YA}
-
 @dataclass(frozen=True, slots=True)
 class MaddLazimIbdal:
     """Name the hamza replaced by the long alif at madd-tasheel sites."""
@@ -33,6 +29,7 @@ class MaddLazimIbdal:
     rule: Rule = Rule.IBDAL_HAMZA
     phase: Phase = Phase.LENGTH
     triggers: frozenset = frozenset({VowelForm.LONG})
+    emits: frozenset = frozenset({Rule.IBDAL_HAMZA})
 
     def look(
         self, near: Neighbourhood, plan: Plan, at: SlotId,
@@ -49,54 +46,6 @@ class MaddLazimIbdal:
             return None
         return _classify(Rule.IBDAL_HAMZA, at, None)
 
-@dataclass(frozen=True, slots=True)
-class PausalGlide:
-    rule: Rule = Rule.MADD_TABII
-    phase: Phase = Phase.LENGTH
-    triggers: frozenset = frozenset({L.WAW, L.YA})
-
-    def look(
-        self, near: Neighbourhood, plan: Plan, at: SlotId,
-        boundaries: BoundaryPlan,
-    ) -> Verdict | None:
-        slot, word = near.slot(at), near.word_of(at)
-        if slot is None or word is None or not boundaries.stopped_on(word):
-            return None
-        slots = near.score.words[word].slots
-        if not slots or slots[-1].id != at:
-            return None
-        if plan.merged_away(at, Aspect.CONSONANT):
-            # A glide the stop removed outright lengthens nothing.
-            return None
-        if slot.onset is Onset.GEMINATE:
-            # A doubled glide is a consonant -- `ٱلْعَلِىُّ` ends `-iyy`, not `-ii`.
-            return None
-        if slot.nucleus.sounds_long:
-            # A glide the stop cannot strip still carries its own vowel, so it
-            # is a consonant: `نَسِيَا` ends `-iyaa`, not `-iiaa`.
-            return None
-        before = near.before(at)
-        if before is None or not before.nucleus.is_short:
-            return None
-        if GLIDE_OF.get(before.nucleus.quality) is not slot.letter:
-            return None
-        return Verdict(
-            Occurrence(
-                mint(Rule.MADD_TABII, at),
-                Rule.MADD_TABII,
-                (at,),
-            ),
-            (
-                # The merged sound lets both halves share one occurrence.
-                Realize(
-                    before.id,
-                    Aspect.VOWEL,
-                    Vowel(before.nucleus.quality, long=True),
-                ),
-                MergeInto(at, Aspect.CONSONANT, before.id, Aspect.VOWEL),
-            ),
-        )
-
 
 @dataclass(frozen=True, slots=True)
 class IltiqaShortening:
@@ -109,6 +58,7 @@ class IltiqaShortening:
     rule: Rule = Rule.ILTIQA_SHORTENING
     phase: Phase = Phase.LENGTH
     triggers: frozenset = frozenset({VowelForm.LONG})
+    emits: frozenset = frozenset({Rule.ILTIQA_SHORTENING})
 
     def look(
         self, near: Neighbourhood, plan: Plan, at: SlotId,
@@ -118,7 +68,7 @@ class IltiqaShortening:
         slot, word = near.slot(at), near.word_of(at)
         if slot is None or word is None:
             return None
-        if not (slot.nucleus.is_long or slot.nucleus.is_silah):
+        if not (slot.nucleus.is_long or slot.nucleus.is_joined_only_long):
             return None
         slots = near.score.words[word].slots
         if not slots or slots[-1].id != at:
@@ -172,12 +122,14 @@ def _madd_of(
     slot, word = near.slot(at), near.word_of(at)
     if slot is None or word is None or not slot.nucleus.sounds_long:
         return None
+    if plan.merged_away(at, Aspect.VOWEL):
+        return None  # a vowel a boundary rule deleted has no length left
     slots = near.score.words[word].slots
     final = bool(slots) and slots[-1].id == at
 
     if final and boundaries.stopped_on(word):
         # A stopped silah is absent rather than long and takes no instance.
-        return None if slot.nucleus.is_silah else (Rule.MADD_TABII, None)
+        return None if slot.nucleus.is_joined_only_long else (Rule.MADD_TABII, None)
     if final and boundaries.after(word) is Junction.SAKT:
         return (Rule.MADD_TABII, None)
     if final and all(item.spelled for item in slots):
@@ -235,6 +187,10 @@ class MaddClass:
     phase: Phase = Phase.LENGTH
     triggers: frozenset = frozenset({VowelForm.LONG, Onset.WASL})
     additive_arid: bool = False
+    emits: frozenset = frozenset({
+        Rule.MADD_TABII, Rule.MADD_MUTTASIL, Rule.MADD_MUNFASIL,
+        Rule.MADD_LAZIM, Rule.MADD_ARID_LISSUKUN,
+    })
 
     def look(
         self, near: Neighbourhood, plan: Plan, at: SlotId,
@@ -268,6 +224,7 @@ class MaddBadal:
     rule: Rule = Rule.MADD_BADAL
     phase: Phase = Phase.LENGTH
     triggers: frozenset = frozenset({VowelForm.LONG, Onset.WASL})
+    emits: frozenset = frozenset({Rule.MADD_BADAL})
 
     def look(
         self, near: Neighbourhood, plan: Plan, at: SlotId,
@@ -295,13 +252,14 @@ class MaddSilah:
     rule: Rule = Rule.MADD_SILAH
     phase: Phase = Phase.LENGTH
     triggers: frozenset = frozenset({VowelForm.LONG})
+    emits: frozenset = frozenset({Rule.MADD_SILAH})
 
     def look(
         self, near: Neighbourhood, plan: Plan, at: SlotId,
         boundaries: BoundaryPlan,
     ) -> Verdict | None:
         slot = near.slot(at)
-        if slot is None or not slot.nucleus.is_silah:
+        if slot is None or not slot.nucleus.is_joined_only_long:
             return None
         if _madd_of(near, plan, at, boundaries) is None:
             return None
@@ -321,6 +279,7 @@ class MaddLeen:
     rule: Rule = Rule.MADD_LEEN
     phase: Phase = Phase.LENGTH
     triggers: frozenset = frozenset({L.WAW, L.YA})
+    emits: frozenset = frozenset({Rule.MADD_LEEN, Rule.MADD_LAZIM})
 
     def look(
         self, near: Neighbourhood, plan: Plan, at: SlotId,

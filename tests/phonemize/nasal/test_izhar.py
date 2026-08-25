@@ -34,10 +34,9 @@ CASES = (
         sound_rules={"n[1]": R("izhar"), "n[2]": R("izhar")},
     ),
     # Hafs: يَكُنْ غَنِيًّا أَوْ
-    # Warsh: يَّكُنْ غَنِيّاً اَوْ
     Case(
         id="ghayn-hamza",
-        site=Site.shared("4:135", (16, 17, 18)),
+        site=Site(hafs=("4:135", (16, 17, 18))),
         read=through(),
         phonemes=("j a k u n", "ɣ aˤ n i jj a n", "ʔ a w"),
         char_rules={"ن[1]": R("izhar"), "@fathatan": R("izhar")},
@@ -74,10 +73,9 @@ CASES = (
         sound_rules={"n": R("izhar")},
     ),
     # Hafs: قَدِيرٌ
-    # Warsh: قَدِيرٌۖ
     Case(
         id="verse-seam",
-        site=Site.shared("2:106", (19,)),
+        site=Site(hafs=("2:106", (19,))),
         read=joining(),
         phonemes="q aˤ d i: rˤ u n",
         char_rules={"@dammatan": R("izhar")},

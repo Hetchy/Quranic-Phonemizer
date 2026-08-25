@@ -8,22 +8,27 @@ from pathlib import Path
 
 from ...canon import derive
 from ...canon.ledger import EMPTY as EMPTY_LEDGER
-from ...canon.ledger import Ledger
+from ...canon.ledger import Ledger, load_ledger
 from ...canon.lexicon import Lexicon, load_affixes, load_lexicon
 from ...canon.passes import LEXEME_PASSES
 from ...canon.spell import Muqattaat, load_muqattaat, spell_muqattaat
 from ...corpus import AlignedCorpus, load_aligned_corpus
 from ...model.address import Location, Riwayah, Script, VerseRef
+from ...model.canon import Quality
 from ...orthography.adapter import Reading
 from ...orthography.cluster import read_verse
 from ...orthography.inventory import Inventory, load_inventory
 from ..khilaf import EMPTY as EMPTY_KHILAF
 from ..khilaf import Khilaf
 from ..tables import RuleTables, load_rule_tables
-from .sequence import entries_for
+from .sequence import entries_for_words
 
 RIWAYAH = Riwayah.WARSH
 SCRIPTS = (Script.UTHMANI,)
+
+#: Warsh collapses kubra to taqlil when the `imala` extra phoneme is not
+#: spent; ordinary taqlil is never gated.
+QUALITY_FALLBACKS = {Quality.KUBRA: Quality.TAQLIL}
 ARTIFACT = "king-fahd-warsh-v2"
 DATA = Path(__file__).resolve().parents[2] / "data" / "riwayat" / "warsh"
 
@@ -37,11 +42,16 @@ class Adapter:
     def read(
         self, verse: VerseRef, words: tuple[tuple[Location, str], ...]
     ) -> Reading:
+        prepared = iter(
+            entries_for_words(
+                self.inventory, tuple(text for _, text in words)
+            )
+        )
         return read_verse(
             self.inventory,
             verse,
             words,
-            entries_for=lambda text: entries_for(self.inventory, text),
+            entries_for=lambda text: next(prepared),
             sources_for=self.corpus.sources_for,
         )
 
@@ -78,7 +88,8 @@ def adapters_for(riwayah: Riwayah) -> dict[Script, Adapter]:
 
 @lru_cache(maxsize=None)
 def ledger() -> Ledger:
-    return EMPTY_LEDGER
+    path = DATA / "ledger.yaml"
+    return load_ledger(path, riwayah=RIWAYAH) if path.exists() else EMPTY_LEDGER
 
 
 @lru_cache(maxsize=None)

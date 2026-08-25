@@ -36,6 +36,12 @@ EXTRA_PHONEMES = frozenset(
 #: withheld unless asked for.
 _LEGACY_ACTIVE = frozenset({"emphatic_fatha"})
 
+#: Which quality a collapsed inclined vowel reads as when `imala` is not
+#: spent. The riwayah package owns the real mapping -- Hafs collapses kubra
+#: to I, Warsh to taqlil -- and a caller that passes none keeps the reading
+#: callers had before the mapping existed.
+_LEGACY_FALLBACKS: dict[Quality, Quality] = {Quality.KUBRA: Quality.I}
+
 
 class NotationError(KeyError):
     """A sound this notation cannot write. Never a silent gap."""
@@ -57,9 +63,6 @@ class Entry:
     eased: str | None = None
     """Read from the data but not yet composed: gated at the notation once
     an `extra_phonemes` toggle exists to ask for it."""
-    imala: str | None = None
-    """The inclined form of a vowel. `plain` is the reading of the same vowel
-    for a caller who has not asked for the distinction."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -70,23 +73,39 @@ class Alphabet:
     releases: dict[Degree, str]
 
     def token(
-        self, sound: Sound, *, extra_phonemes: frozenset[str] | None = None
+        self,
+        sound: Sound,
+        *,
+        extra_phonemes: frozenset[str] | None = None,
+        quality_fallbacks: dict[Quality, Quality] | None = None,
     ) -> str:
         active = _LEGACY_ACTIVE if extra_phonemes is None else frozenset(extra_phonemes)
+        fallbacks = (
+            _LEGACY_FALLBACKS if quality_fallbacks is None else quality_fallbacks
+        )
         match sound:
             case Consonant():
                 return self._consonant(sound, active)
             case Vowel():
-                return self._vowel(sound, active)
+                return self._vowel(sound, active, fallbacks)
             case Release():
                 return self._release(sound, active)
         raise NotationError(f"{type(sound).__name__} is not a Sound")
 
     def tokens(
-        self, sounds, *, extra_phonemes: frozenset[str] | None = None
+        self,
+        sounds,
+        *,
+        extra_phonemes: frozenset[str] | None = None,
+        quality_fallbacks: dict[Quality, Quality] | None = None,
     ) -> tuple[str, ...]:
         return tuple(
-            self.token(sound, extra_phonemes=extra_phonemes) for sound in sounds
+            self.token(
+                sound,
+                extra_phonemes=extra_phonemes,
+                quality_fallbacks=quality_fallbacks,
+            )
+            for sound in sounds
         )
 
     # -- composition -------------------------------------------------------
@@ -122,11 +141,17 @@ class Alphabet:
         # gemination adds nothing further to write.
         return self._feature(entry.nasal, "nasal", sound)
 
-    def _vowel(self, sound: Vowel, active: frozenset[str]) -> str:
-        entry = self.vowels[sound.quality]
-        if entry.imala is not None and "imala" in active:
-            token = entry.imala
-        elif sound.emphatic and (sound.long or "emphatic_fatha" in active):
+    def _vowel(
+        self, sound: Vowel, active: frozenset[str],
+        fallbacks: dict[Quality, Quality],
+    ) -> str:
+        quality = sound.quality
+        if "imala" not in active:
+            # The typed quality survives the collapse; only the token reads
+            # as the riwayah's fallback quality.
+            quality = fallbacks.get(quality, quality)
+        entry = self.vowels[quality]
+        if sound.emphatic and (sound.long or "emphatic_fatha" in active):
             token = self._feature(entry.emphatic, "emphatic", sound)
         else:
             token = entry.plain
@@ -218,7 +243,7 @@ def _entry(raw: Any, where: str) -> Entry:
         return Entry(plain=raw)
     require_keys(
         raw, {"plain"}, name=where,
-        optional={"emphatic", "nasal", "hum", "heavy_hum", "eased", "imala"},
+        optional={"emphatic", "nasal", "hum", "heavy_hum", "eased"},
     )
     return Entry(
         plain=str(raw["plain"]),
@@ -227,7 +252,6 @@ def _entry(raw: Any, where: str) -> Entry:
         hum=_optional(raw, "hum"),
         heavy_hum=_optional(raw, "heavy_hum"),
         eased=_optional(raw, "eased"),
-        imala=_optional(raw, "imala"),
     )
 
 

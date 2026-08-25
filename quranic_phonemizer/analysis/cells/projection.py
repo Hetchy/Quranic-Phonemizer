@@ -3,11 +3,11 @@ from __future__ import annotations
 
 from dataclasses import replace
 
-from ...model.canon import Annotation, Quality
+from ...model.canon import Annotation, Quality, Rule
 from ...model.inscription import GlyphKind
 from ...model.performance import Aspect, Vowel
 from ...orthography.write import Pen
-from ..attributions import Hosted, Insertion, Merged, Silenced
+from ..attributions import Hosted, Insertion, Merged, Relengthened, Silenced
 from ..facts import AnalysisFacts
 from ..ids import CellColumnId, OccurrenceId, SoundId
 from ..inscription import InscriptionFacts
@@ -185,7 +185,7 @@ def _adjust_carrier(carrier, value, text, facts, slot_of_unit, was_dropped):
 
 def _transform_existing_carrier(columns, by_id, span, existing, value, pen):
     if (
-        value.quality in {Quality.A, Quality.E}
+        value.quality in {Quality.A, Quality.KUBRA, Quality.TAQLIL}
         and existing.text == MAQSURA
     ):
         columns[by_id[existing.id.value]] = replace(
@@ -280,6 +280,20 @@ def _silenced_targets(columns, edge, slot_of_unit):
     ]
 
 
+def _modifier_targets(words, columns, facts, modifier):
+    occurrence = OccurrenceId(modifier.by)
+    carrier_only = (
+        isinstance(modifier, Relengthened)
+        and facts.occurrences[modifier.by].rule is Rule.ILTIQA_SHORTENING
+    )
+    if carrier_only:
+        return [col for col in columns if col.silence == occurrence]
+    targets = _column_targets(words, modifier.sound)
+    if isinstance(facts.sounds[modifier.sound].value, Vowel):
+        targets.extend(_column_targets(words, modifier.sound, presenters=True))
+    return targets
+
+
 def _place_rules(words: tuple[CellWord, ...], facts: AnalysisFacts,
                  slot_of_unit) -> tuple[CellWord, ...]:
     placed: dict[int, list[OccurrenceId]] = {
@@ -305,7 +319,9 @@ def _place_rules(words: tuple[CellWord, ...], facts: AnalysisFacts,
         if isinstance(edge, Merged):
             targets = _column_targets(words, edge.sound, presenters=True)
         elif isinstance(edge, Silenced):
-            targets = _silenced_targets(columns, edge, slot_of_unit)
+            targets = [] if (
+                rule == Rule.NAQL.value and edge.aspect is Aspect.VOWEL
+            ) else _silenced_targets(columns, edge, slot_of_unit)
         elif isinstance(edge, (Hosted, Insertion)):
             targets = _column_targets(words, edge.sound)
         else:
@@ -315,12 +331,7 @@ def _place_rules(words: tuple[CellWord, ...], facts: AnalysisFacts,
                 placed[col.id.value].append(occurrence)
     for modifier in facts.modifiers:
         occurrence = OccurrenceId(modifier.by)
-        targets = _column_targets(words, modifier.sound)
-        if isinstance(facts.sounds[modifier.sound].value, Vowel):
-            targets.extend(_column_targets(
-                words, modifier.sound, presenters=True
-            ))
-        for col in targets:
+        for col in _modifier_targets(words, columns, facts, modifier):
             if occurrence not in placed[col.id.value]:
                 placed[col.id.value].append(occurrence)
     return tuple(replace(w, columns=tuple(

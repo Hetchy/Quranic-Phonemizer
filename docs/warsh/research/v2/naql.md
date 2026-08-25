@@ -40,6 +40,14 @@ carrier is excluded because it is not a sakin sahih or leen host. A medial
 sakin within an ordinary word is excluded; `ردءا` below is the single
 authored lexical exception.
 
+This vertical implements the ordinary short-vowel family only. An initial
+hamza followed by a badal carrier is deferred to
+[`madd-badal.md`](madd-badal.md): naql transfers the short haraka, while the
+carrier separately owns the resulting length. Treating the whole long
+nucleus as naql would collapse `badal mughayyar bin-naql` into the wrong
+rule. The selected source has 227 deferred initial forms: 177 A, 47 U, and
+3 I.
+
 ## Corpus size and data ownership
 
 The selected corpus has 1,550 eligible within-ayah cross-word boundaries.

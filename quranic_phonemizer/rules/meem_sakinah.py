@@ -12,7 +12,7 @@ from ..model.performance import Aspect, Consonant, Occurrence
 from .lam_shamsiyyah import ArticleShape
 from .ownership import is_performed_quiescent
 from .khilaf import nasal_place
-from .tables import Followers
+from .tables import MEEM_OUTCOMES, Followers
 
 NASAL_LETTERS = frozenset({L.NOON, L.MEEM})
 
@@ -33,6 +33,7 @@ class GhunnahMushaddadah:
     rule: Rule = Rule.GHUNNAH_MUSHADDADAH
     phase: Phase = Phase.MERGE
     triggers: frozenset = field(default=NASAL_LETTERS)
+    emits: frozenset = frozenset({Rule.GHUNNAH_MUSHADDADAH})
 
     def look(
         self, near: Neighbourhood, plan: Plan, at: SlotId,
@@ -82,6 +83,7 @@ class MeemSakinah:
     rule: Rule = Rule.IZHAR_SHAFAWI
     phase: Phase = Phase.MERGE
     triggers: frozenset = field(default=frozenset({L.MEEM}))
+    emits: frozenset = MEEM_OUTCOMES | {Rule.IZHAR_SHAFAWI}
 
     def look(
         self, near: Neighbourhood, plan: Plan, at: SlotId,

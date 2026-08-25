@@ -95,6 +95,46 @@ def test_every_impossible_tuple_raises(alphabet):
     assert not answered, f"impossible tuples given a token: {answered}"
 
 
+def test_kubra_collapses_to_the_riwayah_fallback_quality(alphabet):
+    """Without the `imala` token spent, kubra reads as the quality the
+    riwayah package declares: I for Hafs, taqlil for Warsh. The typed
+    quality itself is untouched -- only the token collapses."""
+    from quranic_phonemizer.riwayat import hafs, warsh
+
+    kubra = Vowel(Quality.KUBRA, long=True)
+    spent = frozenset({"imala"})
+    assert alphabet.token(kubra, extra_phonemes=spent) == "e:"
+    assert alphabet.token(
+        kubra, extra_phonemes=frozenset(),
+        quality_fallbacks=hafs.QUALITY_FALLBACKS,
+    ) == "i:"
+    assert alphabet.token(
+        kubra, extra_phonemes=frozenset(),
+        quality_fallbacks=warsh.QUALITY_FALLBACKS,
+    ) == "ɛ:"
+    # A caller that predates the mapping keeps the old collapsed reading.
+    assert alphabet.token(kubra) == "i:"
+
+
+def test_taqlil_is_never_gated_by_an_extra_phoneme(alphabet):
+    """Taqlil is an ordinary sound distinction, identical whether or not
+    `imala` is spent and under either riwayah's fallback mapping."""
+    from quranic_phonemizer.riwayat import hafs, warsh
+
+    for long in (False, True):
+        taqlil = Vowel(Quality.TAQLIL, long=long)
+        expected = "ɛ:" if long else "ɛ"
+        assert alphabet.token(taqlil) == expected
+        assert alphabet.token(
+            taqlil, extra_phonemes=frozenset({"imala"})
+        ) == expected
+        for fallbacks in (hafs.QUALITY_FALLBACKS, warsh.QUALITY_FALLBACKS):
+            assert alphabet.token(
+                taqlil, extra_phonemes=frozenset(),
+                quality_fallbacks=fallbacks,
+            ) == expected
+
+
 def test_emphasis_is_offered_exactly_where_the_rule_can_reach(alphabet):
     """The alphabet's emphatic entries and tafkheem's reach are one claim."""
     offered = {

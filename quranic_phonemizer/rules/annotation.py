@@ -27,6 +27,7 @@ class CanonicalColour:
 
     rule: Rule = Rule.IMALA
     phase: Phase = Phase.COLOUR
+    emits: frozenset = frozenset({Rule.IMALA, Rule.TASHIL, Rule.ISHMAM})
     triggers: frozenset = frozenset(
         {Annotation.IMALA, Annotation.ISHMAM, Onset.TASHIL}
     )
@@ -61,6 +62,7 @@ class Tarqeeq:
     rule: Rule = Rule.TARQEEQ
     phase: Phase = Phase.COLOUR
     triggers: frozenset = field(default=frozenset({L.RA}))
+    emits: frozenset = frozenset({Rule.TARQEEQ})
 
     def look(
         self, near: Neighbourhood, plan: Plan, at: SlotId,

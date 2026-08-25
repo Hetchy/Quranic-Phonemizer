@@ -15,7 +15,7 @@ from ..model.canon import CanonLetter, Rule
 from ..model.performance import Aspect, Consonant, Occurrence
 from .lam_shamsiyyah import ArticleShape
 from .meem_sakinah import NASAL_LETTERS
-from .tables import Pairs
+from .tables import PAIR_OUTCOMES, Pairs
 
 
 #: Noon and meem have their own families, which handle their same-letter case.
@@ -33,6 +33,7 @@ class Idgham:
     rule: Rule = Rule.IDGHAM_MUTAMATHILAYN
     phase: Phase = Phase.MERGE
     triggers: frozenset = field(default=frozenset())
+    emits: frozenset = PAIR_OUTCOMES | {Rule.IDGHAM_MUTAMATHILAYN}
 
     def __post_init__(self) -> None:
         # Like into like fires on any repeated letter, so the trigger set is
