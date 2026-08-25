@@ -21,7 +21,7 @@ lexeme with a pure carrier matching the immediately preceding performed vowel:
 | --- | --- | --- |
 | A | long A | `يَالَمُونَ`, source 4:103:10, canonical 4:104:10: `j a: l a m ...` |
 | U | long U | `يُومِنُونَ`, source 2:2:2, canonical 2:3:2: `j u: m i n ...` |
-| I | long I | connected `اَ۬لذِے اؤتمن`, source 2:282:15-16, canonical 2:283:15-16: `... ð i: t u m i n a` |
+| I | long I | connected `اَ۬لذِے اؤتمن`, source 2:282:15-16, canonical 2:283:15-16: `ʔ a ll a ð i: t u m i n a` |
 
 The rule and its matching-carrier result are stated directly in Al-Wafi's
 single-hamza chapter
@@ -164,9 +164,9 @@ classical `المد المشبع للساكنين` face
 The names above describe outcomes only; the public option order and default
 are not duplicated here.
 
-## Fixed tashil and canonical absence
+## Variant-bearing Allai and canonical absence
 
-The supported al-Azraq profile keeps fixed tashil at all four `اللائي` tokens:
+All four `اللائي` tokens share one reading contract:
 
 | Selected source ref | Canonical ref | Exact selected text |
 | --- | --- | --- |
@@ -175,14 +175,15 @@ The supported al-Azraq profile keeps fixed tashil at all four `اللائي` tok
 | 65:4:1 | 65:4:1 | `وَال۪ےْ` |
 | 65:4:12 | 65:4:12 | `وَال۪ےْ` |
 
-The reading is established in Al-Wafi's lexical chapter
-([source](https://www.islamweb.net/ar/library/content/245/68/)). In continuing
-reading, including ibtidaa followed by continuation, the final hamza remains
-typed as eased and emits `tashil`; disabling the extra `tashil` token renders
-that onset as plain `ʔ` but removes neither the typed state nor the rule. At
-ordinary full-sukun waqf, the eased final hamza instead becomes a pure sakin
-yaa: the result has consonantal `/j/` with `ibdal_hamza`, not `tashil`. A
-tashil face through rawm is outside the boundary model.
+Al-Wafi states that Warsh deletes the yaa after the hamza in continuing
+reading and eases the kasra-bearing hamza between hamza and yaa. The alif
+before it has both qasr and madd. At waqf there are three faces: tashil with
+rawm and either alif length, or replacement of the hamza by a sakin yaa with
+six-count madd ([source](https://www.islamweb.net/ar/library/content/245/68/)).
+The continuing result therefore ends in an eased hamza plus short I, never a
+Hafs-derived long I. Because both continuation and waqf are variant-bearing,
+these four tokens are deferred to the variants workstream rather than given a
+single fixed runtime face here.
 
 The selected isqat spellings are canonical absence, not a runtime deletion:
 
@@ -219,5 +220,5 @@ supplied set is complete and correct. Boundary-sensitive sites, such as the
 16 silent-qata starts whose joined result depends on the preceding performed
 vowel, keep their canonical latent structure because the script writes only
 one state. Separately, authored data must assert the complete 56 fixed-ibdal
-tokens, 34 Arayta tokens, four Ha-antum tokens, four Allai tokens, and four
-canonical-absence spellings above.
+tokens and four canonical-absence spellings above. The Arayta, Ha-antum, and
+Allai registers belong to the variants workstream.

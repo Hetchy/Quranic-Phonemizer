@@ -64,7 +64,7 @@ class IltiqaShortening:
         self, near: Neighbourhood, plan: Plan, at: SlotId,
         boundaries: BoundaryPlan,
     ) -> Verdict | None:
-        del plan, boundaries
+        del boundaries
         slot, word = near.slot(at), near.word_of(at)
         if slot is None or word is None:
             return None
@@ -85,6 +85,10 @@ class IltiqaShortening:
             following = near.after(following.id)
             if following is None:
                 return None
+        if plan.removed_by(
+            following.id, Aspect.CONSONANT, Rule.IBDAL_HAMZA
+        ):
+            return None
         if not _opens_on_a_sakin(following):
             return None
         return Verdict(

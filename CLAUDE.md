@@ -81,5 +81,8 @@ reads, and what is actually pronounced under a boundary plan.
 
 ## Validation
 
+Before writing or modifying tests, read `tests/README.md` and follow its
+semantic-case, source-span, boundary, and file-ownership conventions.
+
 Use `python tools/gates.py --fast` while working. Run `python tools/gates.py`
 before handing off runtime or corpus changes.

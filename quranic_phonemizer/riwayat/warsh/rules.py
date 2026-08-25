@@ -28,6 +28,7 @@ from ...rules.meem_sakinah import GhunnahMushaddadah, MeemSakinah
 from ...rules.naql import CarriedNaql, Naql
 from ...rules.noon_sakinah import IkhfaaWeight, NoonSakinah
 from ...rules.qalqala import Qalqala
+from ...rules.single_hamza import JoinedIbdal, SuppliedIbdal
 from ...rules.tafkheem import Emphasis, Weight
 from ...model.address import Location
 from ...model.canon import Quality
@@ -59,6 +60,8 @@ def _boundary() -> tuple:
     return (
         Naql(excluded=_NAQL_TAHQIQ),
         CarriedNaql(),
+        SuppliedIbdal(),
+        JoinedIbdal(),
         WaslHamza(),
         SoftenedHamza(),
         SpelledBeforeWasl(repairs=_DAMM_START_REPAIR),

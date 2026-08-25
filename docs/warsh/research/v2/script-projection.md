@@ -265,6 +265,15 @@ lam weights and selector faces, belong in Warsh authored data. No second Warsh
 script is planned, so the adapter may key its supplied facts to this source's
 reviewed Unicode conventions.
 
+The selected source has 1,385 relative-pronoun forms whose lam immediately
+before dhal does not carry the marks that spell its pronunciation. This
+includes bare and proclitic forms such as `اِ۬لذِے`, `اُ۬لذِينَ`, and
+`لِلذِينَ`; some proclitic forms carry a shadda on the preceding lam instead.
+Projection restores canonical `/ll a/` on the relative-pronoun lam before the
+single dhal. It does not claim ordinary article-plus-dhal words whose dhal
+carries shadda, such as `اُ۬لذِّيبُ`; those retain ordinary lam-shamsiyyah
+assimilation as `/ðð/`.
+
 ## Adapter acceptance checks
 
 The Warsh adapter is complete only when all of the following hold:
