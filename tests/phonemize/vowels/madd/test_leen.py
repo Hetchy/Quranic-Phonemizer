@@ -11,7 +11,6 @@ from tests.support import (
     case_runs,
     isolated,
     joining,
-    pick,
 )
 
 
@@ -28,9 +27,7 @@ CASES = (
     # Hafs: قُرَيْشٍ
     # Warsh: قُرَيْشٍ
     StateCase(id="yaa", site=Site.shared("106:1", (2,)), states={
-        "joined": Expect(read=joining(),
-                         phonemes=pick(hafs="q u rˤ aˤ j ʃ i n",
-                                       warsh="q u rˤ aˤ j ʃ i n i:"),
+        "joined": Expect(read=joining(), phonemes="q u rˤ aˤ j ʃ i n",
                          absent_char_rules={"ي": R("madd_leen")}),
         "stopped": Expect(read=isolated(), phonemes="q u rˤ aˤ j ʃ",
                           char_rules={"ي": R("madd_leen")},

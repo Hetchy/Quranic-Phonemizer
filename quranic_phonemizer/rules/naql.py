@@ -15,7 +15,7 @@ from .ownership import is_quiescent
 
 @dataclass(frozen=True, slots=True)
 class Naql:
-    """Joined speech only: the host takes exactly the qata's vowel and the
+    """Joined speech only: the host takes the qata's short vowel and the
     qata onset is silent. The subject order is the qata, then its host."""
 
     excluded: frozenset[Location] = frozenset()
@@ -37,7 +37,9 @@ class Naql:
             return None
         if slot.letter is not CanonLetter.HAMZA or slot.onset is not Onset.PLAIN:
             return None
-        if slot.nucleus.is_silent or not near.first_of_word(at):
+        if slot.nucleus.is_silent or slot.nucleus.sounds_long:
+            return None
+        if not near.first_of_word(at):
             return None
         if boundaries.after(word - 1) is not Junction.JOIN:
             return None
@@ -47,7 +49,7 @@ class Naql:
             return None
         if near.score.words[word].location in self.excluded:
             return None
-        vowel = Vowel(slot.nucleus.quality, long=slot.nucleus.sounds_long)
+        vowel = Vowel(slot.nucleus.quality)
         return Verdict(
             Occurrence(
                 mint(Rule.NAQL, at), Rule.NAQL, (at, host.id),

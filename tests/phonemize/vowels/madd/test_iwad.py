@@ -74,12 +74,7 @@ CASES = (
     # Hafs: لِقَوْمٍ
     # Warsh: لِقَوْمٍ
     StateCase(id="kasratan-negative", site=Site.shared("5:41", (23,)), states={
-        "joined": Expect(
-            read=joining(),
-            phonemes=pick(
-                hafs="l i q aˤ w m i n", warsh="l i q aˤ w m i n a:"
-            ),
-        ),
+        "joined": Expect(read=joining(), phonemes="l i q aˤ w m i n"),
         "stopped": Expect(read=isolated(), phonemes="l i q aˤ w m"),
     }),
 )

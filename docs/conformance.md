@@ -117,15 +117,17 @@ around the internal naql.
 `tests/conformance/test_warsh_registers.py` asserts the mechanical latent
 register generated from the supplied script families and canonical hosts:
 
-- 1,868 within-ayah latent boundaries, every one after a matching written
-  moved haraka or a tanwin host: 1,592 written-haraka qata forms (A/I/U),
-  103 damm-stroke forms, and 173 badal forms.
-- 325 adjacent-ayah latent edges: 323 tanwin-final hosts, the one written
+- 1,658 within-ayah short-qata boundaries, every one after a matching written
+  moved haraka or a tanwin host: 1,589 written-haraka forms (A/I/U) and
+  69 damm-stroke forms.
+- 308 adjacent-ayah short-qata edges: 306 tanwin-final hosts, the one written
   moved haraka of `وَانْحَرِ` before 108:3, and one spelled-opening edge at
   canonical 29:1 -> 29:2. Five further latent verse starts open a surah and
   join nothing. The spelled-opening edge does not perform naql: a
   disjoined-letter opening ends as it would at a pause, so `اَحَسِبَ` keeps
   its restored qata even when the reader runs on.
+- The 227 initial badal forms (177 A, 47 U, and 3 I) are deferred to the
+  madd-badal vertical. Ordinary naql does not transfer their long nucleus.
 - The article register is exactly the documented 1,307: 1,283 written
   article alifs (955 wasl-marked, 328 prefixed bare), 22 suppressed-alif
   prefix forms, and the two interrogative tokens; the reviewed long bases

@@ -44,14 +44,31 @@ def latent_qata_quality(text: str) -> Quality | None:
     """The transferred vowel a word-initial latent qata spells, or None."""
     if len(text) < 2 or text[0] != "ا":
         return None
+    if latent_qata_badal_quality(text) is not None:
+        return None
     if text[1] in _HARAKA_QUALITY and (len(text) < 3 or text[2] not in _WASL_MARKS):
         if len(text) >= 5 and text[2] == "ل" and text[4] == "ٓ":
             return None  # a vocalized compact opening spells letter names
         return _HARAKA_QUALITY[text[1]]
     if text[1] == "۟" and (len(text) < 3 or text[2] not in _HARAKA_QUALITY):
         return None if text.startswith(_EASED_AAL) else Quality.U
+    return None
+
+
+def latent_qata_badal_quality(text: str) -> Quality | None:
+    """The initial long badal family deferred from ordinary naql."""
+    if len(text) < 2 or text[0] != "ا":
+        return None
     if text[1] == "ٰ":
-        return Quality.A  # the badal family: a latent qata with its long A
+        return Quality.A
+    if len(text) < 3:
+        return None
+    if text[1] in "ُ۟" and text[2] == "و":
+        return Quality.U
+    if text[1] == "ِ" and text[2] in "يے" and (
+        len(text) < 4 or text[3] != "ّ"
+    ):
+        return Quality.I
     return None
 
 
@@ -178,6 +195,7 @@ def project_article_naql(text: str, entries: list) -> None:
 
 __all__ = [
     "demote_moved_haraka",
+    "latent_qata_badal_quality",
     "latent_qata_quality",
     "project_article_naql",
     "project_latent_qata",

@@ -16,6 +16,7 @@ from quranic_phonemizer.model.canon import (
 )
 from quranic_phonemizer.model.inscription import SlotFact
 from quranic_phonemizer.orthography.inventory import InventoryError
+from quranic_phonemizer.riwayat.warsh import naql_script
 from quranic_phonemizer.riwayat.warsh.resources import corpus, script_adapter
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -196,6 +197,18 @@ def test_the_damm_stroke_after_a_bare_alif_is_the_qata_damm():
     assert entry.text[1] == "۟"
     assert first.letter is CanonLetter.HAMZA and first.onset is None
     assert quality.value == Nucleus.short(Quality.U)
+
+
+@pytest.mark.parametrize(("ref", "quality"), (
+    ((5, 41, 24), Quality.A),
+    ((2, 161, 7), Quality.U),
+    ((6, 158, 23), Quality.I),
+    ((10, 53, 5), Quality.I),
+))
+def test_initial_badals_are_deferred_from_ordinary_naql(ref, quality):
+    entry, _ = _reading(ref)
+    assert naql_script.latent_qata_badal_quality(entry.text) is quality
+    assert naql_script.latent_qata_quality(entry.text) is None
 
 
 def test_the_same_stroke_in_a_wasl_sequence_stays_the_start_quality():

@@ -272,8 +272,6 @@ def _naql_family(text: str) -> str | None:
     quality = naql_script.latent_qata_quality(text)
     if quality is None:
         return None
-    if text[1] == "\u0670":
-        return "badal"
     if text[1] == "\u06df":
         return "damm_stroke"
     return f"written_{quality.name}"
@@ -325,29 +323,35 @@ def test_the_naql_latent_register_reconciles_with_canonical_hosts():
     """Every supplied latent qata stands after an eligible host: a written
     moved haraka, a tanwin, or one spelled opening at a verse edge."""
     within, edge = _naql_boundaries()
-    assert sum(within.values()) == 1868
+    assert sum(within.values()) == 1658
     assert within == Counter({
         ("written_A", "moved_haraka"): 752,
         ("written_A", "tanwin"): 365,
-        ("written_I", "moved_haraka"): 174,
-        ("written_I", "tanwin"): 299,
-        ("written_U", "moved_haraka"): 1,
+        ("written_I", "moved_haraka"): 173,
+        ("written_I", "tanwin"): 298,
         ("written_U", "tanwin"): 1,
-        ("damm_stroke", "moved_haraka"): 60,
-        ("damm_stroke", "tanwin"): 43,
-        ("badal", "moved_haraka"): 131,
-        ("badal", "tanwin"): 42,
+        ("damm_stroke", "moved_haraka"): 46,
+        ("damm_stroke", "tanwin"): 23,
     })
     joinable = {key: count for key, count in edge.items() if key[1] != "surah_start"}
-    assert sum(joinable.values()) == 325
+    assert sum(joinable.values()) == 308
     assert joinable == {
         ("written_A", "tanwin"): 112,
         ("written_A", "spelled"): 1,
-        ("written_I", "tanwin"): 193,
+        ("written_I", "tanwin"): 192,
         ("written_I", "moved_haraka"): 1,
-        ("damm_stroke", "tanwin"): 14,
-        ("badal", "tanwin"): 4,
+        ("damm_stroke", "tanwin"): 2,
     }
+
+
+def test_the_227_initial_badals_are_deferred_from_ordinary_naql():
+    deferred = Counter(
+        quality.name
+        for entry in warsh_corpus().entries.values()
+        if (quality := naql_script.latent_qata_badal_quality(entry.text))
+        is not None
+    )
+    assert deferred == Counter({"A": 177, "U": 47, "I": 3})
 
 
 def test_a_full_hamza_after_a_sakin_verse_end_is_only_kitabiyah():
