@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import pytest
 
+from quranic_phonemizer.api import recitation
 from quranic_phonemizer.analysis.build import build_bundle
 from quranic_phonemizer.analysis.cells import (
     CellRole,
@@ -13,7 +14,7 @@ from quranic_phonemizer.analysis.cells import (
 from quranic_phonemizer.analysis.facts import analyse
 from quranic_phonemizer.analysis.inscription import inscribe
 from quranic_phonemizer.analysis.source import build_source_view
-from quranic_phonemizer.model.address import Script
+from quranic_phonemizer.model.address import Riwayah, Script
 from quranic_phonemizer.model.canon import Quality, VowelForm
 from quranic_phonemizer.model.performance import Aspect, Consonant, Vowel
 from quranic_phonemizer.orthography.write import pen_for
@@ -483,8 +484,16 @@ def test_muqattaat_expand_to_flat_named_letter_runs(hafs, pen):
     ) == ("أَلِفْ", "لَآم", "مِّيٓمْ")
 
 
-def test_ishmam_keeps_the_fatha_visible_and_names_the_noon(hafs, pen):
-    _, bundle, view = _build(hafs, pen, "12:11")
+@pytest.mark.parametrize("riwayah", (Riwayah.HAFS, Riwayah.WARSH))
+def test_ishmam_keeps_the_fatha_visible_and_names_the_noon(riwayah):
+    reading = recitation(riwayah)
+    pen = pen_for(reading.inventory(Script.UTHMANI))
+    session = phonemize_request(reading, "12:11")
+    kw = dict(
+        ref="12:11", riwayah=riwayah.value, script="uthmani", variant={}
+    )
+    bundle = build_bundle(session, **kw)
+    view = build_cell_view(session, spelling="transformed", pen=pen, **kw)
     occurrence = next(o for o in bundle.rule_occurrences if o.rule_id.value == "ishmam")
     word_id = next(w.id for w in bundle.words if w.ref == "12:11:6")
     word = next(w for w in view.words if w.word_id == word_id)

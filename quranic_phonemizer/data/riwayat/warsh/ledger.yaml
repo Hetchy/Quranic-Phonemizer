@@ -5,6 +5,11 @@ schema_version: 1
 riwayah: warsh
 
 supplies:
+  # 12:11 `تَامَ۬نَّا` carries the shared Tamanna ishmam reading, although
+  # this script does not write the Hafs ishmam mark after the mim.
+  - {slot: "12:11:6#1", skeleton: "تمن", fact: TAJWEED_MARK, value: ISHMAM,
+     citation: "Warsh via al-Azraq; Al-Nashr on the ishmam face of تَأْمَنَّا"}
+
   # 28:34 `رِداٗ` - the one within-word lexical naql: the hamza of ردء is
   # deleted in every state and its fatha stays on the dal. The written form
   # is already transformed; this names the latent qata responsibility.

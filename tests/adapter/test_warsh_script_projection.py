@@ -205,6 +205,17 @@ def test_relative_pronoun_restores_the_unwritten_geminate_lam():
     ]
 
 
+def test_tamanna_supplies_the_unwritten_ishmam_annotation():
+    entry, reading = _reading((12, 11, 6))  # تَامَ۬نَّا
+    built = recitation(Riwayah.WARSH).build(reading)
+    ta, meem, noon = built.score.words[0].slots
+
+    assert "۫" not in entry.text
+    assert ta.letter is CanonLetter.TA
+    assert Annotation.ISHMAM in meem.annotations
+    assert noon.letter is CanonLetter.NOON
+
+
 @pytest.mark.parametrize("ref", ((2, 79, 2), (2, 212, 2)))
 def test_prefixed_relative_pronoun_restores_its_second_lam(ref):
     entry, reading = _reading(ref)

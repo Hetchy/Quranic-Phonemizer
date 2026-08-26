@@ -1,16 +1,16 @@
-"""`تَأْمَ۫نَّا` at 12:11 is the only ishmam in this reading.
+"""Tamanna at 12:11 carries ishmam in Hafs and Warsh.
 
-The written mark follows the meem, but the rounding belongs to the noon. The
-rule names a sound it does not make and owns none of its own.
+Hafs writes the mark after the meem; Warsh supplies the same canonical fact
+without that mark. The rounding belongs to the noon in both readings.
 """
 from __future__ import annotations
 
 from quranic_phonemizer.model import performance as pf
-from quranic_phonemizer.model.canon import Rule
+from quranic_phonemizer.model.canon import CanonLetter, Rule
 
 from tests.support import Site, for_each_riwayah
 
-TAMANNA = Site(hafs=("12:11", (6,)))
+TAMANNA = Site.shared("12:11", (6,), riwayat=("hafs", "warsh"))
 
 
 def _the_ishmam(r) -> pf.Occurrence:
@@ -24,10 +24,15 @@ def _the_ishmam(r) -> pf.Occurrence:
 
 @for_each_riwayah(TAMANNA, isolated=6)
 def test_the_ishmam_names_one_letter_and_reads_nothing_beside_it(r):
-    # تَأْمَ۫نَّا
-    assert r.phonemes(6) == "taʔmaña:"
+    # Hafs: تَأْمَ۫نَّا
+    # Warsh: تَامَ۬نَّا
+    assert r.phonemes(6) == r.pick(hafs="taʔmaña:", warsh="ta:maña:")
     occurrence = _the_ishmam(r)
-    assert occurrence.subjects == (r.score.words[5].slots[3].id,)
+    noon = next(
+        slot for slot in r.score.words[5].slots
+        if slot.letter is CanonLetter.NOON
+    )
+    assert occurrence.subjects == (noon.id,)
     assert occurrence.context == ()
     assert occurrence.boundary is None
     assert r.source_of("ishmam") == "ن"
@@ -38,7 +43,8 @@ def test_the_ishmam_names_one_letter_and_reads_nothing_beside_it(r):
 def test_the_ishmam_classifies_the_consonant_and_owns_no_sound(r):
     """Its only edge is a classification, so a consumer drawing the noon can
     name the rule without the reading crediting it with the sound."""
-    # تَأْمَ۫نَّا
+    # Hafs: تَأْمَ۫نَّا
+    # Warsh: تَامَ۬نَّا
     occurrence = _the_ishmam(r)
     assert [
         edge for edge in r.performance.attributions
@@ -56,7 +62,8 @@ def test_the_ishmam_classifies_the_consonant_and_owns_no_sound(r):
 @for_each_riwayah(TAMANNA, ibtidaa=6, wasl=6)
 def test_the_rounding_holds_whichever_way_the_word_is_read(r):
     """It is a fact of the word, not of the junction after it."""
-    # تَأْمَ۫نَّا
-    assert r.phonemes(6) == "taʔmaña:"
+    # Hafs: تَأْمَ۫نَّا
+    # Warsh: تَامَ۬نَّا
+    assert r.phonemes(6) == r.pick(hafs="taʔmaña:", warsh="ta:maña:")
     assert "ishmam" in r.rules_on_char(6, "ن")
     assert "ishmam" not in r.rules_on_char(6, "۫")
