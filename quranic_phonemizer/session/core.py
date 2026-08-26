@@ -63,12 +63,14 @@ def phonemize_request(
         for stop_ref in stop_refs
         for location in recitation.corpus.locations(stop_ref)
     )
+    verse_ends = recitation.corpus.verse_ends(locations)
     boundaries = resolve_boundaries(
         built.inscription.advice,
         locations,
         built.score,
         stop_signs=stop_signs,
         stop_refs=resolved_stop_refs,
+        verse_ends=verse_ends,
     )
     performance = recitation.perform(
         built.score, boundaries, selection=selection
@@ -81,7 +83,7 @@ def phonemize_request(
         },
         verse_ends=frozenset(
             recitation.corpus.public_ref(location)
-            for location in recitation.corpus.verse_ends(locations)
+            for location in verse_ends
         ),
         public_refs=tuple(
             recitation.corpus.public_ref(location) for location in locations

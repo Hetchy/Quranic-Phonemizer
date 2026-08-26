@@ -172,6 +172,7 @@ def test_every_document_is_the_native_serialization():
             "hafs",
             "uthmani",
             (
+                "verse",
                 "preferred_continue",
                 "preferred_stop",
                 "optional_stop",
@@ -184,6 +185,7 @@ def test_every_document_is_the_native_serialization():
             "hafs",
             "indopak",
             (
+                "verse",
                 "preferred_continue",
                 "preferred_stop",
                 "optional_stop",
@@ -193,7 +195,7 @@ def test_every_document_is_the_native_serialization():
                 "permitted_stop",
             ),
         ),
-        ("warsh", "uthmani", ("optional_stop",)),
+        ("warsh", "uthmani", ("verse", "optional_stop")),
     ],
 )
 def test_stop_catalogues_are_configuration_scoped(riwayah, script, expected):
@@ -233,6 +235,25 @@ def test_warsh_requests_and_word_refs_use_its_source_coordinates():
     )
 
 
+@pytest.mark.parametrize(
+    ("reader", "ref", "verse_final_ref"),
+    [
+        (Phonemizer(), "1:4-1:5", "1:4:3"),
+        (Phonemizer(riwayah="warsh"), "1:3-1:4", "1:3:3"),
+    ],
+)
+def test_verse_stop_is_published_and_stops_at_each_source_ayah(
+    reader, ref, verse_final_ref
+):
+    assert "verse" in reader.available_stop_signs
+    joined = reader.analyse(ref)
+    stopped = reader.analyse(ref, stop_signs=("verse",))
+    word = next(word for word in joined.words if word.ref == verse_final_ref)
+
+    assert joined.boundaries[word.after_boundary_id.value].state is BoundaryState.JOIN
+    assert stopped.boundaries[word.after_boundary_id.value].state is BoundaryState.STOP
+
+
 def test_warsh_stop_sign_is_typed_and_requested_by_its_catalogue_name():
     reader = Phonemizer(riwayah="warsh")
     ref = "1:4-1:5"
@@ -266,7 +287,7 @@ def test_unavailable_stop_names_fail_before_boundary_resolution(monkeypatch):
         reader.analyse("1:1", stop_signs=("preferred_stop", "unknown"))
     assert str(caught.value) == (
         "['preferred_stop', 'unknown'] is not available for warsh/uthmani; "
-        "available stop signs: ['optional_stop']"
+        "available stop signs: ['verse', 'optional_stop']"
     )
 
 
