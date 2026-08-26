@@ -102,7 +102,7 @@ NAML_CASES = (
                 char_rules={"ا[2]": R("hamza_wasl_silent")},
                 absent_sound_rules={
                     "j": R("madd_yaa_zawaid", "madd_tabii"),
-                    "a[2]": R("madd_yaa_zawaid", "madd_tabii"),
+                    "a": R("madd_yaa_zawaid", "madd_tabii"),
                 },
             ),
             "host-waqf": Expect(

@@ -73,6 +73,24 @@ class Scribe:
         self.decorates = [row for row in self.decorates if row[1] not in gone]
         self.attests = [row for row in self.attests if row[1] not in gone]
 
+    def retarget(self, offsets, subjects, target) -> None:
+        """Move selected source edges from replaced drafts onto their survivor."""
+        wanted = set(offsets)
+        old = {subject.uid for subject in subjects}
+        self.evidences = [
+            (offset, target.uid, fact) if offset in wanted and uid in old
+            else (offset, uid, fact)
+            for offset, uid, fact in self.evidences
+        ]
+        self.decorates = [
+            (offset, target.uid) if offset in wanted and uid in old else (offset, uid)
+            for offset, uid in self.decorates
+        ]
+        self.attests = [
+            (offset, target.uid) if offset in wanted and uid in old else (offset, uid)
+            for offset, uid in self.attests
+        ]
+
     def finish(self, reading, drafts, ordinals: dict[int, int]) -> Inscription:
         spellings: list[Spelling] = []
         for offset, key, fact in self.evidences:

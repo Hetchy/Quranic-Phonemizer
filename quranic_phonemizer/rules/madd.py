@@ -236,7 +236,7 @@ class MaddBadal:
 
     rule: Rule = Rule.MADD_BADAL
     phase: Phase = Phase.LENGTH
-    triggers: frozenset = frozenset({VowelForm.LONG, Onset.WASL})
+    triggers: frozenset = frozenset({VowelForm.LONG, Onset.WASL, Annotation.BADAL})
     emits: frozenset = frozenset({Rule.MADD_BADAL})
 
     def look(

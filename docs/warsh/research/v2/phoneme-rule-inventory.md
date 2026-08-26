@@ -78,16 +78,18 @@ hamza and yaa, and a damm hamza between hamza and waw
 ([Al-Wafi](https://www.islamweb.net/ar/library/content/245/14/)). The model
 therefore keeps one eased onset plus an independent A, U, or I nucleus:
 
-| Typed sounds | Broad tokens with `tashil` | Tokens without `tashil` |
+| Typed sounds | Warsh token | Collapsed token available outside Warsh |
 | --- | --- | --- |
 | eased hamza + A | `ʔ̞ a` | `ʔ a` |
 | eased hamza + U | `ʔ̞ u` | `ʔ u` |
 | eased hamza + I | `ʔ̞ i` | `ʔ i` |
 
-The extra-phoneme setting changes only the first token. The consonant remains
-typed as eased and the `tashil` rule remains present on the sound and source
-hamza. A renderer that offers narrower phonetics may use the adjacent nucleus
-as the easing target without changing the public sound inventory.
+Warsh always renders the first token as `ʔ̞`; `tashil` is not accepted as an
+optional extra for this riwayah. A renderer for another riwayah may collapse
+the onset to plain `ʔ`, but the consonant remains typed as eased and the
+`tashil` rule remains present on the sound and source hamza. A renderer that
+offers narrower phonetics may use the adjacent nucleus as the easing target
+without changing the public sound inventory.
 
 Ibdal is a transformation, not another phoneme. A pure replacement uses an
 ordinary vowel carrier, while a moving replacement uses an ordinary waw or

@@ -2,7 +2,7 @@
 
 This records the test-first reconciliation for delivery-map order 12. Domain
 expectations come from `research/v2/raa.md`, its cited sources, and the
-completed inclination and lam-taghliz contracts rather than from previous
+completed inclination and lam-tafkheem contracts rather than from previous
 runtime output.
 
 ## Decision surface
@@ -25,7 +25,7 @@ One `tafkheem` or `tarqeeq` occurrence owns the raa consonant and the source
 character that supplies it. When the raa owns a performed A nucleus, the same
 occurrence also reaches its short or carrier-long vowel sound and rendered
 carrier. It does not erase an independent isti'la coloring cause. Inclination
-keeps precedence over ordinary moving-raa weight, while lam taghliz and its
+keeps precedence over ordinary moving-raa weight, while lam tafkheem and its
 vowel coloring remain independent owners.
 
 ## Selected-script audit

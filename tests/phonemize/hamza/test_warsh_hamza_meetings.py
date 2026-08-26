@@ -87,10 +87,7 @@ FIXED_ONE_WORD_CASES = (
         site=Site(warsh=("43:58", (2,))),
         read=isolated(),
         phonemes="ʔ a ʔ̞ a: l i h a t u n a:",
-        char_rules={
-            "@tashil_mark": R("tashil"),
-            "@dagger_alif": R("madd_badal"),
-        },
+        char_rules={"@tashil_mark": R("tashil")},
         sound_rules={"ʔ̞": R("tashil"), "a:[1]": R("madd_badal")},
         absent_sound_rules={"a:[1]": R("ibdal_hamza", "madd_tabii")},
     ),
@@ -175,10 +172,10 @@ MUTTAFIQ_DEFAULT_CASES = (
         id="default-u-u-ibdal-fuses-carrier",
         site=Site(warsh=("46:32", (14, 15))),
         read=through(),
-        phonemes=("ʔ a w l i j a: ʔ", "u: l a: ʔ i k a"),
-        char_rules={"ا[2]": R("ibdal_hamza", "madd_tabii")},
-        sound_rules={"u:": R("ibdal_hamza", "madd_tabii")},
-        absent_sound_rules={"u:": R("madd_badal", "madd_lazim")},
+        phonemes=("ʔ a w l i j a: ʔ", "u: l a: ʔ i k"),
+        char_rules={"ا[2]": R("ibdal_hamza")},
+        sound_rules={"u:": R("ibdal_hamza", "madd_badal")},
+        absent_sound_rules={"u:": R("madd_tabii", "madd_lazim")},
     ),
 )
 

@@ -35,7 +35,7 @@ CASES = (
         char_rules={"ے": R("madd_leen_mahmuz")},
         sound_rules={"j": R("madd_leen_mahmuz")},
     ),
-    # Warsh: سَوْءَٰتِهِمَاۖ (superscript alif after fatha, not maddah)
+    # Warsh: سَوْءَٰتِهِمَاۖ
     Case(
         id="sawat-keeps-both-identities",
         site=Site(warsh=("7:20", (10,))),

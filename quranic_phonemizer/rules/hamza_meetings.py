@@ -8,7 +8,7 @@ from collections.abc import Mapping
 from ..engine.neighbourhood import Neighbourhood
 from ..engine.plan import Classify, Length, Phase, Plan, Realize, Relength, Silence, Verdict, mint
 from ..model.address import BoundaryPlan, Location, SlotId
-from ..model.canon import CanonLetter, Onset, Quality, Rule
+from ..model.canon import Annotation, CanonLetter, Onset, Quality, Rule
 from ..model.performance import Aspect, Consonant, Occurrence
 
 
@@ -73,13 +73,17 @@ class HamzaMeetings:
         previous = near.before(at)
         if previous is None:
             return None
+        actions = (
+            Silence(previous.id, Aspect.VOWEL),
+            Silence(at, Aspect.CONSONANT),
+            Relength(at, Length.LONG),
+        )
+        following = near.after(at)
+        if row.exception == "fused_badal" and following is not None:
+            actions += (Silence(following.id, Aspect.CONSONANT),)
         return Verdict(
             Occurrence(mint(Rule.IBDAL_HAMZA, at), Rule.IBDAL_HAMZA, (at,), boundary=boundary),
-            (
-                Silence(previous.id, Aspect.VOWEL),
-                Silence(at, Aspect.CONSONANT),
-                Relength(at, Length.LONG),
-            ),
+            actions,
         )
 
 
@@ -95,6 +99,9 @@ class HamzaMeetingMadd:
     def look(self, near: Neighbourhood, plan: Plan, at: SlotId, boundaries: BoundaryPlan) -> Verdict | None:
         del boundaries
         if not plan.hamza_meeting_length(at):
+            return None
+        slot = near.slot(at)
+        if slot is not None and Annotation.BADAL in slot.annotations:
             return None
         following = near.after(at)
         lazim = following is not None and (

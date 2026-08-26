@@ -12,7 +12,7 @@ from ...canon.passes import word_spans
 from ...canon.draft import nucleus_fact
 from ...dataio import require_keys
 from ...model.address import Location
-from ...model.canon import CanonLetter, Nucleus, Onset, Quality, SlotOrigin
+from ...model.canon import Annotation, CanonLetter, Nucleus, Onset, Quality, SlotOrigin
 from ...model.inscription import SlotFact
 
 
@@ -123,6 +123,11 @@ def _word_text(reading, word: int) -> str:
     return "".join(by_offset[offset] for offset in sorted(offsets))
 
 
+def _cluster_offsets(reading, cluster_index: int) -> frozenset[int]:
+    cluster = reading.clusters[cluster_index]
+    return frozenset((cluster.offset, *(mark.offset for mark in cluster.marks)))
+
+
 def supply_hamza_meetings(reading, drafts, lexicon, scribe, selection) -> None:
     """Project only rows attested by the checked-in selected-source register."""
     del lexicon, selection
@@ -148,10 +153,28 @@ def supply_hamza_meetings(reading, drafts, lexicon, scribe, selection) -> None:
         first.letter = CanonLetter.HAMZA
         first.onset = Onset.PLAIN
         first.nucleus = Nucleus.short(row.first)
+        first_cluster = next(
+            index for index, cluster in enumerate(reading.clusters)
+            if cluster.word == right_word
+        )
         second = right[0]
+        if second.cluster != first_cluster:
+            second = _Draft(
+                letter=CanonLetter.HAMZA, onset=Onset.PLAIN,
+                nucleus=Nucleus.short(row.second), origin=SlotOrigin.WRITTEN,
+                cluster=first_cluster, onset_declared=True, nucleus_declared=True,
+            )
+            drafts.insert(drafts.index(right[0]), second)
+            scribe.retarget(_cluster_offsets(reading, first_cluster), right, second)
+            cluster = reading.clusters[first_cluster]
+            scribe.evidence(cluster.offset, second, SlotFact.LETTER)
+            for mark in cluster.marks:
+                scribe.decoration(mark.offset, second)
         second.letter = CanonLetter.HAMZA
         second.onset = Onset.PLAIN
         second.nucleus = Nucleus.short(row.second)
+        if row.exception == "fused_badal":
+            second.annotations |= {Annotation.BADAL}
 
 
 __all__ = ["MeetingRow", "meeting_rows", "rows_by_target", "supply_hamza_meetings"]
