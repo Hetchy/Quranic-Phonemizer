@@ -24,12 +24,42 @@ class Fixture:
 
 
 FIXTURES = (
-    Fixture("raa_firq", (26, 63, 11), (26, 63, 11), "فِرْقٖ"),
-    Fixture("raa_asr_waqf", (11, 80, 9), (11, 81, 9), "فَاسْرِ"),
-    Fixture("raa_alishraq", (38, 17, 7), (38, 18, 7), "وَالِاشْرَاقِ"),
-    Fixture("raa_hayran", (6, 71, 23), (6, 71, 23), "حَيْرَانَۖ"),
-    Fixture("raa_bisharar", (77, 32, 3), (77, 32, 3), "بِشَرَرٖ"),
-    Fixture("raa_hasirat_suduruhum", (4, 89, 11), (4, 90, 11), "حَصِرَتْ"),
+    Fixture(
+        "raa_fixed_ibrahim_heavy",
+        (2, 124, 10),
+        (2, 125, 10),
+        "إِبْرَٰهِيمَ",
+    ),
+    Fixture(
+        "raa_fixed_israil_heavy",
+        (2, 39, 2),
+        (2, 40, 2),
+        "إِسْرَآءِيلَ",
+    ),
+    Fixture(
+        "raa_fixed_imran_heavy",
+        (3, 33, 9),
+        (3, 33, 9),
+        "عِمْرَٰنَ",
+    ),
+    Fixture(
+        "raa_fixed_repeated_heavy",
+        (2, 229, 13),
+        (2, 231, 13),
+        "ضِرَاراٗ",
+    ),
+    Fixture(
+        "raa_fixed_hidhrahum_light",
+        (4, 101, 26),
+        (4, 102, 26),
+        "حِذْرَهُمْ",
+    ),
+    Fixture(
+        "raa_fixed_other_ashir_light",
+        (22, 13, 10),
+        (22, 13, 10),
+        "اَ۬لْعَشِيرُۖ",
+    ),
 )
 
 
@@ -100,11 +130,9 @@ def test_every_fixture_projects_an_ordinary_canonical_raa(fixture):
 @pytest.mark.parametrize(
     ("ref", "text"),
     (
-        ((2, 61, 30), "خَيْرٌۖ"),
-        ((2, 200, 10), "ذِكْراٗۖ"),
-        ((2, 61, 32), "مِصْراٗ"),
-        ((18, 96, 19), "قِطْراٗۖ"),
-        ((54, 23, 3), "بِالنُّذُرِۖ"),
+        ((10, 16, 14), "عُمُراٗ"),
+        ((35, 11, 22), "مُّعَمَّرٖ"),
+        ((63, 4, 18), "فَاحْذَرْهُمْۖ"),
     ),
 )
 def test_source_lookalikes_supply_structure_without_a_weight_hint(ref, text):

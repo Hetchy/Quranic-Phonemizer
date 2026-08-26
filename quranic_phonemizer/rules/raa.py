@@ -5,9 +5,9 @@ from dataclasses import dataclass
 
 from ..engine.neighbourhood import Neighbourhood
 from ..engine.plan import Phase, Plan, Realize, Recolour, SoundFeature, Verdict, mint
-from ..model.address import BoundaryPlan, Junction, Location, SlotId
+from ..model.address import BoundaryPlan, Location, SlotId
 from ..model.canon import CanonLetter as L
-from ..model.canon import Onset, Quality, Rule, VowelForm
+from ..model.canon import Onset, Quality, Rule, SlotOrigin, VowelForm
 from ..model.performance import Aspect, Occurrence, Vowel
 
 RaaKey = tuple[Location, int]
@@ -18,14 +18,7 @@ class RaaProfile:
     by_owner: dict[str, frozenset[RaaKey]]
     heavy: frozenset[RaaKey]
     light: frozenset[RaaKey]
-    waqf_heavy: frozenset[RaaKey]
-    waqf_light: frozenset[RaaKey]
-    wasl_light: frozenset[RaaKey]
     always_heavy: frozenset[L] = frozenset()
-
-    @property
-    def systematic_exclusions(self) -> frozenset[RaaKey]:
-        return frozenset().union(*self.by_owner.values())
 
     def rule(self, near: Neighbourhood, at: SlotId, plan, boundaries) -> Rule:
         slot = near.slot(at)
@@ -35,13 +28,6 @@ class RaaProfile:
         if key in self.heavy:
             return Rule.TAFKHEEM
         if key in self.light:
-            return Rule.TARQEEQ
-        if boundaries.stopped_on(word):
-            if key in self.waqf_heavy:
-                return Rule.TAFKHEEM
-            if key in self.waqf_light:
-                return Rule.TARQEEQ
-        if boundaries.after(word) is Junction.JOIN and key in self.wasl_light:
             return Rule.TARQEEQ
         return (
             Rule.TAFKHEEM
@@ -111,7 +97,12 @@ def _ordinary_is_heavy(near, slot, plan, always_heavy) -> bool:
     own = None if plan.merged_away(slot.id, Aspect.VOWEL) else slot.nucleus.quality
     if own in {Quality.I, Quality.TAQLIL, Quality.KUBRA}:
         return False
-    if own in {Quality.A, Quality.U}:
+    if own is Quality.U:
+        return True
+    if own is Quality.A:
+        following = near.after(slot.id)
+        if following is not None and following.origin is SlotOrigin.NUNATION:
+            return True
         return not _moving_trigger(near, slot, always_heavy)
     before = near.before(slot.id)
     if (
