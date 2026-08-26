@@ -64,13 +64,15 @@ The phoneme inventory uses the standard International Phonetic Alphabet (IPA) [A
 
 ### Tajweed Phonemes
 
-| **Rule**         | **Phoneme**                   |
-|------------------|:------------------------------|
-| Ikhfaa           | `ŋ`                          |
-| Ikhfaa shafawi   | `ŋ`                          |
-| Iqlab            | `ŋ`                          |
-| Idgham           | `ñ` / `m̃` / `j̃` / `w̃`         |
-| Qalqala          | `Q`                          |
+| **Rule**       | **Phoneme**                   |
+|----------------|:------------------------------|
+| Ikhfaa         | `ŋ`                           |
+| Ikhfaa shafawi | `ŋ` / `m̃`                    |
+| Iqlab          | `ŋ` / `m̃`                    |
+| Idgham         | `ñ` / `m̃` / `j̃` / `w̃`     |
+| Qalqala        | `Q`                           |
+
+Iqlab and ikhfaa shafawi use the open-lip nasal `ŋ` by default. Their nasal variants can instead select the closed-lip bilabial realization `m̃`, as both ways are recited.
 
 ### Extra Phonemes
 
@@ -83,7 +85,6 @@ The phoneme inventory uses the standard International Phonetic Alphabet (IPA) [A
 | `qalqala_degree`            | `QQ`              | Off         | Stronger Qalqala kubra/akbar degree |
 | `tashil` (Hafs only)        | `ʔ̞`              | Off         | One case Hafs: `ءَا۬عْجَمِيٌّ` (41:44), off -> `ʔ` <br>Warsh always renders Tashil since it is common |
 | `imala` (kubra)             | `e:`              | Off         | Hafs: `مَجْر۪ىٰهَا` (11:41), off -> `i:` <br> Warsh: `طَه۪` (20:1), off -> `ɛ:` |
-| `iqlab_nasal` / `ikhfaa_shafawi_nasal` | `ŋ` or `m̃`      | `ŋ`  | Open mouth ikhfaa with ghunnah (`ŋ`) vs closed mouth meem with ghunnah (`m̃`) |
 
 ## Usage
 
