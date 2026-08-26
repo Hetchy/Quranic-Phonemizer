@@ -30,6 +30,19 @@ class Naql:
     triggers: frozenset = frozenset({CanonLetter.HAMZA})
     emits: frozenset = frozenset({Rule.NAQL})
 
+    def _ibdal_carrier(
+        self, near: Neighbourhood, at: SlotId, word: int
+    ):
+        following = near.after(at)
+        if (
+            near.score.words[word].location in self.ibdal_meetings
+            and following is not None
+            and near.word_of(following.id) == word
+            and following.letter is CanonLetter.HAMZA
+        ):
+            return following
+        return None
+
     def look(
         self, near: Neighbourhood, plan: Plan, at: SlotId,
         boundaries: BoundaryPlan,
@@ -53,16 +66,12 @@ class Naql:
         if near.score.words[word].location in self.excluded:
             return None
         effects = [Silence(at, Aspect.CONSONANT)]
-        following = near.after(at)
-        meeting_ibdal = (
-            near.score.words[word].location in self.ibdal_meetings
-            and following is not None
-            and near.word_of(following.id) == word
-            and following.letter is CanonLetter.HAMZA
-        )
-        if meeting_ibdal:
+        ibdal_carrier = self._ibdal_carrier(near, at, word)
+        if ibdal_carrier is not None:
             effects.append(
-                MergeInto(host.id, Aspect.VOWEL, following.id, Aspect.VOWEL)
+                MergeInto(
+                    host.id, Aspect.VOWEL, ibdal_carrier.id, Aspect.VOWEL
+                )
             )
         elif slot.nucleus.sounds_long:
             # In badal mughayyar bin-naql the carrier still owns the one long
