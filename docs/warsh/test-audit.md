@@ -593,7 +593,7 @@ sample per rule. Use `pick()` only when a small expected detail differs.
 
 ### Cases that wait for a vertical
 
-- iltiqa U-repair and Warsh-specific written linking vowels;
+- Warsh U-over-I connected forms and inserted tanwin U repair;
 - naql and article-naql starts;
 - single-hamza ibdal/tashil and hamza meetings;
 - transformed-hamza madd attribution;
