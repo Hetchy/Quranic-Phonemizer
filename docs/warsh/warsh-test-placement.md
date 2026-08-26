@@ -97,7 +97,7 @@ tests/phonemize/                               # 508 cases: 436 fixed + 72V
     inclination/                              # 49: 40 fixed + 9V
       test_quality.py                         # 6
       test_hafs_inclination.py                # 2
-      test_warsh_inclination.py               # 20: 11 fixed + 9V
+      test_warsh_inclination.py               # 18: 11 fixed + 7V
       test_warsh_inclination_classification.py # 14
       test_warsh_inclination_coloring.py      # 7
 
@@ -124,6 +124,7 @@ tests/phonemize/                               # 508 cases: 436 fixed + 72V
 
   test_muqattaat.py                           # 15: 14 fixed + 1V
   test_hafs_muqattaat.py                      # 1V
+  test_warsh_muqattaat.py                     # 2V
   test_qalqala.py                             # 13
   test_sakt.py                                # 5V
   test_silent_letters.py                      # 13
@@ -290,13 +291,13 @@ coupling surface discoverable.
 
 ### Muqattaat, qalqala, sakt, and lexical endings
 
-`test_muqattaat.py` owns all fourteen unique opening forms. Every fixed/default
+`test_muqattaat.py` owns all fourteen unique opening forms. Every fixed
 row asserts the complete phoneme sequence and every applicable rule with exact
 source and sound reach; it is not a phoneme-only table. Riwayah picks keep
-fixed Yaseen behavior and opening-letter inclination beside the same Arabic
-form. The shared Noon selector is in this file. `test_hafs_muqattaat.py` owns
-only the Hafs Yaseen selector; Warsh inclination selector matrices remain in
-the inclination file and are integrated here only at their default.
+fixed opening-letter behavior beside the same Arabic form. The shared Noon
+selector is in this file. `test_hafs_muqattaat.py` owns the Hafs Yaseen
+selector. `test_warsh_muqattaat.py` is deferred to the selector phase and owns
+the Maryam Haa/Yaa and Yaseen Yaa inclination selectors.
 
 Qalqala, silent letters, and taa marbuta remain shared. Their Warsh rows use
 clean sites and the same rule IDs.
@@ -427,7 +428,9 @@ into a mixed-domain catch-all.
 | `vowels/test_hafs_aatani.py` | Keep the Aatani waqf choice with its own lexical owner | One Hafs-only `VariantCase` | Variants last |
 | `vowels/test_seven_alifs.py` | Put Hafs and Warsh matrices beside each other | Shared `StateCase` or paired rows by lexical form | Seven-alif vertical |
 | `vowels/test_written_carriers.py` | Verify carrier/source relations independent of raw glyph form | Source-selector picks with one canonical expectation | Adapter baseline |
-| `test_muqattaat.py` | Verify all fourteen forms, complete phonemes, and complete rule reach | One fixed/default row per form with small riwayah picks; shared Noon selector added last | Foundation through relevant verticals |
+| `test_muqattaat.py` | Verify all fourteen forms, complete phonemes, and complete rule reach | One fixed row per form with small riwayah picks; shared Noon selector added last | Foundation through relevant verticals |
+| `test_hafs_muqattaat.py` | Verify the Hafs Yaseen junction choice | One Hafs-only `VariantCase` | Variants last |
+| `test_warsh_muqattaat.py` | Verify the Maryam Haa/Yaa and Yaseen Yaa inclination choices | Two Warsh-only `VariantCase` rows | Variants last |
 | `test_qalqala.py` | Preserve all five letters and state/degree partitions | Clean shared rows | Adapter baseline |
 | `test_sakt.py` | Own shared Maliyah and the four Hafs lexical sites | Five `VariantCase` rows with sakt/idraj, downstream-rule, and waqf assertions | Variants last |
 | `test_silent_letters.py` | Verify shared canonical silence and attribution | Shared row or source-selector pick | Adapter baseline |
