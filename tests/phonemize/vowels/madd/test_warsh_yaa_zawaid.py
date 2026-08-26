@@ -24,20 +24,20 @@ CASES = (
             "joined": Expect(
                 read=through(),
                 phonemes=("d a ʕ a: n i:", "f a l j a s t a ʒ i: b u:"),
-                char_rules={"@small_yaa[1]": R("madd_tabii")},
-                sound_rules={"i:[1]": R("madd_tabii")},
+                char_rules={
+                    "@small_yaa[1]": R("madd_yaa_zawaid", "madd_tabii")
+                },
+                sound_rules={"i:[1]": R("madd_yaa_zawaid", "madd_tabii")},
                 absent_sound_rules={"i:[1]": R("madd_silah")},
-            ),
-            "host-ibtidaa": Expect(
-                read=explicit(ibtidaa=11, waqf=12),
-                phonemes=("d a ʕ a: n i:", "f a l j a s t a ʒ i: b u:"),
-                char_rules={"@small_yaa[1]": R("madd_tabii")},
-                sound_rules={"i:[1]": R("madd_tabii")},
             ),
             "host-waqf": Expect(
                 read=explicit(ibtidaa=11, waqf=(11, 12)),
                 phonemes=("d a ʕ a: n", "f a l j a s t a ʒ i: b u:"),
-                absent_char_rules={"@small_yaa[1]": R("madd_tabii", "madd_silah")},
+                absent_char_rules={
+                    "@small_yaa[1]": R(
+                        "madd_yaa_zawaid", "madd_tabii", "madd_silah"
+                    )
+                },
             ),
         },
     ),
@@ -49,24 +49,20 @@ CASES = (
             "joined": Expect(
                 read=through(),
                 phonemes=("ʔ a dd a: ʕ i:", "ʔ i ð a:"),
-                char_rules={"@small_yaa": R("madd_munfasil")},
-                sound_rules={"i:": R("madd_munfasil")},
+                char_rules={
+                    "@small_yaa": R("madd_yaa_zawaid", "madd_munfasil")
+                },
+                sound_rules={"i:": R("madd_yaa_zawaid", "madd_munfasil")},
                 absent_char_rules={"إ": R("madd_munfasil")},
             ),
             "host-waqf": Expect(
                 read=explicit(ibtidaa=9, waqf=(9, 10)),
                 phonemes=("ʔ a dd a: ʕ", "ʔ i ð a:"),
-                absent_char_rules={"@small_yaa": R("madd_munfasil")},
+                absent_char_rules={
+                    "@small_yaa": R("madd_yaa_zawaid", "madd_munfasil")
+                },
             ),
         },
-    ),
-    # Warsh: إِذَا
-    Case(
-        id="next-word-ibtidaa",
-        site=Site(warsh=("2:186", (10,))),
-        read=through(),
-        phonemes="ʔ i ð a:",
-        absent_sound_rules={"i": R("madd_munfasil")},
     ),
     # Warsh: دُعَآءِۦۖ رَبَّنَا
     StateCase(
@@ -76,14 +72,18 @@ CASES = (
             "joined": Expect(
                 read=through(),
                 phonemes=("d u ʕ a: ʔ i:", "rˤ aˤ bb a n a:"),
-                char_rules={"@small_yaa": R("madd_badal")},
-                sound_rules={"i:": R("madd_badal")},
+                char_rules={"@small_yaa": R("madd_yaa_zawaid", "madd_badal")},
+                sound_rules={"i:": R("madd_yaa_zawaid", "madd_badal")},
                 absent_sound_rules={"i:": R("madd_tabii", "madd_silah")},
             ),
             "host-waqf": Expect(
                 read=explicit(ibtidaa=9, waqf=(9, 10)),
                 phonemes=("d u ʕ a: ʔ", "rˤ aˤ bb a n a:"),
-                absent_char_rules={"@small_yaa": R("madd_badal", "madd_tabii")},
+                absent_char_rules={
+                    "@small_yaa": R(
+                        "madd_yaa_zawaid", "madd_badal", "madd_tabii"
+                    )
+                },
             ),
         },
     ),
@@ -104,7 +104,10 @@ NAML_CASES = (
                     "ي": R("taqlil", "madd_tabii"),
                 },
                 sound_rules={"ɛ:": R("taqlil", "madd_tabii")},
-                absent_sound_rules={"j": R("madd_tabii"), "a": R("madd_tabii")},
+                absent_sound_rules={
+                    "j": R("madd_yaa_zawaid", "madd_tabii"),
+                    "a[2]": R("madd_yaa_zawaid", "madd_tabii"),
+                },
             ),
             "host-waqf": Expect(
                 read=explicit(ibtidaa=8, waqf=(8, 9)),

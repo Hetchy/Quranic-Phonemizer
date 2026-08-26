@@ -15,16 +15,18 @@ After boundary planning and wasl elision, apply a collision repair only when:
 4. the exposed first consonant of the next word is sakin.
 
 The repaired host may be a lexical consonant, the consonantal noon supplied by
-tanwin, plural mim, feminine taa, or another canonically silent boundary unit.
+tanwin, feminine taa, or another canonically silent boundary unit. The
+plural-pronoun mim's authored short U before wasl belongs to mim al-jam and is
+not an `iltiqa_haraka` occurrence.
 A visible source haraka may attest the result, but does not trigger it.
 
-The selected-corpus register has 1,665 within-ayah `iltiqa_haraka` sites:
+The selected-corpus register has 1,659 within-ayah `iltiqa_haraka` sites:
 
 | Result quality | Count |
 | --- | ---: |
 | A | 770 |
 | I | 381 |
-| U | 514 |
+| U | 508 |
 
 These counts are a generated corpus invariant, not a hand-maintained location
 table. The generator compares canonical morphology with the requested
@@ -36,8 +38,8 @@ one compulsory cross-ayah plan.
 
 Lexically established boundary vowels keep their quality. For example, the
 sakin noon of `مِنْ` takes A in `وَمِنَ اَ۬لنَّاسِ`, source 2:7:1-2,
-canonical 2:8:1-2. Plural mim and the other closed morphological classes keep
-their authenticated U or I behavior.
+canonical 2:8:1-2. Other closed morphological classes keep their authenticated
+U or I behavior.
 
 For the otherwise-default I repair, Warsh and the other cited readers use U
 when the following WASL word begins with U because its third written letter
@@ -55,13 +57,12 @@ two written clusters ahead produces the wrong result here.
 
 ## Warsh U register
 
-There are 38 closed U-over-I boundaries in the selected Warsh reading. The
+There are 32 closed U-over-I boundaries in the selected Warsh reading. The
 domain grouping and canonical registers are:
 
 | Host family | Count | Canonical boundary refs |
 | --- | ---: | --- |
 | `أن` | 11 | 4:66:5-6; 5:49:1-2; 5:117:8-9; 16:36:7-8; 23:32:5-6; 27:45:7-8; 31:12:5-6; 31:14:12-13; 36:61:1-2; 68:22:1-2; 71:3:1-2 |
-| Plural mim | 6 | 4:154:6-7; 7:161:3-4; 16:32:7-8; 25:60:3-4; 36:45:3-4; 40:60:2-3 |
 | `قل` | 5 | 7:195:20-21; 10:101:1-2; 17:56:1-2; 17:110:1-2; 34:22:1-2 |
 | `من` | 4 | 2:173:13-14; 5:3:51-52; 6:145:30-31; 16:115:13-14 |
 | Tanwin noon | 4 | 6:65:21-22; 6:99:32-33; 7:49:7-8; 14:26:5-6 |
@@ -75,8 +76,6 @@ The corresponding selected-source boundaries, in the same row order, are:
 - `أن`: 4:65:5-6; 5:51:1-2; 5:119:8-9; 16:36:7-8;
   23:32:5-6; 27:47:7-8; 31:11:5-6; 31:13:12-13; 36:60:1-2;
   68:22:1-2; 71:3:1-2.
-- plural mim: 4:153:6-7; 7:161:3-4; 16:32:7-8; 25:60:3-4;
-  36:44:3-4; 40:60:2-3.
 - `قل`: 7:195:20-21; 10:101:1-2; 17:56:1-2; 17:109:1-2;
   34:22:1-2.
 - `من`: 2:172:13-14; 5:4:51-52; 6:146:30-31; 16:115:13-14.
@@ -88,7 +87,7 @@ The corresponding selected-source boundaries, in the same row order, are:
 
 The register is closed because U depends on an authenticated qiraa choice,
 not merely on the universal collision. Its data rows should carry both
-addresses and the target word's derived U start. The general 1,665-site
+addresses and the target word's derived U start. The general 1,659-site
 register remains predicate-owned.
 
 ## Manual outcomes
@@ -139,10 +138,10 @@ without a host repair.
 - A source stop sign does not suppress the repair. Only the explicit boundary
   plan does.
 - Under the single-script decision, the reviewed linking-haraka family may
-  supply the repair quality per site; the predicate, the 1,665 partition, and
-  the 38 U rows remain its conformance reconciliation. The repair itself stays
+  supply the repair quality per site; the predicate, the 1,659 partition, and
+  the 32 U rows remain its conformance reconciliation. The repair itself stays
   boundary-dependent: an explicit stop suppresses it regardless of the mark.
 
-Tests should derive the complete register, assert the 1,665 total and quality
+Tests should derive the complete register, assert the 1,659 total and quality
 partition, assert all 38 U-over-I rows, and fail on any source attestation that
 disagrees with the independently derived result.

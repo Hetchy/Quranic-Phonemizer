@@ -109,7 +109,8 @@ CASES = (
     # Warsh: أَنفُسَكُمُۖ اُ۬لْيَوْمَ
     Case(id="plural-meem", site=Site.shared("6:93", (34, 35)), read=through(),
          phonemes=("ʔ a ŋ f u s a k u m u", "l j a w m"),
-         char_rules={}),
+         char_rules={},
+         absent_sound_rules={"u[2]": R("iltiqa_haraka")}),
 )
 
 

@@ -101,7 +101,7 @@ Known residue deferred to later verticals:
 - The joined outcomes of the sixteen silent-qata words use the connected
   single-hamza chapter and land with that vertical; only their started forms
   are asserted here.
-- The general 1,665-site `iltiqa_haraka` partition (770 A / 381 I / 514 U)
+- The general 1,659-site `iltiqa_haraka` partition (770 A / 381 I / 508 U)
   remains a documented research invariant. Its tanwin family and damm rows
   are executable above; the lexical-host family is supplied per site by the
   source linking haraka and still needs a morphology-backed generator to be

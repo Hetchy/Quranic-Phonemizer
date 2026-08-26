@@ -146,6 +146,7 @@ WARSH_CASES = (
         sound_rules={"a[2]": R("pausal_alif")},
     ),
     # Warsh: أَنَا اَ۬لْغَفُورُ
+    # Ana's joined short A is the pausal-alif joined face, not iltiqa shortening.
     Case(
         id="warsh-ana-wasl-onset",
         site=Site(warsh=("15:49", (4, 5))),

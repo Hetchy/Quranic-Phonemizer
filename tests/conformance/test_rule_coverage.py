@@ -60,10 +60,15 @@ SAMPLE = (
 #: and `test_the_deferred_list_does_not_rot` fails once the reason no longer
 #: holds.
 #:
-#: `naql` is Warsh-only: no Hafs classifier emits it, and
-#: `test_naql_is_warsh_bound_and_fires` asserts the Warsh side.
+#: These rules are Warsh-only: no Hafs classifier emits them, and the focused
+#: Warsh tests below assert that each is bound and fires.
 DEFERRED: set[Rule] = {
-    Rule.NAQL, Rule.MADD_LEEN_MAHMUZ, Rule.TAQLIL, Rule.TAGHLIZ,
+    Rule.NAQL,
+    Rule.MADD_LEEN_MAHMUZ,
+    Rule.MADD_MIM_AL_JAM,
+    Rule.MADD_YAA_ZAWAID,
+    Rule.TAQLIL,
+    Rule.TAGHLIZ,
 }
 
 
@@ -160,6 +165,29 @@ def test_taqlil_is_warsh_bound_and_fires():
         ).occurrences
     }
     assert Rule.TAQLIL in fired
+
+
+def test_joined_shape_madds_are_warsh_bound_and_fire():
+    from quranic_phonemizer.api import recitation
+    from quranic_phonemizer.model.address import Script, VerseRef
+    from quranic_phonemizer.riwayat.warsh.rules import WARSH
+
+    expected = {Rule.MADD_MIM_AL_JAM, Rule.MADD_YAA_ZAWAID}
+    assert expected <= WARSH.emitted()
+    assert expected.isdisjoint(ruleset_for(Riwayah.HAFS).emitted())
+
+    package = recitation(Riwayah.WARSH)
+    fired = set()
+    for verse in (VerseRef(60, 1), VerseRef(2, 186)):
+        words = package.words(verse)
+        built = package.build(package.read(Script.UTHMANI, verse, words))
+        fired |= {
+            occurrence.rule
+            for occurrence in perform(
+                built.score, WARSH, all_join(len(built.score.words))
+            ).occurrences
+        }
+    assert expected <= fired
 
 
 @pytest.mark.parametrize("riwayah", list(Riwayah))

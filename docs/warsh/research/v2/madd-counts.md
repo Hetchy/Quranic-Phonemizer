@@ -25,6 +25,10 @@ and route-dependent exceptions ([Al-Wafi, madd and qasr](https://islamweb.net/ar
 | `madd_badal` | 2, 4, or 6 | The long token carries `madd_badal`; independently applicable arid, lazim, or muttasil classifications overlap it. | [Al-Nashr, madd after hamza](https://islamweb.net/ar/library/content/70/99/%D9%81%D8%B5%D9%84-%D9%81%D9%8A-%D9%88%D9%82%D9%88%D8%B9-%D8%AD%D8%B1%D9%81-%D8%A7%D9%84%D9%85%D8%AF-%D8%A8%D8%B9%D8%AF-%D8%A7%D9%84%D9%87%D9%85%D8%B2), [route correlations at a stop](https://islamweb.net/ar/library/content/70/102/%D9%81%D8%B5%D9%84-%D9%81%D9%8A-%D9%82%D9%88%D8%A7%D8%B9%D8%AF-%D9%81%D9%8A-%D9%87%D8%B0%D8%A7-%D8%A7%D9%84%D8%A8%D8%A7%D8%A8-%D9%85%D9%87%D9%85%D8%A9) |
 | `madd_leen_mahmuz` | 4 or 6 | The same `/w/` or `/j/` token carries the leen-mahmuz rule in wasl and waqf. | [Al-Wafi, leen followed by hamza](https://islamweb.net/ar/library/content/245/13/%D8%A8%D8%A7%D8%A8-%D8%A7%D9%84%D9%85%D8%AF-%D9%88%D8%A7%D9%84%D9%82%D8%B5%D8%B1) |
 
+The identity rules coexist with the effective count rule: pronoun silah keeps
+`madd_silah`, mim al-jam keeps `madd_mim_al_jam`, and a long yaa-zawaid keeps
+`madd_yaa_zawaid`.
+
 The five plural `سَوْءَات` sites are the closed combined exception. Their
 received `(leen-mahmuz, badal)` pairs are `(none, 2)`, `(none, 4)`,
 `(none, 6)`, and `(4, 4)`; a 6-count leen face is not received there. The

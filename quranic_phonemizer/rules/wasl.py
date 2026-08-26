@@ -37,11 +37,6 @@ _START_OF: dict[Quality, Rule] = {
     Quality.U: Rule.HAMZA_WASL_DAMMA,
 }
 
-_PLURAL_MEEM_HOSTS = frozenset(
-    {CanonLetter.KAF, CanonLetter.HEH, CanonLetter.TA}
-)
-
-
 @dataclass(frozen=True, slots=True)
 class WaslHamza:
     """The prosthetic hamza sounds only when started on.
@@ -118,47 +113,6 @@ class SoftenedHamza:
                 Relength(at, Length.LONG),
                 Silence(following.id, Aspect.CONSONANT),
             ),
-        )
-
-
-@dataclass(frozen=True, slots=True)
-class PluralMeemBeforeWasl:
-    """Repair a plural-pronoun meem before an elided prosthetic hamza."""
-
-    rule: Rule = Rule.ILTIQA_HARAKA
-    phase: Phase = Phase.BOUNDARY
-    triggers: frozenset = frozenset({CanonLetter.MEEM})
-    emits: frozenset = frozenset({Rule.ILTIQA_HARAKA})
-
-    def look(
-        self, near: Neighbourhood, plan: Plan, at: SlotId,
-        boundaries: BoundaryPlan,
-    ) -> Verdict | None:
-        del plan, boundaries
-        slot, word = near.slot(at), near.word_of(at)
-        if slot is None or word is None or not near.last_of_word(at):
-            return None
-        if (
-            slot.letter is not CanonLetter.MEEM
-            or not slot.nucleus.is_short
-            or slot.nucleus.quality is not Quality.U
-        ):
-            return None
-        host = near.before(at)
-        following = near.after(at)
-        if (
-            host is None
-            or host.letter not in _PLURAL_MEEM_HOSTS
-            or following is None
-            or following.onset is not Onset.WASL
-        ):
-            return None
-        return Verdict(
-            Occurrence(
-                mint(Rule.ILTIQA_HARAKA, at), Rule.ILTIQA_HARAKA, (at,),
-                (following.id,), boundary=word,
-            ),
-            (Realize(at, Aspect.VOWEL, Vowel(Quality.U)),),
         )
 
 

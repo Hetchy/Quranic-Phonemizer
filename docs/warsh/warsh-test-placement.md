@@ -487,7 +487,7 @@ table so a domain reviewer never has to reconstruct the text from coordinates.
 | Naql | `hamza/test_warsh_naql.py` | register and source-attribution tests |
 | Single hamza | generic ibdal/tashil plus `test_warsh_single_hamza.py` | effective madd and adapter source tests |
 | Hamza meetings | `hamza/test_warsh_hamza_meetings.py` | effective madd and boundary plan tests |
-| Mim al-jam | `vowels/madd/test_warsh_mim_al_jam.py` | joined-only model and iltiqa tests |
+| Mim al-jam | `vowels/madd/test_warsh_mim_al_jam.py` | joined-only identity and authored before-wasl contrast |
 | Yaa-zawaid | `vowels/madd/test_warsh_yaa_zawaid.py` | joined-only model and authored-register tests |
 | Seven alifs | `vowels/test_seven_alifs.py` | authored-register tests |
 | Madd badal | `vowels/madd/test_warsh_badal.py` | provenance/effective-state tests, including badal plus arid at waqf |

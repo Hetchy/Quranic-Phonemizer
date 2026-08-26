@@ -4,7 +4,7 @@ from __future__ import annotations
 import unicodedata
 
 from ...canon.passes import word_spans
-from ...model.canon import CanonLetter, Nucleus, Onset, Quality
+from ...model.canon import Annotation, CanonLetter, Nucleus, Onset, Quality
 from ...model.inscription import SlotFact
 
 
@@ -92,14 +92,17 @@ def supply_joined_pausal(reading, drafts, lexicon, scribe, selection) -> None:
         text = _word_text(reading, word)
         if "مُۥٓ" in text and _plural_meem(span):
             span[-1].nucleus = Nucleus.joined_only_long(Quality.U)
+            span[-1].annotations |= {Annotation.MIM_AL_JAM}
         elif _plural_meem(span) and _before_wasl(spans, word):
             _demote_boundary_damma(span, scribe)
 
         shape = yaa_zawaid_shape(text)
         if shape == "long":
             span[-1].nucleus = Nucleus.joined_only_long(Quality.I)
+            span[-1].annotations |= {Annotation.YAA_ZAWAID}
         elif shape == "glide":
             span[-1].onset = Onset.GLIDE
+            span[-1].annotations |= {Annotation.YAA_ZAWAID}
 
         if _pausal_alif(text):
             span[-1].nucleus = Nucleus.pausal_long(Quality.A)

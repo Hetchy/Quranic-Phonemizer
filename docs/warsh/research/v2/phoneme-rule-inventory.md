@@ -158,6 +158,8 @@ one meaning across every riwayah that binds it.
 | `naql` | Transformation | The eligible preceding sakin receives the qata vowel and the qata onset becomes silent. |
 | `madd_badal` | Classification | An eligible after-hamza long carrier with badal origin, normally replacing an underlying second hamza. General single-hamza ibdal is excluded. |
 | `madd_leen_mahmuz` | Classification | An eligible sakin waw or yaa immediately followed by hamza. |
+| `madd_mim_al_jam` | Classification | The joined-only long U of the plural-pronoun mim before qata. |
+| `madd_yaa_zawaid` | Classification | A retained extra yaa realized as joined-only long I. |
 | `iltiqa_haraka` | Transformation | A preceding consonant or nunation receives the required A, I, or U repair vowel after wasl elision. |
 
 `iltiqa_haraka` replaces the overly narrow name `iltiqa_kasra`: Warsh has
@@ -179,15 +181,18 @@ The following existing shared identifiers retain their established meaning:
 - the shared noon, meem, idgham, article, qalqala, pausal, and taa-marbuta
   rules are not renamed for Warsh.
 
-There is no `fath`, `kubra`, `isqat`, `mim_al_jam`, `yaa_zawaid`, or
-`seven_alifs` rule ID:
+There is no `fath`, `kubra`, `isqat`, or `seven_alifs` rule ID:
 
 - Fath is the absence of an inclination classification.
 - Kubra is the exact vowel quality classified by `imala`.
 - Isqat in the selected corpus is canonical absence, not a performed deletion.
-- Mim al-jam, yaa zawaid, and the seven alifs first define canonical
-  joined/stopped vowel shapes. Existing madd and boundary rules classify the
-  resulting performance.
+- The seven alifs define canonical joined/stopped vowel shapes whose existing
+  madd and boundary rules classify the resulting performance.
+
+Mim al-jam and yaa zawaid also define canonical joined/stopped shapes, but
+their long results retain public identity through `madd_mim_al_jam` and
+`madd_yaa_zawaid`. These coexist with the effective madd classifier, just as
+`madd_silah` coexists with `madd_tabii` or `madd_munfasil` for pronoun haa.
 
 ## Rule reach
 
