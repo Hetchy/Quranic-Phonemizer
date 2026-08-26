@@ -29,14 +29,17 @@ def _vowel_groups(word, facts, by_id, attached, claimed) -> list[CellGroup]:
         value = facts.sounds[sound.sound_id.value].value
         if not isinstance(value, Vowel) or not value.long:
             continue
+        local_columns = tuple(
+            column for column in sound.column_ids if column in by_id
+        )
         carrier = next((
-            by_id[column] for column in sound.column_ids
+            by_id[column] for column in local_columns
             if by_id[column].role is CellRole.MADD
         ), None)
         if carrier is None:
             continue
         quality = [
-            column for column in sound.column_ids
+            column for column in local_columns
             if column != carrier.id
             and by_id[column].tier is not CellTier.MAIN
         ]

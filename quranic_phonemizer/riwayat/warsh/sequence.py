@@ -251,10 +251,13 @@ def entries_for(inventory: Inventory, text: str):
 
 def entries_for_words(inventory: Inventory, texts: Sequence[str]):
     """Per-word classifications for one verse, with cross-word context: a
-    host's written moved haraka before a latent qata is a naql witness."""
+    host's written moved haraka before a latent qata or initial badal is a
+    naql witness."""
     prepared = [_entries(inventory, text) for text in texts]
     for index in range(len(texts) - 1):
         quality = naql_script.latent_qata_quality(texts[index + 1])
+        if quality is None:
+            quality = naql_script.latent_qata_badal_quality(texts[index + 1])
         if quality is not None:
             naql_script.demote_moved_haraka(
                 texts[index], prepared[index], quality
