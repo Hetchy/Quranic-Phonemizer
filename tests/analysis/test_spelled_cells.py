@@ -62,6 +62,16 @@ def test_each_name_is_a_flat_run_of_native_cells(hafs, ref, expected):
     assert claimed == [column.id for column in word.columns]
 
 
+def test_cross_verse_muqattaat_keep_the_score_slot_ids(hafs):
+    view, _ = _build(hafs, "42:1-42:2")
+    word = view.words[1]
+    columns = {column.id: column for column in word.columns}
+    assert tuple(
+        "".join(columns[column].text for column in run.column_ids)
+        for run in word.runs
+    ) == FORMS["42:2"]
+
+
 def test_source_spelling_stays_compact(hafs):
     session = phonemize_request(hafs, "2:1")
     view = build_cell_view(

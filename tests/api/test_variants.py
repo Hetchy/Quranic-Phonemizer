@@ -33,7 +33,7 @@ def test_public_catalogue_and_defaults_are_scalar():
         for name, (options, default) in VARIANTS.items()
     }
     assert available_variants("hafs") == expected
-    resolved = Phonemizer().phonemize("1:1").variant
+    resolved = Phonemizer().analyse("1:1").analysis.variant
     assert resolved == {name: default for name, (_, default) in VARIANTS.items()}
 
 
@@ -66,6 +66,6 @@ def test_invalid_scalar_choice_is_rejected_before_phonemizing():
 def test_selecting_one_variant_leaves_other_defaults_unchanged():
     result = Phonemizer(
         variants={"iqlab_nasal": "bilabial"}
-    ).phonemize("1:1")
-    assert result.variant["iqlab_nasal"] == "bilabial"
-    assert result.variant["ikhfaa_shafawi_nasal"] == "assimilated"
+    ).analyse("1:1")
+    assert result.analysis.variant["iqlab_nasal"] == "bilabial"
+    assert result.analysis.variant["ikhfaa_shafawi_nasal"] == "assimilated"

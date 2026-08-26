@@ -1,7 +1,7 @@
 # Test suite
 
-Hand-authored recitation examples live under `phonemize/`. Adapter, API,
-document, engine, schema, and conformance tests stay outside it.
+Hand-authored recitation examples live under `phonemize/`. Adapter, analysis,
+API, engine, schema, and conformance tests stay outside it.
 
 ## Semantic cases
 
@@ -155,7 +155,7 @@ when a distinct domain owner would make the combined file misleading.
   marbuta.
 - `adapter/`: source recognition and projection.
 - `api/`: request and metadata contracts, never phonemization behavior.
-- `document/`: public graph, alignment, recited text, and labels.
+- `analysis/`: native result, source, highlights, cells, facade, and wire laws.
 - `engine/`: planning, neighbourhoods, interaction, and windowing.
 - `schema/`: data/model validation.
 - `conformance/`: corpus-wide and snapshot gates.

@@ -1,220 +1,227 @@
-# Public API and projections
+# Public API
 
-This document describes the current schema-v1 graph. The accepted replacement
-architecture and phased implementation plan are in
-[design/consumer-analysis-projection.md](design/consumer-analysis-projection.md).
-Until that cutover lands, this document remains the contract for the released
-shape. Its output is untrusted differential evidence for the redesign, not a
-correctness oracle: native laws and audited fixtures decide the new semantics.
-
-The package has one public operation:
+The ordinary consumer path is one root import, one configured reader, and one
+analysis call:
 
 ```python
-from quranic_phonemizer import Phonemizer
+from quranic_phonemizer import Phonemizer, Result
 
-result = Phonemizer().phonemize("1:1")
+reader = Phonemizer()
+result: Result = reader.analyse("1:1")
 ```
 
-`Phonemizer` selects a riwayah, script, variant choices, and optional phoneme
-distinctions. Each call returns a fresh `PhonemizeResult`: one self-contained,
-index-addressed document holding the written text, canonical units, performed
-sounds, applied rules, and the relations between them.
+The facade returns native analysis records. It does not translate them into
+an adapter-specific graph or infer presentation semantics.
 
-The root `README.md` documents ordinary use. This document describes the
-result graph and the projections derived from it.
-
-For one unusually large, bounded request, `phonemize(..., suspend_gc=True)`
-defers CPython cyclic collection until the call returns. It does not change
-the result and restores the caller's prior collector state, including after
-an error. Cyclic GC is process-global, so this advanced option also defers
-collection of unrelated cycles created by other threads during the call. Use
-it only when the process has enough memory for the complete returned document.
-
-## Result identity
-
-Every result identifies the request and the choices that produced it:
-
-| Member | Meaning |
-| --- | --- |
-| `ref` | Resolved Quran reference |
-| `riwayah` | Selected transmission |
-| `script` | Selected written orthography |
-| `variant` | Resolved riwayah-specific choices |
-| `extra_phonemes` | Optional output distinctions in force |
-| `schema_version` | Version of the public document shape |
-| `canon_digest` | Digest of the canonical passage |
-
-`extra_phonemes` contains only optional distinctions accepted by the selected
-riwayah. Warsh tashil is fixed notation: eased hamzas always render as `ʔ̞`,
-and requesting `tashil` as an extra is invalid.
-
-The canonical digest is independent of public array indices. It identifies
-the canonical reading used to build the result, not a particular projection.
-
-## Nodes
-
-Six arrays hold the public nodes. An array position is that node's identity
-inside the result.
-
-| Array | Holds |
-| --- | --- |
-| `words` | Source locations, word text, and resolved start/stop state |
-| `glyphs` | Characters of the source script in source order |
-| `rendered` | Characters of the recited spelling |
-| `units` | Canonical letter positions and their vowel state |
-| `sounds` | Performed sound features and rendered phoneme tokens |
-| `rules` | Applied tajweed rule instances |
-
-`units` are the public projection of the script-free Score. They do not retain
-internal `SlotId` values. `sounds` are the public projection of Performance;
-their `token` is resolved through the selected output alphabet.
-
-## Edges
-
-Three arrays hold relations. Their fields are integer indices into the node
-arrays, so copying a result member by member preserves the whole graph.
-
-### Spellings
-
-`spellings` relates source glyphs to canonical units:
-
-- `Supplies` says that a glyph supplies a named fact of a unit.
-- `Witnesses` says that a glyph witnesses a performed rule outcome.
-- `Decorates` attaches a visible glyph that supplies no canonical fact.
-- `Structural` identifies source material outside the word/unit graph.
-
-These edges preserve the distinction between what the script writes and what
-the recitation knows. A unit does not point back into a particular script.
-
-### Attributions
-
-`attributions` relates canonical unit parts to performed sounds:
-
-- `Hosts` names the primary unit part responsible for a sound.
-- `MergedInto` records a contributor whose sound merged into its host.
-- `Silent` records a unit part that produced no sound and why.
-
-Every sound has one primary host. A merger has both the host relation and the
-contributor relation; silence is represented explicitly rather than inferred
-from a missing token.
-
-### Modifiers
-
-`modifiers` records a rule changing or classifying a sound:
-
-- `Recolours` changes a sound feature such as emphasis or nasal place.
-- `SetsLength` changes vowel length.
-- `Classifies` attaches a rule classification without claiming ownership of
-  the sound.
-
-Rules themselves live in `rules`; modifier edges connect a particular rule
-instance to the affected sound.
-
-## The two texts
-
-The result keeps the source spelling and the recited spelling as separate
-arrays because neither is an edit list over the other.
+## Reader configuration
 
 ```python
-result.text()             # source spelling
-result.text("recited")   # spelling of this performed reading
+reader = Phonemizer(
+    riwayah="hafs",
+    script="uthmani",
+    variants={"iqlab_nasal": "bilabial"},
+    extra_phonemes=("emphatic_fatha", "emphatic_ikhfaa"),
+)
 ```
 
-`glyphs` preserves exactly what the selected script supplied. `rendered`
-represents what is recited after start, stop, elision, insertion, expansion,
-and substitution have been resolved. Rendered glyphs retain provenance where
-they came from source glyphs and reach into the canonical units they present.
+- `riwayah` selects the reading. The default is `hafs`.
+- `script` selects one of that reading's packaged scripts. The default is
+  `uthmani`.
+- `variants` selects scalar choices from the reading's khilaf catalogue.
+- `extra_phonemes` enables optional notation distinctions. Fixed distinctions
+  remain active without being listed here.
 
-A transformation can be many-to-one, one-to-many, inserted, or silent. That
-is why source and recited text each receive their own alignment.
+Construction validates riwayah, script, variants, and optional phonemes before
+a request is run. `UnknownExtraPhoneme` and `UnknownRiwayah` are public
+`ValueError` subclasses.
 
-## Projections
+## Configuration-scoped catalogues
 
-The convenience methods derive views from the arrays; they do not hold a
-second copy of the reading.
-
-### Phonemes
+The reader publishes only values applicable to its selected configuration:
 
 ```python
+reader.available_stop_signs
+reader.available_variants
+reader.tajweed_rules
+```
+
+Equivalent metadata queries are available at the package root:
+
+```python
+from quranic_phonemizer import (
+    available_stop_signs,
+    available_variants,
+    supported_riwayat,
+    tajweed_rules,
+)
+
+available_stop_signs("hafs", script="uthmani")
+available_variants("hafs")
+tajweed_rules("hafs")
+supported_riwayat()
+```
+
+The packaged stop catalogues are:
+
+| Configuration | Stop classes |
+| --- | --- |
+| Hafs/Uthmani | `preferred_continue`, `preferred_stop`, `optional_stop`, `compulsory_stop`, `prohibited_stop`, `either_stop` |
+| Hafs/IndoPak | the Hafs/Uthmani classes plus `permitted_stop` |
+| Warsh/Uthmani | `optional_stop` |
+
+Warsh Uthmani authors `ۖ` as `optional_stop`. The source character and its
+boundary retain that exact glyph and `StopAdvice.OPTIONAL_STOP` whether or not
+the caller selects the stop class.
+
+## Requests and stop plans
+
+```python
+result = reader.analyse(
+    "2:255",
+    stop_signs=("preferred_stop",),
+    stop_refs=("2:255:35",),
+)
+```
+
+`ref` may address one word, verse, surah, or same-depth range. `stop_signs`
+selects stop-advice classes. `stop_refs` selects exact word references. An
+empty tuple is valid for either option.
+
+Stop classes are validated against the reader before boundary resolution.
+Unknown or unavailable names are collected, sorted, and reported by the public
+`UnknownStopSign` error together with the applicable catalogue. Reference
+errors continue to use the existing request-domain exceptions.
+
+Callers request stops, not `sakt`. Sakt is authored by the riwayah.
+
+## Eager core result
+
+`analyse()` resolves the request and eagerly builds `result.analysis`, an
+immutable `AnalysisResult`. The facade exposes its central records directly:
+
+```python
+result.words
+result.boundaries
+result.sounds
+result.rule_occurrences
+result.mergers
+
+result.text()
 result.phonemes()
-result.phonemes("word")
+result.phonemes(by="word")
 ```
 
-The ungrouped form returns tokens in performed order. Word grouping assigns a
-sound to the word of its primary host, including when another word contributed
-to a cross-word merger.
+`text()` is the exact source spelling. There is no general recited-text
+projection. Use transformed cells when a consumer needs a spelling delta with
+status and provenance.
 
-### Alignment
+`result.analysis` also carries `ref`, `riwayah`, `script`, the resolved
+`variant`, `extra_phonemes`, `schema_version`, and `canon_digest`.
 
-```python
-result.alignment(text="source", grouping="glyph")
-result.alignment(text="recited", grouping="cell")
-```
+## Boundaries
 
-`text` selects the glyph array. `grouping="glyph"` produces one pairing per
-character; `grouping="cell"` groups a letter with its associated marks.
+For `N` words, `result.boundaries` has `N + 1` records.
 
-Each pairing identifies its glyphs, sounds it owns, sounds it shares, applied
-rules, and whether its glyphs are silent. A performed sound with no presenting
-glyph becomes a gap pairing whose `after` field anchors it in reading order.
-
-### Respelling
-
-```python
-result.respelling(grouping="cell")
-```
-
-Respelling joins the source and recited alignments into corresponding blocks.
-Blocks may contain several pairings on either side, which preserves expansions,
-contractions, mergers, insertions, and deletions without pretending that the
-transformation is character-for-character.
-
-## Rules
-
-A `RuleInstance` identifies the rule, its source unit when it has one, and the
-second unit the rule names when there is one. That second unit is another unit
-the rule is about or one its own edges acted on -- a merger's host, a letter it
-silenced, a vowel it lengthened -- never a unit it only read to decide. The rule
-list is exhaustive for the performed passage: `madd_badal` and `madd_silah` are
-rules in it, not derived labels beside it.
-
-`tajweed_rules(riwayah)` lists one row per identifier a result can publish --
-every rule, then the two silence reasons (`orthographic_silence` and
-`variant_silence`): the public identifier, the English name, the Arabic name,
-and a one-sentence summary. Rule indices attached to pairings point into the
-same `rules` array published on the result.
-
-## Schema stability
-
-The native analysis documents use the integer `schema_version` stamped at the
-top of each wire document. A change to a wire record or its meaning requires a
-version bump. Native schema 2 adds canonical slot provenance, flat named-letter
-runs, and intra-word merger bridges to the cell document. The
-`@quranic-phonemizer/cells` package major equals the native schema version it
-reads, so package 2.x accepts native schema 2 and throws on a mismatch. The rule
-catalogue returned by `tajweed_rules()` is additive metadata outside that
-versioned document contract.
-
-The canonical JSON-shaped representation is defined in
-`quranic_phonemizer/phonemize/schema.py`. Its tagged unions and indices are
-validated by `schema_checks.py` and the tests under `tests/schema/`.
-
-Adding a node or edge union member changes the public document shape and
-requires a schema-version change. Reordering internal model identifiers does
-not, because assembly translates them into result-local indices.
-
-## Implementation map
-
-| Concern | Owner |
+| State | Meaning |
 | --- | --- |
-| Result object and convenience methods | `phonemize/document.py` |
-| Node records | `phonemize/nodes.py` |
-| Edge records | `phonemize/edges.py` |
-| Internal-to-public assembly | `phonemize/assemble.py` |
-| Source/recited alignment | `phonemize/pairing.py` |
-| Respelling blocks | `phonemize/respell.py` |
-| Recited spelling | `phonemize/recited.py` |
-| Canonical serialization and validation | `phonemize/schema.py`, `schema_checks.py` |
+| `start` | Leading request boundary before the first word. |
+| `join` | Ordinary continuation across an internal boundary. |
+| `sakt` | Authored breathless pause that blocks cross-boundary interaction without applying waqf or ibtidaa. |
+| `stop` | Waqf before the boundary; an internal stop also starts the following word. The trailing boundary is always a stop. |
 
-For the upstream pipeline that produces these arrays, read
-[architecture.md](architecture.md).
+Each boundary identifies its before and after word IDs, exact written stop sign
+when present, and authored stop advice when present. These are resolved results,
+not a menu of possible states.
+
+## Rule catalogue and occurrences
+
+```python
+result.rule_catalogue
+result.rule_definition("idgham_bi_ghunnah")
+result.rule_occurrences
+```
+
+The catalogue contains only identifiers the selected riwayah declares it can
+emit, followed by its published silence reasons. It is additive metadata and
+is not embedded in the schema-versioned analysis document. `UnknownRule` is
+raised when a lookup is outside that catalogue.
+
+Occurrences are the source of truth for what happened in this request. Their
+unit and sound references answer different questions and may both be present.
+
+## Source view
+
+```python
+source = result.source()
+
+for character in source.characters:
+    print(character.index, character.text, character.kind)
+
+for unit in source.units:
+    print(unit.text, unit.kind, unit.silence, unit.rule_occurrence_ids)
+```
+
+`source()` returns the native `SourceView`. Characters are exact Unicode
+scalars. Units are the producer-tokenized letter surface. Stop signs and sakt
+marks belong to boundaries rather than lexical units.
+
+## Highlights
+
+```python
+for group in result.highlights():
+    print(group.unit_ids, group.sound_ids, group.ranges)
+```
+
+Highlight groups are generated from the source view without constructing
+cells. They share source-unit and sound IDs with the core result.
+
+## Cells
+
+```python
+source_cells = result.cells(spelling="source")
+transformed_cells = result.cells(spelling="transformed")
+```
+
+Both calls return native `CellView` values. The transformed view uses the pen
+selected by the reader internally. A caller never imports or constructs it.
+
+Cell status is one of `present`, `inserted`, `replaced`, `dropped`, or `gap`.
+Roles, tiers, attachments, source units, rule occurrences, sound ownership,
+runs, and merger bridges are producer fields. The facade does not reconstruct
+or reinterpret them.
+
+## Lazy caching and identity
+
+Source, highlights, and each cell spelling are built on first use and cached.
+Repeated calls return the same immutable value. Concurrent access is guarded so
+one result does not build a projection twice.
+
+Every view reuses the session, facts, inscription, bundle, and result-local ID
+space created by `analyse()`. References therefore close across all native
+documents.
+
+## Versioned documents
+
+```python
+analysis = result.document("analysis_result")
+source = result.document("source_view")
+highlights = result.document("highlight_groups")
+cells = result.document("cell_view", spelling="transformed")
+```
+
+Each call returns a JSON-compatible dictionary stamped with
+`schema_version == 2`:
+
+| Kind | Contents |
+| --- | --- |
+| `analysis_result` | Metadata, source text, words, boundaries, sounds, rule occurrences, and mergers. |
+| `source_view` | Source characters, letter units, silence, and placements. |
+| `highlight_groups` | Source ranges and unit IDs grouped by active sound IDs. |
+| `cell_view` | Source or transformed educational cells, runs, boundaries, and merger bridges. |
+
+There is no `document("all")`. An unknown kind or invalid cell spelling raises
+a user-facing `ValueError`. Low-level document constructors and serializers
+remain available from `quranic_phonemizer.analysis` for specialist consumers.
+
+The `@quranic-phonemizer/cells` 2.x package parses schema 2 and owns renderer
+layout. The Python producer owns semantics and IDs.

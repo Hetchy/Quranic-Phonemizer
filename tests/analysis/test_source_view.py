@@ -196,6 +196,18 @@ def test_warsh_optional_stop_is_a_typed_boundary_sign():
     assert stopped_bundle.boundaries[sign.boundary_id.value].state is BoundaryState.STOP
 
 
+def test_every_warsh_optional_stop_uses_the_typed_inventory_entry():
+    warsh = recitation(Riwayah.WARSH)
+    occurrences = sum(
+        word.text.count("ۖ") for word in warsh.corpus.entries.values()
+    )
+    entry = warsh.inventory(Script.UTHMANI).classify("ۖ")
+
+    assert occurrences == 9_948
+    assert entry.advice is StopAdvice.OPTIONAL_STOP
+    assert not entry.structural
+
+
 def test_a_cross_word_merger_places_a_contributor(hafs):
     _, bundle, view = _both(hafs, "36:52-36:53", {})
     assert view.merger_placements

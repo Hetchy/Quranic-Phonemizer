@@ -12,7 +12,7 @@ from tests.hardcase.registry import FixtureRef, RULE_FIXTURES
 
 def _catalogued() -> set[str]:
     return {
-        rule[0]
+            rule.id.value
         for riwayah in ("hafs", "warsh")
         for rule in tajweed_rules(riwayah)
     }

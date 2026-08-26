@@ -6,7 +6,7 @@ import pkgutil
 from dataclasses import dataclass
 
 import tests.phonemize
-from tests.document.test_ishmam import (
+from tests.phonemize.vowels.test_ishmam import (
     test_the_ishmam_classifies_the_consonant_and_owns_no_sound,
     test_the_ishmam_names_one_letter_and_reads_nothing_beside_it,
 )

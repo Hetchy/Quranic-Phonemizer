@@ -18,7 +18,7 @@ TOOLS = ROOT / "tools"
 #: so a new package must declare itself before anything may reach it. `""`
 #: is the package root; `dataio` and `model` are leaves by construction.
 ALLOWED: dict[str, set[str]] = {
-    "": {"model", "phonemize"},
+    "": {"analysis", "model"},
     "dataio": set(),
     "model": set(),
     "corpus": {"model"},
@@ -43,7 +43,7 @@ ALLOWED: dict[str, set[str]] = {
     # only the resolved request, the model, the notation, the pen, and the
     # riwayah registry for the per-reading rule catalogue -- no edge to the
     # public assembler above it.
-    "analysis": {"model", "orthography", "render", "riwayat", "session"},
+    "analysis": {"api", "model", "orthography", "render", "riwayat", "session"},
     # Above `api`: it imports the assembled bundle rather than re-deriving
     # it. It reaches the request layers through `session` now, so it keeps no
     # direct canon, corpus or engine edge -- a declared edge nothing exercises
@@ -70,10 +70,10 @@ MODULE_ALLOWED: dict[tuple[str, str], set[str]] = {
 #: Names a consumer outside this repository may import. Everything else that
 #: nothing here calls is dead.
 PUBLIC_API = frozenset({
-    "Option", "VariantSelection", "KhilafId",
-    "Phonemizer", "PhonemizeResult", "UnknownExtraPhoneme", "UnknownRiwayah",
+    "Option", "VariantSelection", "KhilafId", "Riwayah", "Script",
+    "Phonemizer", "Result", "UnknownExtraPhoneme", "UnknownRiwayah",
+    "UnknownRule", "UnknownStopSign", "available_stop_signs",
     "available_variants", "supported_riwayat", "tajweed_rules",
-    "edges", "nodes",
 })
 
 #: Imports whose only purpose is the side effect of importing them.
