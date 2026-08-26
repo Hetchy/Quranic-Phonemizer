@@ -215,7 +215,7 @@ Inclination classifies a sounded nucleus, not an abstract written alif.
   plain waqf, the restored alif receives the selected or fixed quality.
 - At `مُصَلّىٗۖ` (source 2:124:11, canonical 2:125) and `يَصْلَى اَ۬لنَّارَ`
   (source 87:12:2, canonical 87:12), wasl suppresses the inclined alif and the
-  coupled owner realizes fath plus lam taghliz. At waqf the selected coupled
+  coupled owner realizes fath plus lam tafkheem. At waqf the selected coupled
   face manifests again.
 - A selector remains a stable request even when its target is masked in the
   current state. Masking is not validation failure and does not rewrite the
@@ -225,8 +225,8 @@ Inclination classifies a sounded nucleus, not an abstract written alif.
 
 Inclination and lam weight are incompatible in only one pairing: an inclined
 alif requires a light lam, while an emphatic lam requires fath. The classifier
-therefore returns `taqlil` plus lam tarqiq or fath plus `taghliz` as one owned
-decision. It must never produce taqlil plus taghliz
+therefore returns `taqlil` plus lam tarqiq or fath plus `tafkheem` as one owned
+decision. It must never produce taqlil plus tafkheem
 ([Al-Nashr](https://islamweb.net/ar/library/content/70/192/)).
 
 The closed register has ten sites:
@@ -237,7 +237,7 @@ The closed register has ten sites:
 | `lam_verse_heads` | 75:31, 87:15, 96:10 | 3 |
 
 Exact selected-script source keys and spellings are listed in
-[`lam-taghliz.md`](lam-taghliz.md), which owns the lam side and the two
+[`lam-tafkheem.md`](lam-tafkheem.md), which owns the lam side and the two
 boundary masks.
 
 ## Source fixtures and manual sound checks
@@ -266,7 +266,7 @@ typed KUBRA, imala disabled: ɛ:
 
 صَلّ۪ىٰۖ, source 75:30:4, canonical 75:31
 taqlil plus tarqiq: sˤ aˤ ll ɛ:
-fath plus taghliz:  sˤ aˤ lˤlˤ aˤ:
+fath plus tafkheem:  sˤ aˤ lˤlˤ aˤ:
 ```
 
 The two Haa renderings above must have identical typed quality and identical

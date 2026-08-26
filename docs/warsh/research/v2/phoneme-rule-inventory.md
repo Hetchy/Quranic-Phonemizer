@@ -123,7 +123,7 @@ lam:
 When a raa or lam is the cause of emphasis on its A nucleus, that vowel follows
 the effective consonant result regardless of how the boundary state realizes
 it. The nucleus may be short A from fatha or fathatan, lexical long A from a
-carrier, or stop-created long A from `madd_iwad`. Tafkheem or taghliz adds the
+carrier, or stop-created long A from `madd_iwad`. Tafkheem adds the
 owner's emphasis cause; tarqiq removes only that owner's cause. The A becomes
 plain only when no independent isti'la consonant or other owner still requires
 emphasis.
@@ -136,11 +136,12 @@ composite tanwin column retains its noon rule but does not receive a vowel-
 color occurrence merely because its A sound is colored. This directional
 propagation does not recolor an unrelated vowel before the consonant.
 
-Lam uses `taghliz`; `tafkheem` remains the raa/general emphasis name. The
-distinct terminology follows the classical Warsh lam chapter
-([Al-Nashr](https://www.islamweb.net/ar/library/content/70/190/)). Gemination
-is orthogonal, so the same emphatic LAM type represents a single `lˤ` or a
-geminated `lˤlˤ` token.
+Lam and raa use the shared `tafkheem` rule. Classical Warsh sources commonly
+call lam tafkheem *taghliz*, but the API normalizes the synonymous operations
+while the owning classifier and occurrence reach preserve the consonant-specific
+contract ([Al-Nashr](https://www.islamweb.net/ar/library/content/70/190/)).
+Gemination is orthogonal, so the same emphatic LAM type represents a single
+`lˤ` or a geminated `lˤlˤ` token.
 
 ## Rule vocabulary
 
@@ -154,7 +155,6 @@ one meaning across every riwayah that binds it.
 | --- | --- | --- |
 | `taqlil` | Classification | A vowel whose exact quality is `TAQLIL`. |
 | `imala` | Classification | A vowel whose exact quality is `KUBRA`. |
-| `taghliz` | Recoloring | A lam and its causally dependent A nucleus become emphatic. |
 | `naql` | Transformation | The eligible preceding sakin receives the qata vowel and the qata onset becomes silent. |
 | `madd_badal` | Classification | An eligible after-hamza long carrier with badal origin, normally replacing an underlying second hamza. General single-hamza ibdal is excluded. |
 | `madd_leen_mahmuz` | Classification | An eligible sakin waw or yaa immediately followed by hamza. |
@@ -172,7 +172,8 @@ The following existing shared identifiers retain their established meaning:
 - `tashil` classifies an eased hamza, regardless of token collapse;
 - `ibdal_hamza` names replacement of a hamza by a vowel carrier or moving
   consonant;
-- `tafkheem` and `tarqeeq` classify the effective raa/general weight;
+- `tafkheem` and `tarqeeq` classify an explicitly owned effective raa or lam
+  weight, as well as general emphasis where applicable;
 - `madd_tabii`, `madd_muttasil`, `madd_munfasil`, `madd_lazim`,
   `madd_arid_lissukun`, `madd_leen`, `madd_iwad`, `madd_badal`, and
   `madd_silah` keep their shared meanings;
@@ -207,9 +208,8 @@ silence, rather than copying every core participant onto every glyph.
 | Rule | Required reach |
 | --- | --- |
 | `taqlil`, `imala` | The vowel sound and its visible vowel/carrier cells; an inclination witness stays provenance inside the owning unit rather than becoming an independent rule target. |
-| `taghliz` | The lam sound and its dependent A-vowel sound. Transformed cells place the occurrence on the lam and vowel/carrier columns, but not on a composite tanwin column. |
-| `tafkheem`, `tarqeeq` on raa | The raa sound and its dependent A-vowel sound. Transformed cells place the occurrence on the raa and vowel/carrier columns, but not on a composite tanwin column. |
-| `tarqeeq` on an owned lam choice | The lam and dependent A sounds and their transformed columns. Ordinary unowned light lam emits no `tarqeeq`. |
+| `tafkheem` on an owned raa or lam | The consonant sound and its dependent A-vowel sound. Transformed cells place the occurrence on the consonant and vowel/carrier columns, but not on a composite tanwin column. |
+| `tarqeeq` on an owned raa or lam choice | The consonant and dependent A sounds and their transformed columns. Ordinary unowned light lam emits no `tarqeeq`. |
 | `tashil` | The eased consonant sound and the responsible hamza source; Warsh renders the sound as `ʔ̞`. |
 | `ibdal_hamza` | The replacement vowel or consonant sound and every source unit that creates or selects it: the replaced hamza or replacement spelling, plus the realized wasl unit or immediately preceding vowel witness when that context determines the result. |
 | `madd_badal` | The resulting long-vowel sound, its carrier or replacement source, and the source hamza provenance that makes it badal. A transformed hamza does not remove that reach. |

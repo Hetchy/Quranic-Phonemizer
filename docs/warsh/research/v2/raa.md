@@ -6,7 +6,8 @@ closed occurrence registers. Public selector values and defaults remain in
 [`docs/variants.md`](../../../variants.md).
 
 `heavy` and `light` below mean the effective raa result. The rule occurrence is
-`tafkheem` or `tarqeeq`; these names are not reused for lam taghliz.
+`tafkheem` or `tarqeeq`. Lam uses the same public vocabulary; its distinct
+classifier and occurrence ownership preserve the lam-specific contract.
 
 ## Structural law
 

@@ -20,15 +20,15 @@ CASES = (
             hafs_uthmani={"@dagger_alif": R("madd_arid_lissukun")},
             hafs_indopak={"و": R("madd_arid_lissukun")},
             warsh_uthmani={
-                "@dagger_alif": R("madd_arid_lissukun", "taghliz"),
-                "ل[2]": R("taghliz"),
+                "@dagger_alif": R("madd_arid_lissukun", "tafkheem"),
+                "ل[2]": R("tafkheem"),
             },
         ),
         sound_rules=pick(
             hafs={"a:": R("madd_arid_lissukun")},
             warsh={
-                "lˤ": R("taghliz"),
-                "aˤ:": R("madd_arid_lissukun", "taghliz"),
+                "lˤ": R("tafkheem"),
+                "aˤ:": R("madd_arid_lissukun", "tafkheem"),
             },
         ),
     ),

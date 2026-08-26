@@ -66,7 +66,7 @@ def _weight_rules(location: Location, *, stopped: bool) -> tuple[Rule, ...]:
         occurrence.rule
         for occurrence in performance.occurrences
         if target.id in occurrence.subjects
-        and occurrence.rule in {Rule.TAGHLIZ, Rule.TARQEEQ, Rule.TAFKHEEM}
+        and occurrence.rule in {Rule.TAFKHEEM, Rule.TARQEEQ}
     )
 
 
@@ -90,8 +90,8 @@ def test_the_finite_register_subtotals_are_exact_and_disjoint():
 
 
 @pytest.mark.parametrize("location", sorted(COUPLED_DHAT_YAA))
-def test_every_default_dhat_yaa_pair_is_fath_plus_one_taghliz(location):
-    assert _weight_rules(location, stopped=True) == (Rule.TAGHLIZ,)
+def test_every_default_dhat_yaa_pair_is_fath_plus_one_tafkheem(location):
+    assert _weight_rules(location, stopped=True) == (Rule.TAFKHEEM,)
 
 
 @pytest.mark.parametrize("location", sorted(COUPLED_VERSE_HEADS))
@@ -100,14 +100,14 @@ def test_every_default_verse_head_pair_is_taqlil_plus_one_tarqiq(location):
 
 
 @pytest.mark.parametrize("location", sorted(SEPARATED))
-def test_every_alif_separated_default_has_one_taghliz_owner(location):
-    assert _weight_rules(location, stopped=True) == (Rule.TAGHLIZ,)
+def test_every_alif_separated_default_has_one_tafkheem_owner(location):
+    assert _weight_rules(location, stopped=True) == (Rule.TAFKHEEM,)
 
 
 @pytest.mark.parametrize("location", sorted(FINAL_WAQF))
 def test_final_lam_waqf_replaces_the_ordinary_owner_without_stacking(location):
-    assert _weight_rules(location, stopped=True) == (Rule.TAGHLIZ,)
-    assert _weight_rules(location, stopped=False) == (Rule.TAGHLIZ,)
+    assert _weight_rules(location, stopped=True) == (Rule.TAFKHEEM,)
+    assert _weight_rules(location, stopped=False) == (Rule.TAFKHEEM,)
 
 
 @pytest.mark.parametrize("location", sorted(SALSAL))
@@ -125,7 +125,7 @@ def test_salsal_owns_only_the_first_lam_with_default_tarqiq(location):
             occurrence.rule
             for occurrence in performance.occurrences
             if lam.id in occurrence.subjects
-            and occurrence.rule in {Rule.TAGHLIZ, Rule.TARQEEQ, Rule.TAFKHEEM}
+            and occurrence.rule in {Rule.TAFKHEEM, Rule.TARQEEQ}
         )
         for lam in lams
     }
@@ -158,7 +158,7 @@ def test_nearby_shapes_and_an_unrelated_inclination_witness_are_not_claimed(
     }
 
     assert not any(
-        occurrence.rule is Rule.TAGHLIZ
+        occurrence.rule is Rule.TAFKHEEM
         and target_lams.intersection(occurrence.subjects)
         for occurrence in performance.occurrences
     )

@@ -68,7 +68,6 @@ DEFERRED: set[Rule] = {
     Rule.MADD_MIM_AL_JAM,
     Rule.MADD_YAA_ZAWAID,
     Rule.TAQLIL,
-    Rule.TAGHLIZ,
 }
 
 

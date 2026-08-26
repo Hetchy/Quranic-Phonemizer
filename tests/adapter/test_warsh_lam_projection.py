@@ -153,4 +153,4 @@ def test_dangerous_source_lookalikes_remain_ordinary_projection(ref, text):
 
     assert entry.text == text
     assert any(cluster.letter is CanonLetter.LAM for cluster in reading.clusters)
-    assert all(mark.role != "taghliz" for cluster in reading.clusters for mark in cluster.marks)
+    assert all(mark.role != "tafkheem" for cluster in reading.clusters for mark in cluster.marks)

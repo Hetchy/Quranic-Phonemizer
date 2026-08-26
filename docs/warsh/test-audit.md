@@ -61,7 +61,7 @@ The `phonemize/` folders name sound domains, not runtime circumstances:
 - `articles/` owns the pronounced or assimilated definite-article lam;
 - `assimilation/` owns consonant-to-consonant idgham and its release at a
   reading start;
-- `emphasis/` owns tafkheem, tarqiq, and lam taghliz, including dependent A
+- `emphasis/` owns tafkheem and tarqiq for raa and lam, including dependent A
   coloring;
 - `hamza/` owns wasl, iltiqa, ibdal, tashil, naql, seats, and hamza meetings;
 - `nasal/` owns noon, tanwin, meem, and ghunnah behavior;
@@ -90,7 +90,7 @@ without a boundary or waqf bucket:
 | --- | --- |
 | `articles/` | `lam_shamsiyyah`, `lam_qamariyyah`, and article/non-article contrasts |
 | `assimilation/` | `idgham_mutamathilayn`, `idgham_mutaqaribayn`, both `idgham_mutajanisayn` forms, and ibtidaa recovery from a cross-word merger |
-| `emphasis/` | `tafkheem`, `tarqeeq`, `taghliz`, raa weight, lam weight, and dependent A coloring including fathatan and iwad |
+| `emphasis/` | `tafkheem`, `tarqeeq`, raa weight, lam weight, and dependent A coloring including fathatan and iwad |
 | `hamza/` | `hamza_wasl_*`, `iltiqa_haraka`, `iltiqa_shortening`, `ibdal_hamza`, `tashil`, `naql`, hamza seats, and hamza meetings |
 | `nasal/` | `izhar`, `ikhfaa`, `iqlab`, noon idgham, the three shafawi rules, and `ghunnah_mushaddadah` |
 | `vowels/` | `madd_iwad`, `waqf_diacritic_drop`, `pausal_alif`, ordinary vowel quality, final glides, joined-only vowels, and seven alifs |
@@ -599,7 +599,7 @@ sample per rule. Use `pick()` only when a small expected detail differs.
 - transformed-hamza madd attribution;
 - mim al-jam, yaa zawaid, and Warsh seven-alif behavior;
 - madd badal and leen mahmuz;
-- inclination, Warsh raa, and lam taghliz;
+- inclination, Warsh raa, and lam tafkheem;
 - muqattaat affected by inclination or opening-boundary choices;
 - every public selector.
 

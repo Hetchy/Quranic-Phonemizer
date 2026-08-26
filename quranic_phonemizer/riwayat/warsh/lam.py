@@ -68,11 +68,11 @@ def _keys(owner: str) -> frozenset[LamKey]:
 
 
 PROFILE = LamProfile(
-    coupled_taghliz=_keys("lam_dhat_yaa"),
+    coupled_tafkheem=_keys("lam_dhat_yaa"),
     coupled_tarqeeq=_keys("lam_verse_heads"),
     salsal_tarqeeq=_keys("lam_salsal"),
-    separated_taghliz=_keys("lam_separated_by_alif"),
-    final_waqf_taghliz=_keys("lam_final_waqf"),
+    separated_tafkheem=_keys("lam_separated_by_alif"),
+    final_waqf_tafkheem=_keys("lam_final_waqf"),
 )
 
 
