@@ -99,18 +99,12 @@ NAML_CASES = (
             "joined": Expect(
                 read=through(),
                 phonemes=("ʔ a: t ɛ: n i j a", "lˤlˤ aˤ: h"),
-                char_rules={
-                    "ا[2]": R("hamza_wasl_silent"),
-                    "ي": R("taqlil", "madd_tabii"),
-                },
-                sound_rules={"ɛ:": R("taqlil", "madd_tabii")},
+                char_rules={"ا[2]": R("hamza_wasl_silent")},
                 absent_sound_rules={"j": R("madd_tabii"), "a": R("madd_tabii")},
             ),
             "host-waqf": Expect(
                 read=explicit(ibtidaa=8, waqf=(8, 9)),
                 phonemes=("ʔ a: t ɛ: n", "ʔ a lˤlˤ aˤ: h"),
-                char_rules={"ي": R("taqlil", "madd_arid_lissukun")},
-                sound_rules={"ɛ:": R("taqlil", "madd_arid_lissukun")},
             ),
         },
     ),
