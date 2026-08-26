@@ -39,6 +39,19 @@ def test_the_across_word_register_is_the_documented_156():
     })
 
 
+def test_the_two_joined_ayah_rows_are_exact_and_none_crosses_a_surah():
+    across = [row for row in meeting_rows() if row.scope != "one_word"]
+    joined_ayahs = {
+        (row.previous, row.canonical, row.source, row.first.name, row.second.name)
+        for row in across if row.scope == "joined_ayahs"
+    }
+    assert joined_ayahs == {
+        (Location(14, 27, 18), Location(14, 28, 1), "14:30:1", "U", "A"),
+        (Location(19, 2, 5), Location(19, 3, 1), "19:2:1", "A", "I"),
+    }
+    assert all(row.previous.surah == row.canonical.surah for row in across)
+
+
 def test_every_authored_exception_is_closed():
     by_exception = {
         name: {row.canonical for row in meeting_rows() if row.exception == name}
