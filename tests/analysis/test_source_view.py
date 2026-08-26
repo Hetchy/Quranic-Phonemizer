@@ -20,7 +20,10 @@ from quranic_phonemizer.analysis.source_laws import (
     SourceValidationError,
     validate_source_view,
 )
-from quranic_phonemizer.model.address import Script, VerseRef
+from quranic_phonemizer.api import recitation
+from quranic_phonemizer.analysis.dtos import BoundaryState
+from quranic_phonemizer.model.address import Riwayah, Script, VerseRef
+from quranic_phonemizer.model.inscription import StopAdvice
 from quranic_phonemizer.session import phonemize_request
 from quranic_phonemizer.session.boundaries import resolve_boundaries
 from quranic_phonemizer.session.core import Session
@@ -159,8 +162,6 @@ def test_mergers_place_a_host_and_agree_with_the_core(hafs, ref, kwargs):
 
 
 def test_the_site_set_exercises_every_boundary_state(hafs):
-    from quranic_phonemizer.analysis.dtos import BoundaryState
-
     states: set[BoundaryState] = set()
     for ref, kwargs in SITES:
         session, _, _ = _both(hafs, ref, kwargs)
@@ -170,6 +171,29 @@ def test_the_site_set_exercises_every_boundary_state(hafs):
         )
         states |= {b.state for b in bundle.boundaries}
     assert states == set(BoundaryState)
+
+
+def test_warsh_optional_stop_is_a_typed_boundary_sign():
+    warsh = recitation(Riwayah.WARSH)
+
+    session = phonemize_request(warsh, "2:2")
+    bundle = build_bundle(
+        session, ref="2:2", riwayah="warsh", script="uthmani", variant={}
+    )
+    view = build_source_view(session, bundle=bundle)
+    sign = next(character for character in view.characters if character.text == "ۖ")
+    boundary = bundle.boundaries[sign.boundary_id.value]
+
+    assert sign.kind is CharacterKind.STOP_SIGN
+    assert boundary.stop_sign == "ۖ"
+    assert boundary.stop_advice is StopAdvice.OPTIONAL_STOP
+    assert boundary.state is BoundaryState.JOIN
+
+    stopped = phonemize_request(warsh, "2:2", stop_signs=("optional_stop",))
+    stopped_bundle = build_bundle(
+        stopped, ref="2:2", riwayah="warsh", script="uthmani", variant={}
+    )
+    assert stopped_bundle.boundaries[sign.boundary_id.value].state is BoundaryState.STOP
 
 
 def test_a_cross_word_merger_places_a_contributor(hafs):

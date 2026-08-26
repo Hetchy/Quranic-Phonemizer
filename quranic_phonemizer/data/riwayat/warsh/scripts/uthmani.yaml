@@ -84,4 +84,7 @@ decorates:
   "۬": {slot: host, cls: annotation, role: marked_hamza}
   "ۢ": {slot: host, cls: annotation, role: mini_meem, attests: true}
 
-structural: [" ", "ۖ", "۩"]
+advice:
+  "ۖ": OPTIONAL_STOP
+
+structural: [" ", "۩"]

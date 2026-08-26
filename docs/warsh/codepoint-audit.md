@@ -262,9 +262,8 @@ not letters and not phonemes.
 
 The script adapter creates structural graphemes and typed stop-sign facts. A
 separate boundary policy decides whether a sign produces a stop. Unicode names
-and the current Hafs YAML label `PREFERRED_CONTINUE` are not enough to assert
-the Warsh source convention; that convention remains a required reviewed
-fixture set.
+do not define that policy: the shared U+06D6 glyph is `PREFERRED_CONTINUE` in
+the Hafs inventory and `OPTIONAL_STOP` in the Warsh inventory.
 
 ## 3. Complete runtime-word inventory
 
@@ -330,7 +329,7 @@ a distribution that needs riwāyah research, not an implemented Warsh rule.
 | `U+0670` | ٰ | 9,726 | 10,033 | same | dagger alef/long-vowel carrier mark |
 | `U+0671` | ٱ | 13,483 | 0 | equiv | Hafs scalar encoding of hamzat al-waṣl |
 | `U+06D2` | ے | 0 | 2,996 | equiv | Warsh source yāʾ-family base |
-| `U+06D6` | ۖ | 1,682 | 9,948 | structural | source stop sign; convention review required |
+| `U+06D6` | ۖ | 1,682 | 9,948 | structural | source stop sign; Hafs preferred-continue, Warsh optional-stop |
 | `U+06D7` | ۗ | 603 | 0 | structural | Hafs stop sign |
 | `U+06D8` | ۘ | 22 | 0 | structural | Hafs stop sign |
 | `U+06D9` | ۙ | 68 | 0 | structural | Hafs stop sign |
@@ -370,7 +369,6 @@ It must reject or mark unresolved:
 - the 32 minority `U+06EA` contexts outside the two major vowel/initial-alef
   families until individually classified;
 - minority non-article `U+06EC` contexts until fixture-reviewed;
-- the full semantic meaning of Warsh stop signs;
 - plural-mīm/small-wāw pronunciation;
 - any imālah/taqlīl value not backed by Warsh recitation research;
 - ambiguous combining-hamza-below sequences not covered by fixtures.
