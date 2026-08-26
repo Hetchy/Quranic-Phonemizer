@@ -37,6 +37,11 @@ def test_rule_plan_laws_hold_over_a_corpus_sample(packed, hafs, script):
             check_performance(performance, score)
 
 
+def test_full_rules_share_nasal_merger_ownership(packed, hafs):
+    score, performance = performance_for(packed, hafs, 2, 1)
+    check_performance(performance, score)
+
+
 def test_a_merger_has_matching_source_and_host_edges(packed, hafs):
     _, performance = performance_for(packed, hafs, 2, 5, RULES)
     merges = [a for a in performance.attributions if isinstance(a, MergedInto)]

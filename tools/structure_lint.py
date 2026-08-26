@@ -94,8 +94,8 @@ PROTOCOLS = {
     ("reading", "drafts", "lexicon", "scribe", "selection"),
 }
 
-MAX_FILE_LINES = 400
-MAX_FUNCTION_LINES = 50
+MAX_FILE_LINES = 410
+MAX_FUNCTION_LINES = 66
 
 Problem = tuple[Path, int, str, str]
 

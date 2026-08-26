@@ -19,7 +19,8 @@ FLOORS = {
     ("cross", "word"): "99.997",
     ("cross", "verse"): "100.0",
     ("regression", "word"): "99.919",
-    ("regression", "verse"): "97.850",
+    # 90ad7dd/ff318e2 correct naql/ibdal and nasal-idgham ownership.
+    ("regression", "verse"): "97.848",
     ("roundtrip", "uthmani"): "100.0",
     ("attest", "uthmani"): "176",
     ("attest", "indopak"): "237",
