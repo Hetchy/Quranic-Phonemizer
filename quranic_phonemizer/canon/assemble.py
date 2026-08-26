@@ -32,7 +32,7 @@ def assemble(
             slots=tuple(by_word.get(index, ())),
             sakt_after=index in sakt,
             spelling_runs=_spelling_runs(
-                location, run_drafts.get(index, {})
+                reading.verse, location, run_drafts.get(index, {})
             ),
         )
         for index, location in enumerate(reading.words)
@@ -45,7 +45,7 @@ def assemble(
     ), ordinals
 
 
-def _spelling_runs(location, drafts_by_run) -> tuple[SpellingRun, ...]:
+def _spelling_runs(verse, location, drafts_by_run) -> tuple[SpellingRun, ...]:
     out = []
     for run, drafts in sorted(drafts_by_run.items()):
         letters = {draft.spelled_letter for draft, _ in drafts}
@@ -54,7 +54,7 @@ def _spelling_runs(location, drafts_by_run) -> tuple[SpellingRun, ...]:
         out.append(SpellingRun(
             id=SpellingRunId(location, run),
             source_letter=next(iter(letters)),
-            slot_ids=tuple(SlotId(location.verse, ordinal) for _, ordinal in drafts),
+            slot_ids=tuple(SlotId(verse, ordinal) for _, ordinal in drafts),
         ))
     return tuple(out)
 

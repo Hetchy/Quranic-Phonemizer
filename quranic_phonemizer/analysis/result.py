@@ -62,6 +62,12 @@ def _from_bundle(bundle: AnalysisBundle) -> AnalysisResult:
     })
 
 
+def _result_from_bundle(bundle: AnalysisBundle) -> AnalysisResult:
+    """Validate one shared bundle and expose its immutable core result."""
+    validate(bundle)
+    return _from_bundle(bundle)
+
+
 def build_result(
     session: Session,
     *,
@@ -79,8 +85,7 @@ def build_result(
         variant=variant,
         extra_phonemes=extra_phonemes,
     )
-    validate(bundle)
-    return _from_bundle(bundle)
+    return _result_from_bundle(bundle)
 
 
 __all__ = ["AnalysisResult", "build_result"]

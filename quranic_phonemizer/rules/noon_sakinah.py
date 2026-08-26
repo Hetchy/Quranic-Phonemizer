@@ -18,7 +18,7 @@ from ..engine.plan import (
     Verdict,
     mint,
 )
-from ..model.address import BoundaryPlan, Junction, KhilafId, SlotId
+from ..model.address import BoundaryPlan, Junction, KhilafId, Location, SlotId
 from ..model.canon import CanonLetter as L
 from ..model.canon import Rule, SlotOrigin
 from ..model.performance import Aspect, Consonant, Occurrence
@@ -33,6 +33,7 @@ class NoonSakinah:
 
     followers: Followers
     opening_wasl: object | None = None
+    fixed_opening_izhar: frozenset[Location] = frozenset()
     rule: Rule = Rule.IKHFAA
     phase: Phase = Phase.MERGE
     triggers: frozenset = field(default=frozenset({L.NOON}))
@@ -51,7 +52,12 @@ class NoonSakinah:
         clear = _clear_at_boundary(near, at, boundaries)
         opening = self._opening_wasl(near, at, boundaries)
         if opening is not None:
-            choice = self.opening_wasl.choose(near.score.selection)
+            location = near.score.words[word].location
+            choice = (
+                "izhar"
+                if location in self.fixed_opening_izhar
+                else self.opening_wasl.choose(near.score.selection)
+            )
             if choice == "izhar":
                 return _classification(Rule.IZHAR, at, None)
             return _merge(Rule.IDGHAM_BI_GHUNNAH, at, opening, ghunnah=True)
@@ -94,12 +100,20 @@ class NoonSakinah:
 
     def _opening_wasl(self, near, at, boundaries):
         word = near.word_of(at)
-        if self.opening_wasl is None or word is None:
+        if word is None:
             return None
         if boundaries.after(word) is not Junction.JOIN:
             return None
         location = near.score.words[word].location
-        if location not in self.opening_wasl.locations or not near.last_of_word(at):
+        selectable = (
+            frozenset()
+            if self.opening_wasl is None
+            else self.opening_wasl.locations
+        )
+        if (
+            location not in self.fixed_opening_izhar | selectable
+            or not near.last_of_word(at)
+        ):
             return None
         following = near.raw_after(at)
         if following is None or following.letter is not L.WAW:

@@ -2,6 +2,7 @@ include README.md
 include LICENSE
 recursive-include quranic_phonemizer *.py
 recursive-include quranic_phonemizer/data *.json *.yaml *.bin
+prune quranic_phonemizer/phonemize
 prune docs
 prune .claude
 prune .github

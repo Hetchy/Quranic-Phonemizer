@@ -7,7 +7,14 @@ from ...model.canon import Annotation, Quality, Rule
 from ...model.inscription import GlyphKind
 from ...model.performance import Aspect, Vowel
 from ...orthography.write import Pen
-from ..attributions import Hosted, Insertion, Merged, Relengthened, Silenced
+from ..attributions import (
+    Classified,
+    Hosted,
+    Insertion,
+    Merged,
+    Relengthened,
+    Silenced,
+)
 from ..facts import AnalysisFacts
 from ..ids import CellColumnId, OccurrenceId, SoundId
 from ..inscription import InscriptionFacts
@@ -292,7 +299,9 @@ def _modifier_targets(words, columns, facts, modifier):
     if carrier_only:
         return [col for col in columns if col.silence == occurrence]
     targets = _column_targets(words, modifier.sound)
-    if isinstance(facts.sounds[modifier.sound].value, Vowel):
+    if isinstance(modifier, Classified) or isinstance(
+        facts.sounds[modifier.sound].value, Vowel
+    ):
         targets.extend(_column_targets(words, modifier.sound, presenters=True))
     return targets
 

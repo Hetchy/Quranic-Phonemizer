@@ -44,6 +44,7 @@ Issues = "https://github.com/Hetchy/Quranic-Phonemizer/issues"
 
 [tool.setuptools.packages.find]
 include = ["quranic_phonemizer*"]
+exclude = ["quranic_phonemizer.phonemize*"]
 
 [tool.setuptools.package-data]
 quranic_phonemizer = [

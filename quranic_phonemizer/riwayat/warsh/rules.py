@@ -61,6 +61,7 @@ _DAMM_START_REPAIR = {Quality.U: Quality.U}
 #: The `كتابيه إني` boundary reads tahqiq by default: haa stays sakin and
 #: the qata is fully realized, so the general transfer must not claim it.
 _NAQL_TAHQIQ = frozenset({Location(69, 20, 1)})
+_OPENING_IZHAR = frozenset({Location(68, 1, 1)})
 _HAMZA_MEETING_STARTS = frozenset(
     row.canonical for row in meeting_rows() if row.scope != "one_word"
 )
@@ -116,7 +117,10 @@ def _build() -> RuleSet:
         {
             Phase.BOUNDARY: _boundary(),
             Phase.MERGE: (
-                NoonSakinah(followers=tables.followers_of_noon),
+                NoonSakinah(
+                    followers=tables.followers_of_noon,
+                    fixed_opening_izhar=_OPENING_IZHAR,
+                ),
                 MeemSakinah(followers=tables.followers_of_meem),
                 ArticleLam(sun=tables.sun_letters, article=article),
                 GhunnahMushaddadah(sun=tables.sun_letters, article=article),

@@ -73,6 +73,7 @@ def test_the_wheel_carries_the_package_and_its_data(wheel):
     assert any(n.startswith("quranic_phonemizer/data/") and n.endswith(".yaml")
                for n in names)
     assert any(n.endswith(".bin") for n in names)
+    assert not any(n.startswith("quranic_phonemizer/phonemize/") for n in names)
 
 
 def test_the_installed_wheel_exposes_the_same_all(wheel, tmp_path):
@@ -91,3 +92,22 @@ def test_the_installed_wheel_exposes_the_same_all(wheel, tmp_path):
         check=True, capture_output=True, text=True, timeout=120,
     )
     assert json.loads(done.stdout.strip().splitlines()[-1]) == list(analysis.__all__)
+
+
+def test_the_installed_wheel_exposes_only_the_root_facade(wheel, tmp_path):
+    extracted = tmp_path / "site"
+    zipfile.ZipFile(wheel).extractall(extracted)
+    code = (
+        "import sys;"
+        "sys.meta_path=[f for f in sys.meta_path"
+        " if 'editable' not in type(f).__module__];"
+        f"sys.path.insert(0, {str(extracted)!r});"
+        "import quranic_phonemizer as q;"
+        "r=q.Phonemizer().analyse('1:1');"
+        "print(type(r).__name__, hasattr(q, 'PhonemizeResult'))"
+    )
+    done = subprocess.run(
+        [sys.executable, "-c", code],
+        check=True, capture_output=True, text=True, timeout=120,
+    )
+    assert done.stdout.strip().splitlines()[-1] == "Result False"

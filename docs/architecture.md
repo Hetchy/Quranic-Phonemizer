@@ -8,21 +8,21 @@ in [hafs/research/recitation-overview.md](hafs/research/recitation-overview.md).
 
 ## The shape of a request
 
-The package has one public operation: `Phonemizer(...).phonemize(ref,
-stop_signs=(), stop_refs=(), suspend_gc=False) -> PhonemizeResult`.
+The package has one public operation: `Phonemizer(...).analyse(ref,
+stop_signs=(), stop_refs=()) -> Result`.
 
-[`quranic_phonemizer/phonemize/__init__.py`](../quranic_phonemizer/phonemize/__init__.py)
-implements that facade. Construction resolves and loads a riwayah, chooses a
-script and variant selection, loads the output alphabet, and builds a script
-writer. A call then follows one request path:
+[`quranic_phonemizer/analysis/facade.py`](../quranic_phonemizer/analysis/facade.py)
+implements the facade. Construction resolves and loads a riwayah, chooses a
+script and variant selection, and prepares the output alphabet and script pen.
+A call then follows one request path:
 
-`ref -> locations and corpus words -> Reading -> Built(Score, Inscription) -> BoundaryPlan -> Performance -> Assembled public graph -> PhonemizeResult and its projections`
+`ref -> locations and corpus words -> Reading -> Built(Score, Inscription) -> BoundaryPlan -> Performance -> AnalysisBundle -> AnalysisResult`
 
 [`quranic_phonemizer/session/core.py`](../quranic_phonemizer/session/core.py)
 owns the request-shaped part of this flow. It resolves the reference, builds
 one score over the requested span, resolves stops, and performs the score.
-[`quranic_phonemizer/phonemize/assemble.py`](../quranic_phonemizer/phonemize/assemble.py)
-then translates model identifiers into the public result's array indices.
+The facade builds one native facts and inscription state, then one validated
+bundle. Source, highlight, and cell projections reuse that state lazily.
 
 The composition root is [`quranic_phonemizer/api.py`](../quranic_phonemizer/api.py), not the facade. `recitation(riwayah)` assembles a `Recitation` containing the corpus, adapters, canonical data, variants, lexeme passes, and rules for one riwayah. It decides no linguistic fact; it wires owners together and offers `read`, `build`, and `perform`.
 
@@ -136,56 +136,28 @@ binds the currently shipped classifiers and data tables into Hafs' `RuleSet`.
 Riwayah differences belong at that binding point: the generic engine does not
 branch on a riwayah name.
 
-## The public result graph
+## The public facade
 
-`PhonemizeResult` is defined in
-[`quranic_phonemizer/phonemize/document.py`](../quranic_phonemizer/phonemize/document.py).
-Its durable content is six node arrays and three edge arrays. Every edge field
-is an integer index into one of those arrays, never an internal `SlotId`,
-`SoundId`, or `OccurrenceId`.
+`Result` is defined in
+[`quranic_phonemizer/analysis/facade.py`](../quranic_phonemizer/analysis/facade.py).
+Its eager `analysis` value holds words, first-class boundaries, performed
+sounds, rule occurrences, mergers, source text, tokens, and request metadata.
+The facade delegates `text()` and `phonemes()` to that immutable native result.
 
-| Array | Meaning |
-| --- | --- |
-| `words` | locations, source word text, and resolved boundary facts |
-| `glyphs` | source scalars in source order |
-| `rendered` | recited-text scalars, including source provenance and unit reach |
-| `units` | the public projection of canonical slots |
-| `sounds` | performed sound features plus the alphabet token |
-| `rules` | applied rule instances, with source and merger host units |
-| `spellings` | source glyph-to-unit supplies, witnesses, decorations, or structure |
-| `attributions` | hosted, merged, or silent unit parts |
-| `modifiers` | recolour, length, and classification relations from rules to sounds |
+Source tokenization, continuous-text highlights, source cells, and transformed
+cells are separate lazy projections. An `RLock` guards their caches, so each is
+built at most once even when several callers share one result. Every projection
+uses the same session, facts, inscription, bundle, and result-local IDs.
 
-The concrete node and edge records are in
-[`quranic_phonemizer/phonemize/nodes.py`](../quranic_phonemizer/phonemize/nodes.py)
-and [`quranic_phonemizer/phonemize/edges.py`](../quranic_phonemizer/phonemize/edges.py).
-Assembly also derives the recited spelling from the performed sounds, retains
-`from_glyphs` provenance for rendered glyphs, and represents orthographic
-silence as rule instances needed by the public graph.
+`document()` wraps the selected native value in one of the four schema-v2 wire
+envelopes and uses the native serializer. It does not create a combined
+document. The rule catalogue is configuration-scoped metadata outside the
+versioned wire.
 
 Only [`quranic_phonemizer/render/alphabet.py`](../quranic_phonemizer/render/alphabet.py)
 turns a typed sound into a phoneme token. The decision layers carry sound
-features, not output strings. Optional phoneme distinctions are also resolved
-at this notation boundary.
-
-The convenience methods are projections over the arrays. `phonemes()` reads
-tokens in performed order; `text()` concatenates source or rendered glyphs;
-`alignment()` pairs glyphs with owned/shared sounds, silence, and rules; and
-`respelling()` closes source and recited alignments under provenance and sound
-ownership.
-
-Alignment is implemented by
-[`quranic_phonemizer/phonemize/pairing.py`](../quranic_phonemizer/phonemize/pairing.py)
-and supports glyph or cell grouping. A sound with no presenting glyph in the
-selected text becomes a gap pairing with an `after` anchor. Respelling in
-[`quranic_phonemizer/phonemize/respell.py`](../quranic_phonemizer/phonemize/respell.py)
-uses union-find so many-to-one and one-to-many spelling changes remain one
-block.
-
-[`quranic_phonemizer/phonemize/legacy_views.py`](../quranic_phonemizer/phonemize/legacy_views.py)
-contains pre-`Session` helpers for internal callers that directly hold a raw
-`Score`, `Inscription`, and `Performance`. They are not a second public
-assembly path and should not be used to define new output contracts.
+features, not output strings. Optional phoneme distinctions are resolved at
+this notation boundary.
 
 ## The native analysis projection
 
@@ -209,9 +181,9 @@ Each surface validates itself on every build: the laws modules run inside the
 builders, not only in tests. [`quranic_phonemizer/analysis/schema/`](../quranic_phonemizer/analysis/schema/)
 serializes the result and its views as versioned JSON documents with closed
 references; the frozen fixtures under `tests/analysis/schema/` pin the wire
-shape. The package imports only `model`, `orthography` (through its writer),
-`render`, and `session` -- nothing of the legacy `phonemize` projection -- and
-nothing imports it yet: the public facade still publishes the legacy graph.
+shape. The root package now publishes this native projection through the
+facade. The legacy graph is excluded from built distributions and remains in
+the repository only for differential tests and corpus ratchets.
 
 ## Data and extension seams
 
@@ -253,11 +225,11 @@ as an allow-list. It rejects undeclared package edges, unused permissions, and
 module cycles. `dataio` and `model` are leaves. `corpus` depends only on
 `model`; `orthography` on `dataio` and `model`; `canon` on those three;
 `engine` on `model`; `rules` on `engine` and `model`; and `render` on `dataio`
-and `model`. `riwayat` binds those lower layers, `api` composes them, and
-`phonemize` sits above `api` to publish the request-shaped result. `session`
-resolves the request over `canon`, `corpus`, `engine`, and `model`; `analysis`
-builds the native projection over `model`, `orthography` (its writer module
-only), `render`, and `session`, and nothing imports it.
+and `model`. `riwayat` binds those lower layers and `api` composes them.
+`session` resolves the request over `canon`, `corpus`, `engine`, and `model`;
+`analysis` builds the native projection over `api`, `model`, `orthography`
+(its writer module only), `render`, `riwayat`, and `session`. The root imports
+only `analysis` and stable model option types.
 
 Two restrictions are especially load-bearing: `canon` may reach
 `orthography` only through its adapter protocol, and neither `orthography` nor
@@ -285,8 +257,8 @@ The architecture relies on executable laws rather than comments alone:
 
 Model-level performance and inscription laws live in
 [`quranic_phonemizer/engine/laws.py`](../quranic_phonemizer/engine/laws.py).
-Public document validation lives in
-[`quranic_phonemizer/phonemize/schema_checks.py`](../quranic_phonemizer/phonemize/schema_checks.py).
+Public document validation lives under
+[`quranic_phonemizer/analysis/schema/`](../quranic_phonemizer/analysis/schema/).
 Corpus-wide laws and loader rejection tests live in
 [`tests/laws/`](../tests/laws/) and [`tests/schema/`](../tests/schema/).
 
@@ -322,8 +294,8 @@ For a new contributor, this order minimizes backtracking:
    [`canon/build.py`](../quranic_phonemizer/canon/build.py) for evidence becoming slots.
 4. [`engine/run.py`](../quranic_phonemizer/engine/run.py), `engine/plan.py`, and
    one classifier family under `rules/` for execution.
-5. [`phonemize/assemble.py`](../quranic_phonemizer/phonemize/assemble.py) and
-   `phonemize/document.py` for the public graph and projections.
+5. [`analysis/facade.py`](../quranic_phonemizer/analysis/facade.py) for the
+   public entry point and lazy projection cache.
 6. [`analysis/build.py`](../quranic_phonemizer/analysis/build.py) and
    [`analysis/source.py`](../quranic_phonemizer/analysis/source.py) for the
    native projection and its laws.

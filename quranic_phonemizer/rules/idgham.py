@@ -11,7 +11,7 @@ from ..engine.neighbourhood import Neighbourhood
 from ..engine.plan import Classify, MergeInto, Phase, Plan, Realize, Verdict, mint
 from ..model.address import BoundaryPlan, SlotId
 from ..model.canon import CanonLetter as L
-from ..model.canon import CanonLetter, Rule
+from ..model.canon import CanonLetter, Rule, SlotOrigin
 from ..model.performance import Aspect, Consonant, Occurrence
 from .lam_shamsiyyah import ArticleShape
 from .meem_sakinah import NASAL_LETTERS
@@ -62,6 +62,11 @@ class Idgham:
                 return None
 
         if here.letter in NASAL_LETTERS and here.letter is following.letter:
+            if (
+                here.origin is SlotOrigin.SPELLED
+                and following.origin is SlotOrigin.SPELLED
+            ):
+                return None
             owner = (
                 Rule.IDGHAM_BI_GHUNNAH
                 if here.letter is L.NOON
@@ -71,10 +76,7 @@ class Idgham:
                 return None
             return Verdict(
                 Occurrence(mint(rule, at), rule, (at, following.id)),
-                (
-                    MergeInto(at, Aspect.CONSONANT, following.id, Aspect.CONSONANT),
-                    Classify(following.id, Aspect.CONSONANT),
-                ),
+                (Classify(following.id, Aspect.CONSONANT),),
             )
 
         if rule is Rule.IDGHAM_MUTAJANISAYN_NAQIS:

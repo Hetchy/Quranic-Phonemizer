@@ -1,26 +1,38 @@
-"""Quranic phonemizer. `Phonemizer(...).phonemize(ref)` is the entry point;
-`KhilafId`/`Option`/`VariantSelection` are the vocabulary for stating a
-khilaf choice, which `available_variants()` lists."""
-from .model.address import KhilafId, Option, VariantSelection
-from .phonemize import (
+"""Quranic phonemizer. `Phonemizer(...).analyse(ref)` is the entry point."""
+from .analysis.facade import (
     Phonemizer,
-    PhonemizeResult,
+    Result,
+    UnknownExtraPhoneme,
+    UnknownRule,
+    UnknownStopSign,
+    available_stop_signs,
     available_variants,
-    edges,
-    nodes,
     supported_riwayat,
     tajweed_rules,
+)
+from .model.address import (
+    KhilafId,
+    Option,
+    Riwayah,
+    Script,
+    UnknownRiwayah,
+    VariantSelection,
 )
 
 __all__: list[str] = [
     "KhilafId",
     "Option",
     "Phonemizer",
-    "PhonemizeResult",
+    "Result",
+    "Riwayah",
+    "Script",
+    "UnknownExtraPhoneme",
+    "UnknownRiwayah",
+    "UnknownRule",
+    "UnknownStopSign",
     "VariantSelection",
+    "available_stop_signs",
     "available_variants",
-    "edges",
-    "nodes",
     "supported_riwayat",
     "tajweed_rules",
 ]

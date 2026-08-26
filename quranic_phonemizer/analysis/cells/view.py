@@ -264,6 +264,33 @@ def _facts_with_rendering(session, riwayah, extra_phonemes):
     return facts, active
 
 
+def _check_spelling(spelling: str) -> None:
+    if spelling not in ("source", "transformed"):
+        raise ValueError(f"spelling must be source or transformed, got {spelling!r}")
+
+
+def _shared_projection(
+    session, metadata, extra_phonemes, bundle, source, facts, insc
+):
+    active = effective_extra_phonemes(Riwayah(metadata["riwayah"]), extra_phonemes)
+    if facts is None:
+        facts, active = _facts_with_rendering(
+            session, metadata["riwayah"], extra_phonemes
+        )
+    if insc is None:
+        insc = inscribe(session)
+    if bundle is None:
+        bundle = build_bundle(
+            session, **metadata, extra_phonemes=extra_phonemes,
+            facts=facts, insc=insc,
+        )
+    if source is None:
+        source = build_source_view(
+            session, bundle=bundle, facts=facts, insc=insc
+        )
+    return facts, active, insc, bundle, source
+
+
 def build_cell_view(
     session: Session,
     *,
@@ -274,16 +301,16 @@ def build_cell_view(
     extra_phonemes: frozenset[str] = frozenset(),
     spelling: str = "source",
     pen: Pen | None = None,
+    bundle=None,
+    source: SourceView | None = None,
+    facts=None,
+    insc=None,
 ) -> CellView:
-    if spelling not in ("source", "transformed"):
-        raise ValueError(f"spelling must be 'source' or 'transformed', got {spelling!r}")
-    facts, active = _facts_with_rendering(session, riwayah, extra_phonemes)
-    insc = inscribe(session)
-    bundle = build_bundle(
-        session, ref=ref, riwayah=riwayah, script=script, variant=variant,
-        extra_phonemes=extra_phonemes, facts=facts, insc=insc,
+    _check_spelling(spelling)
+    metadata = dict(ref=ref, riwayah=riwayah, script=script, variant=variant)
+    facts, active, insc, bundle, source = _shared_projection(
+        session, metadata, extra_phonemes, bundle, source, facts, insc
     )
-    source = build_source_view(session, bundle=bundle, facts=facts, insc=insc)
     words = _words(
         session, bundle, source, facts, insc, spelling, pen, active
     )

@@ -32,15 +32,15 @@ from quranic_phonemizer import Phonemizer
 pm = Phonemizer()
 out = {}
 for ref in sys.argv[1:]:
-    warm = pm.phonemize(ref)
+    warm = pm.analyse(ref)
     out.setdefault("counts", {})[ref] = [len(warm.words), len(warm.sounds)]
-    out.setdefault("digests", {})[ref] = warm.canon_digest
+    out.setdefault("digests", {})[ref] = warm.analysis.canon_digest
     del warm
     best = None
     for _ in range(3):
         gc.collect()
         started = time.perf_counter()
-        pm.phonemize(ref)
+        pm.analyse(ref)
         spent = (time.perf_counter() - started) * 1000
         best = spent if best is None else min(best, spent)
     out.setdefault("ms", {})[ref] = best
