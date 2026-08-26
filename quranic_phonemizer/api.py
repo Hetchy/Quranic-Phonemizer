@@ -51,6 +51,7 @@ class Recitation:
     ledger: Ledger
     passes: tuple[LexemePass, ...]
     adapters: dict[Script, ScriptAdapter]
+    quality_fallbacks: dict
 
     def read(
         self,
@@ -120,6 +121,7 @@ def recitation(riwayah: Riwayah) -> Recitation:
         ledger=package.ledger(),
         passes=package.lexeme_passes(),
         adapters=package.adapters_for(riwayah),
+        quality_fallbacks=package.QUALITY_FALLBACKS,
     )
 
 

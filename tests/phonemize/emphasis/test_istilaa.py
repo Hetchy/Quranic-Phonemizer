@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from tests.support import Case, R, Site, assert_case, case_runs, isolated
+from tests.support import Case, R, Site, assert_case, case_runs, isolated, pick
 
 
 CASES = (
@@ -49,10 +49,18 @@ CASES = (
     # Hafs: ظَلَمَ
     # Warsh: ظَّلَمَ
     Case(id="zhaa", site=Site.shared("2:231", (19,)), read=isolated(),
-         phonemes="ðˤ aˤ l a m",
+         phonemes=pick(hafs="ðˤ aˤ l a m", warsh="ðˤ aˤ lˤ aˤ m"),
          extra_phonemes=("emphatic_fatha",),
-         char_rules={"ظ": R("tafkheem"), "@fatha[1]": R("tafkheem")},
-         sound_rules={"ðˤ": R("tafkheem"), "aˤ": R("tafkheem")}),
+         char_rules=pick(
+             hafs={"ظ": R("tafkheem"), "@fatha[1]": R("tafkheem")},
+             warsh={"ظ": R("tafkheem"), "@fatha[1]": R("tafkheem"),
+                    "ل": R("tafkheem"), "@fatha[2]": R("tafkheem")},
+         ),
+         sound_rules=pick(
+             hafs={"ðˤ": R("tafkheem"), "aˤ": R("tafkheem")},
+             warsh={"ðˤ": R("tafkheem"), "aˤ[1]": R("tafkheem"),
+                    "lˤ": R("tafkheem"), "aˤ[2]": R("tafkheem")},
+         )),
     # Hafs: سَمِعُوا۟
     # Warsh: سَمِعُواْ
     Case(id="seen-light", site=Site.shared("5:83", (2,)), read=isolated(),

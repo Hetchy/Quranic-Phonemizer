@@ -86,18 +86,14 @@ class Quality(StrEnum):
     I = "i"
     TAQLIL = "ɛ"
     KUBRA = "e"
-
-
 #: The letter each quality lengthens into. A property of the canonical model,
 #: not of any script: every script writes these three and no other.
 CARRIER_OF: dict[Quality, CanonLetter] = {
-    Quality.A: CanonLetter.ALIF,
-    Quality.U: CanonLetter.WAW,
+    Quality.A: CanonLetter.ALIF, Quality.U: CanonLetter.WAW,
     Quality.I: CanonLetter.YA,
 }
 
 CARRIERS = frozenset(CARRIER_OF.values())
-
 
 class Annotation(StrEnum):
     """A canonical fact that changes no sound.
@@ -120,7 +116,8 @@ class Annotation(StrEnum):
     """This slot is the selected script's replacement for a lexical hamza."""
     BADAL = "badal"
     """This long retains an after-hamza origin after an independent change."""
-
+    MIM_AL_JAM = "mim_al_jam"  # the plural-pronoun mim's joined-only nucleus
+    YAA_ZAWAID = "yaa_zawaid"  # a retained extra yaa nucleus or glide
 
 class VowelForm(StrEnum):
     """A vowel's shape in one boundary reading, apart from its quality."""
@@ -317,9 +314,9 @@ class Rule(StrEnum):
     QALQALA_SUGHRA = "qalqala_sughra"
     QALQALA_KUBRA = "qalqala_kubra"
     QALQALA_AKBAR = "qalqala_akbar"
-
     TAFKHEEM = "tafkheem"
     TARQEEQ = "tarqeeq"
+    TAQLIL = "taqlil"
     IMALA = "imala"
     TASHIL = "tashil"
     ISHMAM = "ishmam"
@@ -334,6 +331,8 @@ class Rule(StrEnum):
     MADD_BADAL = "madd_badal"
     MADD_LEEN_MAHMUZ = "madd_leen_mahmuz"
     MADD_SILAH = "madd_silah"
+    MADD_MIM_AL_JAM = "madd_mim_al_jam"
+    MADD_YAA_ZAWAID = "madd_yaa_zawaid"
 
     IBDAL_HAMZA = "ibdal_hamza"
     NAQL = "naql"
@@ -348,11 +347,9 @@ class Rule(StrEnum):
     WAQF_TAA_MARBUTA = "waqf_taa_marbuta"
     PAUSAL_ALIF = "pausal_alif"
 
-
 #: A prosthetic hamza started on, one rule per helping vowel.
 HAMZA_WASL_START: frozenset[Rule] = frozenset(
-    {Rule.HAMZA_WASL_FATHA, Rule.HAMZA_WASL_KASRA, Rule.HAMZA_WASL_DAMMA}
-)
+    {Rule.HAMZA_WASL_FATHA, Rule.HAMZA_WASL_KASRA, Rule.HAMZA_WASL_DAMMA})
 
 #: The idgham family: a quiescent letter folds into the letter after it.
 IDGHAM_RULES: frozenset[Rule] = frozenset(
@@ -369,8 +366,7 @@ IDGHAM_RULES: frozenset[Rule] = frozenset(
 
 #: The two repairs where quiescent letters may not meet.
 ILTIQA_RULES: frozenset[Rule] = frozenset(
-    {Rule.ILTIQA_HARAKA, Rule.ILTIQA_SHORTENING}
-)
+    {Rule.ILTIQA_HARAKA, Rule.ILTIQA_SHORTENING})
 
 #: Rules whose occurrence may produce no effect; `engine/run.py` mints each
 #: one a `Classifies` edge in place of an attribution, and only where it
@@ -388,12 +384,14 @@ CLASSIFICATION_ONLY: frozenset[Rule] = frozenset(
         Rule.LAM_QAMARIYYAH,
         Rule.MADD_BADAL,
         Rule.MADD_SILAH,
+        Rule.MADD_MIM_AL_JAM,
+        Rule.MADD_YAA_ZAWAID,
         Rule.MADD_MUTTASIL,
         Rule.MADD_MUNFASIL,
         Rule.MADD_LAZIM, Rule.MADD_ARID_LISSUKUN,
         Rule.MADD_LEEN, Rule.MADD_LEEN_MAHMUZ,
         Rule.IBDAL_HAMZA,
-        Rule.IMALA,
+        Rule.TAQLIL, Rule.IMALA,
         Rule.TASHIL,
         Rule.ISHMAM,
     }

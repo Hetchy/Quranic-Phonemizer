@@ -7,16 +7,57 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from ..engine.neighbourhood import Neighbourhood
-from ..engine.plan import Phase, Plan, Verdict, mint
+from ..engine.plan import Phase, Plan, Realize, Verdict, mint
 from ..model.address import BoundaryPlan, SlotId
 from ..model.canon import CanonLetter as L
-from ..model.canon import Annotation, Onset, Rule
-from ..model.performance import Occurrence
+from ..model.canon import Annotation, Onset, Quality, Rule, VowelForm
+from ..model.performance import Aspect, Occurrence, Vowel
 from .tafkheem import Weight
 
 
 def _classification(rule: Rule, at: SlotId) -> Verdict:
     return Verdict(Occurrence(mint(rule, at), rule, (at,)), ())
+
+
+@dataclass(frozen=True, slots=True)
+class Inclination:
+    """Classify the effective sounded taqlil or kubra quality."""
+
+    rule: Rule = Rule.TAQLIL
+    phase: Phase = Phase.COLOUR
+    emits: frozenset = frozenset({Rule.TAQLIL, Rule.IMALA})
+    triggers: frozenset = frozenset({VowelForm.SHORT, VowelForm.LONG})
+
+    def look(
+        self, near: Neighbourhood, plan: Plan, at: SlotId,
+        boundaries: BoundaryPlan,
+    ) -> Verdict | None:
+        slot, word = near.slot(at), near.word_of(at)
+        if slot is None or word is None or plan.merged_away(at, Aspect.VOWEL):
+            return None
+        state = (
+            slot.nucleus.stopped
+            if boundaries.stopped_on(word)
+            else slot.nucleus.joined
+        )
+        rule = {
+            Quality.TAQLIL: Rule.TAQLIL,
+            Quality.KUBRA: Rule.IMALA,
+        }.get(state.quality)
+        if rule is None:
+            return None
+        realized = next(
+            (
+                effect.sound for effect in plan.effects()
+                if isinstance(effect, Realize)
+                and effect.slot == at
+                and effect.aspect is Aspect.VOWEL
+            ),
+            None,
+        )
+        if isinstance(realized, Vowel) and realized.quality is not state.quality:
+            return None
+        return _classification(rule, at)
 
 
 @dataclass(frozen=True, slots=True)
@@ -74,3 +115,6 @@ class Tarqeeq:
         if self.weight.is_heavy(near, slot, plan, boundaries):
             return None
         return _classification(Rule.TARQEEQ, at)
+
+
+__all__ = ["CanonicalColour", "Inclination", "Tarqeeq"]

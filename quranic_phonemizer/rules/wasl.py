@@ -37,7 +37,6 @@ _START_OF: dict[Quality, Rule] = {
     Quality.U: Rule.HAMZA_WASL_DAMMA,
 }
 
-
 @dataclass(frozen=True, slots=True)
 class WaslHamza:
     """The prosthetic hamza sounds only when started on.

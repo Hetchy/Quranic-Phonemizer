@@ -12,13 +12,25 @@ CASES = (
         id="salah-waw-carrier",
         site=Site.shared("2:3", (5,)),
         read=isolated(),
-        phonemes="ʔ a sˤsˤ aˤ l a: h",
+        phonemes=pick(
+            hafs="ʔ a sˤsˤ aˤ l a: h",
+            warsh="ʔ a sˤsˤ aˤ lˤ aˤ: h",
+        ),
         char_rules=pick(
             hafs_uthmani={"@dagger_alif": R("madd_arid_lissukun")},
             hafs_indopak={"و": R("madd_arid_lissukun")},
-            warsh_uthmani={"@dagger_alif": R("madd_arid_lissukun")},
+            warsh_uthmani={
+                "@dagger_alif": R("madd_arid_lissukun", "tafkheem"),
+                "ل[2]": R("tafkheem"),
+            },
         ),
-        sound_rules={"a:": R("madd_arid_lissukun")},
+        sound_rules=pick(
+            hafs={"a:": R("madd_arid_lissukun")},
+            warsh={
+                "lˤ": R("tafkheem"),
+                "aˤ:": R("madd_arid_lissukun", "tafkheem"),
+            },
+        ),
     ),
     # Hafs: ٱلزَّكَوٰةَ
     # Warsh: اُ۬لزَّكَوٰةَۖ
@@ -54,7 +66,10 @@ CASES = (
         id="salawat-sounded-waw",
         site=Site.shared("2:157", (3,)),
         read=isolated(),
-        phonemes="sˤ aˤ l a w a: t",
+        phonemes=pick(
+            hafs="sˤ aˤ l a w a: t",
+            warsh="sˤ aˤ lˤ aˤ w a: t",
+        ),
         char_rules={"@dagger_alif": R("madd_arid_lissukun")},
         sound_rules={"a:": R("madd_arid_lissukun")},
     ),

@@ -78,16 +78,18 @@ hamza and yaa, and a damm hamza between hamza and waw
 ([Al-Wafi](https://www.islamweb.net/ar/library/content/245/14/)). The model
 therefore keeps one eased onset plus an independent A, U, or I nucleus:
 
-| Typed sounds | Broad tokens with `tashil` | Tokens without `tashil` |
+| Typed sounds | Warsh token | Collapsed token available outside Warsh |
 | --- | --- | --- |
 | eased hamza + A | `ʔ̞ a` | `ʔ a` |
 | eased hamza + U | `ʔ̞ u` | `ʔ u` |
 | eased hamza + I | `ʔ̞ i` | `ʔ i` |
 
-The extra-phoneme setting changes only the first token. The consonant remains
-typed as eased and the `tashil` rule remains present on the sound and source
-hamza. A renderer that offers narrower phonetics may use the adjacent nucleus
-as the easing target without changing the public sound inventory.
+Warsh always renders the first token as `ʔ̞`; `tashil` is not accepted as an
+optional extra for this riwayah. A renderer for another riwayah may collapse
+the onset to plain `ʔ`, but the consonant remains typed as eased and the
+`tashil` rule remains present on the sound and source hamza. A renderer that
+offers narrower phonetics may use the adjacent nucleus as the easing target
+without changing the public sound inventory.
 
 Ibdal is a transformation, not another phoneme. A pure replacement uses an
 ordinary vowel carrier, while a moving replacement uses an ordinary waw or
@@ -123,7 +125,7 @@ lam:
 When a raa or lam is the cause of emphasis on its A nucleus, that vowel follows
 the effective consonant result regardless of how the boundary state realizes
 it. The nucleus may be short A from fatha or fathatan, lexical long A from a
-carrier, or stop-created long A from `madd_iwad`. Tafkheem or taghliz adds the
+carrier, or stop-created long A from `madd_iwad`. Tafkheem adds the
 owner's emphasis cause; tarqiq removes only that owner's cause. The A becomes
 plain only when no independent isti'la consonant or other owner still requires
 emphasis.
@@ -136,11 +138,12 @@ composite tanwin column retains its noon rule but does not receive a vowel-
 color occurrence merely because its A sound is colored. This directional
 propagation does not recolor an unrelated vowel before the consonant.
 
-Lam uses `taghliz`; `tafkheem` remains the raa/general emphasis name. The
-distinct terminology follows the classical Warsh lam chapter
-([Al-Nashr](https://www.islamweb.net/ar/library/content/70/190/)). Gemination
-is orthogonal, so the same emphatic LAM type represents a single `lˤ` or a
-geminated `lˤlˤ` token.
+Lam and raa use the shared `tafkheem` rule. Classical Warsh sources commonly
+call lam tafkheem *taghliz*, but the API normalizes the synonymous operations
+while the owning classifier and occurrence reach preserve the consonant-specific
+contract ([Al-Nashr](https://www.islamweb.net/ar/library/content/70/190/)).
+Gemination is orthogonal, so the same emphatic LAM type represents a single
+`lˤ` or a geminated `lˤlˤ` token.
 
 ## Rule vocabulary
 
@@ -154,14 +157,16 @@ one meaning across every riwayah that binds it.
 | --- | --- | --- |
 | `taqlil` | Classification | A vowel whose exact quality is `TAQLIL`. |
 | `imala` | Classification | A vowel whose exact quality is `KUBRA`. |
-| `taghliz` | Recoloring | A lam and its causally dependent A nucleus become emphatic. |
 | `naql` | Transformation | The eligible preceding sakin receives the qata vowel and the qata onset becomes silent. |
 | `madd_badal` | Classification | An eligible after-hamza long carrier with badal origin, normally replacing an underlying second hamza. General single-hamza ibdal is excluded. |
 | `madd_leen_mahmuz` | Classification | An eligible sakin waw or yaa immediately followed by hamza. |
-| `iltiqa_haraka` | Transformation | A preceding consonant or nunation receives the required A, I, or U repair vowel after wasl elision. |
+| `madd_mim_al_jam` | Classification | The joined-only long U of the plural-pronoun mim before qata. |
+| `madd_yaa_zawaid` | Classification | A retained extra yaa realized as joined-only long I. |
+| `iltiqa_haraka` | Transformation | A canonically vowel-absent tanwin noon or spelled-name ending receives an inserted A, I, or U after wasl elision. |
 
-`iltiqa_haraka` replaces the overly narrow name `iltiqa_kasra`: Warsh has
-authenticated U repairs as well as the ordinary I repair. The vowel quality is
+`iltiqa_haraka` replaces the overly narrow name `iltiqa_kasra`: inserted
+repairs may be A, I, or U. Lexical connected vowels such as Hafs `قُلِ` and
+Warsh `قُلُ` are canonical forms and emit no occurrence. The vowel quality is
 carried by the resulting sound, not encoded in the rule name.
 
 The following existing shared identifiers retain their established meaning:
@@ -169,7 +174,8 @@ The following existing shared identifiers retain their established meaning:
 - `tashil` classifies an eased hamza, regardless of token collapse;
 - `ibdal_hamza` names replacement of a hamza by a vowel carrier or moving
   consonant;
-- `tafkheem` and `tarqeeq` classify the effective raa/general weight;
+- `tafkheem` and `tarqeeq` classify an explicitly owned effective raa or lam
+  weight, as well as general emphasis where applicable;
 - `madd_tabii`, `madd_muttasil`, `madd_munfasil`, `madd_lazim`,
   `madd_arid_lissukun`, `madd_leen`, `madd_iwad`, `madd_badal`, and
   `madd_silah` keep their shared meanings;
@@ -179,15 +185,18 @@ The following existing shared identifiers retain their established meaning:
 - the shared noon, meem, idgham, article, qalqala, pausal, and taa-marbuta
   rules are not renamed for Warsh.
 
-There is no `fath`, `kubra`, `isqat`, `mim_al_jam`, `yaa_zawaid`, or
-`seven_alifs` rule ID:
+There is no `fath`, `kubra`, `isqat`, or `seven_alifs` rule ID:
 
 - Fath is the absence of an inclination classification.
 - Kubra is the exact vowel quality classified by `imala`.
 - Isqat in the selected corpus is canonical absence, not a performed deletion.
-- Mim al-jam, yaa zawaid, and the seven alifs first define canonical
-  joined/stopped vowel shapes. Existing madd and boundary rules classify the
-  resulting performance.
+- The seven alifs define canonical joined/stopped vowel shapes whose existing
+  madd and boundary rules classify the resulting performance.
+
+Mim al-jam and yaa zawaid also define canonical joined/stopped shapes, but
+their long results retain public identity through `madd_mim_al_jam` and
+`madd_yaa_zawaid`. These coexist with the effective madd classifier, just as
+`madd_silah` coexists with `madd_tabii` or `madd_munfasil` for pronoun haa.
 
 ## Rule reach
 
@@ -201,16 +210,15 @@ silence, rather than copying every core participant onto every glyph.
 | Rule | Required reach |
 | --- | --- |
 | `taqlil`, `imala` | The vowel sound and its visible vowel/carrier cells; an inclination witness stays provenance inside the owning unit rather than becoming an independent rule target. |
-| `taghliz` | The lam sound and its dependent A-vowel sound. Transformed cells place the occurrence on the lam and vowel/carrier columns, but not on a composite tanwin column. |
-| `tafkheem`, `tarqeeq` on raa | The raa sound and its dependent A-vowel sound. Transformed cells place the occurrence on the raa and vowel/carrier columns, but not on a composite tanwin column. |
-| `tarqeeq` on an owned lam choice | The lam and dependent A sounds and their transformed columns. Ordinary unowned light lam emits no `tarqeeq`. |
-| `tashil` | The eased consonant sound and the responsible hamza source, even when rendered as plain `ʔ`. |
+| `tafkheem` on an owned raa or lam | The consonant sound and its dependent A-vowel sound. Transformed cells place the occurrence on the consonant and vowel/carrier columns, but not on a composite tanwin column. |
+| `tarqeeq` on an owned raa or lam choice | The consonant and dependent A sounds and their transformed columns. Ordinary unowned light lam emits no `tarqeeq`. |
+| `tashil` | The eased consonant sound and the responsible hamza source; Warsh renders the sound as `ʔ̞`. |
 | `ibdal_hamza` | The replacement vowel or consonant sound and every source unit that creates or selects it: the replaced hamza or replacement spelling, plus the realized wasl unit or immediately preceding vowel witness when that context determines the result. |
 | `madd_badal` | The resulting long-vowel sound, its carrier or replacement source, and the source hamza provenance that makes it badal. A transformed hamza does not remove that reach. |
 | Effective madd after ibdal or on a badal carrier | The resulting long-vowel sound and the same source units that own the created carrier, plus any further causal unit required by the effective classification, such as the following fixed sukun for `madd_lazim`. |
 | `madd_leen_mahmuz` | The target sakin `/w/` or `/j/` sound; the target waw/yaa and following hamza source units. The preceding fatha is a predicate only. |
 | `naql` | The source qata unit, the preceding host consonant or nunation, the transferred vowel sound, and their source glyphs. |
-| `iltiqa_haraka` | Only the inserted A, I, or U sound. Its transformed column and sound cell live on the boundary; the preceding consonant or nunation sound and base column do not receive the rule. The core occurrence still names the repaired slot as its subject and the wasl slot as private trigger context. |
+| `iltiqa_haraka` | Only the runtime-inserted A, I, or U sound. Its transformed column and sound cell live on the boundary; the preceding consonant or nunation sound and base column do not receive the rule. The core occurrence still names the repaired slot as its subject and the wasl slot as private trigger context. Canonical connected vowels receive no occurrence. |
 
 A pure ibdal-created long vowel normally carries both `ibdal_hamza` and
 `madd_tabii`. A fixed following sukun instead produces `madd_lazim`. When the
@@ -281,18 +289,18 @@ Warsh package binds it with the al-Azraq matcher and exception data. Shared
 mim-al-jam data creates additional qualifying vowels.
 
 Riwayah-scoped binding is also the ownership boundary for defaults and optional
-rendering. A Warsh package supplies kubra's taqlil fallback and its default
-extra-phoneme set; the shared renderer receives those values without importing
-or comparing a riwayah enum.
+rendering. A Warsh package supplies kubra's taqlil fallback and fixes tashil to
+the eased `ʔ̞` token; the shared renderer receives those values without
+inferring them from the sound alone.
 
 The public setting distinguishes omission from an exact override:
 
-- `extra_phonemes=None` resolves the owning riwayah's defaults; and
+- `extra_phonemes=None` resolves the owning riwayah's optional defaults; and
 - an explicit tuple is the complete requested set, including an empty tuple
   which disables every optional token distinction.
 
-This distinction is required so a caller can disable a Warsh default without
-changing the underlying eased, inclined, or emphatic sound facts.
+Fixed riwayah notation is outside that set: Warsh tashil remains `ʔ̞`, and
+requesting `tashil` as an extra is invalid.
 
 ## Conformance checks
 

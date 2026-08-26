@@ -1,5 +1,4 @@
-"""Warsh wasl and iltiqa registers: the source supplies each start and
-repair, and the canonical morphology derivation is their reconciliation."""
+"""Warsh wasl and connected-vowel registers reconciled to morphology."""
 from __future__ import annotations
 
 import json
@@ -73,9 +72,9 @@ QATA_STARTS = (
     ("2:283:16", "ʔu:tumina", "joined"),
 )
 
-#: The closed damm-over-kasr repair register: canonical boundary, selected
-#: source boundary, and host family.
-DAMM_REPAIRS = (
+#: The closed damm-over-kasr connected-form register: canonical boundary,
+#: selected source boundary, and host family.
+DAMM_CONNECTED_FORMS = (
     ("4:66:5", "4:65:5", "an"),
     ("5:49:1", "5:51:1", "an"),
     ("5:117:8", "5:119:8", "an"),
@@ -174,6 +173,21 @@ def _read(riwayah: str, ref: str, words: tuple[int, ...], **boundary):
 
     by_word = phonemes_by_word(performance, built.score, alphabet())
     return tuple("".join(by_word[word - 1]) for word in words)
+
+
+def _boundary_rules(ref: str) -> set[Rule]:
+    package = recitation(Riwayah.WARSH)
+    surah, ayah, word = (int(part) for part in ref.split(":"))
+    verse = VerseRef(surah, ayah)
+    verse_words = package.words(verse)
+    built = package.build(package.read(Script.UTHMANI, verse, verse_words))
+    plan = plan_for(len(verse_words), ibtidaa=word, waqf=word + 1)
+    performance = package.perform(built.score, plan)
+    return {
+        occurrence.rule
+        for occurrence in performance.occurrences
+        if occurrence.boundary == word - 1
+    }
 
 
 @lru_cache(maxsize=1)
@@ -303,19 +317,26 @@ def test_a_joined_silent_qata_form_uses_the_preceding_vowel(ref, started, state)
 
 
 @pytest.mark.parametrize(
-    ("canonical", "source", "family"), DAMM_REPAIRS, ids=[row[0] for row in DAMM_REPAIRS]
+    ("canonical", "source", "family"),
+    DAMM_CONNECTED_FORMS,
+    ids=[row[0] for row in DAMM_CONNECTED_FORMS],
 )
-def test_a_damm_repair_row_joins_on_damm(canonical, source, family):
+def test_a_damm_over_kasr_form_joins_on_damm(canonical, source, family):
     word = int(canonical.split(":")[2])
     first, second = _read(
         "warsh", canonical, (word, word + 1), ibtidaa=word, waqf=word + 1
     )
     assert first.endswith("u"), (canonical, first, second)
+    assert (Rule.ILTIQA_HARAKA in _boundary_rules(canonical)) is (
+        family == "tanwin"
+    )
 
 
-def test_the_damm_repair_register_is_the_documented_38():
-    assert len(DAMM_REPAIRS) == 38
-    assert Counter(family for *_, family in DAMM_REPAIRS) == Counter(FAMILY_SIZES)
+def test_the_damm_connected_form_register_is_the_documented_38():
+    assert len(DAMM_CONNECTED_FORMS) == 38
+    assert Counter(
+        family for *_, family in DAMM_CONNECTED_FORMS
+    ) == Counter(FAMILY_SIZES)
 
 
 def test_relative_pronoun_projection_covers_only_its_selected_script_family():
@@ -440,7 +461,9 @@ def test_the_tanwin_repair_register_is_generated_from_the_source():
     assert len(sites) == 44
     assert Counter(sites.values()) == Counter({"I": 40, "U": 4})
     register_tanwin = {
-        source_ref for _, source_ref, family in DAMM_REPAIRS if family == "tanwin"
+        source_ref
+        for _, source_ref, family in DAMM_CONNECTED_FORMS
+        if family == "tanwin"
     }
     assert {ref for ref, quality in sites.items() if quality == "U"} == register_tanwin
 

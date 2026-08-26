@@ -1,24 +1,56 @@
 # Iltiqa al-sakinayn
 
-This document owns the connected-reading repair when eliding a genuine
-hamzat al-wasl would expose two adjacent sakin sounds. It defines the general
-`iltiqa_haraka` transformation and its Warsh U subregister. It does not own
-the WASL onset, ordinary naql, or the separate shortening of a long vowel.
+This document distinguishes two related facts which must not share one public
+rule occurrence merely because both avoid adjacent sakin sounds:
 
-## Structural trigger
+- a connected-form haraka already present in the canonical reading; and
+- a short vowel the boundary runtime must insert onto a canonically
+  vowel-absent unit.
 
-After boundary planning and wasl elision, apply a collision repair only when:
+The public `iltiqa_haraka` rule names only the second transformation. It does
+not own hamzat al-wasl, ordinary naql, long-vowel shortening, or every lexical
+connected vowel traditionally explained through iltiqa al-sakinayn.
 
-1. the last performed unit of the first word would otherwise be sakin;
-2. the next word begins a canonical WASL onset;
-3. that onset is elided by joined speech; and
-4. the exposed first consonant of the next word is sakin.
+## Public transformation trigger
 
-The repaired host may be a lexical consonant, the consonantal noon supplied by
-tanwin, plural mim, feminine taa, or another canonically silent boundary unit.
-A visible source haraka may attest the result, but does not trigger it.
+Emit `iltiqa_haraka` only when all of the following hold:
 
-The selected-corpus register has 1,665 within-ayah `iltiqa_haraka` sites:
+1. the next word begins with genuine hamzat al-wasl;
+2. joined reading elides that onset;
+3. its first exposed consonant is sakin;
+4. the preceding canonical unit has no vowel; and
+5. the runtime realizes a new short A, I, or U on that unit.
+
+The implemented hosts are the consonantal noon supplied by tanwin and the
+quiescent ending of a spelled letter name. A visible source haraka may attest
+the result, but does not by itself trigger or define the public rule.
+
+Lexical and morphological connected forms are different. Hafs `قُلِ
+ٱنظُرُوا۟`, Warsh `قُلُ اُ۟دْعُواْ`, `مِنَ اَ۬لنَّاسِ`, `أَنِ/أَنُ`, feminine
+taa, and mim al-jam before wasl already carry their connected vowel in the
+canonical reading. They emit no `iltiqa_haraka` occurrence.
+
+## Choosing A, I, or U
+
+A spelled letter name takes A. The cross-ayah join `الٓمٓ اَ۬للَّهُ`, canonical
+3:1-3:2, therefore inserts A after the final meem.
+
+A tanwin noon takes I by default. Warsh takes U in the authenticated subfamily
+where the following wasl word begins with an original U, rather than a
+temporary surface damm. Al-Wafi states this condition and gives representative
+families including tanwin before `انظر`
+([Al-Wafi](https://www.islamweb.net/ar/library/content/245/38/)). Al-Nashr
+enumerates the same connected-reading choices
+([Al-Nashr](https://www.islamweb.net/ar/library/content/70/230/)).
+
+The selected source contains 44 within-ayah tanwin repair sites: 40 with I and
+4 with Warsh U. Cross-ayah continuation is request-dependent and therefore not
+part of that closed within-ayah count.
+
+## Connected-vowel audit
+
+The broader selected-corpus audit contains 1,665 within-ayah connected-vowel
+sites:
 
 | Result quality | Count |
 | --- | ---: |
@@ -26,37 +58,12 @@ The selected-corpus register has 1,665 within-ayah `iltiqa_haraka` sites:
 | I | 381 |
 | U | 514 |
 
-These counts are a generated corpus invariant, not a hand-maintained location
-table. The generator compares canonical morphology with the requested
-boundary and then reconciles the result to the selected Warsh source. Ayah-end
-continuation is outside this count because the source corpus does not encode
-one compulsory cross-ayah plan.
+This is not a count of `iltiqa_haraka` occurrences. It reconciles canonical
+morphology and selected-source linking marks, so it also includes lexical and
+morphological connected forms which emit no public transformation.
 
-## Choosing A, I, or U
-
-Lexically established boundary vowels keep their quality. For example, the
-sakin noon of `مِنْ` takes A in `وَمِنَ اَ۬لنَّاسِ`, source 2:7:1-2,
-canonical 2:8:1-2. Plural mim and the other closed morphological classes keep
-their authenticated U or I behavior.
-
-For the otherwise-default I repair, Warsh and the other cited readers use U
-when the following WASL word begins with U because its third written letter
-has an original, not temporary, damm. Al-Wafi states the condition and the
-representative families `قل ادعوا`, `أو انقص`, `قالت اخرج`, `أن اعبدوا`,
-tanwin before `انظر`, and `ولقد استهزئ`
-([Al-Wafi](https://www.islamweb.net/ar/library/content/245/38/)). Al-Nashr
-enumerates the same consonant classes and readings
-([Al-Nashr](https://www.islamweb.net/ar/library/content/70/230/)).
-
-The original-vowel condition matters. `أَنِ اِ۪تَّقُواْ`, source
-4:130:16-17, canonical 4:131:16-17, stays I. The qaf damm in `اتقوا` is not
-the original stem damm licensed by the U rule. A classifier that simply looks
-two written clusters ahead produces the wrong result here.
-
-## Warsh U register
-
-There are 38 closed U-over-I boundaries in the selected Warsh reading. The
-domain grouping and canonical registers are:
+Within that audit, 38 boundaries use Warsh U where the corresponding Hafs
+connected form uses I:
 
 | Host family | Count | Canonical boundary refs |
 | --- | ---: | --- |
@@ -86,63 +93,58 @@ The corresponding selected-source boundaries, in the same row order, are:
 - `لكن`: 7:143:15-16.
 - feminine taa: 12:31:14-15.
 
-The register is closed because U depends on an authenticated qiraa choice,
-not merely on the universal collision. Its data rows should carry both
-addresses and the target word's derived U start. The general 1,665-site
-register remains predicate-owned.
+Only the four tanwin rows in this 38-row quality register emit
+`iltiqa_haraka`. The other 34 are authored connected forms; plural mim remains
+owned by mim al-jam.
 
 ## Manual outcomes
 
-The sequences below show the affected span only.
+| Domain | Connected sequence | Public rules |
+| --- | --- | --- |
+| Spelled name A | `الٓمٓ اَ۬للَّهُ`, 3:1-3:2: `... m a lˤlˤ ...` | `iltiqa_haraka` on inserted A; `hamza_wasl_silent` on the following onset |
+| Tanwin I | `خَيْرٌۖ اِ۪هْبِطُواْ`, canonical 2:61:30-31: `... rˤ u n i h b ...` | `iltiqa_haraka` on inserted I; `hamza_wasl_silent` separately |
+| Warsh tanwin U | `بَعْضٍۖ اُ۟نظُرْ`, canonical 6:65:21-22: `... dˤ i n u ŋˤ ðˤ ...` | `iltiqa_haraka` on inserted U; `hamza_wasl_silent` separately |
+| Lexical I/U | Hafs `قُلِ ٱدْعُوا۟`; Warsh `قُلُ اُ۟دْعُواْ` | No `iltiqa_haraka`; only `hamza_wasl_silent` on the following onset |
+| Mim al-jam U | `فَزَادَهُمُ اُ۬للَّهُ` | No `iltiqa_haraka`; mim al-jam owns the connected form |
 
-| Quality | Selected source and refs | Wasl sequence | Rules |
-| --- | --- | --- | --- |
-| A | `وَمِنَ اَ۬لنَّاسِ`, source 2:7:1-2, canonical 2:8:1-2 | `... m i n a ñ a: ...` | `iltiqa_haraka` classifies only A. Its transformed vowel column is inserted at the boundary; `hamza_wasl_silent` and the ordinary article/noon rules remain separate. |
-| I | `وَإِذِ اِ۪سْتَسْق۪ىٰ`, source 2:59:1-2, canonical 2:60:1-2 | `w a ʔ i ð i s t ...` | `iltiqa_haraka` classifies only I. Its transformed vowel column is inserted at the boundary; `hamza_wasl_silent` remains separate. The omitted final nucleus follows its independent inclination selection. |
-| U | `قُلُ اُ۟دْعُواْ`, source and canonical 7:195:20-21 | `q u l u d Q ʕ u:` | `iltiqa_haraka` classifies only U. Its transformed vowel column is inserted at the boundary. Ordinary qalqala owns `/Q/`, and `hamza_wasl_silent` remains separate. |
-| U on tanwin | `بَعْضٍۖ اُ۟نظُرْ`, source 6:66:21-22, canonical 6:65:21-22 | `... dˤ i n u ŋˤ ðˤ u rˤ` | `iltiqa_haraka` classifies only U. Its transformed vowel column is inserted at the boundary. The following emphatic `ikhfaa`, ordinary raa tafkheem, and `hamza_wasl_silent` remain separate. |
-
-For any row, a complete stop after the first word suppresses
-`iltiqa_haraka`; the first word receives its ordinary waqf result. If the
-requested range continues after that stop, the second word is a new ibtidaa
-and realizes its WASL onset and helping vowel with `hamza_wasl_damma`, so the U
-example begins `ʔ u d Q ʕ u:`. Ordinary qalqala still owns `/Q/`. Only a
-following word outside the requested
-utterance is unperformed. Neither case emits a repair on the preceding word.
+A complete stop after the first word suppresses a runtime insertion. If the
+range continues, the second word begins a new ibtidaa and realizes its wasl
+onset with `hamza_wasl_fatha`, `hamza_wasl_kasra`, or
+`hamza_wasl_damma`. No preceding-word `iltiqa_haraka` survives that stop.
 
 ## Rule identity and reach
 
-The public rule is `iltiqa_haraka`, not `iltiqa_kasra`. Its result vowel holds
-A, I, or U; the rule name does not encode one quality.
+The public rule is `iltiqa_haraka`, not `iltiqa_kasra`, because its inserted
+sound may be A, I, or U. The quality lives on the resulting vowel rather than
+in the rule name.
 
-One occurrence classifies only the realized short A, I, or U sound. It does
-not classify the repaired consonant or noon sound. The core occurrence names
-the repaired slot, including the nunation slot for tanwin, as its subject and
-the following wasl slot as trigger context. In the transformed cell view the
-performed vowel is an inserted boundary column carrying `iltiqa_haraka`; the
-base consonant or tanwin column does not carry that rule. A written linking-
-haraka witness remains source evidence and never selects the result.
+One occurrence reaches only the newly realized short-vowel sound. It does not
+classify the host consonant or tanwin-noon sound. The core occurrence names
+the repaired slot as its subject and the following wasl slot as private trigger
+context. The transformed cell view places the sound and occurrence on a
+source-less inserted boundary-haraka column.
 
-The next word's WASL unit is trigger context, not an affected participant of
-`iltiqa_haraka`; it receives its separate `hamza_wasl_silent` occurrence. The two
-rules must not be collapsed, because a caller can start on the next word
-without a host repair.
+The next word's wasl unit receives its independent `hamza_wasl_silent`
+occurrence. A source linking mark may attest the canonical or performed
+quality, but a mark alone never creates rule ownership.
 
 ## Exclusions and precedence
 
-- If the preceding unit is a long carrier, collision repair is
-  `iltiqa_shortening`; do not add a short vowel or `iltiqa_haraka`.
-- If an ordinary lexical vowel already sounds at the boundary, there is no
-  collision and no iltiqa rule.
-- A qata onset softened by ordinary naql is not WASL. Naql transfers the qata
-  vowel and owns that transformation; it emits no iltiqa rule.
-- A source stop sign does not suppress the repair. Only the explicit boundary
-  plan does.
-- Under the single-script decision, the reviewed linking-haraka family may
-  supply the repair quality per site; the predicate, the 1,665 partition, and
-  the 38 U rows remain its conformance reconciliation. The repair itself stays
-  boundary-dependent: an explicit stop suppresses it regardless of the mark.
+- A long carrier meeting the exposed sakin uses `iltiqa_shortening`.
+- A lexical or morphological connected vowel already present in the Score
+  emits no `iltiqa_haraka`, regardless of its historical explanation.
+- Mim al-jam before wasl is an authored connected form, not a runtime repair.
+- A qata onset handled by naql is not hamzat al-wasl; naql owns that change.
+- A source stop sign does not choose the boundary state. Only the requested
+  plan decides whether the words join.
 
-Tests should derive the complete register, assert the 1,665 total and quality
-partition, assert all 38 U-over-I rows, and fail on any source attestation that
-disagrees with the independently derived result.
+## Acceptance checks
+
+- Assert the closed 44-row tanwin source register and its 40-I/4-U partition.
+- Assert the spelled-name A case across 3:1-3:2.
+- Assert source, sound, and transformed-cell reach only for inserted vowels.
+- Assert Hafs `قُلِ` and Warsh `قُلُ` have no `iltiqa_haraka` occurrence.
+- Retain the 1,665 connected-vowel audit and 38 U-over-I register as quality
+  reconciliation, without treating either as a public-rule count.
+- Keep `hamza_wasl_silent`, `iltiqa_shortening`, naql, and mim al-jam under
+  their separate owners.

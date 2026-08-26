@@ -61,9 +61,9 @@ participants, or source ownership of the tajwid rule.
 | `istifham_article` | `ibdal`, `tashil`; default `ibdal` in Hafs and Warsh | `ءَآلذَّكَرَيْنِ` at 6:143 and 6:144, `ءَآلْـَٔـٰنَ` at 10:51 and 10:91, and `ءَآللَّهُ` at 10:59 and 27:59; all states | `ibdal` replaces the article hamza. Both `ibdal_hamza` and `madd_lazim` reach the replacement sound and responsible source character. `tashil` keeps an eased hamza and always classifies tashil. | [Six forms and both faces](https://ablibrary.net/book_content/7278/72) |
 | `maliyah_halak` | `sakt`, `idgham`; default `sakt` in Hafs and Warsh | `مَالِيَهْ هَلَكَ`, 69:28 -> 69:29; wasl only | `sakt` realizes the izhar face by keeping the two haa sounds apart with a breathless pause. `idgham` merges them into one geminated haa. | [Both faces and their route correlation](https://islamweb.net/ar/library/index.php?ID=18&bk_no=245), [Hafs performance account](https://www.islamweb.net/ar/library/content/231/68/) |
 
-The `tashil` extra phoneme changes only the rendered token. A tashil selection
-still carries the typed eased-hamza state and the `tashil` rule when that extra
-token is disabled.
+The `tashil` extra phoneme is a Hafs-only rendering control. Warsh always
+renders an eased hamza as `ʔ̞`, so `tashil` is not accepted in its
+`extra_phonemes` set.
 
 When ibdal creates a long vowel, `ibdal_hamza` and the applicable madd rule
 both reach the resulting sound and the responsible source character. The madd
@@ -201,8 +201,8 @@ selectors.
 | --- | --- | --- | --- | --- |
 | `maryam_haa_yaa` | `taqlil`, `fath`; default `taqlil` | Haa and Yaa of `كهيعص`, 19:1; all states | Selects both opening letters as one transmitted pair. | [Al-Nashr, opening-letter inclination](https://www.islamweb.net/ar/library/content/70/169/) |
 | `yaseen_yaa` | `fath`, `taqlil`; default `fath` | Yaa of `يس`, 36:1; all states | Selects the Yaa vowel quality. The final Seen-noon is fixed idgham in Warsh and is independent. | [Al-Nashr, opening-letter inclination](https://www.islamweb.net/ar/library/content/70/169/) |
-| `lam_dhat_yaa` | `fath_taghliz`, `taqlil_tarqiq`; default `fath_taghliz` | Seven non-verse-head sad-lam forms, including `مُصَلًّى`, `يَصْلَاهَا`, `تَصْلَى`, and `سَيَصْلَى`: 2:125, 17:18, 84:12, 87:12, 88:4, 92:15, and 111:3 | Couples the only compatible vowel and lam outcomes. At `مُصَلًّى` and `يَصْلَى ٱلنَّارَ`, wasl masks the selection and realizes `fath_taghliz`; the selected value manifests again at waqf. | [Al-Nashr, coupled inclination and lam](https://www.islamweb.net/ar/library/content/70/190/) |
-| `lam_verse_heads` | `taqlil_tarqiq`, `fath_taghliz`; default `taqlil_tarqiq` | `صَلَّى` verse heads at 75:31, 87:15, and 96:10; all states | Couples the target vowel with the compatible lam weight. | [Al-Nashr, coupled verse-head faces](https://www.islamweb.net/ar/library/content/70/190/), [Shatibiyya profile](https://www.islamweb.com/ar/library/content/245/31/) |
+| `lam_dhat_yaa` | `fath_tafkheem`, `taqlil_tarqiq`; default `fath_tafkheem` | Seven non-verse-head sad-lam forms, including `مُصَلًّى`, `يَصْلَاهَا`, `تَصْلَى`, and `سَيَصْلَى`: 2:125, 17:18, 84:12, 87:12, 88:4, 92:15, and 111:3 | Couples the only compatible vowel and lam outcomes. At `مُصَلًّى` and `يَصْلَى ٱلنَّارَ`, wasl masks the selection and realizes `fath_tafkheem`; the selected value manifests again at waqf. | [Al-Nashr, coupled inclination and lam](https://www.islamweb.net/ar/library/content/70/190/) |
+| `lam_verse_heads` | `taqlil_tarqiq`, `fath_tafkheem`; default `taqlil_tarqiq` | `صَلَّى` verse heads at 75:31, 87:15, and 96:10; all states | Couples the target vowel with the compatible lam weight. | [Al-Nashr, coupled verse-head faces](https://www.islamweb.net/ar/library/content/70/190/), [Shatibiyya profile](https://www.islamweb.com/ar/library/content/245/31/) |
 
 Taha has no selector. Its Haa is an imala-kubra site. Enabling the `imala`
 extra phoneme renders kubra; disabling it uses the Warsh taqlil fallback while
@@ -210,23 +210,23 @@ preserving the typed imala fact and rule.
 
 ## Warsh lam choices
 
-`taghliz` is a lam-specific rule, not generic tafkheem. When the lam is what
+`tafkheem` is the shared public heavy-coloring rule. When the lam is what
 gives its following fatha or alif an emphatic quality, that vowel follows the
-selected lam: `taghliz` makes both emphatic and `tarqiq` makes both plain. An
+selected lam: `tafkheem` makes both emphatic and `tarqiq` makes both plain. An
 independent emphasis cause is not removed.
 
 | ID | Options and default | Scope and examples | Effect | Source |
 | --- | --- | --- | --- | --- |
-| `lam_separated_by_alif` | `taghliz`, `tarqiq`; default `taghliz` | The five alif-separated forms `فِصَالًا`, `يُصَالِحَا`, `أَفَطَالَ`, `طَالَ`, and `فَطَالَ` at 2:233, 4:128, 20:86, 21:44, and 57:16; all states | Selects lam weight despite the separating alif. | [Al-Nashr, disputed lam scopes](https://www.islamweb.net/ar/library/content/70/190/) |
-| `lam_final_waqf` | `taghliz`, `tarqiq`; default `taghliz` | `يُوصَلَ` at 2:27, 13:21, and 13:25; `فَصَلَ` at 2:249; `فَصَّلَ` at 6:119; `وَبَطَلَ` at 7:118; `ظَلَّ` at 16:58 and 43:17; and `وَفَصْلَ` at 38:20; waqf only | Selects the final lam at a complete stop. `طَالَ` belongs to `lam_separated_by_alif`. | [Al-Nashr, final lam at waqf](https://www.islamweb.net/ar/library/content/70/190/) |
-| `lam_after_taa` | `tarqiq`, `taghliz`; default `taghliz` | Ordinary qualifying taa followed by open lam, such as `مَطْلَعِ`; all sounded states, with terminal waqf owned above | Selects the broader authenticated tarqiq face or the prevalent taghliz face. Narrow lexical route splits remain within this one consumer scope. | [Al-Nashr, taa-lam routes](https://www.islamweb.net/ar/library/content/70/190/) |
-| `lam_after_zhaa` | `tarqiq`, `taghliz`; default `taghliz` | Ordinary qualifying zhaa followed by open lam, such as `يُظْلَمُونَ`; all sounded states, with terminal waqf owned above | Selects the broader authenticated tarqiq face or the prevalent taghliz face. Open-versus-sakin route splits remain within this one consumer scope. | [Al-Nashr, zhaa-lam routes](https://www.islamweb.net/ar/library/content/70/190/) |
-| `lam_salsal` | `tarqiq`, `taghliz`; default `tarqiq` | The first lam in all four `صَلْصَال` tokens at 15:26, 15:28, 15:33, and 55:14; all states | Selects tarqiq or taghliz for the medial first lam. | [Al-Nashr, salsal](https://www.islamweb.net/ar/library/content/70/190/) |
+| `lam_separated_by_alif` | `tafkheem`, `tarqiq`; default `tafkheem` | The five alif-separated forms `فِصَالًا`, `يُصَالِحَا`, `أَفَطَالَ`, `طَالَ`, and `فَطَالَ` at 2:233, 4:128, 20:86, 21:44, and 57:16; all states | Selects lam weight despite the separating alif. | [Al-Nashr, disputed lam scopes](https://www.islamweb.net/ar/library/content/70/190/) |
+| `lam_final_waqf` | `tafkheem`, `tarqiq`; default `tafkheem` | `يُوصَلَ` at 2:27, 13:21, and 13:25; `فَصَلَ` at 2:249; `فَصَّلَ` at 6:119; `وَبَطَلَ` at 7:118; `ظَلَّ` at 16:58 and 43:17; and `وَفَصْلَ` at 38:20; waqf only | Selects the final lam at a complete stop. `طَالَ` belongs to `lam_separated_by_alif`. | [Al-Nashr, final lam at waqf](https://www.islamweb.net/ar/library/content/70/190/) |
+| `lam_after_taa` | `tarqiq`, `tafkheem`; default `tafkheem` | Ordinary qualifying taa followed by open lam, such as `مَطْلَعِ`; all sounded states, with terminal waqf owned above | Selects the broader authenticated tarqiq face or the prevalent tafkheem face. Narrow lexical route splits remain within this one consumer scope. | [Al-Nashr, taa-lam routes](https://www.islamweb.net/ar/library/content/70/190/) |
+| `lam_after_zhaa` | `tarqiq`, `tafkheem`; default `tafkheem` | Ordinary qualifying zhaa followed by open lam, such as `يُظْلَمُونَ`; all sounded states, with terminal waqf owned above | Selects the broader authenticated tarqiq face or the prevalent tafkheem face. Open-versus-sakin route splits remain within this one consumer scope. | [Al-Nashr, zhaa-lam routes](https://www.islamweb.net/ar/library/content/70/190/) |
+| `lam_salsal` | `tarqiq`, `tafkheem`; default `tarqiq` | The first lam in all four `صَلْصَال` tokens at 15:26, 15:28, 15:33, and 55:14; all states | Selects tarqiq or tafkheem for the medial first lam. | [Al-Nashr, salsal](https://www.islamweb.net/ar/library/content/70/190/) |
 
 Outside these scopes and the coupled inclination selectors, every qualifying
-open lam after sad, taa, or zhaa follows the fixed Warsh taghliz rule. The two
+open lam after sad, taa, or zhaa follows the fixed Warsh tafkheem rule. The two
 general taa and zhaa selectors expose authenticated broader al-Azraq routes;
-their default remains the standard taghliz face.
+their default remains the standard tafkheem face.
 
 ## Warsh systematic raa choices
 
@@ -277,8 +277,9 @@ The following distinctions are deliberately outside the variant API:
 - Madd counts, leen counts, silah counts, and count-dependent face matrices do
   not alter this phonemizer's sound-length model. [Warsh count catalogue and
   sources](warsh/research/v2/madd-counts.md)
-- `imala` and `tashil` are extra-phoneme rendering controls. They do not remove
-  the typed sound feature or named rule. [Phoneme and rule
+- `imala` is an extra-phoneme rendering control. `tashil` is such a control
+  only for Hafs; Warsh always renders its typed eased hamza as `ʔ̞`. Neither
+  changes the typed sound feature or named rule. [Phoneme and rule
   contract](warsh/research/v2/phoneme-rule-inventory.md)
 - Warsh Yaseen-noon is fixed idgham. [Al-Wafi, opening-letter
   junctions](https://www.islamweb.net/amp/ar/library/content/245/26/)

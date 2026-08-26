@@ -5,9 +5,9 @@ throughout: no derivation here reads the public assembler.
 """
 from __future__ import annotations
 
-from ..model.address import Junction, SlotId
+from ..model.address import Junction, Riwayah, SlotId
 from ..model.inscription import GlyphKind
-from ..render.alphabet import packaged_alphabet
+from ..render.alphabet import effective_extra_phonemes, packaged_alphabet
 from ..session import Session
 from . import ids
 from .attributions import Hosted, Insertion
@@ -215,7 +215,13 @@ def build_bundle(
     insc: InscriptionFacts | None = None,
 ) -> AnalysisBundle:
     if facts is None:
-        facts = analyse(session, packaged_alphabet(), extra_phonemes=extra_phonemes)
+        from ..riwayat import quality_fallbacks_for
+
+        active = effective_extra_phonemes(Riwayah(riwayah), extra_phonemes)
+        facts = analyse(
+            session, packaged_alphabet(), extra_phonemes=active,
+            quality_fallbacks=quality_fallbacks_for(riwayah),
+        )
     if insc is None:
         insc = inscribe(session)
 

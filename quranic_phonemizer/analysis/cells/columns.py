@@ -38,6 +38,7 @@ class _Reading:
     written_on: dict[int, int]
     mains_of_slot: dict[SlotId | None, tuple[int, ...]]
     consonant_units: frozenset[int]
+    word_of_unit: dict[int, int]
 
 
 def _reading(view: SourceView, facts: AnalysisFacts, insc: InscriptionFacts,
@@ -88,6 +89,7 @@ def _reading(view: SourceView, facts: AnalysisFacts, insc: InscriptionFacts,
         _variant_of_unit(view, session), below, written_on,
         {slot: tuple(units) for slot, units in mains_of_slot.items()},
         consonant_units,
+        {unit.id.value: unit.word_id.value for unit in view.units},
     )
 
 
@@ -178,8 +180,15 @@ def _seat_unit(unit: LetterUnit, reading: _Reading) -> int | None:
         if sound.value not in reading.long_vowel_orders:
             continue
         owner = reading.owner_of_sound.get(sound.value)
-        if owner is not None:
+        if (
+            owner is not None
+            and reading.word_of_unit.get(owner)
+            == reading.word_of_unit.get(unit.id.value)
+        ):
             return _followed_to_main(owner, reading)
+        # A cross-word long-vowel merger is rendered as a boundary bridge.
+        # Its presenter remains seated on its own word; it must not attach
+        # across the boundary to the carrier that owns the shared sound.
     return _main_of_slot(unit.id.value, reading)
 
 
@@ -253,8 +262,11 @@ def build_cell_words(
     pen=None,
 ) -> tuple[CellWord, ...]:
     if facts is None:
+        from ...riwayat import quality_fallbacks_for
+
         facts = analyse(
-            session, packaged_alphabet(), extra_phonemes=bundle.extra_phonemes
+            session, packaged_alphabet(), extra_phonemes=bundle.extra_phonemes,
+            quality_fallbacks=quality_fallbacks_for(bundle.riwayah),
         )
     if insc is None:
         insc = inscribe(session)

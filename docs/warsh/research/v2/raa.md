@@ -6,7 +6,8 @@ closed occurrence registers. Public selector values and defaults remain in
 [`docs/variants.md`](../../../variants.md).
 
 `heavy` and `light` below mean the effective raa result. The rule occurrence is
-`tafkheem` or `tarqeeq`; these names are not reused for lam taghliz.
+`tafkheem` or `tarqeeq`. Lam uses the same public vocabulary; its distinct
+classifier and occurrence ownership preserve the lam-specific contract.
 
 ## Structural law
 
@@ -17,12 +18,14 @@ same word contains either:
 - an original kasra before the raa, directly or separated by one sakin
   consonant.
 
-A same-word intervening isti'la consonant blocks the kasra trigger. In Quranic
-data the relevant blockers are sad, taa, and qaf. Khaa is the transmitted
-exception among the isti'la letters and does not block tarqeeq. A temporary
-kasra, a hamzat-al-wasl start kasra, or a kasra in a preceding word is not a
-trigger. Al-Wafi states the predicate, the same-word requirement, the one-sakin
-extension, the blockers, and the khaa exception
+A same-word isti'la consonant following the raa blocks the trigger, even when
+an alif intervenes. A same-word isti'la consonant between the kasra and raa
+also blocks it; in Quranic data the relevant interveners are sad, taa, and
+qaf. Khaa is the transmitted exception only in the intervening position and
+does not block tarqeeq there. A temporary kasra, a hamzat-al-wasl start kasra,
+or a kasra in a preceding word is not a trigger. Al-Wafi states the predicate,
+the same-word requirement, the one-sakin extension, the blockers, and the khaa
+exception
 ([source](https://www.islamweb.net/ar/library/content/245/30/)).
 
 For a sakin raa, apply the ordinary shared raa law after boundary resolution:
@@ -187,7 +190,7 @@ owners:
 | Fixed result | Exact register | Count |
 | --- | --- | ---: |
 | Heavy | Every `إِبْرَاهِيم` (69), `إِسْرَائِيل` (43), and `عِمْرَان` (3) | 115 |
-| Heavy | `ضِرَاراٗ` 9:107; `فِرَاراٗ` 18:18, 33:13, 71:6; `اُ۬لْفِرَارُ` 33:16; `إِسْرَاراٗ` 71:9; `مِّدْرَاراٗ` 6:6, 11:52, 71:11 | 10 |
+| Heavy | `ضِرَاراٗ` 2:231 and 9:107; `فِرَاراٗ` 18:18, 33:13, 71:6; `اُ۬لْفِرَارُ` 33:16; `إِسْرَاراٗ` 71:9; `مِّدْرَاراٗ` 6:6, 11:52, 71:11 | 10 |
 | Light | `حِذْرَهُمْ`, 4:102 | 1 |
 | Light | Other `عشير` family sites: 22:13, 26:214, 58:22 | 3 |
 

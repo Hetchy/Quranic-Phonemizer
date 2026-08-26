@@ -101,7 +101,7 @@ tests/
       test_hafs_raa.py                            # 19
       test_warsh_raa.py                           # 31: 11 fixed + 20V
       test_allah_lam.py                           # 8
-      test_warsh_lam_taghliz.py                   # 17: 12 fixed + 5V
+      test_warsh_lam_tafkheem.py                   # 17: 12 fixed + 5V
 
     hamza/                                        # 104 cases: 90 fixed + 14V
       __init__.py
@@ -371,8 +371,8 @@ mutajanisayn file or in an API behavior suite.
 ### Emphasis: 97 cases
 
 `test_istilaa.py` covers the seven letters once, then separately covers every
-dependent A shape: short fatha, fathatan, long alif, and pausal iwad. A heavy
-or taghliz source colors its causally dependent A realization; a light source
+dependent A shape: short fatha, fathatan, long alif, and pausal iwad. A
+tafkheem source colors its causally dependent A realization; a light source
 removes only that cause.
 
 `test_raa.py` owns two shared coloring/reach cases and the six shared lexical
@@ -385,9 +385,9 @@ are added last.
 `test_allah_lam.py` owns only the divine-name forms: heavy standalone forms,
 light prefixed forms, and the joined fatha/damma versus kasra condition. An
 ordinary light lam needs no dedicated semantic sweep. The Warsh structural
-taghliz, selected tarqiq, dependent short/long/fathatan coloring, coupled
+tafkheem, selected tarqiq, dependent short/long/fathatan coloring, coupled
 inclination sites, and register representatives live in
-`test_warsh_lam_taghliz.py`. Its five selector rows are added last.
+`test_warsh_lam_tafkheem.py`. Its five selector rows are added last.
 
 `test_hafs_seen_sad.py` exists only in the final phase for the four Hafs
 seen/saad selectors. Keeping them together is clearer than hiding letter
@@ -403,8 +403,9 @@ The folder follows implementation ownership rather than source spelling:
   has its own final-phase file;
 - `test_wasl_silent.py` covers the shared joined-elision classes,
   including exact onset/nucleus reach and lexical-qata contrasts;
-- `test_iltiqa.py` covers shared shortening and ordinary A/I repair, then
-  compares the Warsh U register and its exclusions directly with Hafs;
+- `test_iltiqa.py` covers shared shortening, inserted tanwin/spelled-name
+  repair, and canonical connected-form negatives, then compares the Warsh U
+  quality register and its exclusions directly with Hafs;
 - `test_ibdal.py` and `test_tashil.py` prove the generic transformation,
   phoneme inventory, effective madd, extra-token behavior, and exact reach;
 - `test_warsh_single_hamza.py` owns the morphology-backed and lexical Warsh
@@ -765,7 +766,7 @@ inputs agree.
 4. **Warsh adapter.** Add source/public alignment, script projection,
    selector fixtures, smoke construction, and vetted shared semantic rows.
 5. **RuleSet foundation.** Add global rule vocabulary, riwayah-bound
-   classifiers, complete `emits` declarations, typed taqlil/taghliz, and
+   classifiers, complete `emits` declarations, typed taqlil/kubra, and
    effective-state madd support with schema/engine/API tests.
 6. **Wasl and iltiqa.** Implement `wasl-hamza.md` and `iltiqa.md` with their
    owning adapter and phonemization files.
@@ -782,7 +783,7 @@ inputs agree.
 12. **Inclination.** Implement quality, classification, opening, and coupled
     coloring files.
 13. **Raa.** Implement structural branches and independent closed registers.
-14. **Lam/taghliz.** Implement taghliz, tarqiq, dependent A coloring, and
+14. **Lam tafkheem.** Implement tafkheem, tarqiq, dependent A coloring, and
     independent closed registers.
 15. **Default conformance.** Prove rule reachability, conflict freedom,
     register reconciliation, cross-script agreement, and only then add Warsh

@@ -45,7 +45,7 @@ reads, and what is actually pronounced under a boundary plan.
   `phoneme-rule-inventory.md` and `script-projection.md` define the foundation;
   the wasl, iltiqa, hamza, madd, mim, yaa, and seven-alif files own their
   individual phenomena; and `inclination.md`, `raa.md`, and
-  `lam-taghliz.md` own vowel and consonant coloring.
+  `lam-tafkheem.md` own vowel and consonant coloring.
 - `docs/warsh/research/v1/` preserves the imported research unchanged. It is
   historical evidence, not an implementation specification.
 - `docs/new-riwayah.md` is tentative guidance, not a final design.

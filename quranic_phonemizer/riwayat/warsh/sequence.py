@@ -9,6 +9,7 @@ from ...model.canon import CanonLetter, Nucleus, Onset, Quality
 from ...model.inscription import GraphemeClass, SlotFact
 from ...orthography.inventory import Inventory, LetterEntry, MarkEntry
 from . import naql_script
+from .inclination import is_inclination_witness
 
 
 _HARAKA_TO_TANWIN = {
@@ -73,17 +74,45 @@ def _silent_qata_hamza(text, entries) -> None:
 def _project_marked_fatha(text, entries, *, wasl: bool) -> None:
     for index, char in enumerate(text):
         if char == "۪" and not (wasl and index == 2):
-            entries[index] = MarkEntry(
-                role="fatha",
-                cls=GraphemeClass.ANNOTATION,
-                fact=SlotFact.VOWEL_QUALITY,
-                value=Nucleus.short(Quality.A),
-            )
+            inclined = is_inclination_witness(text, index)
+            if inclined:
+                entries[index] = MarkEntry(
+                    role="inclination_witness", cls=GraphemeClass.ANNOTATION,
+                    fact=SlotFact.VOWEL_QUALITY,
+                    value=Nucleus.short(Quality.A),
+                )
+            else:
+                entries[index] = MarkEntry(
+                    role="fatha", cls=GraphemeClass.ANNOTATION,
+                    fact=SlotFact.VOWEL_QUALITY,
+                    value=Nucleus.short(Quality.A),
+                )
+            if (
+                inclined and text[index + 1:index + 3] == "يٰ"
+            ):
+                entries[index + 1] = LetterEntry(
+                    CanonLetter.ALIF,
+                    dagger_host=True,
+                    bare_rasm=True,
+                )
 
 
 def _attach_reversed_fathatan(text, entries) -> None:
     for index, char in enumerate(text[1:], start=1):
         if char in _FATHATAN and text[index - 1] == "ا" and index > 1:
+            entries[index] = MarkEntry(
+                role="fathatan",
+                cls=GraphemeClass.TANWEEN,
+                fact=SlotFact.VOWEL_QUALITY,
+                derivation="tanween",
+                attach_to_previous=True,
+            )
+        elif char in _FATHATAN and text[index - 1] == "ى":
+            entries[index - 1] = LetterEntry(
+                CanonLetter.ALIF,
+                dagger_host=True,
+                bare_rasm=True,
+            )
             entries[index] = MarkEntry(
                 role="fathatan",
                 cls=GraphemeClass.TANWEEN,
@@ -222,10 +251,13 @@ def entries_for(inventory: Inventory, text: str):
 
 def entries_for_words(inventory: Inventory, texts: Sequence[str]):
     """Per-word classifications for one verse, with cross-word context: a
-    host's written moved haraka before a latent qata is a naql witness."""
+    host's written moved haraka before a latent qata or initial badal is a
+    naql witness."""
     prepared = [_entries(inventory, text) for text in texts]
     for index in range(len(texts) - 1):
         quality = naql_script.latent_qata_quality(texts[index + 1])
+        if quality is None:
+            quality = naql_script.latent_qata_badal_quality(texts[index + 1])
         if quality is not None:
             naql_script.demote_moved_haraka(
                 texts[index], prepared[index], quality

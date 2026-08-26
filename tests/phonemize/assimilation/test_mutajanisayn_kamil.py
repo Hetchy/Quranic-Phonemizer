@@ -12,6 +12,7 @@ from tests.support import (
     case_runs,
     explicit,
     isolated,
+    pick,
     through,
 )
 
@@ -39,10 +40,22 @@ CASES = (
     # Hafs: إِذ ظَّلَمُوٓا۟
     # Warsh: إِذ ظَّلَمُوٓاْ
     Case(id="dhal-zhaa", site=Site.shared("4:64", (11, 12)), read=through(),
-         phonemes=("ʔ i", "ðˤðˤ aˤ l a m u:"),
-         char_rules={"ذ": R("idgham_mutajanisayn_kamil"),
-                     "ظ": R("idgham_mutajanisayn_kamil")},
-         sound_rules={"ðˤðˤ": R("idgham_mutajanisayn_kamil")}),
+         phonemes=pick(
+             hafs=("ʔ i", "ðˤðˤ aˤ l a m u:"),
+             warsh=("ʔ i", "ðˤðˤ aˤ lˤ aˤ m u:"),
+         ),
+         char_rules=pick(
+             hafs={"ذ": R("idgham_mutajanisayn_kamil"),
+                   "ظ": R("idgham_mutajanisayn_kamil")},
+             warsh={"ذ": R("idgham_mutajanisayn_kamil"),
+                    "ظ": R("idgham_mutajanisayn_kamil"),
+                    "ل": R("tafkheem"), "@fatha[2]": R("tafkheem")},
+         ),
+         sound_rules=pick(
+             hafs={"ðˤðˤ": R("idgham_mutajanisayn_kamil")},
+             warsh={"ðˤðˤ": R("idgham_mutajanisayn_kamil"),
+                    "lˤ": R("tafkheem"), "aˤ[2]": R("tafkheem")},
+         )),
     # Hafs: يَلْهَث ۚ ذَّٰلِكَ
     # Warsh: يَلْهَثْۖ ذَٰلِكَ
     Case(id="thaa-dhal", site=Site.shared("7:176", (20, 21)), read=through(),

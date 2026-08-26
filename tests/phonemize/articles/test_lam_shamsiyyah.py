@@ -19,7 +19,7 @@ CASES = (
     Case(id="noon-sad", site=Site.shared("2:62", (6, 7)), read=through(),
          phonemes=pick(
              hafs=("w a ñ a sˤ aˤ: rˤ aˤ:", "w a sˤsˤ aˤ: b i ʔ i: n"),
-             warsh=("w a ñ a sˤ aˤ: rˤ aˤ:", "w a sˤsˤ aˤ: b i: n"),
+             warsh=("w a ñ a sˤ aˤ: r ɛ:", "w a sˤsˤ aˤ: b i: n"),
          ),
          char_rules={"ل[1]": R("lam_shamsiyyah"),
                      "ل[2]": R("lam_shamsiyyah")},
@@ -27,7 +27,10 @@ CASES = (
     # Hafs: ٱلزَّادِ ٱلتَّقْوَىٰ ۚ
     # Warsh: اَ۬لزَّادِ اِ۬لتَّقْو۪ىٰۖ
     Case(id="zay-taa", site=Site.shared("2:197", (25, 26)), read=through(),
-         phonemes=("ʔ a zz a: d i", "tt a q Q w a:"),
+         phonemes=pick(
+             hafs=("ʔ a zz a: d i", "tt a q Q w a:"),
+             warsh=("ʔ a zz a: d i", "tt a q Q w ɛ:"),
+         ),
          char_rules={"ل[1]": R("lam_shamsiyyah"),
                      "ل[2]": R("lam_shamsiyyah")},
          sound_rules={"zz": R("lam_shamsiyyah"), "tt": R("lam_shamsiyyah")}),

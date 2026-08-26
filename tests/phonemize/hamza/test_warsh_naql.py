@@ -62,7 +62,7 @@ CASES = (
         id="feminine-taa",
         site=Site(warsh=("49:9", (9, 10))),
         read=explicit(ibtidaa=9, waqf=10),
-        phonemes=("b a ɣ aˤ t i", "ħ d a j a: h u m a:"),
+        phonemes=("b a ɣ aˤ t i", "ħ d ɛ: h u m a:"),
         sound_rules={"i": R("naql")},
         absent_sound_rules={"t": R("naql")},
     ),

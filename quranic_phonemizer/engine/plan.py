@@ -174,6 +174,13 @@ class Plan:
             self._keys[key] = (verdict.occurrence.id, verdict.occurrence.rule)
             if isinstance(effect, (MergeInto, Silence)):
                 self._removed.add((effect.slot, effect.aspect))
+                if (
+                    isinstance(effect, MergeInto)
+                    and effect.aspect is Aspect.VOWEL
+                ):
+                    # A vowel merger can make a canonically silent presenter
+                    # voweled without making it the shared sound's owner.
+                    self._voweled.add(effect.slot)
             elif isinstance(effect, Realize) and effect.aspect is Aspect.VOWEL:
                 self._voweled.add(effect.slot)
             elif isinstance(effect, Relength) and effect.length is Length.LONG:
@@ -212,3 +219,13 @@ class Plan:
         """Has an earlier phase drawn this slot's vowel out to a long one
         the Score does not carry?"""
         return slot in self._lengthened
+
+    def hamza_meeting_length(self, slot: SlotId) -> bool:
+        """Whether ibdal fused the preceding qata vowel into this carrier."""
+        previous = SlotId(slot.verse, slot.ordinal - 1)
+        return any(
+            verdict.occurrence.rule is Rule.IBDAL_HAMZA
+            and Relength(slot, Length.LONG) in verdict.effects
+            and Silence(previous, Aspect.VOWEL) in verdict.effects
+            for _, verdict in self.entries
+        )

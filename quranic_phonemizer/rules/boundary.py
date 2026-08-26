@@ -225,7 +225,12 @@ class TanweenIwad:
             ),
             (
                 Realize(
-                    base.id, Aspect.VOWEL, Vowel(base.nucleus.quality, True)
+                    base.id,
+                    Aspect.VOWEL,
+                    Vowel(
+                        base.nucleus.stopped.quality or base.nucleus.quality,
+                        True,
+                    ),
                 ),
             ),
         )

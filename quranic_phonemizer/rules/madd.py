@@ -83,6 +83,9 @@ class IltiqaShortening:
             return None
         if not _opens_on_a_sakin(following):
             return None
+        inclined = slot.nucleus.quality in {Quality.TAQLIL, Quality.KUBRA}
+        effect = (Realize(at, Aspect.VOWEL, Vowel(Quality.A))
+                  if inclined else Relength(at, Length.SHORT))
         return Verdict(
             Occurrence(
                 mint(Rule.ILTIQA_SHORTENING, at),
@@ -90,10 +93,8 @@ class IltiqaShortening:
                 (at,),
                 (following.id,),
             ),
-            (Relength(at, Length.SHORT),),
+            (effect,),
         )
-
-
 def _opens_on_a_sakin(slot) -> bool:
     """A geminate consonant is a sakin plus a voweled one, so `ٱلَّذِى` meets a
     preceding madd with a sakin exactly as a written sukun would."""
@@ -235,7 +236,7 @@ class MaddBadal:
 
     rule: Rule = Rule.MADD_BADAL
     phase: Phase = Phase.LENGTH
-    triggers: frozenset = frozenset({VowelForm.LONG, Onset.WASL})
+    triggers: frozenset = frozenset({VowelForm.LONG, Onset.WASL, Annotation.BADAL})
     emits: frozenset = frozenset({Rule.MADD_BADAL})
 
     def look(
@@ -292,7 +293,11 @@ class MaddSilah:
         boundaries: BoundaryPlan,
     ) -> Verdict | None:
         slot = near.slot(at)
-        if slot is None or not slot.nucleus.is_joined_only_long:
+        if (
+            slot is None
+            or slot.letter is not L.HEH
+            or not slot.nucleus.is_joined_only_long
+        ):
             return None
         if _madd_of(near, plan, at, boundaries) is None:
             return None

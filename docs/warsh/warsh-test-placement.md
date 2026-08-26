@@ -66,7 +66,7 @@ tests/phonemize/                               # 508 cases: 436 fixed + 72V
     test_hafs_raa.py                          # 19
     test_warsh_raa.py                         # 31: 11 fixed + 20V
     test_allah_lam.py                         # 8
-    test_warsh_lam_taghliz.py                 # 17: 12 fixed + 5V
+    test_warsh_lam_tafkheem.py                 # 17: 12 fixed + 5V
 
   hamza/                                      # 104: 90 fixed + 14V
     test_wasl_start.py                        # 14
@@ -97,7 +97,7 @@ tests/phonemize/                               # 508 cases: 436 fixed + 72V
     inclination/                              # 49: 40 fixed + 9V
       test_quality.py                         # 6
       test_hafs_inclination.py                # 2
-      test_warsh_inclination.py               # 20: 11 fixed + 9V
+      test_warsh_inclination.py               # 18: 11 fixed + 7V
       test_warsh_inclination_classification.py # 14
       test_warsh_inclination_coloring.py      # 7
 
@@ -124,6 +124,7 @@ tests/phonemize/                               # 508 cases: 436 fixed + 72V
 
   test_muqattaat.py                           # 15: 14 fixed + 1V
   test_hafs_muqattaat.py                      # 1V
+  test_warsh_muqattaat.py                     # 2V
   test_qalqala.py                             # 13
   test_sakt.py                                # 5V
   test_silent_letters.py                      # 13
@@ -179,9 +180,9 @@ continually infer which tree an example belongs to.
 
 `test_allah_lam.py` owns only the heavy, light, and context-conditioned forms
 of the divine name. Ordinary light lam needs no dedicated sweep. Warsh
-taghliz, Warsh tarqiq choices, dependent A coloring, alif separation,
+tafkheem, Warsh tarqiq choices, dependent A coloring, alif separation,
 final-lam waqf, and the salsal register belong in
-`test_warsh_lam_taghliz.py`. A taghliz occurrence owns the lam and every
+`test_warsh_lam_tafkheem.py`. A tafkheem occurrence owns the lam and every
 causally dependent A realization, including fatha, fathatan, a carrier, and
 madd iwad.
 
@@ -195,12 +196,13 @@ the resulting quality or length classification only.
 - `test_wasl_start.py` owns the shared A/I/U derivation algorithm and a vetted
   riwayah-specific lexical input where necessary.
 - `test_wasl_silent.py` owns the shared started-versus-joined onset behavior.
-- `test_iltiqa.py` owns shared shortening and ordinary A/I repair after wasl
-  elision. Its separate Warsh U-over-I section runs the same boundaries under
-  Hafs so the different repairs and exact exclusions stay adjacent.
+- `test_iltiqa.py` owns shared shortening, inserted tanwin/spelled-name
+  repairs, and lexical connected-form negatives after wasl elision. Its Warsh
+  U-over-I section keeps the different canonical qualities adjacent without
+  assigning `iltiqa_haraka` to lexical forms.
 - `test_ibdal.py` owns generic replacement shapes, effects, and reach.
   `test_tashil.py` owns the generic eased-hamza shape, A/U/I nucleus pairing,
-  extra-token fallback, and reach.
+  Hafs-only extra-token fallback, and reach.
 - `test_warsh_naql.py`, `test_warsh_single_hamza.py`, and
   `test_warsh_hamza_meetings.py` own the three Warsh classifiers and their
   closed registers.
@@ -260,7 +262,7 @@ rows depending on whether the Arabic source span and explanation remain
 readable.
 
 Mim al-jam and yaa-zawaid are Warsh-only authored families under `madd/`.
-Their files own the full wasl/waqf matrices, including mim's short-U iltiqa
+Their files own the full wasl/waqf matrices, including mim's short-U connected
 branch and the one consonantal yaa-zawaid exception, so placing them by their
 principal madd behavior does not split either family. Madd badal and madd leen
 mahmuz also get Warsh-prefixed files because their public classifier/register
@@ -290,13 +292,13 @@ coupling surface discoverable.
 
 ### Muqattaat, qalqala, sakt, and lexical endings
 
-`test_muqattaat.py` owns all fourteen unique opening forms. Every fixed/default
+`test_muqattaat.py` owns all fourteen unique opening forms. Every fixed
 row asserts the complete phoneme sequence and every applicable rule with exact
 source and sound reach; it is not a phoneme-only table. Riwayah picks keep
-fixed Yaseen behavior and opening-letter inclination beside the same Arabic
-form. The shared Noon selector is in this file. `test_hafs_muqattaat.py` owns
-only the Hafs Yaseen selector; Warsh inclination selector matrices remain in
-the inclination file and are integrated here only at their default.
+fixed opening-letter behavior beside the same Arabic form. The shared Noon
+selector is in this file. `test_hafs_muqattaat.py` owns the Hafs Yaseen
+selector. `test_warsh_muqattaat.py` is deferred to the selector phase and owns
+the Maryam Haa/Yaa and Yaseen Yaa inclination selectors.
 
 Qalqala, silent letters, and taa marbuta remain shared. Their Warsh rows use
 clean sites and the same rule IDs.
@@ -410,7 +412,7 @@ into a mixed-domain catch-all.
 | `hamza/test_iltiqa.py` | Cover shared shortening and ordinary repair | Shared rows plus adjacent Hafs/Warsh U-over-I contrasts | Wasl/iltiqa vertical |
 | `hamza/test_seats.py` | Verify shared canonical hamza-seat semantics | Source selectors may differ; canonical assertion stays shared | Adapter baseline |
 | `hamza/test_ibdal.py` | Verify generic transformation primitives independent of classifier | Small typed fixtures, not a corpus sweep | RuleSet/hamza foundation |
-| `hamza/test_tashil.py` | Verify eased onset plus A/U/I nucleus and rendering fallback | Small typed fixtures, not a corpus sweep | RuleSet/hamza foundation |
+| `hamza/test_tashil.py` | Verify eased onset plus A/U/I nucleus and Hafs rendering fallback | Small typed fixtures, not a corpus sweep | RuleSet/hamza foundation |
 | `hamza/test_istifham_article.py` | Execute the same selector against each riwayah package | Three `VariantCase` rows for the three distinct lexical forms | Variants last |
 | Every file under `nasal/` | Preserve the trigger partitions and pausal-clear recovery branches listed in the main plan | Clean Warsh rows share the file; output picks only where an optional public token differs; stopped idgham/ikhfaa/iqlab states recover clear noon/meem | Adapter baseline |
 | `vowels/inclination/test_quality.py` | Verify typed quality and renderer semantics for both riwayat | Tiny explicit riwayah matrix | Model foundation |
@@ -427,7 +429,9 @@ into a mixed-domain catch-all.
 | `vowels/test_hafs_aatani.py` | Keep the Aatani waqf choice with its own lexical owner | One Hafs-only `VariantCase` | Variants last |
 | `vowels/test_seven_alifs.py` | Put Hafs and Warsh matrices beside each other | Shared `StateCase` or paired rows by lexical form | Seven-alif vertical |
 | `vowels/test_written_carriers.py` | Verify carrier/source relations independent of raw glyph form | Source-selector picks with one canonical expectation | Adapter baseline |
-| `test_muqattaat.py` | Verify all fourteen forms, complete phonemes, and complete rule reach | One fixed/default row per form with small riwayah picks; shared Noon selector added last | Foundation through relevant verticals |
+| `test_muqattaat.py` | Verify all fourteen forms, complete phonemes, and complete rule reach | One fixed row per form with small riwayah picks; shared Noon selector added last | Foundation through relevant verticals |
+| `test_hafs_muqattaat.py` | Verify the Hafs Yaseen junction choice | One Hafs-only `VariantCase` | Variants last |
+| `test_warsh_muqattaat.py` | Verify the Maryam Haa/Yaa and Yaseen Yaa inclination choices | Two Warsh-only `VariantCase` rows | Variants last |
 | `test_qalqala.py` | Preserve all five letters and state/degree partitions | Clean shared rows | Adapter baseline |
 | `test_sakt.py` | Own shared Maliyah and the four Hafs lexical sites | Five `VariantCase` rows with sakt/idraj, downstream-rule, and waqf assertions | Variants last |
 | `test_silent_letters.py` | Verify shared canonical silence and attribution | Shared row or source-selector pick | Adapter baseline |
@@ -442,12 +446,12 @@ makes each riwayah's source span cleaner and easier to review.
 Do not include these in the adapter baseline:
 
 - naql or article naql;
-- the Warsh U iltiqa register;
+- the Warsh U-over-I connected-form register;
 - Warsh single-hamza or hamza-meeting transformations;
 - mim al-jam or yaa-zawaid;
 - differing seven-alif branches;
 - madd badal or madd leen mahmuz;
-- inclination, Warsh raa, or lam taghliz;
+- inclination, Warsh raa, or lam tafkheem;
 - Warsh-specific muqattaat behavior; or
 - any selector behavior.
 
@@ -487,14 +491,14 @@ table so a domain reviewer never has to reconstruct the text from coordinates.
 | Naql | `hamza/test_warsh_naql.py` | register and source-attribution tests |
 | Single hamza | generic ibdal/tashil plus `test_warsh_single_hamza.py` | effective madd and adapter source tests |
 | Hamza meetings | `hamza/test_warsh_hamza_meetings.py` | effective madd and boundary plan tests |
-| Mim al-jam | `vowels/madd/test_warsh_mim_al_jam.py` | joined-only model and iltiqa tests |
+| Mim al-jam | `vowels/madd/test_warsh_mim_al_jam.py` | joined-only identity and authored before-wasl contrast |
 | Yaa-zawaid | `vowels/madd/test_warsh_yaa_zawaid.py` | joined-only model and authored-register tests |
 | Seven alifs | `vowels/test_seven_alifs.py` | authored-register tests |
 | Madd badal | `vowels/madd/test_warsh_badal.py` | provenance/effective-state tests, including badal plus arid at waqf |
 | Madd leen mahmuz | `vowels/madd/test_warsh_leen_mahmuz.py` | register reconciliation |
 | Inclination | shared quality plus three `test_warsh_inclination*` files | render, register, coupling tests |
 | Raa | shared raa plus `test_warsh_raa.py` | authored-register tests |
-| Lam taghliz | `emphasis/test_warsh_lam_taghliz.py` | coupling and register tests |
+| Lam tafkheem | `emphasis/test_warsh_lam_tafkheem.py` | coupling and register tests |
 | Selectors | each semantic owner above | generic API catalogue last |
 
 ## Placement acceptance criteria

@@ -12,6 +12,7 @@ from tests.support import (
     assert_case,
     case_runs,
     explicit,
+    isolated,
     joining,
 )
 
@@ -106,6 +107,18 @@ CASES = (
          char_rules=TAA | {"ها/@madd": R("madd_tabii")},
          sound_rules={"tˤ": R("tafkheem"), "aˤ:": R("madd_tabii", "tafkheem"),
                       "a:": R("madd_tabii")}),
+    # Warsh: طَه۪ۖ
+    Case(id="warsh-taa-haa-kubra-collapsed", site=Site(warsh=("20:1", (1,))),
+         read=isolated(), phonemes="tˤ aˤ: h ɛ:",
+         char_rules={"هي/@madd": R("imala", "madd_tabii")},
+         sound_rules={"ɛ:": R("imala", "madd_tabii")},
+         extra_phonemes=()),
+    # Warsh: طَه۪ۖ
+    Case(id="warsh-taa-haa-kubra-rendered", site=Site(warsh=("20:1", (1,))),
+         read=isolated(), phonemes="tˤ aˤ: h e:",
+         char_rules={"هي/@madd": R("imala", "madd_tabii")},
+         sound_rules={"e:": R("imala", "madd_tabii")},
+         extra_phonemes=("imala",)),
     # Hafs: طسٓمٓ
     # Warsh: طَسِٓمِّٓۖ
     Case(id="taa-seen-meem", site=Site.shared("26:1", (1,)), read=joining(),
@@ -154,6 +167,11 @@ CASES = (
                      "ميم/م[2]": R("izhar_shafawi")},
          sound_rules={"a:": R("madd_tabii"), "i:": R("madd_lazim"),
                       "m[2]": R("izhar_shafawi")}),
+    # Warsh: ح۪مِٓۖ
+    Case(id="warsh-haa-meem", site=Site(warsh=("40:1", (1,))),
+         read=isolated(), phonemes="ħ ɛ: m i: m",
+         char_rules={"حا/@madd": R("taqlil", "madd_tabii")},
+         sound_rules={"ɛ:": R("taqlil", "madd_tabii")}),
     # Hafs: عٓسٓقٓ
     # Warsh: عَٓسِٓقَٓۖ
     Case(id="ayn-seen-qaaf", site=Site.shared("42:2", (1,)), read=joining(),

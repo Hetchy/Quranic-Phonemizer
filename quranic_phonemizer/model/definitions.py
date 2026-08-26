@@ -87,7 +87,11 @@ RULE_DEFINITIONS: dict[Rule, tuple[str, str, str]] = {
     ),
     Rule.TARQEEQ: (
         "Tarqeeq", "ترقيق",
-        "The raa is sounded light.",
+        "The letter is sounded light.",
+    ),
+    Rule.TAQLIL: (
+        "Taqlil", "تقليل",
+        "An open vowel is inclined to the intermediate Warsh quality.",
     ),
     Rule.IMALA: (
         "Imala", "إمالة",
@@ -141,6 +145,14 @@ RULE_DEFINITIONS: dict[Rule, tuple[str, str, str]] = {
         "Madd Silah", "مد صلة",
         "A pronoun haa is drawn out because the word is joined to the one after it.",
     ),
+    Rule.MADD_MIM_AL_JAM: (
+        "Madd Mim al-Jam", "مد ميم الجمع",
+        "A plural-pronoun mim is drawn out before a qata hamza.",
+    ),
+    Rule.MADD_YAA_ZAWAID: (
+        "Madd Yaa Zawaid", "مد ياءات الزوائد",
+        "A retained extra yaa is drawn out in a joined reading.",
+    ),
     Rule.IBDAL_HAMZA: (
         "Ibdal Hamza", "إبدال الهمزة",
         "A hamza is replaced by its performed carrier or glide.",
@@ -167,7 +179,7 @@ RULE_DEFINITIONS: dict[Rule, tuple[str, str, str]] = {
     ),
     Rule.ILTIQA_HARAKA: (
         "Iltiqa Haraka", "تحريك التقاء الساكنين",
-        "A letter takes a haraka so that it does not meet the quiescent letter after it.",
+        "A canonically vowel-absent unit receives a short vowel where two quiescent sounds would meet.",
     ),
     Rule.ILTIQA_SHORTENING: (
         "Iltiqa Shortening", "قصر عند التقاء الساكنين",

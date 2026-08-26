@@ -95,9 +95,9 @@ Ordinary second-I and second-U forms are fixed tashil:
 | U | `اَ۟نزِلَ`, source 38:7:1 | 38:8:1 | `ʔ a ʔ̞ u ŋ z i l a ...` |
 | U | `اَ۟لْقِيَ`, source and canonical 54:25:1 | 54:25:1 | `ʔ a ʔ̞ u l q i j a ...` |
 
-Each emits `tashil` on the second hamza in wasl, waqf, and ibtidaa. Disabling
-the extra token changes `ʔ̞` to rendered `ʔ`; it does not remove the eased
-typed state or the rule.
+Each emits `tashil` on the second hamza in wasl, waqf, and ibtidaa. Warsh
+always renders the eased typed onset as `ʔ̞`; `tashil` is not an optional
+extra-phoneme value for this riwayah.
 The ellipses mark continuing spans; any word ending or plural-mim boundary
 outside the hamza meeting follows its independent boundary rule.
 
@@ -192,7 +192,7 @@ lexical waw carrier remains `madd_badal`: under ibdal it fuses with the created
 carrier and the resulting `/u:/` has `ibdal_hamza`, `madd_badal`, and
 `madd_muttasil`; under tashil it remains the muttasil `/u:/` after the eased
 onset.
-Tashil emits `tashil` on that onset even when it renders as plain `ʔ`.
+Tashil emits `tashil` on that onset and renders it as `ʔ̞`.
 In the A+A row, the selected context continues as `احَدٞ مِّنكُم`; ordinary
 tanwin-to-meem idgham owns `/m̃/`. The ellipsis crops the sequence after that
 assimilating onset rather than inventing an isolated final consonant.
@@ -273,5 +273,5 @@ ref, canonical ref, first and second qualities, boundary scope, structural
 owner, and authored-exception owner. Tests assert the exact partitions above,
 all five Aimma sites, the Aajami site, all four triple-hamza sites, both Jaa-Aal
 sites, both kasr-plus-yaa sites, and every boundary state. They must also prove
-that disabling the `tashil` extra token changes only rendering, never the
-typed state, `tashil` occurrence, or source reach.
+that Warsh always renders the eased onset as `ʔ̞` and rejects `tashil` as an
+extra-phoneme request.

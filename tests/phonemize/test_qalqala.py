@@ -2,7 +2,15 @@ from __future__ import annotations
 
 import pytest
 
-from tests.support import Case, R, Site, assert_case, case_runs, isolated, reading
+from tests.support import (
+    Case,
+    R,
+    Site,
+    assert_case,
+    case_runs,
+    isolated,
+    reading,
+)
 
 
 CASES = (

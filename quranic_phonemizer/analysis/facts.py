@@ -52,6 +52,7 @@ def analyse(
     alphabet: Alphabet,
     *,
     extra_phonemes: frozenset[str] = frozenset(),
+    quality_fallbacks: dict | None = None,
 ) -> AnalysisFacts:
     score = session.score
     slots = score.slots()
@@ -73,7 +74,9 @@ def analyse(
             word for word, score_word in enumerate(score.words)
             for _ in score_word.slots
         ),
-        sounds=sound_facts(performance, order, alphabet, extra_phonemes),
+        sounds=sound_facts(
+            performance, order, alphabet, extra_phonemes, quality_fallbacks
+        ),
         sound_index=sound_index,
         occurrences=performance.occurrences,
         occurrence_index=occurrence_index,

@@ -5,10 +5,11 @@ from __future__ import annotations
 from ...engine.classifier import RuleSet
 from ...engine.plan import Phase
 from ...model.address import Riwayah
-from ...rules.annotation import CanonicalColour, Tarqeeq
+from ...rules.annotation import CanonicalColour, Inclination
 from ...rules.boundary import (
     DroppedGlide,
     IwadLength,
+    PausalAlif,
     TaaMarbutaAtWaqf,
     TanweenDrop,
     TanweenIwad,
@@ -17,6 +18,7 @@ from ...rules.boundary import (
 )
 from ...rules.idgham import Idgham
 from ...rules.lam_shamsiyyah import ArticleLam, ArticleShape
+from ...rules.lam import LamWeight
 from ...rules.madd import (
     IltiqaShortening,
     MaddClass,
@@ -24,13 +26,20 @@ from ...rules.madd import (
     MaddLeen,
     MaddSilah,
 )
-from ...rules.warsh_madd import MaddLeenMahmuz, StartedBadal
+from ...rules.warsh_madd import (
+    MaddLeenMahmuz,
+    MaddMimAlJam,
+    MaddYaaZawaid,
+    StartedBadal,
+)
 from ...rules.pausal_glide import PausalGlide
 from ...rules.meem_sakinah import GhunnahMushaddadah, MeemSakinah
 from ...rules.naql import CarriedNaql, Naql
 from ...rules.noon_sakinah import IkhfaaWeight, NoonSakinah
 from ...rules.qalqala import Qalqala
 from ...rules.single_hamza import JoinedIbdal, SuppliedIbdal
+from ...rules.hamza_meetings import HamzaMeetingMadd, HamzaMeetings
+from ...rules.raa import RaaWeight
 from ...rules.tafkheem import Emphasis, Weight
 from ...model.address import Location
 from ...model.canon import Quality
@@ -41,6 +50,9 @@ from ...rules.wasl import (
     WaslHamza,
 )
 from .resources import khilaf, lexicon, rule_tables
+from .hamza_meetings import meeting_rows, rows_by_target
+from .lam import PROFILE as LAM_PROFILE
+from .raa import PROFILE as RAA_PROFILE
 
 #: Warsh repairs a collision with damm when the elided word starts on an
 #: original damm; the shared kasra and fatha defaults stand elsewhere.
@@ -49,6 +61,9 @@ _DAMM_START_REPAIR = {Quality.U: Quality.U}
 #: The `كتابيه إني` boundary reads tahqiq by default: haa stays sakin and
 #: the qata is fully realized, so the general transfer must not claim it.
 _NAQL_TAHQIQ = frozenset({Location(69, 20, 1)})
+_HAMZA_MEETING_STARTS = frozenset(
+    row.canonical for row in meeting_rows() if row.scope != "one_word"
+)
 
 # Canonical locations of مَوْئِلا and الْمَوْءُودَة.  Only the first waw of
 # the latter can satisfy the leen predicate; its following long remains badal.
@@ -67,12 +82,14 @@ def _article(tables) -> ArticleShape:
 
 def _boundary() -> tuple:
     return (
-        Naql(excluded=_NAQL_TAHQIQ),
+        Naql(excluded=_NAQL_TAHQIQ | _HAMZA_MEETING_STARTS),
         CarriedNaql(),
+        HamzaMeetings(rows=rows_by_target()),
         SuppliedIbdal(),
         JoinedIbdal(),
         WaslHamza(),
         SoftenedHamza(),
+        PausalAlif(),
         SpelledBeforeWasl(repairs=_DAMM_START_REPAIR),
         TanweenBeforeWasl(repairs=_DAMM_START_REPAIR),
         TanweenDrop(),
@@ -86,7 +103,6 @@ def _boundary() -> tuple:
 
 def _build() -> RuleSet:
     tables = rule_tables()
-    weight = Weight(always_heavy=tables.always_heavy)
     article = _article(tables)
     return RuleSet(
         {
@@ -105,6 +121,7 @@ def _build() -> RuleSet:
             Phase.LENGTH: (
                 PausalGlide(),
                 IltiqaShortening(),
+                HamzaMeetingMadd(),
                 MaddClass(badal_is_effective=True),
                 MaddClass(additive_arid=True),
                 MaddLeen(mahmuz_is_distinct=True),
@@ -112,11 +129,18 @@ def _build() -> RuleSet:
                 MaddBadal(),
                 StartedBadal(),
                 MaddSilah(),
+                MaddMimAlJam(),
+                MaddYaaZawaid(),
                 IwadLength(),
             ),
             Phase.COLOUR: (
-                Emphasis(weight=weight),
-                Tarqeeq(weight=weight),
+                LamWeight(profile=LAM_PROFILE),
+                Emphasis(weight=Weight(
+                    always_heavy=tables.always_heavy,
+                    raa_enabled=False,
+                )),
+                RaaWeight(profile=RAA_PROFILE),
+                Inclination(),
                 CanonicalColour(),
                 IkhfaaWeight(
                     followers=tables.followers_of_noon,

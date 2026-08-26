@@ -11,9 +11,14 @@ For Warsh through al-Azraq the selected register contains 47 sites:
 - 46 produce joined-only `/i:/` and are absent at waqf;
 - one, `ءَات۪يٰنِۦَ` at canonical `27:36`, produces joined-only `/j a/` and is
   absent at waqf; and
-- among the 46 long-vowel sites, 10 precede hamzat qata and receive
-  `madd_munfasil`, 35 receive `madd_tabii`, and row 7 receives `madd_badal`
-  because its joined yaa follows hamza.
+- all 46 long-vowel sites receive `madd_yaa_zawaid`; alongside it, 10 precede
+  hamzat qata and receive `madd_munfasil`, 35 receive `madd_tabii`, and row 7
+  receives `madd_badal` because its joined yaa follows hamza.
+
+`Madd Silah` is not an appropriate identity for this family: silah names the
+joined extension of pronoun haa. `madd_yaa_zawaid` names the retained extra
+yaa while the ordinary madd classifier continues to say how that long is
+treated.
 
 The classical chapter specifically records the open Warsh yaa in
 `فَمَآ ءَات۪يٰنِۦَ اَ۬للَّهُ` and the deletion on stopping
@@ -29,8 +34,8 @@ Selected source `2:185:11`, canonical `2:186`, is
 
 ```text
 state                         host tokens       effective rule
-wasl                          d a ʕ a: n i:     madd_tabii on i:
-ibtidaa at host and continue  d a ʕ a: n i:     madd_tabii on i:
+wasl                          d a ʕ a: n i:     madd_yaa_zawaid + madd_tabii on i:
+ibtidaa at host and continue  d a ʕ a: n i:     madd_yaa_zawaid + madd_tabii on i:
 waqf on host                  d a ʕ a: n         no final i: and no madd
 ```
 
@@ -39,8 +44,8 @@ Selected source `2:185:9-10`, canonical `2:186`, is
 
 ```text
 state                         relevant tokens              effective rule
-wasl                          ... dd a: ʕ i: ʔ i ð a:     madd_munfasil on i:
-ibtidaa at host and continue  ʔ a dd a: ʕ i: ʔ i ð a:    madd_munfasil on i:
+wasl                          ... dd a: ʕ i: ʔ i ð a:     madd_yaa_zawaid + madd_munfasil on i:
+ibtidaa at host and continue  ʔ a dd a: ʕ i: ʔ i ð a:    madd_yaa_zawaid + madd_munfasil on i:
 waqf on host                  ʔ a dd a: ʕ                 no final i: and no madd
 ```
 
@@ -62,7 +67,8 @@ ibtidaa at host and continue  ʔ a: t ɛ: n i j a lˤlˤ aˤ: h u
 waqf on host                  ʔ a: t ɛ: n
 ```
 
-The extra yaa is `/j/` with fatha, not `/i:/`; it receives no madd rule. The
+The extra yaa is `/j/` with fatha, not `/i:/`; it receives no madd rule,
+including no `madd_yaa_zawaid`. The
 word's yaa-origin medial long is independently owned by the public `dhat_yaa`
 selector: the default `taqlil` face is typed `TAQLIL`, renders `/ɛ:/`, and
 receives `taqlil`, while the `fath` face renders `/a:/` with no inclination
@@ -144,8 +150,9 @@ For an ordinary joined site:
 
 - the authored boundary slot produces `/i:/` in wasl or joined ibtidaa and
   produces no sound at waqf;
-- the result sound receives exactly one effective madd rule:
-  `madd_munfasil` before qata, `madd_badal` at row 7, otherwise `madd_tabii`;
+- the result sound receives `madd_yaa_zawaid` plus exactly one effective madd
+  rule: `madd_munfasil` before qata, `madd_badal` at row 7, otherwise
+  `madd_tabii`;
 - row 7's core occurrence and source projection retain the after-hamza origin;
 - source and cell placements put the madd occurrence on the small-yaa and
   carrier/maddah units that own or present `/i:/`. For munfasil the following

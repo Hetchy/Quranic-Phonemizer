@@ -19,7 +19,10 @@ CASES = (
     # Hafs: هَـٰٓؤُلَآءِ
     # Warsh: هَٰٓؤُلَآءِ
     Case(id="joined-rasm", site=Site.shared("2:31", (12,)), read=joining(),
-         phonemes="h a: ʔ u l a: ʔ i",
+         phonemes=pick(
+             hafs="h a: ʔ u l a: ʔ i",
+             warsh="h a: ʔ u l a: ʔ",
+         ),
          char_rules={"@dagger_alif": R("madd_munfasil"),
                      "ا": R("madd_muttasil")},
          sound_rules={"a:[1]": R("madd_munfasil"),
@@ -27,7 +30,10 @@ CASES = (
     # Hafs: أَهَـٰٓؤُلَآءِ
     # Warsh: أَهَٰٓؤُلَآءِ
     Case(id="interrogative-prefix", site=Site.shared("34:40", (7,)), read=joining(),
-         phonemes="ʔ a h a: ʔ u l a: ʔ i",
+         phonemes=pick(
+             hafs="ʔ a h a: ʔ u l a: ʔ i",
+             warsh="ʔ a h a: ʔ u l a: ʔ",
+         ),
          char_rules=pick(
              hafs_uthmani={"@dagger_alif": R("madd_munfasil"),
                            "ا": R("madd_muttasil")},

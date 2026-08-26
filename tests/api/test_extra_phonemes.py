@@ -30,12 +30,22 @@ def test_the_toggle_changes_no_node_and_no_edge():
     assert off.phonemes() != on.phonemes()
 
 
-def test_tashil_defaults_off():
+def test_hafs_tashil_defaults_off():
     off = Phonemizer().phonemize("41:44")
     on = Phonemizer(extra_phonemes=("tashil",)).phonemize("41:44")
     i = _sound_index(off, lambda s: s.kind.value == "consonant" and s.eased)
     assert off.phonemes()[i] == "ʔ"
     assert on.phonemes()[i] == "ʔ̞"
+
+
+def test_warsh_tashil_is_always_rendered_and_not_an_extra():
+    result = Phonemizer(riwayah="warsh").phonemize("6:19:19")
+    i = _sound_index(result, lambda s: s.kind.value == "consonant" and s.eased)
+    assert result.phonemes()[i] == "ʔ̞"
+    assert result.extra_phonemes == frozenset()
+
+    with pytest.raises(UnknownExtraPhoneme):
+        Phonemizer(riwayah="warsh", extra_phonemes=("tashil",))
 
 
 def test_emphatic_fatha_defaults_off_but_emphatic_alef_is_always_written():

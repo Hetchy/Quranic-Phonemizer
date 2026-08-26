@@ -128,6 +128,7 @@ def assemble(
     alphabet: Alphabet,
     *,
     extra_phonemes: frozenset[str] = frozenset(),
+    quality_fallbacks: dict | None = None,
 ) -> Assembled:
     score = session.score
     word_of_slot, units = _unit_indices(score)
@@ -140,7 +141,9 @@ def assemble(
     sound_of = {sound_id.seq: i for i, sound_id in enumerate(sound_ids)}
     by_id = {sound_id.seq: sound for sound_id, sound in performance.sounds}
     sounds = tuple(
-        _sound(by_id[sound_id.seq], alphabet, extra_phonemes)
+        _sound(
+            by_id[sound_id.seq], alphabet, extra_phonemes, quality_fallbacks
+        )
         for sound_id in sound_ids
     )
 
@@ -226,8 +229,14 @@ def _spellings(inscription: Inscription, glyph_of):
     return tuple(out)
 
 
-def _sound(sound, alphabet: Alphabet, extra_phonemes: frozenset[str]) -> nd.Sound:
-    token = alphabet.token(sound, extra_phonemes=extra_phonemes)
+def _sound(
+    sound, alphabet: Alphabet, extra_phonemes: frozenset[str],
+    quality_fallbacks: dict | None,
+) -> nd.Sound:
+    token = alphabet.token(
+        sound, extra_phonemes=extra_phonemes,
+        quality_fallbacks=quality_fallbacks,
+    )
     match sound:
         case Consonant(letter=l, geminate=g, emphatic=e, ghunnah=gh, eased=ea):
             return nd.Sound(token, nd.SoundKind.CONSONANT, letter=l,

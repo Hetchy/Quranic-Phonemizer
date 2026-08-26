@@ -87,7 +87,7 @@ oracle's `-aa` is the nominative of a word standing in the genitive.
 `tests/conformance/test_warsh_registers.py` asserts the reviewed counts from
 `docs/warsh/research/v2/wasl-hamza.md` and `iltiqa.md`: the canonical start
 register (13,480 onsets, 11,982 A / 1,097 I / 401 U), the sixteen started
-silent-qata forms, the 38-row damm repair register, and the generated tanwin
+silent-qata forms, the 38-row damm connected-form register, and the generated tanwin
 repair family (44 sites, 40 I / 4 U). The runtime start quality is supplied
 by the source wasl mark; the register test reconciles every supplied mark
 against the canonical derivation, whose closed disagreements are the passive
@@ -101,11 +101,10 @@ Known residue deferred to later verticals:
 - The joined outcomes of the sixteen silent-qata words use the connected
   single-hamza chapter and land with that vertical; only their started forms
   are asserted here.
-- The general 1,665-site `iltiqa_haraka` partition (770 A / 381 I / 514 U)
-  remains a documented research invariant. Its tanwin family and damm rows
-  are executable above; the lexical-host family is supplied per site by the
-  source linking haraka and still needs a morphology-backed generator to be
-  counted mechanically.
+- The general 1,665-site connected-vowel partition (770 A / 381 I / 514 U)
+  remains a documented research invariant, not a count of public
+  `iltiqa_haraka` occurrences. Only runtime-inserted tanwin and spelled-name
+  vowels receive that rule; lexical and morphological connected forms do not.
 
 ## Warsh naql registers
 
