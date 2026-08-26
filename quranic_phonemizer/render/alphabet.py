@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 
 from ..dataio import load_yaml, require_keys
+from ..model.address import Riwayah
 from ..model.canon import CanonLetter, Quality
 from ..model.performance import Consonant, Degree, Release, Sound, Vowel
 
@@ -28,6 +29,27 @@ LENGTH = ":"
 EXTRA_PHONEMES = frozenset(
     {"tashil", "emphatic_fatha", "emphatic_ikhfaa", "qalqala_degree", "imala"}
 )
+
+_ALWAYS_RENDERED: dict[Riwayah, frozenset[str]] = {
+    Riwayah.WARSH: frozenset({"tashil"}),
+}
+
+
+def allowed_extra_phonemes(riwayah: Riwayah) -> frozenset[str]:
+    """Optional rendering distinctions accepted for one riwayah."""
+    return EXTRA_PHONEMES - _ALWAYS_RENDERED.get(riwayah, frozenset())
+
+
+def effective_extra_phonemes(
+    riwayah: Riwayah, requested: frozenset[str]
+) -> frozenset[str]:
+    """Rendering distinctions active after riwayah-fixed notation."""
+    unknown = requested - allowed_extra_phonemes(riwayah)
+    if unknown:
+        raise ValueError(
+            f"{sorted(unknown)} is not optional for {riwayah.value}"
+        )
+    return requested | _ALWAYS_RENDERED.get(riwayah, frozenset())
 
 #: `token(sound)` with no `extra_phonemes` argument -- every caller that
 #: predates the toggle -- must keep reading exactly as it does today, which

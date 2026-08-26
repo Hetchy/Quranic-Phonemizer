@@ -200,7 +200,7 @@ the resulting quality or length classification only.
   Hafs so the different repairs and exact exclusions stay adjacent.
 - `test_ibdal.py` owns generic replacement shapes, effects, and reach.
   `test_tashil.py` owns the generic eased-hamza shape, A/U/I nucleus pairing,
-  extra-token fallback, and reach.
+  Hafs-only extra-token fallback, and reach.
 - `test_warsh_naql.py`, `test_warsh_single_hamza.py`, and
   `test_warsh_hamza_meetings.py` own the three Warsh classifiers and their
   closed registers.
@@ -410,7 +410,7 @@ into a mixed-domain catch-all.
 | `hamza/test_iltiqa.py` | Cover shared shortening and ordinary repair | Shared rows plus adjacent Hafs/Warsh U-over-I contrasts | Wasl/iltiqa vertical |
 | `hamza/test_seats.py` | Verify shared canonical hamza-seat semantics | Source selectors may differ; canonical assertion stays shared | Adapter baseline |
 | `hamza/test_ibdal.py` | Verify generic transformation primitives independent of classifier | Small typed fixtures, not a corpus sweep | RuleSet/hamza foundation |
-| `hamza/test_tashil.py` | Verify eased onset plus A/U/I nucleus and rendering fallback | Small typed fixtures, not a corpus sweep | RuleSet/hamza foundation |
+| `hamza/test_tashil.py` | Verify eased onset plus A/U/I nucleus and Hafs rendering fallback | Small typed fixtures, not a corpus sweep | RuleSet/hamza foundation |
 | `hamza/test_istifham_article.py` | Execute the same selector against each riwayah package | Three `VariantCase` rows for the three distinct lexical forms | Variants last |
 | Every file under `nasal/` | Preserve the trigger partitions and pausal-clear recovery branches listed in the main plan | Clean Warsh rows share the file; output picks only where an optional public token differs; stopped idgham/ikhfaa/iqlab states recover clear noon/meem | Adapter baseline |
 | `vowels/inclination/test_quality.py` | Verify typed quality and renderer semantics for both riwayat | Tiny explicit riwayah matrix | Model foundation |

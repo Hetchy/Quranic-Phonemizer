@@ -21,9 +21,8 @@ therefore not reachable yet.
   carriers relengthened by an earlier phase now dispatch through the same
   following-context classifier, producing lazim before a permanent sakin and
   tabii otherwise.
-- Tashil expectations now exercise both renderings: the typed eased onset,
-  occurrence, and source reach persist when the optional `tashil` token is
-  disabled.
+- Tashil expectations use the fixed Warsh rendering `ʔ̞`; the Hafs-only
+  `tashil` extra is rejected for Warsh.
 - Two existing munfasil fixtures that join into an I+I meeting now carry
   Warsh-specific expected output: meeting ibdal fuses the following qata
   carrier while leaving the two preceding madd classifications intact.

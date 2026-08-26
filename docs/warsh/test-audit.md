@@ -423,7 +423,7 @@ collected case is accounted for by its file row.
 | --- | --- |
 | Majraha inclination and its extra token | `phonemize/vowels/inclination/test_quality.py` |
 | Tamanna ishmam | No phonemization behavior case; generated selector metadata only |
-| Aajamiyy tashil and its extra token | `phonemize/hamza/test_tashil.py` |
+| Hafs Aajamiyy tashil and its extra token | `phonemize/hamza/test_tashil.py` |
 | Man Raq, Bal Ran, and Maliyah sakt | `phonemize/test_sakt.py` |
 | Nunji small noon | semantic assertion in `phonemize/nasal/test_ikhfaa.py`; source-sequence fixture in `adapter/` |
 | Iddaratum dagger/seat behavior | semantic assertion in `phonemize/hamza/test_seats.py`; seat projection in `adapter/test_hamza_seats.py` |

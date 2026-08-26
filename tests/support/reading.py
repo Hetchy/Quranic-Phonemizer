@@ -28,6 +28,7 @@ from quranic_phonemizer.phonemize.legacy_views import (
     graphemes_by_id,
     phonemes_by_word,
 )
+from quranic_phonemizer.render.alphabet import effective_extra_phonemes
 from quranic_phonemizer.session import Session as PhonemizeSession
 
 from .boundary import UnreachableWasl, plan_for, reaches_past
@@ -282,7 +283,8 @@ class Reading:
 
 
 def _projections_for(
-    name, script, built, plan, performance, words, extra, *, ref, selection
+    name, script, built, plan, performance, words, requested_extra,
+    render_extra, *, ref, selection
 ):
     session = PhonemizeSession(
         locations=tuple(location for location, _ in words),
@@ -290,7 +292,10 @@ def _projections_for(
         boundaries=plan, performance=performance,
     )
     assembled = assemble(
-        session, _pen(name, script), _alphabet(), extra_phonemes=extra,
+        session,
+        _pen(name, script),
+        _alphabet(),
+        extra_phonemes=render_extra,
         quality_fallbacks=_recitation(name).quality_fallbacks,
     )
     metadata = dict(
@@ -298,7 +303,7 @@ def _projections_for(
         riwayah=name.value,
         script=script.value,
         variant={option.khilaf.value: option.name for option in selection.options},
-        extra_phonemes=extra,
+        extra_phonemes=requested_extra,
     )
     bundle = build_bundle(session, **metadata)
     return assembled, bundle, session, metadata
@@ -314,8 +319,8 @@ def reading(
 ) -> Reading:
     """Build and perform one site under one riwayah and one boundary plan.
 
-    `extra_phonemes` left unnamed keeps `phonemes`/`sounds` reading the
-    legacy default; naming it, even as `()`, gates all four toggles.
+    `extra_phonemes` left unnamed keeps the legacy optional defaults. Fixed
+    riwayah notation, including Warsh tashil, remains active either way.
     """
     name = Riwayah(riwayah)
     recitation_ = _recitation(name)
@@ -341,19 +346,20 @@ def reading(
         **boundary,
     )
     performance = recitation_.perform(built.score, plan, selection=selection)
-    extra = (
+    requested_extra = (
         frozenset({"emphatic_fatha"})
         if extra_phonemes is None
         else frozenset(extra_phonemes)
     )
+    extra = effective_extra_phonemes(name, requested_extra)
     assembled, bundle, cell_session, cell_metadata = _projections_for(
         name, script, built, plan, performance, words,
-        extra,
+        requested_extra, extra,
         ref=f"{address.verse.surah}:{address.verse.ayah}",
         selection=selection,
     )
     return Reading(
         riwayah, script, built, performance, words, assembled, bundle,
         cell_session, cell_metadata,
-        uses_extra_phonemes=extra_phonemes is not None,
+        uses_extra_phonemes=(extra_phonemes is not None or name is Riwayah.WARSH),
     )

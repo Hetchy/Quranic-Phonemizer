@@ -156,7 +156,7 @@ For `ءَآلذَّكَرَيْنِ`, 6:143, the relevant results are:
 | Selection | Relevant sequence | Rule reach |
 | --- | --- | --- |
 | `ibdal` | `ʔ a: ðð a k a rˤ aˤ j n i` | `ibdal_hamza` and `madd_lazim` both reach the single replacement vowel and responsible source characters; ordinary article assimilation owns `/ðð/`, and ordinary raa tafkheem colors its following A. |
-| `tashil` | `ʔ a ʔ̞ a ðð a k a rˤ aˤ j n i` | `tashil` reaches the eased onset and source hamza even when the extra token is rendered as plain `ʔ`; the same ordinary article and raa rules apply. |
+| `tashil` | `ʔ a ʔ̞ a ðð a k a rˤ aˤ j n i` | `tashil` reaches the eased onset and source hamza; Warsh always renders it as `ʔ̞`. The same ordinary article and raa rules apply. |
 
 The internal hamza choice is unchanged at wasl, waqf on the word, and ibtidaa;
 the selector concerns an internal meeting, not a preceding word boundary. The

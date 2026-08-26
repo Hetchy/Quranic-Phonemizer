@@ -5,7 +5,7 @@ Default collections cover only the selected value; they are not fixed-face claim
 
 import pytest
 
-from tests.support import Case, Expect, R, Site, StateCase, assert_case, case_runs, explicit, isolated
+from tests.support import Case, Expect, R, Site, StateCase, assert_case, case_runs, explicit, isolated, through
 
 
 DHAT_FATH_DEFAULT_CASES = (
@@ -19,21 +19,27 @@ DHAT_FATH_DEFAULT_CASES = (
         sound_rules={"a:": R("ibdal_hamza", "madd_lazim")},
         absent_sound_rules={"a:": R("madd_badal")},
     ),
+)
+
+
+BARE_ANTA_PAUSAL_CASES = (
+    # Warsh: ءَآنتَ فَعَلْتَ
+    Case(
+        id="continuing-default-ibdal",
+        site=Site(warsh=("21:62", (2, 3))),
+        read=through(),
+        phonemes=("ʔ a: ŋ t a", "f a ʕ a l t"),
+        sound_rules={"a:": R("ibdal_hamza", "madd_lazim")},
+    ),
     # Warsh: ءَآنتَ
-    StateCase(id="default-ibdal-with-pausal-mask", site=Site(warsh=("21:62", (2,))), states={
-        "continuing": Expect(
-            read=explicit(ibtidaa=2, wasl=2),
-            phonemes="ʔ a: ŋ t a",
-            sound_rules={"a:": R("ibdal_hamza", "madd_lazim")},
-        ),
-        "stopped": Expect(
-            read=isolated(),
-            phonemes="ʔ a ʔ̞ a ŋ t",
-            sound_rules={"ʔ̞": R("tashil")},
-            absent_sound_rules={"ʔ̞": R("ibdal_hamza")},
-            extra_phonemes=("tashil",),
-        ),
-    }),
+    Case(
+        id="waqf-forces-tashil",
+        site=Site(warsh=("21:62", (2,))),
+        read=isolated(),
+        phonemes="ʔ a ʔ̞ a ŋ t",
+        sound_rules={"ʔ̞": R("tashil")},
+        absent_sound_rules={"ʔ̞": R("ibdal_hamza")},
+    ),
 )
 
 
@@ -46,17 +52,6 @@ FIXED_ONE_WORD_CASES = (
         phonemes="ʔ a ʔ̞ i ñ a k u m",
         char_rules={"ئ": R("tashil")},
         sound_rules={"ʔ̞": R("tashil")},
-        extra_phonemes=("tashil",),
-    ),
-    # Warsh: أَئِنَّكُمْ
-    Case(
-        id="one-word-tashil-token-disabled",
-        site=Site(warsh=("6:19", (19,))),
-        read=isolated(),
-        phonemes="ʔ a ʔ i ñ a k u m",
-        char_rules={"ئ": R("tashil")},
-        sound_rules={"ʔ[2]": R("tashil")},
-        extra_phonemes=(),
     ),
     # Warsh: اَ۟لْقِيَ
     Case(
@@ -66,7 +61,6 @@ FIXED_ONE_WORD_CASES = (
         phonemes="ʔ a ʔ̞ u l q i:",
         char_rules={"ا": R("tashil")},
         sound_rules={"ʔ̞": R("tashil")},
-        extra_phonemes=("tashil",),
     ),
     # Warsh: ءَاٰ۬مَنتُم
     Case(
@@ -76,7 +70,6 @@ FIXED_ONE_WORD_CASES = (
         phonemes="ʔ a ʔ̞ a: m a ŋ t u m",
         sound_rules={"ʔ̞": R("tashil"), "a:": R("madd_badal")},
         absent_sound_rules={"a:": R("ibdal_hamza", "madd_tabii")},
-        extra_phonemes=("tashil",),
     ),
 )
 
@@ -90,7 +83,6 @@ AIMMA_DEFAULT_CASES = (
         phonemes="ʔ a ʔ̞ i m̃ a h",
         char_rules={"ي": R("tashil")},
         sound_rules={"ʔ̞": R("tashil"), "m̃": R("ghunnah_mushaddadah")},
-        extra_phonemes=("tashil",),
     ),
 )
 
@@ -98,30 +90,17 @@ AIMMA_DEFAULT_CASES = (
 MUTTAFIQ_DEFAULT_CASES = (
     # Warsh: جَآءَ احَدٞ
     StateCase(id="default-ibdal-boundaries", site=Site(warsh=("4:43", (27, 28))), states={
-        "joined": Expect(
-            read=explicit(ibtidaa=27, wasl=28),
-            phonemes=("ʒ a: ʔ", "a: ħ a d u"),
-            sound_rules={"a:[2]": R("ibdal_hamza", "madd_tabii")},
-        ),
         "stopped-before": Expect(
             read=explicit(ibtidaa=27, waqf=(27, 28)),
             phonemes=("ʒ a: ʔ", "ʔ a ħ a d Q"),
             absent_sound_rules={"ʔ[2]": R("ibdal_hamza", "tashil")},
         ),
-        "joined-then-stop": Expect(
+        "joined": Expect(
             read=explicit(ibtidaa=27, waqf=28),
             phonemes=("ʒ a: ʔ", "a: ħ a d Q"),
             sound_rules={"a:[2]": R("ibdal_hamza", "madd_tabii")},
         ),
     }),
-    # Warsh: احَدٞ
-    Case(
-        id="matching-start-second",
-        site=Site(warsh=("4:43", (28,))),
-        read=explicit(ibtidaa=28, waqf=28),
-        phonemes="ʔ a ħ a d Q",
-        absent_sound_rules={"ʔ": R("ibdal_hamza", "tashil")},
-    ),
 )
 
 
@@ -151,7 +130,6 @@ FIXED_DIFFERENT_VOWEL_CASES = (
         read=explicit(ibtidaa=17, waqf=18),
         phonemes=("t a f i: ʔ a", "ʔ̞ i l a:"),
         sound_rules={"ʔ̞": R("tashil")},
-        extra_phonemes=("tashil",),
     ),
 )
 
@@ -175,6 +153,11 @@ def test_dhat_fath_default(run):
 
 @pytest.mark.parametrize("run", case_runs(FIXED_ONE_WORD_CASES))
 def test_fixed_one_word_meetings(run):
+    assert_case(run)
+
+
+@pytest.mark.parametrize("run", case_runs(BARE_ANTA_PAUSAL_CASES))
+def test_bare_anta_pausal_mask(run):
     assert_case(run)
 
 

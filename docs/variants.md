@@ -61,9 +61,9 @@ participants, or source ownership of the tajwid rule.
 | `istifham_article` | `ibdal`, `tashil`; default `ibdal` in Hafs and Warsh | `ءَآلذَّكَرَيْنِ` at 6:143 and 6:144, `ءَآلْـَٔـٰنَ` at 10:51 and 10:91, and `ءَآللَّهُ` at 10:59 and 27:59; all states | `ibdal` replaces the article hamza. Both `ibdal_hamza` and `madd_lazim` reach the replacement sound and responsible source character. `tashil` keeps an eased hamza and always classifies tashil. | [Six forms and both faces](https://ablibrary.net/book_content/7278/72) |
 | `maliyah_halak` | `sakt`, `idgham`; default `sakt` in Hafs and Warsh | `مَالِيَهْ هَلَكَ`, 69:28 -> 69:29; wasl only | `sakt` realizes the izhar face by keeping the two haa sounds apart with a breathless pause. `idgham` merges them into one geminated haa. | [Both faces and their route correlation](https://islamweb.net/ar/library/index.php?ID=18&bk_no=245), [Hafs performance account](https://www.islamweb.net/ar/library/content/231/68/) |
 
-The `tashil` extra phoneme changes only the rendered token. A tashil selection
-still carries the typed eased-hamza state and the `tashil` rule when that extra
-token is disabled.
+The `tashil` extra phoneme is a Hafs-only rendering control. Warsh always
+renders an eased hamza as `ʔ̞`, so `tashil` is not accepted in its
+`extra_phonemes` set.
 
 When ibdal creates a long vowel, `ibdal_hamza` and the applicable madd rule
 both reach the resulting sound and the responsible source character. The madd
@@ -277,8 +277,9 @@ The following distinctions are deliberately outside the variant API:
 - Madd counts, leen counts, silah counts, and count-dependent face matrices do
   not alter this phonemizer's sound-length model. [Warsh count catalogue and
   sources](warsh/research/v2/madd-counts.md)
-- `imala` and `tashil` are extra-phoneme rendering controls. They do not remove
-  the typed sound feature or named rule. [Phoneme and rule
+- `imala` is an extra-phoneme rendering control. `tashil` is such a control
+  only for Hafs; Warsh always renders its typed eased hamza as `ʔ̞`. Neither
+  changes the typed sound feature or named rule. [Phoneme and rule
   contract](warsh/research/v2/phoneme-rule-inventory.md)
 - Warsh Yaseen-noon is fixed idgham. [Al-Wafi, opening-letter
   junctions](https://www.islamweb.net/amp/ar/library/content/245/26/)

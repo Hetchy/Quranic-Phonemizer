@@ -44,6 +44,10 @@ Every result identifies the request and the choices that produced it:
 | `schema_version` | Version of the public document shape |
 | `canon_digest` | Digest of the canonical passage |
 
+`extra_phonemes` contains only optional distinctions accepted by the selected
+riwayah. Warsh tashil is fixed notation: eased hamzas always render as `ʔ̞`,
+and requesting `tashil` as an extra is invalid.
+
 The canonical digest is independent of public array indices. It identifies
 the canonical reading used to build the result, not a particular projection.
 

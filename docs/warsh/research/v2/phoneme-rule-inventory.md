@@ -209,7 +209,7 @@ silence, rather than copying every core participant onto every glyph.
 | `taghliz` | The lam sound and its dependent A-vowel sound. Transformed cells place the occurrence on the lam and vowel/carrier columns, but not on a composite tanwin column. |
 | `tafkheem`, `tarqeeq` on raa | The raa sound and its dependent A-vowel sound. Transformed cells place the occurrence on the raa and vowel/carrier columns, but not on a composite tanwin column. |
 | `tarqeeq` on an owned lam choice | The lam and dependent A sounds and their transformed columns. Ordinary unowned light lam emits no `tarqeeq`. |
-| `tashil` | The eased consonant sound and the responsible hamza source, even when rendered as plain `ʔ`. |
+| `tashil` | The eased consonant sound and the responsible hamza source; Warsh renders the sound as `ʔ̞`. |
 | `ibdal_hamza` | The replacement vowel or consonant sound and every source unit that creates or selects it: the replaced hamza or replacement spelling, plus the realized wasl unit or immediately preceding vowel witness when that context determines the result. |
 | `madd_badal` | The resulting long-vowel sound, its carrier or replacement source, and the source hamza provenance that makes it badal. A transformed hamza does not remove that reach. |
 | Effective madd after ibdal or on a badal carrier | The resulting long-vowel sound and the same source units that own the created carrier, plus any further causal unit required by the effective classification, such as the following fixed sukun for `madd_lazim`. |
@@ -286,18 +286,18 @@ Warsh package binds it with the al-Azraq matcher and exception data. Shared
 mim-al-jam data creates additional qualifying vowels.
 
 Riwayah-scoped binding is also the ownership boundary for defaults and optional
-rendering. A Warsh package supplies kubra's taqlil fallback and its default
-extra-phoneme set; the shared renderer receives those values without importing
-or comparing a riwayah enum.
+rendering. A Warsh package supplies kubra's taqlil fallback and fixes tashil to
+the eased `ʔ̞` token; the shared renderer receives those values without
+inferring them from the sound alone.
 
 The public setting distinguishes omission from an exact override:
 
-- `extra_phonemes=None` resolves the owning riwayah's defaults; and
+- `extra_phonemes=None` resolves the owning riwayah's optional defaults; and
 - an explicit tuple is the complete requested set, including an empty tuple
   which disables every optional token distinction.
 
-This distinction is required so a caller can disable a Warsh default without
-changing the underlying eased, inclined, or emphatic sound facts.
+Fixed riwayah notation is outside that set: Warsh tashil remains `ʔ̞`, and
+requesting `tashil` as an extra is invalid.
 
 ## Conformance checks
 
