@@ -45,6 +45,7 @@ _DEFAULT_SCRIPT = {
     Riwayah.WARSH: Script.UTHMANI,
 }
 _SPELLINGS = ("source", "transformed")
+_SYNTHETIC_STOP_SIGNS = ("verse",)
 
 
 class UnknownExtraPhoneme(ValueError):
@@ -79,7 +80,9 @@ def available_stop_signs(
         entry.advice for entry in inventory.marks.values()
         if entry.advice is not None
     }
-    return tuple(advice.value for advice in StopAdvice if advice in declared)
+    return _SYNTHETIC_STOP_SIGNS + tuple(
+        advice.value for advice in StopAdvice if advice in declared
+    )
 
 
 def available_variants(riwayah: str) -> dict[str, dict[str, object]]:

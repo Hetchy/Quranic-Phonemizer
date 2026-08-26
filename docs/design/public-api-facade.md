@@ -155,10 +155,11 @@ reader.available_variants
 reader.tajweed_rules
 ```
 
-`available_stop_signs` returns the stop-advice names accepted by this reader's
-`stop_signs` request argument. The names are derived from the selected
-`(riwayah, script)` inventory, not from a process-wide enum: each script
-authors its own subset and scalar mapping.
+`available_stop_signs` returns the names accepted by this reader's
+`stop_signs` request argument. Every reader includes the synthetic `verse`
+selector. The remaining names come from the selected `(riwayah, script)`
+inventory, not from a process-wide enum: each script authors its own subset
+and scalar mapping.
 `available_variants` lists only the selected riwayah's khilaf points and
 choices. `tajweed_rules` lists only rules the selected riwayah declares it can
 emit, followed by its published silence reasons.
@@ -168,15 +169,15 @@ The currently packaged stop-sign catalogues are explicit contract fixtures:
 ```python
 Phonemizer(riwayah="hafs", script="uthmani").available_stop_signs
 # (
-#     "preferred_continue", "preferred_stop", "optional_stop",
+#     "verse", "preferred_continue", "preferred_stop", "optional_stop",
 #     "compulsory_stop", "prohibited_stop", "either_stop",
 # )
 
 Phonemizer(riwayah="hafs", script="indopak").available_stop_signs
-# the same six names plus "permitted_stop"
+# the same seven names plus "permitted_stop"
 
 Phonemizer(riwayah="warsh", script="uthmani").available_stop_signs
-# ("optional_stop",)
+# ("verse", "optional_stop")
 ```
 
 The packaged Warsh Uthmani source contains U+06D6 `ۖ` 9,948 times. It is a
@@ -186,6 +187,10 @@ caller addresses it with `stop_signs=("optional_stop",)`. The resulting
 boundary exposes the exact `stop_sign="ۖ"` and
 `stop_advice=StopAdvice.OPTIONAL_STOP`. `stop_refs` remains available for
 explicit word-addressed stops.
+
+`verse` restores the legacy cross-ayah behavior without pretending that an
+ayah boundary is an inventory-authored stop-advice glyph. It stops after each
+selected source ayah in a multi-ayah request.
 
 The existing root functions may remain as explicit metadata queries:
 
@@ -209,7 +214,7 @@ Phonemizer(riwayah="warsh").analyse(
     stop_signs=("preferred_stop",),
 )
 # UnknownStopSign: ['preferred_stop'] is not available for warsh/uthmani;
-# available stop signs: ['optional_stop']
+# available stop signs: ['verse', 'optional_stop']
 ```
 
 `UnknownStopSign` is a public `ValueError`. Multiple unknown or unavailable
@@ -495,9 +500,9 @@ payload came from the facade or the current backend composition.
   `stop_sign` source character owned by its boundary.
 - Prove on corpus and focused fixtures that all 9,948 Warsh occurrences remain
   exact source text, become typed stop signs rather than generic separators,
-  and make an internal boundary stop only when `optional_stop` or an explicit
-  `stop_refs` request applies; the passage-final boundary retains its ordinary
-  mandatory stop.
+  and make an internal boundary stop only when `verse`, `optional_stop`, or an
+  explicit `stop_refs` request applies; the passage-final boundary retains its
+  ordinary mandatory stop.
 - Refactor internal construction so `AnalysisResult`, source,
   highlights, and cells share one facts/inscription/bundle state.
 - Keep existing builder functions callable and tested.
@@ -542,8 +547,8 @@ access tests are therefore part of this step rather than deferred facade tests.
   wiring, not a website API redesign.
 - Replace the website's process-wide default stop list with names from the
   configured `reader.available_stop_signs`. Preserve today's Hafs defaults.
-  Publish Warsh `optional_stop` as the name for its `ۖ` glyph; the UI may
-  submit that class or explicit word stops.
+  Publish `verse` for every reader and Warsh `optional_stop` as the name for
+  its `ۖ` glyph; the UI may submit either class or explicit word stops.
 - Publish the selected configuration's stop-sign, variant, and rule catalogues
   from `/api/meta`; the frontend must not reuse the Hafs catalogue for Warsh.
 - Keep the backend's Digital Khatt override as host presentation data; it must
@@ -582,12 +587,11 @@ access tests are therefore part of this step rather than deferred facade tests.
   riwayah;
 - no configured catalogue includes a value belonging only to another
   configuration;
-- Warsh Uthmani publishes exactly `optional_stop` for `ۖ`, accepts both
-  `stop_signs=()` and `stop_signs=("optional_stop",)`, reports the glyph and
-  `StopAdvice.OPTIONAL_STOP` on the native boundary, and continues to accept valid
-  `stop_refs`;
+- Warsh Uthmani publishes `verse` plus `optional_stop` for `ۖ`, accepts both
+  selectors, reports the glyph and `StopAdvice.OPTIONAL_STOP` on the native
+  boundary, and continues to accept valid `stop_refs`;
 - requesting `preferred_stop` for Warsh raises `UnknownStopSign` and reports
-  `optional_stop` as the exact available class;
+  `verse` and `optional_stop` as the exact available classes;
 - an invalid stop class for Hafs reports the selected script and the exact
   available values;
 - Invalid arguments raise stable, user-facing errors.
@@ -653,9 +657,9 @@ The facade is ready when all of the following are true:
    `build_source_view`, `build_cell_view`, or `pen_for`.
 4. Native DTOs and IDs remain unchanged.
 5. Stop-sign catalogues and validation are scoped by `(riwayah, script)`;
-   variant and rule catalogues are scoped by riwayah; Warsh Uthmani exposes
-   `optional_stop` for `ۖ` and supports both that class and `stop_refs` for
-   requested stops.
+   every reader exposes `verse`; variant and rule catalogues are scoped by
+   riwayah; Warsh Uthmani exposes `optional_stop` for `ۖ` and supports that
+   class, `verse`, and `stop_refs` for requested stops.
 6. The website backend uses only the facade and produces equivalent analysis,
    cells, text, phonemes, stops, and Digital Khatt data for the same requests.
 7. `phonemize()`, `PhonemizeResult`, public graph exports, alignment,

@@ -136,21 +136,22 @@ Warsh: m `a` l i k i j a w m i dd i: n
 
 ## Waqf
 
-Use `stop_signs` to apply waqf at mushaf signs and `stop_refs` to stop after exact words:
+Use `verse` to stop at every ayah end in a range. Mushaf sign keys and exact
+word references can add other stops:
 
 ```python
+hafs.analyse("1:4-1:5", stop_signs=("verse",))
 hafs.analyse("68:33", stop_signs=("optional_stop",))
 hafs.analyse("2:255", stop_refs=("2:255:7",))
 ```
 
-This applies waqf to `2:255:7` and ibtidaa to `2:55:8`, or any words with `ۚ ` in `68:33`, changing phonemes and tajweed rules accordingly.
-
-Note the first and last word of a request always apply ibtidaa and waqf respectively.
+The first word always starts in ibtidaa. The last word always ends in waqf.
 
 `reader.available_stop_signs` gives the keys valid for that reader. Hafs uses:
 
 | Stop key | Sign |
 | :--- | :---: |
+| `verse` | ۝ |
 | `preferred_continue` | ۖ |
 | `preferred_stop` | ۗ |
 | `optional_stop` | ۚ |
@@ -158,25 +159,26 @@ Note the first and last word of a request always apply ibtidaa and waqf respecti
 | `prohibited_stop` | ۙ |
 | `either_stop` | ۛ |
 
-Warsh exposes only `optional_stop`ۖ
+Warsh also supports `verse`. Its only written stop-sign key is
+`optional_stop`, rendered as ۖ.
 
 ## Analysis
 
 The phonemizer exposes more detailed analysis, breakdowns, relationships and rules:
 
 ```python
-result = hafs.analyse("107:4")
+result = hafs.analyse("112:2")
 
 print(result.text())
 print(" ".join(result.phonemes()))
-print([occurrence.rule_id.value for occurrence in result.rule_occurrences])
+print(sorted({occurrence.rule_id.value for occurrence in result.rule_occurrences}))
 ```
 
 ```text
-فَوَيْلٌ لِّلْمُصَلِّينَ
-f a w a j l u ll i l m u sˤ a ll i: n
-['waqf_diacritic_drop', 'idgham_bila_ghunnah', 'lam_qamariyyah',
- 'izhar', 'madd_arid_lissukun', 'tafkheem']
+ٱللَّهُ ٱلصَّمَدُ
+ʔ a lˤlˤ aˤ: h u sˤsˤ a m a d Q
+['hamza_wasl_fatha', 'hamza_wasl_silent', 'lam_shamsiyyah', 'madd_tabii',
+ 'qalqala_kubra', 'tafkheem', 'waqf_diacritic_drop']
 ```
 
 The core records are available directly:
@@ -197,21 +199,15 @@ highlights = result.highlights()
 cells = result.cells(spelling="transformed")
 ```
 
-The transformed view contains 19 columns. These are the columns carrying a rule, a spelling change, or shared sound presentation:
+Here is the transformed cell view without its internal IDs:
 
-| Column | Text | Status | Rule occurrence | Owns | Presents |
-| ---: | :---: | --- | --- | --- | --- |
-| 7 | `ٌ` | `present` | `1 idgham_bila_ghunnah` | `6` | `7` |
-| 8 | `لّ` | `present` | `1 idgham_bila_ghunnah` | `7` | |
-| 10 | `لْ` | `present` | `2 lam_qamariyyah` | `9` | |
-| 14 | `ص` | `present` | `5 tafkheem` | `12` | |
-| 15 | `َ` | `present` | `5 tafkheem` | `13` | |
-| 17 | `ِ` | `present` | | | `15` |
-| 18 | `ي` | `present` | `4 madd_arid_lissukun` | `15` | |
-| 19 | `نْ` | `replaced` | `3 izhar` | `16` | |
-| 20 | `َ` | `dropped` | `0 waqf_diacritic_drop` | | |
+| Transformed cells | Phonemes | Changes | Rules |
+| :--- | :--- | :--- | :--- |
+| `أ` `َ` `ل` `لّ` `َ` `ٰ` `ه` `ُ` | `ʔ a lˤlˤ aˤ: h u` | Spoken hamza and fatha replace the opening wasl; madd is added | `hamza_wasl_fatha`, `lam_shamsiyyah`, `madd_tabii`, `tafkheem` |
+| ~~`ٱ`~~ `ل` `صّ` `َ` `م` `َ` `دْ` ~~`ُ`~~ | `sˤsˤ a m a d Q` | Wasl alif and final damma drop; final dal takes sukun | `hamza_wasl_silent`, `lam_shamsiyyah`, `tafkheem`, `qalqala_kubra`, `waqf_diacritic_drop` |
 
-The first boundary bridges columns 7 and 8 through sound 7 and rule occurrence 1. IDs remain valid across the core analysis, source view, highlights, and cells.
+The article lam merges into sad, producing `sˤsˤ`. Struck cells are retained
+for alignment but are not pronounced.
 
 `document()` returns JSON-compatible schema 2 documents for the analysis and its projections. See the [public API reference](docs/public-api.md) for every record and field.
 

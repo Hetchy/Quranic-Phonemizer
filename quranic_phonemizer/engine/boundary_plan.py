@@ -5,7 +5,7 @@ Operates on per-word advice already extracted from the writing, not on a
 """
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Collection, Sequence
 
 from ..model.address import BoundaryPlan, Junction, Location
 from ..model.canon import Score
@@ -23,18 +23,21 @@ def plan_from_request(
     stop_refs: Sequence[str] = (),
     *,
     score: Score | None = None,
+    verse_ends: Collection[Location] = (),
 ) -> BoundaryPlan:
     """`locations` is `advice` and `score.words` in the same order, so a
     caller's stop-sign class and a caller's word ref both index it."""
-    requested = _parse_stop_signs(stop_signs)
+    requested, stop_at_verse = _parse_stop_signs(stop_signs)
     at_refs = frozenset(stop_refs)
 
     sakt = _sakt_flags(score, len(advice))
     junctions = []
     for index, word_advice in enumerate(advice):
         last = index == len(advice) - 1
-        asked = (word_advice is not None and word_advice in requested) or (
-            str(locations[index]) in at_refs
+        asked = (
+            (stop_at_verse and locations[index] in verse_ends)
+            or (word_advice is not None and word_advice in requested)
+            or str(locations[index]) in at_refs
         )
         if last:
             junctions.append(Junction.EDGE)
@@ -48,10 +51,16 @@ def plan_from_request(
     return BoundaryPlan(tuple(junctions))
 
 
-def _parse_stop_signs(stop_signs: Sequence[str]) -> set[StopAdvice]:
+def _parse_stop_signs(
+    stop_signs: Sequence[str],
+) -> tuple[set[StopAdvice], bool]:
     requested: set[StopAdvice] = set()
     unknown: list[str] = []
+    stop_at_verse = False
     for sign in stop_signs:
+        if sign == "verse":
+            stop_at_verse = True
+            continue
         try:
             requested.add(StopAdvice(sign))
         except ValueError:
@@ -59,9 +68,9 @@ def _parse_stop_signs(stop_signs: Sequence[str]) -> set[StopAdvice]:
     if unknown:
         raise UnknownStopError(
             f"unknown stop sign {sorted(unknown)}; expected some of "
-            f"{[m.value for m in StopAdvice]}"
+            f"{['verse', *(m.value for m in StopAdvice)]}"
         )
-    return requested
+    return requested, stop_at_verse
 
 
 def all_join(word_count: int) -> BoundaryPlan:

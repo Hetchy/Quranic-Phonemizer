@@ -65,13 +65,14 @@ The packaged stop catalogues are:
 
 | Configuration | Stop classes |
 | --- | --- |
-| Hafs/Uthmani | `preferred_continue`, `preferred_stop`, `optional_stop`, `compulsory_stop`, `prohibited_stop`, `either_stop` |
+| Hafs/Uthmani | `verse`, `preferred_continue`, `preferred_stop`, `optional_stop`, `compulsory_stop`, `prohibited_stop`, `either_stop` |
 | Hafs/IndoPak | the Hafs/Uthmani classes plus `permitted_stop` |
-| Warsh/Uthmani | `optional_stop` |
+| Warsh/Uthmani | `verse`, `optional_stop` |
 
 Warsh Uthmani authors `ۖ` as `optional_stop`. The source character and its
 boundary retain that exact glyph and `StopAdvice.OPTIONAL_STOP` whether or not
-the caller selects the stop class.
+the caller selects the stop class. `verse` is a synthetic selector shared by
+all scripts; it stops at every ayah boundary in the requested range.
 
 ## Requests and stop plans
 
@@ -84,8 +85,8 @@ result = reader.analyse(
 ```
 
 `ref` may address one word, verse, surah, or same-depth range. `stop_signs`
-selects stop-advice classes. `stop_refs` selects exact word references. An
-empty tuple is valid for either option.
+selects `verse` or stop-advice classes. `stop_refs` selects exact word
+references. An empty tuple is valid for either option.
 
 References use the selected script's own ayah and word coordinates. The same
 passage can therefore have a different reference in another riwayah. Word

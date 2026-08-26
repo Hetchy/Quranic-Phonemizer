@@ -5,7 +5,7 @@ the one call site that hands it the assembled request's own words.
 """
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Collection, Sequence
 
 from ..engine.boundary_plan import plan_from_request
 from ..model.address import BoundaryPlan, Location
@@ -20,7 +20,9 @@ def resolve_boundaries(
     *,
     stop_signs: Sequence[str] = (),
     stop_refs: Sequence[str] = (),
+    verse_ends: Collection[Location] = (),
 ) -> BoundaryPlan:
     return plan_from_request(
-        advice, locations, stop_signs, stop_refs, score=score
+        advice, locations, stop_signs, stop_refs,
+        score=score, verse_ends=verse_ends,
     )
