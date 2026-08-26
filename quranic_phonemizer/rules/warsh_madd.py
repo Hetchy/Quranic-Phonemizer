@@ -7,8 +7,9 @@ from ..engine.neighbourhood import Neighbourhood
 from ..engine.plan import Classify, Phase, Plan, Verdict, mint
 from ..model.address import BoundaryPlan, Location, SlotId
 from ..model.canon import CanonLetter as L
-from ..model.canon import Onset, Quality, Rule
+from ..model.canon import Annotation, Onset, Quality, Rule
 from ..model.performance import Aspect, Occurrence
+from .madd import _madd_of
 
 
 @dataclass(frozen=True, slots=True)
@@ -77,4 +78,77 @@ class MaddLeenMahmuz:
         )
 
 
-__all__ = ["MaddLeenMahmuz", "StartedBadal"]
+@dataclass(frozen=True, slots=True)
+class MaddMimAlJam:
+    """Classify the joined-only long of the plural-pronoun mim.
+
+    The effective madd beside it remains munfasil; this rule names why the
+    carrier exists, in parallel with pronoun-haa silah.
+    """
+
+    rule: Rule = Rule.MADD_MIM_AL_JAM
+    phase: Phase = Phase.LENGTH
+    triggers: frozenset = frozenset({Annotation.MIM_AL_JAM})
+    emits: frozenset = frozenset({Rule.MADD_MIM_AL_JAM})
+
+    def look(
+        self, near: Neighbourhood, plan: Plan, at: SlotId,
+        boundaries: BoundaryPlan,
+    ) -> Verdict | None:
+        slot = near.slot(at)
+        if (
+            slot is None
+            or Annotation.MIM_AL_JAM not in slot.annotations
+            or not slot.nucleus.is_joined_only_long
+            or slot.nucleus.quality is not Quality.U
+            or _madd_of(near, plan, at, boundaries) is None
+        ):
+            return None
+        return Verdict(
+            Occurrence(
+                mint(Rule.MADD_MIM_AL_JAM, at), Rule.MADD_MIM_AL_JAM, (at,)
+            ),
+            (),
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class MaddYaaZawaid:
+    """Classify a yaa-zawaid long retained only in a joined reading.
+
+    Its effective madd remains tabii, munfasil, or badal. The exceptional
+    consonantal Naml yaa is annotated by the projection but is not a madd.
+    """
+
+    rule: Rule = Rule.MADD_YAA_ZAWAID
+    phase: Phase = Phase.LENGTH
+    triggers: frozenset = frozenset({Annotation.YAA_ZAWAID})
+    emits: frozenset = frozenset({Rule.MADD_YAA_ZAWAID})
+
+    def look(
+        self, near: Neighbourhood, plan: Plan, at: SlotId,
+        boundaries: BoundaryPlan,
+    ) -> Verdict | None:
+        slot = near.slot(at)
+        if (
+            slot is None
+            or Annotation.YAA_ZAWAID not in slot.annotations
+            or not slot.nucleus.is_joined_only_long
+            or slot.nucleus.quality is not Quality.I
+            or _madd_of(near, plan, at, boundaries) is None
+        ):
+            return None
+        return Verdict(
+            Occurrence(
+                mint(Rule.MADD_YAA_ZAWAID, at), Rule.MADD_YAA_ZAWAID, (at,)
+            ),
+            (),
+        )
+
+
+__all__ = [
+    "MaddLeenMahmuz",
+    "MaddMimAlJam",
+    "MaddYaaZawaid",
+    "StartedBadal",
+]

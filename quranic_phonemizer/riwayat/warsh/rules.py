@@ -25,7 +25,12 @@ from ...rules.madd import (
     MaddLeen,
     MaddSilah,
 )
-from ...rules.warsh_madd import MaddLeenMahmuz, StartedBadal
+from ...rules.warsh_madd import (
+    MaddLeenMahmuz,
+    MaddMimAlJam,
+    MaddYaaZawaid,
+    StartedBadal,
+)
 from ...rules.pausal_glide import PausalGlide
 from ...rules.meem_sakinah import GhunnahMushaddadah, MeemSakinah
 from ...rules.naql import CarriedNaql, Naql
@@ -37,7 +42,6 @@ from ...rules.tafkheem import Emphasis, Weight
 from ...model.address import Location
 from ...model.canon import Quality
 from ...rules.wasl import (
-    PluralMeemBeforeWasl,
     SoftenedHamza,
     SpelledBeforeWasl,
     TanweenBeforeWasl,
@@ -82,7 +86,6 @@ def _boundary() -> tuple:
         WaslHamza(),
         SoftenedHamza(),
         PausalAlif(),
-        PluralMeemBeforeWasl(),
         SpelledBeforeWasl(repairs=_DAMM_START_REPAIR),
         TanweenBeforeWasl(repairs=_DAMM_START_REPAIR),
         TanweenDrop(),
@@ -123,6 +126,8 @@ def _build() -> RuleSet:
                 MaddBadal(),
                 StartedBadal(),
                 MaddSilah(),
+                MaddMimAlJam(),
+                MaddYaaZawaid(),
                 IwadLength(),
             ),
             Phase.COLOUR: (

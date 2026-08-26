@@ -141,6 +141,14 @@ RULE_DEFINITIONS: dict[Rule, tuple[str, str, str]] = {
         "Madd Silah", "مد صلة",
         "A pronoun haa is drawn out because the word is joined to the one after it.",
     ),
+    Rule.MADD_MIM_AL_JAM: (
+        "Madd Mim al-Jam", "مد ميم الجمع",
+        "A plural-pronoun mim is drawn out before a qata hamza.",
+    ),
+    Rule.MADD_YAA_ZAWAID: (
+        "Madd Yaa Zawaid", "مد ياءات الزوائد",
+        "A retained extra yaa is drawn out in a joined reading.",
+    ),
     Rule.IBDAL_HAMZA: (
         "Ibdal Hamza", "إبدال الهمزة",
         "A hamza is replaced by its performed carrier or glide.",

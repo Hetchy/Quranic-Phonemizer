@@ -7,7 +7,7 @@ from pathlib import Path
 
 from quranic_phonemizer.api import recitation
 from quranic_phonemizer.model.address import Riwayah, Script, VerseRef
-from quranic_phonemizer.model.canon import CanonLetter, Onset, Quality
+from quranic_phonemizer.model.canon import Annotation, CanonLetter, Onset, Quality
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -154,6 +154,7 @@ def test_every_projected_qata_mim_has_the_neutral_joined_only_shape():
         assert mim.letter is CanonLetter.MEEM, location
         assert mim.nucleus.is_joined_only_long, location
         assert mim.nucleus.quality is Quality.U, location
+        assert Annotation.MIM_AL_JAM in mim.annotations, location
 
 
 def test_every_yaa_zawaid_source_projects_its_reviewed_shape():
@@ -171,6 +172,7 @@ def test_every_yaa_zawaid_source_projects_its_reviewed_shape():
             Script.UTHMANI, verse, (source[location.word - 1],)
         )
         slots = package.build(reading).score.words[0].slots
+        assert Annotation.YAA_ZAWAID in slots[-1].annotations, location
 
         if "ۦَ" in entry.text:
             assert slots[-1].letter is CanonLetter.YA, location

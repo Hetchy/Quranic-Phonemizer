@@ -69,7 +69,7 @@ article-lam attribution duplicate the `dhakarayn` row owned by
 | `hamza/test_iltiqa.py` | `long-i` | In `فِے اِ۬لَارْضِ`, article naql leaves the preceding long I intact instead of exposing the Hafs shortening shape. |
 | `hamza/test_iltiqa.py` | `noon-repair` | This boundary is in the closed Warsh U-over-I iltiqa register. |
 | `hamza/test_iltiqa.py` | `lam-repair` | `قُلُ اُ۟نظُرُواْ` is in the closed Warsh U-over-I iltiqa register. |
-| `hamza/test_iltiqa.py` | `plural-meem` | Its short U is Warsh mim al-jam before wasl and must carry `iltiqa_haraka` on the inserted boundary vowel. |
+| `hamza/test_iltiqa.py` | `plural-meem` | Its short U is the authored Warsh mim-al-jam connected form before wasl; it is not an inserted `iltiqa_haraka` repair. |
 | `hamza/test_seats.py` | `sakin-hamza-waw-seat` | Warsh replaces this single sakin hamza, producing long U rather than a sounded hamza. |
 | `hamza/test_seats.py` | `sakin-hamza-alif-seat` | Warsh replaces this single sakin hamza, producing long A rather than a sounded hamza. |
 | `nasal/test_ikhfaa.py` | `tha` | The selected word includes article naql before the noon-thaa ikhfaa; the whole-word expectation cannot be shared independently. |

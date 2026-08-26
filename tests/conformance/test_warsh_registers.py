@@ -87,12 +87,6 @@ DAMM_REPAIRS = (
     ("36:61:1", "36:60:1", "an"),
     ("68:22:1", "68:22:1", "an"),
     ("71:3:1", "71:3:1", "an"),
-    ("4:154:6", "4:153:6", "plural_mim"),
-    ("7:161:3", "7:161:3", "plural_mim"),
-    ("16:32:7", "16:32:7", "plural_mim"),
-    ("25:60:3", "25:60:3", "plural_mim"),
-    ("36:45:3", "36:44:3", "plural_mim"),
-    ("40:60:2", "40:60:2", "plural_mim"),
     ("7:195:20", "7:195:20", "qul"),
     ("10:101:1", "10:101:1", "qul"),
     ("17:56:1", "17:56:1", "qul"),
@@ -117,7 +111,7 @@ DAMM_REPAIRS = (
 )
 
 FAMILY_SIZES = {
-    "an": 11, "plural_mim": 6, "qul": 5, "min": 4, "tanwin": 4,
+    "an": 11, "qul": 5, "min": 4, "tanwin": 4,
     "aw": 3, "qad": 3, "lakin": 1, "feminine_taa": 1,
 }
 
@@ -313,8 +307,8 @@ def test_a_damm_repair_row_joins_on_damm(canonical, source, family):
     assert first.endswith("u"), (canonical, first, second)
 
 
-def test_the_damm_repair_register_is_the_documented_38():
-    assert len(DAMM_REPAIRS) == 38
+def test_the_damm_repair_register_is_the_documented_32():
+    assert len(DAMM_REPAIRS) == 32
     assert Counter(family for *_, family in DAMM_REPAIRS) == Counter(FAMILY_SIZES)
 
 
