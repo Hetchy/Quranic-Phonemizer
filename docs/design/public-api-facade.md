@@ -107,7 +107,9 @@ untyped mega-object or making cells mandatory for phoneme-only callers.
 - Do not make cells or source tokenization part of a phoneme-only request.
 - Do not infer rules, folds, mergers, silence, or transformed spelling in the
   facade.
-- Do not change the schema-v2 wire vocabulary.
+- Do not change the schema-v2 wire vocabulary. Correctly classifying an authored
+  Warsh stop mark with the existing `stop_sign` kind and boundary fields is a
+  conformance repair, not a new wire concept.
 - Do not make the TypeScript renderer depend on Python package internals.
 
 ## Proposed public surface
@@ -133,7 +135,7 @@ result = Phonemizer(
 The request arguments mirror `phonemize()`:
 
 - `ref`: one word, verse, or verse range;
-- `stop_signs`: named written-stop classes;
+- `stop_signs`: configuration-scoped written-sign selectors;
 - `stop_refs`: word references at which to stop.
 
 The returned type is `Result`. It is immutable from the caller's perspective;
@@ -141,7 +143,7 @@ projection caches are implementation details and do not alter its values.
 
 ### Configuration-scoped catalogues
 
-Stop-sign classes, variants, and rules belong to the configured `Phonemizer`.
+Stop-sign options, variants, and rules belong to the configured `Phonemizer`.
 The facade must never expose the union of values packaged for every riwayah or
 script:
 
@@ -153,10 +155,17 @@ reader.available_variants
 reader.tajweed_rules
 ```
 
-`available_stop_signs` lists the named `stop_signs` values accepted by this
-reader. It is derived from the selected `(riwayah, script)` inventory, not from
-a process-wide enum: the semantic advice vocabulary may be shared internally,
-but each script authors a different subset and scalar mapping.
+`available_stop_signs` returns immutable `StopSignOption` records with `name`,
+`signs`, and optional `advice` fields. `name` is the value accepted by the
+`stop_signs` request argument; `signs` contains the exact authored scalar or
+scalars it selects. `advice` is what that mushaf convention calls the option
+when the meaning is known. Sign identity and advice are deliberately separate:
+a source may author a real stop glyph without assigning it one of the Hafs
+advice names.
+
+The options are derived from the selected `(riwayah, script)` inventory, not
+from a process-wide enum. Each script authors its own selectors, scalar
+mappings, and optional advice.
 `available_variants` lists only the selected riwayah's khilaf points and
 choices. `tajweed_rules` lists only rules the selected riwayah declares it can
 emit, followed by its published silence reasons.
@@ -166,21 +175,32 @@ The currently packaged stop-sign catalogues are explicit contract fixtures:
 ```python
 Phonemizer(riwayah="hafs", script="uthmani").available_stop_signs
 # (
-#     "preferred_continue", "preferred_stop", "optional_stop",
-#     "compulsory_stop", "prohibited_stop", "either_stop",
+#     StopSignOption(
+#         name="preferred_continue", signs=("ۖ",),
+#         advice="preferred_continue",
+#     ),
+#     ... five further Hafs options,
 # )
 
 Phonemizer(riwayah="hafs", script="indopak").available_stop_signs
-# the same six values plus "permitted_stop"
+# the six Hafs advice selectors plus "permitted_stop", with the exact
+# IndoPak scalar set authored on each option
 
 Phonemizer(riwayah="warsh", script="uthmani").available_stop_signs
-# ()
+# (
+#     StopSignOption(name="sad_lam_alif", signs=("ۖ",), advice=None),
+# )
 ```
 
-Warsh Uthmani currently authors no stop-advice mapping. Its written structural
-marks remain in the exact source, but no named `stop_signs` class is available.
-A Warsh caller stops only with `stop_refs` until its inventory authors such a
-mapping.
+The packaged Warsh Uthmani source contains U+06D6 `ۖ` 9,948 times. It is a
+written stop sign and must not disappear into the generic structural-separator
+category. `sad_lam_alif` is a neutral, configuration-scoped identity for that
+glyph, not a claim that Warsh gives it the Hafs `preferred_continue` meaning.
+A caller may request stops at its occurrences with
+`stop_signs=("sad_lam_alif",)`. The resulting boundary exposes the exact
+`stop_sign="ۖ"` and `stop_advice=None` until the Warsh convention is backed by
+reviewed fixtures. `stop_refs` remains available for explicit word-addressed
+stops.
 
 The existing root functions may remain as explicit metadata queries:
 
@@ -195,7 +215,7 @@ Invalid request values must be reported against the applicable selected
 catalogue: `(riwayah, script)` for stop signs and `riwayah` for variants and
 rules.
 
-An unavailable stop class is an error even if another packaged configuration
+An unavailable stop selector is an error even if another packaged configuration
 uses the same name. Validation happens before boundary resolution:
 
 ```python
@@ -204,12 +224,13 @@ Phonemizer(riwayah="warsh").analyse(
     stop_signs=("preferred_stop",),
 )
 # UnknownStopSign: ['preferred_stop'] is not available for warsh/uthmani;
-# available stop signs: []
+# available stop signs: ['sad_lam_alif']
 ```
 
 `UnknownStopSign` is a public `ValueError`. Multiple unknown or unavailable
-names are reported together in sorted order. An empty tuple is always valid;
-invalid `stop_refs` continue to use the existing reference errors.
+names are reported together in sorted order. The error lists option names, not
+advice values or raw union-enum members. An empty tuple is always valid; invalid
+`stop_refs` continue to use the existing reference errors.
 
 ### Core analysis
 
@@ -254,9 +275,14 @@ are results, not a menu of options:
 Each boundary names its `before` and `after` word IDs, exact written
 `stop_sign` if one exists, and riwayah-authored `stop_advice` if one exists.
 Public documentation must show ordinary join, an explicit `stop_refs` stop, a
-stop selected through a configuration-scoped `stop_signs` class, authored
+stop selected through a configuration-scoped `stop_signs` option, authored
 sakt, and the trailing stop. It must state that callers request stops but never
 request `sakt`; sakt is authored by the riwayah.
+
+For Warsh, a boundary carrying `ۖ` is therefore represented even when the
+caller does not select it: `stop_sign="ۖ"`, `stop_advice=None`, and state
+`join`. Selecting `sad_lam_alif` changes the applicable boundary state to
+`stop`; it does not manufacture an advice label.
 
 ### Rules
 
@@ -480,6 +506,15 @@ payload came from the facade or the current backend composition.
 
 ### Step 1: Centralize shared construction
 
+- Repair the Warsh Uthmani inventory/projection seam first: author U+06D6 `ۖ`
+  as a stop mark with selector `sad_lam_alif` and no advice, project it as a
+  `stop_sign` source character owned by its boundary, and allow boundary
+  resolution to match a selector independently of `StopAdvice`.
+- Prove on corpus and focused fixtures that all 9,948 Warsh occurrences remain
+  exact source text, become typed stop signs rather than generic separators,
+  and make an internal boundary stop only when the selector or an explicit
+  `stop_refs` request applies; the passage-final boundary retains its ordinary
+  mandatory stop.
 - Refactor internal construction so `AnalysisResult`, source,
   highlights, and cells share one facts/inscription/bundle state.
 - Keep existing builder functions callable and tested.
@@ -507,7 +542,8 @@ access tests are therefore part of this step rather than deferred facade tests.
 ### Step 3: Add catalogues, errors, and JSON document access
 
 - Add the configuration-scoped stop-sign, variant, and rule catalogues.
-- Add `UnknownStopSign` and validate requested stop classes before boundary
+- Export the immutable `StopSignOption` value type used by the stop catalogue.
+- Add `UnknownStopSign` and validate requested stop selectors before boundary
   resolution.
 - Implement `document(kind, spelling=...)`.
 - Reuse existing document constructors and serializers.
@@ -522,11 +558,11 @@ access tests are therefore part of this step rather than deferred facade tests.
 - Preserve the `/api/analyse` response fields and values for the same riwayah,
   reference, stop plan, variants, and extra phonemes. The facade migration is
   wiring, not a website API redesign.
-- Replace the website's process-wide default stop list with the intersection of
-  its preferred defaults and the configured
-  `reader.available_stop_signs`. This preserves today's Hafs behavior and
-  produces an empty named-stop plan for current Warsh, where callers may still
-  submit explicit word stops.
+- Replace the website's process-wide default stop list with names from the
+  configured `reader.available_stop_signs`. Preserve today's Hafs defaults.
+  Publish Warsh `sad_lam_alif` and its `ۖ` glyph as a selectable option, but do
+  not silently assign it a Hafs advice label or make a new default-stop-policy
+  claim; the UI may submit that selector or explicit word stops.
 - Publish the selected configuration's stop-sign, variant, and rule catalogues
   from `/api/meta`; the frontend must not reuse the Hafs catalogue for Warsh.
 - Keep the backend's Digital Khatt override as host presentation data; it must
@@ -565,10 +601,13 @@ access tests are therefore part of this step rather than deferred facade tests.
   riwayah;
 - no configured catalogue includes a value belonging only to another
   configuration;
-- Warsh Uthmani publishes an empty stop-sign catalogue, accepts
-  `stop_signs=()`, rejects every non-empty `stop_signs` request with
-  `UnknownStopSign`, and continues to accept valid `stop_refs`;
-- an invalid stop class for Hafs reports the selected script and the exact
+- Warsh Uthmani publishes exactly `sad_lam_alif` for `ۖ`, accepts both
+  `stop_signs=()` and `stop_signs=("sad_lam_alif",)`, reports the glyph on the
+  native boundary with `stop_advice=None`, and continues to accept valid
+  `stop_refs`;
+- requesting `preferred_stop` for Warsh raises `UnknownStopSign` and reports
+  `sad_lam_alif` as the exact available selector;
+- an invalid stop selector for Hafs reports the selected script and the exact
   available values;
 - Invalid arguments raise stable, user-facing errors.
 
@@ -586,6 +625,8 @@ For representative passages including `1:1`, `2:2`, `2:255`, `3:103`,
 - `source()` does not build cells;
 - repeated projection calls reuse the cached values;
 - all stop plans preserve shared IDs where the producer contract requires it.
+- Warsh U+06D6 characters are `stop_sign` characters owned by the matching
+  boundaries, never lexical units or generic separators.
 
 ### Wire tests
 
@@ -631,8 +672,9 @@ The facade is ready when all of the following are true:
    `build_source_view`, `build_cell_view`, or `pen_for`.
 4. Native DTOs and IDs remain unchanged.
 5. Stop-sign catalogues and validation are scoped by `(riwayah, script)`;
-   variant and rule catalogues are scoped by riwayah; current Warsh exposes no
-   named stop classes and uses `stop_refs` for requested stops.
+   variant and rule catalogues are scoped by riwayah; Warsh Uthmani exposes
+   `sad_lam_alif` for `ۖ`, keeps its advice unset, and supports both that
+   selector and `stop_refs` for requested stops.
 6. The website backend uses only the facade and produces equivalent analysis,
    cells, text, phonemes, stops, and Digital Khatt data for the same requests.
 7. `phonemize()`, `PhonemizeResult`, public graph exports, alignment,
