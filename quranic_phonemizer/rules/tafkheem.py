@@ -35,11 +35,12 @@ class Weight:
 
     always_heavy: frozenset[CanonLetter] = frozenset()
     raa: SitedKhilaf = field(default_factory=SitedKhilaf)
+    raa_enabled: bool = True
 
     def is_heavy(self, near, slot, plan, boundaries) -> bool:
         if slot.letter in self.always_heavy:
             return True
-        if slot.letter is L.RA:
+        if slot.letter is L.RA and self.raa_enabled:
             return self._raa(near, slot, plan, boundaries)
         if slot.letter is L.LAM:
             return _is_divine_lam(near, slot, plan)
@@ -70,7 +71,13 @@ class Emphasis:
 
     def __post_init__(self) -> None:
         object.__setattr__(
-            self, "triggers", frozenset(self.weight.always_heavy | CONDITIONAL)
+            self,
+            "triggers",
+            frozenset(
+                self.weight.always_heavy
+                | {L.LAM}
+                | ({L.RA} if self.weight.raa_enabled else set())
+            ),
         )
 
     def look(

@@ -239,6 +239,7 @@ QAWARIRA_CASES = (
         phonemes=("q aˤ w a: r i: r a ŋˤ", "q aˤ w a: r i: r a:"),
         char_rules={"@fathatan[1]": R("ikhfaa")},
         sound_rules={"ŋˤ": R("ikhfaa"), "a:[3]": R("madd_iwad", "madd_tabii")},
+        extra_phonemes=("emphatic_fatha", "emphatic_ikhfaa"),
     ),
     # Warsh: قَوَارِيراٗ مِّن
     StateCase(id="warsh-qawarira-second", site=Site(warsh=("76:16", (1, 2))), states={
@@ -251,7 +252,7 @@ QAWARIRA_CASES = (
         "host-waqf": Expect(
             read=explicit(ibtidaa=1, waqf=(1, 2)),
             phonemes=("q aˤ w a: r i: r a:", "m i n"),
-            sound_rules={"a:[3]": R("madd_iwad", "madd_tabii")},
+            sound_rules={"a:[2]": R("madd_iwad", "madd_tabii")},
         ),
     }),
 )
@@ -262,10 +263,6 @@ def test_seven_alifs(run):
     assert_case(run)
 
 
-@pytest.mark.xfail(
-    reason="the default light Qawarira raa is owned by the raa vertical",
-    strict=True,
-)
 @pytest.mark.parametrize("run", case_runs(QAWARIRA_CASES))
 def test_seven_alifs_qawarira_raa_interaction(run):
     assert_case(run)

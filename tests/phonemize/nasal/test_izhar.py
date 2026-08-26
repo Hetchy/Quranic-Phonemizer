@@ -48,7 +48,10 @@ CASES = (
         id="kha",
         site=Site.shared("2:65", (11, 12)),
         read=through(),
-        phonemes=("q i rˤ aˤ d a t a n", "x aˤ: s i ʔ i: n"),
+        phonemes=pick(
+            hafs=("q i rˤ aˤ d a t a n", "x aˤ: s i ʔ i: n"),
+            warsh=("q i r a d a t a n", "x aˤ: s i ʔ i: n"),
+        ),
         char_rules={"@fathatan": R("izhar")},
         sound_rules={"n[1]": R("izhar")},
     ),

@@ -5,7 +5,7 @@ from __future__ import annotations
 from ...engine.classifier import RuleSet
 from ...engine.plan import Phase
 from ...model.address import Riwayah
-from ...rules.annotation import CanonicalColour, Inclination, Tarqeeq
+from ...rules.annotation import CanonicalColour, Inclination
 from ...rules.boundary import (
     DroppedGlide,
     IwadLength,
@@ -34,6 +34,7 @@ from ...rules.noon_sakinah import IkhfaaWeight, NoonSakinah
 from ...rules.qalqala import Qalqala
 from ...rules.single_hamza import JoinedIbdal, SuppliedIbdal
 from ...rules.hamza_meetings import HamzaMeetingMadd, HamzaMeetings
+from ...rules.raa import RaaWeight
 from ...rules.tafkheem import Emphasis, Weight
 from ...model.address import Location
 from ...model.canon import Quality
@@ -47,6 +48,7 @@ from ...rules.wasl import (
 from .resources import khilaf, lexicon, rule_tables
 from .hamza_meetings import meeting_rows, rows_by_target
 from .lam import PROFILE as LAM_PROFILE
+from .raa import PROFILE as RAA_PROFILE
 
 #: Warsh repairs a collision with damm when the elided word starts on an
 #: original damm; the shared kasra and fatha defaults stand elsewhere.
@@ -98,7 +100,6 @@ def _boundary() -> tuple:
 
 def _build() -> RuleSet:
     tables = rule_tables()
-    weight = Weight(always_heavy=tables.always_heavy)
     article = _article(tables)
     return RuleSet(
         {
@@ -129,8 +130,11 @@ def _build() -> RuleSet:
             ),
             Phase.COLOUR: (
                 LamWeight(profile=LAM_PROFILE),
-                Emphasis(weight=weight),
-                Tarqeeq(weight=weight),
+                Emphasis(weight=Weight(
+                    always_heavy=tables.always_heavy,
+                    raa_enabled=False,
+                )),
+                RaaWeight(profile=RAA_PROFILE),
                 Inclination(),
                 CanonicalColour(),
                 IkhfaaWeight(

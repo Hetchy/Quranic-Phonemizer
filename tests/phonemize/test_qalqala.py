@@ -2,7 +2,16 @@ from __future__ import annotations
 
 import pytest
 
-from tests.support import Case, R, Site, assert_case, case_runs, isolated, reading
+from tests.support import (
+    Case,
+    R,
+    Site,
+    assert_case,
+    case_runs,
+    isolated,
+    pick,
+    reading,
+)
 
 
 CASES = (
@@ -21,7 +30,10 @@ CASES = (
     # Hafs: يُبْصِرُونَ
     # Warsh: يُبْصِرُونَۖ
     Case(id="sughra-baa", site=Site.shared("2:17", (17,)), read=isolated(),
-         phonemes="j u b Q sˤ i rˤ u: n",
+         phonemes=pick(
+             hafs="j u b Q sˤ i rˤ u: n",
+             warsh="j u b Q sˤ i r u: n",
+         ),
          char_rules={"ب": R("qalqala_sughra")},
          sound_rules={"Q": R("qalqala_sughra")}),
     # Hafs: يَجْعَلُونَ

@@ -95,7 +95,10 @@ CASES = (
     # Hafs: خَيْرٌ ۚ ٱهْبِطُوا۟
     # Warsh: خَيْرٌۖ اِ۪هْبِطُواْ
     Case(id="dammatan", site=Site.shared("2:61", (30, 31)), read=through(),
-         phonemes=("x aˤ j rˤ u n i", "h b i tˤ u:"),
+         phonemes=pick(
+             hafs=("x aˤ j rˤ u n i", "h b i tˤ u:"),
+             warsh=("x aˤ j r u n i", "h b i tˤ u:"),
+         ),
          sound_rules={"i[1]": R("iltiqa_haraka")}),
     # Hafs: يَوْمَئِذٍ ٱلْحَقُّ ۚ
     # Warsh: يَوْمَئِذٍ اِ۬لْحَقُّۖ
