@@ -175,7 +175,7 @@ RULE_DEFINITIONS: dict[Rule, tuple[str, str, str]] = {
     ),
     Rule.ILTIQA_HARAKA: (
         "Iltiqa Haraka", "تحريك التقاء الساكنين",
-        "A letter takes a haraka so that it does not meet the quiescent letter after it.",
+        "A canonically vowel-absent unit receives a short vowel where two quiescent sounds would meet.",
     ),
     Rule.ILTIQA_SHORTENING: (
         "Iltiqa Shortening", "قصر عند التقاء الساكنين",

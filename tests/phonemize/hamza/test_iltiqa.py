@@ -76,20 +76,20 @@ CASES = (
          )),
     # Hafs: قُمِ ٱلَّيْلَ
     # Warsh: قُمِ اِ۬ليْلَ
-    Case(id="meem-repair", site=Site.shared("73:2", (1, 2)), read=through(),
+    Case(id="lexical-meem-connected-i", site=Site.shared("73:2", (1, 2)), read=through(),
          phonemes=("q u m i", "ll a j l"),
          char_rules={}),
     # Hafs: أَنِ ٱقْتُلُوٓا۟
-    Case(id="noon-repair", site=Site(hafs=("4:66", (5, 6))), read=through(),
+    Case(id="lexical-noon-connected-i", site=Site(hafs=("4:66", (5, 6))), read=through(),
          phonemes=("ʔ a n i", "q Q t u l u:"),
          char_rules={}),
     # Hafs: قُلِ ٱنظُرُوا۟
-    Case(id="lam-repair", site=Site(hafs=("10:101", (1, 2))), read=through(),
+    Case(id="lexical-lam-connected-i", site=Site(hafs=("10:101", (1, 2))), read=through(),
          phonemes=("q u l i", "ŋ ðˤ u rˤ u:"),
          char_rules={}),
     # Hafs: قَالَتِ ٱمْرَأَتُ
     # Warsh: قَالَتِ اِ۪مْرَأَتُ
-    Case(id="feminine-taa-repair", site=Site.shared("3:35", (2, 3)), read=through(),
+    Case(id="feminine-taa-connected-i", site=Site.shared("3:35", (2, 3)), read=through(),
          phonemes=("q aˤ: l a t i", "m rˤ aˤ ʔ a t"),
          char_rules={}),
     # Hafs: خَيْرٌ ۚ ٱهْبِطُوا۟
@@ -114,7 +114,7 @@ CASES = (
 WARSH_U_CONTRASTS = (
     # Hafs: قُلِ ٱدْعُوا۟
     # Warsh: قُلُ اُ۟دْعُواْ
-    StateCase(id="damm-copy-lexical", site=Site.shared("7:195", (20, 21)), states={
+    StateCase(id="lexical-lam-connected-u", site=Site.shared("7:195", (20, 21)), states={
         "joined": Expect(
             read=through(),
             phonemes=pick(
@@ -126,6 +126,10 @@ WARSH_U_CONTRASTS = (
                 hafs_uthmani=("ٱ",),
                 hafs_indopak=("ا[1]",),
                 warsh_uthmani=("ا[1]",),
+            ),
+            absent_sound_rules=pick(
+                hafs={"i": R("iltiqa_haraka")},
+                warsh={"u[2]": R("iltiqa_haraka")},
             ),
         ),
         "restarted": Expect(
@@ -173,7 +177,7 @@ WARSH_U_CONTRASTS = (
     # Hafs: وَقَالَتِ ٱخْرُجْ
     # Warsh: وَقَالَتُ اُ۟خْرُجْ
     Case(
-        id="damm-copy-feminine-taa",
+        id="feminine-taa-connected-u",
         site=Site.shared("12:31", (14, 15)),
         read=through(),
         phonemes=pick(

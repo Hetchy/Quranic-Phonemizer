@@ -403,8 +403,9 @@ The folder follows implementation ownership rather than source spelling:
   has its own final-phase file;
 - `test_wasl_silent.py` covers the shared joined-elision classes,
   including exact onset/nucleus reach and lexical-qata contrasts;
-- `test_iltiqa.py` covers shared shortening and ordinary A/I repair, then
-  compares the Warsh U register and its exclusions directly with Hafs;
+- `test_iltiqa.py` covers shared shortening, inserted tanwin/spelled-name
+  repair, and canonical connected-form negatives, then compares the Warsh U
+  quality register and its exclusions directly with Hafs;
 - `test_ibdal.py` and `test_tashil.py` prove the generic transformation,
   phoneme inventory, effective madd, extra-token behavior, and exact reach;
 - `test_warsh_single_hamza.py` owns the morphology-backed and lexical Warsh

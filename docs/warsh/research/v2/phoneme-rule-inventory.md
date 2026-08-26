@@ -160,10 +160,11 @@ one meaning across every riwayah that binds it.
 | `madd_leen_mahmuz` | Classification | An eligible sakin waw or yaa immediately followed by hamza. |
 | `madd_mim_al_jam` | Classification | The joined-only long U of the plural-pronoun mim before qata. |
 | `madd_yaa_zawaid` | Classification | A retained extra yaa realized as joined-only long I. |
-| `iltiqa_haraka` | Transformation | A preceding consonant or nunation receives the required A, I, or U repair vowel after wasl elision. |
+| `iltiqa_haraka` | Transformation | A canonically vowel-absent tanwin noon or spelled-name ending receives an inserted A, I, or U after wasl elision. |
 
-`iltiqa_haraka` replaces the overly narrow name `iltiqa_kasra`: Warsh has
-authenticated U repairs as well as the ordinary I repair. The vowel quality is
+`iltiqa_haraka` replaces the overly narrow name `iltiqa_kasra`: inserted
+repairs may be A, I, or U. Lexical connected vowels such as Hafs `قُلِ` and
+Warsh `قُلُ` are canonical forms and emit no occurrence. The vowel quality is
 carried by the resulting sound, not encoded in the rule name.
 
 The following existing shared identifiers retain their established meaning:
@@ -215,7 +216,7 @@ silence, rather than copying every core participant onto every glyph.
 | Effective madd after ibdal or on a badal carrier | The resulting long-vowel sound and the same source units that own the created carrier, plus any further causal unit required by the effective classification, such as the following fixed sukun for `madd_lazim`. |
 | `madd_leen_mahmuz` | The target sakin `/w/` or `/j/` sound; the target waw/yaa and following hamza source units. The preceding fatha is a predicate only. |
 | `naql` | The source qata unit, the preceding host consonant or nunation, the transferred vowel sound, and their source glyphs. |
-| `iltiqa_haraka` | Only the inserted A, I, or U sound. Its transformed column and sound cell live on the boundary; the preceding consonant or nunation sound and base column do not receive the rule. The core occurrence still names the repaired slot as its subject and the wasl slot as private trigger context. |
+| `iltiqa_haraka` | Only the runtime-inserted A, I, or U sound. Its transformed column and sound cell live on the boundary; the preceding consonant or nunation sound and base column do not receive the rule. The core occurrence still names the repaired slot as its subject and the wasl slot as private trigger context. Canonical connected vowels receive no occurrence. |
 
 A pure ibdal-created long vowel normally carries both `ibdal_hamza` and
 `madd_tabii`. A fixed following sukun instead produces `madd_lazim`. When the

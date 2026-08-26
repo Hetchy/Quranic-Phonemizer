@@ -195,9 +195,10 @@ the resulting quality or length classification only.
 - `test_wasl_start.py` owns the shared A/I/U derivation algorithm and a vetted
   riwayah-specific lexical input where necessary.
 - `test_wasl_silent.py` owns the shared started-versus-joined onset behavior.
-- `test_iltiqa.py` owns shared shortening and ordinary A/I repair after wasl
-  elision. Its separate Warsh U-over-I section runs the same boundaries under
-  Hafs so the different repairs and exact exclusions stay adjacent.
+- `test_iltiqa.py` owns shared shortening, inserted tanwin/spelled-name
+  repairs, and lexical connected-form negatives after wasl elision. Its Warsh
+  U-over-I section keeps the different canonical qualities adjacent without
+  assigning `iltiqa_haraka` to lexical forms.
 - `test_ibdal.py` owns generic replacement shapes, effects, and reach.
   `test_tashil.py` owns the generic eased-hamza shape, A/U/I nucleus pairing,
   extra-token fallback, and reach.
@@ -260,7 +261,7 @@ rows depending on whether the Arabic source span and explanation remain
 readable.
 
 Mim al-jam and yaa-zawaid are Warsh-only authored families under `madd/`.
-Their files own the full wasl/waqf matrices, including mim's short-U iltiqa
+Their files own the full wasl/waqf matrices, including mim's short-U connected
 branch and the one consonantal yaa-zawaid exception, so placing them by their
 principal madd behavior does not split either family. Madd badal and madd leen
 mahmuz also get Warsh-prefixed files because their public classifier/register
@@ -442,7 +443,7 @@ makes each riwayah's source span cleaner and easier to review.
 Do not include these in the adapter baseline:
 
 - naql or article naql;
-- the Warsh U iltiqa register;
+- the Warsh U-over-I connected-form register;
 - Warsh single-hamza or hamza-meeting transformations;
 - mim al-jam or yaa-zawaid;
 - differing seven-alif branches;
