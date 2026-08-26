@@ -7,9 +7,10 @@ from __future__ import annotations
 
 from dataclasses import replace
 
-from ...render.alphabet import packaged_alphabet
+from ...model.address import Riwayah
 from ...model.inscription import StopAdvice
 from ...session import Session
+from ...render.alphabet import effective_extra_phonemes, packaged_alphabet
 from ..build import build_bundle
 from ..dtos import Boundary, Merger
 from ..facts import analyse
@@ -251,6 +252,11 @@ def _words(session, bundle, source, facts, insc, spelling, pen, extra_phonemes):
     return project_words(words, facts, source, insc, pen)
 
 
+def _facts_with_rendering(session, riwayah, extra_phonemes):
+    active = effective_extra_phonemes(Riwayah(riwayah), extra_phonemes)
+    return analyse(session, packaged_alphabet(), extra_phonemes=active), active
+
+
 def build_cell_view(
     session: Session,
     *,
@@ -264,7 +270,7 @@ def build_cell_view(
 ) -> CellView:
     if spelling not in ("source", "transformed"):
         raise ValueError(f"spelling must be 'source' or 'transformed', got {spelling!r}")
-    facts = analyse(session, packaged_alphabet(), extra_phonemes=extra_phonemes)
+    facts, active = _facts_with_rendering(session, riwayah, extra_phonemes)
     insc = inscribe(session)
     bundle = build_bundle(
         session, ref=ref, riwayah=riwayah, script=script, variant=variant,
@@ -272,7 +278,7 @@ def build_cell_view(
     )
     source = build_source_view(session, bundle=bundle, facts=facts, insc=insc)
     words = _words(
-        session, bundle, source, facts, insc, spelling, pen, extra_phonemes
+        session, bundle, source, facts, insc, spelling, pen, active
     )
     words = separate_tanween_vowel_colours(words, facts)
     words = keep_madd_rules_on_carriers(words, facts)

@@ -374,14 +374,15 @@ iqlab | Iqlab | إقلاب | A quiescent noon or tanween becomes a hummed meem b
 
 ## Optional Phonemes
 
-Five distinctions are not written by default. Pass `extra_phonemes` to spend a phoneme on any of them.
+Optional distinctions depend on the riwayah. Pass `extra_phonemes` to spend a
+phoneme on an allowed distinction.
 
 | Name | Distinction |
 | ---- | ----------- |
 | `emphatic_fatha` | A short fatha next to an emphatic letter becomes `aˤ` |
 | `emphatic_ikhfaa` | Ikhfaa before an istilaa letter becomes `ŋˤ` |
 | `qalqala_degree` | Qalqala kubra and akbar become `QQ`, apart from sughra `Q` |
-| `tashil` | An eased hamza becomes `ʔ̞` |
+| `tashil` | Hafs only: an eased hamza becomes `ʔ̞`; Warsh always writes `ʔ̞` |
 | `imala` | The inclined vowel becomes `e:`, otherwise read as `i:` |
 
 ```python

@@ -208,8 +208,9 @@ predicate context. A moving waw or yaa receives `ibdal_hamza` but no invented
 madd.
 
 Every `tashil` occurrence reaches the eased onset and responsible source
-hamza even when the extra token is disabled. Its following A, U, or I remains
-an independent nucleus and is never folded into the eased consonant type.
+hamza. Warsh always renders that onset as `ʔ̞`. Its following A, U, or I
+remains an independent nucleus and is never folded into the eased consonant
+type.
 
 Under the single-script decision, the selected script already writes the
 replacement carrier at word-internal regular ibdal sites, so projection
