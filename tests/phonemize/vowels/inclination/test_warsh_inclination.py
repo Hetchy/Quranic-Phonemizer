@@ -10,56 +10,13 @@ from tests.support import (
     StateCase,
     assert_case,
     case_runs,
+    explicit,
     isolated,
-    joining,
+    through,
 )
 
 
 CASES = (
-    # Warsh: طَه۪ۖ
-    Case(
-        id="taha-kubra-collapsed",
-        site=Site(warsh=("20:1", (1,))),
-        read=isolated(),
-        phonemes="tˤ aˤ: h ɛ:",
-        char_rules={"هي/@madd": R("imala", "madd_tabii")},
-        sound_rules={"ɛ:": R("imala", "madd_tabii")},
-        extra_phonemes=(),
-    ),
-    # Warsh: طَه۪ۖ
-    Case(
-        id="taha-kubra-rendered",
-        site=Site(warsh=("20:1", (1,))),
-        read=isolated(),
-        phonemes="tˤ aˤ: h e:",
-        char_rules={"هي/@madd": R("imala", "madd_tabii")},
-        sound_rules={"e:": R("imala", "madd_tabii")},
-        extra_phonemes=("imala",),
-    ),
-    # Warsh: ح۪مِٓۖ
-    Case(
-        id="hawamim-haa",
-        site=Site(warsh=("40:1", (1,))),
-        read=isolated(),
-        phonemes="ħ ɛ: m i: m",
-        char_rules={"حا/@madd": R("taqlil", "madd_tabii")},
-        sound_rules={"ɛ:": R("taqlil", "madd_tabii")},
-    ),
-    # Warsh: كَٓه۪ي۪عَٓصَٓۖ
-    Case(
-        id="maryam-haa-yaa-default",
-        site=Site(warsh=("19:1", (1,))),
-        read=isolated(),
-        phonemes="k a: f h ɛ: j ɛ: ʕ a j ŋ sˤ aˤ: d Q",
-        char_rules={
-            "ها/@madd": R("taqlil", "madd_tabii"),
-            "يا/@madd": R("taqlil", "madd_tabii"),
-        },
-        sound_rules={
-            "ɛ:[1]": R("taqlil", "madd_tabii"),
-            "ɛ:[2]": R("taqlil", "madd_tabii"),
-        },
-    ),
     # Warsh: بِالْهُد۪ىٰ
     Case(
         id="ordinary-dhat-yaa-default",
@@ -69,20 +26,20 @@ CASES = (
         char_rules={"ى": R("taqlil", "madd_tabii")},
         sound_rules={"ɛ:": R("taqlil", "madd_tabii")},
     ),
-    # Warsh: هُدىٗ
+    # Warsh: هُدىٗ مِّن
     StateCase(
         id="dhat-yaa-fathatan-mask",
-        site=Site(warsh=("2:5", (3,))),
+        site=Site(warsh=("2:5", (3, 4))),
         states={
             "joined": Expect(
-                read=joining(),
-                phonemes="h u d a",
+                read=through(),
+                phonemes=("h u d a", "m̃ i n"),
                 absent_char_rules={"ى": R("taqlil", "madd_iwad")},
                 absent_sound_rules={"a": R("taqlil", "madd_iwad")},
             ),
             "stopped": Expect(
-                read=isolated(),
-                phonemes="h u d ɛ:",
+                read=explicit(ibtidaa=3, waqf=(3, 4)),
+                phonemes=("h u d ɛ:", "m i n"),
                 char_rules={"ى": R("taqlil", "madd_iwad", "madd_tabii")},
                 sound_rules={"ɛ:": R("taqlil", "madd_iwad", "madd_tabii")},
             ),
@@ -106,14 +63,14 @@ CASES = (
         absent_char_rules={"ى": R("taqlil", "imala")},
         absent_sound_rules={"a:": R("taqlil", "imala")},
     ),
-    # Warsh: يَسِٓۖ
+    # Warsh: ءَات۪يٰنِۦَ
     Case(
-        id="yaseen-yaa-default-fath",
-        site=Site(warsh=("36:1", (1,))),
+        id="yaa-zawaid-host",
+        site=Site(warsh=("27:36", (8,))),
         read=isolated(),
-        phonemes="j a: s i: n",
-        absent_char_rules={"يا/@madd": R("taqlil", "imala")},
-        absent_sound_rules={"a:": R("taqlil", "imala")},
+        phonemes="ʔ a: t ɛ: n",
+        char_rules={"ي": R("taqlil", "madd_arid_lissukun")},
+        sound_rules={"ɛ:": R("taqlil", "madd_arid_lissukun")},
     ),
 )
 

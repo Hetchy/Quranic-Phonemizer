@@ -12,6 +12,7 @@ from tests.support import (
     assert_case,
     case_runs,
     explicit,
+    isolated,
     joining,
 )
 
@@ -100,12 +101,31 @@ CASES = (
                       "ŋ": R("ikhfaa", "tafkheem"),
                       "sˤ": R("tafkheem"), "aˤ:": R("madd_lazim", "tafkheem"),
                       "Q": R("qalqala_sughra")}),
+    # Warsh: كَٓه۪ي۪عَٓصَٓۖ
+    Case(id="warsh-kaaf-haa-yaa-ayn-saad", site=Site(warsh=("19:1", (1,))),
+         read=isolated(), phonemes="k a: f h ɛ: j ɛ: ʕ a j ŋ sˤ aˤ: d Q",
+         char_rules={"ها/@madd": R("taqlil", "madd_tabii"),
+                     "يا/@madd": R("taqlil", "madd_tabii")},
+         sound_rules={"ɛ:[1]": R("taqlil", "madd_tabii"),
+                      "ɛ:[2]": R("taqlil", "madd_tabii")}),
     # Hafs: طه
     Case(id="taa-haa", site=Site(hafs=("20:1", (1,))), read=joining(),
          phonemes="tˤ aˤ: h a:", all_rules=R("madd_tabii", "tafkheem"),
          char_rules=TAA | {"ها/@madd": R("madd_tabii")},
          sound_rules={"tˤ": R("tafkheem"), "aˤ:": R("madd_tabii", "tafkheem"),
                       "a:": R("madd_tabii")}),
+    # Warsh: طَه۪ۖ
+    Case(id="warsh-taa-haa-kubra-collapsed", site=Site(warsh=("20:1", (1,))),
+         read=isolated(), phonemes="tˤ aˤ: h ɛ:",
+         char_rules={"هي/@madd": R("imala", "madd_tabii")},
+         sound_rules={"ɛ:": R("imala", "madd_tabii")},
+         extra_phonemes=()),
+    # Warsh: طَه۪ۖ
+    Case(id="warsh-taa-haa-kubra-rendered", site=Site(warsh=("20:1", (1,))),
+         read=isolated(), phonemes="tˤ aˤ: h e:",
+         char_rules={"هي/@madd": R("imala", "madd_tabii")},
+         sound_rules={"e:": R("imala", "madd_tabii")},
+         extra_phonemes=("imala",)),
     # Hafs: طسٓمٓ
     # Warsh: طَسِٓمِّٓۖ
     Case(id="taa-seen-meem", site=Site.shared("26:1", (1,)), read=joining(),
@@ -139,6 +159,11 @@ CASES = (
                      "سين/@madd": R("madd_lazim"),
                      "سين/ن": R("izhar")},
          sound_rules={"a:": R("madd_tabii"), "i:": R("madd_lazim"), "n": R("izhar")}),
+    # Warsh: يَسِٓۖ
+    Case(id="warsh-yaa-seen-fixed-fath", site=Site(warsh=("36:1", (1,))),
+         read=isolated(), phonemes="j a: s i: n",
+         absent_char_rules={"يا/@madd": R("taqlil", "imala")},
+         absent_sound_rules={"a:": R("taqlil", "imala")}),
     # Hafs: صٓ ۚ
     # Warsh: صَٓۖ
     Case(id="saad", site=Site.shared("38:1", (1,)), read=joining(),
@@ -154,6 +179,11 @@ CASES = (
                      "ميم/م[2]": R("izhar_shafawi")},
          sound_rules={"a:": R("madd_tabii"), "i:": R("madd_lazim"),
                       "m[2]": R("izhar_shafawi")}),
+    # Warsh: ح۪مِٓۖ
+    Case(id="warsh-haa-meem", site=Site(warsh=("40:1", (1,))),
+         read=isolated(), phonemes="ħ ɛ: m i: m",
+         char_rules={"حا/@madd": R("taqlil", "madd_tabii")},
+         sound_rules={"ɛ:": R("taqlil", "madd_tabii")}),
     # Hafs: عٓسٓقٓ
     # Warsh: عَٓسِٓقَٓۖ
     Case(id="ayn-seen-qaaf", site=Site.shared("42:2", (1,)), read=joining(),

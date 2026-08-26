@@ -18,13 +18,15 @@ CASES = (
          phonemes="ʕ a ðˤ i: m",
          char_rules={"ي": R("madd_arid_lissukun")},
          sound_rules={"i:": R("madd_arid_lissukun")}),
-    # Hafs: مُوسَىٰٓ
-    # Warsh: مُوس۪ىٰٓ
-    Case(id="final-long-negative", site=Site.shared("20:9", (4,)), read=isolated(),
-         phonemes=pick(hafs="m u: s a:", warsh="m u: s ɛ:"),
-         char_rules=pick(hafs={}, warsh={"ى": R("taqlil", "madd_tabii")}),
-         sound_rules=pick(hafs={}, warsh={"ɛ:": R("taqlil", "madd_tabii")}),
-         absent_char_rules={"و": R("madd_arid_lissukun")}),
+    # Hafs: إِذَا
+    # Warsh: إِذَا
+    Case(id="final-long-negative", site=Site.shared("2:186", (10,)), read=isolated(),
+         phonemes="ʔ i ð a:",
+         absent_char_rules=pick(
+             hafs_uthmani={"ا": R("madd_arid_lissukun")},
+             hafs_indopak={"ا[2]": R("madd_arid_lissukun")},
+             warsh={"ا": R("madd_arid_lissukun")},
+         )),
     # Hafs: مِهَـٰدًا
     # Warsh: مِهَٰداٗ
     Case(id="iwad-negative", site=Site.shared("78:6", (4,)), read=isolated(),
