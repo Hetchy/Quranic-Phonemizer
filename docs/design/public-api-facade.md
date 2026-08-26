@@ -20,32 +20,47 @@ reader = Phonemizer(
         "tashil",
     )
 )
-reading = reader.analyse("2:255", stop_refs=("2:255:35",))
+result = reader.analyse("2:255", stop_refs=("2:255:35",))
 ```
 
-The returned `Reading` is the one consumer surface. It exposes the eager core
+The returned `Result` is the one consumer surface. It exposes the eager core
 and lazily builds the source, highlight, and cell projections:
 
 ```python
-reading.text()
-reading.phonemes()
-reading.phonemes(by="word")
-reading.words
-reading.boundaries
-reading.sounds
-reading.rule_occurrences
-reading.mergers
-reading.source()
-reading.highlights()
-reading.cells(spelling="source")
-reading.cells(spelling="transformed")
-reading.document("analysis")
-reading.document("cells")
+result.text()
+result.phonemes()
+result.phonemes(by="word")
+result.words
+result.boundaries
+result.sounds
+result.rule_occurrences
+result.mergers
+result.source()
+result.highlights()
+result.cells(spelling="source")
+result.cells(spelling="transformed")
+result.document("analysis_result")
+result.document("cell_view", spelling="transformed")
 ```
 
 This is a facade, not an adapter. It must return the existing native records,
 preserve result-local IDs across every view, and make no semantic decisions
 that are not already made by the producer.
+
+### Standing relative to the native projection plan
+
+This document changes the migration path in
+`consumer-analysis-projection.md`, not its native DTO semantics. `analyse()`
+is added and proved while the old projection remains available as differential
+evidence. Once the facade and website equivalence gates pass, the pre-release
+cutover removes `phonemize()`, `PhonemizeResult`, the public graph exports, and
+the obsolete alignment, respelling, and general recited-text projections.
+There is no deprecation cycle for an unreleased API.
+
+Where the two documents disagree about the entry point or cutover timing, this
+facade plan is authoritative. The native ownership, identity, boundary,
+source, highlight, cell, and schema laws remain authoritative in the earlier
+projection plan.
 
 ## Problem
 
@@ -92,7 +107,7 @@ untyped mega-object or making cells mandatory for phoneme-only callers.
 - Do not make cells or source tokenization part of a phoneme-only request.
 - Do not infer rules, folds, mergers, silence, or transformed spelling in the
   facade.
-- Do not change the schema-v1 wire vocabulary.
+- Do not change the schema-v2 wire vocabulary.
 - Do not make the TypeScript renderer depend on Python package internals.
 
 ## Proposed public surface
@@ -104,7 +119,7 @@ selection, and extra phonemes. Add `analyse()` beside the existing
 `phonemize()` method:
 
 ```python
-reading = Phonemizer(
+result = Phonemizer(
     riwayah="hafs",
     script="uthmani",
     variants={"iqlab_nasal": "bilabial"},
@@ -119,37 +134,129 @@ The request arguments mirror `phonemize()`:
 
 - `ref`: one word, verse, or verse range;
 - `stop_signs`: named written-stop classes;
-- `stop_refs`: word references at which to stop;
-- `suspend_gc`: optional compatibility/performance control if retained by the
-  existing high-level method.
+- `stop_refs`: word references at which to stop.
 
-The returned type is `Reading`. It is immutable from the caller's perspective;
+The returned type is `Result`. It is immutable from the caller's perspective;
 projection caches are implementation details and do not alter its values.
+
+### Configuration-scoped catalogues
+
+Stop-sign classes, variants, and rules belong to the configured `Phonemizer`.
+The facade must never expose the union of values packaged for every riwayah or
+script:
+
+```python
+reader = Phonemizer(riwayah="hafs", script="uthmani")
+
+reader.available_stop_signs
+reader.available_variants
+reader.tajweed_rules
+```
+
+`available_stop_signs` lists the named `stop_signs` values accepted by this
+reader. It is derived from the selected `(riwayah, script)` inventory, not from
+a process-wide enum: the semantic advice vocabulary may be shared internally,
+but each script authors a different subset and scalar mapping.
+`available_variants` lists only the selected riwayah's khilaf points and
+choices. `tajweed_rules` lists only rules the selected riwayah declares it can
+emit, followed by its published silence reasons.
+
+The currently packaged stop-sign catalogues are explicit contract fixtures:
+
+```python
+Phonemizer(riwayah="hafs", script="uthmani").available_stop_signs
+# (
+#     "preferred_continue", "preferred_stop", "optional_stop",
+#     "compulsory_stop", "prohibited_stop", "either_stop",
+# )
+
+Phonemizer(riwayah="hafs", script="indopak").available_stop_signs
+# the same six values plus "permitted_stop"
+
+Phonemizer(riwayah="warsh", script="uthmani").available_stop_signs
+# ()
+```
+
+Warsh Uthmani currently authors no stop-advice mapping. Its written structural
+marks remain in the exact source, but no named `stop_signs` class is available.
+A Warsh caller stops only with `stop_refs` until its inventory authors such a
+mapping.
+
+The existing root functions may remain as explicit metadata queries:
+
+```python
+available_stop_signs("hafs", script="uthmani")
+available_variants("hafs")
+tajweed_rules("hafs")
+```
+
+The configured properties and root functions must return equivalent values.
+Invalid request values must be reported against the applicable selected
+catalogue: `(riwayah, script)` for stop signs and `riwayah` for variants and
+rules.
+
+An unavailable stop class is an error even if another packaged configuration
+uses the same name. Validation happens before boundary resolution:
+
+```python
+Phonemizer(riwayah="warsh").analyse(
+    "1:1",
+    stop_signs=("preferred_stop",),
+)
+# UnknownStopSign: ['preferred_stop'] is not available for warsh/uthmani;
+# available stop signs: []
+```
+
+`UnknownStopSign` is a public `ValueError`. Multiple unknown or unavailable
+names are reported together in sorted order. An empty tuple is always valid;
+invalid `stop_refs` continue to use the existing reference errors.
 
 ### Core analysis
 
 These properties return the existing native records:
 
 ```python
-reading.words
-reading.boundaries
-reading.sounds
-reading.rule_occurrences
-reading.mergers
+result.words
+result.boundaries
+result.sounds
+result.rule_occurrences
+result.mergers
 ```
 
 The following methods remain convenience readers over the same core:
 
 ```python
-reading.text()                 # source spelling
-reading.text("recited")        # performed spelling
-reading.phonemes()             # performed order
-reading.phonemes(by="word")   # primary word allocation
+result.text()                 # exact source spelling only
+result.phonemes()             # performed order
+result.phonemes(by="word")   # primary word allocation
 ```
 
-`reading.analysis` may expose the underlying `AnalysisResult` for callers who
+There is no general recited or performed text. Transformed spelling is exposed
+only by `result.cells(spelling="transformed")`, where every change has a native
+cell status and provenance.
+
+`result.analysis` may expose the underlying `AnalysisResult` for callers who
 need its complete metadata (`ref`, `riwayah`, `variant`, `canon_digest`, and
 `schema_version`). It is not a second result or a copied ID space.
+
+### Boundaries
+
+`result.boundaries` contains `N + 1` resolved boundaries for `N` words. These
+are results, not a menu of options:
+
+| State | Meaning |
+| --- | --- |
+| `start` | Leading request boundary before the first word. |
+| `join` | Ordinary continuation across an internal boundary. |
+| `sakt` | An authored breathless pause; it blocks cross-boundary interaction without applying waqf or ibtidaa. |
+| `stop` | Waqf before the boundary; at an internal boundary it also implies ibtidaa on the following word. The trailing request boundary is always `stop`. |
+
+Each boundary names its `before` and `after` word IDs, exact written
+`stop_sign` if one exists, and riwayah-authored `stop_advice` if one exists.
+Public documentation must show ordinary join, an explicit `stop_refs` stop, a
+stop selected through a configuration-scoped `stop_signs` class, authored
+sakt, and the trailing stop. It must state that callers request stops but never
+request `sakt`; sakt is authored by the riwayah.
 
 ### Rules
 
@@ -157,31 +264,31 @@ The facade exposes the native catalogue and occurrences together without
 requiring a second top-level import:
 
 ```python
-reading.rule_catalogue
-reading.rule_definition("idgham_bi_ghunnah")
-reading.rule_occurrences
+result.rule_catalogue
+result.rule_definition("idgham_bi_ghunnah")
+result.rule_occurrences
 ```
 
-`rule_catalogue` is additive metadata and is not included in the versioned
-analysis document. `rule_occurrences` remains the source of truth for what
-actually happened in this request. A convenience iterator may be added if
-experience shows that joining a definition to an occurrence is still too
-verbose:
+`rule_catalogue` is the selected riwayah's catalogue, equivalent to the
+configured reader's `tajweed_rules`; it never exposes the combined inventory.
+It is additive metadata and is not included in the versioned analysis
+document. `rule_occurrences` remains the source of truth for what actually
+happened in this request.
 
-```python
-for use in reading.rule_uses():
-    print(use.definition.name, use.occurrence.sound_ids)
-```
-
-If `rule_uses()` is added, `use.definition` and `use.occurrence` must be views
-over the existing records, not a new rule-classification system.
+An occurrence may name both visible units and sounds because those fields
+answer different questions: where the rule is placed in the source, and which
+performed sounds it classified or changed. For example, today's native Hafs
+contract places `lam_shamsiyyah` on the silent article lam and also names the
+resulting doubled sun-letter sound. A cell renderer may choose to draw the
+teaching label only on the letter row, but must not reinterpret the occurrence
+or erase its affected-sound relationship.
 
 ### Source characters and units
 
 Source data is requested explicitly:
 
 ```python
-source = reading.source()
+source = result.source()
 
 for character in source.characters:
     print(character.index, character.text, character.kind)
@@ -197,7 +304,7 @@ reconstruct transformed spelling. `characters` are exact source scalars;
 ### Highlights
 
 ```python
-for group in reading.highlights():
+for group in result.highlights():
     print(group.unit_ids, group.sound_ids, group.ranges)
 ```
 
@@ -207,8 +314,8 @@ asking only for highlight ranges must not pay for transformed cell projection.
 ### Cells
 
 ```python
-source_cells = reading.cells(spelling="source")
-transformed_cells = reading.cells(spelling="transformed")
+source_cells = result.cells(spelling="source")
+transformed_cells = result.cells(spelling="transformed")
 ```
 
 The facade owns the transformed-spelling pen internally. It chooses the pen
@@ -228,27 +335,28 @@ The two views remain producer-native `CellView` values. In particular:
 Expose the existing wire envelopes through one method:
 
 ```python
-analysis_payload = reading.document("analysis")
-source_payload = reading.document("source")
-highlight_payload = reading.document("highlights")
-cell_payload = reading.document("cells", spelling="transformed")
+analysis_payload = result.document("analysis_result")
+source_payload = result.document("source_view")
+highlight_payload = result.document("highlight_groups")
+cell_payload = result.document("cell_view", spelling="transformed")
 ```
 
-Each result is a JSON-compatible dictionary stamped with `schema_version`.
-`document("all")` may return a dictionary containing the selected envelopes,
-but it must not introduce a third top-level schema version. The existing
-`analysis_document()`, `cell_document()`, and `serialize_document()` functions
-remain available as low-level APIs.
+The four names deliberately retain the existing schema vocabulary:
 
-The facade should also offer a typed document method if callers need to avoid
-JSON conversion:
+| Kind | JSON envelope contents | Typical consumer |
+| --- | --- | --- |
+| `analysis_result` | Request metadata, source text, words, resolved boundaries, sounds, rule occurrences, and mergers. | NLP, speech, search, and general analysis. |
+| `source_view` | Exact Unicode characters, producer-tokenized letter units, silence, and rule/merger placements. | Source-text inspection and annotation. |
+| `highlight_groups` | Source ranges and unit IDs grouped by the sound IDs that activate them. | Audio-timed continuous-text highlighting. |
+| `cell_view` | Source or transformed educational columns, sound cells, groups, runs, boundary columns, and merger bridges. | Tajweed tables and interactive teaching renderers. |
 
-```python
-reading.typed_document("cells")
-```
-
-The exact name is an implementation choice; the important contract is that
-serialization and typed access share the same cached projection.
+Each call returns a JSON-compatible dictionary stamped with `schema_version`.
+Typed consumers already use `result.analysis`, `result.source()`,
+`result.highlights()`, and `result.cells()`, so there is no `typed_document()`.
+There is no `document("all")`; a caller requests only the envelope it needs.
+The existing `analysis_document()`, `source_document()`,
+`highlight_document()`, `cell_document()`, and `serialize_document()`
+functions remain available as low-level APIs.
 
 ## Internal design
 
@@ -296,14 +404,14 @@ recitation engine a second time.
 
 The facade tests must enforce:
 
-1. `reading.analysis.sounds` and every cell sound use the same sound IDs.
+1. `result.analysis.sounds` and every cell sound use the same sound IDs.
 2. Source unit IDs are shared by source and both cell spellings.
 3. Rule occurrence IDs are shared by analysis, source placements, and cells.
 4. Merger IDs and endpoint placements are shared by analysis and cell bridges.
-5. `reading.document("analysis")` equals serialization of
-   `reading.analysis` under the native serializer.
-6. `reading.document("cells", spelling="transformed")` equals serialization
-   of `reading.cells(spelling="transformed")`.
+5. `result.document("analysis_result")` equals serialization of
+   `result.analysis` under the native serializer.
+6. `result.document("cell_view", spelling="transformed")` equals serialization
+   of `result.cells(spelling="transformed")`.
 7. Request options are reflected identically in every projection.
 
 ### Errors
@@ -323,14 +431,15 @@ No error should mention internal builders such as `build_bundle` or `pen_for`.
 The ordinary path should be:
 
 ```python
-from quranic_phonemizer import Phonemizer, Reading
+from quranic_phonemizer import Phonemizer, Result
 ```
 
 The root package should export the facade type and the stable configuration
 types needed to construct it. Native DTOs may continue to be exported from
 `quranic_phonemizer.analysis` for typed specialist consumers.
 
-The following remain non-primary implementation imports:
+The following remain private implementation imports while their native
+builders still have maintainers and tests as callers:
 
 ```python
 quranic_phonemizer.session.phonemize_request
@@ -339,27 +448,26 @@ quranic_phonemizer.analysis.source.build_source_view
 quranic_phonemizer.orthography.write.pen_for
 ```
 
-They should not be removed in the facade release, but new documentation and
-examples must stop teaching them as the normal workflow.
+They are not root exports, and public documentation must not teach them as the
+normal workflow. Builder modules with no remaining internal caller after the
+website migration are deleted in the cutover rather than retained as a second
+public construction recipe.
 
-## Compatibility strategy
+## Cutover strategy
 
-### Existing `phonemize()`
+### Legacy projection
 
-Keep `Phonemizer.phonemize()` in the first facade release. It returns the
-existing `PhonemizeResult` and remains compatible with callers using
-`text()`, `phonemes()`, `alignment()`, and `respelling()`.
-
-Document `analyse()` as the canonical native API. Do not silently change the
-return type of `phonemize()`.
-
-In a later major release, `phonemize()` may delegate to the same internal
-session builder, but it must continue to return its documented result type
-until an explicit deprecation cycle is complete.
+Keep the old projection only while it is needed for differential checks during
+implementation. Once the facade, website, and wire-equivalence gates pass,
+remove `Phonemizer.phonemize()`, `PhonemizeResult`, the root `edges` and `nodes`
+exports, and the alignment, respelling, and general recited-text projection
+modules. The package is pre-release, so there is no deprecation stage and no
+release carrying two supported public architectures.
 
 ### Wire compatibility
 
-The facade reads and emits schema version 1. A producer schema change still
+The facade reads and emits the current schema version 2. A producer schema
+change still
 requires a schema-version bump and the corresponding major version of
 `quran-cells`. Rule catalogue additions remain outside the document version.
 
@@ -370,58 +478,98 @@ payload came from the facade or the current backend composition.
 
 ## Migration sequence
 
-### Step 1: Add the facade without changing builders
+### Step 1: Centralize shared construction
 
-- Create `analysis/facade.py`.
-- Add `Reading` and its private projection cache.
-- Implement `Phonemizer.analyse()` using the existing request path.
-- Export `Reading` and any public option aliases from the root package.
-
-### Step 2: Centralize shared construction
-
-- Refactor the facade's internal construction so `AnalysisResult`, source,
+- Refactor internal construction so `AnalysisResult`, source,
   highlights, and cells share one facts/inscription/bundle state.
 - Keep existing builder functions callable and tested.
 - Add internal helpers only where they remove duplicate work; do not expose
   builder implementation records through the facade.
+- Prove that the shared path is value-identical to today's independent builders
+  before exposing it publicly.
 
-### Step 3: Add typed and JSON document access
+This is mostly orchestration because `build_bundle()` and
+`build_source_view()` already accept shared facts and inscription. The cell
+builder is the remaining seam: today it creates its own facts, inscription,
+bundle, and source view. Refactoring that seam has correctness risk if a view
+uses different extra-phoneme rendering, transformed pen, or result-local IDs,
+and performance risk if a cache retains more passage state than the requested
+projection needs. Equivalence, call-count, retained-memory, and concurrent
+access tests are therefore part of this step rather than deferred facade tests.
 
+### Step 2: Add the facade over shared construction
+
+- Create `analysis/facade.py`.
+- Add `Result` and its private projection cache.
+- Implement `Phonemizer.analyse()` using the shared request path.
+- Export `Result` and any public option aliases from the root package.
+
+### Step 3: Add catalogues, errors, and JSON document access
+
+- Add the configuration-scoped stop-sign, variant, and rule catalogues.
+- Add `UnknownStopSign` and validate requested stop classes before boundary
+  resolution.
 - Implement `document(kind, spelling=...)`.
 - Reuse existing document constructors and serializers.
 - Add closure tests for analysis, source, highlights, and cells.
 
-### Step 4: Migrate the website backend
+### Step 4: Migrate the website and prove equivalence
 
-- Replace direct imports of `phonemize_request`, `build_result`, and
-  `build_cell_view` in `app/main.py` with `Phonemizer` and `Reading`.
-- Keep the response fields and stop semantics byte-compatible except for
-  intentionally documented native fixes.
+- In `C:/Users/ahmed/Documents/Work/my-projects/phonemizer-web`, replace the
+  backend's direct imports of `phonemize_request`, `build_result`,
+  `build_cell_view`, `pen_for`, and serializer composition with
+  `Phonemizer.analyse()` and `Result.document()`.
+- Preserve the `/api/analyse` response fields and values for the same riwayah,
+  reference, stop plan, variants, and extra phonemes. The facade migration is
+  wiring, not a website API redesign.
+- Replace the website's process-wide default stop list with the intersection of
+  its preferred defaults and the configured
+  `reader.available_stop_signs`. This preserves today's Hafs behavior and
+  produces an empty named-stop plan for current Warsh, where callers may still
+  submit explicit word stops.
+- Publish the selected configuration's stop-sign, variant, and rule catalogues
+  from `/api/meta`; the frontend must not reuse the Hafs catalogue for Warsh.
 - Keep the backend's Digital Khatt override as host presentation data; it must
   not be written back into native transformed cells.
+- Record old and facade responses for representative Hafs and Warsh passages,
+  default and explicit stops, authored sakt, mergers, and transformed cells.
+  Compare the full `analysis` and `cells` documents plus website `text`,
+  `phonemes`, `stops`, and `dk`; every difference must be zero or an explicitly
+  reviewed native correction.
+- Run the website package parser, unit tests, build, layout audit, and browser
+  sweep against the facade backend before removing the old path.
 
-### Step 5: Rewrite public documentation
+### Step 5: Cut over and document the public API
 
-- Make `docs/public-api.md` lead with the facade.
-- Move the builder recipe to an advanced implementation section.
-- Add runnable examples for phonemes, characters, rules, mergers, source
-  cells, transformed cells, and JSON documents.
-- Link the Python facade guide to the `quran-cells` renderer consumer guide.
-
-### Step 6: Deprecation review
-
-- Measure whether any public caller still needs the old projection as a
-  separate construction path.
-- If appropriate, add a deprecation notice only after the facade has been
-  released and exercised by the website and an external scratch consumer.
+- Remove the legacy `phonemize()` public surface and every old projection module
+  with no remaining internal caller.
+- Make `README.md` the concise quick start and make `docs/public-api.md` the
+  concise but comprehensive contract for construction, scoped catalogues,
+  errors, core records, boundaries, source, highlights, cells, and documents.
+- Include only small runnable snippets needed to explain each surface. Detailed
+  generated examples, tutorials, and presentation walkthroughs belong in
+  future README or consumer documentation, not this implementation step.
+- Link to the `quran-cells` renderer contract without duplicating its layout or
+  presentation documentation.
 
 ## Testing plan
 
 ### API shape tests
 
-- `from quranic_phonemizer import Phonemizer, Reading` succeeds.
-- `Phonemizer().analyse("1:1")` returns `Reading`.
+- `from quranic_phonemizer import Phonemizer, Result` succeeds.
+- `Phonemizer().analyse("1:1")` returns `Result`.
 - Every documented method returns the documented native type.
+- configured and root stop-sign catalogues agree for every packaged
+  `(riwayah, script)`;
+- configured and root variant and rule catalogues agree for every packaged
+  riwayah;
+- no configured catalogue includes a value belonging only to another
+  configuration;
+- Warsh Uthmani publishes an empty stop-sign catalogue, accepts
+  `stop_signs=()`, rejects every non-empty `stop_signs` request with
+  `UnknownStopSign`, and continues to accept valid `stop_refs`;
+- an invalid stop class for Hafs reports the selected script and the exact
+  available values;
 - Invalid arguments raise stable, user-facing errors.
 
 ### Projection tests
@@ -441,7 +589,7 @@ For representative passages including `1:1`, `2:2`, `2:255`, `3:103`,
 
 ### Wire tests
 
-- Every facade document has `schema_version == 1`.
+- Every facade document has `schema_version == 2`.
 - The analysis and cell envelopes share sound, word, boundary, and rule IDs.
 - Transformed cell serialization includes `inserted`, `replaced`, `dropped`, and
   `gap` statuses without frontend reconstruction.
@@ -468,8 +616,8 @@ Compare the facade against the current direct builder path:
 - phoneme-only calls must not construct cells;
 - source-only calls must not construct transformed cells;
 - requesting all projections must not rerun boundary resolution or the engine;
-- repeated calls on one `Reading` must be materially cheaper than the first;
-- the facade must not retain unrelated passage state after the `Reading` is
+- repeated calls on one `Result` must be materially cheaper than the first;
+- the facade must not retain unrelated passage state after the `Result` is
   released.
 
 ## Acceptance criteria
@@ -482,27 +630,22 @@ The facade is ready when all of the following are true:
 3. No public example imports `phonemize_request`, `build_bundle`, `inscribe`,
    `build_source_view`, `build_cell_view`, or `pen_for`.
 4. Native DTOs and IDs remain unchanged.
-5. The website backend uses the facade without an adapter or response-shape
-   change.
-6. Existing `Phonemizer.phonemize()` callers continue to work.
-7. The package and documentation explicitly distinguish eager core data from
+5. Stop-sign catalogues and validation are scoped by `(riwayah, script)`;
+   variant and rule catalogues are scoped by riwayah; current Warsh exposes no
+   named stop classes and uses `stop_refs` for requested stops.
+6. The website backend uses only the facade and produces equivalent analysis,
+   cells, text, phonemes, stops, and Digital Khatt data for the same requests.
+7. `phonemize()`, `PhonemizeResult`, public graph exports, alignment,
+   respelling, and general recited-text projections are absent from the shipped
+   package.
+8. The package and documentation explicitly distinguish eager core data from
    lazy selective projections.
-8. The facade passes the full producer gates and the website's existing tests.
+9. `document()` supports all four existing schema kinds and `highlights()` is
+   included in the first facade release.
+10. The facade passes the full producer gates and the website parser, unit,
+    build, layout, and browser gates.
 
-## Open decisions before implementation
+## Resolved surface decisions
 
-These choices should be settled in the implementation PR, not by allowing
-multiple competing public names:
-
-1. `Reading` versus `Analysis` for the facade return type. `Reading` is the
-   recommended name because it covers phonemes, source, boundaries, and cells
-   without implying that cells are the whole result.
-2. `document()` versus `wire()` for JSON-compatible envelopes. `document()` is
-   recommended because the wire envelope is a document, not an arbitrary
-   transport operation.
-3. Whether `rule_uses()` is needed after real examples are written. Start with
-   `rule_catalogue`, `rule_definition()`, and `rule_occurrences`; add the
-   joined convenience only if it removes repeated consumer code.
-4. Whether `highlights()` belongs in the first release or follows source and
-   cells. The implementation should support it without making it mandatory in
-   the initial facade surface.
+- The JSON-compatible envelope method is `document()`.
+- `highlights()` is included in the first release.
