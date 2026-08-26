@@ -220,12 +220,25 @@ def test_rule_lookup_is_scoped_to_the_selected_riwayah():
         result.rule_definition(unavailable)
 
 
+def test_warsh_requests_and_word_refs_use_its_source_coordinates():
+    reader = Phonemizer(riwayah="warsh")
+
+    result = reader.analyse("1:3")
+
+    assert result.text() == "مَلِكِ يَوْمِ اِ۬لدِّينِۖ"
+    assert tuple(word.ref for word in result.words) == (
+        "1:3:1",
+        "1:3:2",
+        "1:3:3",
+    )
+
+
 def test_warsh_stop_sign_is_typed_and_requested_by_its_catalogue_name():
     reader = Phonemizer(riwayah="warsh")
     ref = "1:4-1:5"
     joined = reader.analyse(ref)
     selected = reader.analyse(ref, stop_signs=("optional_stop",))
-    explicit = reader.analyse(ref, stop_refs=("1:4:3",))
+    explicit = reader.analyse(ref, stop_refs=("1:4:4",))
 
     boundary = next(item for item in joined.boundaries if item.stop_sign == "ۖ")
     assert boundary.stop_advice is StopAdvice.OPTIONAL_STOP

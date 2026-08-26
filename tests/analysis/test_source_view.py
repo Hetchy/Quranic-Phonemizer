@@ -175,10 +175,11 @@ def test_the_site_set_exercises_every_boundary_state(hafs):
 
 def test_warsh_optional_stop_is_a_typed_boundary_sign():
     warsh = recitation(Riwayah.WARSH)
+    ref = "1:3-1:4"
 
-    session = phonemize_request(warsh, "2:2")
+    session = phonemize_request(warsh, ref)
     bundle = build_bundle(
-        session, ref="2:2", riwayah="warsh", script="uthmani", variant={}
+        session, ref=ref, riwayah="warsh", script="uthmani", variant={}
     )
     view = build_source_view(session, bundle=bundle)
     sign = next(character for character in view.characters if character.text == "ۖ")
@@ -189,9 +190,9 @@ def test_warsh_optional_stop_is_a_typed_boundary_sign():
     assert boundary.stop_advice is StopAdvice.OPTIONAL_STOP
     assert boundary.state is BoundaryState.JOIN
 
-    stopped = phonemize_request(warsh, "2:2", stop_signs=("optional_stop",))
+    stopped = phonemize_request(warsh, ref, stop_signs=("optional_stop",))
     stopped_bundle = build_bundle(
-        stopped, ref="2:2", riwayah="warsh", script="uthmani", variant={}
+        stopped, ref=ref, riwayah="warsh", script="uthmani", variant={}
     )
     assert stopped_bundle.boundaries[sign.boundary_id.value].state is BoundaryState.STOP
 

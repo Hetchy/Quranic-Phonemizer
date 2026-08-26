@@ -599,7 +599,7 @@ def test_warsh_naql_stays_on_the_written_host_haraka():
 def test_warsh_native_iqlab_meem_is_its_own_source_backed_cell():
     warsh = recitation(Riwayah.WARSH)
     pen = pen_for(warsh.inventory(Script.UTHMANI))
-    ref = "2:10-2:11"
+    ref = "2:9-2:10"
     session = phonemize_request(warsh, ref)
     kw = dict(ref=ref, riwayah="warsh", script="uthmani", variant={})
     bundle = build_bundle(session, **kw)

@@ -35,7 +35,7 @@ def test_hafs_tashil_defaults_off():
 
 
 def test_warsh_tashil_is_always_rendered_and_not_an_extra():
-    result = Phonemizer(riwayah="warsh").analyse("6:19:19")
+    result = Phonemizer(riwayah="warsh").analyse("6:20:19")
     assert "ʔ̞" in result.phonemes()
     assert result.analysis.extra_phonemes == frozenset()
 

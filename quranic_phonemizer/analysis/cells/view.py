@@ -330,7 +330,7 @@ def build_cell_view(
         (
             None
             if session.verse_ends is None
-            else frozenset(str(location) for location in session.verse_ends)
+            else session.verse_ends
         ),
     )
     if spelling == "transformed":

@@ -98,7 +98,7 @@ class Recitation:
         return perform(score, self.rules, boundaries, selection=selection)
 
     def words(self, verse: VerseRef) -> tuple[tuple[Location, str], ...]:
-        """The words this riwayah performs at one public verse address."""
+        """The words at one internal canonical verse address."""
         return self.corpus.words(verse)
 
 

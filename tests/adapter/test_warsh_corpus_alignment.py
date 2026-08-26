@@ -1,4 +1,4 @@
-"""Selected-source words aligned to canonical/public Quran addresses."""
+"""Selected-source words aligned to internal canonical Quran addresses."""
 from __future__ import annotations
 
 import gzip
@@ -75,13 +75,30 @@ def test_only_the_reviewed_cardinality_spans_differ(artifact):
     }
 
 
-def test_runtime_lookup_is_public_and_provenance_is_source_typed():
+def test_runtime_lookup_is_internal_and_provenance_is_source_typed():
     aligned = corpus()
     entry = aligned.entries[Location(2, 3, 1)]
     assert entry.sources[0].location == SourceLocation(ARTIFACT, 2, 2, 1)
     assert aligned.words(VerseRef(2, 3))[0] == (entry.location, entry.text)
     with pytest.raises(ValueError, match="absent"):
         aligned.word(Location(1, 1, 1))
+
+
+def test_every_source_verse_resolves_in_its_own_coordinates(artifact):
+    _, rows = artifact
+    expected: dict[VerseRef, list[str]] = {}
+    for row in rows:
+        for source in row["source"]:
+            surah, ayah, _ = _key(source["ref"])
+            expected.setdefault(VerseRef(surah, ayah), []).append(source["text"])
+
+    aligned = corpus()
+    for verse, texts in expected.items():
+        locations = aligned.locations(str(verse))
+        assert locations == aligned.source_by_verse[verse]
+        assert " ".join(aligned.entries[location].text for location in locations) == (
+            " ".join(texts)
+        )
 
 
 def test_a_two_source_word_preserves_both_source_runs_and_the_separator():
@@ -97,15 +114,17 @@ def test_a_two_source_word_preserves_both_source_runs_and_the_separator():
     assert refs[-1].offset == len(entry.sources[1].text) - 1
 
 
-def test_each_coordinate_of_a_canonical_span_resolves_the_same_runtime_word():
+def test_source_requests_resolve_to_aligned_runtime_words():
     aligned = corpus()
     first = Location(15, 7, 1)
     second = Location(15, 7, 2)
+    third = Location(15, 7, 3)
 
     assert aligned.entries[first].canonical == (first, second)
     assert aligned.locations("15:7:1") == (first,)
-    assert aligned.locations("15:7:2") == (first,)
+    assert aligned.locations("15:7:2") == (third,)
+    assert aligned.public_ref(first) == "15:7:1"
     assert aligned.word(second) == aligned.word(first) == "لَّوْمَا"
     assert aligned.contains_full_verse(
-        first.verse, aligned.locations("15:7")
+        first.verse, aligned.by_verse[first.verse]
     )
