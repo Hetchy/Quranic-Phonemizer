@@ -563,6 +563,65 @@ def test_iltiqa_sound_and_column_live_on_the_boundary(hafs, pen, ref, mark):
     )
 
 
+def test_warsh_naql_stays_on_the_written_host_haraka():
+    warsh = recitation(Riwayah.WARSH)
+    pen = pen_for(warsh.inventory(Script.UTHMANI))
+    session = phonemize_request(warsh, "23:1")
+    kw = dict(ref="23:1", riwayah="warsh", script="uthmani", variant={})
+    bundle = build_bundle(session, **kw)
+    view = build_cell_view(session, spelling="transformed", pen=pen, **kw)
+    occurrence = next(o for o in bundle.rule_occurrences if o.rule_id.value == "naql")
+    host, qata = view.words[:2]
+
+    host_haraka = host.columns[-1]
+    qata_alif, qata_haraka = qata.columns[:2]
+    boundary = next(b for b in view.boundaries if b.boundary_id in occurrence.boundary_ids)
+
+    assert host_haraka.text == "َ"
+    assert host_haraka.role is CellRole.HARAKA
+    assert host_haraka.status is CellStatus.PRESENT
+    assert host_haraka.owned_sound_ids == occurrence.sound_ids
+    assert occurrence.id in host_haraka.rule_occurrence_ids
+
+    assert qata_alif.text == "ا"
+    assert qata_alif.status is CellStatus.DROPPED
+    assert qata_alif.silence == occurrence.id
+    assert qata_haraka.text == "َ"
+    assert qata_haraka.status is CellStatus.DROPPED
+    assert qata_haraka.silence == occurrence.id
+    assert qata_haraka.attached_to_column_id == qata_alif.id
+    assert occurrence.id in qata_haraka.rule_occurrence_ids
+
+    assert not any(occurrence.id in column.rule_occurrence_ids for column in boundary.columns)
+    assert not any(sound.sound_id in occurrence.sound_ids for sound in boundary.sounds)
+
+
+def test_warsh_native_iqlab_meem_is_its_own_source_backed_cell():
+    warsh = recitation(Riwayah.WARSH)
+    pen = pen_for(warsh.inventory(Script.UTHMANI))
+    ref = "2:10-2:11"
+    session = phonemize_request(warsh, ref)
+    kw = dict(ref=ref, riwayah="warsh", script="uthmani", variant={})
+    bundle = build_bundle(session, **kw)
+    view = build_cell_view(session, spelling="transformed", pen=pen, **kw)
+    occurrence = next(o for o in bundle.rule_occurrences if o.rule_id.value == "iqlab")
+    word = next(
+        word for word in view.words
+        if any(column.text == "ۢ" for column in word.columns)
+    )
+    meem = next(column for column in word.columns if column.text == "ۢ")
+    tanween = next(column for column in word.columns if column.role is CellRole.TANWEEN)
+
+    assert meem.source_character_ids
+    assert meem.source_unit_ids
+    assert meem.status is CellStatus.PRESENT
+    assert meem.owned_sound_ids == occurrence.sound_ids
+    assert meem.rule_occurrence_ids == (occurrence.id,)
+    assert meem.attached_to_column_id == tanween.attached_to_column_id
+    assert tanween.owned_sound_ids
+    assert occurrence.id not in tanween.rule_occurrence_ids
+
+
 @pytest.mark.slow
 def test_every_stopped_consonant_in_the_corpus_projects_its_sukun(hafs, pen):
     """Audit every word, including every cancelled cross-word rule and qalqala."""

@@ -22,11 +22,10 @@ CASES = (
         "joined": Expect(
             read=explicit(ibtidaa=1, wasl=2),
             phonemes=("q aˤ d a", "f l a ħ a"),
-            char_rules={"ا": R("naql")},
+            char_rules={"@fatha[2]": R("naql"), "ا": R("naql")},
             sound_rules={"a[1]": R("naql")},
             absent_char_rules={
-                "د": R("qalqala_sughra"), "@fatha[2]": R("naql"),
-                "ف": R("naql"),
+                "د": R("qalqala_sughra"), "ف": R("naql"),
             },
         ),
         "stopped-before": Expect(
@@ -53,9 +52,8 @@ CASES = (
         site=Site(warsh=("77:12", (2, 3))),
         read=explicit(ibtidaa=2, waqf=3),
         phonemes=("j a w m i n u", "ʒʒ i l a t"),
-        char_rules={"ا": R("naql")},
+        char_rules={"@round_zero": R("naql"), "ا": R("naql")},
         sound_rules={"u": R("naql")},
-        absent_char_rules={"@round_zero": R("naql")},
     ),
     # Warsh: بَغَتِ اِحْد۪يٰهُمَا
     Case(
@@ -72,9 +70,8 @@ CASES = (
         site=Site(warsh=("6:151", (2, 3))),
         read=explicit(ibtidaa=2, wasl=3),
         phonemes=("t a ʕ a: l a w a", "t l u"),
-        char_rules={"ا[3]": R("naql")},
+        char_rules={"@fatha[4]": R("naql"), "ا[3]": R("naql")},
         sound_rules={"a[3]": R("naql")},
-        absent_char_rules={"@fatha[4]": R("naql")},
         absent_sound_rules={"w": R("naql")},
     ),
     # Warsh: اِ۬لَارْضِ

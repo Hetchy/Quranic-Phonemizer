@@ -18,7 +18,7 @@ from .derivations import (
     silent_groups,
 )
 from .facts import AnalysisFacts
-from .inscription import InscriptionFacts
+from .inscription import InscriptionFacts, Witnessed
 from .source_dtos import LetterUnitKind, LiteralSilence, Silence
 from .source_units import Tokenization
 
@@ -106,14 +106,35 @@ def _present_carrier_vowel(
         presenters[sound].add(vowel)
 
 
+def _naql_witness_unit(facts, tok, insc, edge) -> int | None:
+    if (
+        edge.by is None
+        or edge.aspect is not Aspect.VOWEL
+        or facts.occurrences[edge.by].rule is not Rule.NAQL
+    ):
+        return None
+    candidates = [
+        tok.unit_of_glyph[spelling.glyph]
+        for spelling in insc.spellings
+        if isinstance(spelling, Witnessed)
+        and spelling.slot == edge.slots[0]
+        and spelling.glyph in tok.unit_of_glyph
+        and tok.units[tok.unit_of_glyph[spelling.glyph]].kind
+            is LetterUnitKind.HARAKA
+    ]
+    return candidates[-1] if candidates else None
+
+
 def _owners_and_presenters(facts, tok, insc, carriers):
     owner: dict[int, int] = {}
     presenters: dict[int, set[int]] = defaultdict(set)
     for edge in facts.hosts:
-        unit = _unit_at(
-            facts, tok, insc, carriers,
-            edge.slots[0], edge.aspect, edge.sound,
-        )
+        unit = _naql_witness_unit(facts, tok, insc, edge)
+        if unit is None:
+            unit = _unit_at(
+                facts, tok, insc, carriers,
+                edge.slots[0], edge.aspect, edge.sound,
+            )
         if unit is not None:
             owner[edge.sound] = unit
             if edge.aspect is Aspect.VOWEL:
@@ -144,8 +165,6 @@ def _silenced_units(facts, tok) -> dict[int, int]:
         rule = facts.occurrences[edge.by].rule
         unit = tok.roles.letter.get(edge.slots[0])
         if edge.aspect is Aspect.VOWEL:
-            if rule is Rule.NAQL:
-                continue
             unit = tok.roles.vowel.get(edge.slots[0], unit)
             if rule is Rule.WAQF_SILAH_DROP:
                 carrier = tok.roles.carrier.get(edge.slots[0])

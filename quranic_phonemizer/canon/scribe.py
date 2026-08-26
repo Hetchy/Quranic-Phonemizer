@@ -155,3 +155,18 @@ def _slot(verse: VerseRef, ordinals: dict[int, int], key: int, offset: int) -> S
 
 def _grapheme(verse: VerseRef, offset: int) -> GraphemeId:
     return GraphemeId(verse, offset)
+
+
+def record_attestations(scribe: Scribe, reading, drafts) -> int:
+    """Carry adapter witnesses onto the surviving canonical slot drafts."""
+    by_cluster = {draft.cluster: draft for draft in drafts if draft.cluster >= 0}
+    existing = set(scribe.attests)
+    added = 0
+    for attestation in reading.attestations:
+        anchor = by_cluster.get(attestation.cluster)
+        row = None if anchor is None else (attestation.offset, anchor.uid)
+        if row is not None and row not in existing:
+            scribe.attestation(attestation.offset, anchor)
+            existing.add(row)
+            added += 1
+    return added

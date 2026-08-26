@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from dataclasses import replace
 
-from ...model.canon import Quality
+from ...model.canon import Quality, Rule
 from ...model.performance import Aspect, Vowel
 from ...orthography.write import Pen
 from ..ids import CellColumnId, OccurrenceId, SoundId
@@ -36,6 +36,7 @@ def _boundary_hosted(facts, bundle):
     return [
         edge for edge in facts.hosts
         if edge.by in boundary_of and edge.aspect is Aspect.VOWEL
+        and facts.occurrences[edge.by].rule is Rule.ILTIQA_HARAKA
         and isinstance(facts.sounds[edge.sound].value, Vowel)
         and not facts.sounds[edge.sound].value.long
         and boundaries[boundary_of[edge.by]].before is not None

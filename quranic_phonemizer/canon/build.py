@@ -33,7 +33,7 @@ from .draft import (
 )
 from .juncture import apply_cross_word_noon
 from .passes import LexemePass, apply_ledger, word_bounds
-from .scribe import Scribe
+from .scribe import Scribe, record_attestations
 
 #: The two derivations the builder names itself. Both are properties of the
 #: canonical layer rather than of any script: the length clause of the
@@ -99,6 +99,7 @@ def build(
     apply_ledger(reading, drafts, ledger, track)
     for lexeme_pass in passes:
         lexeme_pass(reading, drafts, lexicon, scribe, selection)
+    track.attested += record_attestations(scribe, reading, drafts)
     score, ordinals = assemble(reading, drafts, selection)
     return Built(score, scribe.finish(reading, drafts, ordinals))
 
