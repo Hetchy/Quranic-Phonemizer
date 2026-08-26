@@ -7,6 +7,7 @@
   <a href="https://huggingface.co/datasets/hetchyy/everyayah-phonemes"><img src="https://img.shields.io/badge/%F0%9F%A4%97_Hugging_Face-EveryAyah_Phonemes_Dataset-yellow" alt="Dataset"></a>
   <a href="https://openreview.net/forum?id=hZt0JK28iV"><img src="https://img.shields.io/badge/Paper-OpenReview-red" alt="Paper"></a>
   <a href="https://github.com/Hetchy/Quranic-Phonemizer/blob/main/LICENSE"><img src="https://img.shields.io/pypi/l/quranic-phonemizer" alt="License"></a>
+</p>
 
 A Grapheme-to-Phoneme converter (G2P) for the Qurʾan (Hafs riwaya), converting text to phoneme sequences with comprehensive support for waqf phonetic effects and tajweed mappings.
 
@@ -20,6 +21,7 @@ Potential use cases:
 
 ## Table of Contents
 - [Phoneme Inventory](#phoneme-inventory)
+- [Extra Phonemes](#extra-phonemes)
 - [Usage](#usage)
 - [Input References](#input-references)
 - [Text Search](#text-search)
@@ -34,45 +36,57 @@ Potential use cases:
 
 ## Phoneme Inventory
 
-The phoneme inventory uses the standard International Phonetic Alphabet (IPA) [Arabic phonemes](https://en.wikipedia.org/wiki/Help%3AIPA/Arabic?utm_source=chatgpt.com) alongside custom phonemes for Tajweed rules, totalling 69-71 phonemes (depending on Tajweed configuration).
+The phoneme inventory uses the standard International Phonetic Alphabet (IPA) [Arabic phonemes](https://en.wikipedia.org/wiki/Help%3AIPA/Arabic?utm_source=chatgpt.com) alongside custom phonemes for Tajweed rules. Hafs has 68 base phonemes plus 5 optional tokens; Warsh has 71 base phonemes plus 4 optional tokens.
 
-All phonemes are configurable in [resources/base_phonemes.yaml](quranic_phonemizer/resources/base_phonemes.yaml) and [resources/rule_phonemes.yaml](quranic_phonemizer/resources/rule_phonemes.yaml).
+### Foundational Phonemes
 
-### Consonants
 | **Letter**               | **Phoneme**              | **Letter** | **Phoneme**               | **Letter** | **Phoneme**              | **Letter** | **Phoneme**              |
-|:------------------------:|:------------------------:|:----------:|:-------------------------:|:----------:|:------------------------:|:----------:|:------------------------:|
+|:------------------------:|:------------------------|:----------:|:-------------------------|:----------:|:------------------------|:----------:|:------------------------|
 | أ , إ , ء , ؤ , ئ        | `ʔ`                      | د          | `d` / `dd`                | ض          | `dˤ` / `dˤdˤ`            | ك          | `k` / `kk`              |
-| ب                        | `b` / `bb`               | ذ          | `ð` / `ðð`                | ط          | `tˤ` / `tˤtˤ`            | ل          | `l` / `ll` / `lˤlˤ`      |
+| ب                        | `b` / `bb`               | ذ          | `ð` / `ðð`                | ط          | `tˤ` / `tˤtˤ`            | ل          | `l` / `lˤ` / `ll` /  `lˤlˤ` |
 | ت                        | `t` / `tt`               | ر          | `r` / `rˤ` / `rr` / `rˤrˤ`| ظ          | `ðˤ` / `ðˤðˤ`            | م          | `m`                      |
 | ث                        | `θ` / `θθ`               | ز          | `z` / `zz`                | ع          | `ʕ` / `ʕʕ`               | ن          | `n`                      |
 | ج                        | `ʒ` / `ʒʒ`               | س          | `s` / `ss`                | غ          | `ɣ`                      | هـ         | `h` / `hh`               |
 | ح                        | `ħ` / `ħħ`               | ش          | `ʃ` / `ʃʃ`                | ف          | `f` / `ff`               | و          | `w` / `ww`               |
 | خ                        | `x` / `xx`               | ص          | `sˤ` / `sˤsˤ`             | ق          | `q` / `qq`               | ي , ى      | `j` / `jj`               |
 
-Gemination (shaddah) is represented by repeating the phoneme to create new distinct phonemes. Note that there is no gemination for `m` / `n` (modelled as tajweed instead), and for `ʔ` / `ɣ` (do not exist in the Qurʾān).
+`lˤ` is the single emphatic lam used in Warsh. Gemination (shaddah) is represented by repeating the phoneme to create new distinct phonemes. Note that there is no gemination for `m` / `n` (modelled as tajweed instead), and for `ʔ` / `ɣ` (do not exist in the Qurʾān).
 
-### Vowels
+### Vowel Phonemes
 
+| **Vowel**                      | **Phoneme**            |
+|:--------------------------------|:------------------------|
+| َ                              | `a`                    |
+| ُ                              | `u`                    |
+| ِ                              | `i`                    |
+| ا , ى                          | `aː` / `aˤː`           |
+| و                              | `uː`                   |
+| ي , ى                          | `iː`                   |
+| ى۪ Warsh Taqlil / Imala Sughra | `ɛː`                   |
 
-| **Vowel**     | **Phoneme**   |
-|:-------------:|:-------------:|
-| َ              | `a` / `aˤ`    |
-| ُ              | `u`           |
-| ِ              | `i`           |
-| ا , ى         | `a:` / `aˤ:`  |
-| و             | `u:`          |
-| ي , ى         | `i:`          |
+### Tajweed Phonemes
 
+| **Rule**         | **Phoneme**                   |
+|------------------|:------------------------------|
+| Ikhfaa           | `ŋ`                          |
+| Ikhfaa shafawi   | `ŋ`                          |
+| Iqlab            | `ŋ`                          |
+| Idgham           | `ñ` / `m̃` / `j̃` / `w̃`         |
+| Qalqala          | `Q`                          |
 
-### Tajweed Rules
+### Extra Phonemes
 
-| **Rule**           | **Phoneme**                                              |
-|:------------------:|:---------------------------------------------------------|
-| Iqlab              | `ŋ`                                                       |
-| Idgham             | `ñ` / `m̃` / `j̃` / `w̃`                                    |
-| Ikhfaa             | `ŋ`  (Light)<br> `ŋˤ` (Heavy)<br> `ŋ` (Shafawi)          |
-| Qalqala            | `Q`  (Sughra)<br> `QQ` (Kubra)                           |
-| Tafkheem           | `lˤlˤ` (Lam in "Allah")<br> `rˤ` / `rˤrˤ` (Raa)          |
+`extra_phonemes` selects toggleable output distinctions. Its default is empty to keep the default inventory compact; the underlying reading rule is unchanged.
+
+| **API option**              | **Phoneme** | **Default** | **Notes** |
+|---------------------------|:-----------|:-----------:|:---------|
+| `emphatic_fatha`            | `aˤ`        | Off         | Allophone |
+| `emphatic_ikhfaa`           | `ŋˤ`        | Off         | Heavy nasal allophone |
+| `qalqala_degree`            | `QQ`        | Off         | Stronger Qalqala kubra/akbar degree |
+| `tashil` (Hafs only)        | `ʔ̞`        | Off         | One case Hafs: `ءَا۬عْجَمِيٌّ` (41:44), off -> `ʔ`; Warsh always renders Tashil since it is common |
+| `imala` (kubra)  | `e:`        | Off         | Hafs: `مَجْر۪ىٰهَا` (11:41), off -> `i:`. Warsh: `طَه۪` (20:1), off -> `ɛ:` |
+
+The separate nasal style options `iqlab_nasal` and `ikhfaa_shafawi_nasal` both default to open mouth ikhfaa sound `ŋ`; closed option `m̃` is closer to a meem sound with a closed mouth.
 
 ## Usage
 
