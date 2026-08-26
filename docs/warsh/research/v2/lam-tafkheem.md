@@ -1,13 +1,16 @@
-# Warsh lam taghliz
+# Warsh lam tafkheem
 
-This document specifies lam taghliz for Warsh from Nafi via al-Azraq. It owns
+This document specifies lam tafkheem for Warsh from Nafi via al-Azraq. It owns
 the structural trigger, the inclination coupling, boundary behavior, and all
 finite exception registers. Public selector values and defaults remain in
 [`docs/variants.md`](../../../variants.md).
 
-Use `taghliz` for lam, not generic `tafkheem`. Al-Nashr notes that the terms are
-near-synonyms but reserves taghliz for lam and tafkheem for raa
-([source](https://www.islamweb.net/ar/library/content/70/190/)).
+The public rule is `tafkheem`, shared with raa and general emphasis. Classical
+sources conventionally call lam tafkheem *taghliz* while reserving the word
+*tafkheem* for raa; Al-Nashr states that the two terms are synonymous
+([source](https://www.islamweb.net/ar/library/content/70/190/)). The API
+normalizes the synonymous operations while lam ownership remains explicit in
+the lam classifier and its source/host reach.
 
 ## Sound and rule model
 
@@ -16,13 +19,13 @@ Lam has one light and one emphatic typed sound:
 | Effective lam | Broad token | Rule |
 | --- | --- | --- |
 | Light | `l` | A selected or exceptional light face carries `tarqeeq`; an ordinary unowned light lam carries neither weight rule. |
-| Emphatic | `lˤ` | `taghliz` |
+| Emphatic | `lˤ` | `tafkheem` |
 
 Gemination is independent. The same emphatic lam type renders `lˤ` for a
 single lam and `lˤlˤ` for a geminated lam. Do not add a separate
 "Allah-only" or "single emphatic lam" phoneme.
 
-A `taghliz` or lam-`tarqeeq` occurrence reaches the lam sound and source lam.
+A `tafkheem` or lam-`tarqeeq` occurrence reaches the lam sound and source lam.
 When the owned lam determines its A nucleus, the same occurrence also reaches
 that vowel sound. This includes short A from fatha or fathatan, lexical long A
 from a carrier, and stop-created long A from `madd_iwad`:
@@ -33,7 +36,7 @@ from a carrier, and stop-created long A from `madd_iwad`:
   only if sad, taa, zhaa, or another owner does not still require emphasis.
 
 This propagation is directional. It does not recolor a vowel before the lam.
-Al-Nashr describes taghliz as thickening the lam's own movement and treats the
+Al-Nashr describes the thickening as affecting the lam's own movement and treats the
 following alif as dependent on the surrounding emphatic articulation
 ([lam terminology](https://www.islamweb.net/ar/library/content/70/190/),
 [dependent alif](https://www.islamweb.net/amp/ar/library/content/70/44/)).
@@ -50,7 +53,7 @@ Al-Nashr states these three conditions and gives the Quranic forms
 ([source](https://www.islamweb.net/ar/library/content/70/190/)). The ordinary
 ownership is:
 
-- qualifying sad-lam is fixed taghliz unless a more specific owner below
+- qualifying sad-lam is fixed tafkheem unless a more specific owner below
   applies;
 - qualifying taa-lam is owned by `lam_after_taa`;
 - qualifying zhaa-lam is owned by `lam_after_zhaa`; and
@@ -82,13 +85,13 @@ An inclined alif and an emphatic lam are incompatible at these targets. The
 only legal pairs are:
 
 ```text
-fath plus taghliz
+fath plus tafkheem
 taqlil plus lam tarqiq
 ```
 
 No independent lam selector or validator is needed. The named inclination
-choice returns the compatible pair. Al-Nashr states that inclination and
-taghliz do not combine
+choice returns the compatible pair. Al-Nashr states that inclination and lam
+tafkheem do not combine
 ([source](https://islamweb.net/ar/library/content/70/192/)).
 
 ### Non-verse-head dhat-yaa sites
@@ -97,10 +100,10 @@ taghliz do not combine
 
 | Source ref | Canonical ref | Exact selected text | State note |
 | --- | --- | --- | --- |
-| 2:124:11 | 2:125 | `مُصَلّىٗۖ` | Waqf manifests the selected pair; wasl masks it to fath plus taghliz. |
+| 2:124:11 | 2:125 | `مُصَلّىٗۖ` | Waqf manifests the selected pair; wasl masks it to fath plus tafkheem. |
 | 17:18:16 | 17:18 | `يَصْلَيٰهَا` | Selected pair in all sounded states. |
 | 84:12:1 | 84:12 | `وَيُصَلَّىٰ` | Selected pair in all sounded states. |
-| 87:12:2 | 87:12 | `يَصْلَى` | Waqf manifests the selected pair; wasl before `اَ۬لنَّارَ` masks it to fath plus taghliz. |
+| 87:12:2 | 87:12 | `يَصْلَى` | Waqf manifests the selected pair; wasl before `اَ۬لنَّارَ` masks it to fath plus tafkheem. |
 | 88:4:1 | 88:4 | `تَصْلَىٰ` | Selected pair in all sounded states. |
 | 92:15:2 | 92:15 | `يَصْلَيٰهَآ` | Selected pair in all sounded states. |
 | 111:3:1 | 111:3 | `سَيَصْلَىٰ` | Selected pair in all sounded states. |
@@ -195,7 +198,7 @@ condition
 | --- | --- | --- | --- |
 | Ordinary direct trigger | Effective while lam and its fatha sound | If the target lam becomes final, `lam_final_waqf` may replace it | Recomputed from same-word structure |
 | `lam_dhat_yaa`, ordinary five sites | Selected coupled pair | Selected coupled pair | Selected coupled pair |
-| `lam_dhat_yaa`, 2:125 and 87:12 | Fath plus taghliz because the inclined alif is deleted | Selected coupled pair | Recomputed from the started token; no preceding-word dependency |
+| `lam_dhat_yaa`, 2:125 and 87:12 | Fath plus tafkheem because the inclined alif is deleted | Selected coupled pair | Recomputed from the started token; no preceding-word dependency |
 | `lam_verse_heads` | Selected coupled pair | Selected coupled pair | Selected coupled pair |
 | `lam_separated_by_alif` | Selected lam result | Same result, including `طَالَ` | Same result |
 | `lam_final_waqf` | Inactive | Selected final-lam result | Inactive |
@@ -206,21 +209,21 @@ condition
 ```text
 مَطْلَعِ, source 97:5:4, canonical 97:5
 tarqiq:  m a tˤ Q l a ʕ i
-taghliz: m a tˤ Q lˤ aˤ ʕ i
+tafkheem: m a tˤ Q lˤ aˤ ʕ i
 
 فِصَالاً عَن, source 2:231:36-37, canonical 2:233
 joined tarqiq:  f i sˤ aˤ: l a n ʕ
-joined taghliz: f i sˤ aˤ: lˤ aˤ n ʕ
+joined tafkheem: f i sˤ aˤ: lˤ aˤ n ʕ
 waqf tarqiq:    f i sˤ aˤ: l a:
-waqf taghliz:   f i sˤ aˤ: lˤ aˤ:
+waqf tafkheem:   f i sˤ aˤ: lˤ aˤ:
 
 صَلّ۪ىٰۖ, source 75:30:4, canonical 75:31
 taqlil plus tarqiq: sˤ aˤ ll ɛ:
-fath plus taghliz:  sˤ aˤ lˤlˤ aˤ:
+fath plus tafkheem:  sˤ aˤ lˤlˤ aˤ:
 
 صَلْصَٰلٖ مِّنْ حَمَإٖ, source 15:26:5-7, canonical 15:26, target first lam, joined
 tarqiq first word:  sˤ aˤ l sˤ aˤ: l i
-taghliz first word: sˤ aˤ lˤ sˤ aˤ: l i
+tafkheem first word: sˤ aˤ lˤ sˤ aˤ: l i
 following span:     m̃ i n ħ a ...
 ```
 
@@ -233,7 +236,7 @@ changing each other's rule identity. In transformed cells the color occurrence
 is placed on the rendered vowel/carrier column, not on the composite tanwin
 column; that tanwin column retains only its own noon/boundary rules.
 The sakin taa in `مَطْلَعِ` independently emits `qalqala_sughra` on `Q`.
-`صَلْصَٰلٖ` has no A nucleus on the target first lam, so its `taghliz`
+`صَلْصَٰلٖ` has no A nucleus on the target first lam, so its `tafkheem`
 occurrence reaches only that lam sound and source lam. Its tanwin merges into
 the following meem; the held `/m̃/` already represents the geminate and is not
 doubled.
@@ -272,4 +275,4 @@ performance.
 - Removing the lam's coloring cause does not erase emphasis owned by the
   preceding sad, taa, zhaa, or another independent owner.
 - `طَالَ` is never admitted to `lam_final_waqf`; Salsal owns only its first lam.
-- An unknown source color or inclination witness cannot create taghliz.
+- An unknown source color or inclination witness cannot create tafkheem.

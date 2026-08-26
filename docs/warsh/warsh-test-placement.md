@@ -66,7 +66,7 @@ tests/phonemize/                               # 508 cases: 436 fixed + 72V
     test_hafs_raa.py                          # 19
     test_warsh_raa.py                         # 31: 11 fixed + 20V
     test_allah_lam.py                         # 8
-    test_warsh_lam_taghliz.py                 # 17: 12 fixed + 5V
+    test_warsh_lam_tafkheem.py                 # 17: 12 fixed + 5V
 
   hamza/                                      # 104: 90 fixed + 14V
     test_wasl_start.py                        # 14
@@ -179,9 +179,9 @@ continually infer which tree an example belongs to.
 
 `test_allah_lam.py` owns only the heavy, light, and context-conditioned forms
 of the divine name. Ordinary light lam needs no dedicated sweep. Warsh
-taghliz, Warsh tarqiq choices, dependent A coloring, alif separation,
+tafkheem, Warsh tarqiq choices, dependent A coloring, alif separation,
 final-lam waqf, and the salsal register belong in
-`test_warsh_lam_taghliz.py`. A taghliz occurrence owns the lam and every
+`test_warsh_lam_tafkheem.py`. A tafkheem occurrence owns the lam and every
 causally dependent A realization, including fatha, fathatan, a carrier, and
 madd iwad.
 
@@ -447,7 +447,7 @@ Do not include these in the adapter baseline:
 - mim al-jam or yaa-zawaid;
 - differing seven-alif branches;
 - madd badal or madd leen mahmuz;
-- inclination, Warsh raa, or lam taghliz;
+- inclination, Warsh raa, or lam tafkheem;
 - Warsh-specific muqattaat behavior; or
 - any selector behavior.
 
@@ -494,7 +494,7 @@ table so a domain reviewer never has to reconstruct the text from coordinates.
 | Madd leen mahmuz | `vowels/madd/test_warsh_leen_mahmuz.py` | register reconciliation |
 | Inclination | shared quality plus three `test_warsh_inclination*` files | render, register, coupling tests |
 | Raa | shared raa plus `test_warsh_raa.py` | authored-register tests |
-| Lam taghliz | `emphasis/test_warsh_lam_taghliz.py` | coupling and register tests |
+| Lam tafkheem | `emphasis/test_warsh_lam_tafkheem.py` | coupling and register tests |
 | Selectors | each semantic owner above | generic API catalogue last |
 
 ## Placement acceptance criteria

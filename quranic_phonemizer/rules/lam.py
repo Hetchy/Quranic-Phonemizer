@@ -15,11 +15,11 @@ LamKey = tuple[Location, int]
 
 @dataclass(frozen=True, slots=True)
 class LamProfile:
-    coupled_taghliz: frozenset[LamKey] = frozenset()
+    coupled_tafkheem: frozenset[LamKey] = frozenset()
     coupled_tarqeeq: frozenset[LamKey] = frozenset()
     salsal_tarqeeq: frozenset[LamKey] = frozenset()
-    separated_taghliz: frozenset[LamKey] = frozenset()
-    final_waqf_taghliz: frozenset[LamKey] = frozenset()
+    separated_tafkheem: frozenset[LamKey] = frozenset()
+    final_waqf_tafkheem: frozenset[LamKey] = frozenset()
 
     def rule(self, near: Neighbourhood, at: SlotId, boundaries) -> Rule | None:
         word = near.word_of(at)
@@ -27,26 +27,26 @@ class LamProfile:
         if word is None or slot is None or slot.letter is not L.LAM:
             return None
         key = _key(near, word, at)
-        if key in self.coupled_taghliz:
-            return Rule.TAGHLIZ
+        if key in self.coupled_tafkheem:
+            return Rule.TAFKHEEM
         if key in self.coupled_tarqeeq:
             return Rule.TARQEEQ
         if key in self.salsal_tarqeeq:
             return Rule.TARQEEQ
-        if key in self.separated_taghliz:
-            return Rule.TAGHLIZ
-        if key in self.final_waqf_taghliz and boundaries.stopped_on(word):
-            return Rule.TAGHLIZ
-        return Rule.TAGHLIZ if _ordinary_trigger(near, slot) else None
+        if key in self.separated_tafkheem:
+            return Rule.TAFKHEEM
+        if key in self.final_waqf_tafkheem and boundaries.stopped_on(word):
+            return Rule.TAFKHEEM
+        return Rule.TAFKHEEM if _ordinary_trigger(near, slot) else None
 
 
 @dataclass(frozen=True, slots=True)
 class LamWeight:
     profile: LamProfile
-    rule: Rule = Rule.TAGHLIZ
+    rule: Rule = Rule.TAFKHEEM
     phase: Phase = Phase.COLOUR
     triggers: frozenset = frozenset({L.LAM})
-    emits: frozenset = frozenset({Rule.TAGHLIZ, Rule.TARQEEQ})
+    emits: frozenset = frozenset({Rule.TAFKHEEM, Rule.TARQEEQ})
 
     def look(
         self, near: Neighbourhood, plan: Plan, at: SlotId,

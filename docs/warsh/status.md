@@ -26,8 +26,8 @@ complete tests before production code, then implement from projection upward.
 | 8 | Hamza meetings | [`hamza-meetings.md`](research/v2/hamza-meetings.md) | **Complete** | [PR #66](https://github.com/Hetchy/Quranic-Phonemizer/pull/66); `feat/warsh-hamza-meetings` |
 | 9 | Joined-only and pausal shapes: mim al-jam, yaa zawaid, and seven alifs | [`mim-al-jam.md`](research/v2/mim-al-jam.md), [`yaa-zawaid.md`](research/v2/yaa-zawaid.md), [`seven-alifs.md`](research/v2/seven-alifs.md) | **Complete** | [PR #67](https://github.com/Hetchy/Quranic-Phonemizer/pull/67); `feat/warsh-joined-pausal-shapes` |
 | 10 | Inclination: taqlil, kubra, fath, registers, and precedence | [`inclination.md`](research/v2/inclination.md) | **Complete** | [PR #68](https://github.com/Hetchy/Quranic-Phonemizer/pull/68); `feat/warsh-inclination` |
-| 11 | Lam taghliz and its inclination coupling | [`lam-taghliz.md`](research/v2/lam-taghliz.md), [`lam-taghliz-iteration-log.md`](lam-taghliz-iteration-log.md) | **Complete** | [PR #69](https://github.com/Hetchy/Quranic-Phonemizer/pull/69); `feat/warsh-lam-taghliz` |
-| 12 | Raa weighting and dependent vowel coloring | [`raa.md`](research/v2/raa.md) | **Pending** | Follows lam taghliz |
+| 11 | Lam tafkheem and its inclination coupling | [`lam-tafkheem.md`](research/v2/lam-tafkheem.md), [`lam-tafkheem-iteration-log.md`](lam-tafkheem-iteration-log.md) | **Complete** | [PR #69](https://github.com/Hetchy/Quranic-Phonemizer/pull/69); `feat/warsh-lam-taghliz` |
+| 12 | Raa weighting and dependent vowel coloring | [`raa.md`](research/v2/raa.md) | **Pending** | Follows lam tafkheem |
 | 13 | Full-corpus attribution, default-profile conformance, and projection gates | [`script-projection.md`](research/v2/script-projection.md), [`phoneme-rule-inventory.md`](research/v2/phoneme-rule-inventory.md), [`conformance.md`](../conformance.md) | **Pending** | After all fixed rule verticals |
 | 14 | Public variant catalogue and selectable behavior | [`variants.md`](../variants.md), plus the owning v2 research file for each phenomenon | **Pending** | Add last, in two or three owner-family PRs |
 | 15 | Merge completed workstreams into the integration branch and open the overview PR to `main` | [`architecture.md`](../architecture.md), [`public-api.md`](../public-api.md), README.md, docs/design/public-api-facade.md | **Pending** | `feat/warsh-phonemizer` |
@@ -51,7 +51,7 @@ complete tests before production code, then implement from projection upward.
 - Tashil preserves its typed eased-hamza state and attribution even when its
   optional rendering is collapsed to ordinary hamza. Ibdal names the replaced
   hamza as source and the replacement unit as host.
-- Warsh adds `taqlil`, `taghliz`, `naql`, and `madd_leen_mahmuz` to the shared
+- Warsh adds `taqlil`, `naql`, and `madd_leen_mahmuz` to the shared
   rule vocabulary. Each riwayah derives its public rule catalogue from the
   rule IDs emitted by its bound classifiers.
 

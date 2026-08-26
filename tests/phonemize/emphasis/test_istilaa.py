@@ -54,12 +54,12 @@ CASES = (
          char_rules=pick(
              hafs={"ظ": R("tafkheem"), "@fatha[1]": R("tafkheem")},
              warsh={"ظ": R("tafkheem"), "@fatha[1]": R("tafkheem"),
-                    "ل": R("taghliz"), "@fatha[2]": R("taghliz")},
+                    "ل": R("tafkheem"), "@fatha[2]": R("tafkheem")},
          ),
          sound_rules=pick(
              hafs={"ðˤ": R("tafkheem"), "aˤ": R("tafkheem")},
              warsh={"ðˤ": R("tafkheem"), "aˤ[1]": R("tafkheem"),
-                    "lˤ": R("taghliz"), "aˤ[2]": R("taghliz")},
+                    "lˤ": R("tafkheem"), "aˤ[2]": R("tafkheem")},
          )),
     # Hafs: سَمِعُوا۟
     # Warsh: سَمِعُواْ
