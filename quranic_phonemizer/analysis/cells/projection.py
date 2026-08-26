@@ -21,6 +21,7 @@ from .dtos import (
     CellTier,
     CellWord,
 )
+from .laws import CellValidationError
 from .projection_marks import (
     DAGGER_ALIF,
     MAQSURA,
@@ -208,7 +209,18 @@ def _ensure_one_carrier(
     slot_of_unit, pen, next_id,
 ):
     by_id = {column.id.value: index for index, column in enumerate(columns)}
-    span = [columns[by_id[column.value]] for column in cell.column_ids]
+    # A cross-word merger's sound already spans presenter and owner columns,
+    # while carrier projection runs one word at a time. Inspect only this
+    # word's endpoint; the complete span is retained for the boundary bridge.
+    span = [
+        columns[by_id[column.value]]
+        for column in cell.column_ids
+        if column.value in by_id
+    ]
+    if not span:
+        raise CellValidationError(
+            f"sound {cell.sound_id.value} has no column in its owning word"
+        )
     existing = next((c for c in span if c.role is CellRole.MADD), None)
     if existing is not None:
         _transform_existing_carrier(

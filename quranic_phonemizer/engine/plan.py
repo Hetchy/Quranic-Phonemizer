@@ -174,6 +174,13 @@ class Plan:
             self._keys[key] = (verdict.occurrence.id, verdict.occurrence.rule)
             if isinstance(effect, (MergeInto, Silence)):
                 self._removed.add((effect.slot, effect.aspect))
+                if (
+                    isinstance(effect, MergeInto)
+                    and effect.aspect is Aspect.VOWEL
+                ):
+                    # A vowel merger can make a canonically silent presenter
+                    # voweled without making it the shared sound's owner.
+                    self._voweled.add(effect.slot)
             elif isinstance(effect, Realize) and effect.aspect is Aspect.VOWEL:
                 self._voweled.add(effect.slot)
             elif isinstance(effect, Relength) and effect.length is Length.LONG:

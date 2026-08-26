@@ -48,7 +48,9 @@ class Qalqala:
         # silenced by a BOUNDARY rule. A long final vowel is neither, and
         # neither is a sakin an earlier repair or transfer has voweled.
         canonically = slot.nucleus.is_silent and not plan.voweled(at)
-        silenced = plan.merged_away(at, Aspect.VOWEL)
+        silenced = (
+            plan.merged_away(at, Aspect.VOWEL) and not plan.voweled(at)
+        )
         if not (canonically or silenced):
             return None
 

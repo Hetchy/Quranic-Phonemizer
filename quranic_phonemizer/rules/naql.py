@@ -6,7 +6,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from ..engine.neighbourhood import Neighbourhood
-from ..engine.plan import Phase, Plan, Realize, Silence, Verdict, mint
+from ..engine.plan import MergeInto, Phase, Plan, Realize, Silence, Verdict, mint
 from ..model.address import BoundaryPlan, Junction, Location, SlotId
 from ..model.canon import Annotation, CanonLetter, Onset, Rule
 from ..model.performance import Aspect, Occurrence, Vowel
@@ -49,15 +49,20 @@ class Naql:
             return None
         if near.score.words[word].location in self.excluded:
             return None
-        vowel = Vowel(slot.nucleus.quality)
-        effects = [
-            Realize(host.id, Aspect.VOWEL, vowel),
-            Silence(at, Aspect.CONSONANT),
-        ]
-        # A modified badal transfers the qata's quality but retains the long
-        # carrier whose after-hamza origin MaddBadal classifies independently.
-        if not slot.nucleus.sounds_long:
-            effects.append(Silence(at, Aspect.VOWEL))
+        effects = [Silence(at, Aspect.CONSONANT)]
+        if slot.nucleus.sounds_long:
+            # In badal mughayyar bin-naql the carrier still owns the one long
+            # vowel. The preceding sakin presents that same sound through a
+            # bridge; realizing a separate short vowel here would produce
+            # the impossible sequence /a a:/ (and likewise for /u/ and /i/).
+            effects.append(
+                MergeInto(host.id, Aspect.VOWEL, at, Aspect.VOWEL)
+            )
+        else:
+            effects.extend((
+                Realize(host.id, Aspect.VOWEL, Vowel(slot.nucleus.quality)),
+                Silence(at, Aspect.VOWEL),
+            ))
         return Verdict(
             Occurrence(
                 mint(Rule.NAQL, at), Rule.NAQL, (at, host.id),
