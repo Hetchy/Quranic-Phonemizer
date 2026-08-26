@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import array
+import bisect
 import gzip
 import json
 import struct
@@ -105,15 +106,31 @@ class PackedCorpus:
             raise ValueError(f"Reference selects no words: {reference}")
         return tuple(result)
 
+    @staticmethod
+    def public_ref(location: Location) -> str:
+        return str(location)
+
+    def verse_ends(self, locations: tuple[Location, ...]) -> frozenset[Location]:
+        return frozenset(
+            location
+            for location in locations
+            if location.word
+            == self.surah_info[str(location.surah)][location.ayah - 1]
+        )
+
 
 @dataclass(frozen=True, slots=True)
 class AlignedCorpus:
-    """A corpus whose selected-source words are aligned to public locations."""
+    """A selected-source corpus aligned to internal canonical locations."""
 
     entries: Mapping[Location, AlignedWord]
     canonical_to_runtime: Mapping[Location, Location]
     by_verse: Mapping[VerseRef, tuple[Location, ...]]
     surah_info: Mapping[str, tuple[int, ...]]
+    source_to_runtime: Mapping[Location, Location]
+    source_locations: tuple[Location, ...]
+    source_by_verse: Mapping[VerseRef, tuple[Location, ...]]
+    source_verse_ends: frozenset[Location]
 
     def word(self, location: Location) -> str:
         try:
@@ -147,14 +164,33 @@ class AlignedCorpus:
         high = _canonical_endpoint(end, end=True)
         if low > high:
             raise ValueError(f"Reference starts after it ends: {reference}")
+        first = bisect.bisect_left(self.source_locations, Location(*low))
+        last = bisect.bisect_right(self.source_locations, Location(*high))
         result: list[Location] = []
-        for canonical, runtime in self.canonical_to_runtime.items():
-            key = (canonical.surah, canonical.ayah, canonical.word)
-            if low <= key <= high and (not result or result[-1] != runtime):
+        for source in self.source_locations[first:last]:
+            runtime = self.source_to_runtime[source]
+            if not result or result[-1] != runtime:
                 result.append(runtime)
         if not result:
             raise ValueError(f"Reference selects no words: {reference}")
         return tuple(result)
+
+    def public_ref(self, location: Location) -> str:
+        entry = self.entries[self.canonical_to_runtime[location]]
+        refs = tuple(
+            Location(source.location.surah, source.location.ayah,
+                     source.location.word)
+            for source in entry.sources
+        )
+        if len(refs) == 1:
+            return str(refs[0])
+        return f"{refs[0]}-{refs[-1]}"
+
+    def verse_ends(self, locations: tuple[Location, ...]) -> frozenset[Location]:
+        return frozenset(
+            location for location in locations
+            if location in self.source_verse_ends
+        )
 
     def sources_for(
         self, location: Location, text: str
@@ -254,10 +290,12 @@ def load_corpus(db_path: Path, info_path: Path) -> PackedCorpus:
 
 
 def load_aligned_corpus(path: Path, *, artifact: str) -> AlignedCorpus:
-    """Load the complete selected-source/public alignment artifact."""
+    """Load the complete selected-source/internal alignment artifact."""
     entries: dict[Location, AlignedWord] = {}
     canonical_to_runtime: dict[Location, Location] = {}
     by_verse: dict[VerseRef, list[Location]] = {}
+    source_to_runtime: dict[Location, Location] = {}
+    source_by_verse: dict[VerseRef, list[Location]] = {}
     canonical_verses: dict[int, int] = {}
     canonical_counts: dict[VerseRef, int] = {}
     with gzip.open(path, "rt", encoding="utf-8") as source:
@@ -286,37 +324,56 @@ def load_aligned_corpus(path: Path, *, artifact: str) -> AlignedCorpus:
             _bind_aligned_word(
                 path, line_number, canonical, sources,
                 entries, canonical_to_runtime, by_verse,
+                source_to_runtime, source_by_verse,
             )
 
     ordered = dict(sorted(entries.items()))
     frozen_by_verse = {
         verse: tuple(sorted(locations)) for verse, locations in by_verse.items()
     }
+    frozen_source_by_verse = {
+        verse: tuple(locations) for verse, locations in source_by_verse.items()
+    }
     return AlignedCorpus(
         MappingProxyType(ordered),
         MappingProxyType(dict(sorted(canonical_to_runtime.items()))),
         MappingProxyType(frozen_by_verse),
         MappingProxyType(_surah_info(canonical_verses, canonical_counts)),
+        MappingProxyType(dict(sorted(source_to_runtime.items()))),
+        tuple(sorted(source_to_runtime)),
+        MappingProxyType(frozen_source_by_verse),
+        frozenset(words[-1] for words in frozen_source_by_verse.values()),
     )
 
 
 def _bind_aligned_word(
     path, line_number, canonical, sources,
     entries, canonical_to_runtime, by_verse,
+    source_to_runtime, source_by_verse,
 ) -> None:
     if not canonical:
         raise ValueError(f"{path}:{line_number}: source-only row")
-    public = canonical[0]
-    if public in entries:
-        raise ValueError(f"{path}:{line_number}: duplicate {public}")
+    runtime = canonical[0]
+    if runtime in entries:
+        raise ValueError(f"{path}:{line_number}: duplicate {runtime}")
     for alias in canonical:
         if alias in canonical_to_runtime:
             raise ValueError(
                 f"{path}:{line_number}: duplicate canonical {alias}"
             )
-        canonical_to_runtime[alias] = public
-    entries[public] = AlignedWord(public, canonical, sources)
-    by_verse.setdefault(public.verse, []).append(public)
+        canonical_to_runtime[alias] = runtime
+    entries[runtime] = AlignedWord(runtime, canonical, sources)
+    by_verse.setdefault(runtime.verse, []).append(runtime)
+    for source in sources:
+        location = Location(
+            source.location.surah, source.location.ayah, source.location.word
+        )
+        if location in source_to_runtime:
+            raise ValueError(f"{path}:{line_number}: duplicate source {location}")
+        source_to_runtime[location] = runtime
+        verse_words = source_by_verse.setdefault(location.verse, [])
+        if not verse_words or verse_words[-1] != runtime:
+            verse_words.append(runtime)
 
 
 def _surah_info(canonical_verses, canonical_counts):

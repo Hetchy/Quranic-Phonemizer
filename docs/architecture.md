@@ -192,7 +192,7 @@ Runtime resources are package data under
 what the data varies with:
 
 - `riwayat/hafs/corpus/` holds the packed source text and address metadata;
-- `riwayat/warsh/corpus/` holds the selected-source/public alignment;
+- `riwayat/warsh/corpus/` holds the selected-source/internal alignment;
 - `riwayat/hafs/scripts/` holds one total scalar inventory per shipped script;
 - `riwayat/warsh/scripts/` holds the King Fahd Warsh scalar inventory;
 - `riwayat/hafs/ledger.yaml` supplies authored canonical facts and script
@@ -203,9 +203,10 @@ what the data varies with:
 - `render/ipa.yaml` holds the output alphabet shared across riwayat.
 
 [`quranic_phonemizer/corpus.py`](../quranic_phonemizer/corpus.py) owns packed
-corpus decoding and aligned selected-source/public addressing. Aligned
-graphemes retain typed source-artifact locations while public lookup remains
-canonical. [`quranic_phonemizer/dataio.py`](../quranic_phonemizer/dataio.py)
+corpus decoding and selected-source lookup over the internal alignment.
+Aligned graphemes retain typed source-artifact locations while public lookup
+uses the selected script's coordinates.
+[`quranic_phonemizer/dataio.py`](../quranic_phonemizer/dataio.py)
 provides the strict YAML loader: duplicate keys, missing required keys, and
 unknown keys are errors at the relevant resource loaders.
 

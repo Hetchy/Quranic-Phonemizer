@@ -87,6 +87,10 @@ result = reader.analyse(
 selects stop-advice classes. `stop_refs` selects exact word references. An
 empty tuple is valid for either option.
 
+References use the selected script's own ayah and word coordinates. The same
+passage can therefore have a different reference in another riwayah. Word
+records returned by the result use that same coordinate system.
+
 Stop classes are validated against the reader before boundary resolution.
 Unknown or unavailable names are collected, sorted, and reported by the public
 `UnknownStopSign` error together with the applicable catalogue. Reference

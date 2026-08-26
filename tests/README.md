@@ -63,7 +63,7 @@ not in the generic API catalogue test.
 
 ## Sites and riwayat
 
-Semantic sites use canonical/public coordinates:
+Semantic sites use canonical internal coordinates:
 
 ```python
 Site(hafs=("2:5", (3, 4)))
@@ -75,7 +75,8 @@ script that package ships. Use `pick()` only for a small script or riwayah
 difference under the same domain law. A different rule, scope, or explanation
 gets its own case.
 
-Source-corpus coordinates belong in adapter fixtures, not semantic sites.
+Source-corpus coordinates belong in adapter fixtures and public API tests, not
+semantic sites.
 For an explicit cross-ayah boundary, the focused word numbers may continue
 through the flattened next ayah; the case must provide the exact boundary
 plan so the seam is visible to the reviewer.

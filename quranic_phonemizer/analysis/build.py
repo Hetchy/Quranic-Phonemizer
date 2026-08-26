@@ -113,7 +113,11 @@ def _build_words(
     for i, score_word in enumerate(session.score.words):
         words.append(Word(
             id=ids.WordId(i),
-            ref=str(score_word.location),
+            ref=(
+                session.public_refs[i]
+                if len(session.public_refs) == len(session.score.words)
+                else str(score_word.location)
+            ),
             text=texts[i],
             before_boundary_id=ids.BoundaryId(i),
             after_boundary_id=ids.BoundaryId(i + 1),

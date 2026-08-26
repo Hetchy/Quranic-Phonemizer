@@ -37,8 +37,10 @@ class Session:
     letter_khilaf_sites: dict[Location, KhilafId] = field(default_factory=dict)
     """Where the reading's authored data sites a per-location letter khilaf,
     for a projection to tag; empty when a caller resolves without one."""
-    verse_ends: frozenset[Location] | None = None
+    verse_ends: frozenset[str] | None = None
     """Actual corpus verse-final words touched by this request."""
+    public_refs: tuple[str, ...] = ()
+    """The selected script's address for each internal score word."""
 
 
 def phonemize_request(
@@ -56,12 +58,17 @@ def phonemize_request(
     built = assemble_span(
         recitation, locations, script=script, selection=selection
     )
+    resolved_stop_refs = tuple(
+        str(location)
+        for stop_ref in stop_refs
+        for location in recitation.corpus.locations(stop_ref)
+    )
     boundaries = resolve_boundaries(
         built.inscription.advice,
         locations,
         built.score,
         stop_signs=stop_signs,
-        stop_refs=stop_refs,
+        stop_refs=resolved_stop_refs,
     )
     performance = recitation.perform(
         built.score, boundaries, selection=selection
@@ -73,11 +80,10 @@ def phonemize_request(
             for site in recitation.khilaf.canonical.letters
         },
         verse_ends=frozenset(
-            Location(
-                verse.surah,
-                verse.ayah,
-                recitation.corpus.surah_info[str(verse.surah)][verse.ayah - 1],
-            )
-            for verse in {location.verse for location in locations}
+            recitation.corpus.public_ref(location)
+            for location in recitation.corpus.verse_ends(locations)
+        ),
+        public_refs=tuple(
+            recitation.corpus.public_ref(location) for location in locations
         ),
     )
