@@ -9,7 +9,6 @@ from tests.support import (
     assert_case,
     case_runs,
     isolated,
-    pick,
     reading,
 )
 
@@ -30,10 +29,7 @@ CASES = (
     # Hafs: يُبْصِرُونَ
     # Warsh: يُبْصِرُونَۖ
     Case(id="sughra-baa", site=Site.shared("2:17", (17,)), read=isolated(),
-         phonemes=pick(
-             hafs="j u b Q sˤ i rˤ u: n",
-             warsh="j u b Q sˤ i r u: n",
-         ),
+         phonemes="j u b Q sˤ i rˤ u: n",
          char_rules={"ب": R("qalqala_sughra")},
          sound_rules={"Q": R("qalqala_sughra")}),
     # Hafs: يَجْعَلُونَ

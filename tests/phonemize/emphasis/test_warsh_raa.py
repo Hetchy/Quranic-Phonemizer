@@ -16,77 +16,42 @@ from tests.support import (
 )
 
 
-SYSTEMATIC_CONSUMER_CASES = (
-    # Warsh: خَيْراٗ فَإِنَّ
-    StateCase(
-        id="fathatan-light-and-iwad",
-        site=Site(warsh=("2:158", (20, 21))),
-        states={
-            "joined": Expect(
-                read=through(),
-                phonemes=("x aˤ j r a ŋ", "f a ʔ i ñ"),
-                char_rules={"ر": R("tarqeeq")},
-                sound_rules={"r": R("tarqeeq"), "a[1]": R("tarqeeq")},
-                extra_phonemes=("emphatic_fatha",),
-            ),
-            "stopped": Expect(
-                read=explicit(ibtidaa=20, waqf=(20, 21)),
-                phonemes=("x aˤ j r a:", "f a ʔ i ñ"),
-                char_rules={
-                    "ر": R("tarqeeq"),
-                    "ا": R("tarqeeq", "madd_iwad", "madd_tabii"),
-                },
-                sound_rules={
-                    "r": R("tarqeeq"),
-                    "a:": R("tarqeeq", "madd_iwad", "madd_tabii"),
-                },
-                extra_phonemes=("emphatic_fatha",),
-            ),
-        },
-    ),
-    # Warsh: خَيْرٞ لَّكُمْ
-    StateCase(
-        id="damma-light-then-pausal-sakin",
-        site=Site(warsh=("2:54", (17, 18))),
-        states={
-            "joined": Expect(
-                read=through(),
-                phonemes=("x aˤ j r u", "ll a k u m"),
-                char_rules={"ر": R("tarqeeq")},
-                sound_rules={"r": R("tarqeeq")},
-                extra_phonemes=("emphatic_fatha",),
-            ),
-            "stopped": Expect(
-                read=explicit(ibtidaa=17, waqf=(17, 18)),
-                phonemes=("x aˤ j r", "l a k u m"),
-                char_rules={"ر": R("tarqeeq")},
-                sound_rules={"r": R("tarqeeq")},
-                extra_phonemes=("emphatic_fatha",),
-            ),
-        },
-    ),
-    # Warsh: عِشْرُونَ
+MOVING_STRUCTURAL_CASES = (
+    # Warsh: قِرَدَةً
     Case(
-        id="ishruna-fixed-light",
-        site=Site(warsh=("8:65", (10,))),
+        id="direct-original-kasra",
+        site=Site(warsh=("2:65", (11,))),
         read=isolated(),
-        phonemes="ʕ i ʃ r u: n",
+        phonemes="q i r a d a h",
         char_rules={"ر": R("tarqeeq")},
-        sound_rules={"r": R("tarqeeq")},
+        sound_rules={"r": R("tarqeeq"), "a[1]": R("tarqeeq")},
     ),
-    # Warsh: كِبْرٞ مَّا
+    # Warsh: اُ۬لْخَيْرَٰتِۖ
     Case(
-        id="kibr-damma-fixed-light",
-        site=Site(warsh=("40:56", (14, 15))),
-        read=through(),
-        phonemes=("k i b Q r u", "m̃ a:"),
-        char_rules={"ر": R("tarqeeq")},
-        sound_rules={"r": R("tarqeeq")},
+        id="sakin-yaa-and-carrier-coloring",
+        site=Site(warsh=("2:148", (6,))),
+        read=isolated(),
+        phonemes="ʔ a l x aˤ j r a: t",
+        char_rules={
+            "ر": R("tarqeeq"),
+            "@dagger_alif": R("tarqeeq", "madd_arid_lissukun"),
+        },
+        sound_rules={
+            "r": R("tarqeeq"),
+            "a:": R("tarqeeq", "madd_arid_lissukun"),
+        },
+        extra_phonemes=("emphatic_fatha",),
     ),
-)
-
-
-STRUCTURAL_LAW_CASES = (
+    # Warsh: ذِكْرَ رَبِّهِۦ
+    Case(
+        id="one-sakin-extension",
+        site=Site(warsh=("12:42", (12, 13))),
+        read=through(),
+        phonemes=("ð i k r a", "rˤ aˤ bb i h"),
+        char_rules={"ر[1]": R("tarqeeq")},
+        sound_rules={"r": R("tarqeeq"), "a": R("tarqeeq")},
+        extra_phonemes=("emphatic_fatha",),
+    ),
     # Warsh: إِخْرَاجُهُمُۥٓۖ
     Case(
         id="khaa-intervening-exception",
@@ -120,136 +85,66 @@ STRUCTURAL_LAW_CASES = (
         char_rules={"ر": R("tafkheem")},
         sound_rules={"rˤ": R("tafkheem")},
     ),
-)
-
-
-SHARED_CLOSED_SCOPE_CASES = (
-    # Warsh: فِرْقٖ
+    # Warsh: رَبِّهِۦ
     Case(
-        id="firq-fixed-light",
-        site=Site(warsh=("26:63", (11,))),
+        id="ordinary-open-heavy",
+        site=Site(warsh=("12:42", (13,))),
         read=isolated(),
-        phonemes="f i r q Q",
-        char_rules={"ر": R("tarqeeq")},
-        sound_rules={"r": R("tarqeeq")},
-    ),
-    # Warsh: اَ۬لْقِطْرِۖ
-    Case(
-        id="alqitr-pausal-light",
-        site=Site(warsh=("34:12", (10,))),
-        read=isolated(),
-        phonemes="ʔ a l q i tˤ Q r",
-        char_rules={"ر": R("tarqeeq")},
-        sound_rules={"r": R("tarqeeq")},
-    ),
-    # Warsh: بِمِصْرَ
-    Case(
-        id="misr-pausal-heavy",
-        site=Site(warsh=("10:87", (8,))),
-        read=isolated(),
-        phonemes="b i m i sˤ rˤ",
+        phonemes="rˤ aˤ bb i h",
         char_rules={"ر": R("tafkheem")},
-        sound_rules={"rˤ": R("tafkheem")},
-    ),
-    # Warsh: فَاسْرِ
-    Case(
-        id="asr-pausal-heavy",
-        site=Site(warsh=("11:81", (9,))),
-        read=isolated(),
-        phonemes="f a s rˤ",
-        char_rules={"ر": R("tafkheem")},
-        sound_rules={"rˤ": R("tafkheem")},
-    ),
-    # Warsh: يَسْرِۦ
-    Case(
-        id="yasr-pausal-light",
-        site=Site(warsh=("89:4", (3,))),
-        read=isolated(),
-        phonemes="j a s r",
-        char_rules={"ر": R("tarqeeq")},
-        sound_rules={"r": R("tarqeeq")},
-    ),
-    # Warsh: وَنُذُرِۦۖ
-    Case(
-        id="wanuthur-pausal-light",
-        site=Site(warsh=("54:16", (4,))),
-        read=isolated(),
-        phonemes="w a n u ð u r",
-        char_rules={"ر": R("tarqeeq")},
-        sound_rules={"r": R("tarqeeq")},
+        sound_rules={"rˤ": R("tafkheem"), "aˤ": R("tafkheem")},
     ),
 )
 
 
-LEXICAL_CHOICE_CASES = (
-    # Warsh: ذِكْراٗۖ فَمِنَ
+SAKIN_AND_BOUNDARY_CASES = (
+    # Warsh: خَيْرَ اَ۬لزَّادِ
     StateCase(
-        id="five-word-heavy-and-iwad",
-        site=Site(warsh=("2:200", (10, 11))),
+        id="final-open-raa-recomputed-at-waqf",
+        site=Site(warsh=("2:197", (24, 25))),
         states={
             "joined": Expect(
                 read=through(),
-                phonemes=("ð i k rˤ aˤ ŋ", "f a m i n"),
-                char_rules={"ر": R("tafkheem")},
-                sound_rules={"rˤ": R("tafkheem"), "aˤ": R("tafkheem")},
+                phonemes=("x aˤ j r a", "zz a: d Q"),
+                char_rules={"ر": R("tarqeeq")},
+                sound_rules={"r": R("tarqeeq"), "a": R("tarqeeq")},
                 extra_phonemes=("emphatic_fatha",),
             ),
             "stopped": Expect(
-                read=explicit(ibtidaa=10, waqf=(10, 11)),
-                phonemes=("ð i k rˤ aˤ:", "f a m i n"),
-                char_rules={
-                    "ر": R("tafkheem"),
-                    "ا": R("tafkheem", "madd_iwad", "madd_tabii"),
-                },
-                sound_rules={
-                    "rˤ": R("tafkheem"),
-                    "aˤ:": R("tafkheem", "madd_iwad", "madd_tabii"),
-                },
+                read=explicit(ibtidaa=24, waqf=(24, 25)),
+                phonemes=("x aˤ j r", "ʔ a zz a: d Q"),
+                char_rules={"ر": R("tarqeeq")},
+                sound_rules={"r": R("tarqeeq")},
                 extra_phonemes=("emphatic_fatha",),
             ),
         },
     ),
-    # Warsh: ذِرَاعَيْهِ
+    # Warsh: وَاذْكُرْ فِے
     Case(
-        id="alif-ayn-fixed-light",
-        site=Site(warsh=("18:18", (12,))),
-        read=isolated(),
-        phonemes="ð i r a: ʕ a j h",
-        char_rules={"ر": R("tarqeeq"), "ا": R("tarqeeq", "madd_tabii")},
-        sound_rules={"r": R("tarqeeq"), "a:": R("tarqeeq", "madd_tabii")},
+        id="sakin-raa-governed-by-damma",
+        site=Site(warsh=("19:16", (1, 2))),
+        read=through(),
+        phonemes=("w a ð k u rˤ", "f i:"),
+        char_rules={"ر": R("tafkheem")},
+        sound_rules={"rˤ": R("tafkheem")},
     ),
-    # Warsh: وَالِاشْرَاقِ
+    # Warsh: اِ۪رْتَبْتُمْ
     Case(
-        id="alishraq-heavy",
-        site=Site(warsh=("38:18", (7,))),
+        id="wasl-start-kasra-is-not-original",
+        site=Site(warsh=("5:106", (35,))),
         read=isolated(),
-        phonemes="w a l i ʃ rˤ aˤ: q Q",
-        char_rules={"ر": R("tafkheem"), "ا[3]": R("tafkheem")},
-        sound_rules={"rˤ": R("tafkheem"), "aˤ:": R("tafkheem")},
-        extra_phonemes=("emphatic_fatha",),
+        phonemes="ʔ i rˤ t a b Q t u m",
+        char_rules={"ر": R("tafkheem")},
+        sound_rules={"rˤ": R("tafkheem")},
     ),
-    # Warsh: حَيْرَانَۖ
+    # Warsh: اَمِ اِ۪رْتَابُوٓاْ
     Case(
-        id="hayran-heavy",
-        site=Site(warsh=("6:71", (23,))),
-        read=isolated(),
-        phonemes="ħ a j rˤ aˤ: n",
-        char_rules={"ر": R("tafkheem"), "ا": R("tafkheem")},
-        sound_rules={"rˤ": R("tafkheem"), "aˤ:": R("tafkheem")},
-        extra_phonemes=("emphatic_fatha",),
-    ),
-    # Warsh: بِشَرَرٖ
-    Case(
-        id="bisharar-both-light-at-waqf",
-        site=Site(warsh=("77:32", (3,))),
-        read=isolated(),
-        phonemes="b i ʃ a r a r",
-        char_rules={"ر[1]": R("tarqeeq"), "ر[2]": R("tarqeeq")},
-        sound_rules={
-            "r[1]": R("tarqeeq"),
-            "a[2]": R("tarqeeq"),
-            "r[2]": R("tarqeeq"),
-        },
+        id="cross-word-kasra-is-not-original",
+        site=Site(warsh=("24:50", (4, 5))),
+        read=through(),
+        phonemes=("ʔ a m i", "rˤ t a: b u:"),
+        char_rules={"ر": R("tafkheem")},
+        sound_rules={"rˤ": R("tafkheem")},
     ),
 )
 
@@ -294,57 +189,56 @@ FIXED_LEXICAL_EXCLUSION_CASES = (
             "aˤ:": R("tafkheem", "madd_arid_lissukun"),
         },
     ),
-)
-
-
-CROSS_WORD_LEXICAL_CHOICE_CASES = (
-    # Warsh: حَصِرَتْ صُدُورُهُمُۥٓ
-    StateCase(
-        id="hasirat-cross-word-owner",
-        site=Site(warsh=("4:90", (11, 12))),
-        states={
-            "joined": Expect(
-                read=through(),
-                phonemes=("ħ a sˤ i r a t", "sˤ u d u: rˤ u h u m"),
-                char_rules={"ر[1]": R("tarqeeq")},
-                sound_rules={"r": R("tarqeeq"), "a[2]": R("tarqeeq")},
-            ),
-            "stopped": Expect(
-                read=explicit(ibtidaa=11, waqf=(11, 12)),
-                phonemes=("ħ a sˤ i r a t", "sˤ u d u: rˤ u h u m"),
-                char_rules={"ر[1]": R("tarqeeq")},
-                sound_rules={"r": R("tarqeeq"), "a[2]": R("tarqeeq")},
-            ),
-        },
+    # Warsh: ضِرَاراٗ
+    Case(
+        id="repeated-raa-fixed-heavy",
+        site=Site(warsh=("2:231", (13,))),
+        read=isolated(),
+        phonemes="dˤ i rˤ aˤ: rˤ aˤ:",
+        char_rules={"ر[1]": R("tafkheem"), "ر[2]": R("tafkheem")},
+        sound_rules={"rˤ[1]": R("tafkheem"), "rˤ[2]": R("tafkheem")},
+        extra_phonemes=("emphatic_fatha",),
+    ),
+    # Warsh: حِذْرَهُمْ
+    Case(
+        id="hidhrahum-fixed-light",
+        site=Site(warsh=("4:102", (26,))),
+        read=isolated(),
+        phonemes="ħ i ð r a h u m",
+        char_rules={"ر": R("tarqeeq")},
+        sound_rules={"r": R("tarqeeq"), "a": R("tarqeeq")},
+    ),
+    # Warsh: اَ۬لْعَشِيرُۖ
+    Case(
+        id="other-ashir-fixed-light",
+        site=Site(warsh=("22:13", (10,))),
+        read=isolated(),
+        phonemes="ʔ a l ʕ a ʃ i: r",
+        char_rules={"ر": R("tarqeeq")},
+        sound_rules={"r": R("tarqeeq")},
+    ),
+    # Warsh: فَاحْذَرْهُمْۖ
+    Case(
+        id="hidhrahum-lookalike-keeps-structural-weight",
+        site=Site(warsh=("63:4", (18,))),
+        read=isolated(),
+        phonemes="f a ħ ð a rˤ h u m",
+        char_rules={"ر": R("tafkheem")},
+        sound_rules={"rˤ": R("tafkheem")},
     ),
 )
 
 
-@pytest.mark.parametrize("run", case_runs(SYSTEMATIC_CONSUMER_CASES))
-def test_systematic_consumers(run):
+@pytest.mark.parametrize("run", case_runs(MOVING_STRUCTURAL_CASES))
+def test_moving_structural_law(run):
     assert_case(run)
 
 
-@pytest.mark.parametrize("run", case_runs(STRUCTURAL_LAW_CASES))
-def test_structural_law(run):
-    assert_case(run)
-
-
-@pytest.mark.parametrize("run", case_runs(SHARED_CLOSED_SCOPE_CASES))
-def test_shared_closed_scopes(run):
-    assert_case(run)
-
-
-@pytest.mark.parametrize("run", case_runs(LEXICAL_CHOICE_CASES))
-def test_lexical_choices(run):
+@pytest.mark.parametrize("run", case_runs(SAKIN_AND_BOUNDARY_CASES))
+def test_sakin_and_boundary_law(run):
     assert_case(run)
 
 
 @pytest.mark.parametrize("run", case_runs(FIXED_LEXICAL_EXCLUSION_CASES))
 def test_fixed_lexical_exclusions(run):
-    assert_case(run)
-
-
-@pytest.mark.parametrize("run", case_runs(CROSS_WORD_LEXICAL_CHOICE_CASES))
-def test_cross_word_lexical_choices(run):
     assert_case(run)
