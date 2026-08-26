@@ -4,14 +4,13 @@
   <a href="https://pypi.org/project/quranic-phonemizer/"><img src="https://img.shields.io/pypi/v/quranic-phonemizer" alt="PyPI version"></a>
   <a href="https://pypi.org/project/quranic-phonemizer/"><img src="https://img.shields.io/pypi/pyversions/quranic-phonemizer" alt="Python versions"></a>
   <a href="https://quranicphonemizer.com/"><img src="https://img.shields.io/badge/Demo-quranicphonemizer.com-blue" alt="Website"></a>
-  <a href="https://huggingface.co/datasets/hetchyy/everyayah-phonemes"><img src="https://img.shields.io/badge/%F0%9F%A4%97_Hugging_Face-EveryAyah_Phonemes_Dataset-yellow" alt="Dataset"></a>
   <a href="https://openreview.net/forum?id=hZt0JK28iV"><img src="https://img.shields.io/badge/Paper-OpenReview-red" alt="Paper"></a>
   <a href="https://github.com/Hetchy/Quranic-Phonemizer/blob/main/LICENSE"><img src="https://img.shields.io/pypi/l/quranic-phonemizer" alt="License"></a>
 </p>
 
-A Grapheme-to-Phoneme converter (G2P) for the Qurʾan (Hafs riwaya), converting text to phoneme sequences with comprehensive support for waqf phonetic effects and tajweed mappings.
+Qur'anic Grapheme-to-Phoneme (G2P) converter and tajweed annotator in Hafs and Warsh, converting text to phoneme sequences with comprehensive support for waqf/intidaa transformations and tajweed breakdowns.
 
-Potential use cases:
+Use cases:
 
 - **Speech Recognition**: Phonetically transcribe recitations, create training data for machine learning systems
 - **Text-to-Speech**: Develop accurate TTS systems for Qurʾanic Arabic
@@ -21,7 +20,6 @@ Potential use cases:
 
 ## Table of Contents
 - [Phoneme Inventory](#phoneme-inventory)
-- [Extra Phonemes](#extra-phonemes)
 - [Usage](#usage)
 - [Input References](#input-references)
 - [Text Search](#text-search)
@@ -62,7 +60,7 @@ The phoneme inventory uses the standard International Phonetic Alphabet (IPA) [A
 | ا , ى                          | `aː` / `aˤː`           |
 | و                              | `uː`                   |
 | ي , ى                          | `iː`                   |
-| ى۪ Warsh Taqlil / Imala Sughra | `ɛː`                   |
+| ى۪ Warsh Taqlil (Imala Sughra) | `ɛː`                   |
 
 ### Tajweed Phonemes
 
@@ -78,15 +76,14 @@ The phoneme inventory uses the standard International Phonetic Alphabet (IPA) [A
 
 `extra_phonemes` selects toggleable output distinctions. Its default is empty to keep the default inventory compact; the underlying reading rule is unchanged.
 
-| **API option**              | **Phoneme** | **Default** | **Notes** |
-|---------------------------|:-----------|:-----------:|:---------|
-| `emphatic_fatha`            | `aˤ`        | Off         | Allophone |
-| `emphatic_ikhfaa`           | `ŋˤ`        | Off         | Heavy nasal allophone |
-| `qalqala_degree`            | `QQ`        | Off         | Stronger Qalqala kubra/akbar degree |
-| `tashil` (Hafs only)        | `ʔ̞`        | Off         | One case Hafs: `ءَا۬عْجَمِيٌّ` (41:44), off -> `ʔ`; Warsh always renders Tashil since it is common |
-| `imala` (kubra)  | `e:`        | Off         | Hafs: `مَجْر۪ىٰهَا` (11:41), off -> `i:`. Warsh: `طَه۪` (20:1), off -> `ɛ:` |
-
-The separate nasal style options `iqlab_nasal` and `ikhfaa_shafawi_nasal` both default to open mouth ikhfaa sound `ŋ`; closed option `m̃` is closer to a meem sound with a closed mouth.
+| **API option**              | **Phoneme**        | **Default** | **Notes** |
+|-----------------------------|:------------------|:-----------:|:---------|
+| `emphatic_fatha`            | `aˤ`              | Off         | Allophone |
+| `emphatic_ikhfaa`           | `ŋˤ`              | Off         | Heavy nasal allophone |
+| `qalqala_degree`            | `QQ`              | Off         | Stronger Qalqala kubra/akbar degree |
+| `tashil` (Hafs only)        | `ʔ̞`              | Off         | One case Hafs: `ءَا۬عْجَمِيٌّ` (41:44), off -> `ʔ` <br>Warsh always renders Tashil since it is common |
+| `imala` (kubra)             | `e:`              | Off         | Hafs: `مَجْر۪ىٰهَا` (11:41), off -> `i:` <br> Warsh: `طَه۪` (20:1), off -> `ɛ:` |
+| `iqlab_nasal` / `ikhfaa_shafawi_nasal` | `ŋ` or `m̃`      | `ŋ`  | Open mouth ikhfaa with ghunnah (`ŋ`) vs closed mouth meem with ghunnah (`m̃`) |
 
 ## Usage
 
