@@ -34,7 +34,7 @@ The audit promoted 28 logical rows, adding 29 Warsh pytest executions because
 | `test_muqattaat.py` | `alif-lam-meem` | Same named-letter phonemes and rules. Initial seated hamza and visible name-vowel marks are accepted as compact opening notation. |
 | `test_muqattaat.py` | `alif-lam-meem-saad` | Same named-letter phonemes and complete assimilation, madd, tafkheem, and qalqala rules. |
 | `test_muqattaat.py` | `taa-seen-meem` | Same named-letter phonemes and complete idgham, madd, and tafkheem rules. |
-| `test_muqattaat.py` | `taa-seen` | Same named-letter phonemes and complete izhar, madd, and tafkheem rules. |
+| `test_muqattaat.py` | `taa-seen` | Same named-letter phonemes and complete wasl-ikhfaa, pausal-izhar, madd, and tafkheem rules. |
 | `test_muqattaat.py` | `saad` | Same fixed named-letter phonemes and madd, tafkheem, and qalqala rules. |
 | `test_muqattaat.py` | `ayn-seen-qaaf` | Same named-letter phonemes and complete ikhfaa, madd, and tafkheem rules. |
 | `test_muqattaat.py` | `qaaf` | Same fixed named-letter phonemes and madd and tafkheem rules. |

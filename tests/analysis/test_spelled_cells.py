@@ -3,9 +3,10 @@ from __future__ import annotations
 
 import pytest
 
+from quranic_phonemizer.api import recitation
 from quranic_phonemizer.analysis.build import build_bundle
 from quranic_phonemizer.analysis.cells import build_cell_view
-from quranic_phonemizer.model.address import Script
+from quranic_phonemizer.model.address import Riwayah, Script
 from quranic_phonemizer.orthography.write import pen_for
 from quranic_phonemizer.session import phonemize_request
 
@@ -18,7 +19,7 @@ FORMS = {
     "19:1": ("كَآفْ", "هَا", "يَا", "عَيْٓن", "صَآدْ"),
     "20:1": ("طَا", "هَا"),
     "26:1": ("طَا", "سِيٓن", "مِّيٓمْ"),
-    "27:1": ("طَا", "سِيٓنْ"),
+    "27:1": ("طَا", "سِيٓن"),
     "36:1": ("يَا", "سِيٓنْ"),
     "38:1": ("صَآدْ",),
     "40:1": ("حَا", "مِيٓمْ"),
@@ -29,12 +30,14 @@ FORMS = {
 }
 
 
-def _build(hafs, ref, *, stop_refs=()):
-    session = phonemize_request(hafs, ref, stop_refs=stop_refs)
-    kw = dict(ref=ref, riwayah="hafs", script="uthmani", variant={})
+def _build(reading, ref, *, stop_refs=()):
+    session = phonemize_request(reading, ref, stop_refs=stop_refs)
+    kw = dict(
+        ref=ref, riwayah=reading.riwayah.value, script="uthmani", variant={}
+    )
     view = build_cell_view(
         session, **kw, spelling="transformed",
-        pen=pen_for(hafs.inventory(Script.UTHMANI)),
+        pen=pen_for(reading.inventory(Script.UTHMANI)),
     )
     return view, build_bundle(session, **kw)
 
@@ -75,6 +78,27 @@ def test_the_lam_meem_idgham_is_an_internal_bridge(hafs):
     assert bridge.merger_id == merger.id
     assert bridge.sound.sound_id == merger.sound_id
     assert bridge.before_column_ids and bridge.after_column_ids
+
+
+@pytest.mark.parametrize("riwayah", (Riwayah.HAFS, Riwayah.WARSH))
+def test_taa_seen_wasl_hides_the_final_noon_in_its_named_cell(riwayah):
+    reading = recitation(riwayah)
+    view, bundle = _build(reading, "27:1")
+    ikhfaa = next(
+        occurrence for occurrence in bundle.rule_occurrences
+        if occurrence.rule_id.value == "ikhfaa"
+    )
+    noon = next(
+        column for column in view.words[0].columns
+        if column.text == "ن"
+    )
+    hum = next(
+        sound for sound in view.words[0].sounds
+        if sound.sound_id in ikhfaa.sound_ids
+    )
+
+    assert ikhfaa.id in noon.rule_occurrence_ids
+    assert ikhfaa.id in hum.rule_occurrence_ids
 
 
 def test_ain_has_only_madd_lazim_on_its_ya(hafs):

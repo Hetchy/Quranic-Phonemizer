@@ -26,10 +26,10 @@ CASES = (
                 read=through(),
                 phonemes=("q u l u: b i h i", "m̃ a rˤ aˤ dˤ"),
                 char_rules={
-                    "م[1]": R("idgham_shafawi"),
-                    "م[2]": R("idgham_shafawi"),
+                    "م[1]": R("idgham_shafawi", "idgham_mutamathilayn"),
+                    "م[2]": R("idgham_shafawi", "idgham_mutamathilayn"),
                 },
-                sound_rules={"m̃": R("idgham_shafawi")},
+                sound_rules={"m̃": R("idgham_shafawi", "idgham_mutamathilayn")},
             ),
             "ibtidaa-on-host": Expect(
                 read=explicit(ibtidaa=2, waqf=(2, 3)),

@@ -8,7 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from ..engine.neighbourhood import Neighbourhood
-from ..engine.plan import MergeInto, Phase, Plan, Realize, Verdict, mint
+from ..engine.plan import Classify, MergeInto, Phase, Plan, Realize, Verdict, mint
 from ..model.address import BoundaryPlan, SlotId
 from ..model.canon import CanonLetter as L
 from ..model.canon import CanonLetter, Rule
@@ -16,10 +16,6 @@ from ..model.performance import Aspect, Consonant, Occurrence
 from .lam_shamsiyyah import ArticleShape
 from .meem_sakinah import NASAL_LETTERS
 from .tables import PAIR_OUTCOMES, Pairs
-
-
-#: Noon and meem have their own families, which handle their same-letter case.
-OWNED_ELSEWHERE = frozenset({L.NOON, L.MEEM})
 
 
 @dataclass(frozen=True, slots=True)
@@ -36,19 +32,19 @@ class Idgham:
     emits: frozenset = PAIR_OUTCOMES | {Rule.IDGHAM_MUTAMATHILAYN}
 
     def __post_init__(self) -> None:
-        # Like into like fires on any repeated letter, so the trigger set is
-        # the alphabet rather than whatever letters the pair table mentions.
+        # Like into like fires on any repeated letter, including the nasal
+        # pairs that also receive their dedicated family classification.
         object.__setattr__(
             self,
             "triggers",
-            frozenset(set(CanonLetter) - OWNED_ELSEWHERE - self.never_follows),
+            frozenset(set(CanonLetter) - self.never_follows),
         )
 
     def look(
         self, near: Neighbourhood, plan: Plan, at: SlotId,
         boundaries: BoundaryPlan,
     ) -> Verdict | None:
-        del plan, boundaries
+        del boundaries
         here = near.slot(at)
         if here is None or not here.nucleus.is_silent:
             return None
@@ -64,6 +60,22 @@ class Idgham:
             rule = self.pairs.of(here.letter, following.letter)
             if rule is None:
                 return None
+
+        if here.letter in NASAL_LETTERS and here.letter is following.letter:
+            owner = (
+                Rule.IDGHAM_BI_GHUNNAH
+                if here.letter is L.NOON
+                else Rule.IDGHAM_SHAFAWI
+            )
+            if not plan.removed_by(at, Aspect.CONSONANT, owner):
+                return None
+            return Verdict(
+                Occurrence(mint(rule, at), rule, (at, following.id)),
+                (
+                    MergeInto(at, Aspect.CONSONANT, following.id, Aspect.CONSONANT),
+                    Classify(following.id, Aspect.CONSONANT),
+                ),
+            )
 
         if rule is Rule.IDGHAM_MUTAJANISAYN_NAQIS:
             # The first letter survives as a colour on the second, so nothing

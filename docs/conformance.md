@@ -125,8 +125,10 @@ register generated from the supplied script families and canonical hosts:
   join nothing. The spelled-opening edge does not perform naql: a
   disjoined-letter opening ends as it would at a pause, so `اَحَسِبَ` keeps
   its restored qata even when the reader runs on.
-- The 227 initial badal forms (177 A, 47 U, and 3 I) are deferred to the
-  madd-badal vertical. Ordinary naql does not transfer their long nucleus.
+- Of 227 selected-script initial-long shapes (177 A, 47 U, and 3 I), 224 are
+  badal mughayyar bin-naql: 208 within ayahs and 16 across ayah edges. The
+  other three are hamza-meeting forms at 2:140:14, 20:22:10, and 58:13:1.
+  Ordinary naql does not transfer a long nucleus.
 - The article register is exactly the documented 1,307: 1,283 written
   article alifs (955 wasl-marked, 328 prefixed bare), 22 suppressed-alif
   prefix forms, and the two interrogative tokens; the reviewed long bases

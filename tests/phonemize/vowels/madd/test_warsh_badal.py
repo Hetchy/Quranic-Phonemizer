@@ -5,8 +5,9 @@ from collections import Counter
 import pytest
 
 from quranic_phonemizer.engine.boundary_plan import all_join
-from quranic_phonemizer.model.address import Script, VerseRef
+from quranic_phonemizer.model.address import Location, Script, VerseRef
 from quranic_phonemizer.model.canon import Rule
+from quranic_phonemizer.riwayat.warsh.hamza_meetings import rows_by_target
 from quranic_phonemizer.riwayat.warsh.naql_script import latent_qata_badal_quality
 from tests.support import (
     Case,
@@ -188,6 +189,13 @@ MUGHAYYAR_BIN_NAQL_CASES = (
 )
 
 
+MEETING_OWNED_INITIAL_SHAPES = frozenset({
+    Location(2, 140, 14),
+    Location(20, 22, 10),
+    Location(58, 13, 1),
+})
+
+
 @pytest.mark.parametrize("run", case_runs(CASES))
 def test_warsh_madd_badal(run):
     assert_case(run)
@@ -256,6 +264,7 @@ def _mughayyar_overlaps(built, performance, candidates):
 @pytest.mark.slow
 def test_warsh_mughayyar_bin_naql_register_reconciles():
     package = loaded("warsh")
+    meeting_targets = rows_by_target()
     boundaries: Counter = Counter()
     qualities: Counter = Counter()
     hosts: Counter = Counter()
@@ -269,6 +278,7 @@ def test_warsh_mughayyar_bin_naql_register_reconciles():
                 for location, text in words
                 if location.word > 1
                 and (quality := latent_qata_badal_quality(text)) is not None
+                and location not in meeting_targets
             }
             if not candidates:
                 continue
@@ -287,6 +297,8 @@ def test_warsh_mughayyar_bin_naql_register_reconciles():
         for ayah in range(2, len(ayah_counts) + 1):
             current = VerseRef(int(surah), ayah)
             current_words = package.words(current)
+            if current_words[0][0] in meeting_targets:
+                continue
             quality = latent_qata_badal_quality(current_words[0][1])
             if quality is None:
                 continue
@@ -304,6 +316,12 @@ def test_warsh_mughayyar_bin_naql_register_reconciles():
                 qualities[found_quality] += 1
                 hosts[host] += 1
 
-    assert boundaries == Counter({"within": 210, "ayah_edge": 17})
-    assert qualities == Counter({"A": 177, "U": 47, "I": 3})
-    assert hosts == Counter({"written": 147, "nunation": 80})
+    initial_shapes = {
+        location
+        for location, entry in package.corpus.entries.items()
+        if latent_qata_badal_quality(entry.text) is not None
+    }
+    assert initial_shapes & set(meeting_targets) == MEETING_OWNED_INITIAL_SHAPES
+    assert boundaries == Counter({"within": 208, "ayah_edge": 16})
+    assert qualities == Counter({"A": 174, "U": 47, "I": 3})
+    assert hosts == Counter({"written": 146, "nunation": 78})

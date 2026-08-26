@@ -29,6 +29,24 @@ DHAT_FATH_DEFAULT_CASES = (
         sound_rules={"a:": R("ibdal_hamza", "madd_tabii")},
         absent_sound_rules={"a:": R("madd_badal", "madd_lazim")},
     ),
+    # Warsh: قُلَ آٰنتُمُۥٓ
+    Case(
+        id="default-ibdal-after-naql",
+        site=Site(warsh=("2:140", (13, 14))),
+        read=through(),
+        phonemes=("q u l", "a: ŋ t u m"),
+        sound_rules={"a:": R("naql", "ibdal_hamza", "madd_lazim")},
+        absent_sound_rules={"a:": R("madd_badal", "madd_tabii")},
+    ),
+    # Warsh: رَّحِيمٌۖ آٰشْفَقْتُمُۥٓ
+    Case(
+        id="default-ibdal-after-naql-at-ayah-edge",
+        site=Site(warsh=("58:12", (22, 23))),
+        read=through(),
+        phonemes=("rˤ aˤ ħ i: m u n", "a: ʃ f a q Q t u m"),
+        sound_rules={"a:": R("naql", "ibdal_hamza", "madd_lazim")},
+        absent_sound_rules={"a:": R("madd_badal", "madd_tabii")},
+    ),
 )
 
 

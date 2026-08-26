@@ -8,12 +8,14 @@ from tests.support import (
     Expect,
     R,
     Site,
+    StateCase,
     VariantCase,
     assert_case,
     case_runs,
     explicit,
     isolated,
     joining,
+    through,
 )
 
 
@@ -134,17 +136,36 @@ CASES = (
          sound_rules={"tˤ": R("tafkheem"), "aˤ:": R("madd_tabii", "tafkheem"),
                       "i:[1]": R("madd_lazim"), "m̃": R("idgham_bi_ghunnah"),
                       "i:[2]": R("madd_lazim"), "m": R("izhar_shafawi")}),
-    # Hafs: طسٓ ۚ
-    # Warsh: طَسِٓۖ
-    Case(id="taa-seen", site=Site.shared("27:1", (1,)), read=joining(),
-         phonemes="tˤ aˤ: s i: n",
-         all_rules=R("izhar", "madd_tabii", "madd_lazim", "tafkheem"),
-         char_rules=TAA | {
-             "سين/@madd": R("madd_lazim"),
-             "سين/ن": R("izhar"),
-         },
-         sound_rules={"tˤ": R("tafkheem"), "aˤ:": R("madd_tabii", "tafkheem"),
-                      "i:": R("madd_lazim"), "n": R("izhar")}),
+    # Hafs: طسٓ ۚ تِلْكَ
+    # Warsh: طَسِٓۖ تِلْكَ
+    StateCase(
+        id="taa-seen", site=Site.shared("27:1", (1, 2)),
+        states={
+            "joined": Expect(
+                read=through(), phonemes=("tˤ aˤ: s i: ŋ", "t i l k"),
+                all_rules=R("ikhfaa", "madd_tabii", "madd_lazim", "tafkheem", "waqf_diacritic_drop"),
+                char_rules=TAA | {
+                    "سين/@madd": R("madd_lazim"),
+                    "سين/ن": R("ikhfaa"),
+                },
+                sound_rules={"tˤ": R("tafkheem"),
+                             "aˤ:": R("madd_tabii", "tafkheem"),
+                             "i:": R("madd_lazim"), "ŋ": R("ikhfaa")},
+            ),
+            "stopped": Expect(
+                read=explicit(ibtidaa=1, waqf=1),
+                phonemes=("tˤ aˤ: s i: n", "t i l k a"),
+                all_rules=R("izhar", "madd_tabii", "madd_lazim", "tafkheem"),
+                char_rules=TAA | {
+                    "سين/@madd": R("madd_lazim"),
+                    "سين/ن": R("izhar"),
+                },
+                sound_rules={"tˤ": R("tafkheem"),
+                             "aˤ:": R("madd_tabii", "tafkheem"),
+                             "i:": R("madd_lazim"), "n": R("izhar")},
+            ),
+        },
+    ),
     # Hafs: يسٓ
     Case(id="yaa-seen", site=Site(hafs=("36:1", (1,))), read=joining(),
          phonemes="j a: s i: n", all_rules=R("izhar", "madd_tabii", "madd_lazim"),

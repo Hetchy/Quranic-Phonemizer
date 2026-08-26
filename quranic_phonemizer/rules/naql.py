@@ -22,6 +22,9 @@ class Naql:
     """Authored boundaries the riwayah reads with tahqiq instead; the qata
     word's location keys each one."""
 
+    ibdal_meetings: frozenset[Location] = frozenset()
+    """One-word meetings whose default ibdal supplies the post-naql long."""
+
     rule: Rule = Rule.NAQL
     phase: Phase = Phase.BOUNDARY
     triggers: frozenset = frozenset({CanonLetter.HAMZA})
@@ -50,7 +53,18 @@ class Naql:
         if near.score.words[word].location in self.excluded:
             return None
         effects = [Silence(at, Aspect.CONSONANT)]
-        if slot.nucleus.sounds_long:
+        following = near.after(at)
+        meeting_ibdal = (
+            near.score.words[word].location in self.ibdal_meetings
+            and following is not None
+            and near.word_of(following.id) == word
+            and following.letter is CanonLetter.HAMZA
+        )
+        if meeting_ibdal:
+            effects.append(
+                MergeInto(host.id, Aspect.VOWEL, following.id, Aspect.VOWEL)
+            )
+        elif slot.nucleus.sounds_long:
             # In badal mughayyar bin-naql the carrier still owns the one long
             # vowel. The preceding sakin presents that same sound through a
             # bridge; realizing a separate short vowel here would produce

@@ -179,7 +179,7 @@ def _build_mergers(
         for edge in facts.attributions
         if isinstance(edge, Hosted)
     }
-    out: list[Merger] = []
+    grouped: dict[tuple[int, int, int], set[int]] = {}
     for merged in facts.merges:
         before = _word_of(facts, merged.slots[0])
         after = sound_word[merged.sound]
@@ -189,6 +189,9 @@ def _build_mergers(
         host = hosts.get(merged.sound)
         if host is not None and host.by is not None:
             occs.add(host.by)
+        grouped.setdefault((before, after, merged.sound), set()).update(occs)
+    out: list[Merger] = []
+    for (before, after, sound), occs in grouped.items():
         out.append(Merger(
             id=ids.MergerId(len(out)),
             boundary_id=(
@@ -197,7 +200,7 @@ def _build_mergers(
             ),
             before_word_id=ids.WordId(before),
             after_word_id=ids.WordId(after),
-            sound_id=ids.SoundId(merged.sound),
+            sound_id=ids.SoundId(sound),
             rule_occurrence_ids=tuple(ids.OccurrenceId(o) for o in sorted(occs)),
         ))
     return tuple(out)

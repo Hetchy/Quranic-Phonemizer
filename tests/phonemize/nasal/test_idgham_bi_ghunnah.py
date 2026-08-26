@@ -29,6 +29,19 @@ CASES = (
                     "ي": R("idgham_bi_ghunnah")},
         sound_rules={"j̃": R("idgham_bi_ghunnah")},
     ),
+    # Hafs: عَن نَّفْسٍ
+    # Warsh: عَن نَّفْسٖ
+    Case(
+        id="noon-noon",
+        site=Site.shared("2:48", (6, 7)),
+        read=through(),
+        phonemes=("ʕ a", "ñ a f s"),
+        char_rules={
+            "ن[1]": R("idgham_bi_ghunnah", "idgham_mutamathilayn"),
+            "ن[2]": R("idgham_bi_ghunnah", "idgham_mutamathilayn"),
+        },
+        sound_rules={"ñ": R("idgham_bi_ghunnah", "idgham_mutamathilayn")},
+    ),
     # Hafs: حَيَوٰةٌ يَـٰٓأُو۟لِى
     # Warsh: حَيَوٰةٞ يَٰٓأُوْلِے
     Case(
@@ -53,9 +66,9 @@ CASES = (
             hafs=("sˤ i dd i: q aˤ", "ñ a b i jj a:"),
             warsh=("sˤ i dd i: q aˤ", "ñ a b i: ʔ a:"),
         ),
-        char_rules={"@fathatan[1]": R("idgham_bi_ghunnah"),
-                    "ن": R("idgham_bi_ghunnah")},
-        sound_rules={"ñ": R("idgham_bi_ghunnah")},
+        char_rules={"@fathatan[1]": R("idgham_bi_ghunnah", "idgham_mutamathilayn"),
+                    "ن": R("idgham_bi_ghunnah", "idgham_mutamathilayn")},
+        sound_rules={"ñ": R("idgham_bi_ghunnah", "idgham_mutamathilayn")},
     ),
     # Hafs: تَكُن مِّنَ
     # Warsh: تَكُن مِّنَ

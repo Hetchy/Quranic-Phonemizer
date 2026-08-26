@@ -64,6 +64,11 @@ _NAQL_TAHQIQ = frozenset({Location(69, 20, 1)})
 _HAMZA_MEETING_STARTS = frozenset(
     row.canonical for row in meeting_rows() if row.scope != "one_word"
 )
+_NAQL_IBDAL_MEETINGS = frozenset(
+    row.canonical
+    for row in meeting_rows()
+    if row.scope == "one_word" and row.owner == "hamza_dhat_fath"
+)
 
 # Canonical locations of مَوْئِلا and الْمَوْءُودَة.  Only the first waw of
 # the latter can satisfy the leen predicate; its following long remains badal.
@@ -82,7 +87,10 @@ def _article(tables) -> ArticleShape:
 
 def _boundary() -> tuple:
     return (
-        Naql(excluded=_NAQL_TAHQIQ | _HAMZA_MEETING_STARTS),
+        Naql(
+            excluded=_NAQL_TAHQIQ | _HAMZA_MEETING_STARTS,
+            ibdal_meetings=_NAQL_IBDAL_MEETINGS,
+        ),
         CarriedNaql(),
         HamzaMeetings(rows=rows_by_target()),
         SuppliedIbdal(),

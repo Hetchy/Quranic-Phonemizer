@@ -161,9 +161,16 @@ class Plan:
 
     def record(self, phase: Phase, verdict: Verdict) -> None:
         for effect in verdict.effects:
+            if isinstance(effect, Classify):
+                continue
             key = (phase, conflict_key(effect))
             existing = self._keys.get(key)
             if existing is not None:
+                if isinstance(effect, MergeInto) and any(
+                    recorded_phase is phase and effect in recorded.effects
+                    for recorded_phase, recorded in self.entries
+                ):
+                    continue
                 raise ConflictError(
                     f"{phase.value}: two effects on {key[1]} — "
                     f"{existing[1].value} ({existing[0]}) and "
