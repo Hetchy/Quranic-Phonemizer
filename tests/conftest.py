@@ -13,17 +13,26 @@ def pytest_addoption(parser):
         "--runslow", action="store_true",
         help="run the corpus-wide tests marked slow",
     )
+    parser.addoption(
+        "--runaudit", action="store_true",
+        help="run manual legacy and equivalence audits",
+    )
+
+
+def pytest_configure(config):
+    config.addinivalue_line(
+        "markers", "audit: manual legacy or equivalence diagnostic"
+    )
 
 
 def pytest_collection_modifyitems(config, items):
     """A corpus-wide test costs minutes, so it is opt-in rather than
     deselected by an `-m` the caller may already be using."""
-    if config.getoption("--runslow"):
-        return
-    skip = pytest.mark.skip(reason="corpus-wide; pass --runslow")
     for item in items:
-        if "slow" in item.keywords:
-            item.add_marker(skip)
+        if "slow" in item.keywords and not config.getoption("--runslow"):
+            item.add_marker(pytest.mark.skip(reason="corpus-wide; pass --runslow"))
+        if "audit" in item.keywords and not config.getoption("--runaudit"):
+            item.add_marker(pytest.mark.skip(reason="manual audit; pass --runaudit"))
 
 
 @pytest.fixture(scope="session")

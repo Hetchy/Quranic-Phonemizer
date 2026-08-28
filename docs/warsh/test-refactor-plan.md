@@ -869,12 +869,11 @@ Use these at each relevant stage:
 
 ```text
 python -m pytest --collect-only -q
-python tools/gates.py --fast
-git diff --exit-code -- tests/snapshots
+python tools/quick.py <targeted tests...>
 ```
 
-Run the full gate before handing off adapter, runtime, corpus, schema,
-snapshot, or broad test changes:
+Pull requests run the complete ordinary suite and required structural and
+source-context checks:
 
 ```text
 python tools/gates.py

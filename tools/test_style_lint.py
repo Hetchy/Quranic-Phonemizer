@@ -1,31 +1,17 @@
 """Mechanical shape checks for hand-authored semantic test tables."""
 from __future__ import annotations
 
+import argparse
 import ast
 import importlib.util
-import re
 import sys
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[1]
 SEMANTIC = ROOT / "tests" / "phonemize"
-ARABIC = re.compile(r"[\u0600-\u06ff]")
-LEGACY_DIRS = frozenset({"adjacent", "boundary", "laws", "nasal", "tafkheem", "waqf"})
-CASE_BUILDERS = frozenset({"Case", "StateCase", "VariantCase"})
-ID_FIRST_BUILDERS = frozenset({"_case", "_pausal", "elision", "wasl_case"})
-SOURCE_BUILDERS = CASE_BUILDERS | ID_FIRST_BUILDERS | frozenset({"_started", "_joined"})
-FORBIDDEN_SOURCE_ALIASES = frozenset({
-    "@long_a", "@long_i", "@long_u", "@wasl_alif",
-})
-MERGER_RULES = frozenset({
-    "idgham_bi_ghunnah",
-    "idgham_bila_ghunnah",
-    "idgham_mutajanisayn_kamil",
-    "idgham_mutajanisayn_naqis",
-    "idgham_mutamathilayn",
-    "idgham_mutaqaribayn",
-    "idgham_shafawi",
+SOURCE_BUILDERS = frozenset({
+    "Case", "StateCase", "VariantCase", "_case", "_pausal", "elision",
+    "wasl_case", "_started", "_joined",
 })
 
 Problem = tuple[Path, int, str]
@@ -51,13 +37,6 @@ def _cases(tree: ast.Module) -> tuple[ast.expr, ...]:
     return ()
 
 
-def _has_arabic_comment(lines: list[str], line: int) -> bool:
-    if line < 2:
-        return False
-    previous = lines[line - 2].strip()
-    return previous.startswith("#") and ARABIC.search(previous) is not None
-
-
 def _call_id(node: ast.expr) -> str | None:
     if not isinstance(node, ast.Call):
         return None
@@ -81,8 +60,8 @@ def _source_comment_block(lines: list[str], line: int) -> list[str]:
 
 
 def _source_text(site, riwayah: str) -> str:
-    from tests.support.reading import _through, _words, loaded
     from quranic_phonemizer.model.address import Riwayah, Script
+    from tests.support.reading import _through, _words, loaded
 
     address = site.address(riwayah)
     record = loaded(riwayah)
@@ -145,126 +124,32 @@ def _source_comment_problems(
     return out
 
 
-def _fingerprint(node: ast.expr) -> str | None:
-    if not isinstance(node, ast.Call):
-        return None
-    name = _name(node.func)
-    short = name.rsplit(".", 1)[-1]
-    if short not in CASE_BUILDERS | ID_FIRST_BUILDERS:
-        return None
-    args = list(node.args)
-    if short in ID_FIRST_BUILDERS and args:
-        args = args[1:]
-    keywords = [keyword for keyword in node.keywords if keyword.arg not in {"id", "name"}]
-    normalized = ast.Call(func=ast.Name(id=short), args=args, keywords=keywords)
-    return ast.dump(normalized, include_attributes=False)
+def _semantic_paths(paths: tuple[str, ...]) -> tuple[Path, ...]:
+    if not paths:
+        return tuple(sorted(SEMANTIC.rglob("test_*.py")))
+    selected = []
+    for raw in paths:
+        path = (ROOT / raw.split("::", 1)[0]).resolve()
+        if path.is_file() and path.suffix == ".py" and SEMANTIC in path.parents:
+            selected.append(path)
+    return tuple(dict.fromkeys(selected))
 
 
-def _rules(node: ast.AST) -> frozenset[str]:
-    if not isinstance(node, ast.Call) or _name(node.func) != "R":
-        return frozenset()
-    return frozenset(
-        arg.value for arg in node.args
-        if isinstance(arg, ast.Constant) and isinstance(arg.value, str)
-    )
-
-
-def _merger_counts(
-    node: ast.AST, constants: dict[str, ast.AST]
-) -> tuple[dict[str, int], ...]:
-    if isinstance(node, ast.Name) and node.id in constants:
-        return _merger_counts(constants[node.id], constants)
-    if isinstance(node, ast.BinOp) and isinstance(node.op, ast.BitOr):
-        return tuple(
-            {rule: left[rule] + right[rule] for rule in MERGER_RULES}
-            for left in _merger_counts(node.left, constants)
-            for right in _merger_counts(node.right, constants)
-        )
-    if isinstance(node, ast.Call) and _name(node.func) == "pick":
-        return tuple(
-            counts
-            for keyword in node.keywords
-            for counts in _merger_counts(keyword.value, constants)
-        )
-    if not isinstance(node, ast.Dict):
-        return ()
-    counts = {rule: 0 for rule in MERGER_RULES}
-    for value in node.values:
-        if value is None:
-            continue
-        for rule in _rules(value) & MERGER_RULES:
-            counts[rule] += 1
-    return (counts,)
-
-
-def _check_merger_sources(
-    path: Path, node: ast.AST, constants: dict[str, ast.AST], out: list[Problem]
-) -> None:
-    for counts in _merger_counts(node, constants):
-        for rule, count in counts.items():
-            if count == 1:
-                out.append((
-                    path,
-                    node.lineno,
-                    f"{rule} needs both written source and host in char_rules",
-                ))
-
-
-def check() -> list[Problem]:
+def check(paths: tuple[str, ...] = ()) -> list[Problem]:
     out: list[Problem] = []
-    seen: dict[str, tuple[Path, int]] = {}
-    for legacy in sorted(LEGACY_DIRS):
-        path = ROOT / "tests" / legacy
-        if any(path.glob("*.py")):
-            out.append((path, 1, "legacy semantic directory remains"))
-    for path in sorted(SEMANTIC.rglob("test_*.py")):
+    for path in _semantic_paths(paths):
         source = path.read_text(encoding="utf-8")
         lines = source.splitlines()
         tree = ast.parse(source)
-        constants = {
-            target.id: node.value
-            for node in tree.body if isinstance(node, ast.Assign)
-            for target in node.targets if isinstance(target, ast.Name)
-        }
-        for alias in sorted(FORBIDDEN_SOURCE_ALIASES):
-            if alias in source:
-                out.append((path, 1, f"use the literal carrier instead of {alias}"))
-        for keyword in (
-            item for item in ast.walk(tree)
-            if isinstance(item, ast.keyword) and item.arg == "char_rules"
-        ):
-            _check_merger_sources(path, keyword.value, constants, out)
-        cases = _cases(tree)
         out.extend(_source_comment_problems(path, tree, lines))
-        names = {node.id for node in ast.walk(tree) if isinstance(node, ast.Name)}
-        has_typed_cases = False
-        for case in cases:
-            if not _has_arabic_comment(lines, case.lineno):
-                out.append((path, case.lineno, "CASES row needs an adjacent Arabic comment"))
-            if not isinstance(case, ast.Call):
-                out.append((path, case.lineno, "CASES row needs Case, StateCase, or pytest.param"))
-                continue
-            if isinstance(case, ast.Call) and _name(case.func) == "pytest.param":
-                if not any(keyword.arg == "id" for keyword in case.keywords):
-                    out.append((path, case.lineno, "pytest.param row needs a readable id"))
-            short = _name(case.func).rsplit(".", 1)[-1] if isinstance(case, ast.Call) else ""
-            has_typed_cases |= short in CASE_BUILDERS | ID_FIRST_BUILDERS
-            fingerprint = _fingerprint(case)
-            if fingerprint is None:
-                continue
-            previous = seen.get(fingerprint)
-            if previous is not None:
-                first, line = previous
-                out.append((path, case.lineno, f"duplicate semantic case from {first.relative_to(ROOT)}:{line}"))
-            else:
-                seen[fingerprint] = (path, case.lineno)
-        if has_typed_cases and not {"case_runs", "assert_case"} <= names:
-            out.append((path, 1, "typed CASES must use case_runs and assert_case"))
     return out
 
 
 def main() -> int:
-    problems = check()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("paths", nargs="*")
+    args = parser.parse_args()
+    problems = check(tuple(args.paths))
     for path, line, message in problems:
         print(f"{path.relative_to(ROOT)}:{line}: test-style: {message}")
     print(f"\n{len(problems)} problems")

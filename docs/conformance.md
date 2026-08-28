@@ -1,8 +1,8 @@
-# Conformance residues
+# Manual audit residues
 
-The floors in `tools/gates.py` are not all 1.000. This file names
-every row behind every one of them, so a floor short of 100% is a claim that
-can be checked rather than a number nobody looks at.
+The cross-script, legacy regression, roundtrip, attestation, and L1 tools are
+manual diagnostics rather than automated gates. This file records their known
+residue so a deliberate manual run has an explainable baseline.
 
 The frozen legacy snapshot is a change detector rather than a correctness
 oracle. A deliberate correction may therefore lower a parity floor; the same

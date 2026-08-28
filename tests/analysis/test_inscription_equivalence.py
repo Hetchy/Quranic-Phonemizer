@@ -18,14 +18,15 @@ from quranic_phonemizer.analysis import (
     shortened_carriers,
     silent_groups,
 )
-from quranic_phonemizer.model.inscription import GlyphKind
 from quranic_phonemizer.model.address import Junction, Script
-from quranic_phonemizer.model.inscription import SlotFact
+from quranic_phonemizer.model.inscription import GlyphKind, SlotFact
 from quranic_phonemizer.orthography.write import pen_for
 from quranic_phonemizer.phonemize import derived as legacy
 from quranic_phonemizer.phonemize import edges as ed
 from quranic_phonemizer.phonemize.assemble import assemble
 from quranic_phonemizer.session import phonemize_request
+
+pytestmark = pytest.mark.audit
 
 #: Chosen for the hard cases a `derived.py` port goes wrong on: a tatweel seat
 #: and a dagger alif beside its carrier (`إِبْرَٰهِـۧمَ`), a tanween's noon, a

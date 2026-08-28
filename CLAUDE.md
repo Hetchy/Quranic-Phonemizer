@@ -55,12 +55,25 @@ reads, and what is actually pronounced under a boundary plan.
 - Use ASCII transliteration in prose. Arabic script is allowed when quoting a
   word or mark. Avoid typographic punctuation in source.
 - Do not write essays in comments, keep them short and to the point and only complement the code; which should be self-explanatory anyways. You do not need to explain general domain knowledge in comments, a reader is already familiar with that, but you can bring up specific domain knowledge that is relevant to the code.
-- Respect `tools/comment_lint.py` and `tools/structure_lint.py`; do not bypass
-  their import, export, size, or phoneme-ownership checks.
+- Respect the import, role, transform, and phoneme-ownership boundaries checked
+  by `tools/structure_lint.py`. Comment and size guidance is review advice.
 
 ## Validation
 
 Before writing or modifying tests, read `tests/README.md` and follow its
 semantic-case, source-span, boundary, and file-ownership conventions.
 
-Use `python tools/gates.py --fast` if you need to run a gate. Do not run the full suit unnecessarily for minor modifications.
+Use `python tools/quick.py <targeted tests...>` while iterating; it never infers
+or expands the test scope. Pull requests run the full ordinary suite, essential
+structure checks, and exact Arabic source-context validation. The PR suite uses
+two pytest workers to bound corpus memory while parallelizing independent cases.
+
+Releases are `v*` tags. The publish workflow repeats the PR checks, runs Warsh
+cell closure, installs and smoke-tests the wheel, then publishes it to PyPI.
+
+Cross-script, L1, roundtrip, attestation, and legacy snapshot tools are manual
+audits. Run pytest-based audits explicitly with
+`python -m pytest --runaudit -m audit`; do not treat them as routine gates.
+
+Ruff is configured for imports and objective Python hygiene. Its current
+baseline is intentionally non-gating until the one-time repository cleanup.

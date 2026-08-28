@@ -1,6 +1,6 @@
-"""Run a gate harness and check its number against a ratchet floor/ceiling.
+"""Run a manual audit and compare it with an explicit baseline.
 
-Floors live in `tools/gates.py`, which is what CI runs.
+Known residue is documented in `docs/conformance.md`; these audits are not CI.
 
 Run: python tools/floor.py cross|regression|l1 word|verse|- FLOOR
 """

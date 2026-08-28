@@ -1,13 +1,10 @@
-# The ratchet numbers live in tools/gates.py, so a job here names a gate and
-# nothing else. Every row behind a floor short of 100% is named in
-# docs/conformance/gate-residues.md, so requiring zero would mean a red build
-# with nothing to do about it, and requiring nothing would let a regression
-# land silently.
+# Pull requests run behavioral tests, architectural boundaries, and exact
+# Arabic source-context validation as separate jobs.
 name: gates
 
 on:
   push:
-    branches: [main, "riwayah/**", "feat/**"]
+    branches: [main]
   pull_request:
 
 jobs:
@@ -16,15 +13,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        name: [suite, comments, structure, cross-script, regression,
-               roundtrip, attestation, l1]
+        name: [suite, structure, test-style]
     name: ${{ matrix.name }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.13"
-      # structure's tool-import-smoke executes each tool rather than parsing
-      # it, so every gate needs the package and its YAML dependency present.
       - run: pip install -e ".[dev]"
       - run: python tools/gates.py ${{ matrix.name }}

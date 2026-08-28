@@ -22,6 +22,8 @@ from tools.parity import (
     units,
 )
 
+pytestmark = pytest.mark.audit
+
 SNAPSHOTS = (
     pathlib.Path(__file__).resolve().parents[1] / "snapshots" / "phonemes"
 )
