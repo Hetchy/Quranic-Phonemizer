@@ -8,7 +8,7 @@ from __future__ import annotations
 from ...engine.classifier import RuleSet
 from ...engine.plan import Phase
 from ...model.address import KhilafId, Riwayah
-from ...rules.annotation import CanonicalColour, Tarqeeq
+from ...rules.annotation import CanonicalColour, CarrierTarqeeq, Tarqeeq
 from ...rules.boundary import (
     DroppedGlide,
     IwadLength,
@@ -84,6 +84,7 @@ def _build() -> RuleSet:
             Phase.COLOUR: (
                 Emphasis(weight=weight),
                 Tarqeeq(weight=weight),
+                CarrierTarqeeq(),
                 CanonicalColour(),
                 IkhfaaWeight(
                     followers=tables.followers_of_noon,

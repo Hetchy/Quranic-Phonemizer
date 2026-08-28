@@ -42,6 +42,16 @@ _OPENING_TEXTS = frozenset({
 })
 _STOP_SIGNS = frozenset("ۖۗۘۙۚۛۜ۩ٓ")
 
+# `رأى` before a following-word sakin is written without either inclination
+# witness in the connected Warsh source. Both qualities return at a stop.
+# These are canonical/internal corpus coordinates. Their Warsh public refs are
+# 6:78:2, 6:79:2, 16:85:2, 16:86:2, 18:52:1, and 33:22:2.
+RAA_SEEN_BEFORE_SAKIN = frozenset({
+    Location(6, 77, 2), Location(6, 78, 2),
+    Location(16, 85, 2), Location(16, 86, 2),
+    Location(18, 53, 1), Location(33, 22, 2),
+})
+
 
 def mark_sequence_family(text: str, offset: int) -> str:
     """Classify one U+06EA by its complete local sequence family."""
@@ -59,7 +69,18 @@ def is_inclination_witness(text: str, offset: int) -> bool:
     family = mark_sequence_family(text, offset)
     if family in {"carrier", "dagger"}:
         return text[offset + 1:offset + 2] != "ے"
-    return family == "special" and text in _OPENING_TEXTS
+    return family == "special" and (
+        text in _OPENING_TEXTS or _is_raa_short_witness(text, offset)
+    )
+
+
+def _is_raa_short_witness(text: str, offset: int) -> bool:
+    """The first of the two marks in the exact `رأى` sequence family."""
+    before = text[:offset]
+    return (
+        (before.endswith("ر") or before.endswith("رّ"))
+        and text[offset + 1:offset + 4] in {"ء۪ا", "أ۪ى"}
+    )
 
 
 def _word_text(reading, word: int) -> str:
@@ -111,6 +132,30 @@ def _supply_marked(reading, span, word: int, location: Location, scribe) -> None
         target.nucleus = target.nucleus.with_quality(_quality(location))
         if target.origin is SlotOrigin.SPELLED:
             scribe.evidence(offset, target, SlotFact.VOWEL_QUALITY)
+
+
+def _supply_raa_before_sakin(span, location: Location) -> None:
+    """Restore both `رأى` inclinations only in the stopped state."""
+    if location not in RAA_SEEN_BEFORE_SAKIN:
+        return
+    raa = next((draft for draft in span if draft.letter is CanonLetter.RA), None)
+    hamza = next(
+        (
+            draft for draft in span
+            if draft.letter is CanonLetter.HAMZA and draft.nucleus.sounds_long
+        ),
+        None,
+    )
+    if raa is None or hamza is None:
+        raise ValueError(f"{location}: incomplete رأى before-sakin projection")
+    raa.nucleus = Nucleus(
+        raa.nucleus.joined,
+        VowelState(raa.nucleus.stopped.form, Quality.TAQLIL),
+    )
+    hamza.nucleus = Nucleus(
+        hamza.nucleus.joined,
+        VowelState(hamza.nucleus.stopped.form, Quality.TAQLIL),
+    )
 
 
 def _supply_fathatan_dhat_yaa(text: str, span, location: Location) -> None:
@@ -201,6 +246,7 @@ def supply_inclination(reading, drafts, lexicon, scribe, selection) -> None:
         _repair_naml_badal_carrier(drafts, span, location, scribe)
         text = _word_text(reading, word)
         _supply_marked(reading, span, word, location, scribe)
+        _supply_raa_before_sakin(span, location)
         _supply_fathatan_dhat_yaa(text, span, location)
         _supply_verse_head(reading, drafts, span, word, location, scribe)
 
@@ -212,6 +258,7 @@ __all__ = [
     "LAM_DHAT_YAA",
     "LAM_VERSE_HEADS",
     "RAA_OPENINGS",
+    "RAA_SEEN_BEFORE_SAKIN",
     "VERSE_HEAD_SURAHS",
     "is_inclination_witness",
     "mark_sequence_family",

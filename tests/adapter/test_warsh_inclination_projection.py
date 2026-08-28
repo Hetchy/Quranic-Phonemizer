@@ -64,12 +64,12 @@ def test_the_taha_witness_is_an_opening_register_sequence():
     assert reading.clusters[-1].letter is CanonLetter.HEH
 
 
-def test_the_first_raa_mark_is_not_the_inclination_witness():
+def test_both_raa_seen_marks_are_inclination_witnesses():
     entry, reading = _reading((6, 76, 5))  # source 6:77:5 ر۪ء۪ا
     offsets = [index for index, char in enumerate(entry.text) if char == "۪"]
 
     assert [_mark(reading, offset).role for offset in offsets] == [
-        "fatha", "inclination_witness",
+        "inclination_witness", "inclination_witness",
     ]
 
 

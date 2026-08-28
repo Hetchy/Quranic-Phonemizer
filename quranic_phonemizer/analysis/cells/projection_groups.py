@@ -11,8 +11,30 @@ from .dtos import (
     CellGroupKind,
     CellRole,
     CellTier,
+    CellStatus,
     CellWord,
 )
+
+
+_IQLAB_MEEM = frozenset({"ۢ", "ۭ"})
+
+
+def _has_rule(column, rule: str, facts: AnalysisFacts) -> bool:
+    return any(
+        facts.occurrences[occurrence.value].rule.value == rule
+        for occurrence in column.rule_occurrence_ids
+    )
+
+
+def _dropped_iqlab_mark(word, carrier, facts):
+    if not _has_rule(carrier, "madd_iwad", facts):
+        return ()
+    return tuple(
+        column.id for column in word.columns
+        if column.source_character_ids
+        and column.text in _IQLAB_MEEM
+        and column.status is CellStatus.DROPPED
+    )
 
 
 def _sound_ids(word: CellWord, ids: set[CellColumnId]) -> tuple[SoundId, ...]:
@@ -43,9 +65,11 @@ def _vowel_groups(word, facts, by_id, attached, claimed) -> list[CellGroup]:
             if column != carrier.id
             and by_id[column].tier is not CellTier.MAIN
         ]
-        ids = tuple((*quality, carrier.id, *[
+        dropped_iqlab = _dropped_iqlab_mark(word, carrier, facts)
+        ids = tuple((*quality, *dropped_iqlab, carrier.id, *[
             column for column in attached.get(carrier.id, ())
             if column not in quality
+            and column not in dropped_iqlab
         ]))
         claimed.update(ids)
         groups.append(CellGroup(

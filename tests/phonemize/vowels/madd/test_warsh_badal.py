@@ -206,7 +206,7 @@ def test_warsh_madd_badal_mughayyar_bin_naql(run):
     assert_case(run)
 
 
-def test_warsh_mughayyar_bin_naql_is_one_second_word_bridge():
+def test_warsh_mughayyar_bin_naql_is_one_cross_word_bridge():
     case = next(
         item for item in MUGHAYYAR_BIN_NAQL_CASES if item.id == "a-tanwin"
     )
@@ -229,16 +229,25 @@ def test_warsh_mughayyar_bin_naql_is_one_second_word_bridge():
         for item in sound.rule_occurrence_ids
     }
     bridge = next(
-        item
-        for boundary in result._cells.boundaries
-        for item in boundary.bridges
+        item for boundary in result._cells.boundaries for item in boundary.bridges
         if item.merger_id == merger.id
+    )
+    before_column = next(
+        item for item in result._cells.words[before].columns
+        if sound.id in item.presented_sound_ids
+    )
+    after_column = next(
+        item for item in result._cells.words[after].columns
+        if sound.id in item.owned_sound_ids
     )
 
     assert sound.word_id == merger.after_word_id
-    assert rules == {"naql", "madd_badal"}
-    assert bridge.before_column_ids and bridge.after_column_ids
-    assert bridge.sound.sound_id == sound.id
+    assert rules == {"naql", "madd_badal", "tarqeeq"}
+    assert bridge.before_column_ids == (before_column.id,)
+    assert bridge.after_column_ids == (after_column.id,)
+    assert bridge.sound.column_ids == (before_column.id, after_column.id)
+    assert before_column.role.value in {"haraka", "tanween"}
+    assert after_column.role.value == "madd"
 
 
 def _mughayyar_overlaps(built, performance, candidates):

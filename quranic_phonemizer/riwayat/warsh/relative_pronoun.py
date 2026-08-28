@@ -10,11 +10,12 @@ from ...model.inscription import SlotFact
 
 
 _IGNORED = frozenset("ـۥۦۧۨ")
-_FORMS = frozenset(
-    {
+_FORMS = {
+    CanonLetter.THAL: frozenset({
         "الذين",
         "الذے",
         "الذن",
+        "والذن",
         "والذين",
         "والذے",
         "بالذين",
@@ -26,8 +27,16 @@ _FORMS = frozenset(
         "للذے",
         "وبالذے",
         "وللذين",
-    }
-)
+    }),
+    CanonLetter.TA: frozenset({
+        "التے",
+        "بالتے",
+        "والتے",
+        "كالتے",
+        "للتے",
+    }),
+}
+_ALL_FORMS = frozenset().union(*_FORMS.values())
 
 
 def _skeleton(text: str) -> str:
@@ -40,7 +49,7 @@ def _skeleton(text: str) -> str:
 
 def relative_pronoun_form(text: str) -> bool:
     """Whether the selected token is one reviewed relative-pronoun form."""
-    return _skeleton(text) in _FORMS
+    return _skeleton(text) in _ALL_FORMS
 
 
 def _word_text(reading, word: int) -> str:
@@ -61,13 +70,18 @@ def supply_relative_pronoun(reading, drafts, lexicon, scribe, selection) -> None
     """Restore the pronounced geminate lam omitted by the selected script."""
     del lexicon, selection
     for word, span in enumerate(word_spans(reading, drafts)):
-        if not relative_pronoun_form(_word_text(reading, word)):
+        skeleton = _skeleton(_word_text(reading, word))
+        following_letter = next(
+            (letter for letter, forms in _FORMS.items() if skeleton in forms),
+            None,
+        )
+        if following_letter is None:
             continue
         lam = next(
             current
             for current, following in zip(span, span[1:])
             if current.letter is CanonLetter.LAM
-            and following.letter is CanonLetter.THAL
+            and following.letter is following_letter
         )
         lam.onset = Onset.GEMINATE
         lam.onset_declared = True

@@ -17,7 +17,7 @@ from quranic_phonemizer.model.canon import (
 )
 from quranic_phonemizer.model.inscription import SlotFact
 from quranic_phonemizer.orthography.inventory import InventoryError
-from quranic_phonemizer.riwayat.warsh import naql_script
+from quranic_phonemizer.riwayat.warsh import naql_script, sequence
 from quranic_phonemizer.riwayat.warsh.resources import corpus, script_adapter
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -46,6 +46,29 @@ def test_the_inventory_is_total_over_all_62_selected_source_scalars():
 
     assert len(scalars) == 62
     assert all(inventory.classify(char) is not None for char in scalars)
+
+
+def test_all_69_hamza_maddah_spellings_supply_a_long_a_nucleus():
+    source = json.loads(SOURCE.read_text(encoding="utf-8"))
+    inventory = script_adapter(Script.UTHMANI).inventory
+    rows = [
+        record["text"] for record in source.values()
+        if any(pair in record["text"] for pair in ("أٓ", "إٓ", "ءٓ", "ؤٓ", "ئٓ"))
+    ]
+
+    assert len(rows) == 69
+    for text in rows:
+        entries = sequence.entries_for(inventory, text)
+        madd = text.index("ٓ")
+        assert entries[madd].value == Nucleus.long(Quality.A)
+
+
+def test_article_long_base_ignores_its_trailing_stop_advice():
+    text = json.loads(SOURCE.read_text(encoding="utf-8"))["24:18:4"]["text"]
+    entries = sequence.entries_for(script_adapter(Script.UTHMANI).inventory, text)
+
+    assert text == "اُ۬لَايَٰتِۖ"
+    assert entries[text.index("َ")].value == Nucleus.long(Quality.A)
 
 
 def test_initial_alif_haraka_mark_is_one_wasl_sequence():
@@ -140,6 +163,95 @@ def test_plural_alif_sukun_is_a_source_backed_silence_sign():
     assert reading.clusters[decoration.cluster].letter is CanonLetter.ALIF
 
 
+def test_every_alif_sukun_is_a_source_backed_silence_sign():
+    source = json.loads(SOURCE.read_text(encoding="utf-8"))
+    inventory = script_adapter(Script.UTHMANI).inventory
+    count = 0
+
+    for record in source.values():
+        text = record["text"]
+        entries = sequence.entries_for(inventory, text)
+        for index in range(len(text) - 1):
+            if text[index:index + 2] != "اْ":
+                continue
+            count += 1
+            assert entries[index + 1].silences, text
+
+    assert count == 3716
+
+
+def test_every_explicit_hamza_u_sukun_waw_is_rasm_only():
+    source = json.loads(SOURCE.read_text(encoding="utf-8"))
+    inventory = script_adapter(Script.UTHMANI).inventory
+    count = 0
+
+    for record in source.values():
+        text = record["text"]
+        entries = sequence.entries_for(inventory, text)
+        start = text.find("أُوْ")
+        while start >= 0:
+            count += 1
+            assert entries[start + 3].silences, text
+            start = text.find("أُوْ", start + 1)
+
+    assert count == 220
+
+
+def test_biaydin_jarrah_is_sukun_and_the_second_yaa_is_rasm_only():
+    entry, reading = _reading((51, 47, 3))  # بِأَيَيْدٖ
+    first_yaa = entry.text.index("ي")
+    second_yaa = entry.text.index("ي", first_yaa + 1)
+    jarrah = first_yaa + 1
+    silence = second_yaa + 1
+
+    absence = _evidence_at(reading, jarrah, SlotFact.VOWEL_ABSENCE)
+    decoration = next(row for row in reading.decorations if row.offset == silence)
+
+    assert entry.text[jarrah] == "َ"
+    assert reading.clusters[absence.cluster].letter is CanonLetter.YA
+    assert reading.clusters[absence.cluster].offset == first_yaa
+    assert decoration.silences
+    assert reading.clusters[decoration.cluster].letter is CanonLetter.YA
+    assert reading.clusters[decoration.cluster].offset == second_yaa
+
+
+def test_collapsed_double_hamza_mark_does_not_silence_the_explicit_hamza():
+    entry, reading = _reading((19, 66, 3))  # أَ۟ذَا
+    first, thal, alif = reading.clusters
+
+    assert first.letter is CanonLetter.HAMZA
+    assert [mark.role for mark in first.marks] == ["fatha", "collapsed_hamza"]
+    assert not any(row.silences for row in reading.decorations)
+    assert thal.letter is CanonLetter.THAL
+    assert alif.letter is CanonLetter.ALIF
+
+
+def test_all_14_explicit_collapsed_double_hamzas_keep_their_first_hamza():
+    rows = [
+        (location, entry)
+        for location, entry in corpus().entries.items()
+        if entry.text.startswith("أَ۟")
+    ]
+
+    assert len(rows) == 14
+    for location, entry in rows:
+        reading = script_adapter(Script.UTHMANI).read(
+            location.verse, ((location, entry.text),)
+        )
+        first = reading.clusters[0]
+        assert first.letter is CanonLetter.HAMZA
+        assert [mark.role for mark in first.marks[:2]] == [
+            "fatha", "collapsed_hamza",
+        ]
+        assert not any(row.silences for row in reading.decorations)
+        slots = recitation(Riwayah.WARSH).build(reading).score.words[0].slots
+        assert [slot.letter for slot in slots[:2]] == [
+            CanonLetter.HAMZA, CanonLetter.HAMZA,
+        ]
+        assert slots[1].onset is Onset.TASHIL
+        assert len(slots) >= 3 and slots[2].letter is not CanonLetter.HAMZA
+
+
 def test_sounded_yaa_before_combining_hamza_remains_a_separate_glide():
     entry, reading = _reading((2, 48, 8))  # شَئْاٗ
     letters = tuple(cluster.letter for cluster in reading.clusters)
@@ -228,6 +340,28 @@ def test_prefixed_relative_pronoun_restores_its_second_lam(ref):
     assert relative.onset is Onset.GEMINATE
     assert relative.nucleus == Nucleus.short(Quality.A)
     assert thal.letter is CanonLetter.THAL and thal.onset is Onset.PLAIN
+
+
+@pytest.mark.parametrize(
+    "ref",
+    ((2, 24, 8), (6, 152, 6), (4, 15, 1), (16, 92, 3), (17, 9, 5)),
+)
+def test_feminine_relative_pronoun_restores_its_geminate_lam(ref):
+    entry, reading = _reading(ref)
+    built = recitation(Riwayah.WARSH).build(reading)
+    lam, ta = next(
+        (current, following)
+        for current, following in zip(
+            built.score.words[0].slots, built.score.words[0].slots[1:]
+        )
+        if current.letter is CanonLetter.LAM
+        and following.letter is CanonLetter.TA
+    )
+
+    assert "ّ" not in entry.text
+    assert lam.onset is Onset.GEMINATE
+    assert lam.nucleus == Nucleus.short(Quality.A)
+    assert ta.onset is Onset.PLAIN
 
 
 def _reading_pair(first: tuple[int, int, int], second: tuple[int, int, int]):
@@ -325,7 +459,13 @@ def test_the_moved_host_haraka_demotes_to_a_naql_witness():
         row.offset == fatha and row.fact is SlotFact.VOWEL_QUALITY
         for row in reading.evidence
     )
-    assert any(row.offset == fatha for row in reading.attestations)
+    witness = next(
+        row
+        for row in reading.evidence
+        if row.offset == fatha and row.fact is SlotFact.TAJWEED_MARK
+    )
+    assert witness.value is Annotation.NAQL_WITNESS
+    assert not any(row.offset == fatha for row in reading.attestations)
 
 
 def test_the_latent_qata_keeps_its_full_shape_for_restoration():

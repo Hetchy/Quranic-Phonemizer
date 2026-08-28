@@ -22,12 +22,12 @@ The selected Warsh corpus contains 60 one-word adjacent-hamza sites:
 | `ءَأَعْجَمِيٌّ` | 1 | Fixed tashil |
 | Triple-hamza forms | 4 | Fixed tashil on the second qata |
 
-The selected corpus also contains 156 adjacent qata pairs across two words:
+The selected corpus also contains 154 adjacent qata pairs across two words:
 
 | First + second quality | Count | General outcome |
 | --- | ---: | --- |
 | A + A | 30 | `hamza_muttafiq`, except the two `jaa_aal` sites |
-| I + I | 37 | `hamza_muttafiq`, except the two `hamza_kasr_yaa` sites |
+| I + I | 35 | `hamza_muttafiq`, except the two `hamza_kasr_yaa` sites |
 | U + U | 1 | `hamza_muttafiq` |
 | A + I | 19 | Fixed tashil |
 | A + U | 1 | Fixed tashil |
@@ -98,6 +98,12 @@ Ordinary second-I and second-U forms are fixed tashil:
 Each emits `tashil` on the second hamza in wasl, waqf, and ibtidaa. Warsh
 always renders the eased typed onset as `ʔ̞`; `tashil` is not an optional
 extra-phoneme value for this riwayah.
+
+Fourteen selected-source tokens begin with the collapsed spelling `أَ۟...`,
+including `أَ۟ذَا` at 19:66:3. The explicit `أَ` writes the full interrogative
+hamza and its A; the rounded mark witnesses the unwritten second qata and must
+not silence the explicit hamza. Projection assigns that witness to the eased
+second onset and keeps the following lexical consonant in the same word.
 The ellipses mark continuing spans; any word ending or plural-mim boundary
 outside the hamza meeting follows its independent boundary rule.
 
@@ -268,7 +274,7 @@ the same result sound. Visible unit and cell placements follow sound ownership
 and silence; trigger-only neighboring letters are not tagged. A moving waw or
 yaa receives no invented madd.
 
-Machine data must own all 60 one-word and 156 across-word rows with source
+Machine data must own all 60 one-word and 154 across-word rows with source
 ref, canonical ref, first and second qualities, boundary scope, structural
 owner, and authored-exception owner. Tests assert the exact partitions above,
 all five Aimma sites, the Aajami site, all four triple-hamza sites, both Jaa-Aal

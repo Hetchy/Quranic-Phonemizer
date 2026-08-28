@@ -3,6 +3,7 @@
 Each internal boundary carries a stop-sign pause column and, for a cross-word
 merger, a bridge that holds the shared sound; that sound leaves the host word.
 """
+
 from __future__ import annotations
 
 from dataclasses import replace
@@ -18,7 +19,7 @@ from ..facts import analyse
 from ..ids import CellColumnId
 from ..inscription import inscribe
 from ..source import build_source_view
-from ..source_dtos import Character, CharacterKind, MergerPlacement, SourceView
+from ..source_dtos import Character, CharacterKind, SourceView
 from ...orthography.write import Pen
 from .align import next_column_id
 from .columns import build_cell_words
@@ -37,21 +38,24 @@ from .dtos import (
 from .transform import transform_words
 from .boundary_hosting import move_boundary_sounds
 from .projection import project_words
-from .projection_semantics import keep_madd_rules_on_carriers, separate_tanween_vowel_colours
+from .projection_semantics import (
+    assign_native_iqlab_meem,
+    keep_carrier_identity_off_harakas,
+    keep_ibdal_off_harakas,
+    keep_madd_rules_on_carriers,
+    keep_taqlil_on_carriers,
+    keep_waqf_drop_on_silenced_cells,
+    keep_weight_labels_off_short_vowels,
+    keep_weight_labels_on_sound_owners,
+    separate_tanween_vowel_colours,
+)
+from .projection_naql_badal import project_naql_badal_bridges
+from .projection_naql import (
+    move_tanween_naql_haraka_to_boundary,
+    place_tanween_naql_on_written_haraka,
+)
 from .transform_laws import validate_transformed
-from .view_laws import validate_cell_view
-
-
-def _column_of_unit(words: tuple[CellWord, ...]) -> dict[int, CellColumnId]:
-    out = {
-        unit.value: col.id
-        for word in words for col in word.columns for unit in col.source_unit_ids
-    }
-    for word in words:
-        for column in word.columns:
-            if column.anchor_unit_id is not None:
-                out[column.anchor_unit_id.value] = column.id
-    return out
+from .view_laws import validate_cell_view, validate_spoken_hamza_glyphs
 
 
 def _extract_merger_sounds(
@@ -72,46 +76,63 @@ def _extract_merger_sounds(
         cells.remove(cell)
         shared[merger.id.value] = cell
     remaining = {
-        w.word_id.value: {s.sound_id for s in held[w.word_id.value]}
-        for w in words
+        w.word_id.value: {s.sound_id for s in held[w.word_id.value]} for w in words
     }
-    out = tuple(replace(
-        w, sounds=tuple(held[w.word_id.value]),
-        groups=tuple(replace(g, sound_ids=tuple(
-            s for s in g.sound_ids if s in remaining[w.word_id.value]
-        )) for g in w.groups),
-    ) for w in words)
+    out = tuple(
+        replace(
+            w,
+            sounds=tuple(held[w.word_id.value]),
+            groups=tuple(
+                replace(
+                    g,
+                    sound_ids=tuple(
+                        s for s in g.sound_ids if s in remaining[w.word_id.value]
+                    ),
+                )
+                for g in w.groups
+            ),
+        )
+        for w in words
+    )
     return out, shared
 
 
 def _bridge(
     merger: Merger,
-    placement: MergerPlacement,
-    column_of_unit: dict[int, CellColumnId],
+    words: tuple[CellWord, ...],
     sound: CellSound,
 ) -> CellBridge:
+    before_word = next(word for word in words if word.word_id == merger.before_word_id)
+    after_word = next(word for word in words if word.word_id == merger.after_word_id)
+    before = tuple(
+        column.id
+        for column in before_word.columns
+        if merger.sound_id in column.presented_sound_ids
+    )
+    after = tuple(
+        column.id
+        for column in after_word.columns
+        if merger.sound_id in column.owned_sound_ids
+    )
     return CellBridge(
         merger_id=merger.id,
-        before_column_ids=tuple(column_of_unit[u.value] for u in placement.before_unit_ids),
-        after_column_ids=tuple(column_of_unit[u.value] for u in placement.after_unit_ids),
-        sound=sound,
+        before_column_ids=before,
+        after_column_ids=after,
+        sound=replace(sound, column_ids=(*before, *after)),
     )
 
 
-def _boundary_signs(
-    boundary: Boundary, source: SourceView
-) -> tuple[Character, ...]:
+def _boundary_signs(boundary: Boundary, source: SourceView) -> tuple[Character, ...]:
     """Every written stop or sakt sign the source assigns to this boundary, in
     text order; a boundary may carry more than one."""
     return tuple(
-        c for c in source.characters
+        c
+        for c in source.characters
         if c.boundary_id == boundary.id and c.kind is CharacterKind.STOP_SIGN
     )
 
 
-def _stop_sign_column(
-    signs: tuple[Character, ...], new_id: int
-) -> CellColumn:
+def _stop_sign_column(signs: tuple[Character, ...], new_id: int) -> CellColumn:
     return CellColumn(
         id=CellColumnId(new_id),
         role=CellRole.STOP_SIGN,
@@ -135,8 +156,7 @@ def _stop_sign_column(
 def _boundaries(
     bundle,
     source: SourceView,
-    placement_of: dict[int, MergerPlacement],
-    column_of_unit: dict[int, CellColumnId],
+    words: tuple[CellWord, ...],
     shared: dict[int, CellSound],
     next_id: int,
     verse_ends: frozenset[str] | None,
@@ -146,8 +166,7 @@ def _boundaries(
         if merger.boundary_id is None:
             continue
         bridges.setdefault(merger.boundary_id.value, []).append(
-            _bridge(merger, placement_of[merger.id.value], column_of_unit,
-                    shared[merger.id.value])
+            _bridge(merger, words, shared[merger.id.value])
         )
     exclusive = _exclusive_groups(bundle.boundaries)
     words = {word.id.value: word for word in bundle.words}
@@ -157,19 +176,22 @@ def _boundaries(
             continue
         column = _stop_sign_column(_boundary_signs(boundary, source), next_id)
         next_id += 1
-        out.append(CellBoundary(
-            boundary_id=boundary.id,
-            columns=(column,),
-            bridges=tuple(bridges.get(boundary.id.value, ())),
-            state=boundary.state,
-            verse_end=_verse_end(boundary, words, verse_ends),
-            exclusive_group=exclusive.get(boundary.id.value),
-        ))
+        out.append(
+            CellBoundary(
+                boundary_id=boundary.id,
+                columns=(column,),
+                bridges=tuple(bridges.get(boundary.id.value, ())),
+                state=boundary.state,
+                verse_end=_verse_end(boundary, words, verse_ends),
+                exclusive_group=exclusive.get(boundary.id.value),
+            )
+        )
     return tuple(out)
 
 
 def _word_bridges(
-    words: tuple[CellWord, ...], mergers: tuple[Merger, ...],
+    words: tuple[CellWord, ...],
+    mergers: tuple[Merger, ...],
     shared: dict[int, CellSound],
 ) -> tuple[CellWord, ...]:
     words_by_id = {word.word_id.value: word for word in words}
@@ -179,25 +201,27 @@ def _word_bridges(
             continue
         word = words_by_id[merger.before_word_id.value]
         before = tuple(
-            column.id for column in word.columns
+            column.id
+            for column in word.columns
             if merger.sound_id in column.presented_sound_ids
         )
         after = tuple(
-            column.id for column in word.columns
+            column.id
+            for column in word.columns
             if merger.sound_id in column.owned_sound_ids
         )
         by_word.setdefault(merger.before_word_id.value, []).append(
             CellBridge(
-                merger_id=merger.id, before_column_ids=before,
+                merger_id=merger.id,
+                before_column_ids=before,
                 after_column_ids=after,
-                sound=replace(
-                    shared[merger.id.value], column_ids=(*before, *after)
-                ),
+                sound=replace(shared[merger.id.value], column_ids=(*before, *after)),
             )
         )
-    return tuple(replace(
-        word, bridges=tuple(by_word.get(word.word_id.value, ()))
-    ) for word in words)
+    return tuple(
+        replace(word, bridges=tuple(by_word.get(word.word_id.value, ())))
+        for word in words
+    )
 
 
 def _ayah(ref: str) -> int:
@@ -237,9 +261,15 @@ def _exclusive_groups(boundaries: tuple[Boundary, ...]) -> dict[int, int]:
     return out
 
 
-def _words(session, bundle, source, facts, insc, spelling, pen, extra_phonemes):
+def _words(
+    session, bundle, source, facts, insc, spelling, pen, extra_phonemes, riwayah
+):
     words = build_cell_words(
-        session, bundle=bundle, view=source, facts=facts, insc=insc,
+        session,
+        bundle=bundle,
+        view=source,
+        facts=facts,
+        insc=insc,
         pen=pen if spelling == "transformed" else None,
     )
     if spelling != "transformed":
@@ -247,10 +277,15 @@ def _words(session, bundle, source, facts, insc, spelling, pen, extra_phonemes):
     if pen is None:
         raise ValueError("the transformed spelling needs a pen")
     words = transform_words(
-        words, session, source, pen, extra_phonemes=extra_phonemes,
-        facts=facts, insc=insc,
+        words,
+        session,
+        source,
+        pen,
+        extra_phonemes=extra_phonemes,
+        facts=facts,
+        insc=insc,
     )
-    return project_words(words, facts, source, insc, pen)
+    return project_words(words, facts, source, insc, pen, riwayah=riwayah)
 
 
 def _facts_with_rendering(session, riwayah, extra_phonemes):
@@ -269,9 +304,7 @@ def _check_spelling(spelling: str) -> None:
         raise ValueError(f"spelling must be source or transformed, got {spelling!r}")
 
 
-def _shared_projection(
-    session, metadata, extra_phonemes, bundle, source, facts, insc
-):
+def _shared_projection(session, metadata, extra_phonemes, bundle, source, facts, insc):
     active = effective_extra_phonemes(Riwayah(metadata["riwayah"]), extra_phonemes)
     if facts is None:
         facts, active = _facts_with_rendering(
@@ -281,13 +314,14 @@ def _shared_projection(
         insc = inscribe(session)
     if bundle is None:
         bundle = build_bundle(
-            session, **metadata, extra_phonemes=extra_phonemes,
-            facts=facts, insc=insc,
+            session,
+            **metadata,
+            extra_phonemes=extra_phonemes,
+            facts=facts,
+            insc=insc,
         )
     if source is None:
-        source = build_source_view(
-            session, bundle=bundle, facts=facts, insc=insc
-        )
+        source = build_source_view(session, bundle=bundle, facts=facts, insc=insc)
     return facts, active, insc, bundle, source
 
 
@@ -311,36 +345,43 @@ def build_cell_view(
     facts, active, insc, bundle, source = _shared_projection(
         session, metadata, extra_phonemes, bundle, source, facts, insc
     )
-    words = _words(
-        session, bundle, source, facts, insc, spelling, pen, active
-    )
+    words = _words(session, bundle, source, facts, insc, spelling, pen, active, riwayah)
+    words = assign_native_iqlab_meem(words, facts, riwayah)
     words = separate_tanween_vowel_colours(words, facts)
     words = keep_madd_rules_on_carriers(words, facts)
-    placement_of = {p.merger_id.value: p for p in source.merger_placements}
-    column_of_unit = _column_of_unit(words)
+    words = keep_waqf_drop_on_silenced_cells(words, facts)
+    words = keep_ibdal_off_harakas(words, facts, pen)
+    words = keep_taqlil_on_carriers(words, facts)
+    words = keep_carrier_identity_off_harakas(words, facts)
+    words = keep_weight_labels_off_short_vowels(words, facts)
+    words = keep_weight_labels_on_sound_owners(words, facts)
+    words = project_naql_badal_bridges(words, bundle, facts)
+    words = place_tanween_naql_on_written_haraka(words, bundle)
     words, shared = _extract_merger_sounds(words, bundle.mergers)
     words = _word_bridges(words, bundle.mergers, shared)
     boundaries = _boundaries(
         bundle,
         source,
-        placement_of,
-        column_of_unit,
+        words,
         shared,
         next_column_id(words),
-        (
-            None
-            if session.verse_ends is None
-            else session.verse_ends
-        ),
+        (None if session.verse_ends is None else session.verse_ends),
+    )
+    words, boundaries = move_tanween_naql_haraka_to_boundary(
+        words, boundaries, bundle, source
     )
     if spelling == "transformed":
-        words, boundaries = move_boundary_sounds(
-            words, boundaries, facts, bundle, pen
-        )
+        words, boundaries = move_boundary_sounds(words, boundaries, facts, bundle, pen)
     view = CellView(words=words, boundaries=boundaries)
     validate_cell_view(view, bundle, source)
     if spelling == "transformed":
-        validate_transformed(view, source, session.performance.selection)
+        validate_spoken_hamza_glyphs(view, bundle)
+        validate_transformed(
+            view,
+            source,
+            session.performance.selection,
+            bundle=bundle,
+        )
     return view
 
 

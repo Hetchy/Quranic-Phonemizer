@@ -24,6 +24,15 @@ CASES = (
         phonemes="w a ʔ u l a: ʔ i k",
         char_rules={"و[2]": R("orthographic_silence")},
     ),
+    # Hafs: أُو۟لُوا۟
+    # Warsh: أُوْلُواْ
+    Case(
+        id="ulu-plural-waw",
+        site=Site.shared("27:33", (3,)),
+        read=isolated(),
+        phonemes="ʔ u l u:",
+        char_rules={"و[1]": R("orthographic_silence")},
+    ),
     # Hafs: خَلَقُوا۟
     # Warsh: خَلَقُواْ
     Case(
@@ -64,6 +73,24 @@ CASES = (
         phonemes="m i ʔ a h",
         char_rules={"ا": R("orthographic_silence")},
     ),
+    # Hafs: مِّا۟ئَةُ
+    # Warsh: مِّاْئَةُ
+    Case(
+        id="miata-geminated-alif",
+        site=Site.shared("2:261", (16,)),
+        read=isolated(),
+        phonemes="m i ʔ a h",
+        char_rules={"ا": R("orthographic_silence")},
+    ),
+    # Hafs: يَبْدَؤُا۟
+    # Warsh: يَبْدَؤُاْ
+    Case(
+        id="yabdau-final-alif",
+        site=Site.shared("10:4", (8,)),
+        read=isolated(),
+        phonemes="j a b Q d a ʔ",
+        char_rules={"ا": R("orthographic_silence")},
+    ),
     # Hafs: ٱلرِّبَوٰا۟ ۗ
     # Warsh: اُ۬لرِّبَوٰاْۖ
     Case(
@@ -87,7 +114,7 @@ CASES = (
         char_rules=pick(
             hafs_uthmani={"ي[2]": R("orthographic_silence")},
             hafs_indopak={"ى": R("orthographic_silence")},
-            warsh_uthmani={"ي[1]": R("orthographic_silence")},
+            warsh_uthmani={"ي[2]": R("orthographic_silence")},
         ),
     ),
     # Hafs: أَفَإِي۟ن

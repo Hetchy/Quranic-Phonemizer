@@ -12,7 +12,7 @@ from typing import TypeAlias
 from ..model.address import OccurrenceId, SlotId
 from ..model.canon import Rule
 from ..model.inscription import SilenceReason
-from ..model.performance import Aspect, Length, Occurrence, Side, Sound
+from ..model.performance import Aspect, Length, Occurrence, Side, Sound, Vowel
 
 
 class Phase(StrEnum):
@@ -233,6 +233,29 @@ class Plan:
         return any(
             verdict.occurrence.rule is Rule.IBDAL_HAMZA
             and Relength(slot, Length.LONG) in verdict.effects
-            and Silence(previous, Aspect.VOWEL) in verdict.effects
+            and MergeInto(
+                previous, Aspect.VOWEL, slot, Aspect.VOWEL
+            ) in verdict.effects
+            for _, verdict in self.entries
+        )
+
+    def joined_ibdal_length(self, slot: SlotId) -> bool:
+        """Whether connected ibdal made this root hamza a long-vowel host."""
+        return any(
+            verdict.occurrence.rule is Rule.IBDAL_HAMZA
+            and any(
+                isinstance(effect, Realize)
+                and effect.slot == slot
+                and effect.aspect is Aspect.VOWEL
+                and isinstance(effect.sound, Vowel)
+                and effect.sound.long
+                for effect in verdict.effects
+            )
+            and any(
+                isinstance(effect, MergeInto)
+                and effect.host == slot
+                and effect.host_aspect is Aspect.VOWEL
+                for effect in verdict.effects
+            )
             for _, verdict in self.entries
         )

@@ -25,6 +25,11 @@ from .source_units import Tokenization
 #: A base letter's canonical identity, read off its rasm glyph.
 _LETTER_OF_BASE = {glyph: CanonLetter(name) for name, glyph in ABJAD.items()}
 
+#: The only riding letters whose unread half denotes a recitation variant.
+#: Other source-backed tajweed marks (notably Warsh's native iqlab meem) may
+#: ride a host too, but that geometric relation is not a variant handoff.
+_MINI_SEEN = frozenset({"ۜ", "ۣ"})
+
 
 @dataclass(frozen=True, slots=True)
 class Ownership:
@@ -74,7 +79,7 @@ def _paired_owner(facts, tok, insc, slot: SlotId, base: int) -> int:
     return base if base_letter is _slot_letter(facts, slot) else marks[0]
 
 
-def _variant_pair_units(tok: Tokenization) -> frozenset[int]:
+def _riding_pair_units(tok: Tokenization) -> frozenset[int]:
     pairs: set[int] = set()
     for index, unit in enumerate(tok.units):
         if unit.written_on_anchor is None:
@@ -83,6 +88,25 @@ def _variant_pair_units(tok: Tokenization) -> frozenset[int]:
         if base is not None:
             pairs.update((base, index))
     return frozenset(pairs)
+
+
+def _variant_pair_units(
+    tok: Tokenization, insc: InscriptionFacts
+) -> frozenset[int]:
+    riding = _riding_pair_units(tok)
+    seen = {
+        index for index, unit in enumerate(tok.units)
+        if any(
+            insc.glyphs[glyph].char in _MINI_SEEN for glyph in unit.glyphs
+        )
+    }
+    return frozenset(
+        index for index in riding
+        if index in seen or any(
+            tok.unit_of_anchor.get(tok.units[item].written_on_anchor) == index
+            for item in seen
+        )
+    )
 
 
 def _unit_at(facts, tok, insc, carriers,
@@ -150,8 +174,15 @@ def _owners_and_presenters(facts, tok, insc, carriers):
         if unit is not None:
             owner.setdefault(edge.sound, unit)
     for edge in facts.merges:
-        unit = tok.roles.letter.get(edge.slots[0])
-        if unit is not None:
+        unit = (
+            _unit_at(
+                facts, tok, insc, carriers,
+                edge.slots[0], edge.aspect, edge.sound,
+            )
+            if edge.aspect is Aspect.VOWEL
+            else tok.roles.letter.get(edge.slots[0])
+        )
+        if unit is not None and unit != owner.get(edge.sound):
             presenters[edge.sound].add(unit)
     return owner, presenters
 
@@ -172,6 +203,16 @@ def _silenced_units(facts, tok) -> dict[int, int]:
                     out.setdefault(carrier, edge.by)
         if unit is not None:
             out.setdefault(unit, edge.by)
+    # A source-backed pronunciation mark riding a silenced unit is cancelled
+    # by that same explicit occurrence. It is not a variant or an eternally
+    # orthographic letter merely because the stopped performance leaves it
+    # without a sound (Warsh tanween iqlab mini-meem at waqf).
+    for index, draft in enumerate(tok.units):
+        if draft.written_on_anchor is None:
+            continue
+        host = tok.unit_of_anchor.get(draft.written_on_anchor)
+        if host in out:
+            out.setdefault(index, out[host])
     return out
 
 
@@ -224,7 +265,8 @@ def ownership(
     sounding = set(owner.values()) | {u for us in presenters.values() for u in us}
     silenced_by = _silenced_units(facts, tok)
     shortened = _shortened_units(facts, tok, insc)
-    variant_pairs = _variant_pair_units(tok)
+    riding_pairs = _riding_pair_units(tok)
+    variant_pairs = _variant_pair_units(tok, insc)
     orthographic = _orthographic_units(facts, tok, insc)
     seats = _orthographic_seats(tok)
     silence: dict[int, Silence] = {}
@@ -238,7 +280,7 @@ def ownership(
                 silence[index] = shortened[index]
             elif index in variant_pairs:
                 silence[index] = LiteralSilence.VARIANT
-            elif index in orthographic or index in seats:
+            elif index in orthographic or index in seats or index in riding_pairs:
                 silence[index] = LiteralSilence.ORTHOGRAPHIC
             else:
                 _unclassified(index, unit, insc)

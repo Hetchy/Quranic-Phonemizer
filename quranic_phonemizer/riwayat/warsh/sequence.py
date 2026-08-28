@@ -122,19 +122,13 @@ def _attach_reversed_fathatan(text, entries) -> None:
             )
 
 
-def _project_plural_alif_silence(text, entries) -> None:
-    for alif_index in range(1, len(text) - 1):
+def _project_alif_sukun_silence(text, entries) -> None:
+    """An ordinary sukun on alif marks rasm, never a consonantal alif."""
+    for alif_index in range(len(text) - 1):
         if text[alif_index:alif_index + 2] != "اْ":
             continue
-        previous_base = next(
-            (
-                entry
-                for entry in reversed(entries[:alif_index])
-                if isinstance(entry, LetterEntry)
-            ),
-            None,
-        )
-        if previous_base is not None and previous_base.letter is CanonLetter.WAW:
+        entry = entries[alif_index]
+        if isinstance(entry, LetterEntry) and entry.letter is CanonLetter.ALIF:
             entries[alif_index + 1] = MarkEntry(
                 role="silence_sign",
                 cls=GraphemeClass.HARAKA,
@@ -161,26 +155,42 @@ def _consonantal_sukun(entries, index: int) -> None:
     )
 
 
+def _project_collapsed_hamza(text, entries) -> None:
+    """Keep the explicit interrogative hamza in the `أَ۟...` family.
+
+    The following rounded mark attests the unwritten second qata; it is not a
+    silence sign on the first hamza.
+    """
+    if text.startswith("أَ۟"):
+        entries[2] = MarkEntry(
+            role="collapsed_hamza",
+            cls=GraphemeClass.ANNOTATION,
+            decorates="host",
+        )
+
+
 def _project_orthographic_silence(text, entries) -> None:
     """Project selected-script sukuns or harakas that mark rasm-only letters."""
+    start = text.find("أُوْ")
+    while start >= 0:
+        _silence_mark(entries, start + 3)
+        start = text.find("أُوْ", start + 1)
+
     for pattern, relative in (
-        ("أُوْلَ", 3),
-        ("مِاْئ", 3),
         ("إِيْن", 3),
         ("إِيْه", 3),
         ("إِےْ", 3),
-        ("اْيْـٔ", 1),
-        ("اْےْء", 1),
     ):
         start = text.find(pattern)
         if start >= 0:
             _silence_mark(entries, start + relative)
 
-    # `بِأَيَيْدٖ`: the first written yaa is rasm-only; the following sakin
-    # yaa is the pronounced glide.
+    # `بِأَيَيْدٖ`: the stroke after the first yaa is the Maghribi jarrah
+    # sukun, while the second written yaa is the rasm-only addition.
     start = text.find("أَيَيْ")
     if start >= 0:
-        _silence_mark(entries, start + 3)
+        _consonantal_sukun(entries, start + 3)
+        _silence_mark(entries, start + 5)
 
     for pattern, relative in (
         ("ليْل", 2),
@@ -200,6 +210,19 @@ def _release_dagger_hamza_seats(text, entries) -> None:
                 cls=GraphemeClass.SMALL_VOWEL,
                 decorates="host",
             )
+
+
+def _project_hamza_madd(text, entries) -> None:
+    """A maddah after hamza supplies the written long A nucleus."""
+    for index, char in enumerate(text[1:], start=1):
+        if char != "ٓ" or text[index - 1] not in "ءأإؤئ":
+            continue
+        entries[index] = MarkEntry(
+            role="madd",
+            cls=GraphemeClass.MADD_SIGN,
+            fact=SlotFact.VOWEL_QUALITY,
+            value=Nucleus.long(Quality.A),
+        )
 
 
 def _project_composite_tanwin(text, entries) -> None:
@@ -237,9 +260,11 @@ def _entries(inventory: Inventory, text: str) -> list:
     naql_script.project_verse_final_host(text, entries)
     _project_marked_fatha(text, entries, wasl=wasl)
     _attach_reversed_fathatan(text, entries)
-    _project_plural_alif_silence(text, entries)
+    _project_alif_sukun_silence(text, entries)
     _project_orthographic_silence(text, entries)
+    _project_collapsed_hamza(text, entries)
     _release_dagger_hamza_seats(text, entries)
+    _project_hamza_madd(text, entries)
     _project_composite_tanwin(text, entries)
     return entries
 

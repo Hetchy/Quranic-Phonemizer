@@ -116,23 +116,26 @@ def test_kubra_collapses_to_the_riwayah_fallback_quality(alphabet):
     assert alphabet.token(kubra) == "i:"
 
 
-def test_taqlil_is_never_gated_by_an_extra_phoneme(alphabet):
-    """Taqlil is an ordinary sound distinction, identical whether or not
-    `imala` is spent and under either riwayah's fallback mapping."""
+def test_only_short_taqlil_has_an_optional_narrow_token(alphabet):
+    """Long taqlil is always distinct; the short Warsh realization may
+    collapse to fath without changing its typed quality."""
     from quranic_phonemizer.riwayat import hafs, warsh
 
-    for long in (False, True):
-        taqlil = Vowel(Quality.TAQLIL, long=long)
-        expected = "ɛ:" if long else "ɛ"
-        assert alphabet.token(taqlil) == expected
+    short = Vowel(Quality.TAQLIL)
+    long = Vowel(Quality.TAQLIL, long=True)
+    assert alphabet.token(short) == "a"  # optional distinction defaults off
+    assert alphabet.token(
+        short, extra_phonemes=frozenset(),
+        quality_fallbacks=warsh.QUALITY_FALLBACKS,
+    ) == "a"
+    assert alphabet.token(
+        short, extra_phonemes=frozenset({"taqlil_short"}),
+        quality_fallbacks=warsh.QUALITY_FALLBACKS,
+    ) == "ɛ"
+    for fallbacks in (hafs.QUALITY_FALLBACKS, warsh.QUALITY_FALLBACKS):
         assert alphabet.token(
-            taqlil, extra_phonemes=frozenset({"imala"})
-        ) == expected
-        for fallbacks in (hafs.QUALITY_FALLBACKS, warsh.QUALITY_FALLBACKS):
-            assert alphabet.token(
-                taqlil, extra_phonemes=frozenset(),
-                quality_fallbacks=fallbacks,
-            ) == expected
+            long, extra_phonemes=frozenset(), quality_fallbacks=fallbacks,
+        ) == "ɛ:"
 
 
 def test_emphasis_is_offered_exactly_where_the_rule_can_reach(alphabet):

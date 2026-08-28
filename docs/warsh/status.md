@@ -28,9 +28,9 @@ complete tests before production code, then implement from projection upward.
 | 10 | Inclination: taqlil, kubra, fath, registers, and precedence | [`inclination.md`](research/v2/inclination.md) | **Complete** | [PR #68](https://github.com/Hetchy/Quranic-Phonemizer/pull/68); `feat/warsh-inclination` |
 | 11 | Lam tafkheem and its inclination coupling | [`lam-tafkheem.md`](research/v2/lam-tafkheem.md), [`lam-tafkheem-iteration-log.md`](lam-tafkheem-iteration-log.md) | **Complete** | [PR #69](https://github.com/Hetchy/Quranic-Phonemizer/pull/69); `feat/warsh-lam-taghliz` |
 | 12 | Raa weighting and dependent vowel coloring | [`raa.md`](research/v2/raa.md), [`raa-iteration-log.md`](raa-iteration-log.md) | **Complete** | [PR #70](https://github.com/Hetchy/Quranic-Phonemizer/pull/70); `feat/warsh-raa-weighting` |
-| 13 | Full-corpus attribution, default-profile conformance, and projection gates | [`script-projection.md`](research/v2/script-projection.md), [`phoneme-rule-inventory.md`](research/v2/phoneme-rule-inventory.md), [`projection-audit.md`](projection-audit.md), [`conformance.md`](../conformance.md) | **In progress** | Unicode closure is total by scalar type; 13 verse-level projection blockers remain |
+| 13 | Full-corpus attribution, default-profile conformance, and projection gates | [`script-projection.md`](research/v2/script-projection.md), [`phoneme-rule-inventory.md`](research/v2/phoneme-rule-inventory.md), [`projection-audit.md`](projection-audit.md), [`conformance.md`](../conformance.md) | **In progress** | Public-facade closure is total by scalar type; 23 verse-level blockers remain across 6214 Warsh source verses |
 | 14 | Public variant catalogue and selectable behavior | [`variants.md`](../variants.md), plus the owning v2 research file for each phenomenon | **Pending** | Add last, in two or three owner-family PRs |
-| 15 | Merge completed workstreams into the integration branch and open the overview PR to `main` | [`architecture.md`](../architecture.md), [`public-api.md`](../public-api.md), README.md, docs/design/public-api-facade.md | **Pending** | `feat/warsh-phonemizer` |
+| 15 | Merge completed workstreams into the integration branch and open the overview PR to `main` | [`architecture.md`](../architecture.md), [`public-api.md`](../public-api.md), README.md, docs/design/public-api-facade.md | **In progress** | Public facade merged into `feat/warsh-phonemizer` in [PR #71](https://github.com/Hetchy/Quranic-Phonemizer/pull/71); overview PR to `main` remains |
 
 ## Current implementation contract
 
@@ -51,9 +51,9 @@ complete tests before production code, then implement from projection upward.
 - Tashil preserves its typed eased-hamza state and attribution even when its
   optional rendering is collapsed to ordinary hamza. Ibdal names the replaced
   hamza as source and the replacement unit as host.
-- Warsh adds `taqlil`, `naql`, and `madd_leen_mahmuz` to the shared
-  rule vocabulary. Each riwayah derives its public rule catalogue from the
-  rule IDs emitted by its bound classifiers.
+- Warsh adds `taqlil`, `naql`, `madd_leen_mahmuz`, `madd_mim_al_jam`, and
+  `madd_yaa_zawaid` to the shared rule vocabulary. Each riwayah derives its
+  public rule catalogue from the rule IDs emitted by its bound classifiers.
 
 ## Progress rules
 
@@ -66,8 +66,8 @@ complete tests before production code, then implement from projection upward.
   exhaustive occurrence lists in authored data or tests.
 - Implement fixed behavior before adding public variants. Recount the final
   semantic tree; planning case counts are not completion evidence.
-- Run `python tools/gates.py --fast` during a workstream and the full
-  `python tools/gates.py` before handing off runtime or corpus changes.
+- Run `python tools/quick.py <targeted tests...>` during a workstream; pull
+  requests own the complete ordinary suite and required static checks.
 
 ## Research boundaries
 

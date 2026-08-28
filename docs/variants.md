@@ -65,6 +65,13 @@ The `tashil` extra phoneme is a Hafs-only rendering control. Warsh always
 renders an eased hamza as `ʔ̞`, so `tashil` is not accepted in its
 `extra_phonemes` set.
 
+`taqlil_short` is the converse riwayah-specific rendering control: it is
+accepted only for Warsh and defaults off. It exposes the short intermediate
+vowel on the raa of the fixed `رأى` family as `/ɛ/`; when disabled that sound
+renders as `/a/`. This is not a transmitted face and therefore has no variant
+selector. The canonical vowel remains `TAQLIL`, retains the `taqlil` rule, and
+keeps the raa light under both renderings.
+
 When ibdal creates a long vowel, `ibdal_hamza` and the applicable madd rule
 both reach the resulting sound and the responsible source character. The madd
 is normally `madd_tabii`; a following fixed sukun instead yields
@@ -184,6 +191,14 @@ The closed hamza registers are:
 `fath` retains the ordinary open vowel. `taqlil` selects the first-class
 intermediate inclination. Imala kubra is not used as an option value in these
 selectors.
+
+The `رأى` short-taqlil behavior is fixed rather than a choice. At the 16
+tokens followed by a moving sound, both the raa's short vowel and the
+hamza/alif long vowel are taqlil. At the six tokens followed by a
+following-word sakin (Warsh public references 6:78, 6:79, 16:85, 16:86,
+18:52, and 33:22), ordinary fath is realized on both nuclei in wasl and both
+taqlil qualities return at waqf. `taqlil_short` affects only the short IPA
+token; it does not alter this boundary law or raa tarqiq.
 
 ### General and lexical inclination
 

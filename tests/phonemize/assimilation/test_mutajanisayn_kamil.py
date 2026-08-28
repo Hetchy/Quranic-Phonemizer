@@ -49,7 +49,7 @@ CASES = (
                    "ظ": R("idgham_mutajanisayn_kamil")},
              warsh={"ذ": R("idgham_mutajanisayn_kamil"),
                     "ظ": R("idgham_mutajanisayn_kamil"),
-                    "ل": R("tafkheem"), "@fatha[2]": R("tafkheem")},
+                    "ل": R("tafkheem")},
          ),
          sound_rules=pick(
              hafs={"ðˤðˤ": R("idgham_mutajanisayn_kamil")},

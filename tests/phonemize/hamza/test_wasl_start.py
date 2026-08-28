@@ -2,7 +2,18 @@ from __future__ import annotations
 
 import pytest
 
-from tests.support import Case, R, Site, assert_case, case_runs, isolated, pick
+from quranic_phonemizer.model.address import Script
+from tests.support import (
+    Case,
+    R,
+    Site,
+    assert_case,
+    case_runs,
+    isolated,
+    pick,
+    reading,
+    through,
+)
 
 
 def qata_start_case(
@@ -172,3 +183,55 @@ CASES = (
 @pytest.mark.parametrize("run", case_runs(CASES))
 def test_wasl_start(run):
     assert_case(run)
+
+
+def test_warsh_joined_wasl_ibdal_is_one_cross_word_long_bridge():
+    # Warsh: يَّقُولُ اُ۪يذَن
+    site = Site(warsh=("9:49", (3, 4)))
+    address = site.address("warsh")
+    result = reading(
+        site,
+        "warsh",
+        Script.UTHMANI,
+        **through().kwargs(address.words),
+    )
+    before, after = (word - 1 for word in address.words)
+    merger = next(
+        item for item in result._bundle.mergers
+        if item.before_word_id.value == before
+        and item.after_word_id.value == after
+    )
+    sound = result._bundle.sounds[merger.sound_id.value]
+    rules = {
+        result._bundle.rule_occurrences[item.value].rule_id.value
+        for item in sound.rule_occurrence_ids
+    }
+    bridge = next(
+        item for boundary in result._cells.boundaries for item in boundary.bridges
+        if item.merger_id == merger.id
+    )
+    before_column = next(
+        item for item in result._cells.words[before].columns
+        if sound.id in item.presented_sound_ids
+    )
+    after_column = next(
+        item for item in result._cells.words[after].columns
+        if sound.id in item.owned_sound_ids
+    )
+
+    assert sound.token == "u:"
+    assert rules == {"ibdal_hamza", "madd_tabii"}
+    assert before_column.text == "ُ"
+    assert before_column.role.value == "haraka"
+    assert after_column.text == "و"
+    assert after_column.role.value == "madd"
+    assert after_column.status.value == "replaced"
+    assert before_column.source_unit_ids
+    assert after_column.source_unit_ids
+    assert bridge.before_column_ids == (before_column.id,)
+    assert bridge.after_column_ids == (after_column.id,)
+    assert bridge.sound.column_ids == (before_column.id, after_column.id)
+    assert all(
+        not (column.status.value == "inserted" and column.text == "و")
+        for column in result._cells.words[before].columns
+    )

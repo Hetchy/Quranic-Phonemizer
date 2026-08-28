@@ -50,6 +50,29 @@ DHAT_FATH_DEFAULT_CASES = (
 )
 
 
+NON_ADJACENT_CASES = (
+    # Warsh: إِسْرَآءِيلَ إِلَّا
+    Case(
+        id="internal-hamza-before-final-lam-is-not-a-meeting",
+        site=Site(warsh=("3:93", (6, 7))),
+        read=through(),
+        phonemes=("ʔ i s rˤ aˤ: ʔ i: l a", "ʔ i ll a:"),
+        sound_rules={"i:": R("madd_badal")},
+        absent_sound_rules={"ʔ[2]": R("ibdal_hamza")},
+    ),
+    # Warsh: اُ۬لسُّوٓأ۪ىٰٓ أَن كَذَّبُواْ
+    Case(
+        id="final-inclined-vowel-separates-across-word-hamzas",
+        site=Site(warsh=("30:10", (6, 7, 8))),
+        read=through(),
+        phonemes=("ʔ a ss u: ʔ ɛ:", "ʔ a ŋ", "k a ðð a b u:"),
+        char_rules={"ى": R("taqlil")},
+        sound_rules={"ɛ:": R("taqlil")},
+        absent_sound_rules={"ʔ[2]": R("ibdal_hamza", "tashil")},
+    ),
+)
+
+
 BARE_ANTA_PAUSAL_CASES = (
     # Warsh: ءَآنتَ فَعَلْتَ
     Case(
@@ -294,6 +317,11 @@ DAMM_KASR_DEFAULT_CASES = (
 
 @pytest.mark.parametrize("run", case_runs(DHAT_FATH_DEFAULT_CASES))
 def test_dhat_fath_default(run):
+    assert_case(run)
+
+
+@pytest.mark.parametrize("run", case_runs(NON_ADJACENT_CASES))
+def test_non_adjacent_internal_hamza(run):
     assert_case(run)
 
 

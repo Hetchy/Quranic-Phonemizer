@@ -23,7 +23,7 @@ from quranic_phonemizer.riwayat.warsh.resources import corpus
 OUTPUT = ROOT / "quranic_phonemizer/data/riwayat/warsh/hamza_meetings.json"
 
 TARGETS = {
-    "A+A": 30, "I+I": 37, "U+U": 1, "A+I": 19,
+    "A+A": 30, "I+I": 35, "U+U": 1, "A+I": 19,
     "A+U": 1, "I+A": 29, "U+A": 13, "U+I": 26,
 }
 
@@ -32,6 +32,7 @@ AAJAMI = {"41:44:9"}
 TRIPLE = {"7:123:3", "20:71:2", "26:49:2", "43:58:2"}
 JAA_AAL = {"15:61:3", "54:41:3"}
 KASR_YAA = {"2:31:13", "24:33:33"}
+FUSED_BADAL = {"46:32:15"}
 ONE_WORD_EXCLUDED = {
     "13:5:8", "17:49:6", "17:98:11", "23:82:7", "27:67:4",
     "32:10:6", "37:16:6", "37:53:6", "56:47:8", "60:4:27",
@@ -105,6 +106,7 @@ def _across_candidates(package):
                 second = right.slots[0]
                 if (
                     first.letter is CanonLetter.HAMZA and first.onset is Onset.PLAIN
+                    and first.nucleus.is_short
                     and first.nucleus.quality is not None
                     and second.letter is CanonLetter.HAMZA and second.onset is Onset.PLAIN
                     and second.nucleus.quality is not None
@@ -179,7 +181,11 @@ def _across_rows(package):
         candidates.sort(key=lambda item: (str(item[1]) not in required[pair], item[1]))
         for left, right in candidates[:target]:
             canonical = _ref(right)
-            exception = "jaa_aal" if canonical in JAA_AAL else "kasr_yaa" if canonical in KASR_YAA else None
+            exception = (
+                "jaa_aal" if canonical in JAA_AAL else
+                "kasr_yaa" if canonical in KASR_YAA else
+                "fused_badal" if canonical in FUSED_BADAL else None
+            )
             if exception == "jaa_aal":
                 owner = "jaa_aal"
             elif exception == "kasr_yaa":

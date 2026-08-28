@@ -1,4 +1,5 @@
 """Compose transformed columns into the renderer-ready cell projection."""
+
 from __future__ import annotations
 
 from dataclasses import replace
@@ -32,41 +33,29 @@ from .projection_marks import (
     DAGGER_ALIF,
     MAQSURA,
     clean_structural_marks,
+    fold_shared_silence_riders,
     fold_maqsura_daggers,
     fold_pausal_sukun,
     transform_plain_madd,
 )
 from .projection_groups import group_words
-from .projection_semantics import preserve_semantic_cells
-
-
-def _fold_sukun(word: CellWord) -> CellWord:
-    hosts = {c.id.value: c for c in word.columns if c.tier is CellTier.MAIN}
-    folded: dict[int, CellColumn] = {}
-    removed: set[int] = set()
-    for mark in word.columns:
-        if mark.role is not CellRole.SUKUN or mark.attached_to_column_id is None:
-            continue
-        host = folded.get(mark.attached_to_column_id.value) or hosts[mark.attached_to_column_id.value]
-        folded[host.id.value] = replace(host,
-            text=host.text + mark.text,
-            source_character_ids=(*host.source_character_ids, *mark.source_character_ids),
-            source_unit_ids=(*host.source_unit_ids, *mark.source_unit_ids),
-            rule_occurrence_ids=tuple(dict.fromkeys(
-                (*host.rule_occurrence_ids, *mark.rule_occurrence_ids)
-            )),
-        )
-        removed.add(mark.id.value)
-    columns = tuple(
-        folded.get(c.id.value, c) for c in word.columns if c.id.value not in removed
-    )
-    return replace(word, columns=columns)
+from .projection_semantics import (
+    keep_pausal_alif_on_carriers,
+    preserve_semantic_cells,
+)
+from .projection_naql import split_carried_naql_alif
+from .projection_sukun import fold_sukun
+from .projection_compounds import (
+    fold_article_naql_madd,
+    project_warsh_compounds,
+)
 
 
 def _slot_of_columns(source: SourceView, insc: InscriptionFacts) -> dict[int, object]:
     return {
         unit.id.value: insc.slot_of[min(c.value for c in unit.character_ids)]
-        for unit in source.units if unit.character_ids
+        for unit in source.units
+        if unit.character_ids
     }
 
 
@@ -77,32 +66,49 @@ def _has_maddah(col: CellColumn, insc: InscriptionFacts) -> bool:
     )
 
 
-def _inserted_carrier(new_id: int, seat: CellColumn, sound: SoundId,
-                      text: str) -> CellColumn:
+def _inserted_carrier(
+    new_id: int, seat: CellColumn, sound: SoundId, text: str
+) -> CellColumn:
     anchor = seat.source_unit_ids[0] if seat.source_unit_ids else seat.anchor_unit_id
     return CellColumn(
-        id=CellColumnId(new_id), role=CellRole.MADD,
+        id=CellColumnId(new_id),
+        role=CellRole.MADD,
         text=text,
-        source_character_ids=(), source_unit_ids=(),
-        tier=CellTier.MAIN, attached_to_column_id=None,
-        status=CellStatus.INSERTED, rule_occurrence_ids=(), silence=None,
-        variant_id=seat.variant_id, variant_choice=seat.variant_choice,
-        owned_sound_ids=(sound,), presented_sound_ids=(),
-        anchor_unit_id=anchor, side=CellSide.AFTER,
+        source_character_ids=(),
+        source_unit_ids=(),
+        tier=CellTier.MAIN,
+        attached_to_column_id=None,
+        status=CellStatus.INSERTED,
+        rule_occurrence_ids=(),
+        silence=None,
+        variant_id=seat.variant_id,
+        variant_choice=seat.variant_choice,
+        owned_sound_ids=(sound,),
+        presented_sound_ids=(),
+        anchor_unit_id=anchor,
+        side=CellSide.AFTER,
     )
 
 
-def _move_sound(seat: CellColumn, carrier: CellColumn,
-                sound: SoundId) -> tuple[CellColumn, CellColumn]:
+def _move_sound(
+    seat: CellColumn, carrier: CellColumn, sound: SoundId
+) -> tuple[CellColumn, CellColumn]:
+    presented = tuple(s for s in seat.presented_sound_ids if s != sound)
+    if seat.role in {CellRole.HARAKA, CellRole.TANWEEN}:
+        presented = tuple(dict.fromkeys((*presented, sound)))
     seat = replace(
         seat,
         owned_sound_ids=tuple(s for s in seat.owned_sound_ids if s != sound),
-        presented_sound_ids=tuple(dict.fromkeys((*seat.presented_sound_ids, sound))),
+        presented_sound_ids=presented,
     )
     carrier = replace(
-        carrier, role=CellRole.MADD,
-        status=(CellStatus.PRESENT if carrier.status is CellStatus.DROPPED
-                else carrier.status),
+        carrier,
+        role=CellRole.MADD,
+        status=(
+            CellStatus.PRESENT
+            if carrier.status is CellStatus.DROPPED
+            else carrier.status
+        ),
         silence=None,
         owned_sound_ids=tuple(dict.fromkeys((*carrier.owned_sound_ids, sound))),
     )
@@ -114,8 +120,10 @@ def _candidate_carrier(
 ):
     for index in range(start + 1, len(columns)):
         col = columns[index]
-        if any(not isinstance(facts.sounds[s.value].value, Vowel)
-               for s in col.owned_sound_ids):
+        if any(
+            not isinstance(facts.sounds[s.value].value, Vowel)
+            for s in col.owned_sound_ids
+        ):
             break
         if not col.source_unit_ids:
             continue
@@ -124,46 +132,65 @@ def _candidate_carrier(
             continue
         slot = facts.slots[facts.slot_index[slot_id]]
         kinds = {insc.glyphs[c.value].kind for c in col.source_character_ids}
-        target_presenter = (
-            slot.letter is target and (
-                col.status is CellStatus.DROPPED or sound in col.presented_sound_ids
-            )
+        target_presenter = slot.letter is target and (
+            col.status is CellStatus.DROPPED or sound in col.presented_sound_ids
         )
         ibdal_source = any(
-            slot_id in edge.slots and edge.by is not None
+            slot_id in edge.slots
+            and edge.by is not None
             and facts.occurrences[edge.by].rule.value == "ibdal_hamza"
             for edge in facts.silences
         )
         maqsura_a = value.quality is Quality.A and col.text == MAQSURA
-        if target_presenter or (
-            col.status is CellStatus.DROPPED
-            and (
-                col.text == text or GlyphKind.SMALL_VOWEL in kinds
-                or ibdal_source or maqsura_a
+        carried_naql_alif = (
+            value.quality is Quality.A
+            and col.text.endswith(text)
+            and len(col.source_character_ids) > 1
+            and Annotation.NAQL in slot.annotations
+        )
+        if (
+            target_presenter
+            or (
+                col.status is CellStatus.DROPPED
+                and (
+                    col.text == text
+                    or GlyphKind.SMALL_VOWEL in kinds
+                    or ibdal_source
+                    or maqsura_a
+                )
             )
+            or carried_naql_alif
         ):
             return index
     return None
 
 
-def _new_carrier(columns, seat, cell, value, facts, slot_of_unit,
-                 pen, insc, next_id):
+def _new_carrier(columns, seat, cell, value, facts, slot_of_unit, pen, insc, next_id):
     at = next(i for i, column in enumerate(columns) if column.id == seat.id)
     target, text = pen.performed_carrier(value.quality)
     candidate = _candidate_carrier(
-        columns, at, target, cell.sound_id, value, facts, slot_of_unit,
-        text, insc,
+        columns,
+        at,
+        target,
+        cell.sound_id,
+        value,
+        facts,
+        slot_of_unit,
+        text,
+        insc,
     )
     if candidate is not None:
         return columns[candidate], text, next_id
     slot_id = (
         slot_of_unit.get(seat.source_unit_ids[0].value)
-        if seat.source_unit_ids else None
+        if seat.source_unit_ids
+        else None
     )
     slot = None if slot_id is None else facts.slots[facts.slot_index[slot_id]]
     inserted_text = (
-        DAGGER_ALIF if slot is not None
-        and Annotation.DIVINE_NAME in slot.annotations else text
+        DAGGER_ALIF
+        if slot is not None and Annotation.DIVINE_NAME in slot.annotations
+        else text
     )
     carrier = _inserted_carrier(next_id, seat, cell.sound_id, inserted_text)
     columns.insert(at + 1, carrier)
@@ -173,19 +200,22 @@ def _new_carrier(columns, seat, cell, value, facts, slot_of_unit,
 def _adjust_carrier(carrier, value, text, facts, slot_of_unit, was_dropped):
     carrier_slot = (
         slot_of_unit.get(carrier.source_unit_ids[0].value)
-        if carrier.source_unit_ids else None
+        if carrier.source_unit_ids
+        else None
     )
     ibdal = carrier_slot is not None and any(
-        carrier_slot in edge.slots and edge.by is not None
+        carrier_slot in edge.slots
+        and edge.by is not None
         and facts.occurrences[edge.by].rule.value == "ibdal_hamza"
         for edge in facts.silences
     )
     if was_dropped and value.quality is Quality.A and carrier.text == MAQSURA:
         return replace(
-            carrier, text=carrier.text + DAGGER_ALIF,
+            carrier,
+            text=carrier.text + DAGGER_ALIF,
             status=CellStatus.REPLACED,
         )
-    if was_dropped and ibdal:
+    if ibdal and carrier.text != text:
         return replace(carrier, text=text, status=CellStatus.REPLACED)
     return carrier
 
@@ -196,7 +226,8 @@ def _transform_existing_carrier(columns, by_id, span, existing, value, pen):
         and existing.text == MAQSURA
     ):
         columns[by_id[existing.id.value]] = replace(
-            existing, text=existing.text + DAGGER_ALIF,
+            existing,
+            text=existing.text + DAGGER_ALIF,
             status=CellStatus.REPLACED,
         )
     for column in span:
@@ -211,8 +242,16 @@ def _transform_existing_carrier(columns, by_id, span, existing, value, pen):
 
 
 def _ensure_one_carrier(
-    columns, sounds, sound_index, cell, value, facts, insc,
-    slot_of_unit, pen, next_id,
+    columns,
+    sounds,
+    sound_index,
+    cell,
+    value,
+    facts,
+    insc,
+    slot_of_unit,
+    pen,
+    next_id,
 ):
     by_id = {column.id.value: index for index, column in enumerate(columns)}
     # A cross-word merger's sound already spans presenter and owner columns,
@@ -221,9 +260,7 @@ def _ensure_one_carrier(
     span = [column for column in columns if column.id in cell.column_ids]
     existing = next((c for c in span if c.role is CellRole.MADD), None)
     if existing is not None:
-        _transform_existing_carrier(
-            columns, by_id, span, existing, value, pen
-        )
+        _transform_existing_carrier(columns, by_id, span, existing, value, pen)
         return next_id
     seat = span[0]
     if _has_maddah(seat, insc):
@@ -233,60 +270,76 @@ def _ensure_one_carrier(
     )
     was_dropped = carrier.status is CellStatus.DROPPED
     seat, carrier = _move_sound(seat, carrier, cell.sound_id)
-    carrier = replace(carrier, presented_sound_ids=tuple(
-        sound for sound in carrier.presented_sound_ids if sound != cell.sound_id
-    ))
-    carrier = _adjust_carrier(
-        carrier, value, text, facts, slot_of_unit, was_dropped
+    carrier = replace(
+        carrier,
+        presented_sound_ids=tuple(
+            sound for sound in carrier.presented_sound_ids if sound != cell.sound_id
+        ),
     )
+    carrier = _adjust_carrier(carrier, value, text, facts, slot_of_unit, was_dropped)
     if seat.role is CellRole.TANWEEN:
         seat = replace(
-            seat, role=CellRole.HARAKA, text=pen.short_vowel(value.quality),
+            seat,
+            role=CellRole.HARAKA,
+            text=pen.short_vowel(value.quality),
             status=CellStatus.REPLACED,
         )
     for changed in (seat, carrier):
         at = next(i for i, column in enumerate(columns) if column.id == changed.id)
         columns[at] = changed
-    ids = {seat.id, carrier.id}
+    ids = {carrier.id}
+    if seat.role in {CellRole.HARAKA, CellRole.TANWEEN}:
+        ids.add(seat.id)
     sounds[sound_index] = replace(
         cell, column_ids=tuple(c.id for c in columns if c.id in ids)
     )
     return next_id
 
 
-def _ensure_carriers(word: CellWord, facts: AnalysisFacts, insc: InscriptionFacts,
-                     slot_of_unit, pen: Pen, next_id: int) -> tuple[CellWord, int]:
+def _ensure_carriers(
+    word: CellWord,
+    facts: AnalysisFacts,
+    insc: InscriptionFacts,
+    slot_of_unit,
+    pen: Pen,
+    next_id: int,
+) -> tuple[CellWord, int]:
     columns, sounds = list(word.columns), list(word.sounds)
     for sound_index, cell in enumerate(list(sounds)):
         value = facts.sounds[cell.sound_id.value].value
         if isinstance(value, Vowel) and value.long:
             next_id = _ensure_one_carrier(
-                columns, sounds, sound_index, cell, value, facts, insc,
-                slot_of_unit, pen, next_id,
+                columns,
+                sounds,
+                sound_index,
+                cell,
+                value,
+                facts,
+                insc,
+                slot_of_unit,
+                pen,
+                next_id,
             )
     return replace(word, columns=tuple(columns), sounds=tuple(sounds)), next_id
 
 
 def _column_targets(words: tuple[CellWord, ...], sound: int, *, presenters=False):
     field = "presented_sound_ids" if presenters else "owned_sound_ids"
-    return [
-        c for w in words for c in w.columns
-        if SoundId(sound) in getattr(c, field)
-    ]
+    return [c for w in words for c in w.columns if SoundId(sound) in getattr(c, field)]
 
 
 def _silenced_targets(columns, edge, slot_of_unit):
     roles = (
         {CellRole.HARAKA, CellRole.TANWEEN, CellRole.MADD}
-        if edge.aspect is Aspect.VOWEL else {CellRole.LETTER}
+        if edge.aspect is Aspect.VOWEL
+        else {CellRole.LETTER}
     )
     slots = set(edge.slots)
     return [
-        col for col in columns if (
-            col.role in roles or col.silence == OccurrenceId(edge.by)
-        ) and any(
-            slot_of_unit.get(unit.value) in slots for unit in col.source_unit_ids
-        )
+        col
+        for col in columns
+        if (col.role in roles or col.silence == OccurrenceId(edge.by))
+        and any(slot_of_unit.get(unit.value) in slots for unit in col.source_unit_ids)
     ]
 
 
@@ -306,15 +359,15 @@ def _modifier_targets(words, columns, facts, modifier):
     return targets
 
 
-def _place_rules(words: tuple[CellWord, ...], facts: AnalysisFacts,
-                 slot_of_unit) -> tuple[CellWord, ...]:
+def _place_rules(
+    words: tuple[CellWord, ...], facts: AnalysisFacts, slot_of_unit
+) -> tuple[CellWord, ...]:
     placed: dict[int, list[OccurrenceId]] = {
         c.id.value: [] for w in words for c in w.columns
     }
     columns = [c for w in words for c in w.columns]
     merged = {
-        (edge.by, edge.sound) for edge in facts.attributions
-        if isinstance(edge, Merged)
+        (edge.by, edge.sound) for edge in facts.attributions if isinstance(edge, Merged)
     }
     for edge in facts.attributions:
         if edge.by is None:
@@ -323,7 +376,9 @@ def _place_rules(words: tuple[CellWord, ...], facts: AnalysisFacts,
         if isinstance(edge, Merged) and rule.startswith("madd_"):
             continue
         if (
-            isinstance(edge, Hosted) and (edge.by, edge.sound) in merged
+            isinstance(edge, Hosted)
+            and (edge.by, edge.sound) in merged
+            and rule != "ibdal_hamza"
             and not rule.startswith(("idgham_", "madd_"))
         ):
             continue
@@ -344,19 +399,29 @@ def _place_rules(words: tuple[CellWord, ...], facts: AnalysisFacts,
         for col in _modifier_targets(words, columns, facts, modifier):
             if occurrence not in placed[col.id.value]:
                 placed[col.id.value].append(occurrence)
-    return tuple(replace(w, columns=tuple(
-        replace(c, rule_occurrence_ids=tuple(placed[c.id.value])) for c in w.columns
-    )) for w in words)
+    return tuple(
+        replace(
+            w,
+            columns=tuple(
+                replace(c, rule_occurrence_ids=tuple(placed[c.id.value]))
+                for c in w.columns
+            ),
+        )
+        for w in words
+    )
 
 
 def _visual_statuses(words, facts):
     silenced = {
-        edge.by for edge in facts.attributions
+        edge.by
+        for edge in facts.attributions
         if isinstance(edge, Silenced) and edge.by is not None
     }
     merged = {
-        edge.sound: edge.by for edge in facts.attributions
-        if isinstance(edge, Merged) and edge.by is not None
+        edge.sound: edge.by
+        for edge in facts.attributions
+        if isinstance(edge, Merged)
+        and edge.by is not None
         and facts.occurrences[edge.by].rule.value.startswith("idgham_")
     }
     out = []
@@ -365,11 +430,11 @@ def _visual_statuses(words, facts):
         for col in word.columns:
             merger_source = any(s.value in merged for s in col.presented_sound_ids)
             if merger_source:
-                columns.append(replace(
-                    col, status=CellStatus.PRESENT, silence=None
-                ))
+                columns.append(replace(col, status=CellStatus.PRESENT, silence=None))
                 continue
-            cause = next((o for o in col.rule_occurrence_ids if o.value in silenced), None)
+            cause = next(
+                (o for o in col.rule_occurrence_ids if o.value in silenced), None
+            )
             empty = not col.owned_sound_ids and not col.presented_sound_ids
             if cause is not None and empty:
                 col = replace(col, status=CellStatus.DROPPED, silence=cause)
@@ -378,17 +443,21 @@ def _visual_statuses(words, facts):
     return tuple(out)
 
 
-def project_words(words: tuple[CellWord, ...], facts: AnalysisFacts,
-                  source: SourceView, insc: InscriptionFacts,
-                  pen: Pen) -> tuple[CellWord, ...]:
+def project_words(
+    words: tuple[CellWord, ...],
+    facts: AnalysisFacts,
+    source: SourceView,
+    insc: InscriptionFacts,
+    pen: Pen,
+    *,
+    riwayah: str,
+) -> tuple[CellWord, ...]:
     """Fold marks, supply carriers, place rules, and state every visual group."""
     out = tuple(clean_structural_marks(word) for word in words)
     out = tuple(fold_maqsura_daggers(word) for word in out)
-    out = tuple(_fold_sukun(word) for word in out)
+    out = tuple(fold_sukun(word) for word in out)
     slot_of_unit = _slot_of_columns(source, insc)
-    out = tuple(
-        fold_pausal_sukun(word, facts, slot_of_unit, pen) for word in out
-    )
+    out = tuple(fold_pausal_sukun(word, facts, slot_of_unit, pen) for word in out)
     next_id = next_column_id(out)
     carried = []
     for word in out:
@@ -400,6 +469,12 @@ def project_words(words: tuple[CellWord, ...], facts: AnalysisFacts,
     out = transform_plain_madd(out, facts)
     out = _visual_statuses(out, facts)
     out = preserve_semantic_cells(out, facts)
+    out = split_carried_naql_alif(out, facts, source)
+    out = fold_article_naql_madd(out, facts)
+    if riwayah == "warsh":
+        out = project_warsh_compounds(out, facts, insc, pen)
+    out = keep_pausal_alif_on_carriers(out, facts, slot_of_unit)
+    out = tuple(fold_shared_silence_riders(word, source, facts) for word in out)
     return group_words(out, facts)
 
 

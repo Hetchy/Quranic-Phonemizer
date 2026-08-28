@@ -3,6 +3,7 @@
 Everything here reads the `BoundaryPlan`. The Score is boundary-free, so
 these are the only rules that may ask where the reciter stops.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -20,6 +21,7 @@ from ..engine.plan import (
 )
 from ..model.address import BoundaryPlan, SlotId
 from ..model.canon import (
+    Annotation,
     CanonLetter,
     Onset,
     Quality,
@@ -56,14 +58,20 @@ class WaqfHarakaDrop:
     emits: frozenset = frozenset({Rule.WAQF_DIACRITIC_DROP})
 
     def look(
-        self, near: Neighbourhood, plan: Plan, at: SlotId,
+        self,
+        near: Neighbourhood,
+        plan: Plan,
+        at: SlotId,
         boundaries: BoundaryPlan,
     ) -> Verdict | None:
         del plan
         slot, word = near.slot(at), near.word_of(at)
         if slot is None or word is None or not boundaries.stopped_on(word):
             return None
-        if not slot.nucleus.is_short:
+        if (
+            not slot.nucleus.is_short
+            and Annotation.NAQL_WITNESS not in slot.annotations
+        ):
             return None
         if _followed_by_tanween_noon(near, word):
             # One written tanween, one drop: `TanweenDrop` takes this vowel too.
@@ -87,7 +95,10 @@ class WaqfSilahDrop:
     emits: frozenset = frozenset({Rule.WAQF_SILAH_DROP})
 
     def look(
-        self, near: Neighbourhood, plan: Plan, at: SlotId,
+        self,
+        near: Neighbourhood,
+        plan: Plan,
+        at: SlotId,
         boundaries: BoundaryPlan,
     ) -> Verdict | None:
         del plan
@@ -98,7 +109,9 @@ class WaqfSilahDrop:
             return None
         return Verdict(
             Occurrence(
-                mint(Rule.WAQF_SILAH_DROP, at), Rule.WAQF_SILAH_DROP, (at,),
+                mint(Rule.WAQF_SILAH_DROP, at),
+                Rule.WAQF_SILAH_DROP,
+                (at,),
                 boundary=word,
             ),
             (Silence(at, Aspect.VOWEL),),
@@ -118,7 +131,10 @@ class DroppedGlide:
     triggers: frozenset = frozenset({Onset.GLIDE})
 
     def look(
-        self, near: Neighbourhood, plan: Plan, at: SlotId,
+        self,
+        near: Neighbourhood,
+        plan: Plan,
+        at: SlotId,
         boundaries: BoundaryPlan,
     ) -> Verdict | None:
         del plan
@@ -130,7 +146,9 @@ class DroppedGlide:
         return Verdict(
             Occurrence(
                 mint(SilenceReason.VARIANT, at, _GLIDE_VARIANT),
-                SilenceReason.VARIANT, (at,), boundary=word,
+                SilenceReason.VARIANT,
+                (at,),
+                boundary=word,
             ),
             (Silence(at, Aspect.CONSONANT),),
         )
@@ -149,7 +167,10 @@ class PausalAlif:
     emits: frozenset = frozenset({Rule.PAUSAL_ALIF})
 
     def look(
-        self, near: Neighbourhood, plan: Plan, at: SlotId,
+        self,
+        near: Neighbourhood,
+        plan: Plan,
+        at: SlotId,
         boundaries: BoundaryPlan,
     ) -> Verdict | None:
         del plan
@@ -159,7 +180,10 @@ class PausalAlif:
         if not slot.nucleus.is_pausal_long:
             return None
         occurrence = Occurrence(
-            mint(Rule.PAUSAL_ALIF, at), Rule.PAUSAL_ALIF, (at,), boundary=word,
+            mint(Rule.PAUSAL_ALIF, at),
+            Rule.PAUSAL_ALIF,
+            (at,),
+            boundary=word,
         )
         if boundaries.stopped_on(word):
             return Verdict(
@@ -185,7 +209,10 @@ class TanweenDrop:
     emits: frozenset = frozenset({Rule.WAQF_DIACRITIC_DROP})
 
     def look(
-        self, near: Neighbourhood, plan: Plan, at: SlotId,
+        self,
+        near: Neighbourhood,
+        plan: Plan,
+        at: SlotId,
         boundaries: BoundaryPlan,
     ) -> Verdict | None:
         del plan
@@ -212,7 +239,10 @@ class TanweenIwad:
     emits: frozenset = frozenset({Rule.MADD_IWAD})
 
     def look(
-        self, near: Neighbourhood, plan: Plan, at: SlotId,
+        self,
+        near: Neighbourhood,
+        plan: Plan,
+        at: SlotId,
         boundaries: BoundaryPlan,
     ) -> Verdict | None:
         del plan
@@ -221,7 +251,10 @@ class TanweenIwad:
             return None
         return Verdict(
             Occurrence(
-                mint(Rule.MADD_IWAD, at), Rule.MADD_IWAD, (at,), boundary=word,
+                mint(Rule.MADD_IWAD, at),
+                Rule.MADD_IWAD,
+                (at,),
+                boundary=word,
             ),
             (
                 Realize(
@@ -250,7 +283,10 @@ class IwadLength:
     emits: frozenset = frozenset({Rule.MADD_TABII})
 
     def look(
-        self, near: Neighbourhood, plan: Plan, at: SlotId,
+        self,
+        near: Neighbourhood,
+        plan: Plan,
+        at: SlotId,
         boundaries: BoundaryPlan,
     ) -> Verdict | None:
         del plan
@@ -258,9 +294,7 @@ class IwadLength:
         if base is None or word is None or not _takes_the_iwad(base):
             return None
         return Verdict(
-            Occurrence(
-                mint(Rule.MADD_TABII, base.id), Rule.MADD_TABII, (base.id,)
-            ),
+            Occurrence(mint(Rule.MADD_TABII, base.id), Rule.MADD_TABII, (base.id,)),
             (Relength(base.id, Length.LONG),),
         )
 
@@ -276,7 +310,10 @@ class TaaMarbutaAtWaqf:
     emits: frozenset = frozenset({Rule.WAQF_TAA_MARBUTA})
 
     def look(
-        self, near: Neighbourhood, plan: Plan, at: SlotId,
+        self,
+        near: Neighbourhood,
+        plan: Plan,
+        at: SlotId,
         boundaries: BoundaryPlan,
     ) -> Verdict | None:
         del plan
@@ -287,16 +324,22 @@ class TaaMarbutaAtWaqf:
             return None
         # `بِسُورَةٍ` stops as haa with no iwad; "final" here excludes the tanween noon slot.
         return Verdict(
-            Occurrence(mint(Rule.WAQF_TAA_MARBUTA, at), Rule.WAQF_TAA_MARBUTA,
-                       (at,), boundary=word),
+            Occurrence(
+                mint(Rule.WAQF_TAA_MARBUTA, at),
+                Rule.WAQF_TAA_MARBUTA,
+                (at,),
+                boundary=word,
+            ),
             (Realize(at, Aspect.CONSONANT, Consonant(CanonLetter.HEH)),),
         )
 
 
 def _drop(at: SlotId, word: int, variant: int = 0) -> Occurrence:
     return Occurrence(
-        mint(Rule.WAQF_DIACRITIC_DROP, at, variant), Rule.WAQF_DIACRITIC_DROP,
-        (at,), boundary=word,
+        mint(Rule.WAQF_DIACRITIC_DROP, at, variant),
+        Rule.WAQF_DIACRITIC_DROP,
+        (at,),
+        boundary=word,
     )
 
 
@@ -317,8 +360,7 @@ def _takes_the_iwad(base) -> bool:
     """Taa marbuta stops as haa and takes no iwad, so only a fathatan on
     some other letter is exchanged for length."""
     return (
-        base.letter is not CanonLetter.TAA_MARBUTA
-        and base.nucleus.quality is Quality.A
+        base.letter is not CanonLetter.TAA_MARBUTA and base.nucleus.quality is Quality.A
     )
 
 
@@ -337,9 +379,7 @@ def _followed_by_tanween_noon(near: Neighbourhood, word: int) -> bool:
     return bool(slots) and slots[-1].origin is SlotOrigin.NUNATION
 
 
-def _omitted_glide(
-    yaa: SitedKhilaf, near: Neighbourhood, word: int
-) -> SlotId | None:
+def _omitted_glide(yaa: SitedKhilaf, near: Neighbourhood, word: int) -> SlotId | None:
     """The final glide this reading leaves off, if it leaves one off.
 
     Ithbat says the optional yaa anyway, so the stop takes its vowel and
@@ -348,9 +388,7 @@ def _omitted_glide(
     slots = near.score.words[word].slots
     if not slots or slots[-1].onset is not Onset.GLIDE:
         return None
-    kept = yaa.of(
-        vocalised_word(near.score.words[word]), True, near.score.selection
-    )
+    kept = yaa.of(vocalised_word(near.score.words[word]), True, near.score.selection)
     return None if kept else slots[-1].id
 
 

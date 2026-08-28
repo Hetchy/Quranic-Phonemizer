@@ -10,10 +10,12 @@ from types import SimpleNamespace
 
 import pytest
 
+from quranic_phonemizer.api import recitation
 from quranic_phonemizer.analysis.cells import (
     CellRole,
     CellSide,
     CellStatus,
+    CellTier,
     CellValidationError,
     build_cell_view,
     validate_transformed,
@@ -21,10 +23,10 @@ from quranic_phonemizer.analysis.cells import (
 from quranic_phonemizer.analysis.build import build_bundle
 from quranic_phonemizer.analysis.cells.transform import _inserted_column
 from quranic_phonemizer.analysis.facts import analyse
-from quranic_phonemizer.analysis.ids import LetterUnitId
+from quranic_phonemizer.analysis.ids import CellColumnId, LetterUnitId
 from quranic_phonemizer.analysis.source import build_source_view
 from quranic_phonemizer.model.address import (
-    KhilafId, Option, Script, VariantSelection, VerseRef,
+    KhilafId, Option, Riwayah, Script, VariantSelection, VerseRef,
 )
 from quranic_phonemizer.model.canon import Quality
 from quranic_phonemizer.model.performance import Vowel
@@ -89,6 +91,116 @@ def test_visual_insertions_do_not_invent_performance_insertions(hafs, pen):
         )
         assert not analyse(session, packaged_alphabet()).insertions
     assert inserted > 0
+
+
+@pytest.mark.parametrize(("ref", "word_at"), [
+    ("2:265", 31),
+    ("5:64", 7),
+])
+def test_a_written_connecting_damma_is_not_duplicated_when_transformed(
+    ref, word_at,
+):
+    reading = recitation(Riwayah.WARSH)
+    pen = pen_for(reading.inventory(Script.UTHMANI))
+    session = phonemize_request(reading, ref)
+    view = build_cell_view(
+        session, ref=ref, riwayah="warsh", script="uthmani", variant={},
+        spelling="transformed", pen=pen,
+    )
+    word = view.words[word_at]
+    damma = pen.role("damma")
+    native = [
+        column for column in word.columns
+        if column.role is CellRole.HARAKA
+        and column.text == damma
+        and column.source_character_ids
+    ]
+
+    assert native
+    assert all(column.owned_sound_ids for column in native)
+    assert not [
+        column for column in word.columns
+        if column.status is CellStatus.INSERTED
+        and column.role is CellRole.HARAKA
+        and column.text == damma
+        and any(
+            source.attached_to_column_id == column.attached_to_column_id
+            for source in native
+        )
+    ]
+
+
+def test_biaydin_keeps_the_jarrah_on_the_sounded_yaa_without_a_ghost_vowel():
+    reading = recitation(Riwayah.WARSH)
+    pen = pen_for(reading.inventory(Script.UTHMANI))
+    session = phonemize_request(reading, "51:47:3")
+    view = build_cell_view(
+        session, ref="51:47:3", riwayah="warsh", script="uthmani", variant={},
+        spelling="transformed", pen=pen,
+    )
+    word = view.words[0]
+    yaas = [column for column in word.columns if column.text.startswith("ي")]
+
+    assert [(column.text, column.status) for column in yaas] == [
+        ("يَ", CellStatus.PRESENT),
+        ("يْ", CellStatus.DROPPED),
+    ]
+    assert len(yaas[0].owned_sound_ids) == 1
+    assert not yaas[1].owned_sound_ids
+    assert not [
+        column for column in word.columns
+        if column.role in {CellRole.HARAKA, CellRole.SUKUN}
+        and column.text in {"َ", "ْ"}
+        and not column.owned_sound_ids
+        and not column.presented_sound_ids
+    ]
+
+
+def test_a_duplicate_vowel_rider_fails_the_transformed_law(hafs, pen):
+    view, source, session = _build(hafs, pen, "1:1:1", {})
+    rider = next(
+        column for column in view.words[0].columns
+        if column.role is CellRole.HARAKA
+        and column.attached_to_column_id is not None
+        and column.status is not CellStatus.DROPPED
+    )
+    duplicate = dataclasses.replace(rider, id=CellColumnId(9000))
+    broken_word = dataclasses.replace(
+        view.words[0], columns=(*view.words[0].columns, duplicate)
+    )
+    broken = dataclasses.replace(view, words=(broken_word,))
+
+    with pytest.raises(CellValidationError, match="duplicates column"):
+        validate_transformed(
+            broken, source, session.performance.selection
+        )
+
+
+def test_collapsed_double_hamzas_stay_in_their_word_and_preserve_the_letter():
+    reading = recitation(Riwayah.WARSH)
+    pen = pen_for(reading.inventory(Script.UTHMANI))
+    session = phonemize_request(reading, "19:66")
+    view = build_cell_view(
+        session, ref="19:66", riwayah="warsh", script="uthmani", variant={},
+        spelling="transformed", pen=pen,
+    )
+    insan, aidha = view.words[1:3]
+    aidha_main = [
+        column for column in aidha.columns if column.tier is CellTier.MAIN
+    ]
+
+    assert insan.columns[-1].text == "ُ"
+    assert insan.columns[-1].owned_sound_ids
+    assert [column.text for column in aidha_main] == ["أ", "إ", "ذ", "ا"]
+    assert [column.status for column in aidha_main] == [
+        CellStatus.PRESENT,
+        CellStatus.REPLACED,
+        CellStatus.PRESENT,
+        CellStatus.PRESENT,
+    ]
+    assert next(
+        column for column in aidha.columns if column.text == "ِ"
+    ).status is CellStatus.INSERTED
 
 
 # ---- the concrete cases the laws exercise ----

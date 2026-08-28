@@ -2,6 +2,7 @@
 
 Both adapters run this same code; only their inventory differs.
 """
+
 from __future__ import annotations
 
 import sys
@@ -22,12 +23,9 @@ def read_verse(
     verse: VerseRef,
     words: tuple[tuple[Location, str], ...],
     *,
-    entries_for: Callable[
-        [str], Sequence[LetterEntry | MarkEntry]
-    ] | None = None,
-    sources_for: Callable[
-        [Location, str], Sequence[SourceGraphemeRef | None]
-    ] | None = None,
+    entries_for: Callable[[str], Sequence[LetterEntry | MarkEntry]] | None = None,
+    sources_for: Callable[[Location, str], Sequence[SourceGraphemeRef | None]]
+    | None = None,
 ) -> Reading:
     state = _ReadState(inventory, verse)
     for word_index, (location, text) in enumerate(words):
@@ -162,6 +160,16 @@ class _ReadState:
             self.decorations.append(
                 Decoration(index, offset, entry.decorates, entry.silences)
             )
+            if entry.fact is not None:
+                self.evidence.append(
+                    Evidence(
+                        index,
+                        entry.fact,
+                        value=entry.value,
+                        derivation=entry.derivation,
+                        offset=offset,
+                    )
+                )
             if entry.attests:
                 self.attestations.append(Attestation(index, offset))
             return
@@ -198,7 +206,8 @@ class _ReadState:
             return
         seat = marks.pop()
         self.evidence = [
-            e for e in self.evidence
+            e
+            for e in self.evidence
             if not (e.cluster == index and e.offset == seat.offset)
         ]
         # It still shows the slot it rests on, so the reading can say it was
@@ -206,7 +215,11 @@ class _ReadState:
         self.decorations.append(Decoration(index, seat.offset))
 
     def _omitted_letter(
-        self, char: str, offset: int, entry: MarkEntry, *,
+        self,
+        char: str,
+        offset: int,
+        entry: MarkEntry,
+        *,
         already_written: bool = False,
     ) -> None:
         """A letter of the reading the rasm leaves out, written small.
@@ -289,7 +302,8 @@ class _ReadState:
 
     def finish(self, locations: tuple[Location, ...]) -> Reading:
         bare_seats = [
-            cluster.offset for cluster in self.clusters
+            cluster.offset
+            for cluster in self.clusters
             if cluster.seat and cluster.letter is None and not cluster.marks
         ]
         return Reading(
