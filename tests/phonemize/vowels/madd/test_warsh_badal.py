@@ -33,6 +33,15 @@ CASES = (
         sound_rules={"a:": R("madd_badal")},
         absent_sound_rules={"a:": R("madd_tabii")},
     ),
+    # Warsh: اٰيَةً
+    Case(
+        id="suu-ayah-ibtidaa-restores-qata",
+        site=Site(warsh=("20:22", (10,))),
+        read=isolated(),
+        phonemes="ʔ a: j a h",
+        sound_rules={"a:": R("madd_badal")},
+        absent_sound_rules={"a:": R("naql", "ibdal_hamza", "madd_tabii")},
+    ),
     # Warsh: مَـَٔابٖۖ
     Case(
         id="pausal-arid-overlap",
@@ -116,6 +125,15 @@ MUGHAYYAR_BIN_NAQL_CASES = (
         sound_rules={"a:": R("naql", "madd_badal")},
         absent_sound_rules={"a:": R("madd_tabii")},
     ),
+    # Warsh: سُوٓءٍ اٰيَةً
+    Case(
+        id="a-tanwin-suu-ayah",
+        site=Site(warsh=("20:22", (9, 10))),
+        read=joining(),
+        phonemes=("s u: ʔ i n", "a: j a t a n"),
+        sound_rules={"a:": R("naql", "madd_badal")},
+        absent_sound_rules={"a:": R("ibdal_hamza", "madd_tabii")},
+    ),
     # A-badal across an ayah edge: رَدْماًۖ اٰتُونِے
     Case(
         id="a-ayah-edge",
@@ -133,26 +151,6 @@ MUGHAYYAR_BIN_NAQL_CASES = (
         read=joining(),
         phonemes=("f a q aˤ d", "u: t i j a"),
         char_rules={"ا": R("naql"), "و": R("madd_badal")},
-        sound_rules={"u:": R("naql", "madd_badal")},
-        absent_sound_rules={"u:": R("madd_tabii")},
-    ),
-    # U-badal after tanwin: كُفَّارٌ ا۟وْلَٰٓئِكَ
-    Case(
-        id="u-tanwin",
-        site=Site(warsh=("2:161", (6, 7))),
-        read=joining(),
-        phonemes=("k u ff a: rˤ u n", "u: l a: ʔ i k a"),
-        char_rules={"ا[2]": R("naql"), "و": R("madd_badal")},
-        sound_rules={"u:": R("naql", "madd_badal")},
-        absent_sound_rules={"u:": R("madd_tabii")},
-    ),
-    # U-badal across an ayah edge: اَلِيمٌۖ ا۟وْلَٰٓئِكَ
-    Case(
-        id="u-ayah-edge",
-        site=Site(warsh=("2:174", (29, 30))),
-        read=joining(),
-        phonemes=("ʔ a l i: m u n", "u: l a: ʔ i k a"),
-        char_rules={"ا[2]": R("naql"), "و": R("madd_badal")},
         sound_rules={"u:": R("naql", "madd_badal")},
         absent_sound_rules={"u:": R("madd_tabii")},
     ),
@@ -191,7 +189,6 @@ MUGHAYYAR_BIN_NAQL_CASES = (
 
 MEETING_OWNED_INITIAL_SHAPES = frozenset({
     Location(2, 140, 14),
-    Location(20, 22, 10),
     Location(58, 13, 1),
 })
 
@@ -331,6 +328,6 @@ def test_warsh_mughayyar_bin_naql_register_reconciles():
         if latent_qata_badal_quality(entry.text) is not None
     }
     assert initial_shapes & set(meeting_targets) == MEETING_OWNED_INITIAL_SHAPES
-    assert boundaries == Counter({"within": 208, "ayah_edge": 16})
-    assert qualities == Counter({"A": 174, "U": 47, "I": 3})
-    assert hosts == Counter({"written": 146, "nunation": 78})
+    assert boundaries == Counter({"within": 186, "ayah_edge": 4})
+    assert qualities == Counter({"A": 174, "U": 13, "I": 3})
+    assert hosts == Counter({"written": 144, "nunation": 46})

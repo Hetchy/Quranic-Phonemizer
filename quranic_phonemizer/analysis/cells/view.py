@@ -44,9 +44,12 @@ from .projection_semantics import (
     keep_ibdal_off_harakas,
     keep_madd_rules_on_carriers,
     keep_taqlil_on_carriers,
+    keep_waqf_drop_on_silenced_cells,
+    separate_tanween_vowel_colours,
+)
+from .projection_weight import (
     keep_weight_labels_off_short_vowels,
     keep_weight_labels_on_sound_owners,
-    separate_tanween_vowel_colours,
 )
 from .projection_naql_badal import project_naql_badal_bridges
 from .projection_naql import (
@@ -348,9 +351,10 @@ def build_cell_view(
     words = assign_native_iqlab_meem(words, facts, riwayah)
     words = separate_tanween_vowel_colours(words, facts)
     words = keep_madd_rules_on_carriers(words, facts)
+    words = keep_waqf_drop_on_silenced_cells(words, facts)
     words = keep_ibdal_off_harakas(words, facts, pen)
     words = keep_taqlil_on_carriers(words, facts)
-    words = keep_carrier_identity_off_harakas(words, facts, riwayah)
+    words = keep_carrier_identity_off_harakas(words, facts)
     words = keep_weight_labels_off_short_vowels(words, facts)
     words = keep_weight_labels_on_sound_owners(words, facts)
     words = project_naql_badal_bridges(words, bundle, facts)
@@ -374,7 +378,12 @@ def build_cell_view(
     validate_cell_view(view, bundle, source)
     if spelling == "transformed":
         validate_spoken_hamza_glyphs(view, bundle)
-        validate_transformed(view, source, session.performance.selection)
+        validate_transformed(
+            view,
+            source,
+            session.performance.selection,
+            bundle=bundle,
+        )
     return view
 
 

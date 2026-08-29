@@ -14,6 +14,13 @@ from tests.support import (
 
 
 CASES = (
+    # Warsh: اَرَٰٓيْتُمُۥٓ
+    Case(
+        id="arayta-ibdal-keeps-sakin-yaa",
+        site=Site(warsh=("46:10", (2,))),
+        read=isolated(),
+        phonemes="ʔ a rˤ aˤ: j t u m",
+    ),
     # Warsh: يُومِنُونَ
     Case(
         id="sakin-root-after-u",
@@ -131,7 +138,7 @@ CASES = (
         id="joined-silent-qata",
         site=Site(warsh=("2:283", (15, 16))),
         read=explicit(ibtidaa=15, waqf=16),
-        phonemes=("ʔ a ll a ð i:", "t u m i n"),
+        phonemes=("ʔ a ll a ð", "i: t u m i n"),
         char_rules={"و": R("ibdal_hamza")},
         sound_rules={"i:": R("ibdal_hamza", "madd_tabii")},
         absent_char_rules={"ل": R("lam_shamsiyyah")},

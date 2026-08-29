@@ -34,6 +34,36 @@ def test_one_word_selected_families_project_two_qata(ref, word, text, qualities)
     assert tuple(slot.nucleus.quality for slot in slots[:2]) == qualities
 
 
+def test_second_u_family_does_not_repurpose_its_later_lexical_hamza():
+    source, projected = _span("3:15", (2,))[0]
+
+    assert source == "اَوْ۟نَبِّئُكُم"
+    assert tuple(slot.letter for slot in projected.slots) == (
+        CanonLetter.HAMZA,
+        CanonLetter.HAMZA,
+        CanonLetter.NOON,
+        CanonLetter.BA,
+        CanonLetter.HAMZA,
+        CanonLetter.KAF,
+        CanonLetter.MEEM,
+    )
+    assert tuple(
+        slot.onset for slot in projected.slots
+        if slot.letter is CanonLetter.HAMZA
+    ) == (Onset.PLAIN, Onset.TASHIL, Onset.PLAIN)
+
+
+def test_registered_right_qata_is_restored_when_started_without_its_left_word():
+    source, projected = _span("33:24", (9,))[0]
+
+    assert source == "اوْ"
+    assert tuple(slot.letter for slot in projected.slots) == (
+        CanonLetter.HAMZA,
+        CanonLetter.WAW,
+    )
+    assert projected.slots[0].nucleus.quality is Quality.A
+
+
 def test_aimma_projects_an_eased_second_qata():
     source, projected = _span("9:12", (11,))[0]
     assert source == "أَي۪مَّةَ"

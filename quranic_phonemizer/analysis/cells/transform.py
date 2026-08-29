@@ -21,6 +21,7 @@ from ..ids import CellColumnId, LetterUnitId, SoundId
 from ..source_dtos import SourceView
 from .dtos import CellColumn, CellRole, CellSide, CellStatus, CellTier, CellWord
 from .align import next_column_id
+from .transform_tashil import split_compact_tashil
 
 #: The haraka role that writes each short quality, for spelling an inserted
 #: connecting vowel.
@@ -94,14 +95,28 @@ def _transform_letter(
     lost_shadda = shadda in col.text and not cons.geminate
     gained_shadda = shadda not in col.text and cons.geminate
     needs_hamza = _needs_written_hamza(col, cons, facts)
+    eased_hamza = (
+        cons.eased
+        and cons.letter is CanonLetter.HAMZA
+        and not any(glyph in col.text for glyph in _HAMZA_GLYPHS)
+        and not any(
+            pen.role(role) in col.text for role in _VOWEL_ROLE.values()
+        )
+        and not any(
+            isinstance(facts.sounds[sound.value].value, Vowel)
+            and facts.sounds[sound.value].value.long
+            for sound in col.owned_sound_ids
+        )
+    )
     if (
         not _is_replaced(cons, slot)
         and not needs_hamza
+        and not eased_hamza
         and not lost_shadda
         and not gained_shadda
     ):
         return col
-    if needs_hamza:
+    if needs_hamza or eased_hamza:
         text = _hamza_spelling(slot, pen)
     elif _is_replaced(cons, slot):
         text = _consonant_spelling(cons, pen)
@@ -129,9 +144,7 @@ def _transform_column(
 def _variant_column(
     col: CellColumn, variant_id: KhilafId, choice: str, **changes
 ) -> CellColumn:
-    return replace(
-        col, variant_id=variant_id, variant_choice=choice, **changes
-    )
+    return replace(col, variant_id=variant_id, variant_choice=choice, **changes)
 
 
 def _transform_haraka(
@@ -322,13 +335,13 @@ def _split_started_wasl(words, facts, slot_of_unit, pen):
     return tuple(out)
 
 
-def _split_tashil_words(
+def _split_selected_tashil(
     words: tuple[CellWord, ...],
     facts: AnalysisFacts,
     selection: VariantSelection,
     pen: Pen,
 ) -> tuple[CellWord, ...]:
-    """Expose the compact article hamza as a replaced hamza plus its fatha."""
+    """Expose selected article tashil as its hamza and inserted fatha cells."""
     if selection.chosen(KhilafId.ISTIFHAM_ARTICLE) != "tashil":
         return words
     next_id = next_column_id(words)
@@ -358,7 +371,11 @@ def _split_tashil_words(
                 status=CellStatus.REPLACED,
                 owned_sound_ids=(SoundId(consonants[0]),),
             )
-            mark = _inserted_haraka(next_id, base, vowels[0], facts, pen)
+            mark = _variant_column(
+                _inserted_haraka(next_id, base, vowels[0], facts, pen),
+                KhilafId.ISTIFHAM_ARTICLE,
+                "tashil",
+            )
             next_id += 1
             columns.extend((base, mark))
             sounds = [
@@ -409,9 +426,7 @@ def _split_tamanna_words(
                 facts,
                 pen,
             )
-            first = _variant_column(
-                first, KhilafId.TAMANNA_NOON, "ikhtilas"
-            )
+            first = _variant_column(first, KhilafId.TAMANNA_NOON, "ikhtilas")
             next_id += 1
             mark = _inserted_haraka(next_id, first, vowels[0], facts, pen)
             next_id += 1
@@ -449,45 +464,32 @@ def _transform_iwaja_idraj(
         return words
     out = []
     for word in words:
-        marker = next(
-            (
-                col for col in word.columns
-                if col.text in {"ۜ", "ۣ"}
-                and any(
-                    isinstance(facts.sounds[sound.value].value, Consonant)
-                    and facts.sounds[sound.value].value.letter is CanonLetter.NOON
-                    for sound in col.owned_sound_ids
-                )
-            ),
-            None,
-        )
+        marker = next((
+            col for col in word.columns
+            if col.text in {"ۜ", "ۣ"}
+            and any(
+                isinstance(facts.sounds[sound.value].value, Consonant)
+                and facts.sounds[sound.value].value.letter is CanonLetter.NOON
+                for sound in col.owned_sound_ids
+            )
+        ), None)
         if marker is None:
             out.append(word)
             continue
         marker_at = word.columns.index(marker)
-        carrier = next(
-            (
-                col for col in reversed(word.columns[:marker_at])
-                if col.role in (CellRole.LETTER, CellRole.MADD)
-                and col.text == pen.letter(CanonLetter.ALIF)
-            ),
-            None,
-        )
+        carrier = next((
+            col for col in reversed(word.columns[:marker_at])
+            if col.role in (CellRole.LETTER, CellRole.MADD)
+            and col.text == pen.letter(CanonLetter.ALIF)
+        ), None)
         carrier_at = -1 if carrier is None else word.columns.index(carrier)
-        vowel = next(
-            (
-                col for col in reversed(word.columns[:carrier_at])
-                if col.role is CellRole.HARAKA
-            ),
-            None,
-        )
+        vowel = next((
+            col for col in reversed(word.columns[:carrier_at])
+            if col.role is CellRole.HARAKA
+        ), None)
         if carrier is None or vowel is None:
             out.append(word)
             continue
-        # PausalAlif shortens the joined face before this display transform.
-        # Depending on the projection stage, that short vowel can still point
-        # at the written carrier.  The restored fathatan must own it because
-        # the carrier is absent in idraj.
         vowel_sounds = tuple(
             sound.sound_id
             for sound in word.sounds
@@ -555,95 +557,86 @@ def _omit_inactive_sakt_marks(
     return tuple(out)
 
 
+def _native_vowel_marks(word):
+    return {
+        column.id: tuple(
+            mark for mark in word.columns
+            if mark.role is CellRole.HARAKA
+            and mark.attached_to_column_id == column.id
+            and mark.source_character_ids
+            and mark.status is not CellStatus.DROPPED
+        )
+        for column in word.columns
+    }
+
+
+def _unwritten_short_vowel(col, facts, slot_of_unit, insc):
+    if col.role is not CellRole.LETTER or not col.source_unit_ids:
+        return None
+    slot_id = slot_of_unit.get(col.source_unit_ids[0].value)
+    slot = None if slot_id is None else facts.slots[facts.slot_index[slot_id]]
+    if slot is None or slot.onset is Onset.WASL:
+        return None
+    kinds = {insc.glyphs[glyph.value].kind for glyph in col.source_character_ids}
+    if kinds.difference({GlyphKind.BASE, GlyphKind.SHADDA, GlyphKind.TAJWEED_MARK}):
+        return None
+    consonants = [
+        sound.value for sound in col.owned_sound_ids
+        if isinstance(facts.sounds[sound.value].value, Consonant)
+    ]
+    vowels = [
+        sound.value for sound in col.owned_sound_ids
+        if isinstance(facts.sounds[sound.value].value, Vowel)
+        and not facts.sounds[sound.value].value.long
+        and facts.sounds[sound.value].value.quality in _VOWEL_ROLE
+    ]
+    return vowels[0] if len(consonants) == 1 and len(vowels) == 1 else None
+
+
+def _split_word_short_vowels(word, facts, slot_of_unit, insc, pen, next_id):
+    columns, sounds = [], list(word.sounds)
+    native_marks = _native_vowel_marks(word)
+    native_sounds: dict[CellColumnId, list[SoundId]] = {}
+    for col in word.columns:
+        columns.append(col)
+        vowel = _unwritten_short_vowel(col, facts, slot_of_unit, insc)
+        if vowel is None:
+            continue
+        base = replace(col, owned_sound_ids=tuple(
+            sound for sound in col.owned_sound_ids if sound.value != vowel
+        ))
+        columns[-1] = base
+        text = pen.role(_VOWEL_ROLE[facts.sounds[vowel].value.quality])
+        written = [mark for mark in native_marks[col.id] if mark.text == text]
+        if len(written) == 1:
+            mark = written[0]
+            native_sounds.setdefault(mark.id, []).append(SoundId(vowel))
+        else:
+            mark = _inserted_haraka(next_id, base, vowel, facts, pen)
+            next_id += 1
+            columns.append(mark)
+        sounds = [
+            replace(sound, column_ids=(mark.id,))
+            if sound.sound_id.value == vowel else sound
+            for sound in sounds
+        ]
+    columns = [
+        replace(column, owned_sound_ids=tuple(dict.fromkeys(
+            (*column.owned_sound_ids, *native_sounds[column.id])
+        ))) if column.id in native_sounds else column
+        for column in columns
+    ]
+    return replace(word, columns=tuple(columns), sounds=tuple(sounds)), next_id
+
+
 def _split_unwritten_short_vowels(words, facts, slot_of_unit, insc, pen):
     """Give an unwritten short vowel its own inserted mark cell."""
-    next_id = next_column_id(words)
-    out = []
+    next_id, out = next_column_id(words), []
     for word in words:
-        columns = []
-        sounds = list(word.sounds)
-        native_marks = {
-            column.id: tuple(
-                mark
-                for mark in word.columns
-                if mark.role is CellRole.HARAKA
-                and mark.attached_to_column_id == column.id
-                and mark.source_character_ids
-                and mark.status is not CellStatus.DROPPED
-            )
-            for column in word.columns
-        }
-        native_sounds: dict[CellColumnId, list[SoundId]] = {}
-        for col in word.columns:
-            columns.append(col)
-            if col.role is not CellRole.LETTER or not col.source_unit_ids:
-                continue
-            slot_id = slot_of_unit.get(col.source_unit_ids[0].value)
-            slot = None if slot_id is None else facts.slots[facts.slot_index[slot_id]]
-            if slot is None or slot.onset is Onset.WASL:
-                continue
-            kinds = {
-                insc.glyphs[glyph.value].kind for glyph in col.source_character_ids
-            }
-            if kinds.difference({GlyphKind.BASE, GlyphKind.SHADDA}):
-                continue
-            consonants = [
-                sound.value
-                for sound in col.owned_sound_ids
-                if isinstance(facts.sounds[sound.value].value, Consonant)
-            ]
-            vowels = [
-                sound.value
-                for sound in col.owned_sound_ids
-                if isinstance(facts.sounds[sound.value].value, Vowel)
-                and not facts.sounds[sound.value].value.long
-                and facts.sounds[sound.value].value.quality in _VOWEL_ROLE
-            ]
-            if len(consonants) != 1 or len(vowels) != 1:
-                continue
-            vowel = vowels[0]
-            base = replace(
-                col,
-                owned_sound_ids=tuple(
-                    sound for sound in col.owned_sound_ids if sound.value != vowel
-                ),
-            )
-            columns[-1] = base
-            written = [
-                mark
-                for mark in native_marks[col.id]
-                if mark.text == pen.role(_VOWEL_ROLE[facts.sounds[vowel].value.quality])
-            ]
-            if len(written) == 1:
-                mark = written[0]
-                native_sounds.setdefault(mark.id, []).append(SoundId(vowel))
-            else:
-                mark = _inserted_haraka(next_id, base, vowel, facts, pen)
-                next_id += 1
-                columns.append(mark)
-            sounds = [
-                replace(sound, column_ids=(mark.id,))
-                if sound.sound_id.value == vowel
-                else sound
-                for sound in sounds
-            ]
-        columns = [
-            replace(
-                column,
-                owned_sound_ids=tuple(
-                    dict.fromkeys(
-                        (
-                            *column.owned_sound_ids,
-                            *native_sounds[column.id],
-                        )
-                    )
-                ),
-            )
-            if column.id in native_sounds
-            else column
-            for column in columns
-        ]
-        out.append(replace(word, columns=tuple(columns), sounds=tuple(sounds)))
+        split, next_id = _split_word_short_vowels(
+            word, facts, slot_of_unit, insc, pen, next_id
+        )
+        out.append(split)
     return tuple(out)
 
 
@@ -663,6 +656,9 @@ def transform_words(
         insc = inscribe(session)
     slot_of_unit = _slot_of_unit(source, insc)
     selection = session.performance.selection
+    out = split_compact_tashil(
+        words, facts, source, insc, pen, _inserted_haraka
+    )
     out = tuple(
         replace(
             word,
@@ -681,9 +677,9 @@ def transform_words(
                 for col in word.columns
             ),
         )
-        for word in words
+        for word in out
     )
-    out = _split_tashil_words(out, facts, selection, pen)
+    out = _split_selected_tashil(out, facts, selection, pen)
     out = _split_tamanna_words(out, facts, selection, pen)
     out = _transform_iwaja_idraj(out, facts, selection, pen)
     out = _omit_inactive_sakt_marks(out)

@@ -20,14 +20,13 @@ def fold_sukun(word: CellWord) -> CellWord:
         ) or mark.attached_to_column_id is None:
             continue
         host_id = mark.attached_to_column_id.value
-        # The Warsh source writes the final sukun after a silent separating
-        # alif. Its generic written-on relation points back to the last sounded
-        # consonant; the cell projection keeps it inside that written alif.
+        # A source silence sign follows the rasm-only letter it silences. Its
+        # generic written-on relation can still point to the last sounded slot;
+        # cell ownership follows the adjacent dropped letter instead.
         if (
             mark.text == "ْ"
             and previous_main is not None
             and previous_main.status is CellStatus.DROPPED
-            and "ا" in previous_main.text
         ):
             host_id = previous_main.id.value
         host = folded.get(host_id) or hosts[host_id]

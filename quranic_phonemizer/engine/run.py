@@ -46,7 +46,8 @@ from .plan import (
 )
 
 #: Which aspect a rule's `Classifies` edge names.
-#: `ishmam` names the noon whose rounding is shown by the preceding mark.
+#: `ishmam` names a consonant: either the merged noon whose rounding is shown
+#: without sound, or the first consonant whose vowel begins with partial damma.
 _CLASSIFIES_ASPECT: dict[Rule, Aspect] = {
     Rule.TARQEEQ: Aspect.CONSONANT,
     Rule.ISHMAM: Aspect.CONSONANT,

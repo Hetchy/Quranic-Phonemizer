@@ -1,12 +1,6 @@
-"""Audit visible weight-rule attribution over complete packaged corpora.
+"""Audit weight attribution with continued/paused boundaries and both fatha modes.
 
-Each reading is projected twice per chunk: with every junction continued and
-with every word boundary explicitly paused.  The pass is repeated with the
-optional emphatic-fatha rendering off and on.  Cell-view laws enforce that:
-
-* every pronounced raa, lam, and long-A carrier has exactly one weight label;
-* tarqeeq labels only those three carrier families;
-* fatha/tanween cells and rendered short /a/ sounds have no weight label.
+Enforce complete raa/lam/long-A labels without labels on short-A carriers.
 """
 from __future__ import annotations
 

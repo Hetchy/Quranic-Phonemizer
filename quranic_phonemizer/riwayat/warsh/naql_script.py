@@ -79,7 +79,11 @@ def latent_qata_badal_quality(text: str) -> Quality | None:
         return Quality.A
     if len(text) < 3:
         return None
-    if text[1] in "ُ۟" and text[2] == "و":
+    if (
+        text[1] in "ُ۟"
+        and text[2] == "و"
+        and (len(text) < 4 or text[3] != "ْ")
+    ):
         return Quality.U
     if text[1] == "ِ" and text[2] in "يے" and (len(text) < 4 or text[3] != "ّ"):
         return Quality.I
@@ -95,7 +99,7 @@ def project_latent_qata(text: str, entries: list) -> None:
         # The stroke spells the qata's damm here, not a wasl start quality.
         entries[1] = MarkEntry(
             role="damma",
-            cls=GraphemeClass.HARAKA,
+            cls=GraphemeClass.ANNOTATION,
             fact=SlotFact.VOWEL_QUALITY,
             value=Nucleus.short(Quality.U),
         )

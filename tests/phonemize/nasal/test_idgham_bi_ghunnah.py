@@ -50,7 +50,7 @@ CASES = (
         read=through(),
         phonemes=pick(
             hafs=("ħ a j a: t u", "j̃ a: ʔ u l i:"),
-            warsh=("ħ a j a: t u", "j̃ a: ʔ u: l i:"),
+            warsh=("ħ a j a: t u", "j̃ a: ʔ u l i:"),
         ),
         char_rules={"@dammatan": R("idgham_bi_ghunnah"),
                     "ي[2]": R("idgham_bi_ghunnah")},

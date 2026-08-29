@@ -163,6 +163,202 @@ def test_plural_alif_sukun_is_a_source_backed_silence_sign():
     assert reading.clusters[decoration.cluster].letter is CanonLetter.ALIF
 
 
+def test_every_alif_sukun_is_a_source_backed_silence_sign():
+    source = json.loads(SOURCE.read_text(encoding="utf-8"))
+    inventory = script_adapter(Script.UTHMANI).inventory
+    count = 0
+
+    for record in source.values():
+        text = record["text"]
+        entries = sequence.entries_for(inventory, text)
+        for index in range(len(text) - 1):
+            if text[index:index + 2] != "اْ":
+                continue
+            count += 1
+            assert entries[index + 1].silences, text
+
+    assert count == 3716
+
+
+def test_every_explicit_hamza_u_sukun_waw_is_rasm_only():
+    source = json.loads(SOURCE.read_text(encoding="utf-8"))
+    inventory = script_adapter(Script.UTHMANI).inventory
+    count = 0
+
+    for record in source.values():
+        text = record["text"]
+        entries = sequence.entries_for(inventory, text)
+        start = text.find("أُوْ")
+        while start >= 0:
+            count += 1
+            assert entries[start + 3].silences, text
+            start = text.find("أُوْ", start + 1)
+
+    assert count == 220
+
+
+def test_every_latent_hamza_u_sukun_waw_is_rasm_only():
+    source = json.loads(SOURCE.read_text(encoding="utf-8"))
+    inventory = script_adapter(Script.UTHMANI).inventory
+    count = 0
+
+    for record in source.values():
+        text = record["text"]
+        entries = sequence.entries_for(inventory, text)
+        start = text.find("ا۟وْ")
+        while start >= 0:
+            count += 1
+            assert entries[start + 3].silences, text
+            assert naql_script.latent_qata_badal_quality(text) is None
+            start = text.find("ا۟وْ", start + 1)
+
+    assert count == 34
+
+
+def test_all_34_arayta_spellings_keep_the_sakin_yaa_consonantal():
+    source = json.loads(SOURCE.read_text(encoding="utf-8"))
+    inventory = script_adapter(Script.UTHMANI).inventory
+    rows = [
+        record["text"] for record in source.values()
+        if "ٰٓيْ" in record["text"]
+    ]
+
+    assert len(rows) == 34
+    for text in rows:
+        sukun = text.index("ْ", text.index("ٰٓيْ"))
+        entries = sequence.entries_for(inventory, text)
+        assert entries[sukun].role == "consonantal_sukun", text
+
+    package = recitation(Riwayah.WARSH)
+    selected = [
+        (location, entry) for location, entry in corpus().entries.items()
+        if "ٰٓيْ" in entry.text
+    ]
+    assert len(selected) == 34
+    for location, entry in selected:
+        built = package.build(package.read(
+            Script.UTHMANI, location.verse, ((location, entry.text),)
+        ))
+        assert CanonLetter.YA in {
+            slot.letter for slot in built.score.words[0].slots
+        }, location
+
+
+def test_mahyaya_keeps_the_selected_sakin_yaa_consonantal():
+    text = json.loads(SOURCE.read_text(encoding="utf-8"))["6:164:5"]["text"]
+    entries = sequence.entries_for(
+        script_adapter(Script.UTHMANI).inventory, text
+    )
+
+    assert text == "وَمَحْي۪آےْ"
+    assert entries[-1].role == "consonantal_sukun"
+
+    package = recitation(Riwayah.WARSH)
+    location = Location(6, 162, 5)
+    entry = corpus().entries[location]
+    built = package.build(package.read(
+        Script.UTHMANI, location.verse, ((location, entry.text),)
+    ))
+    assert built.score.words[0].slots[-1].letter is CanonLetter.YA
+
+
+def test_bare_aw_start_keeps_its_sakin_waw_consonantal():
+    text = json.loads(SOURCE.read_text(encoding="utf-8"))["33:24:9"]["text"]
+    entries = sequence.entries_for(
+        script_adapter(Script.UTHMANI).inventory, text
+    )
+
+    assert text == "اوْ"
+    assert entries[-1].role == "consonantal_sukun"
+
+
+@pytest.mark.parametrize(("ref", "text"), (
+    ((10, 15, 24), "تِلْقَآءِےْ"),
+    ((16, 90, 6), "وَإِيتَآءِےْ"),
+    ((20, 130, 14), "اٰنَآءِےْ"),
+    ((42, 51, 11), "وَّرَآءِےْ"),
+))
+def test_final_hamza_yaa_support_is_silent_not_long_i(ref, text):
+    entry, reading = _reading(ref)
+    entries = sequence.entries_for(
+        script_adapter(Script.UTHMANI).inventory, entry.text
+    )
+    built = recitation(Riwayah.WARSH).build(reading)
+
+    assert entry.text == text
+    assert entries[-1].role == "silence_sign"
+    assert built.score.words[0].slots[-1].letter is CanonLetter.HAMZA
+    assert built.score.words[0].slots[-1].nucleus == Nucleus.short(Quality.I)
+
+
+def test_final_hamza_yaa_support_family_is_exactly_the_reviewed_four():
+    found = {
+        location for location, entry in corpus().entries.items()
+        if entry.text.endswith("ءِےْ")
+    }
+    assert found == {
+        Location(10, 15, 24),
+        Location(16, 90, 6),
+        Location(20, 130, 14),
+        Location(42, 51, 11),
+    }
+
+
+def test_biaydin_jarrah_is_sukun_and_the_second_yaa_is_rasm_only():
+    entry, reading = _reading((51, 47, 3))  # بِأَيَيْدٖ
+    first_yaa = entry.text.index("ي")
+    second_yaa = entry.text.index("ي", first_yaa + 1)
+    jarrah = first_yaa + 1
+    silence = second_yaa + 1
+
+    absence = _evidence_at(reading, jarrah, SlotFact.VOWEL_ABSENCE)
+    decoration = next(row for row in reading.decorations if row.offset == silence)
+
+    assert entry.text[jarrah] == "َ"
+    assert reading.clusters[absence.cluster].letter is CanonLetter.YA
+    assert reading.clusters[absence.cluster].offset == first_yaa
+    assert decoration.silences
+    assert reading.clusters[decoration.cluster].letter is CanonLetter.YA
+    assert reading.clusters[decoration.cluster].offset == second_yaa
+
+
+def test_collapsed_double_hamza_mark_does_not_silence_the_explicit_hamza():
+    entry, reading = _reading((19, 66, 3))  # أَ۟ذَا
+    first, thal, alif = reading.clusters
+
+    assert first.letter is CanonLetter.HAMZA
+    assert [mark.role for mark in first.marks] == ["fatha", "collapsed_hamza"]
+    assert not any(row.silences for row in reading.decorations)
+    assert thal.letter is CanonLetter.THAL
+    assert alif.letter is CanonLetter.ALIF
+
+
+def test_all_14_explicit_collapsed_double_hamzas_keep_their_first_hamza():
+    rows = [
+        (location, entry)
+        for location, entry in corpus().entries.items()
+        if entry.text.startswith("أَ۟")
+    ]
+
+    assert len(rows) == 14
+    for location, entry in rows:
+        reading = script_adapter(Script.UTHMANI).read(
+            location.verse, ((location, entry.text),)
+        )
+        first = reading.clusters[0]
+        assert first.letter is CanonLetter.HAMZA
+        assert [mark.role for mark in first.marks[:2]] == [
+            "fatha", "collapsed_hamza",
+        ]
+        assert not any(row.silences for row in reading.decorations)
+        slots = recitation(Riwayah.WARSH).build(reading).score.words[0].slots
+        assert [slot.letter for slot in slots[:2]] == [
+            CanonLetter.HAMZA, CanonLetter.HAMZA,
+        ]
+        assert slots[1].onset is Onset.TASHIL
+        assert len(slots) >= 3 and slots[2].letter is not CanonLetter.HAMZA
+
+
 def test_sounded_yaa_before_combining_hamza_remains_a_separate_glide():
     entry, reading = _reading((2, 48, 8))  # شَئْاٗ
     letters = tuple(cluster.letter for cluster in reading.clusters)
@@ -239,6 +435,23 @@ def test_tamanna_supplies_the_unwritten_ishmam_annotation():
     assert noon.letter is CanonLetter.NOON
 
 
+@pytest.mark.parametrize(
+    "ref",
+    ((11, 77, 5), (29, 33, 6), (67, 27, 4)),
+)
+def test_sia_family_projects_the_ishmam_vowel_before_the_real_hamza(ref):
+    entry, reading = _reading(ref)
+    built = recitation(Riwayah.WARSH).build(reading)
+    seen, hamza, *_ = built.score.words[0].slots
+
+    assert entry.text.startswith("س۬")
+    assert seen.letter is CanonLetter.SEEN
+    assert seen.nucleus == Nucleus.long(Quality.I)
+    assert Annotation.ISHMAM in seen.annotations
+    assert hamza.letter is CanonLetter.HAMZA
+    assert hamza.nucleus == Nucleus.short(Quality.A)
+
+
 @pytest.mark.parametrize("ref", ((2, 79, 2), (2, 212, 2)))
 def test_prefixed_relative_pronoun_restores_its_second_lam(ref):
     entry, reading = _reading(ref)
@@ -305,7 +518,7 @@ def test_the_damm_stroke_after_a_bare_alif_is_the_qata_damm():
 
 @pytest.mark.parametrize(("ref", "quality"), (
     ((5, 41, 24), Quality.A),
-    ((2, 161, 7), Quality.U),
+    ((2, 269, 9), Quality.U),
     ((6, 158, 23), Quality.I),
     ((10, 53, 5), Quality.I),
 ))
@@ -370,8 +583,13 @@ def test_the_moved_host_haraka_demotes_to_a_naql_witness():
         row.offset == fatha and row.fact is SlotFact.VOWEL_QUALITY
         for row in reading.evidence
     )
-    witness = _evidence_at(reading, fatha, SlotFact.TAJWEED_MARK)
+    witness = next(
+        row
+        for row in reading.evidence
+        if row.offset == fatha and row.fact is SlotFact.TAJWEED_MARK
+    )
     assert witness.value is Annotation.NAQL_WITNESS
+    assert not any(row.offset == fatha for row in reading.attestations)
 
 
 def test_the_latent_qata_keeps_its_full_shape_for_restoration():

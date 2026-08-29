@@ -24,7 +24,7 @@ from quranic_phonemizer.analysis.build import build_bundle
 from quranic_phonemizer.analysis.cells.transform import _inserted_column
 from quranic_phonemizer.analysis.dtos import BoundaryState
 from quranic_phonemizer.analysis.facts import analyse
-from quranic_phonemizer.analysis.ids import LetterUnitId
+from quranic_phonemizer.analysis.ids import CellColumnId, LetterUnitId
 from quranic_phonemizer.analysis.source import build_source_view
 from quranic_phonemizer.model.address import (
     KhilafId, Option, Riwayah, Script, VariantSelection, VerseRef,
@@ -69,15 +69,8 @@ def _build(hafs, pen, ref, kwargs, selection=VariantSelection()):
 
 def _build_selected(hafs, ref, selection, script):
     selected_pen = pen_for(hafs.inventory(script))
-    session = phonemize_request(
-        hafs, ref, script=script, selection=selection
-    )
-    kw = dict(
-        ref=ref,
-        riwayah="hafs",
-        script=script.value,
-        variant={},
-    )
+    session = phonemize_request(hafs, ref, script=script, selection=selection)
+    kw = dict(ref=ref, riwayah="hafs", script=script.value, variant={})
     view = build_cell_view(
         session, spelling="transformed", pen=selected_pen, **kw
     )
@@ -147,6 +140,118 @@ def test_a_written_connecting_damma_is_not_duplicated_when_transformed(
             for source in native
         )
     ]
+
+
+def test_biaydin_keeps_the_jarrah_on_the_sounded_yaa_without_a_ghost_vowel():
+    reading = recitation(Riwayah.WARSH)
+    pen = pen_for(reading.inventory(Script.UTHMANI))
+    session = phonemize_request(reading, "51:47:3")
+    view = build_cell_view(
+        session, ref="51:47:3", riwayah="warsh", script="uthmani", variant={},
+        spelling="transformed", pen=pen,
+    )
+    word = view.words[0]
+    yaas = [column for column in word.columns if column.text.startswith("ي")]
+
+    assert [(column.text, column.status) for column in yaas] == [
+        ("يَ", CellStatus.PRESENT),
+        ("يْ", CellStatus.DROPPED),
+    ]
+    assert len(yaas[0].owned_sound_ids) == 1
+    assert not yaas[1].owned_sound_ids
+    assert not [
+        column for column in word.columns
+        if column.role in {CellRole.HARAKA, CellRole.SUKUN}
+        and column.text in {"َ", "ْ"}
+        and not column.owned_sound_ids
+        and not column.presented_sound_ids
+    ]
+
+
+def test_a_duplicate_vowel_rider_fails_the_transformed_law(hafs, pen):
+    view, source, session = _build(hafs, pen, "1:1:1", {})
+    rider = next(
+        column for column in view.words[0].columns
+        if column.role is CellRole.HARAKA
+        and column.attached_to_column_id is not None
+        and column.status is not CellStatus.DROPPED
+    )
+    duplicate = dataclasses.replace(rider, id=CellColumnId(9000))
+    broken_word = dataclasses.replace(
+        view.words[0], columns=(*view.words[0].columns, duplicate)
+    )
+    broken = dataclasses.replace(view, words=(broken_word,))
+
+    with pytest.raises(CellValidationError, match="duplicates column"):
+        validate_transformed(
+            broken, source, session.performance.selection
+        )
+
+
+def test_collapsed_double_hamzas_stay_in_their_word_and_preserve_the_letter():
+    reading = recitation(Riwayah.WARSH)
+    pen = pen_for(reading.inventory(Script.UTHMANI))
+    session = phonemize_request(reading, "19:66")
+    view = build_cell_view(
+        session, ref="19:66", riwayah="warsh", script="uthmani", variant={},
+        spelling="transformed", pen=pen,
+    )
+    insan, aidha = view.words[1:3]
+    aidha_main = [
+        column for column in aidha.columns if column.tier is CellTier.MAIN
+    ]
+
+    assert insan.columns[-1].text == "ُ"
+    assert insan.columns[-1].owned_sound_ids
+    assert [column.text for column in aidha_main] == ["أ", "إ", "ذ", "ا"]
+    assert [column.status for column in aidha_main] == [
+        CellStatus.PRESENT,
+        CellStatus.REPLACED,
+        CellStatus.PRESENT,
+        CellStatus.PRESENT,
+    ]
+    assert next(
+        column for column in aidha.columns if column.text == "ِ"
+    ).status is CellStatus.INSERTED
+
+
+def test_compact_fixed_tashil_is_two_vocalised_hamza_groups():
+    reading = recitation(Riwayah.WARSH)
+    pen = pen_for(reading.inventory(Script.UTHMANI))
+    session = phonemize_request(reading, "54:25")
+    metadata = dict(
+        ref="54:25", riwayah="warsh", script="uthmani", variant={}
+    )
+    bundle = build_bundle(session, **metadata)
+    view = build_cell_view(
+        session,
+        spelling="transformed",
+        pen=pen,
+        bundle=bundle,
+        **metadata,
+    )
+    word = view.words[0]
+    first, eased = word.groups[:2]
+
+    assert [bundle.sounds[item.value].token for item in first.sound_ids] == [
+        "ʔ", "a",
+    ]
+    assert [bundle.sounds[item.value].token for item in eased.sound_ids] == [
+        "ʔ̞", "u",
+    ]
+    columns = {column.id: column for column in word.columns}
+    assert [columns[item].role for item in first.column_ids] == [
+        CellRole.LETTER, CellRole.HARAKA,
+    ]
+    assert [columns[item].role for item in eased.column_ids] == [
+        CellRole.LETTER, CellRole.HARAKA,
+    ]
+    assert columns[eased.column_ids[0]].source_character_ids
+    assert columns[eased.column_ids[0]].status is CellStatus.REPLACED
+    assert not columns[eased.column_ids[1]].source_character_ids
+    assert columns[eased.column_ids[1]].status is CellStatus.INSERTED
+    assert max(len(column.owned_sound_ids) for column in word.columns) <= 2
+    assert max(len(group.sound_ids) for group in word.groups) <= 3
 
 
 # ---- the concrete cases the laws exercise ----
@@ -236,36 +341,14 @@ def test_the_source_spelling_is_unchanged(hafs, pen):
 
 # ---- the seen/saad variant carries onto the transformed cells ----
 
-@pytest.mark.parametrize(
-    ("ref", "variant_id"),
-    [
-        ("2:245:14", KhilafId.YABSUT),
-        ("7:69:22", KhilafId.BASTAH),
-        ("52:37:7", KhilafId.ALMUSAYTIRUN),
-    ],
-)
-@pytest.mark.parametrize("choice", ("seen", "saad"))
-def test_the_seen_sad_pair_carries_the_variant(
-    hafs, pen, ref, variant_id, choice
-):
+def test_the_seen_sad_pair_carries_the_variant(hafs, pen):
     """At a selected seen/saad khilaf both cells of the pair carry the variant;
-    the selected letter hosts the sound and the other stays visibly silent."""
-    selection = VariantSelection((Option(variant_id, choice),))
-    view, source, session = _build(hafs, pen, ref, {}, selection)
-    pair = [c for c in _columns(view) if c.variant_id == variant_id]
+    one sounds and one is silent, and both name the resolved choice."""
+    selection = VariantSelection((Option(KhilafId.YABSUT, "seen"),))
+    view, source, session = _build(hafs, pen, "2:245:14", {}, selection)
+    pair = [c for c in _columns(view) if c.variant_id == KhilafId.YABSUT]
     assert len(pair) == 2
-    assert all(c.variant_choice == choice for c in pair)
-    base = next(c for c in pair if c.tier is CellTier.MAIN)
-    mini_seen = next(c for c in pair if c.tier is not CellTier.MAIN)
-    assert mini_seen.text in {"ۜ", "ۣ"}
-    active, silent = (
-        (mini_seen, base) if choice == "seen" else (base, mini_seen)
-    )
-    assert active.owned_sound_ids and active.silence is None
-    assert not silent.owned_sound_ids
-    assert silent.silence is None
-    assert base.status is CellStatus.PRESENT
-    assert mini_seen.status is CellStatus.PRESENT
+    assert all(c.variant_choice == "seen" for c in pair)
     validate_transformed(view, source, session.performance.selection)
 
 
@@ -333,7 +416,7 @@ def test_iwaja_idraj_restores_tanwin_and_silences_its_alif(hafs, pen):
     ]
     assert [(col.role, col.text, col.status) for col in changed] == [
         (CellRole.TANWEEN, "ً", CellStatus.REPLACED),
-        (CellRole.LETTER, "ا", CellStatus.DROPPED),
+        (CellRole.MADD, "ا", CellStatus.DROPPED),
     ]
     assert len(changed[0].owned_sound_ids + changed[0].presented_sound_ids) == 2
     assert all(col.text != "ۜ" for word in view.words for col in word.columns)

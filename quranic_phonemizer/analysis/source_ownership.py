@@ -9,7 +9,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 
 from ..model.address import SlotId
-from ..model.canon import ABJAD, CanonLetter, Rule, SlotOrigin
+from ..model.canon import ABJAD, CanonLetter, Rule
 from ..model.performance import Aspect, Vowel
 from .derivations import (
     decoration_targets,
@@ -22,13 +22,14 @@ from .inscription import InscriptionFacts, Witnessed
 from .source_dtos import LetterUnitKind, LiteralSilence, Silence
 from .source_units import Tokenization
 
+#: A base letter's canonical identity, read off its rasm glyph.
+_LETTER_OF_BASE = {glyph: CanonLetter(name) for name, glyph in ABJAD.items()}
+
 #: The only riding letters whose unread half denotes a recitation variant.
 #: Other source-backed tajweed marks (notably Warsh's native iqlab meem) may
 #: ride a host too, but that geometric relation is not a variant handoff.
 _MINI_SEEN = frozenset({"ۜ", "ۣ"})
-
-#: A base letter's canonical identity, read off its rasm glyph.
-_LETTER_OF_BASE = {glyph: CanonLetter(name) for name, glyph in ABJAD.items()}
+_IQLAB_MEEM = frozenset({"ۢ", "ۭ"})
 
 
 @dataclass(frozen=True, slots=True)
@@ -94,23 +95,17 @@ def _variant_pair_units(
     tok: Tokenization, insc: InscriptionFacts
 ) -> frozenset[int]:
     riding = _riding_pair_units(tok)
-    seen = _mini_seen_units(tok, insc)
+    seen = {
+        index for index, unit in enumerate(tok.units)
+        if any(
+            insc.glyphs[glyph].char in _MINI_SEEN for glyph in unit.glyphs
+        )
+    }
     return frozenset(
         index for index in riding
         if index in seen or any(
             tok.unit_of_anchor.get(tok.units[item].written_on_anchor) == index
             for item in seen
-        )
-    )
-
-
-def _mini_seen_units(
-    tok: Tokenization, insc: InscriptionFacts
-) -> frozenset[int]:
-    return frozenset(
-        index for index, unit in enumerate(tok.units)
-        if any(
-            insc.glyphs[glyph].char in _MINI_SEEN for glyph in unit.glyphs
         )
     )
 
@@ -121,9 +116,7 @@ def _unit_at(facts, tok, insc, carriers,
         return _vowel_unit(facts, tok, carriers, slot, sound)
     # A tanween's own noon has no letter of its own; its unit is the tanween.
     base = tok.roles.letter.get(slot, tok.roles.vowel.get(slot))
-    return None if base is None else _paired_owner(
-        facts, tok, insc, slot, base
-    )
+    return None if base is None else _paired_owner(facts, tok, insc, slot, base)
 
 
 def _present_carrier_vowel(
@@ -182,26 +175,20 @@ def _owners_and_presenters(facts, tok, insc, carriers):
         if unit is not None:
             owner.setdefault(edge.sound, unit)
     for edge in facts.merges:
-        presenter = facts.slots[facts.slot_index[edge.slots[0]]]
-        tanween_naql = (
-            edge.by is not None
-            and edge.aspect is Aspect.VOWEL
-            and presenter.origin is SlotOrigin.NUNATION
-            and facts.occurrences[edge.by].rule is Rule.NAQL
-        )
         unit = (
             _unit_at(
                 facts, tok, insc, carriers,
                 edge.slots[0], edge.aspect, edge.sound,
             )
-            if tanween_naql else tok.roles.letter.get(edge.slots[0])
+            if edge.aspect is Aspect.VOWEL
+            else tok.roles.letter.get(edge.slots[0])
         )
         if unit is not None and unit != owner.get(edge.sound):
             presenters[edge.sound].add(unit)
     return owner, presenters
 
 
-def _silenced_units(facts, tok) -> dict[int, int]:
+def _silenced_units(facts, tok, insc) -> dict[int, int]:
     """Unit -> the occurrence that silenced it, from the performance edges."""
     out: dict[int, int] = {}
     for edge in facts.silences:
@@ -227,6 +214,19 @@ def _silenced_units(facts, tok) -> dict[int, int]:
         host = tok.unit_of_anchor.get(draft.written_on_anchor)
         if host in out:
             out.setdefault(index, out[host])
+    iqlab_drops = {
+        subject: index
+        for index, occurrence in enumerate(facts.occurrences)
+        if occurrence.rule is Rule.WAQF_DIACRITIC_DROP
+        for subject in occurrence.subjects
+    }
+    for index, draft in enumerate(tok.units):
+        if (
+            draft.written_on_anchor is not None
+            and draft.slot in iqlab_drops
+            and any(insc.glyphs[glyph].char in _IQLAB_MEEM for glyph in draft.glyphs)
+        ):
+            out.setdefault(index, iqlab_drops[draft.slot])
     return out
 
 
@@ -291,7 +291,7 @@ def ownership(
     carriers = tok.roles.carrier
     owner, presenters = _owners_and_presenters(facts, tok, insc, carriers)
     sounding = set(owner.values()) | {u for us in presenters.values() for u in us}
-    silenced_by = _silenced_units(facts, tok)
+    silenced_by = _silenced_units(facts, tok, insc)
     variant_omitted = _variant_omitted_units(facts, tok)
     shortened = _shortened_units(facts, tok, insc)
     riding_pairs = _riding_pair_units(tok)

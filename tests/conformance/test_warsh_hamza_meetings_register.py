@@ -20,21 +20,21 @@ def test_the_one_word_register_is_the_documented_sixty():
     })
 
 
-def test_the_across_word_register_is_the_documented_154():
+def test_the_across_word_register_is_the_documented_153():
     rows = [row for row in meeting_rows() if row.scope != "one_word"]
-    assert len(rows) == 154
+    assert len(rows) == 153
     assert Counter((row.first.name, row.second.name) for row in rows) == Counter({
         ("A", "A"): 30,
         ("I", "I"): 35,
         ("U", "U"): 1,
         ("A", "I"): 19,
         ("A", "U"): 1,
-        ("I", "A"): 29,
+        ("I", "A"): 28,
         ("U", "A"): 13,
         ("U", "I"): 26,
     })
     assert Counter(row.scope for row in rows) == Counter({
-        "joined_words": 152,
+        "joined_words": 151,
         "joined_ayahs": 2,
     })
 

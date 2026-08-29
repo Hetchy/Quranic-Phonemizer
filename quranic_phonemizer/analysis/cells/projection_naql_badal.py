@@ -57,13 +57,17 @@ def _move_naql_presenter(
                 if occurrence not in semantic
             ),
         )
+    satellite_rules = tuple(
+        occurrence for occurrence in satellite.rule_occurrence_ids
+        if occurrence not in semantic
+    )
     before_columns[satellite_at] = replace(
         satellite,
         presented_sound_ids=tuple(dict.fromkeys(
             (*satellite.presented_sound_ids, merger.sound_id)
         )),
         rule_occurrence_ids=tuple(dict.fromkeys(
-            (*satellite.rule_occurrence_ids, rules["naql"])
+            (*satellite_rules, rules["naql"])
         )),
     )
     words[before_at] = replace(before, columns=tuple(before_columns))

@@ -2,7 +2,16 @@ from __future__ import annotations
 
 import pytest
 
-from tests.support import Case, R, Site, assert_case, case_runs, isolated, pick
+from tests.support import (
+    Case,
+    R,
+    Site,
+    assert_case,
+    case_runs,
+    isolated,
+    pick,
+    through,
+)
 
 
 CASES = (
@@ -15,6 +24,28 @@ CASES = (
         phonemes="ʔ u l a: ʔ i k",
         char_rules={"و": R("orthographic_silence")},
     ),
+    # Warsh: ا۟وْلَٰٓئِكَ
+    Case(
+        id="warsh-latent-ulaika-start",
+        site=Site(warsh=("2:161", (7,))),
+        read=isolated(),
+        phonemes="ʔ u l a: ʔ i k",
+        char_rules={"و": R("orthographic_silence")},
+        absent_sound_rules={"u": R("madd_badal")},
+    ),
+    # Warsh: كُفَّارٌ ا۟وْلَٰٓئِكَ
+    Case(
+        id="warsh-latent-ulaika-joined",
+        site=Site(warsh=("2:161", (6, 7))),
+        read=through(),
+        phonemes=("k u ff a: rˤ u n", "u l a: ʔ i k"),
+        char_rules={
+            "ا[2]": R("naql"),
+            "و": R("orthographic_silence"),
+        },
+        absent_char_rules={"و": R("naql")},
+        absent_sound_rules={"u[3]": R("madd_badal")},
+    ),
     # Hafs: وَأُو۟لَـٰٓئِكَ
     # Warsh: وَأُوْلَٰٓئِكَ
     Case(
@@ -23,6 +54,15 @@ CASES = (
         read=isolated(),
         phonemes="w a ʔ u l a: ʔ i k",
         char_rules={"و[2]": R("orthographic_silence")},
+    ),
+    # Hafs: أُو۟لُوا۟
+    # Warsh: أُوْلُواْ
+    Case(
+        id="ulu-plural-waw",
+        site=Site.shared("27:33", (3,)),
+        read=isolated(),
+        phonemes="ʔ u l u:",
+        char_rules={"و[1]": R("orthographic_silence")},
     ),
     # Hafs: خَلَقُوا۟
     # Warsh: خَلَقُواْ
@@ -64,6 +104,24 @@ CASES = (
         phonemes="m i ʔ a h",
         char_rules={"ا": R("orthographic_silence")},
     ),
+    # Hafs: مِّا۟ئَةُ
+    # Warsh: مِّاْئَةُ
+    Case(
+        id="miata-geminated-alif",
+        site=Site.shared("2:261", (16,)),
+        read=isolated(),
+        phonemes="m i ʔ a h",
+        char_rules={"ا": R("orthographic_silence")},
+    ),
+    # Hafs: يَبْدَؤُا۟
+    # Warsh: يَبْدَؤُاْ
+    Case(
+        id="yabdau-final-alif",
+        site=Site.shared("10:4", (8,)),
+        read=isolated(),
+        phonemes="j a b Q d a ʔ",
+        char_rules={"ا": R("orthographic_silence")},
+    ),
     # Hafs: ٱلرِّبَوٰا۟ ۗ
     # Warsh: اُ۬لرِّبَوٰاْۖ
     Case(
@@ -87,7 +145,7 @@ CASES = (
         char_rules=pick(
             hafs_uthmani={"ي[2]": R("orthographic_silence")},
             hafs_indopak={"ى": R("orthographic_silence")},
-            warsh_uthmani={"ي[1]": R("orthographic_silence")},
+            warsh_uthmani={"ي[2]": R("orthographic_silence")},
         ),
     ),
     # Hafs: أَفَإِي۟ن
