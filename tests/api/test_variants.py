@@ -106,6 +106,34 @@ def test_variant_catalogue_owns_website_metadata_and_occurrences():
     assert "وَنُذُرِ" in wanuthur["description"]
 
 
+def test_catalogue_rows_expose_the_raa_subgroup_and_moved_group():
+    catalogue = variant_catalogue("hafs")
+    by_id = {row["id"]: row for row in catalogue}
+    lexical = {
+        "raa_firq", "raa_alqitr_waqf", "raa_misr_waqf",
+        "raa_wanuthur_waqf", "raa_yasr_waqf", "raa_asr_waqf",
+    }
+    assert {row_id for row_id, row in by_id.items() if row["subgroup"]} == lexical
+    assert all(by_id[row_id]["subgroup"] == "lexical" for row_id in lexical)
+    assert by_id["maliyah_halak"]["group"] == "joined_readings"
+
+
+def test_dynamic_nasal_selectors_report_realized_occurrences():
+    joined = Phonemizer().analyse("2:56:3-2:56:4")
+    rows = [
+        row for row in joined.variant_occurrences()
+        if row["variant_id"] == "iqlab_nasal"
+    ]
+    assert len(rows) == 1
+    assert rows[0]["selected"] == "open"
+    assert rows[0]["active"] is True and rows[0]["masked"] is False
+    stopped = Phonemizer().analyse("2:56:3-2:56:4", stop_refs=("2:56:3",))
+    assert not [
+        row for row in stopped.variant_occurrences()
+        if row["variant_id"] == "iqlab_nasal"
+    ]
+
+
 def test_analysis_reports_active_and_masked_variant_occurrences():
     joined = Phonemizer().analyse("11:42:14-11:42:15")
     assert joined.variant_occurrences() == ({

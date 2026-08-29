@@ -1,0 +1,8 @@
+# Scalar Warsh choices. Selector families land per owner-family PR; an ID
+# is published here only once its rules bind, so the catalogue never carries
+# a silent no-op selector.
+schema_version: 3
+
+variants: {}
+
+catalogue: {}

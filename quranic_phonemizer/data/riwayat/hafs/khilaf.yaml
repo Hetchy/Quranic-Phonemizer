@@ -244,13 +244,14 @@ catalogue:
      occurrences: [{words: ["88:22:3"], anchor: word, requires: all}]}
 
   raa_firq:
-    {group: raa_pronunciation, display_name: "Raa Firq", website_visible: true,
+    {group: raa_pronunciation, subgroup: lexical, display_name: "Raa Firq", website_visible: true,
      occurrences: [{words: ["26:63:11"], anchor: word, requires: wasl}]}
   raa_alqitr_waqf:
-    {group: raa_pronunciation, display_name: "Raa Alqitr Waqf", website_visible: true,
+    {group: raa_pronunciation, subgroup: lexical, display_name: "Raa Alqitr Waqf", website_visible: true,
      occurrences: [{words: ["34:12:10"], anchor: word, requires: waqf}]}
   raa_misr_waqf:
     group: raa_pronunciation
+    subgroup: lexical
     display_name: "Raa Misr Waqf"
     website_visible: true
     occurrences:
@@ -260,6 +261,7 @@ catalogue:
       - {words: ["43:51:10"], anchor: word, requires: waqf}
   raa_wanuthur_waqf:
     group: raa_pronunciation
+    subgroup: lexical
     display_name: "Raa Wanuthur Waqf"
     description: "The six وَنُذُرِ endings in Surah al-Qamar."
     website_visible: true
@@ -271,10 +273,11 @@ catalogue:
       - {words: ["54:37:9"], anchor: word, requires: waqf}
       - {words: ["54:39:3"], anchor: word, requires: waqf}
   raa_yasr_waqf:
-    {group: raa_pronunciation, display_name: "Raa Yasr Waqf", website_visible: true,
+    {group: raa_pronunciation, subgroup: lexical, display_name: "Raa Yasr Waqf", website_visible: true,
      occurrences: [{words: ["89:4:3"], anchor: word, requires: waqf}]}
   raa_asr_waqf:
     group: raa_pronunciation
+    subgroup: lexical
     display_name: "Raa Asr Waqf"
     website_visible: true
     occurrences:
@@ -301,7 +304,7 @@ catalogue:
     {group: joined_readings, display_name: "Yaseen Wasl", website_visible: true,
      occurrences: [{words: ["36:1:1", "36:2:1"], anchor: boundary, requires: wasl}]}
   maliyah_halak:
-    {group: sakt, display_name: "Maliyah Halak", website_visible: true,
+    {group: joined_readings, display_name: "Maliyah Halak", website_visible: true,
      occurrences: [{words: ["69:28:4", "69:29:1"], anchor: boundary, requires: wasl}]}
   irkab_maana:
     {group: joined_readings, display_name: "Irkab Maana", website_visible: true,
