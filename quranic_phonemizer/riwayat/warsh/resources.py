@@ -111,7 +111,14 @@ def rule_tables() -> RuleTables:
 
 @lru_cache(maxsize=None)
 def khilaf() -> Khilaf:
-    return load_khilaf(DATA / "khilaf.yaml")
+    from dataclasses import replace
+
+    from .raa import catalogue_registers, dynamic_sites, selector_profile
+
+    loaded = load_khilaf(DATA / "khilaf.yaml", registers=catalogue_registers())
+    return replace(
+        loaded, dynamic_sites=dynamic_sites(selector_profile(loaded.variants))
+    )
 
 
 @lru_cache(maxsize=None)

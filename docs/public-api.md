@@ -65,11 +65,14 @@ supported_riwayat()
 ```
 
 `available_variants` is the compact selector contract. `variant_catalogue`
-adds producer-owned groups, display metadata, visibility, fixed occurrence
-spans, anchors, and boundary requirements. After a request,
-`result.variant_occurrences()` maps matching spans to result-local word and
-boundary IDs and says whether each selector is active or masked by the current
-boundary plan.
+adds producer-owned groups, an optional subgroup for finer website
+sectioning, display metadata, visibility, fixed occurrence spans, anchors,
+and boundary requirements. A dynamic-scope selector has no fixed spans and a
+`None` occurrence count. After a request, `result.variant_occurrences()`
+maps matching spans to result-local word and boundary IDs and says whether
+each selector is active or masked by the current boundary plan; a
+dynamic-scope selector contributes a row for every site it realizes inside
+the analysed window.
 
 The packaged stop catalogues are:
 

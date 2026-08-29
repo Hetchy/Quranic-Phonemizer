@@ -17,7 +17,13 @@ from quranic_phonemizer.analysis.inscription import inscribe
 from quranic_phonemizer.analysis.source import build_source_view
 from quranic_phonemizer.analysis.source_dtos import LiteralSilence
 from quranic_phonemizer.api import recitation
-from quranic_phonemizer.model.address import Riwayah, Script
+from quranic_phonemizer.model.address import (
+    KhilafId,
+    Option,
+    Riwayah,
+    Script,
+    VariantSelection,
+)
 from quranic_phonemizer.model.canon import CanonLetter, Onset, Quality, VowelForm
 from quranic_phonemizer.model.performance import Aspect, Consonant, Vowel
 from quranic_phonemizer.orthography.write import pen_for
@@ -45,10 +51,13 @@ def _build(hafs, pen, ref: str, *, extra_phonemes=frozenset()):
     return session, bundle, view
 
 
-def _build_warsh(ref: str, *, stop_refs=(), extra_phonemes=frozenset()):
+def _build_warsh(
+    ref: str, *, stop_refs=(), extra_phonemes=frozenset(),
+    selection=VariantSelection(),
+):
     warsh = recitation(Riwayah.WARSH)
     warsh_pen = pen_for(warsh.inventory(Script.UTHMANI))
-    session = phonemize_request(warsh, ref, stop_refs=stop_refs)
+    session = phonemize_request(warsh, ref, stop_refs=stop_refs, selection=selection)
     kw = dict(ref=ref, riwayah="warsh", script="uthmani", variant={})
     bundle = build_bundle(session, extra_phonemes=extra_phonemes, **kw)
     view = build_cell_view(
@@ -1936,7 +1945,13 @@ def test_a_stopped_naql_witness_uses_the_shared_waqf_diacritic_drop():
 
 
 def test_warsh_native_iqlab_fatha_renders_weight_without_a_label():
-    _, bundle, view = _build_warsh("61:6", extra_phonemes=frozenset({"emphatic_fatha"}))
+    _, bundle, view = _build_warsh(
+        "61:6",
+        extra_phonemes=frozenset({"emphatic_fatha"}),
+        selection=VariantSelection(
+            (Option(KhilafId.RAA_FATHATAN, "heavy"),)
+        ),
+    )
     word_id = next(word.id for word in bundle.words if word.ref == "61:6:18")
     word = next(item for item in view.words if item.word_id == word_id)
     rules = {
