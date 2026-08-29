@@ -4,6 +4,7 @@ from __future__ import annotations
 import pytest
 
 from quranic_phonemizer.api import recitation
+from quranic_phonemizer.analysis.build import build_bundle
 from quranic_phonemizer.analysis.cells import build_cell_view
 from quranic_phonemizer.analysis.cells.dtos import CellRole, CellStatus
 from quranic_phonemizer.model.address import Riwayah, Script
@@ -48,6 +49,27 @@ def test_stopping_before_3_15_second_word_keeps_each_column_semantic():
     assert all(mark not in eased.text for mark in "ْ۟")
 
 
+def _assert_madd_badal_only_labels_carriers(ref, view, bundle):
+    badal = {
+        occurrence.id for occurrence in bundle.rule_occurrences
+        if occurrence.rule_id.value == "madd_badal"
+    }
+    columns = tuple(
+        column for word in view.words for column in word.columns
+    ) + tuple(
+        column for boundary in view.boundaries for column in boundary.columns
+    )
+    for occurrence in badal:
+        labelled = tuple(
+            column for column in columns
+            if occurrence in column.rule_occurrence_ids
+        )
+        assert all(column.role is CellRole.MADD for column in labelled), (
+            f"{ref}: Madd Badal {occurrence.value} leaks onto "
+            f"{[(column.id.value, column.role.value, column.text) for column in labelled]}"
+        )
+
+
 @pytest.mark.slow
 @pytest.mark.parametrize("surah", range(1, 115))
 @pytest.mark.parametrize("boundary_plan", ["joined", "all_stopped"])
@@ -70,15 +92,18 @@ def test_warsh_cells_have_semantic_sound_cardinality(surah, boundary_plan):
             else ()
         )
         session = phonemize_request(reading, ref, stop_refs=stop_refs)
+        metadata = dict(
+            ref=ref, riwayah="warsh", script="uthmani", variant={}
+        )
+        bundle = build_bundle(session, **metadata)
 
         # build_cell_view applies the cardinality laws after every projection
         # and reports the exact offending column/group if this sweep regresses.
-        build_cell_view(
+        view = build_cell_view(
             session,
-            ref=ref,
-            riwayah="warsh",
-            script="uthmani",
-            variant={},
             spelling="transformed",
             pen=pen,
+            bundle=bundle,
+            **metadata,
         )
+        _assert_madd_badal_only_labels_carriers(ref, view, bundle)

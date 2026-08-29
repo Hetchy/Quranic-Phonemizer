@@ -1231,6 +1231,40 @@ def test_warsh_naql_badal_long_vowel_is_a_cross_word_bridge():
     )
 
 
+def test_warsh_tanween_naql_does_not_put_madd_badal_on_tanween():
+    _, bundle, view = _build_warsh("20:21")
+    rules = {
+        occurrence.id: occurrence.rule_id.value
+        for occurrence in bundle.rule_occurrences
+    }
+    merger = next(
+        item for item in bundle.mergers
+        if item.boundary_id is not None
+        and bundle.words[item.before_word_id.value].ref == "20:21:9"
+        and bundle.words[item.after_word_id.value].ref == "20:21:10"
+        and {
+            rules[occurrence]
+            for occurrence in bundle.sounds[item.sound_id.value].rule_occurrence_ids
+        } >= {"naql", "madd_badal"}
+    )
+    before = next(word for word in view.words if word.word_id == merger.before_word_id)
+    after = next(word for word in view.words if word.word_id == merger.after_word_id)
+    tanween = next(
+        column for column in before.columns
+        if merger.sound_id in column.presented_sound_ids
+    )
+    carrier = next(
+        column for column in after.columns
+        if merger.sound_id in column.owned_sound_ids
+    )
+
+    assert tanween.role is CellRole.TANWEEN
+    assert {rules[item] for item in tanween.rule_occurrence_ids} == {"naql"}
+    assert {rules[item] for item in carrier.rule_occurrence_ids} >= {
+        "naql", "madd_badal",
+    }
+
+
 def test_warsh_tanween_naql_vowel_is_a_cross_word_bridge():
     _, bundle, view = _build_warsh("7:58")
     occurrence = next(
