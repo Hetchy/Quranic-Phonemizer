@@ -419,10 +419,10 @@ other mark folds into the unit whose fact it states:
   lengthens the vowel before it or stands as a consonant of its own is a
   canonical fact, not a written one, so that split belongs to the cell column
   role and not to kind;
-- the mini seen of a seen/saad khilaf is a unit wherever the script writes it,
-  on the same test as any letter: it can own the sound its site reads. The base
-  letter it rides can own that sound instead, so where both are present they
-  are a pair and the reading sounds one and silences the other. Whether the
+- the mini seen of a seen/saad khilaf is a unit wherever the script writes it.
+  It presents the seen realization while the base saad remains the sound owner
+  and alignment host in both faces; selecting saad marks the mini seen as
+  variant-silent without removing its column. Whether the
   pair exists is a script fact and not a variant one: Uthmani writes the mark
   at three of the four sites and IndoPak at all four, and where it is unwritten
   the base letter alone carries whichever sound the reading takes. Its
@@ -468,9 +468,10 @@ non-owning visible sharing. The two arrays are disjoint:
   already owns. There is no second vocabulary of causes to drift from the
   rules;
 - the one silence no rule accounts for is a letter the script writes and the
-  reading does not read -- the alif of قَالُوا۟, and the unread half of a
-  seen/saad khilaf pair -- which after 11.1 has no occurrence to name. It takes
-  the literal orthographic. Where a selected variant decided it, the column's
+  reading does not read -- the alif of قَالُوا۟, or a selected seen/saad mini
+  seen -- which after 11.1 has no occurrence to name. It takes the literal
+  orthographic or variant silence respectively. Where a selected variant
+  decided it, the column's
   variant_id and variant_choice say so, and the reason stays orthographic
   rather than naming a rule that did not fire. Those are the only two forms
   silence takes;
@@ -541,11 +542,11 @@ There are exactly three fold directions, and every silent unit takes one:
 
 - back: a silent unit joins the group of the unit before it. Silent alif, waw,
   and yaa; the alif after tanween; the skipped mini yaa of a stopped Aatani;
-  an unread mini seen, which is written after the base letter that is read.
+  and a variant-silent mini seen, which rides the base letter that owns the
+  realization in both faces.
 - forward: a silent unit at a word start joins the group of the next sounding
   unit. Silent hamzat wasl, the article lam before a sun letter, the hamzat
-  wasl or silent long vowel of an iltiqa, and an unread base letter of a
-  seen/saad pair, whose mini seen is read and written after it.
+  wasl or silent long vowel of an iltiqa.
 - across: a silent unit at a word end joins the first sounding unit of the
   next word. Cross-word idgham of every family, and the iltiqa chain.
 
@@ -683,10 +684,10 @@ CellBoundary orders every boundary-owned column at that exact boundary.
 - A unit that pairs with the base letter it rides for the same sound takes a
   smaller column with that tier and attached_to_column_id rather than a main
   one. The mini seen of a seen/saad khilaf is the only Hafs case. Where the
-  script writes it there are two columns and the site's one sound goes to
-  exactly one of them, the other being silent and owning no phoneme. The
-  riwayah's default decides that allocation and selecting the variant flips it,
-  and both columns carry the variant_id and variant_choice. Where the script
+  script writes it there are two columns. The base saad owns and aligns the
+  site's sound in both faces; in the seen face the mini seen presents that
+  sound, and in the saad face it remains as a dropped, variant-silent column.
+  Both columns carry the variant_id and variant_choice. Where the script
   writes no mark there is no second column and no pair: the variant changes the
   single main column's phoneme and leaves every letter column as it stands.
   Uthmani reads that second shape at 88:22:3.
@@ -904,8 +905,8 @@ rather than renumbering the ones after it.
     script writes no carrier to be that unit: the divine name in a script that
     spells no dagger alif, hamza with fathatan, and muqattaat.
 33d. A unit that owns a sound is alone in its group unless a merger, an
-    insertion anchor, a long vowel's carrier, or the unread half of a
-    seen/saad pair put another unit there. Ikhfaa,
+    insertion anchor, a long vowel's carrier, or a riding seen/saad mini seen
+    put another unit there. Ikhfaa,
     iqlab, and their shafawi counterparts therefore never fold across a
     boundary, because the nasalized unit still owns its sound.
 33e. Every published ID array has one stated order and is deterministic across
@@ -1193,9 +1194,10 @@ and script inventories. It adds no public field, no kind, and no role.
 Law 36 states this, and it is what keeps a Hafs peculiarity out of the shape.
 The mini seen of a seen/saad khilaf is the case that tested it: Warsh does not
 write that codepoint at all, so a kind named for it would have been a Hafs word
-in a shared vocabulary. It does not need one. It is a letter that the resolved
-variant may or may not sound, which the column already says with tier,
-silence, variant_id, and variant_choice. Whether it is written at all is a
+in a shared vocabulary. It does not need one. It is a letter that can present
+the base-owned sound or be variant-silent, which the column already says with
+tier, presentation, silence, variant_id, and variant_choice. Whether it is
+written at all is a
 script fact even inside Hafs, which is the second reason the shape must not
 name it.
 
@@ -1379,7 +1381,7 @@ adopting it:
 | --- | --- | --- |
 | The maddah takes its own madd cell and carries the rule | The maddah folds into the letter it marks, and the rule lands on that letter | A bar over a mark claims a length the mark does not own. The letter is what is read long. The pre-v11 cells folded it too, and splitting it out is where the muqattaat grouping went wrong: in `الٓمٓ` the lam and its maddah share a group, the meem and its maddah do not, because the shared sound is last of the lam's three and middle of the meem's. Ten openings carry that split. Folding cannot express it |
 | The pausal zero takes a madd cell, as a length carrier | It folds, and is a silence sign | It writes an absence: the alif it sits on is silent when joined to. A zero is not a carrier |
-| The mini seen of a seen/saad khilaf composes into the saad | Where the script writes it, it is a unit with its own column, paired with the base letter | Exactly one of the pair is sounded and the other silent, and two columns state that outright rather than leaving it to be read back off a variant field. Where the script writes no mark there is no pair and the variant changes the base column's phoneme alone, which is Uthmani at 88:22:3 |
+| The mini seen of a seen/saad khilaf composes into the saad | Where the script writes it, it is a unit with its own column, riding the base letter | The base owns and aligns the realization in both faces. The mini seen presents the seen face and becomes variant-silent in the saad face, preserving both column widths. Where the script writes no mark there is no riding column and the variant changes the base column's phoneme alone, which is Uthmani at 88:22:3 |
 | A sukun is status=dropped | A sukun is an ordinary present unit that owns no sound | Nothing is dropped. The mark is written and read as the absence of a vowel, which is not the same as a letter the reading discards |
 
 The 121,746 v11 cells carrying a share_group are the same relation section 8
@@ -2052,7 +2054,7 @@ supplies, never on the raw codepoint, and each is asserted by a native fixture:
 | --- | --- | --- |
 | Pausal zero fold | Folds into the carrier unit it marks; the pausal alif beside it is that carrier | A silence_sign supplying a length opens no unit; the base carrier it rides owns the length and the zero is a character inside it |
 | Imala mark fold | Folds into the letter it qualifies, which carries the imala length | A tajweed_mark supplying vowel quality opens no unit; only kind haraka, tanween or small_vowel opens the vowel position, so the mark joins its letter |
-| Mini seen as a paired unit | Its own letter unit wherever the script writes it, riding the base it pairs with; one sounds and the other is silent | A decorated tajweed_mark on a word with no sakt opens its own unit and names the base it rides in written_on_unit_id |
+| Mini seen as a riding unit | Its own letter unit wherever the script writes it, riding the base sound owner; it presents the seen realization or becomes variant-silent | A decorated tajweed_mark on a word with no sakt opens its own unit and names the base it rides in written_on_unit_id |
 | Sakt sign ownership | The boundary owns the pause; the small sakt seen is a boundary character, not a word letter unit | A decorated tajweed_mark on a word carrying a sakt is a boundary character like a stop sign, with a boundary_id and no letter unit |
 
 The main-unit multiple-range case section 7.2 names is likewise held: a letter

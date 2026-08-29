@@ -123,10 +123,9 @@ def test_the_imala_mark_folds_into_the_letter_it_qualifies(hafs):
     assert not any(u.text == IMALA_MARK for u in view.units)
 
 
-def test_the_read_half_of_the_seen_saad_pair_owns_the_sound(hafs):
-    """The seen the script writes rides the base saad as its own letter unit.
-    On the seen reading the mini seen sounds and the base saad is silent; the
-    unread half takes the variant silence, not the sound."""
+def test_the_seen_reading_keeps_the_sound_on_the_base_saad(hafs):
+    """The mini seen is a visible reading sign; the base cell remains the
+    sound-alignment host when that sign selects the seen realization."""
     view = _view(hafs, "2:245:14")
     seen = _unit_of(view, SEEN_ABOVE)
     saad = _unit_of(view, SAD)
@@ -134,14 +133,16 @@ def test_the_read_half_of_the_seen_saad_pair_owns_the_sound(hafs):
     assert seen.id != saad.id
     assert seen.written_on_unit_id == saad.id
     assert seen.text == SEEN_ABOVE
-    assert seen.owned_sound_ids and not saad.owned_sound_ids
+    assert saad.owned_sound_ids
+    assert not seen.owned_sound_ids
+    assert seen.presented_sound_ids == saad.owned_sound_ids
     assert seen.silence is None
-    assert saad.silence is LiteralSilence.VARIANT
+    assert saad.silence is None
 
 
-def test_the_saad_reading_flips_which_half_of_the_pair_sounds(hafs):
-    """Selecting saad at the same site reads the base and silences the mini
-    seen: the owner and the variant-silent half swap with the reading."""
+def test_the_saad_reading_only_silences_the_mini_seen(hafs):
+    """Selecting saad keeps the same sound host and applies variant silence
+    only to the mini seen."""
     view = _view(
         hafs, "2:245:14",
         selection=VariantSelection((Option(KhilafId.YABSUT, "saad"),)),

@@ -15,6 +15,7 @@ from quranic_phonemizer.analysis.cells import (
     CellRole,
     CellSide,
     CellStatus,
+    CellTier,
     CellValidationError,
     build_cell_view,
     validate_transformed,
@@ -235,14 +236,22 @@ def test_the_source_spelling_is_unchanged(hafs, pen):
 
 # ---- the seen/saad variant carries onto the transformed cells ----
 
-def test_the_seen_sad_pair_carries_the_variant(hafs, pen):
+@pytest.mark.parametrize("choice", ("seen", "saad"))
+def test_the_seen_sad_pair_carries_the_variant(hafs, pen, choice):
     """At a selected seen/saad khilaf both cells of the pair carry the variant;
-    one sounds and one is silent, and both name the resolved choice."""
-    selection = VariantSelection((Option(KhilafId.YABSUT, "seen"),))
+    the base hosts the sound and the mini seen stays visible in both faces."""
+    selection = VariantSelection((Option(KhilafId.YABSUT, choice),))
     view, source, session = _build(hafs, pen, "2:245:14", {}, selection)
     pair = [c for c in _columns(view) if c.variant_id == KhilafId.YABSUT]
     assert len(pair) == 2
-    assert all(c.variant_choice == "seen" for c in pair)
+    assert all(c.variant_choice == choice for c in pair)
+    base = next(c for c in pair if c.tier is CellTier.MAIN)
+    mini_seen = next(c for c in pair if c.tier is not CellTier.MAIN)
+    assert base.status is CellStatus.PRESENT and base.owned_sound_ids
+    assert mini_seen.text in {"ۜ", "ۣ"}
+    assert mini_seen.status is (
+        CellStatus.PRESENT if choice == "seen" else CellStatus.DROPPED
+    )
     validate_transformed(view, source, session.performance.selection)
 
 
