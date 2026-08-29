@@ -172,7 +172,7 @@ def _project_collapsed_hamza(text, entries) -> None:
 def _project_orthographic_silence(text, entries) -> None:
     """Project selected-script sukuns or harakas that mark rasm-only letters."""
     for pattern, relative in (
-        ("أُوْلَ", 3),
+        ("أُوْ", 3),
         ("إِيْن", 3),
         ("إِيْه", 3),
         ("إِےْ", 3),
