@@ -158,6 +158,33 @@ CASES = (
             absent_char_rules={"ه[1]": R("idgham_mutamathilayn")},
         ),
     ),
+    # Warsh: مَالِيَهۖ هَّلَكَ
+    VariantCase(
+        id="maliyah-halak-warsh",
+        site=Site(warsh=("69:28", (4, 5))),
+        selector=KhilafId.MALIYAH_HALAK,
+        faces={
+            "idgham": Expect(
+                read=through(),
+                phonemes=("m a: l i j a", "hh a l a k"),
+                char_rules={
+                    "ه[1]": R("idgham_mutamathilayn"),
+                    "ه[2]": R("idgham_mutamathilayn"),
+                },
+            ),
+            "sakt": Expect(
+                read=through(),
+                phonemes=("m a: l i j a h", "h a l a k"),
+                absent_char_rules={"ه[1]": R("idgham_mutamathilayn")},
+            ),
+        },
+        default="idgham",
+        masked=Expect(
+            read=explicit(ibtidaa=4, waqf=(4, 5)),
+            phonemes=("m a: l i j a h", "h a l a k"),
+            absent_char_rules={"ه[1]": R("idgham_mutamathilayn")},
+        ),
+    ),
 )
 
 

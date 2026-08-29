@@ -67,7 +67,7 @@ def apply_canonical_khilaf(khilaf: CanonicalKhilaf):
     def apply(reading: Reading, drafts, lexicon, scribe, selection) -> None:
         del lexicon
         spans = word_spans(reading, drafts)
-        for location, span in zip(reading.words, spans):
+        for word, (location, span) in enumerate(zip(reading.words, spans)):
             if not span:
                 continue
             _apply_vowel(khilaf.vowel, span, selection)
@@ -79,8 +79,10 @@ def apply_canonical_khilaf(khilaf: CanonicalKhilaf):
                 khilaf.tamanna, location, span, drafts, scribe, selection
             )
             _apply_salasila(khilaf.salasila, location, span, selection)
+            following = spans[word + 1] if word + 1 < len(spans) else ()
             _apply_sakt(
-                khilaf.sakt, location, span, drafts, reading, scribe, selection
+                khilaf.sakt, location, span, following, drafts, reading,
+                scribe, selection,
             )
 
     return apply
@@ -93,7 +95,8 @@ def _choice(site, selection) -> str:
 def _apply_tamanna(site, location, span, drafts, scribe, selection) -> None:
     if site is None or location != site.location or _choice(site, selection) == "ishmam":
         return
-    host, noon = span[2], span[3]
+    noon = next(draft for draft in span if draft.letter is CanonLetter.NOON)
+    host = span[span.index(noon) - 1]
     host.annotations -= {Annotation.ISHMAM}
     noon.onset = Onset.PLAIN
     reduced = _Draft(
@@ -123,7 +126,9 @@ def _apply_salasila(site, location, span, selection) -> None:
         span[-1].nucleus = Nucleus.pausal_long(Quality.A)
 
 
-def _apply_sakt(sites, location, span, drafts, reading, scribe, selection) -> None:
+def _apply_sakt(
+    sites, location, span, following, drafts, reading, scribe, selection,
+) -> None:
     site = next((item for item in sites if item.location == location), None)
     if site is not None:
         choice = _choice(site, selection)
@@ -134,6 +139,15 @@ def _apply_sakt(sites, location, span, drafts, reading, scribe, selection) -> No
         for draft in span:
             draft.sakt_after = False
         host.sakt_after = choice == "sakt"
+        if (
+            choice == "sakt"
+            and following
+            and following[0].letter is host.letter
+            and following[0].onset is Onset.GEMINATE
+        ):
+            # A script that writes the idgham face geminates the next word's
+            # onset; the sakt face reads that letter plain.
+            following[0].onset = Onset.PLAIN
         if site.khilaf == KhilafId.IWAJA_QAYYIMA and choice == "sakt":
             nunation = [
                 draft for draft in span if draft.origin is SlotOrigin.NUNATION

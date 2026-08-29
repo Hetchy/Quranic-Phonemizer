@@ -183,6 +183,11 @@ def supply_hamza_meetings(reading, drafts, lexicon, scribe, selection) -> None:
         second = _restore_right_qata(reading, drafts, scribe, right, row)
         if second is None:
             continue
+        if row.exception == "jaa_aal":
+            # The lexical `آل` long stands in every state: the restored qata
+            # carries its badal carrier rather than a short helping vowel.
+            second.nucleus = Nucleus.long(row.second)
+            second.annotations |= {Annotation.BADAL}
         if not joined:
             continue
         left = spans[row.previous]
@@ -196,4 +201,62 @@ def supply_hamza_meetings(reading, drafts, lexicon, scribe, selection) -> None:
             second.annotations |= {Annotation.BADAL}
 
 
-__all__ = ["MeetingRow", "meeting_rows", "rows_by_target", "supply_hamza_meetings"]
+#: Selector owner tags realized through the meetings rule; `hamza_aimma`
+#: rows are tagged `fixed_tashil` with the `aimma` exception.
+SELECTOR_OWNERS = (
+    "hamza_dhat_fath",
+    "hamza_muttafiq",
+    "hamza_damm_kasr",
+    "jaa_aal",
+    "hamza_kasr_yaa",
+    "hamza_aimma",
+)
+
+
+def _selector_owner(row: MeetingRow) -> str | None:
+    if row.exception == "aimma":
+        return "hamza_aimma"
+    return row.owner if row.owner in SELECTOR_OWNERS else None
+
+
+def selector_choices(definitions) -> dict[str, object]:
+    """Published meeting selectors by owner tag, for the boundary rule."""
+    from ...model.address import KhilafId
+
+    choices = {}
+    for owner in SELECTOR_OWNERS:
+        definition = definitions.get(KhilafId(owner))
+        if definition is not None:
+            choices[owner] = definition
+    return choices
+
+
+def catalogue_registers():
+    """Occurrence spans per meeting selector, in source coordinates."""
+    from ..khilaf import VariantSpan
+
+    registers: dict[str, list] = {owner: [] for owner in SELECTOR_OWNERS}
+    for row in meeting_rows():
+        owner = _selector_owner(row)
+        if owner is None:
+            continue
+        second = _location(row.source)
+        if row.scope == "one_word":
+            registers[owner].append(VariantSpan((second,), "word", "all"))
+        else:
+            first = Location(second.surah, second.ayah, second.word - 1)
+            registers[owner].append(
+                VariantSpan((first, second), "boundary", "wasl")
+            )
+    return {owner: tuple(spans) for owner, spans in registers.items()}
+
+
+__all__ = [
+    "MeetingRow",
+    "SELECTOR_OWNERS",
+    "catalogue_registers",
+    "meeting_rows",
+    "rows_by_target",
+    "selector_choices",
+    "supply_hamza_meetings",
+]

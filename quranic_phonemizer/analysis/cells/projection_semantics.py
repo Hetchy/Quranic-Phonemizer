@@ -156,7 +156,8 @@ def _native_meem_host(meem, columns, by_id, facts):
 
 
 def assign_native_iqlab_meem(words: tuple[CellWord, ...], facts: AnalysisFacts,
-                             riwayah: str) -> tuple[CellWord, ...]:
+                             riwayah: str,
+                             source=None) -> tuple[CellWord, ...]:
     """Give a written iqlab meem the sound instead of duplicating it."""
     if riwayah != "warsh":
         return words
@@ -192,8 +193,17 @@ def assign_native_iqlab_meem(words: tuple[CellWord, ...], facts: AnalysisFacts,
             remaining = tuple(
                 sound for sound in host.owned_sound_ids if sound not in moved
             )
+            written = (
+                "".join(
+                    source.units[uid.value].text
+                    for uid in host.source_unit_ids
+                )
+                if source is not None and not remaining
+                else host.text
+            )
             columns[host_at] = replace(
                 host,
+                text=written,
                 status=(host.status if remaining else CellStatus.DROPPED),
                 rule_occurrence_ids=tuple(
                     item for item in host.rule_occurrence_ids

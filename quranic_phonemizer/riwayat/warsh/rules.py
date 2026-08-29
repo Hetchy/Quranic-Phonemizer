@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from ...engine.classifier import RuleSet
 from ...engine.plan import Phase
-from ...model.address import Location, Riwayah
+from ...model.address import KhilafId, Location, Riwayah
 from ...model.canon import Quality
 from ...rules.annotation import CanonicalColour, CarrierTarqeeq, Inclination
 from ...rules.boundary import (
@@ -25,6 +25,7 @@ from ...rules.madd import (
     IltiqaShortening,
     MaddBadal,
     MaddClass,
+    MaddLazimIbdal,
     MaddLeen,
     MaddSilah,
 )
@@ -49,7 +50,7 @@ from ...rules.wasl import (
     TanweenBeforeWasl,
     WaslHamza,
 )
-from .hamza_meetings import meeting_rows, rows_by_target
+from .hamza_meetings import meeting_rows, rows_by_target, selector_choices
 from .lam import selector_profile as lam_selector_profile
 from .raa import selector_profile as raa_selector_profile
 from .resources import khilaf, lexicon, rule_tables
@@ -61,7 +62,6 @@ _DAMM_START_REPAIR = {Quality.U: Quality.U}
 #: The `كتابيه إني` boundary reads tahqiq by default: haa stays sakin and
 #: the qata is fully realized, so the general transfer must not claim it.
 _NAQL_TAHQIQ = frozenset({Location(69, 20, 1)})
-_OPENING_IZHAR = frozenset({Location(68, 1, 1)})
 _HAMZA_MEETING_STARTS = frozenset(
     row.canonical for row in meeting_rows() if row.scope != "one_word"
 )
@@ -91,9 +91,13 @@ def _boundary() -> tuple:
         Naql(
             excluded=_NAQL_TAHQIQ | _HAMZA_MEETING_STARTS,
             ibdal_meetings=_NAQL_IBDAL_MEETINGS,
+            meeting_choice=khilaf().variants.get(KhilafId.HAMZA_DHAT_FATH),
         ),
         CarriedNaql(),
-        HamzaMeetings(rows=rows_by_target()),
+        HamzaMeetings(
+            rows=rows_by_target(),
+            choices=selector_choices(khilaf().variants),
+        ),
         SuppliedIbdal(),
         JoinedIbdal(),
         WaslHamza(),
@@ -121,7 +125,9 @@ def _build() -> RuleSet:
             Phase.MERGE: (
                 NoonSakinah(
                     followers=tables.followers_of_noon,
-                    fixed_opening_izhar=_OPENING_IZHAR,
+                    opening_wasl=(
+                        khilaf().definition(KhilafId.NOON_WASL),
+                    ),
                 ),
                 MeemSakinah(followers=tables.followers_of_meem),
                 ArticleLam(sun=tables.sun_letters, article=article),
@@ -135,6 +141,10 @@ def _build() -> RuleSet:
             Phase.LENGTH: (
                 PausalGlide(),
                 IltiqaShortening(),
+                MaddLazimIbdal(
+                    khilaf().canonical.madd.locations,
+                    khilaf().canonical.madd.default,
+                ),
                 HamzaMeetingMadd(),
                 JoinedIbdalMadd(),
                 MaddClass(badal_is_effective=True),

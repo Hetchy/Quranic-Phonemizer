@@ -25,6 +25,10 @@ class Naql:
     ibdal_meetings: frozenset[Location] = frozenset()
     """One-word meetings whose default ibdal supplies the post-naql long."""
 
+    meeting_choice: object | None = None
+    """The one-word meeting selector; its tashil face keeps the second qata
+    a consonant, so the transfer realizes a plain short vowel instead."""
+
     rule: Rule = Rule.NAQL
     phase: Phase = Phase.BOUNDARY
     triggers: frozenset = frozenset({CanonLetter.HAMZA})
@@ -33,6 +37,11 @@ class Naql:
     def _ibdal_carrier(
         self, near: Neighbourhood, at: SlotId, word: int
     ):
+        if (
+            self.meeting_choice is not None
+            and self.meeting_choice.choose(near.score.selection) != "ibdal"
+        ):
+            return None
         following = near.after(at)
         if (
             near.score.words[word].location in self.ibdal_meetings

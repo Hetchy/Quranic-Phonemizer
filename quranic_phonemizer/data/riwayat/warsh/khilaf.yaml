@@ -246,6 +246,90 @@ variants:
     default: tarqiq
     source: docs/warsh/research/v2/lam-tafkheem.md
 
+  tamanna_noon:
+    kind: tamanna
+    options: [ishmam, ikhtilas]
+    default: ishmam
+    locations: ["12:11:6"]
+    source: docs/variants.md
+
+  istifham_article:
+    kind: madd_tasheel
+    options: [ibdal, tashil]
+    default: ibdal
+    locations: ["6:143:10", "6:144:8", "10:51:7", "10:91:1", "10:59:14", "27:59:9"]
+    source: docs/variants.md
+
+  noon_wasl:
+    kind: rule
+    options: [izhar, idgham]
+    default: izhar
+    junction: wasl
+    locations: ["68:1:1"]
+    source: docs/variants.md
+
+  maliyah_halak:
+    kind: sakt
+    options: [sakt, idgham]
+    default: idgham
+    junction: wasl
+    locations: ["69:28:4"]
+    source: docs/variants.md
+
+  hamza_dhat_fath:
+    kind: hamza_meeting
+    options: [ibdal, tashil]
+    default: ibdal
+    source: docs/warsh/research/v2/hamza-meetings.md
+
+  hamza_muttafiq:
+    kind: hamza_meeting
+    options: [ibdal, tashil]
+    default: ibdal
+    junction: wasl
+    source: docs/warsh/research/v2/hamza-meetings.md
+
+  hamza_damm_kasr:
+    kind: hamza_meeting
+    options: [ibdal, tashil]
+    default: ibdal
+    junction: wasl
+    source: docs/warsh/research/v2/hamza-meetings.md
+
+  jaa_aal:
+    kind: hamza_meeting
+    options: [ibdal, tashil]
+    default: tashil
+    junction: wasl
+    source: docs/warsh/research/v2/hamza-meetings.md
+
+  hamza_kasr_yaa:
+    kind: hamza_meeting
+    options: [ibdal, tashil, yaa]
+    default: ibdal
+    junction: wasl
+    source: docs/warsh/research/v2/hamza-meetings.md
+
+  hamza_aimma:
+    kind: hamza_meeting
+    options: [tashil, ibdal]
+    default: tashil
+    source: docs/warsh/research/v2/hamza-meetings.md
+
+  iqlab_nasal:
+    kind: nasal_place
+    options: [open, closed]
+    default: open
+    locations: [all_iqlab]
+    source: docs/variants.md
+
+  ikhfaa_shafawi_nasal:
+    kind: nasal_place
+    options: [open, closed]
+    default: open
+    locations: [all_ikhfaa_shafawi]
+    source: docs/variants.md
+
 
 catalogue:
   raa_firq:
@@ -450,3 +534,65 @@ catalogue:
   lam_salsal:
     {group: lam_pronunciation, display_name: "Lam Salsal",
      website_visible: true, register: lam_salsal}
+
+  tamanna_noon:
+    {group: word_readings, display_name: "Tamanna Noon", website_visible: true,
+     occurrences: [{words: ["12:11:6"], anchor: word, requires: all}]}
+  istifham_article:
+    group: word_readings
+    display_name: Istifham Article
+    description: "The forms آٰلذَّكَرَيْنِ, ءَالَٰنَ, and آٰللَّهُ."
+    website_visible: true
+    occurrences:
+      - {words: ["6:144:10"], anchor: word, requires: all}
+      - {words: ["6:145:8"], anchor: word, requires: all}
+      - {words: ["10:51:7"], anchor: word, requires: all}
+      - {words: ["10:91:1"], anchor: word, requires: all}
+      - {words: ["10:59:14"], anchor: word, requires: all}
+      - {words: ["27:61:9"], anchor: word, requires: all}
+  noon_wasl:
+    {group: joined_readings, display_name: "Noon Wasl", website_visible: true,
+     occurrences: [{words: ["68:1:1", "68:1:2"], anchor: boundary, requires: wasl}]}
+  maliyah_halak:
+    {group: joined_readings, display_name: "Maliyah Halak", website_visible: true,
+     occurrences: [{words: ["69:28:4", "69:29:1"], anchor: boundary, requires: wasl}]}
+  hamza_dhat_fath:
+    group: hamza_readings
+    display_name: "Hamza Dhat Fath"
+    description: "Ordinary one-word double hamzas with an open second, such as ءَآنذَرْتَهُمُۥٓ; the fixed-tashil forms are excluded."
+    website_visible: true
+    register: hamza_dhat_fath
+  hamza_muttafiq:
+    group: hamza_readings
+    display_name: "Hamza Muttafiq"
+    description: "Two qata hamzas with matching vowels across joined words, such as جَآءَ احَدٞ."
+    website_visible: true
+    register: hamza_muttafiq
+  hamza_damm_kasr:
+    group: hamza_readings
+    display_name: "Hamza Damm Kasr"
+    description: "A damm qata before a kasr qata across joined words, such as يَٰزَكَرِيَّآءُ اِ۪نَّا."
+    website_visible: true
+    register: hamza_damm_kasr
+  jaa_aal:
+    group: hamza_readings
+    display_name: "Jaa Aal"
+    description: "The two جَآءَ ا۟لَ boundaries."
+    website_visible: true
+    register: jaa_aal
+  hamza_kasr_yaa:
+    group: hamza_readings
+    display_name: "Hamza Kasr Yaa"
+    description: "The two exceptional boundaries هَٰٓؤُلَآءِ ان and اَ۬لْبِغَآءِ انَ."
+    website_visible: true
+    register: hamza_kasr_yaa
+  hamza_aimma:
+    {group: hamza_readings, display_name: "Hamza Aimma",
+     website_visible: true, register: hamza_aimma}
+
+  iqlab_nasal:
+    {group: nasal_variants, display_name: Iqlab Nasal, website_visible: false,
+     dynamic_scope: all_iqlab}
+  ikhfaa_shafawi_nasal:
+    {group: nasal_variants, display_name: Ikhfaa Shafawi Nasal,
+     website_visible: false, dynamic_scope: all_ikhfaa_shafawi}

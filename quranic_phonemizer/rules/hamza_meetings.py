@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from ..engine.neighbourhood import Neighbourhood
 from ..engine.plan import (
@@ -24,10 +24,38 @@ from ..model.performance import Aspect, Consonant, Occurrence
 
 _BARE_ANTA = frozenset({Location(5, 116, 7), Location(21, 62, 2)})
 
+#: The fixed face an unbound selector owner realizes, matching the reading
+#: each register row was reviewed against.
+_UNBOUND = {
+    "hamza_dhat_fath": "ibdal",
+    "hamza_muttafiq": "ibdal",
+    "hamza_damm_kasr": "ibdal",
+    "jaa_aal": "tashil",
+    "hamza_kasr_yaa": "ibdal",
+}
+
+
+#: Selector owner tags in the authored register, with the face each option
+#: realizes. `merge` folds the second qata into the first vowel's long;
+#: `moving` replaces it with a consonantal carrier keeping its own vowel.
+_SELECTOR_FACES = {
+    "hamza_dhat_fath": {"ibdal": "merge", "tashil": "tashil"},
+    "hamza_muttafiq": {"ibdal": "merge", "tashil": "tashil"},
+    "hamza_damm_kasr": {"ibdal": "moving", "tashil": "tashil"},
+    "jaa_aal": {"ibdal": "merge", "tashil": "tashil"},
+    "hamza_kasr_yaa": {
+        "ibdal": "merge", "tashil": "tashil", "yaa": "moving",
+    },
+}
+
 
 @dataclass(frozen=True, slots=True)
 class HamzaMeetings:
     rows: Mapping[Location, object]
+    choices: Mapping[str, object] = field(default_factory=dict)
+    """Selector owner tag to its `VariantDefinition`; an unbound owner
+    realizes the fixed face its register row implies."""
+
     rule: Rule = Rule.IBDAL_HAMZA
     phase: Phase = Phase.BOUNDARY
     triggers: frozenset = frozenset({CanonLetter.HAMZA})
@@ -57,6 +85,33 @@ class HamzaMeetings:
             return None, None
         return row, word
 
+    def _chosen(self, owner: str, near: Neighbourhood, fixed: str) -> str:
+        definition = self.choices.get(owner)
+        if definition is None:
+            return fixed
+        return definition.choose(near.score.selection)
+
+    def _face(self, row, word, near, boundaries) -> str:
+        if row.owner == "fixed_tashil":
+            if row.exception == "aimma":
+                chosen = self._chosen("hamza_aimma", near, "tashil")
+                return "tashil" if chosen == "tashil" else "moving"
+            return "tashil"
+        if row.owner == "fixed_ibdal":
+            return "moving"
+        face = _SELECTOR_FACES[row.owner][
+            self._chosen(row.owner, near, _UNBOUND[row.owner])
+        ]
+        if (
+            face == "merge"
+            and row.canonical in _BARE_ANTA
+            and boundaries.stopped_on(word)
+        ):
+            # The ibdal face would end three sakins deep at a full stop, so
+            # the selection is masked to tashil in that one boundary state.
+            return "tashil"
+        return face
+
     def look(self, near: Neighbourhood, plan: Plan, at: SlotId, boundaries: BoundaryPlan) -> Verdict | None:
         del plan
         row, word = self._row_at(near, at)
@@ -65,22 +120,21 @@ class HamzaMeetings:
         slot = near.slot(at)
         if slot is None:
             return None
-        tashil = (
-            row.owner == "fixed_tashil"
-            or row.owner == "jaa_aal"
-            or (row.scope == "one_word" and row.canonical in _BARE_ANTA and boundaries.stopped_on(word))
-        )
+        face = self._face(row, word, near, boundaries)
         boundary = word - 1 if row.scope != "one_word" else None
-        if tashil:
+        if face == "tashil":
             if slot.onset is Onset.TASHIL:
                 return None
             return Verdict(
                 Occurrence(mint(Rule.TASHIL, at), Rule.TASHIL, (at,), boundary=boundary),
                 (Realize(at, Aspect.CONSONANT, Consonant(CanonLetter.HAMZA, eased=True)),),
             )
-        moving = row.owner == "fixed_ibdal" or row.owner == "hamza_damm_kasr"
-        if moving:
-            letter = CanonLetter.YA if row.first is Quality.I else CanonLetter.WAW
+        if face == "moving":
+            letter = (
+                CanonLetter.YA
+                if row.exception == "aimma" or row.first is Quality.I
+                else CanonLetter.WAW
+            )
             actions = [
                 Realize(at, Aspect.CONSONANT, Consonant(letter)),
             ]

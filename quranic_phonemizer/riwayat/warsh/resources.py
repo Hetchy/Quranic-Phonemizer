@@ -113,7 +113,7 @@ def rule_tables() -> RuleTables:
 def khilaf() -> Khilaf:
     from dataclasses import replace
 
-    from . import inclination, lam, raa
+    from . import hamza_meetings, inclination, lam, raa
 
     loaded = load_khilaf(
         DATA / "khilaf.yaml",
@@ -121,6 +121,7 @@ def khilaf() -> Khilaf:
             **raa.catalogue_registers(),
             **lam.catalogue_registers(),
             **inclination.catalogue_registers(),
+            **hamza_meetings.catalogue_registers(),
         },
     )
     return replace(
