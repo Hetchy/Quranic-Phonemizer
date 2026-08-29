@@ -29,6 +29,7 @@ _LETTER_OF_BASE = {glyph: CanonLetter(name) for name, glyph in ABJAD.items()}
 #: Other source-backed tajweed marks (notably Warsh's native iqlab meem) may
 #: ride a host too, but that geometric relation is not a variant handoff.
 _MINI_SEEN = frozenset({"ۜ", "ۣ"})
+_IQLAB_MEEM = frozenset({"ۢ", "ۭ"})
 
 
 @dataclass(frozen=True, slots=True)
@@ -187,7 +188,7 @@ def _owners_and_presenters(facts, tok, insc, carriers):
     return owner, presenters
 
 
-def _silenced_units(facts, tok) -> dict[int, int]:
+def _silenced_units(facts, tok, insc) -> dict[int, int]:
     """Unit -> the occurrence that silenced it, from the performance edges."""
     out: dict[int, int] = {}
     for edge in facts.silences:
@@ -213,6 +214,19 @@ def _silenced_units(facts, tok) -> dict[int, int]:
         host = tok.unit_of_anchor.get(draft.written_on_anchor)
         if host in out:
             out.setdefault(index, out[host])
+    iqlab_drops = {
+        subject: index
+        for index, occurrence in enumerate(facts.occurrences)
+        if occurrence.rule is Rule.WAQF_DIACRITIC_DROP
+        for subject in occurrence.subjects
+    }
+    for index, draft in enumerate(tok.units):
+        if (
+            draft.written_on_anchor is not None
+            and draft.slot in iqlab_drops
+            and any(insc.glyphs[glyph].char in _IQLAB_MEEM for glyph in draft.glyphs)
+        ):
+            out.setdefault(index, iqlab_drops[draft.slot])
     return out
 
 
@@ -263,7 +277,7 @@ def ownership(
     carriers = tok.roles.carrier
     owner, presenters = _owners_and_presenters(facts, tok, insc, carriers)
     sounding = set(owner.values()) | {u for us in presenters.values() for u in us}
-    silenced_by = _silenced_units(facts, tok)
+    silenced_by = _silenced_units(facts, tok, insc)
     shortened = _shortened_units(facts, tok, insc)
     riding_pairs = _riding_pair_units(tok)
     variant_pairs = _variant_pair_units(tok, insc)

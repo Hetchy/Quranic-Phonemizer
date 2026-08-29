@@ -14,6 +14,7 @@ from ...rules.boundary import (
     TanweenDrop,
     TanweenIwad,
     WaqfHarakaDrop,
+    WaqfIqlabMarkDrop,
     WaqfSilahDrop,
 )
 from ...rules.idgham import Idgham
@@ -103,6 +104,7 @@ def _boundary() -> tuple:
         TanweenBeforeWasl(repairs=_DAMM_START_REPAIR),
         TanweenDrop(),
         TanweenIwad(),
+        WaqfIqlabMarkDrop(),
         WaqfHarakaDrop(yaa=khilaf().yaa),
         WaqfSilahDrop(),
         DroppedGlide(yaa=khilaf().yaa),

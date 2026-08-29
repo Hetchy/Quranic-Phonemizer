@@ -151,6 +151,8 @@ class Annotation(StrEnum):
     lexical `ردءا`."""
     NAQL_WITNESS = "naql_witness"
     """This sakin host carries a written moved haraka only during naql."""
+    IQLAB_WITNESS = "iqlab_witness"
+    """This noon carries a native iqlab mark that drops at waqf."""
     IBDAL = "ibdal"
     """This slot is the selected script's replacement for a lexical hamza."""
     BADAL = "badal"

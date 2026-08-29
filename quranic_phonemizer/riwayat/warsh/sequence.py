@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 from dataclasses import replace
 
-from ...model.canon import CanonLetter, Nucleus, Onset, Quality
+from ...model.canon import Annotation, CanonLetter, Nucleus, Onset, Quality
 from ...model.inscription import GraphemeClass, SlotFact
 from ...orthography.inventory import Inventory, LetterEntry, MarkEntry
 from . import naql_script
@@ -246,6 +246,19 @@ def _project_composite_tanwin(text, entries) -> None:
                 )
 
 
+def _project_noon_iqlab_witness(text, entries) -> None:
+    for index, char in enumerate(text[1:], start=1):
+        if char != "ۢ" or text[index - 1] != "ن":
+            continue
+        entry = entries[index]
+        if isinstance(entry, MarkEntry):
+            entries[index] = replace(
+                entry,
+                fact=SlotFact.TAJWEED_MARK,
+                value=Annotation.IQLAB_WITNESS,
+            )
+
+
 def _entries(inventory: Inventory, text: str) -> list:
     entries = [inventory.classify(char) for char in text]
     _release_combining_hamza_seats(inventory, text, entries)
@@ -262,6 +275,7 @@ def _entries(inventory: Inventory, text: str) -> list:
     _release_dagger_hamza_seats(text, entries)
     _project_hamza_madd(text, entries)
     _project_composite_tanwin(text, entries)
+    _project_noon_iqlab_witness(text, entries)
     return entries
 
 

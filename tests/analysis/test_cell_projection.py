@@ -1059,6 +1059,29 @@ def test_stopped_warsh_native_iqlab_meem_is_not_variant_silence():
     assert rules[cell.silence] == "waqf_diacritic_drop"
 
 
+def test_stopped_warsh_native_noon_iqlab_meem_uses_waqf_drop():
+    session, bundle, view = _build_warsh("2:158", stop_refs=("2:158:9",))
+    source = build_source_view(session, bundle=bundle)
+    word_id = next(word.id for word in bundle.words if word.ref == "2:158:9")
+    unit = next(
+        item for item in source.units
+        if item.word_id == word_id and item.text == "ۢ"
+    )
+    word = next(item for item in view.words if item.word_id == word_id)
+    cell = next(column for column in word.columns if column.text == "ۢ")
+    rules = {
+        occurrence.id: occurrence.rule_id.value
+        for occurrence in bundle.rule_occurrences
+    }
+
+    assert unit.silence not in {
+        LiteralSilence.ORTHOGRAPHIC,
+        LiteralSilence.VARIANT,
+    }
+    assert rules[unit.silence] == "waqf_diacritic_drop"
+    assert cell.silence == unit.silence
+
+
 def test_warsh_native_iqlab_meem_follows_kasratan_below_the_host():
     _, _, view = _build_warsh("7:53")
     word = next(
