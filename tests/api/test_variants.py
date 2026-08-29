@@ -80,10 +80,90 @@ def test_selecting_one_variant_leaves_other_defaults_unchanged():
     assert result.analysis.variant["ikhfaa_shafawi_nasal"] == "open"
 
 
+WARSH_VARIANTS = {
+    "raa_firq": (["light", "heavy"], "light"),
+    "raa_alqitr_waqf": (["light", "heavy"], "light"),
+    "raa_misr_waqf": (["heavy", "light"], "heavy"),
+    "raa_wanuthur_waqf": (["light", "heavy"], "light"),
+    "raa_yasr_waqf": (["light", "heavy"], "light"),
+    "raa_asr_waqf": (["heavy", "light"], "heavy"),
+    "raa_fathatan": (["light", "heavy_wasl", "heavy"], "light"),
+    "raa_damma": (["light", "heavy"], "light"),
+    "raa_ishruna_kibr": (["light", "heavy"], "light"),
+    "raa_alishraq": (["heavy", "light"], "heavy"),
+    "raa_hayran": (["heavy", "light"], "heavy"),
+    "raa_bisharar": (["light", "heavy"], "light"),
+    "raa_five_words": (["heavy", "light"], "heavy"),
+    "raa_sihra": (["heavy", "light"], "heavy"),
+    "raa_iram": (["heavy", "light"], "heavy"),
+    "raa_alif_ayn": (["light", "heavy"], "light"),
+    "raa_alif_hamza": (["light", "heavy"], "light"),
+    "raa_dual_alif": (["light", "heavy"], "light"),
+    "raa_ashiratukum": (["light", "heavy"], "light"),
+    "raa_wizraka": (["light", "heavy"], "light"),
+    "raa_dhikraka": (["light", "heavy"], "light"),
+    "raa_wizra_ukhra": (["light", "heavy"], "light"),
+    "raa_ijrami": (["light", "heavy"], "light"),
+    "raa_hidhrakum": (["light", "heavy"], "light"),
+    "raa_ibrah_kibrahu": (["light", "heavy"], "light"),
+    "raa_hasirat_suduruhum": (["light", "heavy"], "light"),
+}
+
+
 def test_catalogues_are_riwayah_specific():
-    assert available_variants("warsh") == {}
+    expected = {
+        name: {"options": options, "default": default}
+        for name, (options, default) in WARSH_VARIANTS.items()
+    }
+    assert available_variants("warsh") == expected
     with pytest.raises(ValueError):
         Phonemizer(riwayah="warsh", variants={"yabsut": "seen"})
+    with pytest.raises(ValueError):
+        Phonemizer(variants={"raa_fathatan": "light"})
+
+
+def test_warsh_catalogue_rows_carry_registers_and_dynamic_scopes():
+    catalogue = variant_catalogue("warsh")
+    assert len(catalogue) == 26
+    assert {row["id"] for row in catalogue} == set(WARSH_VARIANTS)
+    assert all(row["group"] == "raa_pronunciation" for row in catalogue)
+    assert all(
+        row["display_name"] == row["id"].replace("_", " ").title()
+        for row in catalogue
+    )
+    by_id = {row["id"]: row for row in catalogue}
+    systematic = {"raa_fathatan", "raa_damma"}
+    assert {
+        row_id for row_id, row in by_id.items()
+        if row["subgroup"] == "systematic"
+    } == systematic
+    assert all(
+        row["subgroup"] == "lexical"
+        for row_id, row in by_id.items() if row_id not in systematic
+    )
+    assert by_id["raa_five_words"]["occurrence_count"] == 16
+    assert by_id["raa_ibrah_kibrahu"]["occurrence_count"] == 7
+    assert by_id["raa_wizra_ukhra"]["occurrence_count"] == 5
+    assert by_id["raa_fathatan"]["occurrence_count"] is None
+    pair = by_id["raa_hasirat_suduruhum"]["occurrences"][0]
+    assert pair["anchor"] == "boundary"
+    assert pair["word_refs"] == ["4:89:11", "4:89:12"]
+    assert pair["requires"] == "wasl"
+
+
+def test_warsh_systematic_selectors_report_dynamic_occurrences():
+    joined = Phonemizer(riwayah="warsh").analyse("2:157:20-2:157:21")
+    rows = [
+        row for row in joined.variant_occurrences()
+        if row["variant_id"] == "raa_fathatan"
+    ]
+    assert len(rows) == 1
+    assert rows[0]["selected"] == "light"
+    assert rows[0]["word_ids"] == [0]
+    assert not [
+        row for row in joined.variant_occurrences()
+        if row["variant_id"] == "raa_damma"
+    ]
 
 
 def test_variant_catalogue_owns_website_metadata_and_occurrences():

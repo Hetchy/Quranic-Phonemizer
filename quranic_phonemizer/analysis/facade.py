@@ -180,6 +180,7 @@ class Result:
     _state: _ProjectionState
     _rule_catalogue: tuple[RuleDefinition, ...]
     _variant_catalogue: tuple[dict[str, object], ...]
+    _dynamic_sites: dict = field(default_factory=dict)
 
     @property
     def words(self):
@@ -269,18 +270,31 @@ class Result:
         return tuple(rows)
 
     def _dynamic_variant_rows(self, entry) -> list[dict[str, object]]:
-        """Sites of a dynamic-scope selector are its realized marker rules."""
-        markers = DYNAMIC_SCOPE_RULES.get(entry["dynamic_scope"])
-        if markers is None:
+        """Sites of a dynamic-scope selector, from its realized marker rules
+        or the owning package's structural resolver."""
+        scope = entry["dynamic_scope"]
+        markers = DYNAMIC_SCOPE_RULES.get(scope)
+        if markers is not None:
+            spans = [
+                [word_id.value for word_id in occurrence.word_ids]
+                for occurrence in self.analysis.rule_occurrences
+                if occurrence.rule_id.value in markers
+            ]
+        elif scope in self._dynamic_sites:
+            session = self._state.session
+            spans = [
+                [index]
+                for selector, index in self._dynamic_sites[scope](
+                    session.score, session.boundaries
+                )
+                if selector == entry["id"]
+            ]
+        else:
             raise ValueError(
-                f"{entry['id']}: no marker rules for dynamic scope "
-                f"{entry['dynamic_scope']!r}"
+                f"{entry['id']}: no resolver for dynamic scope {scope!r}"
             )
         rows = []
-        for occurrence in self.analysis.rule_occurrences:
-            if occurrence.rule_id.value not in markers:
-                continue
-            word_ids = [word_id.value for word_id in occurrence.word_ids]
+        for word_ids in spans:
             first = next(
                 word for word in self.words
                 if word.id.value == word_ids[0]
@@ -420,6 +434,7 @@ class Phonemizer:
             state,
             self.tajweed_rules,
             self.variant_catalogue,
+            self._recitation.khilaf.dynamic_sites,
         )
 
 

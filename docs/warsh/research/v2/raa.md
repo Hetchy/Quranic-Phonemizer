@@ -70,8 +70,8 @@ lists of Unicode spellings:
 
 | Owner | Target | Selected-corpus acceptance count |
 | --- | --- | ---: |
-| `raa_fathatan` | Otherwise eligible raa carrying fathatan | 255 |
-| `raa_damma` | Otherwise eligible raa carrying damma or dammatan | 837 |
+| `raa_fathatan` | Otherwise eligible raa carrying fathatan | 259 |
+| `raa_damma` | Otherwise eligible raa carrying damma or dammatan | 851 |
 
 The five-word register and `raa_sihra` are excluded from `raa_fathatan`. Named
 lexical and pausal owners are excluded from both. At a word-final dammed raa,
@@ -91,9 +91,10 @@ the second follows the ordinary pausal result when its damma disappears. See
 Al-Nashr for this grouped exception
 ([source](https://www.islamweb.net/ar/library/content/70/185/)).
 
-The counts are conformance assertions for the pinned King Fahd artifact. The
-runtime predicate is canonical; it must not test alternate tanwin glyphs or a
-color mark.
+The counts are conformance assertions produced from the canonical score of
+the pinned King Fahd artifact. They supersede the pre-adapter research
+estimates of 255 and 837. The runtime predicate is canonical; it must not
+test alternate tanwin glyphs or a color mark.
 
 ## Shared closed scopes
 
@@ -281,7 +282,7 @@ canonical facts and authored registers, never from the source's visual marks.
 
 - Store structural predicates separately from finite authored registers.
 - Store source and canonical coordinates separately for every finite fixture.
-- Assert the 255 and 837 systematic counts after excluding every named owner.
+- Assert the 259 and 851 systematic counts after excluding every named owner.
 - Assert every finite subtotal and reject duplicate ownership of one raa.
 - Test both weight outcomes at the sound and source-character projections.
 - Test dependent short A, carrier A, and `madd_iwad` A recoloring in both

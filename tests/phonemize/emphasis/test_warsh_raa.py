@@ -2,18 +2,26 @@ from __future__ import annotations
 
 import pytest
 
+from quranic_phonemizer.model.address import KhilafId
+from quranic_phonemizer.riwayat.warsh.raa import (
+    SELECTOR_JUNCTIONS,
+    SELECTOR_SITES,
+)
 from tests.support import (
     Case,
     Expect,
     R,
     Site,
     StateCase,
+    VariantCase,
     assert_case,
     case_runs,
     explicit,
     isolated,
+    joining,
     through,
 )
+from tests.support.variant import selected
 
 MOVING_STRUCTURAL_CASES = (
     # Warsh: قِرَدَةً
@@ -228,9 +236,283 @@ FIXED_LEXICAL_EXCLUSION_CASES = (
 )
 
 
+def _face(read, phonemes, rule, char="ر", sound=None, extra=("emphatic_fatha",)):
+    if sound is None:
+        sound = "rˤ" if rule == "tafkheem" else "r"
+    return Expect(
+        read=read,
+        phonemes=phonemes,
+        char_rules={char: R(rule)},
+        sound_rules={sound: R(rule)},
+        extra_phonemes=extra,
+    )
+
+
+def _word_case(case_id, site, selector, heavy, light, default, masked=None):
+    return VariantCase(
+        id=case_id,
+        site=site,
+        selector=selector,
+        faces={
+            "heavy": _face(isolated(), heavy, "tafkheem"),
+            "light": _face(isolated(), light, "tarqeeq"),
+        },
+        default=default,
+        masked=masked,
+    )
+
+
+LEXICAL_VARIANT_CASES = (
+    # Warsh: فِرْقٖ
+    _word_case("firq", Site(warsh=("26:63", (11,))), KhilafId.RAA_FIRQ,
+               "f i rˤ q Q", "f i r q Q", "light"),
+    # Warsh: اَ۬لْقِطْرِۖ
+    _word_case("alqitr", Site(warsh=("34:12", (10,))), KhilafId.RAA_ALQITR_WAQF,
+               "ʔ a l q i tˤ Q rˤ", "ʔ a l q i tˤ Q r", "light",
+               masked=_face(joining(), "ʔ a l q i tˤ Q r i", "tarqeeq")),
+    # Warsh: مِصْرَ
+    _word_case("misr", Site(warsh=("12:99", (10,))), KhilafId.RAA_MISR_WAQF,
+               "m i sˤ rˤ", "m i sˤ r", "heavy",
+               masked=_face(joining(), "m i sˤ rˤ aˤ", "tafkheem")),
+    # Warsh: وَنُذُرِۦۖ
+    _word_case("wanuthur", Site(warsh=("54:16", (4,))),
+               KhilafId.RAA_WANUTHUR_WAQF,
+               "w a n u ð u rˤ", "w a n u ð u r", "light",
+               masked=_face(joining(), "w a n u ð u r i:", "tarqeeq")),
+    # Warsh: يَسْرِۦ
+    _word_case("yasr", Site(warsh=("89:4", (3,))), KhilafId.RAA_YASR_WAQF,
+               "j a s rˤ", "j a s r", "light",
+               masked=_face(joining(), "j a s r i:", "tarqeeq")),
+    # Warsh: فَاسْرِ
+    _word_case("asr", Site(warsh=("11:81", (9,))), KhilafId.RAA_ASR_WAQF,
+               "f a s rˤ", "f a s r", "heavy",
+               masked=_face(joining(), "f a s r i", "tarqeeq")),
+    # Warsh: عِشْرُونَ
+    _word_case("ishruna", Site(warsh=("8:65", (10,))),
+               KhilafId.RAA_ISHRUNA_KIBR,
+               "ʕ i ʃ rˤ u: n", "ʕ i ʃ r u: n", "light"),
+    # Warsh: وَالِاشْرَاقِ
+    _word_case("alishraq", Site(warsh=("38:18", (7,))), KhilafId.RAA_ALISHRAQ,
+               "w a l i ʃ rˤ aˤ: q Q", "w a l i ʃ r a: q Q", "heavy"),
+    # Warsh: حَيْرَانَۖ
+    _word_case("hayran", Site(warsh=("6:71", (23,))), KhilafId.RAA_HAYRAN,
+               "ħ a j rˤ aˤ: n", "ħ a j r a: n", "heavy"),
+    # Warsh: ذِكْراٗۖ
+    _word_case("five-words", Site(warsh=("2:200", (10,))),
+               KhilafId.RAA_FIVE_WORDS,
+               "ð i k rˤ aˤ:", "ð i k r a:", "heavy"),
+    # Warsh: وَصِهْراٗۖ
+    _word_case("sihra", Site(warsh=("25:54", (9,))), KhilafId.RAA_SIHRA,
+               "w a sˤ i h rˤ aˤ:", "w a sˤ i h r a:", "heavy"),
+    # Warsh: اِرَمَ
+    _word_case("iram", Site(warsh=("89:7", (1,))), KhilafId.RAA_IRAM,
+               "ʔ i rˤ aˤ m", "ʔ i r a m", "heavy"),
+    # Warsh: ذِرَاعَيْهِ
+    _word_case("alif-ayn", Site(warsh=("18:18", (12,))), KhilafId.RAA_ALIF_AYN,
+               "ð i rˤ aˤ: ʕ a j h", "ð i r a: ʕ a j h", "light"),
+    # Warsh: مِرَآءٗ
+    _word_case("alif-hamza", Site(warsh=("18:22", (27,))),
+               KhilafId.RAA_ALIF_HAMZA,
+               "m i rˤ aˤ: ʔ a:", "m i r a: ʔ a:", "light"),
+    # Warsh: لَسَٰحِرَٰنِ
+    _word_case("dual-alif", Site(warsh=("20:63", (4,))), KhilafId.RAA_DUAL_ALIF,
+               "l a s a: ħ i rˤ aˤ: n", "l a s a: ħ i r a: n", "light"),
+    # Warsh: وَعَشِيرَتُكُمْ
+    _word_case("ashiratukum", Site(warsh=("9:24", (8,))),
+               KhilafId.RAA_ASHIRATUKUM,
+               "w a ʕ a ʃ i: rˤ aˤ t u k u m",
+               "w a ʕ a ʃ i: r a t u k u m", "light"),
+    # Warsh: وِزْرَكَ
+    _word_case("wizraka", Site(warsh=("94:2", (3,))), KhilafId.RAA_WIZRAKA,
+               "w i z rˤ aˤ k", "w i z r a k", "light"),
+    # Warsh: ذِكْرَكَۖ
+    _word_case("dhikraka", Site(warsh=("94:4", (3,))), KhilafId.RAA_DHIKRAKA,
+               "ð i k rˤ aˤ k", "ð i k r a k", "light"),
+    # Warsh: إِجْرَامِے
+    _word_case("ijrami", Site(warsh=("11:35", (8,))), KhilafId.RAA_IJRAMI,
+               "ʔ i ʒ Q rˤ aˤ: m i:", "ʔ i ʒ Q r a: m i:", "light"),
+    # Warsh: حِذْرَكُمْ
+    _word_case("hidhrakum", Site(warsh=("4:71", (5,))), KhilafId.RAA_HIDHRAKUM,
+               "ħ i ð rˤ aˤ k u m", "ħ i ð r a k u m", "light"),
+    # Warsh: لَعِبْرَةٗ
+    _word_case("ibrah", Site(warsh=("3:13", (27,))),
+               KhilafId.RAA_IBRAH_KIBRAHU,
+               "l a ʕ i b Q rˤ aˤ h", "l a ʕ i b Q r a h", "light"),
+)
+
+
+SYSTEMATIC_AND_PAIR_VARIANT_CASES = (
+    # Warsh: خَيْراٗ فَإِنَّ
+    VariantCase(
+        id="fathatan-joined",
+        site=Site(warsh=("2:158", (20, 21))),
+        selector=KhilafId.RAA_FATHATAN,
+        faces={
+            "light": _face(
+                through(), ("x aˤ j r a ŋ", "f a ʔ i ñ"), "tarqeeq"),
+            "heavy_wasl": _face(
+                through(), ("x aˤ j rˤ aˤ ŋ", "f a ʔ i ñ"), "tafkheem"),
+            "heavy": _face(
+                through(), ("x aˤ j rˤ aˤ ŋ", "f a ʔ i ñ"), "tafkheem"),
+        },
+        default="light",
+    ),
+    # Warsh: خَيْراٗ
+    VariantCase(
+        id="fathatan-waqf",
+        site=Site(warsh=("2:158", (20,))),
+        selector=KhilafId.RAA_FATHATAN,
+        faces={
+            "light": _face(isolated(), "x aˤ j r a:", "tarqeeq"),
+            "heavy_wasl": _face(isolated(), "x aˤ j r a:", "tarqeeq"),
+            "heavy": _face(isolated(), "x aˤ j rˤ aˤ:", "tafkheem"),
+        },
+        default="light",
+    ),
+    # Warsh: خَيْرٞ لَّكُمْ
+    VariantCase(
+        id="damma-joined",
+        site=Site(warsh=("2:54", (17, 18))),
+        selector=KhilafId.RAA_DAMMA,
+        faces={
+            "light": _face(through(), ("x aˤ j r u", "ll a k u m"), "tarqeeq"),
+            "heavy": _face(
+                through(), ("x aˤ j rˤ u", "ll a k u m"), "tafkheem"),
+        },
+        default="light",
+        masked=Expect(
+            read=explicit(ibtidaa=17, waqf=(17, 18)),
+            phonemes=("x aˤ j r", "l a k u m"),
+            extra_phonemes=("emphatic_fatha",),
+        ),
+    ),
+    # Warsh: كِبْرٞ مَّا
+    VariantCase(
+        id="kibr-joined",
+        site=Site(warsh=("40:56", (14, 15))),
+        selector=KhilafId.RAA_ISHRUNA_KIBR,
+        faces={
+            "light": _face(through(), ("k i b Q r u", "m̃ a:"), "tarqeeq"),
+            "heavy": _face(through(), ("k i b Q rˤ u", "m̃ a:"), "tafkheem"),
+        },
+        default="light",
+        masked=Expect(
+            read=explicit(ibtidaa=14, waqf=(14, 15)),
+            phonemes=("k i b Q r", "m a:"),
+            extra_phonemes=("emphatic_fatha",),
+        ),
+    ),
+    # Warsh: بِشَرَرٖ كَالْقَصْرِ
+    VariantCase(
+        id="bisharar-joined",
+        site=Site(warsh=("77:32", (3, 4))),
+        selector=KhilafId.RAA_BISHARAR,
+        faces={
+            "light": _face(
+                through(), ("b i ʃ a r a r i ŋ", "k a l q aˤ sˤ rˤ"),
+                "tarqeeq", char="ر[1]", sound="r[1]"),
+            "heavy": _face(
+                through(), ("b i ʃ a rˤ aˤ r i ŋ", "k a l q aˤ sˤ rˤ"),
+                "tafkheem", char="ر[1]", sound="rˤ[1]"),
+        },
+        default="light",
+    ),
+    # Warsh: بِشَرَرٖ
+    VariantCase(
+        id="bisharar-waqf",
+        site=Site(warsh=("77:32", (3,))),
+        selector=KhilafId.RAA_BISHARAR,
+        faces={
+            "light": _face(
+                isolated(), "b i ʃ a r a r", "tarqeeq",
+                char="ر[1]", sound="r[1]"),
+            "heavy": _face(
+                isolated(), "b i ʃ a rˤ aˤ rˤ", "tafkheem",
+                char="ر[1]", sound="rˤ[1]"),
+        },
+        default="light",
+    ),
+    # Warsh: وِزْرَ أُخْر۪ىٰ
+    VariantCase(
+        id="wizra-ukhra",
+        site=Site(warsh=("6:164", (19, 20))),
+        selector=KhilafId.RAA_WIZRA_UKHRA,
+        faces={
+            "light": _face(
+                through(), ("w i z r a", "ʔ u x r ɛ:"), "tarqeeq",
+                char="ر[1]", sound="r[1]"),
+            "heavy": _face(
+                through(), ("w i z rˤ aˤ", "ʔ u x r ɛ:"), "tafkheem",
+                char="ر[1]"),
+        },
+        default="light",
+        masked=Expect(
+            read=explicit(ibtidaa=19, waqf=(19, 20)),
+            phonemes=("w i z r", "ʔ u x r ɛ:"),
+            extra_phonemes=("emphatic_fatha",),
+        ),
+    ),
+    # Warsh: حَصِرَتْ صُدُورُهُمُۥٓۖ
+    VariantCase(
+        id="hasirat-suduruhum",
+        site=Site(warsh=("4:90", (11, 12))),
+        selector=KhilafId.RAA_HASIRAT_SUDURUHUM,
+        faces={
+            "light": _face(
+                through(), ("ħ a sˤ i r a t", "sˤ u d u: rˤ u h u m"),
+                "tarqeeq", char="ر[1]"),
+            "heavy": _face(
+                through(), ("ħ a sˤ i rˤ aˤ t", "sˤ u d u: rˤ u h u m"),
+                "tafkheem", char="ر[1]", sound="rˤ[1]"),
+        },
+        default="light",
+        masked=Expect(
+            read=explicit(ibtidaa=11, waqf=(11, 12)),
+            phonemes=("ħ a sˤ i r a t", "sˤ u d u: rˤ u h u m"),
+            extra_phonemes=("emphatic_fatha",),
+        ),
+    ),
+)
+
+
+SELECTOR_SWEEP = tuple(
+    pytest.param(
+        site,
+        site.junction or SELECTOR_JUNCTIONS[site.owner],
+        id=f"{site.owner}-{site.canonical}-{site.raa}",
+    )
+    for site in SELECTOR_SITES
+)
+
+
 @pytest.mark.parametrize("run", case_runs(MOVING_STRUCTURAL_CASES))
 def test_moving_structural_law(run):
     assert_case(run)
+
+
+@pytest.mark.parametrize("run", case_runs(LEXICAL_VARIANT_CASES))
+def test_lexical_raa_variants(run):
+    assert_case(run)
+
+
+@pytest.mark.parametrize("run", case_runs(SYSTEMATIC_AND_PAIR_VARIANT_CASES))
+def test_systematic_and_pair_raa_variants(run):
+    assert_case(run)
+
+
+@pytest.mark.parametrize(("raa_site", "junction"), SELECTOR_SWEEP)
+def test_every_selector_site_accepts_both_faces(raa_site, junction):
+    location = raa_site.canonical
+    site = Site(warsh=(f"{location.surah}:{location.ayah}", (location.word,)))
+    khilaf = KhilafId(raa_site.owner)
+    stopped = junction != "wasl"
+    heavy = selected(
+        site, location.word, khilaf, "heavy", stopped=stopped, riwayah="warsh"
+    )
+    light = selected(
+        site, location.word, khilaf, "light", stopped=stopped, riwayah="warsh"
+    )
+    assert heavy.sounds(location.word) != light.sounds(location.word)
 
 
 @pytest.mark.parametrize("run", case_runs(SAKIN_AND_BOUNDARY_CASES))

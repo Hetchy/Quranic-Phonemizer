@@ -11,9 +11,10 @@ def selection(khilaf: KhilafId, option: str) -> VariantSelection:
 
 
 def selected(site, word: int, khilaf: KhilafId, option: str, *, stopped=True,
-             extra=None):
+             extra=None, riwayah="hafs"):
     boundary = {"isolated": word} if stopped else {"ibtidaa": word, "wasl": word}
-    kwargs = {"selection": selection(khilaf, option), **boundary}
+    kwargs = {"selection": selection(khilaf, option), **boundary,
+              "riwayah": riwayah}
     if extra is not None:
         kwargs["extra_phonemes"] = extra
     return reading(site, **kwargs)

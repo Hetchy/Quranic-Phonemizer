@@ -1,16 +1,41 @@
 """Raa weight from structural predicates and riwayah-owned registers."""
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from ..engine.neighbourhood import Neighbourhood
 from ..engine.plan import Phase, Plan, Realize, Recolour, SoundFeature, Verdict, mint
-from ..model.address import BoundaryPlan, Location, SlotId
+from ..model.address import BoundaryPlan, KhilafId, Location, SlotId
 from ..model.canon import CanonLetter as L
-from ..model.canon import Onset, Quality, Rule, SlotOrigin, VowelForm
+from ..model.canon import Onset, Quality, Rule, Score, SlotOrigin, VowelForm
 from ..model.performance import Aspect, Occurrence, Vowel
+from .khilaf import HEAVY
 
 RaaKey = tuple[Location, int]
+
+
+@dataclass(frozen=True, slots=True)
+class RaaChoice:
+    """One selector-owned raa site and the junction its dispute lives in."""
+
+    khilaf: KhilafId
+    junction: str
+    default: str
+
+    def active(self, stopped: bool) -> bool:
+        if self.junction == "all":
+            return True
+        if self.junction == "waqf":
+            return stopped
+        return not stopped
+
+
+@dataclass(frozen=True, slots=True)
+class SystematicChoice:
+    """The fathatan or damma consumer over otherwise-eligible raa."""
+
+    khilaf: KhilafId
+    default: str
 
 
 @dataclass(frozen=True, slots=True)
@@ -19,6 +44,9 @@ class RaaProfile:
     heavy: frozenset[RaaKey]
     light: frozenset[RaaKey]
     always_heavy: frozenset[L] = frozenset()
+    selected: dict[RaaKey, RaaChoice] = field(default_factory=dict)
+    fathatan: SystematicChoice | None = None
+    damma: SystematicChoice | None = None
 
     def rule(self, near: Neighbourhood, at: SlotId, plan, boundaries) -> Rule:
         slot = near.slot(at)
@@ -29,6 +57,14 @@ class RaaProfile:
             return Rule.TAFKHEEM
         if key in self.light:
             return Rule.TARQEEQ
+        stopped = boundaries.stopped_on(word)
+        choice = self.selected.get(key)
+        if choice is not None and choice.active(stopped):
+            name = near.score.selection.chosen(choice.khilaf) or choice.default
+            return Rule.TAFKHEEM if HEAVY[name] else Rule.TARQEEQ
+        systematic = self._systematic(near, slot, plan, stopped)
+        if systematic is not None:
+            return systematic
         return (
             Rule.TAFKHEEM
             if _ordinary_is_heavy(
@@ -36,6 +72,17 @@ class RaaProfile:
             )
             else Rule.TARQEEQ
         )
+
+    def _systematic(self, near, slot, plan, stopped) -> Rule | None:
+        owner = systematic_owner(near, slot, self)
+        if owner is None:
+            return None
+        if stopped and plan.merged_away(slot.id, Aspect.VOWEL):
+            return Rule.TARQEEQ
+        name = near.score.selection.chosen(owner.khilaf) or owner.default
+        if name == "heavy_wasl":
+            return Rule.TARQEEQ if stopped else Rule.TAFKHEEM
+        return Rule.TAFKHEEM if HEAVY[name] else Rule.TARQEEQ
 
 
 @dataclass(frozen=True, slots=True)
@@ -66,6 +113,59 @@ class RaaWeight:
             Occurrence(mint(rule, at), rule, (at,)),
             tuple(effects),
         )
+
+
+def systematic_owner(
+    near: Neighbourhood, slot, profile: RaaProfile
+) -> SystematicChoice | None:
+    """The fathatan or damma consumer owning this raa, from joined facts.
+
+    Fixed and selector-owned keys are excluded, so the resolver and the
+    classifier agree on ownership without consulting the boundary state.
+    """
+    word = near.word_of(slot.id)
+    if word is None or slot.letter is not L.RA:
+        return None
+    key = _key(near, word, slot.id)
+    if (
+        key in profile.heavy
+        or key in profile.light
+        or key in profile.selected
+    ):
+        return None
+    quality = slot.nucleus.joined.quality
+    if quality is Quality.U:
+        owner = profile.damma
+    elif quality is Quality.A and _nunation_follows(near, slot):
+        owner = profile.fathatan
+    else:
+        return None
+    if owner is None or not _moving_trigger(near, slot, profile.always_heavy):
+        return None
+    return owner
+
+
+def systematic_sites(
+    score: Score, boundaries: BoundaryPlan, profile: RaaProfile
+) -> tuple[tuple[str, int], ...]:
+    """Every (selector id, word index) the systematic consumers own."""
+    near = Neighbourhood(score, boundaries)
+    sites = []
+    for index, word in enumerate(score.words):
+        for slot in word.slots:
+            owner = systematic_owner(near, slot, profile)
+            if owner is not None:
+                sites.append((owner.khilaf.value, index))
+    return tuple(sites)
+
+
+def _nunation_follows(near: Neighbourhood, slot) -> bool:
+    following = near.after(slot.id)
+    return (
+        following is not None
+        and not near.crosses_word(slot.id)
+        and following.origin is SlotOrigin.NUNATION
+    )
 
 
 def _key(near: Neighbourhood, word: int, at: SlotId) -> RaaKey:
@@ -171,4 +271,12 @@ def _governing(near, slot, plan):
     return None
 
 
-__all__ = ["RaaKey", "RaaProfile", "RaaWeight"]
+__all__ = [
+    "RaaChoice",
+    "RaaKey",
+    "RaaProfile",
+    "RaaWeight",
+    "SystematicChoice",
+    "systematic_owner",
+    "systematic_sites",
+]
