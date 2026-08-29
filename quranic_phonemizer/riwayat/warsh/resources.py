@@ -18,8 +18,7 @@ from ...model.canon import Quality
 from ...orthography.adapter import Reading
 from ...orthography.cluster import read_verse
 from ...orthography.inventory import Inventory, load_inventory
-from ..khilaf import EMPTY as EMPTY_KHILAF
-from ..khilaf import Khilaf
+from ..khilaf import Khilaf, load_khilaf
 from ..tables import RuleTables, load_rule_tables
 from .hamza_meetings import supply_hamza_meetings
 from .inclination import supply_inclination
@@ -112,7 +111,7 @@ def rule_tables() -> RuleTables:
 
 @lru_cache(maxsize=None)
 def khilaf() -> Khilaf:
-    return EMPTY_KHILAF
+    return load_khilaf(DATA / "khilaf.yaml")
 
 
 @lru_cache(maxsize=None)
@@ -122,6 +121,8 @@ def muqattaat() -> Muqattaat:
 
 @lru_cache(maxsize=None)
 def lexeme_passes() -> tuple:
+    from ...canon.khilaf import apply_canonical_khilaf
+
     return (
         *LEXEME_PASSES,
         supply_relative_pronoun,
@@ -130,6 +131,7 @@ def lexeme_passes() -> tuple:
         supply_joined_pausal,
         spell_muqattaat(muqattaat(), vocalized_compact=True),
         supply_inclination,
+        apply_canonical_khilaf(khilaf().canonical),
     )
 
 

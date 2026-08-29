@@ -17,6 +17,7 @@ from ..model.address import (
 from ..model.inscription import StopAdvice
 from ..orthography.write import Pen, pen_for
 from ..render.alphabet import allowed_extra_phonemes, effective_extra_phonemes
+from ..riwayat.khilaf import DYNAMIC_SCOPE_RULES
 from ..session import Session, phonemize_request
 from .build import build_bundle
 from .catalogue import tajweed_rules as _tajweed_rules
@@ -233,6 +234,9 @@ class Result:
         boundaries = {boundary.id: boundary for boundary in self.boundaries}
         rows = []
         for entry in self._variant_catalogue:
+            if entry["dynamic_scope"]:
+                rows.extend(self._dynamic_variant_rows(entry))
+                continue
             for occurrence in entry["occurrences"]:
                 matched = [words.get(ref) for ref in occurrence["word_refs"]]
                 if any(word is None for word in matched):
@@ -263,6 +267,40 @@ class Result:
                     "masked": not active,
                 })
         return tuple(rows)
+
+    def _dynamic_variant_rows(self, entry) -> list[dict[str, object]]:
+        """Sites of a dynamic-scope selector are its realized marker rules."""
+        markers = DYNAMIC_SCOPE_RULES.get(entry["dynamic_scope"])
+        if markers is None:
+            raise ValueError(
+                f"{entry['id']}: no marker rules for dynamic scope "
+                f"{entry['dynamic_scope']!r}"
+            )
+        rows = []
+        for occurrence in self.analysis.rule_occurrences:
+            if occurrence.rule_id.value not in markers:
+                continue
+            word_ids = [word_id.value for word_id in occurrence.word_ids]
+            first = next(
+                word for word in self.words
+                if word.id.value == word_ids[0]
+            )
+            anchor = "boundary" if len(word_ids) > 1 else "word"
+            rows.append({
+                "variant_id": entry["id"],
+                "selected": self.analysis.variant[entry["id"]],
+                "word_ids": word_ids,
+                "anchor": anchor,
+                "anchor_word_id": first.id.value,
+                "anchor_boundary_id": (
+                    first.after_boundary_id.value if anchor == "boundary"
+                    else None
+                ),
+                "requires": "all",
+                "active": True,
+                "masked": False,
+            })
+        return rows
 
     def document(self, kind: str, *, spelling: str = "source") -> Json:
         if kind not in KINDS:

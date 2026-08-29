@@ -19,6 +19,13 @@ from ..rules.khilaf import HEAVY, KEPT, KhilafError, Site, SitedKhilaf
 
 SCHEMA_VERSION = 3
 
+#: Rule IDs whose occurrences realize a dynamic-scope selector, so the
+#: analysis can report the sites the authored catalogue cannot enumerate.
+DYNAMIC_SCOPE_RULES: dict[str, tuple[str, ...]] = {
+    "all_iqlab": ("iqlab",),
+    "all_ikhfaa_shafawi": ("ikhfaa_shafawi",),
+}
+
 
 @dataclass(frozen=True, slots=True)
 class VariantSpan:
@@ -41,6 +48,7 @@ class VariantCatalogueEntry:
     website_visible: bool
     spans: tuple[VariantSpan, ...]
     dynamic_scope: str | None = None
+    subgroup: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -116,6 +124,7 @@ class Khilaf:
                 "options": list(spec.options),
                 "default": spec.default,
                 "group": meta.group,
+                "subgroup": meta.subgroup,
                 "display_name": meta.display_name,
                 "description": meta.description,
                 "website_visible": meta.website_visible,
@@ -130,7 +139,10 @@ class Khilaf:
 EMPTY = Khilaf({}, SitedKhilaf(), SitedKhilaf(), CanonicalKhilaf(), {})
 
 
-def load_khilaf(path: Path) -> Khilaf:
+def load_khilaf(
+    path: Path,
+    registers: dict[str, tuple[VariantSpan, ...]] | None = None,
+) -> Khilaf:
     if not path.exists():
         return EMPTY
     data = load_yaml(path)
@@ -142,7 +154,7 @@ def load_khilaf(path: Path) -> Khilaf:
         )
     raw = data["variants"]
     definitions = _definitions(raw, path)
-    catalogue = _catalogue(data["catalogue"], definitions, path)
+    catalogue = _catalogue(data["catalogue"], definitions, registers or {}, path)
     raa = _sited(
         raw, definitions, _points_of_kind(raw, definitions, "raa_weight"),
         HEAVY, path,
@@ -185,7 +197,7 @@ def load_khilaf(path: Path) -> Khilaf:
     )
 
 
-def _catalogue(raw, definitions, path):
+def _catalogue(raw, definitions, registers, path):
     if set(raw) != {point.value for point in definitions}:
         missing = sorted({point.value for point in definitions} - set(raw))
         extra = sorted(set(raw) - {point.value for point in definitions})
@@ -193,13 +205,28 @@ def _catalogue(raw, definitions, path):
     result = {}
     for point in definitions:
         spec = raw[point.value]
+        where = f"{path} catalogue[{point.value}]"
         require_keys(
             spec,
             {"group", "display_name", "website_visible"},
-            optional={"description", "occurrences", "dynamic_scope"},
-            name=f"{path} catalogue[{point.value}]",
+            optional={
+                "description", "occurrences", "dynamic_scope", "subgroup",
+                "register",
+            },
+            name=where,
         )
+        sources = [
+            key for key in ("occurrences", "register", "dynamic_scope")
+            if spec.get(key)
+        ]
+        if len(sources) > 1:
+            raise KhilafError(f"{where}: {sources} are mutually exclusive")
         spans = tuple(_span(value) for value in spec.get("occurrences", ()))
+        if spec.get("register"):
+            name = str(spec["register"])
+            if name not in registers:
+                raise KhilafError(f"{where}: unknown register {name!r}")
+            spans = registers[name]
         result[point] = VariantCatalogueEntry(
             point,
             str(spec["group"]),
@@ -208,6 +235,7 @@ def _catalogue(raw, definitions, path):
             bool(spec["website_visible"]),
             spans,
             str(spec["dynamic_scope"]) if spec.get("dynamic_scope") else None,
+            str(spec["subgroup"]) if spec.get("subgroup") else None,
         )
     return result
 

@@ -14,8 +14,8 @@ reading.
 | cross-script, word | 99.997% | 2 words |
 | cross-script, verse | **100.000%** | none |
 | round-trip, uthmani | **100.000%** | none |
-| regression, word | 99.919% | 63 words |
-| regression, verse | 97.850% | see below |
+| regression, word | 99.910% | 70 words |
+| regression, verse | 97.839% | see below |
 | L1 | 17 rows over 287,057 slots | |
 | attestations | 176 uthmani, 237 indopak | |
 
@@ -30,31 +30,33 @@ forces separates them.
 | 26:61:2 | `تَرَآءَا` | `تَرَآءَ` | `tarˤaˤ:ʔa lʒamʕa:ni` both |
 | 59:9:2 | `تَبَوَّءُو` | `تَبَوَّءُ` | `tabawwaʔu dda:rˤaˤ` both |
 
-## Regression — 63 words
+## Regression — 70 words
 
 The oracle is the previous implementation with its own defects frozen in, so
 this gate is a change detector and not a target. Every row is one of six
 classes, and each class is a disagreement whose direction is established
 independently of the oracle.
 
-**19 + 4 — the small yaa and the small waw** (`يُحْىِۦ`, `وَلِىِّۦ`,
+**20 + 3 — the small yaa and the small waw** (`يُحْىِۦ`, `وَلِىِّۦ`,
 `تَلْوُۥٓا۟`, `فَأْوُۥٓا۟`, `لِتَسْتَوُۥا۟`). Uthmani writes the vowel with
 `ۦ` and `ۥ`; the oracle drops it and ends the word on the consonant. `juħj`
 for `يُحْىِۦ` says no vowel is written where one is.
 
-`ءَاتَىٰنَِۧ` 27:36 left this class: both scripts write its yaa small where
-19:30 writes the same word's full, so it is a khilaf site and hadhf is the
-default. The oracle agrees.
+The twentieth yaa row is `ءَاتَىٰنَِۧ` 27:36, the `yaa_aatani_waqf` khilaf
+site: the published default is ithbat, which sounds the final yaa at the
+stop, while the oracle drops it. The hadhf face remains selectable.
 
 **11 — the quiescent hamza after a prosthetic one** (`ٱئْتِ`, `ٱئْتُوا۟`,
 `ٱئْذَن`, `ٱؤْتُمِنَ`). Read alone, every one of these is started on, and a
 quiescent hamza after a started prosthetic one becomes the madd of its
 vowel: `ʔi:ti`, not `ʔiʔti`.
 
-**10 — the disputed raa** (`مِصْرَ` ×4 heavy, `يَسْرِ`/`أَسْرِ`/`فَأَسْرِ` ×6
-light). `hafs/research/tafkheem-tarqeeq.md` §2G tabulates both defaults
-and records that the oracle's mechanical rule diverges from them at 89:4. All
-ten are khilaf sites, so the other wajh is selectable.
+**16 — the disputed raa** (`مِصْرَ` ×4 heavy, `يَسْرِ`/`أَسْرِ`/`فَأَسْرِ`
+×6 light, `وَنُذُرِ` ×6 light). `hafs/research/tafkheem-tarqeeq.md` §2G
+tabulates the defaults and records that the oracle's mechanical rule
+diverges from them at 89:4; the oracle also reads the six `raa_wanuthur_waqf`
+endings heavy where the published default is light. All sixteen are khilaf
+sites, so the other wajh is selectable.
 
 **2 — the seen-default Seen/Saad sites** (`يَبْصُطُ` 2:245:14,
 `بَصْطَةً` 7:69:22). The written small seen is above the saad at both sites,
@@ -147,7 +149,9 @@ its idgham-with-naql face is implemented.
 
 ## Verse mode
 
-97.850% counts a word wrong when a sound merged across a boundary is credited
+97.839% counts a word wrong when a sound merged across a boundary is credited
 to the neighbour; the harness prints the phoneme sequence separately, and
-that is 77,430 of 77,433. The three words left are the two Seen/Saad sites
-above and `يَسْرِ` at 89:4, already listed under the disputed raa.
+that is 77,424 of 77,433. The nine words left are the two Seen/Saad sites
+above, `يَسْرِ` at 89:4, and the six verse-final `وَنُذُرِ` endings, all
+already listed under the disputed raa. `ءَاتَىٰنَِۧ` does not appear: it is
+mid-verse, so verse mode joins it and the waqf-only selector is masked.
