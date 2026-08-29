@@ -41,7 +41,6 @@ from .khilaf import SitedKhilaf, vocalised_word
 #: The glide's own drop, so its occurrence does not collide with the drop
 #: of the haraka written on the same letter.
 _GLIDE_VARIANT = 1
-_IQLAB_MARK_VARIANT = 2
 
 
 @dataclass(frozen=True, slots=True)
@@ -80,41 +79,6 @@ class WaqfHarakaDrop:
         if not _takes_the_stop(near, at, word, _omitted_glide(self.yaa, near, word)):
             return None
         return Verdict(_drop(at, word), (Silence(at, Aspect.VOWEL),))
-
-
-@dataclass(frozen=True, slots=True)
-class WaqfIqlabMarkDrop:
-    """A native iqlab mark on final noon is inactive at waqf."""
-
-    rule: Rule = Rule.WAQF_DIACRITIC_DROP
-    phase: Phase = Phase.BOUNDARY
-    triggers: frozenset = frozenset({CanonLetter.NOON})
-    emits: frozenset = frozenset({Rule.WAQF_DIACRITIC_DROP})
-
-    def look(
-        self,
-        near: Neighbourhood,
-        plan: Plan,
-        at: SlotId,
-        boundaries: BoundaryPlan,
-    ) -> Verdict | None:
-        del plan
-        slot, word = near.slot(at), near.word_of(at)
-        if (
-            slot is None
-            or word is None
-            or Annotation.IQLAB_WITNESS not in slot.annotations
-            or not near.last_of_word(at)
-            or not boundaries.stopped_on(word)
-        ):
-            return None
-        occurrence = Occurrence(
-            mint(Rule.WAQF_DIACRITIC_DROP, at, _IQLAB_MARK_VARIANT),
-            Rule.WAQF_DIACRITIC_DROP,
-            (at,),
-            boundary=word,
-        )
-        return Verdict(occurrence, ())
 
 
 @dataclass(frozen=True, slots=True)

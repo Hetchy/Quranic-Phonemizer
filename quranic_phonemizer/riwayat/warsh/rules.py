@@ -14,7 +14,6 @@ from ...rules.boundary import (
     TanweenDrop,
     TanweenIwad,
     WaqfHarakaDrop,
-    WaqfIqlabMarkDrop,
     WaqfSilahDrop,
 )
 from ...rules.idgham import Idgham
@@ -50,6 +49,7 @@ from ...rules.wasl import (
     TanweenBeforeWasl,
     WaslHamza,
 )
+from ...rules.waqf_marks import WaqfIqlabMarkDrop
 from .resources import khilaf, lexicon, rule_tables
 from .hamza_meetings import meeting_rows, rows_by_target
 from .lam import PROFILE as LAM_PROFILE
