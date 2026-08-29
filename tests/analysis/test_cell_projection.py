@@ -801,8 +801,8 @@ def test_warsh_native_iqlab_meem_is_its_own_source_backed_cell():
     assert occurrence.id not in tanween.rule_occurrence_ids
 
 
-def test_stopped_warsh_native_iqlab_meem_is_not_variant_silence():
-    """A written iqlab mark is not an implicit recitation variant handoff."""
+def test_stopped_warsh_native_iqlab_meem_keeps_its_waqf_rule():
+    """A written iqlab mark keeps the explicit rule that stops it."""
     session, bundle, view = _build_warsh(
         "2:9-2:10", stop_refs=("2:9:9",)
     )
@@ -816,11 +816,9 @@ def test_stopped_warsh_native_iqlab_meem_is_not_variant_silence():
         for occurrence in bundle.rule_occurrences
     }
 
-    assert meem.silence not in {
-        LiteralSilence.ORTHOGRAPHIC, LiteralSilence.VARIANT,
-    }
+    assert meem.silence is not LiteralSilence.ORTHOGRAPHIC
     assert rules[meem.silence] == "waqf_diacritic_drop"
-    assert cell.silence is not LiteralSilence.VARIANT
+    assert cell.silence is not LiteralSilence.ORTHOGRAPHIC
     assert rules[cell.silence] == "waqf_diacritic_drop"
 
 

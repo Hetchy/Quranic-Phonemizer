@@ -283,8 +283,8 @@ def test_a_silent_rasm_alif_is_a_dropped_letter_by_orthography(hafs):
 
 def test_the_seen_sad_pair_is_two_columns_carrying_the_variant_on_both(hafs):
     """Where the script writes the mini seen the site has two columns, one main
-    and one riding it; the base always aligns the sound, while selecting saad
-    applies variant silence only to the mini seen."""
+    and one riding it; the selected letter owns the sound and the other remains
+    present and soundless without a silence reason."""
     for choice in ("seen", "saad"):
         selection = VariantSelection(
             (Option(KhilafId.YABSUT, choice),)
@@ -300,17 +300,16 @@ def test_the_seen_sad_pair_is_two_columns_carrying_the_variant_on_both(hafs):
         base = next(c for c in pair if c.tier is CellTier.MAIN)
         assert riding.attached_to_column_id == base.id
         assert base.status is CellStatus.PRESENT
-        assert base.silence is None
-        assert base.owned_sound_ids
-        assert not riding.owned_sound_ids
         if choice == "seen":
-            assert riding.status is CellStatus.PRESENT
+            assert riding.owned_sound_ids and not base.owned_sound_ids
             assert riding.silence is None
-            assert riding.presented_sound_ids == base.owned_sound_ids
+            assert base.silence is None
         else:
-            assert riding.status is CellStatus.PRESENT
-            assert riding.silence is LiteralSilence.VARIANT
-            assert not riding.presented_sound_ids
+            assert base.owned_sound_ids and not riding.owned_sound_ids
+            assert base.silence is None
+            assert riding.silence is None
+        assert base.status is CellStatus.PRESENT
+        assert riding.status is CellStatus.PRESENT
 
 
 def test_the_default_seen_sad_site_is_two_columns_without_a_variant(hafs):

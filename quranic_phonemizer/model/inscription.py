@@ -114,7 +114,7 @@ class SilenceReason(StrEnum):
     an optional one off. Either way the spelling is the whole of it."""
 
     ORTHOGRAPHIC = "orthographic_silence"
-    VARIANT = "variant_silence"
+    VARIANT = "_variant_omission"
 
 
 class StopAdvice(StrEnum):

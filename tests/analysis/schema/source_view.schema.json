@@ -135,8 +135,7 @@
             },
             {
               "enum": [
-                "orthographic_silence",
-                "variant_silence"
+                "orthographic_silence"
               ],
               "type": "string"
             },

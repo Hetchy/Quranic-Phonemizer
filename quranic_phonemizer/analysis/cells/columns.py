@@ -16,7 +16,7 @@ from ..facts import AnalysisFacts, analyse
 from ..ids import CellColumnId
 from ..inscription import InscriptionFacts, inscribe
 from ..source import build_source_view
-from ..source_dtos import LetterUnit, LetterUnitKind, LiteralSilence, SourceView
+from ..source_dtos import LetterUnit, LetterUnitKind, SourceView
 from .align import build_cell_sounds
 from .dtos import CellColumn, CellRole, CellStatus, CellTier, CellWord
 from .laws import validate_cell_columns, validate_cell_sounds
@@ -24,7 +24,6 @@ from .spelled import expand_spelled_words
 
 
 _MINI_MEEM = frozenset({"ۢ", "ۭ"})
-_MINI_SEEN = frozenset({"ۜ", "ۣ"})
 
 
 @dataclass(frozen=True, slots=True)
@@ -225,16 +224,7 @@ def _column(unit: LetterUnit, reading: _Reading,
         seat = _seat_unit(unit, reading)
         attached = None if seat is None else CellColumnId(column_of_unit[seat])
     option = reading.variant_of_unit.get(unit.id.value)
-    visible_variant_mark = (
-        option is not None
-        and unit.text in _MINI_SEEN
-        and unit.silence is LiteralSilence.VARIANT
-    )
-    status = (
-        CellStatus.PRESENT
-        if unit.silence is None or visible_variant_mark
-        else CellStatus.DROPPED
-    )
+    status = CellStatus.DROPPED if unit.silence is not None else CellStatus.PRESENT
     return CellColumn(
         id=CellColumnId(column_of_unit[unit.id.value]),
         role=role,

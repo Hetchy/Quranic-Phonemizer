@@ -22,7 +22,7 @@ from .inscription import InscriptionFacts, Witnessed
 from .source_dtos import LetterUnitKind, LiteralSilence, Silence
 from .source_units import Tokenization
 
-#: The only riding letters whose active or silent state denotes a variant.
+#: The only riding letters whose unread half denotes a recitation variant.
 #: Other source-backed tajweed marks (notably Warsh's native iqlab meem) may
 #: ride a host too, but that geometric relation is not a variant handoff.
 _MINI_SEEN = frozenset({"ۜ", "ۣ"})
@@ -66,19 +66,14 @@ def _slot_letter(facts: AnalysisFacts, slot: SlotId) -> CanonLetter:
 
 
 def _paired_owner(facts, tok, insc, slot: SlotId, base: int) -> int:
-    """Resolve a riding pronunciation letter's owner.
-
-    A seen/saad mini seen changes the base saad's realization but never becomes
-    its sound host.  Other riding letters retain the native ownership rule.
-    """
+    """A base letter and the mini seen written on it are a seen/saad pair; the
+    read half is the one whose letter is the slot's, the other stays silent."""
     marks = [
         i for i, unit in enumerate(tok.units)
         if unit.written_on_anchor is not None
         and tok.unit_of_anchor.get(unit.written_on_anchor) == base
     ]
     if not marks:
-        return base
-    if any(index in _mini_seen_units(tok, insc) for index in marks):
         return base
     base_letter = _LETTER_OF_BASE.get(insc.glyphs[tok.units[base].anchor].char)
     return base if base_letter is _slot_letter(facts, slot) else marks[0]
@@ -143,19 +138,6 @@ def _present_carrier_vowel(
         presenters[sound].add(vowel)
 
 
-def _present_active_seen_mark(facts, tok, insc, slot, sound, owner, presenters):
-    """The mini seen announces /s/ while the base saad remains its host."""
-    if _slot_letter(facts, slot) is not CanonLetter.SEEN:
-        return
-    for index in _mini_seen_units(tok, insc):
-        unit = tok.units[index]
-        if (
-            unit.written_on_anchor is not None
-            and tok.unit_of_anchor.get(unit.written_on_anchor) == owner
-        ):
-            presenters[sound].add(index)
-
-
 def _naql_witness_unit(facts, tok, insc, edge) -> int | None:
     if (
         edge.by is None
@@ -190,11 +172,6 @@ def _owners_and_presenters(facts, tok, insc, carriers):
             if edge.aspect is Aspect.VOWEL:
                 _present_carrier_vowel(
                     facts, tok, carriers, edge.slots[0], edge.sound,
-                    unit, presenters,
-                )
-            else:
-                _present_active_seen_mark(
-                    facts, tok, insc, edge.slots[0], edge.sound,
                     unit, presenters,
                 )
     for edge in facts.insertions:
@@ -253,6 +230,20 @@ def _silenced_units(facts, tok) -> dict[int, int]:
     return out
 
 
+def _variant_omitted_units(facts, tok) -> frozenset[int]:
+    """Variant choices can omit a written unit without publishing a rule."""
+    out: set[int] = set()
+    for slot, aspect in facts.variant_omissions:
+        unit = (
+            tok.roles.vowel.get(slot, tok.roles.letter.get(slot))
+            if aspect is Aspect.VOWEL
+            else tok.roles.letter.get(slot)
+        )
+        if unit is not None:
+            out.add(unit)
+    return frozenset(out)
+
+
 def _shortened_units(facts, tok, insc) -> dict[int, int]:
     """Unit -> the occurrence whose rule shortened its length carrier."""
     return {
@@ -301,10 +292,10 @@ def ownership(
     owner, presenters = _owners_and_presenters(facts, tok, insc, carriers)
     sounding = set(owner.values()) | {u for us in presenters.values() for u in us}
     silenced_by = _silenced_units(facts, tok)
+    variant_omitted = _variant_omitted_units(facts, tok)
     shortened = _shortened_units(facts, tok, insc)
     riding_pairs = _riding_pair_units(tok)
     variant_pairs = _variant_pair_units(tok, insc)
-    mini_seen = _mini_seen_units(tok, insc)
     orthographic = _orthographic_units(facts, tok, insc)
     seats = _orthographic_seats(tok)
     silence: dict[int, Silence] = {}
@@ -316,15 +307,8 @@ def ownership(
                 silence[index] = silenced_by[index]
             elif index in shortened:
                 silence[index] = shortened[index]
-            elif index in variant_pairs:
-                active_seen = (
-                    index in mini_seen
-                    and unit.slot is not None
-                    and _slot_letter(facts, unit.slot) is CanonLetter.SEEN
-                )
-                silence[index] = (
-                    None if active_seen else LiteralSilence.VARIANT
-                )
+            elif index in variant_pairs or index in variant_omitted:
+                silence[index] = None
             elif index in orthographic or index in seats or index in riding_pairs:
                 silence[index] = LiteralSilence.ORTHOGRAPHIC
             else:

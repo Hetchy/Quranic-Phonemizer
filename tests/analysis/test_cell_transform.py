@@ -26,7 +26,6 @@ from quranic_phonemizer.analysis.dtos import BoundaryState
 from quranic_phonemizer.analysis.facts import analyse
 from quranic_phonemizer.analysis.ids import LetterUnitId
 from quranic_phonemizer.analysis.source import build_source_view
-from quranic_phonemizer.analysis.source_dtos import LiteralSilence
 from quranic_phonemizer.model.address import (
     KhilafId, Option, Riwayah, Script, VariantSelection, VerseRef,
 )
@@ -237,23 +236,36 @@ def test_the_source_spelling_is_unchanged(hafs, pen):
 
 # ---- the seen/saad variant carries onto the transformed cells ----
 
+@pytest.mark.parametrize(
+    ("ref", "variant_id"),
+    [
+        ("2:245:14", KhilafId.YABSUT),
+        ("7:69:22", KhilafId.BASTAH),
+        ("52:37:7", KhilafId.ALMUSAYTIRUN),
+    ],
+)
 @pytest.mark.parametrize("choice", ("seen", "saad"))
-def test_the_seen_sad_pair_carries_the_variant(hafs, pen, choice):
+def test_the_seen_sad_pair_carries_the_variant(
+    hafs, pen, ref, variant_id, choice
+):
     """At a selected seen/saad khilaf both cells of the pair carry the variant;
-    the base hosts the sound and the mini seen stays visible in both faces."""
-    selection = VariantSelection((Option(KhilafId.YABSUT, choice),))
-    view, source, session = _build(hafs, pen, "2:245:14", {}, selection)
-    pair = [c for c in _columns(view) if c.variant_id == KhilafId.YABSUT]
+    the selected letter hosts the sound and the other stays visibly silent."""
+    selection = VariantSelection((Option(variant_id, choice),))
+    view, source, session = _build(hafs, pen, ref, {}, selection)
+    pair = [c for c in _columns(view) if c.variant_id == variant_id]
     assert len(pair) == 2
     assert all(c.variant_choice == choice for c in pair)
     base = next(c for c in pair if c.tier is CellTier.MAIN)
     mini_seen = next(c for c in pair if c.tier is not CellTier.MAIN)
-    assert base.status is CellStatus.PRESENT and base.owned_sound_ids
     assert mini_seen.text in {"ۜ", "ۣ"}
-    assert mini_seen.status is CellStatus.PRESENT
-    assert mini_seen.silence is (
-        None if choice == "seen" else LiteralSilence.VARIANT
+    active, silent = (
+        (mini_seen, base) if choice == "seen" else (base, mini_seen)
     )
+    assert active.owned_sound_ids and active.silence is None
+    assert not silent.owned_sound_ids
+    assert silent.silence is None
+    assert base.status is CellStatus.PRESENT
+    assert mini_seen.status is CellStatus.PRESENT
     validate_transformed(view, source, session.performance.selection)
 
 

@@ -535,19 +535,24 @@ def _omit_inactive_sakt_marks(
     words: tuple[CellWord, ...],
 ) -> tuple[CellWord, ...]:
     """An unselected sakt sign has no transformed word cell."""
-    return tuple(
-        replace(
-            word,
-            columns=tuple(
-                col for col in word.columns
-                if not (
-                    col.text in {"ۜ", "ۣ"}
-                    and col.status is CellStatus.DROPPED
+    out = []
+    for word in words:
+        by_id = {col.id: col for col in word.columns}
+        columns = tuple(
+            col for col in word.columns
+            if not (
+                col.text in {"ۜ", "ۣ"}
+                and not col.owned_sound_ids
+                and not col.presented_sound_ids
+                and col.variant_id is None
+                and not (
+                    col.attached_to_column_id is not None
+                    and by_id[col.attached_to_column_id].text.startswith("ص")
                 )
-            ),
+            )
         )
-        for word in words
-    )
+        out.append(replace(word, columns=columns))
+    return tuple(out)
 
 
 def _split_unwritten_short_vowels(words, facts, slot_of_unit, insc, pen):
