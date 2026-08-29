@@ -1,8 +1,298 @@
 # Scalar Warsh choices. Selector families land per owner-family PR; an ID
 # is published here only once its rules bind, so the catalogue never carries
-# a silent no-op selector.
+# a silent no-op selector. Runtime raa site keys live in the authored
+# registers of riwayat/warsh/raa.py; this file owns options, defaults, and
+# the public catalogue.
 schema_version: 3
 
-variants: {}
+variants:
+  raa_firq:
+    kind: raa_site
+    options: [light, heavy]
+    default: light
+    source: docs/warsh/research/v2/raa.md
 
-catalogue: {}
+  raa_alqitr_waqf:
+    kind: raa_site
+    options: [light, heavy]
+    default: light
+    source: docs/warsh/research/v2/raa.md
+
+  raa_misr_waqf:
+    kind: raa_site
+    options: [heavy, light]
+    default: heavy
+    source: docs/warsh/research/v2/raa.md
+
+  raa_wanuthur_waqf:
+    kind: raa_site
+    options: [light, heavy]
+    default: light
+    source: docs/warsh/research/v2/raa.md
+
+  raa_yasr_waqf:
+    kind: raa_site
+    options: [light, heavy]
+    default: light
+    source: docs/warsh/research/v2/raa.md
+
+  raa_asr_waqf:
+    kind: raa_site
+    options: [heavy, light]
+    default: heavy
+    source: docs/warsh/research/v2/raa.md
+
+  raa_fathatan:
+    kind: raa_systematic
+    options: [light, heavy_wasl, heavy]
+    default: light
+    source: docs/warsh/research/v2/raa.md
+
+  raa_damma:
+    kind: raa_systematic
+    options: [light, heavy]
+    default: light
+    source: docs/warsh/research/v2/raa.md
+
+  raa_ishruna_kibr:
+    kind: raa_site
+    options: [light, heavy]
+    default: light
+    source: docs/warsh/research/v2/raa.md
+
+  raa_alishraq:
+    kind: raa_site
+    options: [heavy, light]
+    default: heavy
+    source: docs/warsh/research/v2/raa.md
+
+  raa_hayran:
+    kind: raa_site
+    options: [heavy, light]
+    default: heavy
+    source: docs/warsh/research/v2/raa.md
+
+  raa_bisharar:
+    kind: raa_site
+    options: [light, heavy]
+    default: light
+    source: docs/warsh/research/v2/raa.md
+
+  raa_five_words:
+    kind: raa_site
+    options: [heavy, light]
+    default: heavy
+    source: docs/warsh/research/v2/raa.md
+
+  raa_sihra:
+    kind: raa_site
+    options: [heavy, light]
+    default: heavy
+    source: docs/warsh/research/v2/raa.md
+
+  raa_iram:
+    kind: raa_site
+    options: [heavy, light]
+    default: heavy
+    source: docs/warsh/research/v2/raa.md
+
+  raa_alif_ayn:
+    kind: raa_site
+    options: [light, heavy]
+    default: light
+    source: docs/warsh/research/v2/raa.md
+
+  raa_alif_hamza:
+    kind: raa_site
+    options: [light, heavy]
+    default: light
+    source: docs/warsh/research/v2/raa.md
+
+  raa_dual_alif:
+    kind: raa_site
+    options: [light, heavy]
+    default: light
+    source: docs/warsh/research/v2/raa.md
+
+  raa_ashiratukum:
+    kind: raa_site
+    options: [light, heavy]
+    default: light
+    source: docs/warsh/research/v2/raa.md
+
+  raa_wizraka:
+    kind: raa_site
+    options: [light, heavy]
+    default: light
+    source: docs/warsh/research/v2/raa.md
+
+  raa_dhikraka:
+    kind: raa_site
+    options: [light, heavy]
+    default: light
+    source: docs/warsh/research/v2/raa.md
+
+  raa_wizra_ukhra:
+    kind: raa_site
+    options: [light, heavy]
+    default: light
+    source: docs/warsh/research/v2/raa.md
+
+  raa_ijrami:
+    kind: raa_site
+    options: [light, heavy]
+    default: light
+    source: docs/warsh/research/v2/raa.md
+
+  raa_hidhrakum:
+    kind: raa_site
+    options: [light, heavy]
+    default: light
+    source: docs/warsh/research/v2/raa.md
+
+  raa_ibrah_kibrahu:
+    kind: raa_site
+    options: [light, heavy]
+    default: light
+    source: docs/warsh/research/v2/raa.md
+
+  raa_hasirat_suduruhum:
+    kind: raa_site
+    options: [light, heavy]
+    default: light
+    source: docs/warsh/research/v2/raa.md
+
+catalogue:
+  raa_firq:
+    {group: raa_pronunciation, subgroup: lexical, display_name: "Raa Firq",
+     website_visible: true, register: raa_firq}
+  raa_alqitr_waqf:
+    {group: raa_pronunciation, subgroup: lexical,
+     display_name: "Raa Alqitr Waqf", website_visible: true,
+     register: raa_alqitr_waqf}
+  raa_misr_waqf:
+    {group: raa_pronunciation, subgroup: lexical,
+     display_name: "Raa Misr Waqf", website_visible: true,
+     register: raa_misr_waqf}
+  raa_wanuthur_waqf:
+    group: raa_pronunciation
+    subgroup: lexical
+    display_name: "Raa Wanuthur Waqf"
+    description: "The six وَنُذُرِ endings in Surah al-Qamar."
+    website_visible: true
+    register: raa_wanuthur_waqf
+  raa_yasr_waqf:
+    {group: raa_pronunciation, subgroup: lexical,
+     display_name: "Raa Yasr Waqf", website_visible: true,
+     register: raa_yasr_waqf}
+  raa_asr_waqf:
+    group: raa_pronunciation
+    subgroup: lexical
+    display_name: "Raa Asr Waqf"
+    description: "The three فَاسْرِ sites; both اِ۪سْرِ sites are fixed light."
+    website_visible: true
+    register: raa_asr_waqf
+  raa_fathatan:
+    group: raa_pronunciation
+    subgroup: systematic
+    display_name: "Raa Fathatan"
+    description: "Eligible raa carrying fathatan, such as خَيْراٗ."
+    website_visible: true
+    dynamic_scope: eligible_fathatan
+  raa_damma:
+    group: raa_pronunciation
+    subgroup: systematic
+    display_name: "Raa Damma"
+    description: "Eligible raa carrying damma or dammatan, such as خَيْرٞ."
+    website_visible: true
+    dynamic_scope: eligible_damma
+  raa_ishruna_kibr:
+    group: raa_pronunciation
+    subgroup: lexical
+    display_name: "Raa Ishruna Kibr"
+    description: "عِشْرُونَ and كِبْرٞ."
+    website_visible: true
+    register: raa_ishruna_kibr
+  raa_alishraq:
+    {group: raa_pronunciation, subgroup: lexical,
+     display_name: "Raa Alishraq", website_visible: true,
+     register: raa_alishraq}
+  raa_hayran:
+    {group: raa_pronunciation, subgroup: lexical,
+     display_name: "Raa Hayran", website_visible: true,
+     register: raa_hayran}
+  raa_bisharar:
+    {group: raa_pronunciation, subgroup: lexical,
+     display_name: "Raa Bisharar", website_visible: true,
+     register: raa_bisharar}
+  raa_five_words:
+    group: raa_pronunciation
+    subgroup: lexical
+    display_name: "Raa Five Words"
+    description: "All ذِكْراٗ, سِتْراٗ, اِمْراٗ, وِزْراً, and حِجْراٗ forms."
+    website_visible: true
+    register: raa_five_words
+  raa_sihra:
+    {group: raa_pronunciation, subgroup: lexical,
+     display_name: "Raa Sihra", website_visible: true, register: raa_sihra}
+  raa_iram:
+    {group: raa_pronunciation, subgroup: lexical,
+     display_name: "Raa Iram", website_visible: true, register: raa_iram}
+  raa_alif_ayn:
+    group: raa_pronunciation
+    subgroup: lexical
+    display_name: "Raa Alif Ayn"
+    description: "ذِرَاعَيْهِ, سِرَاعاٗ, and ذِرَاعاٗ."
+    website_visible: true
+    register: raa_alif_ayn
+  raa_alif_hamza:
+    group: raa_pronunciation
+    subgroup: lexical
+    display_name: "Raa Alif Hamza"
+    description: "The two اَ۪فْتِرَآءً forms and مِرَآءٗ."
+    website_visible: true
+    register: raa_alif_hamza
+  raa_dual_alif:
+    group: raa_pronunciation
+    subgroup: lexical
+    display_name: "Raa Dual Alif"
+    description: "طَهِّرَا, لَسَٰحِرَٰنِ, سَٰحِرَٰنِ, and تَنتَصِرَٰنِ."
+    website_visible: true
+    register: raa_dual_alif
+  raa_ashiratukum:
+    {group: raa_pronunciation, subgroup: lexical,
+     display_name: "Raa Ashiratukum", website_visible: true,
+     register: raa_ashiratukum}
+  raa_wizraka:
+    {group: raa_pronunciation, subgroup: lexical,
+     display_name: "Raa Wizraka", website_visible: true,
+     register: raa_wizraka}
+  raa_dhikraka:
+    {group: raa_pronunciation, subgroup: lexical,
+     display_name: "Raa Dhikraka", website_visible: true,
+     register: raa_dhikraka}
+  raa_wizra_ukhra:
+    {group: raa_pronunciation, subgroup: lexical,
+     display_name: "Raa Wizra Ukhra", website_visible: true,
+     register: raa_wizra_ukhra}
+  raa_ijrami:
+    {group: raa_pronunciation, subgroup: lexical,
+     display_name: "Raa Ijrami", website_visible: true, register: raa_ijrami}
+  raa_hidhrakum:
+    group: raa_pronunciation
+    subgroup: lexical
+    display_name: "Raa Hidhrakum"
+    description: "The two حِذْرَكُمْ forms; حِذْرَهُمْ is fixed light."
+    website_visible: true
+    register: raa_hidhrakum
+  raa_ibrah_kibrahu:
+    group: raa_pronunciation
+    subgroup: lexical
+    display_name: "Raa Ibrah Kibrahu"
+    description: "The عِبْرَة and لَعِبْرَة sites plus كِبْرَهُ."
+    website_visible: true
+    register: raa_ibrah_kibrahu
+  raa_hasirat_suduruhum:
+    {group: raa_pronunciation, subgroup: lexical,
+     display_name: "Raa Hasirat Suduruhum", website_visible: true,
+     register: raa_hasirat_suduruhum}

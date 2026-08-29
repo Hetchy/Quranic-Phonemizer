@@ -1,7 +1,7 @@
 """Load a riwayah's scalar khilaf catalogue and runtime sites."""
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 from ..canon.khilaf import (
@@ -77,6 +77,9 @@ class Khilaf:
     yaa: SitedKhilaf
     canonical: CanonicalKhilaf
     catalogue: dict[KhilafId, VariantCatalogueEntry]
+    dynamic_sites: dict = field(default_factory=dict)
+    """Scope name to resolver callable over (score, boundaries), yielding
+    (selector id, word index) pairs for occurrences no authored list holds."""
 
     def definition(self, khilaf: KhilafId) -> VariantDefinition:
         try:
@@ -142,6 +145,7 @@ EMPTY = Khilaf({}, SitedKhilaf(), SitedKhilaf(), CanonicalKhilaf(), {})
 def load_khilaf(
     path: Path,
     registers: dict[str, tuple[VariantSpan, ...]] | None = None,
+    dynamic_sites: dict | None = None,
 ) -> Khilaf:
     if not path.exists():
         return EMPTY
@@ -194,6 +198,7 @@ def load_khilaf(
         yaa,
         CanonicalKhilaf(VowelKhilaf(vowels), letters, madd, tamanna, salasila, sakt),
         catalogue,
+        dynamic_sites or {},
     )
 
 

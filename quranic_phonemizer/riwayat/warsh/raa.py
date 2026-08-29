@@ -1,11 +1,18 @@
 """Authored al-Azraq raa registers and their fixed profile."""
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
-from ...model.address import Location, SourceLocation
+from ...model.address import KhilafId, Location, SourceLocation
 from ...model.canon import CanonLetter as L
-from ...rules.raa import RaaKey, RaaProfile
+from ...rules.raa import (
+    RaaChoice,
+    RaaKey,
+    RaaProfile,
+    SystematicChoice,
+    systematic_sites,
+)
+from ..khilaf import VariantSpan
 
 _ARTIFACT = "king-fahd-warsh-v2"
 
@@ -17,15 +24,17 @@ class RaaSite:
     canonical: Location
     text: str
     raa: int = 1
+    junction: str | None = None
 
     @property
     def key(self) -> RaaKey:
         return self.canonical, self.raa
 
 
-def _site(owner, source, canonical, text, raa=1) -> RaaSite:
+def _site(owner, source, canonical, text, raa=1, junction=None) -> RaaSite:
     return RaaSite(
-        owner, SourceLocation(_ARTIFACT, *source), Location(*canonical), text, raa
+        owner, SourceLocation(_ARTIFACT, *source), Location(*canonical), text,
+        raa, junction,
     )
 
 
@@ -228,4 +237,195 @@ PROFILE = RaaProfile(
 )
 
 
-__all__ = ["BY_OWNER", "PROFILE", "RaaKey", "RaaSite", "SITES"]
+#: Junction each selector's dispute lives in; a site row may override it.
+SELECTOR_JUNCTIONS = {
+    "raa_firq": "all",
+    "raa_alqitr_waqf": "waqf",
+    "raa_misr_waqf": "waqf",
+    "raa_wanuthur_waqf": "waqf",
+    "raa_yasr_waqf": "waqf",
+    "raa_asr_waqf": "waqf",
+    "raa_ishruna_kibr": "all",
+    "raa_alishraq": "all",
+    "raa_hayran": "all",
+    "raa_bisharar": "all",
+    "raa_five_words": "all",
+    "raa_sihra": "all",
+    "raa_iram": "all",
+    "raa_alif_ayn": "all",
+    "raa_alif_hamza": "all",
+    "raa_dual_alif": "all",
+    "raa_ashiratukum": "all",
+    "raa_wizraka": "all",
+    "raa_dhikraka": "all",
+    "raa_wizra_ukhra": "wasl",
+    "raa_ijrami": "all",
+    "raa_hidhrakum": "all",
+    "raa_ibrah_kibrahu": "all",
+    "raa_hasirat_suduruhum": "wasl",
+}
+
+#: The two-word selectors whose occurrence continues into the next word.
+PAIR_SELECTORS = frozenset({"raa_wizra_ukhra", "raa_hasirat_suduruhum"})
+
+SELECTOR_SITES = (
+    _site("raa_firq", (26, 63, 11), (26, 63, 11), "فِرْقٖ"),
+    _site("raa_alqitr_waqf", (34, 12, 10), (34, 12, 10), "اَ۬لْقِطْرِۖ"),
+    _site("raa_misr_waqf", (10, 87, 8), (10, 87, 8), "بِمِصْرَ"),
+    _site("raa_misr_waqf", (12, 21, 5), (12, 21, 5), "مِّصْرَ"),
+    _site("raa_misr_waqf", (12, 99, 10), (12, 99, 10), "مِصْرَ"),
+    _site("raa_misr_waqf", (43, 50, 10), (43, 51, 10), "مِصْرَ"),
+    _site("raa_wanuthur_waqf", (54, 16, 4), (54, 16, 4), "وَنُذُرِۦۖ"),
+    _site("raa_wanuthur_waqf", (54, 18, 6), (54, 18, 6), "وَنُذُرِۦٓۖ"),
+    _site("raa_wanuthur_waqf", (54, 21, 4), (54, 21, 4), "وَنُذُرِۦۖ"),
+    _site("raa_wanuthur_waqf", (54, 30, 4), (54, 30, 4), "وَنُذُرِۦٓۖ"),
+    _site("raa_wanuthur_waqf", (54, 37, 9), (54, 37, 9), "وَنُذُرِۦۖ"),
+    _site("raa_wanuthur_waqf", (54, 39, 3), (54, 39, 3), "وَنُذُرِۦۖ"),
+    _site("raa_yasr_waqf", (89, 4, 3), (89, 4, 3), "يَسْرِۦ"),
+    _site("raa_asr_waqf", (11, 80, 9), (11, 81, 9), "فَاسْرِ"),
+    _site("raa_asr_waqf", (15, 65, 1), (15, 65, 1), "فَاسْرِ"),
+    _site("raa_asr_waqf", (44, 22, 1), (44, 23, 1), "فَاسْرِ"),
+    _site("raa_ishruna_kibr", (8, 66, 10), (8, 65, 10), "عِشْرُونَ"),
+    _site("raa_ishruna_kibr", (40, 55, 14), (40, 56, 14), "كِبْرٞ", junction="wasl"),
+    _site("raa_alishraq", (38, 17, 7), (38, 18, 7), "وَالِاشْرَاقِ"),
+    _site("raa_hayran", (6, 71, 23), (6, 71, 23), "حَيْرَانَۖ"),
+    _site("raa_bisharar", (77, 32, 3), (77, 32, 3), "بِشَرَرٖ"),
+    _site("raa_bisharar", (77, 32, 3), (77, 32, 3), "بِشَرَرٖ", raa=2, junction="waqf"),
+    _site("raa_five_words", (2, 199, 10), (2, 200, 10), "ذِكْراٗۖ"),
+    _site("raa_five_words", (18, 69, 12), (18, 70, 12), "ذِكْراٗۖ"),
+    _site("raa_five_words", (18, 82, 9), (18, 83, 9), "ذِكْراًۖ"),
+    _site("raa_five_words", (20, 97, 13), (20, 99, 13), "ذِكْراٗۖ"),
+    _site("raa_five_words", (20, 110, 14), (20, 113, 14), "ذِكْراٗۖ"),
+    _site("raa_five_words", (21, 48, 7), (21, 48, 7), "وَذِكْراٗ"),
+    _site("raa_five_words", (33, 41, 6), (33, 41, 6), "ذِكْراٗ"),
+    _site("raa_five_words", (37, 3, 2), (37, 3, 2), "ذِكْراً"),
+    _site("raa_five_words", (37, 168, 4), (37, 168, 4), "ذِكْراٗ"),
+    _site("raa_five_words", (65, 10, 16), (65, 10, 16), "ذِكْراٗۖ"),
+    _site("raa_five_words", (77, 5, 2), (77, 5, 2), "ذِكْراً"),
+    _site("raa_five_words", (18, 87, 18), (18, 90, 15), "سِتْراٗ"),
+    _site("raa_five_words", (18, 70, 15), (18, 71, 15), "اِمْراٗۖ"),
+    _site("raa_five_words", (20, 98, 8), (20, 100, 8), "وِزْراً"),
+    _site("raa_five_words", (25, 22, 9), (25, 22, 9), "حِجْراٗۖ"),
+    _site("raa_five_words", (25, 53, 14), (25, 53, 14), "وَحِجْراٗ"),
+    _site("raa_sihra", (25, 54, 9), (25, 54, 9), "وَصِهْراٗۖ"),
+    _site("raa_iram", (89, 7, 1), (89, 7, 1), "اِرَمَ"),
+    _site("raa_alif_ayn", (18, 18, 12), (18, 18, 12), "ذِرَاعَيْهِ"),
+    _site("raa_alif_ayn", (50, 44, 5), (50, 44, 5), "سِرَاعاٗۖ"),
+    _site("raa_alif_ayn", (70, 43, 5), (70, 43, 5), "سِرَاعاٗ"),
+    _site("raa_alif_ayn", (69, 32, 6), (69, 32, 6), "ذِرَاعاٗ"),
+    _site("raa_alif_hamza", (6, 139, 21), (6, 138, 21), "اَ۪فْتِرَآءً"),
+    _site("raa_alif_hamza", (6, 141, 13), (6, 140, 13), "اُ۪فْتِرَآءً"),
+    _site("raa_alif_hamza", (18, 23, 5), (18, 22, 27), "مِرَآءٗ"),
+    _site("raa_dual_alif", (2, 124, 17), (2, 125, 17), "طَهِّرَا"),
+    _site("raa_dual_alif", (20, 62, 4), (20, 63, 4), "لَسَٰحِرَٰنِ"),
+    _site("raa_dual_alif", (28, 48, 21), (28, 48, 21), "سَٰحِرَٰنِ"),
+    _site("raa_dual_alif", (55, 34, 3), (55, 35, 8), "تَنتَصِرَٰنِۖ"),
+    _site("raa_ashiratukum", (9, 24, 8), (9, 24, 8), "وَعَشِيرَتُكُمْ"),
+    _site("raa_wizraka", (94, 2, 3), (94, 2, 3), "وِزْرَكَ"),
+    _site("raa_dhikraka", (94, 4, 3), (94, 4, 3), "ذِكْرَكَۖ"),
+    _site("raa_wizra_ukhra", (6, 166, 19), (6, 164, 19), "وِزْرَ"),
+    _site("raa_wizra_ukhra", (17, 15, 14), (17, 15, 14), "وِزْرَ"),
+    _site("raa_wizra_ukhra", (35, 18, 4), (35, 18, 4), "وِزْرَ"),
+    _site("raa_wizra_ukhra", (39, 8, 18), (39, 7, 18), "وِزْرَ"),
+    _site("raa_wizra_ukhra", (53, 37, 4), (53, 38, 4), "وِزْرَ"),
+    _site("raa_ijrami", (11, 35, 8), (11, 35, 8), "إِجْرَامِے"),
+    _site("raa_hidhrakum", (4, 70, 5), (4, 71, 5), "حِذْرَكُمْ"),
+    _site("raa_hidhrakum", (4, 101, 56), (4, 102, 56), "حِذْرَكُمُۥٓۖ"),
+    _site("raa_ibrah_kibrahu", (3, 13, 27), (3, 13, 27), "لَعِبْرَةٗ"),
+    _site("raa_ibrah_kibrahu", (12, 111, 5), (12, 111, 5), "عِبْرَةٞ"),
+    _site("raa_ibrah_kibrahu", (16, 66, 5), (16, 66, 5), "لَعِبْرَةٗۖ"),
+    _site("raa_ibrah_kibrahu", (23, 21, 5), (23, 21, 5), "لَعِبْرَةٗۖ"),
+    _site("raa_ibrah_kibrahu", (24, 42, 46), (24, 44, 8), "لَعِبْرَةٗ"),
+    _site("raa_ibrah_kibrahu", (79, 26, 4), (79, 26, 4), "لَعِبْرَةٗ"),
+    _site("raa_ibrah_kibrahu", (24, 11, 24), (24, 11, 24), "كِبْرَهُۥ"),
+    _site("raa_hasirat_suduruhum", (4, 89, 11), (4, 90, 11), "حَصِرَتْ"),
+)
+
+SELECTOR_BY_OWNER = {
+    owner: frozenset(
+        site.key for site in SELECTOR_SITES if site.owner == owner
+    )
+    for owner in SELECTOR_JUNCTIONS
+}
+
+
+def selector_profile(definitions) -> RaaProfile:
+    """The fixed profile plus every selector the catalogue publishes."""
+    selected = {}
+    for site in SELECTOR_SITES:
+        khilaf = KhilafId(site.owner)
+        if khilaf not in definitions:
+            continue
+        selected[site.key] = RaaChoice(
+            khilaf,
+            site.junction or SELECTOR_JUNCTIONS[site.owner],
+            definitions[khilaf].default,
+        )
+    systematic = {}
+    for name in ("raa_fathatan", "raa_damma"):
+        khilaf = KhilafId(name)
+        if khilaf in definitions:
+            systematic[name] = SystematicChoice(
+                khilaf, definitions[khilaf].default
+            )
+    return replace(
+        PROFILE,
+        selected=selected,
+        fathatan=systematic.get("raa_fathatan"),
+        damma=systematic.get("raa_damma"),
+    )
+
+
+def catalogue_registers() -> dict[str, tuple[VariantSpan, ...]]:
+    """Occurrence spans per selector, in the source's own coordinates."""
+    registers: dict[str, list[VariantSpan]] = {
+        owner: [] for owner in SELECTOR_JUNCTIONS
+    }
+    for site in SELECTOR_SITES:
+        if site.raa != 1:
+            continue
+        first = Location(site.source.surah, site.source.ayah, site.source.word)
+        words = (first,)
+        anchor = "word"
+        if site.owner in PAIR_SELECTORS:
+            words = (first, replace(first, word=first.word + 1))
+            anchor = "boundary"
+        requires = site.junction or SELECTOR_JUNCTIONS[site.owner]
+        registers[site.owner].append(VariantSpan(words, anchor, requires))
+    return {owner: tuple(spans) for owner, spans in registers.items()}
+
+
+def dynamic_sites(profile: RaaProfile) -> dict:
+    """Structural resolvers for the fathatan and damma consumers."""
+
+    def _scope(selector: str):
+        def resolve(score, boundaries):
+            return tuple(
+                (owner, index)
+                for owner, index in systematic_sites(
+                    score, boundaries, profile
+                )
+                if owner == selector
+            )
+        return resolve
+
+    return {
+        "eligible_fathatan": _scope("raa_fathatan"),
+        "eligible_damma": _scope("raa_damma"),
+    }
+
+
+__all__ = [
+    "BY_OWNER",
+    "PAIR_SELECTORS",
+    "PROFILE",
+    "RaaKey",
+    "RaaSite",
+    "SELECTOR_BY_OWNER",
+    "SELECTOR_JUNCTIONS",
+    "SELECTOR_SITES",
+    "SITES",
+    "catalogue_registers",
+    "dynamic_sites",
+    "selector_profile",
+]

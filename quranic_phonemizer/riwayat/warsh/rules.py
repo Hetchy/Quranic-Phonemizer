@@ -51,7 +51,7 @@ from ...rules.wasl import (
 )
 from .hamza_meetings import meeting_rows, rows_by_target
 from .lam import PROFILE as LAM_PROFILE
-from .raa import PROFILE as RAA_PROFILE
+from .raa import selector_profile as raa_selector_profile
 from .resources import khilaf, lexicon, rule_tables
 
 #: Warsh repairs a collision with damm when the elided word starts on an
@@ -151,7 +151,7 @@ def _build() -> RuleSet:
             Phase.COLOUR: (
                 LamWeight(profile=LAM_PROFILE, base_weight=weight),
                 Emphasis(weight=weight),
-                RaaWeight(profile=RAA_PROFILE),
+                RaaWeight(profile=raa_selector_profile(khilaf().variants)),
                 CarrierTarqeeq(),
                 Inclination(),
                 CanonicalColour(),
