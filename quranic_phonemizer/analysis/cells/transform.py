@@ -534,13 +534,7 @@ def _transform_iwaja_idraj(
 def _omit_inactive_sakt_marks(
     words: tuple[CellWord, ...],
 ) -> tuple[CellWord, ...]:
-    """An unselected sakt sign has no transformed word cell.
-
-    Sakt signs have already been projected to their boundary by this point, so
-    their inactive source columns carry no variant identity.  A seen/saad mini
-    seen, by contrast, is itself the selected variant cell and must remain as a
-    dropped, variant-silent column in the saad face.
-    """
+    """An unselected sakt sign has no transformed word cell."""
     return tuple(
         replace(
             word,
@@ -549,7 +543,6 @@ def _omit_inactive_sakt_marks(
                 if not (
                     col.text in {"ۜ", "ۣ"}
                     and col.status is CellStatus.DROPPED
-                    and col.variant_id is None
                 )
             ),
         )

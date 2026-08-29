@@ -686,7 +686,7 @@ CellBoundary orders every boundary-owned column at that exact boundary.
   one. The mini seen of a seen/saad khilaf is the only Hafs case. Where the
   script writes it there are two columns. The base saad owns and aligns the
   site's sound in both faces; in the seen face the mini seen presents that
-  sound, and in the saad face it remains as a dropped, variant-silent column.
+  sound, and in the saad face it remains present as a variant-silent column.
   Both columns carry the variant_id and variant_choice. Where the script
   writes no mark there is no second column and no pair: the variant changes the
   single main column's phoneme and leaves every letter column as it stands.

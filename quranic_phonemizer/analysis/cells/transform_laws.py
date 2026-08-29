@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from ...model.address import VariantSelection
 from ..checks import requirer
-from ..source_dtos import SourceView
+from ..source_dtos import LiteralSilence, SourceView
 from .dtos import CellColumn, CellStatus, CellView
 from .laws import CellValidationError
 
@@ -97,7 +97,10 @@ def _is_partitioned_unit(
 def _variant_dependent(col: CellColumn) -> bool:
     return bool(
         col.owned_sound_ids or col.presented_sound_ids
-    ) or col.status is CellStatus.DROPPED
+    ) or (
+        col.status is CellStatus.DROPPED
+        or col.silence is LiteralSilence.VARIANT
+    )
 
 
 def _check_variant(col: CellColumn, selection: VariantSelection) -> None:

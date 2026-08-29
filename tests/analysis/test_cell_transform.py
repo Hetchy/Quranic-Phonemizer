@@ -26,6 +26,7 @@ from quranic_phonemizer.analysis.dtos import BoundaryState
 from quranic_phonemizer.analysis.facts import analyse
 from quranic_phonemizer.analysis.ids import LetterUnitId
 from quranic_phonemizer.analysis.source import build_source_view
+from quranic_phonemizer.analysis.source_dtos import LiteralSilence
 from quranic_phonemizer.model.address import (
     KhilafId, Option, Riwayah, Script, VariantSelection, VerseRef,
 )
@@ -249,8 +250,9 @@ def test_the_seen_sad_pair_carries_the_variant(hafs, pen, choice):
     mini_seen = next(c for c in pair if c.tier is not CellTier.MAIN)
     assert base.status is CellStatus.PRESENT and base.owned_sound_ids
     assert mini_seen.text in {"ۜ", "ۣ"}
-    assert mini_seen.status is (
-        CellStatus.PRESENT if choice == "seen" else CellStatus.DROPPED
+    assert mini_seen.status is CellStatus.PRESENT
+    assert mini_seen.silence is (
+        None if choice == "seen" else LiteralSilence.VARIANT
     )
     validate_transformed(view, source, session.performance.selection)
 

@@ -308,7 +308,7 @@ def test_the_seen_sad_pair_is_two_columns_carrying_the_variant_on_both(hafs):
             assert riding.silence is None
             assert riding.presented_sound_ids == base.owned_sound_ids
         else:
-            assert riding.status is CellStatus.DROPPED
+            assert riding.status is CellStatus.PRESENT
             assert riding.silence is LiteralSilence.VARIANT
             assert not riding.presented_sound_ids
 
