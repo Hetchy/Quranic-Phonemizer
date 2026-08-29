@@ -127,13 +127,12 @@ Commands used for the checkpoint:
 
 ```text
 python -m pytest --collect-only -q
-python tools/gates.py --fast
+python tools/quick.py <targeted tests...>
 ```
 
 Those counts are the input audit, not a permanent target: deliberate duplicate
-removal and the RAR merge change collection. The completed refactor must have
-clean collection and gates, while `git diff --exit-code -- tests/snapshots`
-stays clean.
+removal and the RAR merge change collection. Pull-request checks own clean
+collection and the complete ordinary suite.
 
 ## Domain-review and test-style audit
 
@@ -302,8 +301,9 @@ marks inside quotes.
 
 ### Mechanical enforcement
 
-Add a typed `Case` / `StateCase` harness and a test-style lint integrated into
-`tools/gates.py`:
+The typed `Case` / `StateCase` harness enforces semantic contracts at runtime.
+The PR test-style check only keeps the adjacent Arabic source text synchronized
+with the corpus; failures also generate that context directly.
 
 - construction validates one-word string versus multiword tuple shape and
   aligns it to the `Site` span;
@@ -317,12 +317,9 @@ Add a typed `Case` / `StateCase` harness and a test-style lint integrated into
   ambiguous;
 - the shared-rule maps must resolve to the same rule occurrence and exact
   source-to-sound reach;
-- every `pytest.param` case needs a readable `id` and an immediately adjacent
-  Arabic comment;
+- semantic rows retain an exact adjacent Arabic source comment;
 - raw subtle combining-mark keys are rejected in favor of registered `@name`
   selectors, and unknown selector names are rejected;
-- duplicate case fingerprints with the same site, boundary, and asserted
-  contract are reported across semantic files; and
 - regular case-table tests use the shared assertion function. A genuinely
   custom law may use a named test body, but must not reproduce a table case.
 

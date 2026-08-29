@@ -37,30 +37,16 @@ from .projection_marks import (
     transform_plain_madd,
 )
 from .projection_groups import group_words
-from .projection_semantics import preserve_semantic_cells
-
-
-def _fold_sukun(word: CellWord) -> CellWord:
-    hosts = {c.id.value: c for c in word.columns if c.tier is CellTier.MAIN}
-    folded: dict[int, CellColumn] = {}
-    removed: set[int] = set()
-    for mark in word.columns:
-        if mark.role is not CellRole.SUKUN or mark.attached_to_column_id is None:
-            continue
-        host = folded.get(mark.attached_to_column_id.value) or hosts[mark.attached_to_column_id.value]
-        folded[host.id.value] = replace(host,
-            text=host.text + mark.text,
-            source_character_ids=(*host.source_character_ids, *mark.source_character_ids),
-            source_unit_ids=(*host.source_unit_ids, *mark.source_unit_ids),
-            rule_occurrence_ids=tuple(dict.fromkeys(
-                (*host.rule_occurrence_ids, *mark.rule_occurrence_ids)
-            )),
-        )
-        removed.add(mark.id.value)
-    columns = tuple(
-        folded.get(c.id.value, c) for c in word.columns if c.id.value not in removed
-    )
-    return replace(word, columns=columns)
+from .projection_semantics import (
+    keep_pausal_alif_on_carriers,
+    preserve_semantic_cells,
+)
+from .projection_naql import split_carried_naql_alif
+from .projection_sukun import fold_sukun
+from .projection_compounds import (
+    fold_article_naql_madd,
+    project_warsh_compounds,
+)
 
 
 def _slot_of_columns(source: SourceView, insc: InscriptionFacts) -> dict[int, object]:
@@ -94,10 +80,13 @@ def _inserted_carrier(new_id: int, seat: CellColumn, sound: SoundId,
 
 def _move_sound(seat: CellColumn, carrier: CellColumn,
                 sound: SoundId) -> tuple[CellColumn, CellColumn]:
+    presented = tuple(s for s in seat.presented_sound_ids if s != sound)
+    if seat.role in {CellRole.HARAKA, CellRole.TANWEEN}:
+        presented = tuple(dict.fromkeys((*presented, sound)))
     seat = replace(
         seat,
         owned_sound_ids=tuple(s for s in seat.owned_sound_ids if s != sound),
-        presented_sound_ids=tuple(dict.fromkeys((*seat.presented_sound_ids, sound))),
+        presented_sound_ids=presented,
     )
     carrier = replace(
         carrier, role=CellRole.MADD,
@@ -135,13 +124,19 @@ def _candidate_carrier(
             for edge in facts.silences
         )
         maqsura_a = value.quality is Quality.A and col.text == MAQSURA
+        carried_naql_alif = (
+            value.quality is Quality.A
+            and col.text.endswith(text)
+            and len(col.source_character_ids) > 1
+            and Annotation.NAQL in slot.annotations
+        )
         if target_presenter or (
             col.status is CellStatus.DROPPED
             and (
                 col.text == text or GlyphKind.SMALL_VOWEL in kinds
                 or ibdal_source or maqsura_a
             )
-        ):
+        ) or carried_naql_alif:
             return index
     return None
 
@@ -185,7 +180,7 @@ def _adjust_carrier(carrier, value, text, facts, slot_of_unit, was_dropped):
             carrier, text=carrier.text + DAGGER_ALIF,
             status=CellStatus.REPLACED,
         )
-    if was_dropped and ibdal:
+    if ibdal and carrier.text != text:
         return replace(carrier, text=text, status=CellStatus.REPLACED)
     return carrier
 
@@ -247,7 +242,9 @@ def _ensure_one_carrier(
     for changed in (seat, carrier):
         at = next(i for i, column in enumerate(columns) if column.id == changed.id)
         columns[at] = changed
-    ids = {seat.id, carrier.id}
+    ids = {carrier.id}
+    if seat.role in {CellRole.HARAKA, CellRole.TANWEEN}:
+        ids.add(seat.id)
     sounds[sound_index] = replace(
         cell, column_ids=tuple(c.id for c in columns if c.id in ids)
     )
@@ -380,11 +377,11 @@ def _visual_statuses(words, facts):
 
 def project_words(words: tuple[CellWord, ...], facts: AnalysisFacts,
                   source: SourceView, insc: InscriptionFacts,
-                  pen: Pen) -> tuple[CellWord, ...]:
+                  pen: Pen, *, riwayah: str) -> tuple[CellWord, ...]:
     """Fold marks, supply carriers, place rules, and state every visual group."""
     out = tuple(clean_structural_marks(word) for word in words)
     out = tuple(fold_maqsura_daggers(word) for word in out)
-    out = tuple(_fold_sukun(word) for word in out)
+    out = tuple(fold_sukun(word) for word in out)
     slot_of_unit = _slot_of_columns(source, insc)
     out = tuple(
         fold_pausal_sukun(word, facts, slot_of_unit, pen) for word in out
@@ -400,6 +397,11 @@ def project_words(words: tuple[CellWord, ...], facts: AnalysisFacts,
     out = transform_plain_madd(out, facts)
     out = _visual_statuses(out, facts)
     out = preserve_semantic_cells(out, facts)
+    out = split_carried_naql_alif(out, facts, source)
+    out = fold_article_naql_madd(out, facts)
+    if riwayah == "warsh":
+        out = project_warsh_compounds(out, facts, insc, pen)
+    out = keep_pausal_alif_on_carriers(out, facts, riwayah)
     return group_words(out, facts)
 
 

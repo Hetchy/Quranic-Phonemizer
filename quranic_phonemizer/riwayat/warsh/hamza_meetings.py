@@ -149,7 +149,9 @@ def supply_hamza_meetings(reading, drafts, lexicon, scribe, selection) -> None:
         if not _word_text(reading, right_word).startswith(("ا", "أ", "إ", "ء")):
             continue
         left = spans[row.previous]
-        first = next((draft for draft in reversed(left) if draft.letter is CanonLetter.HAMZA), left[-1])
+        if not left or left[-1].letter is not CanonLetter.HAMZA:
+            continue
+        first = left[-1]
         first.letter = CanonLetter.HAMZA
         first.onset = Onset.PLAIN
         first.nucleus = Nucleus.short(row.first)

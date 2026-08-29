@@ -3,6 +3,7 @@
 One entry per letter, quality and qalqala degree, features composed over it.
 Total by coverage, so a feature no entry offers raises at lookup.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -24,11 +25,44 @@ _NOTATION = Path(__file__).resolve().parent.parent / "data" / "render"
 #: beside the tokens rather than inside the resolver's control flow.
 LENGTH = ":"
 
+_SHORT_A = frozenset({"a", "aˤ"})
+_LONG_A = tuple(token + LENGTH for token in _SHORT_A)
+_HAMZA = "ʔ"
+_EASED_HAMZA = "ʔ̞"
+
+
+def is_short_a_token(token: str) -> bool:
+    return token in _SHORT_A
+
+
+def is_long_a_token(token: str) -> bool:
+    return token.startswith(_LONG_A)
+
+
+def is_hamza_token(token: str) -> bool:
+    return token == _HAMZA
+
+
+def is_eased_hamza_token(token: str) -> bool:
+    return token == _EASED_HAMZA
+
+
 #: Each gates one distinction that a `Sound` always carries; the alphabet
 #: spends a token on it only when named.
 EXTRA_PHONEMES = frozenset(
-    {"tashil", "emphatic_fatha", "emphatic_ikhfaa", "qalqala_degree", "imala"}
+    {
+        "tashil",
+        "emphatic_fatha",
+        "emphatic_ikhfaa",
+        "qalqala_degree",
+        "imala",
+        "taqlil_short",
+    }
 )
+
+_RIWAYAH_ONLY: dict[Riwayah, frozenset[str]] = {
+    Riwayah.WARSH: frozenset({"taqlil_short"}),
+}
 
 _ALWAYS_RENDERED: dict[Riwayah, frozenset[str]] = {
     Riwayah.WARSH: frozenset({"tashil"}),
@@ -37,7 +71,10 @@ _ALWAYS_RENDERED: dict[Riwayah, frozenset[str]] = {
 
 def allowed_extra_phonemes(riwayah: Riwayah) -> frozenset[str]:
     """Optional rendering distinctions accepted for one riwayah."""
-    return EXTRA_PHONEMES - _ALWAYS_RENDERED.get(riwayah, frozenset())
+    owned_elsewhere = frozenset().union(
+        *(names for owner, names in _RIWAYAH_ONLY.items() if owner is not riwayah)
+    )
+    return EXTRA_PHONEMES - _ALWAYS_RENDERED.get(riwayah, frozenset()) - owned_elsewhere
 
 
 def effective_extra_phonemes(
@@ -46,10 +83,9 @@ def effective_extra_phonemes(
     """Rendering distinctions active after riwayah-fixed notation."""
     unknown = requested - allowed_extra_phonemes(riwayah)
     if unknown:
-        raise ValueError(
-            f"{sorted(unknown)} is not optional for {riwayah.value}"
-        )
+        raise ValueError(f"{sorted(unknown)} is not optional for {riwayah.value}")
     return requested | _ALWAYS_RENDERED.get(riwayah, frozenset())
+
 
 #: `token(sound)` with no `extra_phonemes` argument -- every caller that
 #: predates the toggle -- must keep reading exactly as it does today, which
@@ -164,10 +200,23 @@ class Alphabet:
         return self._feature(entry.nasal, "nasal", sound)
 
     def _vowel(
-        self, sound: Vowel, active: frozenset[str],
+        self,
+        sound: Vowel,
+        active: frozenset[str],
         fallbacks: dict[Quality, Quality],
     ) -> str:
+        original = self.vowels[sound.quality]
+        if sound.emphatic and original.emphatic is None:
+            raise self._absent("emphatic", sound)
         quality = sound.quality
+        if (
+            quality is Quality.TAQLIL
+            and not sound.long
+            and "taqlil_short" not in active
+        ):
+            # The typed short quality and its rule survive. Only the optional
+            # narrow IPA distinction collapses to ordinary short fath.
+            quality = Quality.A
         if "imala" not in active:
             # The typed quality survives the collapse; only the token reads
             # as the riwayah's fallback quality.
@@ -236,8 +285,7 @@ def _entries(enum: type, raw: Any, section: str, path: Path) -> dict:
 
 def _tokens(enum: type, raw: Any, section: str, path: Path) -> dict:
     return {
-        member: str(raw[member.value])
-        for member in _covered(enum, raw, section, path)
+        member: str(raw[member.value]) for member in _covered(enum, raw, section, path)
     }
 
 
@@ -264,7 +312,9 @@ def _entry(raw: Any, where: str) -> Entry:
     if isinstance(raw, str):
         return Entry(plain=raw)
     require_keys(
-        raw, {"plain"}, name=where,
+        raw,
+        {"plain"},
+        name=where,
         optional={"emphatic", "nasal", "hum", "heavy_hum", "eased"},
     )
     return Entry(

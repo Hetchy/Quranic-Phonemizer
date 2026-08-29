@@ -18,6 +18,19 @@ riwayah when the domain choice is the same but its transmission differs.
 `available_variants(riwayah)` returns the legal values and the default for that
 riwayah. An explicit selection overrides only its own scope.
 
+`variant_catalogue(riwayah)` adds producer-owned presentation and applicability
+metadata: semantic group, display name, optional description, website
+visibility, occurrence count, representative occurrence, every fixed word
+span, selector anchor, and required boundary state. The two corpus-wide nasal
+selectors publish a dynamic scope rather than a fixed occurrence register.
+
+`Phonemizer(...).analyse(ref).variant_occurrences()` returns the fixed
+occurrences wholly contained in that analysis, with result-local word and
+boundary anchors plus `active` and `masked` flags. A choice remains selected
+when its required boundary is absent, but it is masked and cannot change that
+performance. This keeps Quran coordinates and boundary semantics in the
+producer; renderers only display the returned controls.
+
 ## Reading the catalogue
 
 - **All states** means wasl, waqf, and ibtidaa unless the row states a lexical
@@ -48,7 +61,7 @@ These selectors have the same meaning and default in both riwayat.
 | --- | --- | --- | --- | --- |
 | `iqlab_nasal` | `open`, `closed`; default `open` | Every realized iqlab, such as `مِنۢ بَعْدِ` | `open` renders the project's generic nasal token `/ŋ/` with a slight lip opening. `closed` renders the bilabial nasal token `/m̃/` with light lip closure. The ghunnah, named iqlab rule, participants, and source ownership are unchanged. | [Transmitted lip postures and their attribution](https://www.islamweb.net/amp/ar/fatwa/52856/) |
 | `ikhfaa_shafawi_nasal` | `open`, `closed`; default `open` | Every realized ikhfaa shafawi, such as `تَرْمِيهِم بِحِجَارَةٍ` | `open` renders the project's generic nasal token `/ŋ/` with a slight lip opening. `closed` renders the bilabial nasal token `/m̃/` with light lip closure. The ghunnah, named ikhfaa shafawi rule, participants, and source ownership are unchanged. | [Transmitted lip postures and their attribution](https://www.islamweb.net/amp/ar/fatwa/52856/) |
-| `tamanna_noon` | `ishmam`, `ikhtilas`; default `ishmam` | `تَأْمَنَّا`, 12:11; all states | `ishmam` merges the two noons and signals the original damma by the lips. `ikhtilas` keeps both noons and gives the first a reduced audible damma. | [Al-Nashr scan, both faces](https://quranpedia.net/book-attachment/19547/77771), [sound distinction](https://quranpedia.net/book/302/1/260) |
+| `tamanna_noon` | `ishmam`, `ikhtilas`; default `ishmam` | `تَأْمَنَّا`, 12:11; all states | `ishmam` merges the two noons and signals the original damma by the lips. `ikhtilas` keeps both noons and gives the first `/u/` reduced duration; the phoneme quality remains `u`. | [Al-Nashr scan, both faces](https://quranpedia.net/book-attachment/19547/77771), [sound distinction](https://quranpedia.net/book/302/1/260) |
 
 The nasal selectors are rendering choices, not a change to the identity,
 participants, or source ownership of the tajwid rule.
@@ -64,6 +77,13 @@ participants, or source ownership of the tajwid rule.
 The `tashil` extra phoneme is a Hafs-only rendering control. Warsh always
 renders an eased hamza as `ʔ̞`, so `tashil` is not accepted in its
 `extra_phonemes` set.
+
+`taqlil_short` is the converse riwayah-specific rendering control: it is
+accepted only for Warsh and defaults off. It exposes the short intermediate
+vowel on the raa of the fixed `رأى` family as `/ɛ/`; when disabled that sound
+renders as `/a/`. This is not a transmitted face and therefore has no variant
+selector. The canonical vowel remains `TAQLIL`, retains the `taqlil` rule, and
+keeps the raa light under both renderings.
 
 When ibdal creates a long vowel, `ibdal_hamza` and the applicable madd rule
 both reach the resulting sound and the responsible source character. The madd
@@ -81,7 +101,7 @@ not removed.
 
 | ID | Options and default | Scope in Hafs | Scope in Warsh | Source |
 | --- | --- | --- | --- | --- |
-| `raa_firq` | `light`, `heavy`; default `light` | `فِرْقٍ`, 26:63; all states | Same form and scope | [Both faces](https://www.islamweb.net/ar/library/content/245/30/), [tarqiq transmission](https://www.islamweb.net/ar/library/content/231/24/) |
+| `raa_firq` | `light`, `heavy`; default `light` | `فِرْقٍ`, 26:63; wasl only. At waqf the raa is fixed heavy | Same form and scope | [Both faces](https://www.islamweb.net/ar/library/content/245/30/), [tarqiq preference](https://www.islamweb.net/ar/library/content/231/24/) |
 | `raa_alqitr_waqf` | `light`, `heavy`; default `light` | `ٱلْقِطْرِ`, 34:12; waqf only | Same form and scope | [Both pausal faces and preference](https://www.islamweb.org/ar/library/content/245/30/) |
 | `raa_misr_waqf` | `heavy`, `light`; default `heavy` | The four non-tanwin forms `مِصْرَ` and `بِمِصْرَ` at 10:87, 12:21, 12:99, and 43:51; waqf only | Same four lexical forms and scope | [Both pausal faces and preference](https://www.islamweb.org/ar/library/content/245/30/) |
 | `raa_wanuthur_waqf` | `light`, `heavy`; default `light` | The six `وَنُذُرِ` endings at 54:16, 54:18, 54:21, 54:30, 54:37, and 54:39; waqf only | Same six forms; the joined yaa is fixed and drops at waqf | [The exact six Warsh yaas](https://www.islamweb.net/amp/ar/library/content/245/35/), [pausal faces](https://islamweb.net/ar/library/index.php?ID=189&bk_no=70&flag=1&page=bookcontents), [modern preference](https://quranpedia.net/book/302/1/134) |
@@ -106,7 +126,7 @@ alifs preserve the heavy outcome.
 
 | ID | Options and default | Scope and examples | Effect | Source |
 | --- | --- | --- | --- | --- |
-| `yaa_aatani_waqf` | `hadhf`, `ithbat`; default `hadhf` | `ءَاتَانِيَ`, 27:36; waqf only | Deletes or retains the final yaa at the stop. Wasl always retains it with its vowel. | [Both faces and preference](https://www.alukah.net/sharia/0/66578/) |
+| `yaa_aatani_waqf` | `hadhf`, `ithbat`; default `ithbat` | `ءَاتَانِيَ`, 27:36; waqf only | Deletes or retains the final yaa at the stop. Wasl always retains it with its vowel. | [Both faces and ithbat preference](https://quran-warch.org/hafs/wasset/book/p425.htm) |
 | `salasila_waqf` | `hadhf`, `ithbat`; default `hadhf` | `سَلَاسِلَا`, 76:4; waqf only | Stops without or with the final alif. Wasl has no final alif sound. | [Both faces and preference](https://www.alukah.net/sharia/0/66578/) |
 | `alism_ibtidaa` | `hamza`, `lam`; default `hamza` | Beginning at `ٱلِاسْمُ` in `بِئْسَ ٱلِاسْمُ`, 49:11; ibtidaa only | Begins with hamzat al-wasl before the vowel-bearing lam, or begins directly on that lam. Ordinary wasl from `بِئْسَ` is unchanged. | [Both starts and the preferred face](https://www.islamweb.net/ar/library/content/231/79/) |
 
@@ -123,11 +143,10 @@ alifs preserve the heavy outcome.
 | ID | Options and default | Scope and examples | Effect | Source |
 | --- | --- | --- | --- | --- |
 | `iwaja_qayyima` | `sakt`, `idraj`; default `sakt` | `عِوَجَا قَيِّمًا`, 18:1 -> 18:2; joined reading only | `sakt` sets `sakt_after` on `عِوَجَا`, realizes the alif substituted for tanwin, and blocks `ikhfaa`. `idraj` continues directly and applies ordinary tanwin-before-qaf `ikhfaa`. | [Authenticated faces at the four positions](https://islamweb.net/amp/ar/library/content/70/115/) |
-| `marqadina_hadha` | `sakt`, `idraj`; default `sakt` | `مَرْقَدِنَا هَذَا`, 36:52; joined reading only | `sakt` sets `sakt_after` on `مَرْقَدِنَا` after its final alif. `idraj` joins the final vowel directly to haa without another assimilation rule. | [Authenticated faces at the four positions](https://islamweb.net/amp/ar/library/content/70/115/) |
 | `man_raq` | `sakt`, `idraj`; default `sakt` | `مَنْ رَاقٍ`, 75:27; joined reading only | `sakt` sets `sakt_after` on `مَنْ`, preserves the audible noon, and blocks `idgham_bila_ghunnah`. `idraj` applies `idgham_bila_ghunnah` into raa. | [Authenticated faces at the four positions](https://islamweb.net/amp/ar/library/content/70/115/), [effect on idgham](https://www.islamweb.net/ar/library/content/231/68/) |
 | `bal_ran` | `sakt`, `idraj`; default `sakt` | `بَلْ رَانَ`, 83:14; joined reading only | `sakt` sets `sakt_after` on `بَلْ`, preserves the audible lam, and blocks `idgham_mutaqaribayn`. `idraj` applies `idgham_mutaqaribayn` into raa. | [Authenticated faces at the four positions](https://islamweb.net/amp/ar/library/content/70/115/), [effect on idgham](https://www.islamweb.net/ar/library/content/231/68/) |
 
-The four selectors are independent. `idraj` means uninterrupted continuation
+The three selectors are independent. `idraj` means uninterrupted continuation
 through the site. A selected sakt is a breathless continuation junction, not
 waqf: it sets `sakt_after`, does not mark the word as stopped, and blocks the
 ordinary cross-boundary rule. If the caller explicitly stops on the first
@@ -184,6 +203,14 @@ The closed hamza registers are:
 `fath` retains the ordinary open vowel. `taqlil` selects the first-class
 intermediate inclination. Imala kubra is not used as an option value in these
 selectors.
+
+The `رأى` short-taqlil behavior is fixed rather than a choice. At the 16
+tokens followed by a moving sound, both the raa's short vowel and the
+hamza/alif long vowel are taqlil. At the six tokens followed by a
+following-word sakin (Warsh public references 6:78, 6:79, 16:85, 16:86,
+18:52, and 33:22), ordinary fath is realized on both nuclei in wasl and both
+taqlil qualities return at waqf. `taqlil_short` affects only the short IPA
+token; it does not alter this boundary law or raa tarqiq.
 
 ### General and lexical inclination
 
@@ -306,8 +333,9 @@ The following distinctions are deliberately outside the variant API:
   script register](warsh/research/v2/mim-al-jam.md)
 - Yaa zawaid are fixed lexical and boundary facts. [Domain and selected
   script register](warsh/research/v2/yaa-zawaid.md)
-- The seven alifs are fixed lexical and boundary facts. [Domain and selected
-  script matrix](warsh/research/v2/seven-alifs.md)
+- Outside the explicit `salasila_waqf` choice above, the seven alifs are fixed
+  lexical and boundary facts. [Domain and selected script
+  matrix](warsh/research/v2/seven-alifs.md)
 - Surah-transition modes such as optional takbir or inserted basmala are
   outside the passage-boundary selector API.
 - Rejected solitary reports and micro-route splits collapsed into a broader
@@ -315,3 +343,24 @@ The following distinctions are deliberately outside the variant API:
 
 These exclusions keep the API focused on meaningful sound and rule choices
 without encoding duration matrices or historical route bundles.
+
+## Implementation discipline for another riwayah
+
+Before implementing Warsh selectors, reconcile the complete catalogue against
+the research: IDs, option order, defaults, scopes, display names, descriptions,
+and fixed exclusions. Display names should mirror the public IDs. Descriptions
+should add only information the name does not already convey.
+
+Specify each face across every layer it changes before writing rules: canonical
+reading, source and cell shape, performed sounds, rule ownership, mergers, and
+boundary activation. A phoneme-only implementation is valid only when the
+written and canonical cell realization is proved unchanged. Otherwise the face
+must explicitly insert, replace, silence, split, drop, or merge the affected
+cells.
+
+Tests follow the semantic ownership rules in `tests/README.md`. Add a variant
+face to the existing rule or lexical-family case that owns it, including shared
+riwayah coverage where appropriate. Do not create a selector-named test file
+when the behavior belongs in an existing file, and do not duplicate the same
+Quran site in multiple semantic suites. Every face must assert its boundary
+masking, cell transformation, phonemes, and relevant present or absent rules.

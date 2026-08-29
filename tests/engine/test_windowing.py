@@ -1,7 +1,15 @@
 """Request window assembly and multi-verse phonemization."""
 from __future__ import annotations
 
-from quranic_phonemizer.model.address import Junction, Location
+import pytest
+
+from quranic_phonemizer.model.address import (
+    Junction,
+    KhilafId,
+    Location,
+    Option,
+    VariantSelection,
+)
 from quranic_phonemizer.session import span
 from quranic_phonemizer.session import phonemize_request
 from quranic_phonemizer.session import windows
@@ -59,6 +67,28 @@ def test_sakt_is_a_junction_no_stop_request_can_remove(hafs):
     session = phonemize_request(hafs, "83:14")
     index = session.locations.index(Location(83, 14, 2))
     assert session.boundaries.after(index) is Junction.SAKT
+
+
+@pytest.mark.parametrize(
+    ("ref", "stop_ref", "khilaf", "choice"),
+    (
+        ("18:1:11-18:2:1", "18:1:11", KhilafId.IWAJA_QAYYIMA, "idraj"),
+        ("69:28:4-69:29:1", "69:28:4", KhilafId.MALIYAH_HALAK, "idgham"),
+        ("75:27:2-75:27:3", "75:27:2", KhilafId.MAN_RAQ, "idraj"),
+        ("83:14:2-83:14:3", "83:14:2", KhilafId.BAL_RAN, "idraj"),
+    ),
+)
+def test_a_stop_masks_a_selected_sakt_variant(
+    hafs, ref, stop_ref, khilaf, choice
+):
+    selected = VariantSelection((Option(khilaf, choice),))
+    session = phonemize_request(
+        hafs, ref, stop_refs=(stop_ref,), selection=selected
+    )
+    at = session.locations.index(hafs.corpus.locations(stop_ref)[0])
+
+    assert session.boundaries.after(at) is Junction.STOP
+    assert session.performance.selection == VariantSelection()
 
 
 def test_chunked_assembly_matches_one_shot_assembly(hafs, alphabet):

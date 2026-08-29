@@ -9,7 +9,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 
 from ..model.address import SlotId
-from ..model.canon import ABJAD, CanonLetter, Rule
+from ..model.canon import ABJAD, CanonLetter, Rule, SlotOrigin
 from ..model.performance import Aspect, Vowel
 from .derivations import (
     decoration_targets,
@@ -21,6 +21,11 @@ from .facts import AnalysisFacts
 from .inscription import InscriptionFacts, Witnessed
 from .source_dtos import LetterUnitKind, LiteralSilence, Silence
 from .source_units import Tokenization
+
+#: The only riding letters whose unread half denotes a recitation variant.
+#: Other source-backed tajweed marks (notably Warsh's native iqlab meem) may
+#: ride a host too, but that geometric relation is not a variant handoff.
+_MINI_SEEN = frozenset({"ۜ", "ۣ"})
 
 #: A base letter's canonical identity, read off its rasm glyph.
 _LETTER_OF_BASE = {glyph: CanonLetter(name) for name, glyph in ABJAD.items()}
@@ -74,7 +79,7 @@ def _paired_owner(facts, tok, insc, slot: SlotId, base: int) -> int:
     return base if base_letter is _slot_letter(facts, slot) else marks[0]
 
 
-def _variant_pair_units(tok: Tokenization) -> frozenset[int]:
+def _riding_pair_units(tok: Tokenization) -> frozenset[int]:
     pairs: set[int] = set()
     for index, unit in enumerate(tok.units):
         if unit.written_on_anchor is None:
@@ -85,13 +90,40 @@ def _variant_pair_units(tok: Tokenization) -> frozenset[int]:
     return frozenset(pairs)
 
 
+def _variant_pair_units(
+    tok: Tokenization, insc: InscriptionFacts
+) -> frozenset[int]:
+    riding = _riding_pair_units(tok)
+    seen = _mini_seen_units(tok, insc)
+    return frozenset(
+        index for index in riding
+        if index in seen or any(
+            tok.unit_of_anchor.get(tok.units[item].written_on_anchor) == index
+            for item in seen
+        )
+    )
+
+
+def _mini_seen_units(
+    tok: Tokenization, insc: InscriptionFacts
+) -> frozenset[int]:
+    return frozenset(
+        index for index, unit in enumerate(tok.units)
+        if any(
+            insc.glyphs[glyph].char in _MINI_SEEN for glyph in unit.glyphs
+        )
+    )
+
+
 def _unit_at(facts, tok, insc, carriers,
              slot: SlotId, aspect: Aspect, sound: int) -> int | None:
     if aspect is Aspect.VOWEL:
         return _vowel_unit(facts, tok, carriers, slot, sound)
     # A tanween's own noon has no letter of its own; its unit is the tanween.
     base = tok.roles.letter.get(slot, tok.roles.vowel.get(slot))
-    return None if base is None else _paired_owner(facts, tok, insc, slot, base)
+    return None if base is None else _paired_owner(
+        facts, tok, insc, slot, base
+    )
 
 
 def _present_carrier_vowel(
@@ -150,8 +182,21 @@ def _owners_and_presenters(facts, tok, insc, carriers):
         if unit is not None:
             owner.setdefault(edge.sound, unit)
     for edge in facts.merges:
-        unit = tok.roles.letter.get(edge.slots[0])
-        if unit is not None:
+        presenter = facts.slots[facts.slot_index[edge.slots[0]]]
+        tanween_naql = (
+            edge.by is not None
+            and edge.aspect is Aspect.VOWEL
+            and presenter.origin is SlotOrigin.NUNATION
+            and facts.occurrences[edge.by].rule is Rule.NAQL
+        )
+        unit = (
+            _unit_at(
+                facts, tok, insc, carriers,
+                edge.slots[0], edge.aspect, edge.sound,
+            )
+            if tanween_naql else tok.roles.letter.get(edge.slots[0])
+        )
+        if unit is not None and unit != owner.get(edge.sound):
             presenters[edge.sound].add(unit)
     return owner, presenters
 
@@ -172,7 +217,31 @@ def _silenced_units(facts, tok) -> dict[int, int]:
                     out.setdefault(carrier, edge.by)
         if unit is not None:
             out.setdefault(unit, edge.by)
+    # A source-backed pronunciation mark riding a silenced unit is cancelled
+    # by that same explicit occurrence. It is not a variant or an eternally
+    # orthographic letter merely because the stopped performance leaves it
+    # without a sound (Warsh tanween iqlab mini-meem at waqf).
+    for index, draft in enumerate(tok.units):
+        if draft.written_on_anchor is None:
+            continue
+        host = tok.unit_of_anchor.get(draft.written_on_anchor)
+        if host in out:
+            out.setdefault(index, out[host])
     return out
+
+
+def _variant_omitted_units(facts, tok) -> frozenset[int]:
+    """Variant choices can omit a written unit without publishing a rule."""
+    out: set[int] = set()
+    for slot, aspect in facts.variant_omissions:
+        unit = (
+            tok.roles.vowel.get(slot, tok.roles.letter.get(slot))
+            if aspect is Aspect.VOWEL
+            else tok.roles.letter.get(slot)
+        )
+        if unit is not None:
+            out.add(unit)
+    return frozenset(out)
 
 
 def _shortened_units(facts, tok, insc) -> dict[int, int]:
@@ -223,8 +292,10 @@ def ownership(
     owner, presenters = _owners_and_presenters(facts, tok, insc, carriers)
     sounding = set(owner.values()) | {u for us in presenters.values() for u in us}
     silenced_by = _silenced_units(facts, tok)
+    variant_omitted = _variant_omitted_units(facts, tok)
     shortened = _shortened_units(facts, tok, insc)
-    variant_pairs = _variant_pair_units(tok)
+    riding_pairs = _riding_pair_units(tok)
+    variant_pairs = _variant_pair_units(tok, insc)
     orthographic = _orthographic_units(facts, tok, insc)
     seats = _orthographic_seats(tok)
     silence: dict[int, Silence] = {}
@@ -236,9 +307,9 @@ def ownership(
                 silence[index] = silenced_by[index]
             elif index in shortened:
                 silence[index] = shortened[index]
-            elif index in variant_pairs:
-                silence[index] = LiteralSilence.VARIANT
-            elif index in orthographic or index in seats:
+            elif index in variant_pairs or index in variant_omitted:
+                silence[index] = None
+            elif index in orthographic or index in seats or index in riding_pairs:
                 silence[index] = LiteralSilence.ORTHOGRAPHIC
             else:
                 _unclassified(index, unit, insc)

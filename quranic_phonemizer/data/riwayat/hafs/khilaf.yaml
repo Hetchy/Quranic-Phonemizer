@@ -1,11 +1,11 @@
 # Scalar Hafs choices. Each ID applies to every form or location it covers.
-schema_version: 2
+schema_version: 3
 
 variants:
-  raa_firq_wasl:
+  raa_firq:
     kind: raa_weight
-    options: [heavy, light]
-    default: heavy
+    options: [light, heavy]
+    default: light
     junction: wasl
     forms: ["\u0641i\u0631\u0642i\u0646"]
     source: docs/hafs/research/tafkheem-tarqeeq.md
@@ -26,12 +26,12 @@ variants:
     forms: ["\u0645i\u0635\u0631a", "\u0628i\u0645i\u0635\u0631a"]
     source: docs/hafs/research/tafkheem-tarqeeq.md
 
-  raa_nuthur_waqf:
+  raa_wanuthur_waqf:
     kind: raa_weight
-    options: [heavy, light]
-    default: heavy
+    options: [light, heavy]
+    default: light
     junction: waqf
-    forms: ["\u0648a\u0646u\u0630u\u0631i", "\u0628i\u0621a\u0644\u0646u\u0630u\u0631i"]
+    forms: ["\u0648a\u0646u\u0630u\u0631i"]
     source: docs/hafs/research/tafkheem-tarqeeq.md
 
   raa_yasr_waqf:
@@ -53,7 +53,7 @@ variants:
   yaa_aatani_waqf:
     kind: final_yaa
     options: [hadhf, ithbat]
-    default: hadhf
+    default: ithbat
     junction: waqf
     forms: ["\u0621a\u062aa\u0646i\u064aa"]
     source: docs/hafs/research/waqf-ibtidaa.md
@@ -67,7 +67,7 @@ variants:
     forms: ["\u0636a\u0639\u0641i\u0646", "\u0636u\u0639\u0641i\u0646", "\u0636a\u0639\u0641a\u0646", "\u0636u\u0639\u0641a\u0646"]
     source: docs/hafs/research/special-rules.md
 
-  seen_sad_yabsut:
+  yabsut:
     kind: letter
     options: [seen, saad]
     default: seen
@@ -76,7 +76,7 @@ variants:
     locations: ["2:245:14"]
     source: docs/hafs/research/special-rules.md
 
-  seen_sad_bastah:
+  bastah:
     kind: letter
     options: [seen, saad]
     default: seen
@@ -85,7 +85,7 @@ variants:
     locations: ["7:69:22"]
     source: docs/hafs/research/special-rules.md
 
-  seen_sad_al_musaytirun:
+  almusaytirun:
     kind: letter
     options: [saad, seen]
     default: saad
@@ -94,7 +94,7 @@ variants:
     locations: ["52:37:7"]
     source: docs/hafs/research/special-rules.md
 
-  seen_sad_bimusaytir:
+  bimusaytir:
     kind: letter
     options: [saad, seen]
     default: saad
@@ -103,31 +103,226 @@ variants:
     locations: ["88:22:3"]
     source: docs/hafs/research/special-rules.md
 
-  noon_yaseen_wasl:
+  noon_wasl:
     kind: rule
     options: [izhar, idgham]
     default: izhar
     junction: wasl
-    locations: ["36:1:1", "68:1:1"]
+    locations: ["68:1:1"]
     source: docs/hafs/research/noon-meem.md
 
-  madd_lazim_tasheel:
+  yaseen_wasl:
+    kind: rule
+    options: [izhar, idgham]
+    default: izhar
+    junction: wasl
+    locations: ["36:1:1"]
+    source: docs/hafs/research/noon-meem.md
+
+  istifham_article:
     kind: madd_tasheel
-    options: [madd_lazim, tasheel]
-    default: madd_lazim
+    options: [ibdal, tashil]
+    default: ibdal
     locations: ["6:143:10", "6:144:8", "10:51:7", "10:91:1", "10:59:14", "27:59:9"]
     source: docs/hafs/research/madd.md
 
+  tamanna_noon:
+    kind: tamanna
+    options: [ishmam, ikhtilas]
+    default: ishmam
+    locations: ["12:11:6"]
+    source: docs/variants.md
+
+  maliyah_halak:
+    kind: sakt
+    options: [sakt, idgham]
+    default: sakt
+    junction: wasl
+    locations: ["69:28:4"]
+    source: docs/variants.md
+
+  salasila_waqf:
+    kind: salasila
+    options: [hadhf, ithbat]
+    default: hadhf
+    junction: waqf
+    locations: ["76:4:4"]
+    source: docs/variants.md
+
+  alism_ibtidaa:
+    kind: start
+    options: [hamza, lam]
+    default: hamza
+    junction: ibtidaa
+    locations: ["49:11:30"]
+    source: docs/variants.md
+
+  irkab_maana:
+    kind: idgham
+    options: [idgham, izhar]
+    default: idgham
+    junction: wasl
+    locations: ["11:42:14"]
+    source: docs/variants.md
+
+  yalhath_dhalik:
+    kind: idgham
+    options: [idgham, izhar]
+    default: idgham
+    junction: wasl
+    locations: ["7:176:20"]
+    source: docs/variants.md
+
+  iwaja_qayyima:
+    kind: sakt
+    options: [sakt, idraj]
+    default: sakt
+    junction: wasl
+    locations: ["18:1:11"]
+    source: docs/variants.md
+
+  man_raq:
+    kind: sakt
+    options: [sakt, idraj]
+    default: sakt
+    junction: wasl
+    locations: ["75:27:2"]
+    source: docs/variants.md
+
+  bal_ran:
+    kind: sakt
+    options: [sakt, idraj]
+    default: sakt
+    junction: wasl
+    locations: ["83:14:2"]
+    source: docs/variants.md
+
   iqlab_nasal:
     kind: nasal_place
-    options: [assimilated, bilabial]
-    default: assimilated
+    options: [open, closed]
+    default: open
     locations: [all_iqlab]
     source: docs/hafs/research/noon-meem.md
 
   ikhfaa_shafawi_nasal:
     kind: nasal_place
-    options: [assimilated, bilabial]
-    default: assimilated
+    options: [open, closed]
+    default: open
     locations: [all_ikhfaa_shafawi]
     source: docs/hafs/research/noon-meem.md
+
+catalogue:
+  tamanna_noon:
+    {group: word_readings, display_name: "Tamanna Noon", website_visible: true,
+     occurrences: [{words: ["12:11:6"], anchor: word, requires: all}]}
+  istifham_article:
+    group: word_readings
+    display_name: Istifham Article
+    description: "The forms ءَآلذَّكَرَيْنِ, ءَآلْـَٔـٰنَ, and ءَآللَّهُ."
+    website_visible: true
+    occurrences:
+      - {words: ["6:143:10"], anchor: word, requires: all}
+      - {words: ["6:144:8"], anchor: word, requires: all}
+      - {words: ["10:51:7"], anchor: word, requires: all}
+      - {words: ["10:91:1"], anchor: word, requires: all}
+      - {words: ["10:59:14"], anchor: word, requires: all}
+      - {words: ["27:59:9"], anchor: word, requires: all}
+  daaf_haraka:
+    {group: word_readings, display_name: "Daaf Haraka", website_visible: true,
+     occurrences: [{words: ["30:54:5"], anchor: word, requires: all}, {words: ["30:54:10"], anchor: word, requires: all}, {words: ["30:54:17"], anchor: word, requires: all}]}
+  yabsut:
+    {group: word_readings, display_name: Yabsut, website_visible: true,
+     occurrences: [{words: ["2:245:14"], anchor: word, requires: all}]}
+  bastah:
+    {group: word_readings, display_name: Bastah, website_visible: true,
+     occurrences: [{words: ["7:69:22"], anchor: word, requires: all}]}
+  almusaytirun:
+    {group: word_readings, display_name: Almusaytirun, website_visible: true,
+     occurrences: [{words: ["52:37:7"], anchor: word, requires: all}]}
+  bimusaytir:
+    {group: word_readings, display_name: Bimusaytir, website_visible: true,
+     occurrences: [{words: ["88:22:3"], anchor: word, requires: all}]}
+
+  raa_firq:
+    {group: raa_pronunciation, display_name: "Raa Firq", website_visible: true,
+     occurrences: [{words: ["26:63:11"], anchor: word, requires: wasl}]}
+  raa_alqitr_waqf:
+    {group: raa_pronunciation, display_name: "Raa Alqitr Waqf", website_visible: true,
+     occurrences: [{words: ["34:12:10"], anchor: word, requires: waqf}]}
+  raa_misr_waqf:
+    group: raa_pronunciation
+    display_name: "Raa Misr Waqf"
+    website_visible: true
+    occurrences:
+      - {words: ["10:87:8"], anchor: word, requires: waqf}
+      - {words: ["12:21:5"], anchor: word, requires: waqf}
+      - {words: ["12:99:10"], anchor: word, requires: waqf}
+      - {words: ["43:51:10"], anchor: word, requires: waqf}
+  raa_wanuthur_waqf:
+    group: raa_pronunciation
+    display_name: "Raa Wanuthur Waqf"
+    description: "The six وَنُذُرِ endings in Surah al-Qamar."
+    website_visible: true
+    occurrences:
+      - {words: ["54:16:4"], anchor: word, requires: waqf}
+      - {words: ["54:18:6"], anchor: word, requires: waqf}
+      - {words: ["54:21:4"], anchor: word, requires: waqf}
+      - {words: ["54:30:4"], anchor: word, requires: waqf}
+      - {words: ["54:37:9"], anchor: word, requires: waqf}
+      - {words: ["54:39:3"], anchor: word, requires: waqf}
+  raa_yasr_waqf:
+    {group: raa_pronunciation, display_name: "Raa Yasr Waqf", website_visible: true,
+     occurrences: [{words: ["89:4:3"], anchor: word, requires: waqf}]}
+  raa_asr_waqf:
+    group: raa_pronunciation
+    display_name: "Raa Asr Waqf"
+    website_visible: true
+    occurrences:
+      - {words: ["11:81:9"], anchor: word, requires: waqf}
+      - {words: ["15:65:1"], anchor: word, requires: waqf}
+      - {words: ["20:77:6"], anchor: word, requires: waqf}
+      - {words: ["26:52:5"], anchor: word, requires: waqf}
+      - {words: ["44:23:1"], anchor: word, requires: waqf}
+
+  yaa_aatani_waqf:
+    {group: stopping_starting, display_name: "Yaa Aatani Waqf", website_visible: true,
+     occurrences: [{words: ["27:36:8"], anchor: word, requires: waqf}]}
+  salasila_waqf:
+    {group: stopping_starting, display_name: "Salasila Waqf", website_visible: true,
+     occurrences: [{words: ["76:4:4"], anchor: word, requires: waqf}]}
+  alism_ibtidaa:
+    {group: stopping_starting, display_name: "Alism Ibtidaa", website_visible: true,
+     occurrences: [{words: ["49:11:30"], anchor: word, requires: ibtidaa}]}
+
+  noon_wasl:
+    {group: joined_readings, display_name: "Noon Wasl", website_visible: true,
+     occurrences: [{words: ["68:1:1", "68:1:2"], anchor: boundary, requires: wasl}]}
+  yaseen_wasl:
+    {group: joined_readings, display_name: "Yaseen Wasl", website_visible: true,
+     occurrences: [{words: ["36:1:1", "36:2:1"], anchor: boundary, requires: wasl}]}
+  maliyah_halak:
+    {group: sakt, display_name: "Maliyah Halak", website_visible: true,
+     occurrences: [{words: ["69:28:4", "69:29:1"], anchor: boundary, requires: wasl}]}
+  irkab_maana:
+    {group: joined_readings, display_name: "Irkab Maana", website_visible: true,
+     occurrences: [{words: ["11:42:14", "11:42:15"], anchor: boundary, requires: wasl}]}
+  yalhath_dhalik:
+    {group: joined_readings, display_name: "Yalhath Dhalik", website_visible: true,
+     occurrences: [{words: ["7:176:20", "7:176:21"], anchor: boundary, requires: wasl}]}
+
+  iwaja_qayyima:
+    {group: sakt, display_name: "Iwaja Qayyima", website_visible: true,
+     occurrences: [{words: ["18:1:11", "18:2:1"], anchor: boundary, requires: joined}]}
+  man_raq:
+    {group: sakt, display_name: "Man Raq", website_visible: true,
+     occurrences: [{words: ["75:27:2", "75:27:3"], anchor: boundary, requires: joined}]}
+  bal_ran:
+    {group: sakt, display_name: "Bal Ran", website_visible: true,
+     occurrences: [{words: ["83:14:2", "83:14:3"], anchor: boundary, requires: joined}]}
+
+  iqlab_nasal:
+    {group: nasal_variants, display_name: Iqlab Nasal, website_visible: false,
+     dynamic_scope: all_iqlab}
+  ikhfaa_shafawi_nasal:
+    {group: nasal_variants, display_name: Ikhfaa Shafawi Nasal, website_visible: false,
+     dynamic_scope: all_ikhfaa_shafawi}

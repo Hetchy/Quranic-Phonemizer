@@ -283,27 +283,33 @@ def test_a_silent_rasm_alif_is_a_dropped_letter_by_orthography(hafs):
 
 def test_the_seen_sad_pair_is_two_columns_carrying_the_variant_on_both(hafs):
     """Where the script writes the mini seen the site has two columns, one main
-    and one riding it; the reading sounds one and drops the other, and both
-    carry the selected khilaf as the choice flips which is dropped."""
-    for choice, dropped_text in (("seen", "ص"), ("saad", "ۜ")):
+    and one riding it; the selected letter owns the sound and the other remains
+    present and soundless without a silence reason."""
+    for choice in ("seen", "saad"):
         selection = VariantSelection(
-            (Option(KhilafId.SEEN_SAD_YABSUT, choice),)
+            (Option(KhilafId.YABSUT, choice),)
         )
         view, words, _ = _build(hafs, "2:245:14", {}, selection)
         pair = [
             c for c in _columns(words)
-            if c.variant_id is KhilafId.SEEN_SAD_YABSUT
+            if c.variant_id == KhilafId.YABSUT
         ]
         assert len(pair) == 2
         assert all(c.variant_choice == choice for c in pair)
         riding = next(c for c in pair if c.tier is not CellTier.MAIN)
         base = next(c for c in pair if c.tier is CellTier.MAIN)
         assert riding.attached_to_column_id == base.id
-        dropped = next(c for c in pair if c.status is CellStatus.DROPPED)
-        assert dropped_text in dropped.text
-        assert dropped.silence is LiteralSilence.VARIANT
-        present = next(c for c in pair if c.status is CellStatus.PRESENT)
-        assert present.silence is None
+        assert base.status is CellStatus.PRESENT
+        if choice == "seen":
+            assert riding.owned_sound_ids and not base.owned_sound_ids
+            assert riding.silence is None
+            assert base.silence is None
+        else:
+            assert base.owned_sound_ids and not riding.owned_sound_ids
+            assert base.silence is None
+            assert riding.silence is None
+        assert base.status is CellStatus.PRESENT
+        assert riding.status is CellStatus.PRESENT
 
 
 def test_the_default_seen_sad_site_is_two_columns_without_a_variant(hafs):
@@ -319,9 +325,9 @@ def test_the_default_seen_sad_site_is_two_columns_without_a_variant(hafs):
 @pytest.mark.parametrize(
     "option",
     [
-        Option(KhilafId.MADD_LAZIM_TASHEEL, "tasheel"),
-        Option(KhilafId.IQLAB_NASAL, "assimilated"),
-        Option(KhilafId.SEEN_SAD_BASTAH, "seen"),
+        Option(KhilafId.ISTIFHAM_ARTICLE, "tashil"),
+        Option(KhilafId.IQLAB_NASAL, "open"),
+        Option(KhilafId.BASTAH, "seen"),
     ],
 )
 def test_a_foreign_khilaf_leaves_the_seen_sad_pair_unmarked(hafs, option):

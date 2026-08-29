@@ -211,10 +211,6 @@ SILENCE_DEFINITIONS: dict[SilenceReason, tuple[str, str, str]] = {
         "Orthographic Silence", "حرف لا ينطق به",
         "A letter the script writes and no reading ever says.",
     ),
-    SilenceReason.VARIANT: (
-        "Variant Silence", "حذف في وجه من الخلاف",
-        "A written letter the selected reading option leaves unsaid.",
-    ),
 }
 
 __all__ = ["RULE_DEFINITIONS", "SILENCE_DEFINITIONS"]

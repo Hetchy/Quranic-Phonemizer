@@ -9,9 +9,12 @@ python -m tools.warsh_projection_audit
 python -m tools.warsh_projection_audit --hamza
 ```
 
-The audit reads the selected King Fahd Warsh corpus through the packaged
-adapter and builds both source and transformed native cell views. For every
-source scalar it requires one of these declared destinations:
+The audit reads the selected King Fahd Warsh corpus through the public
+`Phonemizer` facade. It builds the analysis result, source view, highlights,
+and both cell spellings, then serializes every public document form. It also
+requires sounds, source units, rule occurrences, and boundary mergers to close
+over the IDs exposed by those views. For every source scalar it requires one
+of these declared destinations:
 
 - one source-backed word cell in both views;
 - a source unit expanded by a declared `CellRun` for a disjoint-letter name;
@@ -20,13 +23,13 @@ source scalar it requires one of these declared destinations:
 
 The audit records the unit kind, cell role, tier, transformed status, and
 route for every Unicode scalar. It retries a failed ten-ayah batch one verse
-at a time so a projection failure has an exact canonical reference.
+at a time so a projection failure has an exact Warsh source reference.
 
 All 62 non-space selected-source scalars have at least one declared route.
-The sweep traverses 6236 source verses. Successful verse projections in the
-current run produced 727004 character records including generated inter-word
-separators; the thirteen blocked verses listed below are excluded from that
-count.
+The sweep traverses all 6214 Warsh source verses. Successful verse projections
+in the current run produced 726320 character records including generated
+inter-word separators; the 23 blocked verses listed below are excluded from
+that count.
 
 ## Hamza forms
 
@@ -73,17 +76,18 @@ boundary short-vowel columns.
 
 ## Known full-corpus residue
 
-Thirteen verses currently fail before scalar closure can be checked. They are
+Twenty-three verses currently fail before scalar closure can be checked. They are
 ratcheted in `tests/conformance/test_warsh_cell_projection.py`.
 
 | Failure class | References |
 | --- | --- |
-| boundary-rule conflict (`naql` and `ibdal_hamza`) | `2:140` |
-| source ownership has no sound or silence | `3:93`, `27:60`, `27:62`, `27:63`, `27:64` |
-| transformed sound spans an unknown column | `11:87`, `27:29`, `27:32`, `27:38`, `35:28` |
+| transformed cells omit a result sound | `2:1`, `3:1`, `7:1`, `13:1`, `26:1`, `28:1`, `29:1`, `30:1`, `31:1`, `32:1` |
+| source ownership has no sound or silence | `3:93`, `27:62`, `27:64`, `27:65`, `27:66` |
+| transformed sound spans an unknown column | `11:87`, `27:29`, `27:32`, `27:39`, `35:28` |
 | riding cell has no main attachment | `12:90`, `37:52` |
+| lexical glyph is classified as a separator | `37:53` |
 
 These are projection blockers, not unclassified Unicode scalars. Every one of
 the 62 scalar types is represented by successfully projected occurrences,
 but complete occurrence-by-occurrence closure remains pending until these
-thirteen verses build.
+23 verses close across every public view.

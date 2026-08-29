@@ -39,7 +39,6 @@ class LiteralSilence(StrEnum):
     """A written letter left unsaid without a performance rule."""
 
     ORTHOGRAPHIC = "orthographic_silence"
-    VARIANT = "variant_silence"
 
 
 #: A unit is silent for a reason, and the reason is either the occurrence that

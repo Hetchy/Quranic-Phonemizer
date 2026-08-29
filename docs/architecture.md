@@ -263,25 +263,21 @@ Public document validation lives under
 Corpus-wide laws and loader rejection tests live in
 [`tests/laws/`](../tests/laws/) and [`tests/schema/`](../tests/schema/).
 
-CI runs the gates registered in [`tools/gates.py`](../tools/gates.py):
+Pull-request CI runs the checks registered in
+[`tools/gates.py`](../tools/gates.py):
 
 | Gate | Architectural question |
 | --- | --- |
 | `suite` | Do rule fixtures, laws, and schema tests pass? |
-| `comments` | Do comments and docstrings obey the source policy? |
-| `structure` | Does the import, size, export, role, and token boundary hold? |
-| `cross-script` | Do Uthmani and IndoPak produce the same performed tokens in the compared modes? |
-| `regression` | Did output move against the frozen legacy change detector? |
-| `roundtrip` | Does score writing and rebuilding close? |
-| `attestation` | Does every written shadda attestation resolve to a merger occurrence? |
-| `l1` | Where do the scripts' canonical score fields still disagree? |
+| `structure` | Do the import, role, transform, and phoneme-token boundaries hold? |
+| `test-style` | Do semantic cases retain their exact Arabic source context? |
 
-The corpus gates are ratchets, not blanket claims of perfection. Their current
-known residue and rationale are maintained in
-[conformance.md](conformance.md). The
-regression snapshots preserve prior output and are a change detector, not an
-independent correctness oracle. Test case conventions and the rule-oriented
-suite layout are documented in [`tests/README.md`](../tests/README.md).
+The release workflow repeats those checks, verifies Warsh cell closure, and
+smoke-tests the built wheel before publishing. Cross-script, L1, roundtrip,
+attestation, and frozen-output programs are manual diagnostics; their known
+residue is recorded in [conformance.md](conformance.md). Test conventions and
+the rule-oriented suite layout are documented in
+[`tests/README.md`](../tests/README.md).
 
 ## Where to start reading
 

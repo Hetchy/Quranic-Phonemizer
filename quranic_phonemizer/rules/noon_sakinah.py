@@ -32,7 +32,7 @@ class NoonSakinah:
     """One classifier for the whole family, because the family has one shape."""
 
     followers: Followers
-    opening_wasl: object | None = None
+    opening_wasl: tuple[object, ...] = ()
     fixed_opening_izhar: frozenset[Location] = frozenset()
     rule: Rule = Rule.IKHFAA
     phase: Phase = Phase.MERGE
@@ -53,10 +53,15 @@ class NoonSakinah:
         opening = self._opening_wasl(near, at, boundaries)
         if opening is not None:
             location = near.score.words[word].location
-            choice = (
-                "izhar"
-                if location in self.fixed_opening_izhar
-                else self.opening_wasl.choose(near.score.selection)
+            definition = next(
+                (
+                    item for item in self.opening_wasl
+                    if location in item.locations
+                ),
+                None,
+            )
+            choice = "izhar" if definition is None else definition.choose(
+                near.score.selection
             )
             if choice == "izhar":
                 return _classification(Rule.IZHAR, at, None)
@@ -105,10 +110,10 @@ class NoonSakinah:
         if boundaries.after(word) is not Junction.JOIN:
             return None
         location = near.score.words[word].location
-        selectable = (
-            frozenset()
-            if self.opening_wasl is None
-            else self.opening_wasl.locations
+        selectable = frozenset(
+            location
+            for definition in self.opening_wasl
+            for location in definition.locations
         )
         if (
             location not in self.fixed_opening_izhar | selectable

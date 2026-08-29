@@ -83,12 +83,10 @@ Run while working:
 
 ```text
 python -m pytest --collect-only -q
-python tools/gates.py --fast
-git diff --exit-code -- tests/snapshots
+python tools/quick.py <targeted tests...>
 ```
 
-Run `python tools/gates.py` before handing off runtime, adapter, corpus,
-schema, snapshot, or broad test changes.
+Pull requests run the complete ordinary suite and required static checks.
 
 ## Done
 

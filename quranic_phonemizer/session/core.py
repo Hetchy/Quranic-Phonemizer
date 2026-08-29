@@ -18,7 +18,7 @@ from ..model.address import (
 from ..model.canon import Score
 from ..model.inscription import Inscription
 from ..model.performance import Performance
-from .boundaries import resolve_boundaries
+from .boundaries import mask_stopped_sakt_variants, resolve_boundaries
 from .request import resolve_words
 from .span import assemble as assemble_span
 
@@ -72,8 +72,23 @@ def phonemize_request(
         stop_refs=resolved_stop_refs,
         verse_ends=verse_ends,
     )
+    effective = mask_stopped_sakt_variants(
+        recitation.khilaf, locations, boundaries, selection
+    )
+    if effective != selection:
+        built = assemble_span(
+            recitation, locations, script=script, selection=effective
+        )
+        boundaries = resolve_boundaries(
+            built.inscription.advice,
+            locations,
+            built.score,
+            stop_signs=stop_signs,
+            stop_refs=resolved_stop_refs,
+            verse_ends=verse_ends,
+        )
     performance = recitation.perform(
-        built.score, boundaries, selection=selection
+        built.score, boundaries, selection=effective
     )
     return Session(
         locations, built.score, built.inscription, boundaries, performance,

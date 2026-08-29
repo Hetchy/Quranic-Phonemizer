@@ -32,7 +32,8 @@ RIWAYAH = Riwayah.WARSH
 SCRIPTS = (Script.UTHMANI,)
 
 #: Warsh collapses kubra to taqlil when the `imala` extra phoneme is not
-#: spent; ordinary taqlil is never gated.
+#: spent. The separate `taqlil_short` control is handled by the renderer and
+#: never changes this canonical quality mapping.
 QUALITY_FALLBACKS = {Quality.KUBRA: Quality.TAQLIL}
 ARTIFACT = "king-fahd-warsh-v2"
 DATA = Path(__file__).resolve().parents[2] / "data" / "riwayat" / "warsh"

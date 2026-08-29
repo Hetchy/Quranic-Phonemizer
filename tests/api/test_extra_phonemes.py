@@ -43,6 +43,19 @@ def test_warsh_tashil_is_always_rendered_and_not_an_extra():
         Phonemizer(riwayah="warsh", extra_phonemes=("tashil",))
 
 
+def test_taqlil_short_is_warsh_only_and_defaults_off():
+    off = Phonemizer(riwayah="warsh").analyse("81:23:2")
+    on = Phonemizer(
+        riwayah="warsh", extra_phonemes=("taqlil_short",)
+    ).analyse("81:23:2")
+
+    assert ("a", "ɛ") in _differences(off, on)
+    assert off.analysis.extra_phonemes == frozenset()
+    assert on.analysis.extra_phonemes == frozenset({"taqlil_short"})
+    with pytest.raises(UnknownExtraPhoneme):
+        Phonemizer(extra_phonemes=("taqlil_short",))
+
+
 def test_emphatic_fatha_defaults_off_but_emphatic_alef_is_always_written():
     short_off = Phonemizer().analyse("2:29")
     short_on = Phonemizer(extra_phonemes=("emphatic_fatha",)).analyse("2:29")

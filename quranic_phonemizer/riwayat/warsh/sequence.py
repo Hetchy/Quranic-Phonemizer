@@ -202,6 +202,19 @@ def _release_dagger_hamza_seats(text, entries) -> None:
             )
 
 
+def _project_hamza_madd(text, entries) -> None:
+    """A maddah after hamza supplies the written long A nucleus."""
+    for index, char in enumerate(text[1:], start=1):
+        if char != "ٓ" or text[index - 1] not in "ءأإؤئ":
+            continue
+        entries[index] = MarkEntry(
+            role="madd",
+            cls=GraphemeClass.MADD_SIGN,
+            fact=SlotFact.VOWEL_QUALITY,
+            value=Nucleus.long(Quality.A),
+        )
+
+
 def _project_composite_tanwin(text, entries) -> None:
     for index, char in enumerate(text):
         if char != "ۢ" or index == 0:
@@ -240,6 +253,7 @@ def _entries(inventory: Inventory, text: str) -> list:
     _project_plural_alif_silence(text, entries)
     _project_orthographic_silence(text, entries)
     _release_dagger_hamza_seats(text, entries)
+    _project_hamza_madd(text, entries)
     _project_composite_tanwin(text, entries)
     return entries
 

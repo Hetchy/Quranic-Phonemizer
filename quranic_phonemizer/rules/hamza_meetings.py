@@ -6,7 +6,18 @@ from dataclasses import dataclass
 from collections.abc import Mapping
 
 from ..engine.neighbourhood import Neighbourhood
-from ..engine.plan import Classify, Length, Phase, Plan, Realize, Relength, Silence, Verdict, mint
+from ..engine.plan import (
+    Classify,
+    Length,
+    MergeInto,
+    Phase,
+    Plan,
+    Realize,
+    Relength,
+    Silence,
+    Verdict,
+    mint,
+)
 from ..model.address import BoundaryPlan, Location, SlotId
 from ..model.canon import Annotation, CanonLetter, Onset, Quality, Rule
 from ..model.performance import Aspect, Consonant, Occurrence
@@ -38,7 +49,12 @@ class HamzaMeetings:
         if not slots or slots[0].id != at or word == 0:
             return None, None
         left = near.score.words[word - 1]
-        if left.location != row.previous or near.after(left.slots[-1].id) is None:
+        if (
+            left.location != row.previous
+            or not left.slots
+            or left.slots[-1].letter is not CanonLetter.HAMZA
+            or near.after(left.slots[-1].id) is None
+        ):
             return None, None
         return row, word
 
@@ -74,7 +90,7 @@ class HamzaMeetings:
         if previous is None:
             return None
         actions = (
-            Silence(previous.id, Aspect.VOWEL),
+            MergeInto(previous.id, Aspect.VOWEL, at, Aspect.VOWEL),
             Silence(at, Aspect.CONSONANT),
             Relength(at, Length.LONG),
         )

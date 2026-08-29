@@ -72,6 +72,68 @@ CASES = (
         char_rules={"ي": R("taqlil", "madd_arid_lissukun")},
         sound_rules={"ɛ:": R("taqlil", "madd_arid_lissukun")},
     ),
+    # Warsh: ر۪ء۪اهُ
+    Case(
+        id="raa-seen-short-taqlil-default-off",
+        site=Site(warsh=("81:23", (2,))),
+        read=isolated(),
+        phonemes="r a ʔ ɛ: h",
+        extra_phonemes=(),
+        sound_rules={
+            "r": R("tarqeeq"),
+            "a": R("taqlil"),
+            "ɛ:": R("taqlil", "madd_badal"),
+        },
+    ),
+    # Warsh: ر۪ء۪اهُ
+    Case(
+        id="raa-seen-short-taqlil-enabled",
+        site=Site(warsh=("81:23", (2,))),
+        read=isolated(),
+        phonemes="r ɛ ʔ ɛ: h",
+        extra_phonemes=("taqlil_short",),
+        sound_rules={
+            "r": R("tarqeeq"),
+            "ɛ": R("taqlil"),
+            "ɛ:": R("taqlil", "madd_badal"),
+        },
+    ),
+    # Warsh: رَءَا اَ۬لشَّمْسَ
+    StateCase(
+        id="raa-seen-before-sakin",
+        site=Site(warsh=("6:78", (2, 3))),
+        states={
+            "joined": Expect(
+                read=through(),
+                phonemes=("rˤ a ʔ a", "ʃʃ a m s"),
+                extra_phonemes=("taqlil_short",),
+                absent_sound_rules={
+                    "a[1]": R("taqlil"),
+                    "a[2]": R("taqlil"),
+                },
+            ),
+            "stopped-off": Expect(
+                read=explicit(ibtidaa=2, waqf=(2, 3)),
+                phonemes=("r a ʔ ɛ:", "ʔ a ʃʃ a m s"),
+                extra_phonemes=(),
+                sound_rules={
+                    "r": R("tarqeeq"),
+                    "a[1]": R("taqlil"),
+                    "ɛ:": R("taqlil", "madd_badal"),
+                },
+            ),
+            "stopped-on": Expect(
+                read=explicit(ibtidaa=2, waqf=(2, 3)),
+                phonemes=("r ɛ ʔ ɛ:", "ʔ a ʃʃ a m s"),
+                extra_phonemes=("taqlil_short",),
+                sound_rules={
+                    "r": R("tarqeeq"),
+                    "ɛ": R("taqlil"),
+                    "ɛ:": R("taqlil", "madd_badal"),
+                },
+            ),
+        },
+    ),
 )
 
 

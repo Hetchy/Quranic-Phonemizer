@@ -2,12 +2,15 @@ from __future__ import annotations
 
 import pytest
 
+from quranic_phonemizer.model.address import KhilafId
+
 from tests.support import (
     Case,
     Expect,
     R,
     Site,
     StateCase,
+    VariantCase,
     assert_case,
     case_runs,
     explicit,
@@ -86,13 +89,29 @@ CASES = (
         "stopped": Expect(read=isolated(), phonemes="q aˤ w a: r i: r",
                           absent_char_rules={"ا[2]": R("pausal_alif")}),
     }),
-    # Hafs: سَلَـٰسِلَا۟
-    StateCase(id="salasila", site=Site(hafs=("76:4", (4,))), states={
-        "joined": Expect(read=joining(), phonemes="s a l a: s i l a",
-                         absent_char_rules={"ا": R("pausal_alif")}),
-        "stopped": Expect(read=isolated(), phonemes="s a l a: s i l",
-                          absent_char_rules={"ا": R("pausal_alif")}),
-    }),
+    # Hafs: سَلَـٰسِلَا۟ وَأَغْلَـٰلًا
+    VariantCase(
+        id="salasila",
+        site=Site(hafs=("76:4", (4, 5))),
+        selector=KhilafId.SALASILA_WAQF,
+        faces={
+            "hadhf": Expect(
+                read=explicit(ibtidaa=4, waqf=(4, 5)),
+                phonemes=("s a l a: s i l", "w a ʔ a ɣ l a: l a:"),
+                absent_char_rules={"ا[2]": R("pausal_alif")},
+            ),
+            "ithbat": Expect(
+                read=explicit(ibtidaa=4, waqf=(4, 5)),
+                phonemes=("s a l a: s i l a:", "w a ʔ a ɣ l a: l a:"),
+            ),
+        },
+        default="hadhf",
+        masked=Expect(
+            read=through(),
+            phonemes=("s a l a: s i l a", "w a ʔ a ɣ l a: l a:"),
+            absent_char_rules={"ا[2]": R("pausal_alif")},
+        ),
+    ),
 )
 
 

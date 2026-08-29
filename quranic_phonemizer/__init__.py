@@ -7,6 +7,7 @@ from .analysis.facade import (
     UnknownStopSign,
     available_stop_signs,
     available_variants,
+    variant_catalogue,
     supported_riwayat,
     tajweed_rules,
 )
@@ -33,6 +34,7 @@ __all__: list[str] = [
     "VariantSelection",
     "available_stop_signs",
     "available_variants",
+    "variant_catalogue",
     "supported_riwayat",
     "tajweed_rules",
 ]

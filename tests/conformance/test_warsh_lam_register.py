@@ -111,7 +111,7 @@ def test_final_lam_waqf_replaces_the_ordinary_owner_without_stacking(location):
 
 
 @pytest.mark.parametrize("location", sorted(SALSAL))
-def test_salsal_owns_only_the_first_lam_with_default_tarqiq(location):
+def test_salsal_keeps_both_pronounced_lams_explicitly_light(location):
     package, words, built = _built(location.verse)
     performance = package.perform(
         built.score, plan_for(len(words), isolated=location.word)
@@ -132,7 +132,7 @@ def test_salsal_owns_only_the_first_lam_with_default_tarqiq(location):
 
     assert len(lams) == 2
     assert by_lam[lams[0].id] == (Rule.TARQEEQ,)
-    assert by_lam[lams[1].id] == ()
+    assert by_lam[lams[1].id] == (Rule.TARQEEQ,)
 
 
 @pytest.mark.parametrize(

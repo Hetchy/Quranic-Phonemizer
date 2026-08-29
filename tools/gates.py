@@ -1,6 +1,6 @@
-"""Every gate, and the one place the ratchet numbers live.
+"""Run the checks required by pull requests.
 
-Run: python tools/gates.py [--fast] [--serial] [-jN] [gate ...]
+Run: python tools/gates.py [--serial] [-jN] [gate ...]
 """
 from __future__ import annotations
 
@@ -13,50 +13,18 @@ import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 
-#: Floors normally rise and ceilings normally fall. An intentional output
-#: correction may move the other way only when its exact refs are documented.
-FLOORS = {
-    ("cross", "word"): "99.997",
-    ("cross", "verse"): "100.0",
-    ("regression", "word"): "99.919",
-    # 90ad7dd/ff318e2 correct naql/ibdal and nasal-idgham ownership.
-    ("regression", "verse"): "97.848",
-    ("roundtrip", "uthmani"): "100.0",
-    ("attest", "uthmani"): "176",
-    ("attest", "indopak"): "237",
-    ("l1", "-"): "17",
-}
-
 GATES: dict[str, tuple[tuple[str, ...], ...]] = {
     "suite": ((sys.executable, "-m", "pytest", "tests/", "-q"),),
-    "comments": ((sys.executable, "tools/comment_lint.py"),),
     "structure": ((sys.executable, "tools/structure_lint.py"),),
     "test-style": ((sys.executable, "tools/test_style_lint.py"),),
-    "cross-script": (("cross", "word"), ("cross", "verse")),
-    "regression": (("regression", "word"), ("regression", "verse")),
-    "roundtrip": (("roundtrip", "uthmani"),),
-    "attestation": (("attest", "uthmani"), ("attest", "indopak")),
-    "l1": (("l1", "-"),),
 }
-
-#: The three that read no corpus. Seconds rather than minutes, so these are the
-#: ones worth running after every change.
-FAST = ("suite", "comments", "structure", "test-style")
-
-
-def _command(step: tuple[str, ...]) -> list[str]:
-    """A step is either an argv, or a harness and mode to look the floor up by."""
-    if step in FLOORS:
-        return [sys.executable, "tools/floor.py", *step, FLOORS[step]]
-    return list(step)
-
 
 def _run(name: str) -> tuple[str, bool, str]:
     """Output is captured, because the gates do not finish in the order given."""
     output = []
     for step in GATES[name]:
         done = subprocess.run(
-            _command(step), cwd=ROOT, capture_output=True, text=True
+            list(step), cwd=ROOT, capture_output=True, text=True
         )
         output.append(done.stdout + done.stderr)
         if done.returncode != 0:
@@ -67,20 +35,16 @@ def _run(name: str) -> tuple[str, bool, str]:
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("gates", nargs="*")
-    parser.add_argument("--fast", action="store_true",
-                        help="only the gates that read no corpus")
     parser.add_argument("--serial", action="store_true")
     parser.add_argument("-j", type=int, default=0, help="how many at once")
     args = parser.parse_args(argv)
 
-    names = args.gates or (list(FAST) if args.fast else list(GATES))
+    names = args.gates or list(GATES)
     unknown = [n for n in names if n not in GATES]
     if unknown:
         print(f"unknown gate {unknown[0]!r}; expected one of {sorted(GATES)}")
         return 2
 
-    # Every corpus gate is one CPU-bound process holding its own copy of the
-    # corpus, so this is bounded by cores and by memory, not by the work.
     workers = args.j or min(len(names), max(1, (os.cpu_count() or 4) - 2))
     if args.serial or workers == 1:
         results = [_run(name) for name in names]

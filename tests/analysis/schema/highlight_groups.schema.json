@@ -10,7 +10,7 @@
           "type": "array"
         },
         "schema_version": {
-          "const": 2,
+          "const": 3,
           "type": "integer"
         }
       },

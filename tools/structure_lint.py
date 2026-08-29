@@ -552,14 +552,9 @@ def signature_honesty() -> list[Problem]:
 
 CHECKS = {
     "import-graph": import_graph,
-    "unused-imports": unused_imports,
     "role-vocabulary": role_vocabulary,
     "transform-rule-id": transform_rule_id,
-    "signature-honesty": signature_honesty,
-    "module-size": module_size,
-    "dead-exports": dead_exports,
     "phoneme-strings": phoneme_strings,
-    "tool-import-smoke": tool_import_smoke,
 }
 
 

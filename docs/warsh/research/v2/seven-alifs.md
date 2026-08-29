@@ -93,8 +93,10 @@ ibtidaa at Ana and continue:  ʔ a n a ʔ i ll a: ...
 waqf on Ana:                  ʔ a n a:
 ```
 
-The joined short `/a/` and final alif source witness receive `pausal_alif`;
-there is no munfasil madd. At waqf `/a:/` instead receives `madd_tabii`.
+The joined short `/a/` carries the phonological `pausal_alif` occurrence, but
+the visible cell-level identity stays exclusively on the final alif source
+witness; the accompanying fatha is never labelled. There is no munfasil madd.
+At waqf `/a:/` instead receives `madd_tabii`.
 All other joined `أَنَا` sites follow this short/long pausal shape unless they
 are in the 12-row retained table.
 
@@ -111,9 +113,10 @@ ibtidaa at Lakinna and join:  l a: k i ñ a h u w a ...
 waqf on Lakinna:              l a: k i ñ a:
 ```
 
-Joined `/a/` receives `pausal_alif`; stopped `/a:/` receives `madd_tabii`.
-The geminated nasal is the ordinary noon rule result, not part of the alif
-decision.
+Joined `/a/` carries the phonological `pausal_alif` occurrence, while the
+visible cell-level label belongs only to the final alif source witness and not
+to its fatha. Stopped `/a:/` receives `madd_tabii`. The geminated nasal is the
+ordinary noon rule result, not part of the alif decision.
 
 ## The three retained Ahzab alifs
 

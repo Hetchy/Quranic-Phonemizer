@@ -23,6 +23,9 @@ from .laws import validate_cell_columns, validate_cell_sounds
 from .spelled import expand_spelled_words
 
 
+_MINI_MEEM = frozenset({"ۢ", "ۭ"})
+
+
 @dataclass(frozen=True, slots=True)
 class _Reading:
     """What the reading says about the units, keyed for column decisions."""
@@ -61,8 +64,15 @@ def _reading(view: SourceView, facts: AnalysisFacts, insc: InscriptionFacts,
     owner = {
         s.value: unit.id.value for unit in view.units for s in unit.owned_sound_ids
     }
+    consonant_owners = {
+        owner[sound] for sound in consonant if sound in owner
+    }
     for edge in (*facts.hosts, *facts.insertions):
-        if edge.aspect is not Aspect.VOWEL or edge.sound not in owner:
+        if (
+            edge.aspect is not Aspect.VOWEL
+            or edge.sound not in owner
+            or owner[edge.sound] in consonant_owners
+        ):
             continue
         slot = edge.slots[0] if hasattr(edge, "slots") else edge.anchor[0]
         slot_of_unit[owner[edge.sound]] = slot
@@ -141,6 +151,15 @@ def _tier(unit: LetterUnit, reading: _Reading) -> CellTier:
     if not _rides(unit):
         return CellTier.MAIN
     if unit.kind is LetterUnitKind.LETTER:
+        quality = reading.canonical_quality.get(unit.id.value)
+        if quality is None:
+            target = reading.written_on.get(unit.id.value)
+            quality = reading.canonical_quality.get(target)
+        if (
+            unit.text in _MINI_MEEM
+            and quality is Quality.I
+        ):
+            return CellTier.BELOW
         return CellTier.BELOW if unit.id.value in reading.below_units else CellTier.ABOVE
     quality = reading.canonical_quality.get(unit.id.value)
     return CellTier.BELOW if quality is Quality.I else CellTier.ABOVE
@@ -204,8 +223,8 @@ def _column(unit: LetterUnit, reading: _Reading,
     if tier is not CellTier.MAIN:
         seat = _seat_unit(unit, reading)
         attached = None if seat is None else CellColumnId(column_of_unit[seat])
-    status = CellStatus.DROPPED if unit.silence is not None else CellStatus.PRESENT
     option = reading.variant_of_unit.get(unit.id.value)
+    status = CellStatus.DROPPED if unit.silence is not None else CellStatus.PRESENT
     return CellColumn(
         id=CellColumnId(column_of_unit[unit.id.value]),
         role=role,

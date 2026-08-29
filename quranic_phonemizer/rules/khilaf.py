@@ -12,8 +12,8 @@ from ..model.canon import ABJAD, CanonLetter, Onset
 #: on the letter the rule mints: a real meem sounds where the lips close, a
 #: noon-lettered hum where they do not.
 NASAL_PLACES = {
-    "bilabial": CanonLetter.MEEM,
-    "assimilated": CanonLetter.NOON,
+    "closed": CanonLetter.MEEM,
+    "open": CanonLetter.NOON,
 }
 DEFAULT_NASAL_PLACE = CanonLetter.NOON
 

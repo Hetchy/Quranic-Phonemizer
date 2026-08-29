@@ -9,7 +9,13 @@ from dataclasses import dataclass
 
 from ..model.address import Junction, OccurrenceId, SlotId, SoundId
 from ..model.canon import Slot
-from ..model.performance import Occurrence, effect_targets
+from ..model.inscription import SilenceReason
+from ..model.performance import (
+    Aspect,
+    Occurrence,
+    Silent as PerformanceSilent,
+    effect_targets,
+)
 from ..render.alphabet import Alphabet
 from ..session import Session
 from .attributions import (
@@ -45,6 +51,7 @@ class AnalysisFacts:
     insertions: tuple[Insertion, ...]
     silences: tuple[Silenced, ...]
     merges: tuple[Merged, ...]
+    variant_omissions: frozenset[tuple[SlotId, Aspect]]
 
 
 def analyse(
@@ -60,8 +67,16 @@ def analyse(
 
     order = sounds_in_order(performance)
     sound_index = {sound: i for i, sound in enumerate(order)}
+    hidden = frozenset(
+        occurrence.id for occurrence in performance.occurrences
+        if occurrence.rule is SilenceReason.VARIANT
+    )
+    occurrences = tuple(
+        occurrence for occurrence in performance.occurrences
+        if occurrence.id not in hidden
+    )
     occurrence_index = {
-        occurrence.id: i for i, occurrence in enumerate(performance.occurrences)
+        occurrence.id: i for i, occurrence in enumerate(occurrences)
     }
     edges = attributions(performance, sound_index, occurrence_index)
     by_type: dict[type, list] = {Hosted: [], Insertion: [], Silenced: [], Merged: []}
@@ -78,9 +93,13 @@ def analyse(
             performance, order, alphabet, extra_phonemes, quality_fallbacks
         ),
         sound_index=sound_index,
-        occurrences=performance.occurrences,
+        occurrences=occurrences,
         occurrence_index=occurrence_index,
-        effect_targets=effect_targets(performance),
+        effect_targets={
+            occurrence: targets
+            for occurrence, targets in effect_targets(performance).items()
+            if occurrence not in hidden
+        },
         attributions=edges,
         modifiers=modifiers(performance, sound_index, occurrence_index),
         junctions=session.boundaries.junctions,
@@ -89,6 +108,12 @@ def analyse(
         insertions=tuple(by_type[Insertion]),
         silences=tuple(by_type[Silenced]),
         merges=tuple(by_type[Merged]),
+        variant_omissions=frozenset(
+            (edge.slots[0], edge.aspect)
+            for edge in performance.attributions
+            if isinstance(edge, PerformanceSilent)
+            and edge.by in hidden
+        ),
     )
 
 

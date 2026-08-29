@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import unicodedata
 from collections import Counter
 from functools import lru_cache
 from pathlib import Path
@@ -346,10 +347,134 @@ def test_relative_pronoun_projection_covers_only_its_selected_script_family():
         if relative_pronoun_form(entry.text)
     ]
 
-    assert len(relative) == 1385
+    forms = Counter(
+        "".join(
+            char for char in entry.text
+            if not unicodedata.combining(char) and char not in "ـۥۦۧۨ"
+        )
+        for entry in relative
+    )
+
+    assert forms == Counter({
+        "الذين": 812,
+        "الذے": 268,
+        "والذين": 163,
+        "للذين": 80,
+        "التے": 65,
+        "والذے": 15,
+        "بالذے": 11,
+        "فالذين": 10,
+        "كالذين": 9,
+        "بالتے": 7,
+        "بالذين": 6,
+        "كالذے": 5,
+        "والتے": 4,
+        "للذے": 4,
+        "كالتے": 1,
+        "للتے": 1,
+        "وبالذے": 1,
+        "وللذين": 1,
+        "والذن": 1,
+    })
+    assert len(relative) == 1464
     assert not relative_pronoun_form(
         warsh_corpus().entries[Location(12, 13, 10)].text
     )
+    assert not relative_pronoun_form(
+        warsh_corpus().entries[Location(7, 144, 7)].text
+    )
+
+
+def test_every_selected_relative_pronoun_restores_the_lam_gemination():
+    warsh = recitation(Riwayah.WARSH)
+    seen = 0
+    for location, entry in warsh_corpus().entries.items():
+        if not relative_pronoun_form(entry.text):
+            continue
+        built = warsh.build(warsh.read(
+            Script.UTHMANI,
+            location.verse,
+            ((location, entry.text),),
+        ))
+        lam, relative = next(
+            (current, following)
+            for current, following in zip(
+                built.score.words[0].slots,
+                built.score.words[0].slots[1:],
+            )
+            if current.letter is CanonLetter.LAM
+            and following.letter in {CanonLetter.THAL, CanonLetter.TA}
+        )
+        assert lam.onset is Onset.GEMINATE, (location, entry.text)
+        assert lam.nucleus.is_short and lam.nucleus.quality is Quality.A
+        assert relative.onset is Onset.PLAIN, (location, entry.text)
+        seen += 1
+
+    assert seen == 1464
+
+
+def test_unwritten_gemination_source_conventions_are_closed():
+    families = Counter()
+    for entry in warsh_corpus().entries.values():
+        text = entry.text
+        if "ّ" in text:
+            continue
+        skeleton = "".join(
+            char for char in text
+            if not unicodedata.combining(char) and char not in "ـۥۦۧۨ"
+        )
+        if relative_pronoun_form(text):
+            families["relative_pronoun"] += 1
+        elif skeleton in {"لله", "ولله", "فلله"}:
+            families["contracted_divine_name"] += 1
+        elif skeleton == "اليل":
+            families["al_layl"] += 1
+
+    assert families == Counter({
+        "relative_pronoun": 1434,
+        "contracted_divine_name": 135,
+        "al_layl": 59,
+    })
+
+
+def test_every_unmarked_solar_shape_is_relative_or_a_closed_nonarticle():
+    sun = set("تثدذرزسشصضطظلن")
+    prefixes = ("وبال", "وكال", "وال", "فال", "بال", "كال", "ولل", "لل", "ال")
+    residual = Counter()
+    for entry in warsh_corpus().entries.values():
+        bases = [
+            (char, offset)
+            for offset, char in enumerate(entry.text)
+            if not unicodedata.combining(char) and char not in "ـۥۦۧۨ"
+        ]
+        skeleton = "".join(char for char, _ in bases)
+        prefix = next((one for one in prefixes if skeleton.startswith(one)), None)
+        if prefix is None or len(bases) <= len(prefix):
+            continue
+        following = len(prefix)
+        if bases[following][0] not in sun:
+            continue
+        start = bases[following][1]
+        end = bases[following + 1][1] if following + 1 < len(bases) else len(entry.text)
+        if "ّ" in entry.text[start:end] or relative_pronoun_form(entry.text):
+            continue
+        residual[skeleton] += 1
+
+    assert residual == Counter({
+        "الن": 4,
+        "التقى": 3,
+        "فالن": 1,
+        "التقتا": 1,
+        "التقيتم": 1,
+        "الزمنه": 1,
+        "فالتقطه": 1,
+        "والد": 1,
+        "والده": 1,
+        "فالتقمه": 1,
+        "فالتقى": 1,
+        "فالتمسوا": 1,
+        "والتفت": 1,
+    })
 
 
 def test_the_fixed_single_hamza_register_is_the_documented_56():
