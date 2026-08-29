@@ -94,16 +94,25 @@ def _transform_letter(
     lost_shadda = shadda in col.text and not cons.geminate
     gained_shadda = shadda not in col.text and cons.geminate
     needs_hamza = _needs_written_hamza(col, cons, facts)
-    collapsed_tashil = cons.eased and col.text == "۟"
+    eased_hamza = (
+        cons.eased
+        and cons.letter is CanonLetter.HAMZA
+        and not any(glyph in col.text for glyph in _HAMZA_GLYPHS)
+        and not any(
+            isinstance(facts.sounds[sound.value].value, Vowel)
+            and facts.sounds[sound.value].value.long
+            for sound in col.owned_sound_ids
+        )
+    )
     if (
         not _is_replaced(cons, slot)
         and not needs_hamza
-        and not collapsed_tashil
+        and not eased_hamza
         and not lost_shadda
         and not gained_shadda
     ):
         return col
-    if needs_hamza or collapsed_tashil:
+    if needs_hamza or eased_hamza:
         text = _hamza_spelling(slot, pen)
     elif _is_replaced(cons, slot):
         text = _consonant_spelling(cons, pen)

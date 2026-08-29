@@ -5,9 +5,47 @@ import pytest
 
 from quranic_phonemizer.api import recitation
 from quranic_phonemizer.analysis.cells import build_cell_view
+from quranic_phonemizer.analysis.cells.dtos import CellRole, CellStatus
 from quranic_phonemizer.model.address import Riwayah, Script
 from quranic_phonemizer.orthography.write import pen_for
 from quranic_phonemizer.session import phonemize_request
+
+
+def test_stopping_before_3_15_second_word_keeps_each_column_semantic():
+    """Ibtidaa exposes both hamzas in `اَوْ۟نَبِّئُكُم`; they remain two
+    vocalised groups rather than one four-sound source column."""
+    reading = recitation(Riwayah.WARSH)
+    pen = pen_for(reading.inventory(Script.UTHMANI))
+    session = phonemize_request(
+        reading, "3:15", stop_refs=("3:15:1",)
+    )
+    view = build_cell_view(
+        session,
+        ref="3:15",
+        riwayah="warsh",
+        script="uthmani",
+        variant={},
+        spelling="transformed",
+        pen=pen,
+    )
+
+    word = view.words[1]
+    assert max(len(column.owned_sound_ids) for column in word.columns) <= 2
+    assert max(len(group.sound_ids) for group in word.groups) <= 3
+    first, first_vowel, eased, eased_vowel = word.columns[:4]
+    assert tuple(column.role for column in word.columns[:4]) == (
+        CellRole.LETTER,
+        CellRole.HARAKA,
+        CellRole.LETTER,
+        CellRole.HARAKA,
+    )
+    assert first.status is CellStatus.REPLACED
+    assert eased.status is CellStatus.REPLACED
+    assert eased_vowel.status is CellStatus.INSERTED
+    assert first_vowel.source_character_ids
+    assert eased.source_character_ids
+    assert not eased_vowel.source_character_ids
+    assert all(mark not in eased.text for mark in "ْ۟")
 
 
 @pytest.mark.slow

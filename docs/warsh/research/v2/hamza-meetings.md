@@ -22,7 +22,7 @@ The selected Warsh corpus contains 60 one-word adjacent-hamza sites:
 | `ءَأَعْجَمِيٌّ` | 1 | Fixed tashil |
 | Triple-hamza forms | 4 | Fixed tashil on the second qata |
 
-The selected corpus also contains 154 adjacent qata pairs across two words:
+The selected corpus also contains 153 adjacent qata pairs across two words:
 
 | First + second quality | Count | General outcome |
 | --- | ---: | --- |
@@ -31,7 +31,7 @@ The selected corpus also contains 154 adjacent qata pairs across two words:
 | U + U | 1 | `hamza_muttafiq` |
 | A + I | 19 | Fixed tashil |
 | A + U | 1 | Fixed tashil |
-| I + A | 29 | Fixed pure ibdal |
+| I + A | 28 | Fixed pure ibdal |
 | U + A | 13 | Fixed pure ibdal |
 | U + I | 26 | `hamza_damm_kasr` |
 
@@ -211,7 +211,7 @@ The different-vowel matrix is structural:
 | --- | ---: | --- | --- |
 | A+I | 19 | `تَفِےٓءَ ا۪لَىٰٓ`, source and canonical 49:9:17-18 | Fixed tashil: `... ʔ a ʔ̞ i l a:`. The final nucleus has the fixed Warsh fath result. |
 | A+U | 1 | `جَآءَ اُ۟مَّةٗ رَّسُولُهَا`, source and canonical 23:44:7-9 | Fixed tashil: `... ʔ a ʔ̞ u m̃ a t a rˤrˤ aˤ ...` in its actual joined context; ordinary tanwin-to-raa idgham owns `/rˤrˤ/`. |
-| I+A | 29 | `اِ۬لنِّسَآءِ اَ۬وَ اَكْنَنتُمْ فِےٓ`, source 2:233:9-12, canonical 2:235:9-12 | Fixed moving ibdal to yaa + A, followed by ordinary naql at the next boundary: `... ʔ i j a w a k n a ŋ t u m f i:`. |
+| I+A | 28 | `اِ۬لنِّسَآءِ اَ۬وَ اَكْنَنتُمْ فِےٓ`, source 2:233:9-12, canonical 2:235:9-12 | Fixed moving ibdal to yaa + A, followed by ordinary naql at the next boundary: `... ʔ i j a w a k n a ŋ t u m f i:`. |
 | U+A | 13 | `وَيَٰسَمَآءُ اَ۬قْلِعِےۖ`, source and canonical 11:44:5-6 | Fixed moving ibdal to waw + A: `... ʔ u w a q Q l ...`. |
 | U+I | 26 | `يَٰزَكَرِيَّآءُ اِ۪نَّا`, source 19:6:1-2, canonical 19:7:1-2 | Public `hamza_damm_kasr`: ibdal `... ʔ u w i ñ a:`, tashil `... ʔ u ʔ̞ i ñ a:`. |
 
@@ -274,7 +274,7 @@ the same result sound. Visible unit and cell placements follow sound ownership
 and silence; trigger-only neighboring letters are not tagged. A moving waw or
 yaa receives no invented madd.
 
-Machine data must own all 60 one-word and 154 across-word rows with source
+Machine data must own all 60 one-word and 153 across-word rows with source
 ref, canonical ref, first and second qualities, boundary scope, structural
 owner, and authored-exception owner. Tests assert the exact partitions above,
 all five Aimma sites, the Aajami site, all four triple-hamza sites, both Jaa-Aal

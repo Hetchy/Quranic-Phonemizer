@@ -161,7 +161,25 @@ def _project_collapsed_hamza(text, entries) -> None:
     The following rounded mark attests the unwritten second qata; it is not a
     silence sign on the first hamza.
     """
-    if text.startswith("أَ۟"):
+    if text.startswith("اَوْ۟"):
+        # `اَوْ۟نَبِّئُكُم` writes the second qata on the waw-shaped
+        # carrier. Keep it as its own source-backed slot; otherwise the
+        # fallback repair puts both vocalised hamzas on the first alif and
+        # creates an impossible four-sound cell at ibtidaa.
+        entries[2] = LetterEntry(CanonLetter.HAMZA)
+        entries[3] = MarkEntry(
+            role="hamza_seat",
+            cls=GraphemeClass.ANNOTATION,
+            fact=SlotFact.ONSET,
+            value=Onset.PLAIN,
+        )
+        entries[4] = MarkEntry(
+            role="damma",
+            cls=GraphemeClass.ANNOTATION,
+            fact=SlotFact.VOWEL_QUALITY,
+            value=Nucleus.short(Quality.U),
+        )
+    elif text.startswith("أَ۟"):
         entries[2] = MarkEntry(
             role="collapsed_hamza",
             cls=GraphemeClass.ANNOTATION,
@@ -177,6 +195,7 @@ def _project_orthographic_silence(text, entries) -> None:
         ("إِيْن", 3),
         ("إِيْه", 3),
         ("إِےْ", 3),
+        ("ءِےْ", 3),
     ):
         start = text.find(pattern)
         if start >= 0:

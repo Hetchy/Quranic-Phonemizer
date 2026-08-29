@@ -120,6 +120,15 @@ Naql transfers that short damma, and the written waw remains rasm-only in both
 states. Initial `ا۟و...` without waw sukun is the distinct sounded Warsh badal
 carrier family.
 
+The four selected forms `تِلْقَآءِےْ` (10:15:24), `وَإِيتَآءِےْ`
+(16:90:6), `اٰنَآءِےْ` (20:130:14), and `وَّرَآءِےْ` (42:51:11)
+share a final rasm-support yaa after a kasra-bearing hamza. The yaa is silent
+in both wasl and waqf; wasl realizes short `/i/` on the hamza, while waqf
+stops on the hamza itself. It must not lengthen that kasra or become a separate
+slot. Hidayat al-Qari states this rule for the final hamza drawn on yaa and
+names `إيتاء` and `آناء` explicitly
+([source](https://www.islamweb.net/ar/library/content/231/84/?idfrom=&idto=&start=)).
+
 ### Alternate tanwin
 
 The selected source supplements ordinary tanwin with three alternate marks:

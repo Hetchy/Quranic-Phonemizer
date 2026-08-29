@@ -162,11 +162,7 @@ def _restore_right_qata(reading, drafts, scribe, right, row: MeetingRow):
             scribe.decoration(mark.offset, second)
     second.letter = CanonLetter.HAMZA
     second.onset = Onset.PLAIN
-    if (
-        second.nucleus.is_silent
-        or row.exception != "lexical_badal_start"
-    ):
-        second.nucleus = Nucleus.short(row.second)
+    second.nucleus = Nucleus.short(row.second)
     return second
 
 

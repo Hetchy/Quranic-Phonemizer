@@ -33,6 +33,15 @@ CASES = (
         sound_rules={"a:": R("madd_badal")},
         absent_sound_rules={"a:": R("madd_tabii")},
     ),
+    # Warsh: اٰيَةً
+    Case(
+        id="suu-ayah-ibtidaa-restores-qata",
+        site=Site(warsh=("20:22", (10,))),
+        read=isolated(),
+        phonemes="ʔ a: j a h",
+        sound_rules={"a:": R("madd_badal")},
+        absent_sound_rules={"a:": R("naql", "ibdal_hamza", "madd_tabii")},
+    ),
     # Warsh: مَـَٔابٖۖ
     Case(
         id="pausal-arid-overlap",
@@ -116,6 +125,15 @@ MUGHAYYAR_BIN_NAQL_CASES = (
         sound_rules={"a:": R("naql", "madd_badal")},
         absent_sound_rules={"a:": R("madd_tabii")},
     ),
+    # Warsh: سُوٓءٍ اٰيَةً
+    Case(
+        id="a-tanwin-suu-ayah",
+        site=Site(warsh=("20:22", (9, 10))),
+        read=joining(),
+        phonemes=("s u: ʔ i n", "a: j a t a n"),
+        sound_rules={"a:": R("naql", "madd_badal")},
+        absent_sound_rules={"a:": R("ibdal_hamza", "madd_tabii")},
+    ),
     # A-badal across an ayah edge: رَدْماًۖ اٰتُونِے
     Case(
         id="a-ayah-edge",
@@ -171,7 +189,6 @@ MUGHAYYAR_BIN_NAQL_CASES = (
 
 MEETING_OWNED_INITIAL_SHAPES = frozenset({
     Location(2, 140, 14),
-    Location(20, 22, 10),
     Location(58, 13, 1),
 })
 

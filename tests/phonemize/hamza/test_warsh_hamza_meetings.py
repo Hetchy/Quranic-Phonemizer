@@ -189,10 +189,10 @@ MUTTAFIQ_DEFAULT_CASES = (
     ),
     # Warsh: شَآءَ اوْ
     Case(
-        id="bare-aw-glide-fuses-only-across-the-meeting",
+        id="bare-aw-glide-survives-the-meeting",
         site=Site(warsh=("33:24", (8, 9))),
         read=through(),
-        phonemes=("ʃ a: ʔ", "a:"),
+        phonemes=("ʃ a: ʔ", "a: w"),
     ),
     # Warsh: جَآءَ احَدٞ مِّنكُم
     StateCase(id="default-a-a-ibdal-boundaries", site=Site(warsh=("4:43", (27, 28, 29))), states={
@@ -244,13 +244,6 @@ MUTTAFIQ_DEFAULT_CASES = (
 
 
 FIXED_DIFFERENT_VOWEL_CASES = (
-    # Warsh: اٰيَةً
-    Case(
-        id="registered-right-qata-keeps-complete-lexical-start",
-        site=Site(warsh=("20:22", (10,))),
-        read=isolated(),
-        phonemes="ʔ a: j a h",
-    ),
     # Warsh: اِ۬لنِّسَآءِ اَ۬وَ اَكْنَنتُمْ فِےٓ
     Case(
         id="different-i-a-through-following-naql",

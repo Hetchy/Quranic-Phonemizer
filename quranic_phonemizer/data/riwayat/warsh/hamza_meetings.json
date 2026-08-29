@@ -809,7 +809,7 @@
       "second": "A",
       "scope": "joined_words",
       "owner": "hamza_muttafiq",
-      "exception": "fused_glide"
+      "exception": null
     },
     {
       "source": "33:54:4",
@@ -1540,16 +1540,6 @@
       "scope": "joined_words",
       "owner": "fixed_ibdal",
       "exception": null
-    },
-    {
-      "source": "20:21:10",
-      "canonical": "20:22:10",
-      "previous": "20:22:9",
-      "first": "I",
-      "second": "A",
-      "scope": "joined_words",
-      "owner": "fixed_ibdal",
-      "exception": "lexical_badal_start"
     },
     {
       "source": "21:98:4",

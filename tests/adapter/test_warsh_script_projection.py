@@ -272,6 +272,38 @@ def test_bare_aw_start_keeps_its_sakin_waw_consonantal():
     assert entries[-1].role == "consonantal_sukun"
 
 
+@pytest.mark.parametrize(("ref", "text"), (
+    ((10, 15, 24), "تِلْقَآءِےْ"),
+    ((16, 90, 6), "وَإِيتَآءِےْ"),
+    ((20, 130, 14), "اٰنَآءِےْ"),
+    ((42, 51, 11), "وَّرَآءِےْ"),
+))
+def test_final_hamza_yaa_support_is_silent_not_long_i(ref, text):
+    entry, reading = _reading(ref)
+    entries = sequence.entries_for(
+        script_adapter(Script.UTHMANI).inventory, entry.text
+    )
+    built = recitation(Riwayah.WARSH).build(reading)
+
+    assert entry.text == text
+    assert entries[-1].role == "silence_sign"
+    assert built.score.words[0].slots[-1].letter is CanonLetter.HAMZA
+    assert built.score.words[0].slots[-1].nucleus == Nucleus.short(Quality.I)
+
+
+def test_final_hamza_yaa_support_family_is_exactly_the_reviewed_four():
+    found = {
+        location for location, entry in corpus().entries.items()
+        if entry.text.endswith("ءِےْ")
+    }
+    assert found == {
+        Location(10, 15, 24),
+        Location(16, 90, 6),
+        Location(20, 130, 14),
+        Location(42, 51, 11),
+    }
+
+
 def test_biaydin_jarrah_is_sukun_and_the_second_yaa_is_rasm_only():
     entry, reading = _reading((51, 47, 3))  # بِأَيَيْدٖ
     first_yaa = entry.text.index("ي")
