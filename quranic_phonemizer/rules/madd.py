@@ -41,7 +41,7 @@ class MaddLazimIbdal:
         if near.score.words[word].location not in self.locations:
             return None
         chosen = near.score.selection.chosen(self.khilaf) or self.default
-        if chosen != "madd_lazim":
+        if chosen != "ibdal":
             return None
         return _classify(Rule.IBDAL_HAMZA, at, None)
 

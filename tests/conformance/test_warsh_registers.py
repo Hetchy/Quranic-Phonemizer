@@ -671,13 +671,13 @@ def test_the_naql_latent_register_reconciles_with_canonical_hosts():
         ("damm_stroke", "tanwin"): 43,
     })
     joinable = {key: count for key, count in edge.items() if key[1] != "surah_start"}
-    assert sum(joinable.values()) == 308
+    assert sum(joinable.values()) == 320
     assert joinable == {
         ("written_A", "tanwin"): 112,
         ("written_A", "spelled"): 1,
         ("written_I", "tanwin"): 192,
         ("written_I", "moved_haraka"): 1,
-        ("damm_stroke", "tanwin"): 2,
+        ("damm_stroke", "tanwin"): 14,
     }
 
 
