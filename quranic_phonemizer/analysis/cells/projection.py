@@ -23,6 +23,7 @@ from .align import next_column_id
 from .dtos import CellRole, CellStatus, CellWord
 from .projection_marks import (
     clean_structural_marks,
+    fold_vowel_ishmam_presenter,
     fold_shared_silence_riders,
     fold_maqsura_daggers,
     fold_pausal_sukun,
@@ -190,6 +191,7 @@ def project_words(
         )
         carried.append(projected)
     out = _place_rules(tuple(carried), facts, slot_of_unit)
+    out = tuple(fold_vowel_ishmam_presenter(word) for word in out)
     out = transform_plain_madd(out, facts)
     out = _visual_statuses(out, facts)
     out = preserve_semantic_cells(out, facts)

@@ -435,6 +435,23 @@ def test_tamanna_supplies_the_unwritten_ishmam_annotation():
     assert noon.letter is CanonLetter.NOON
 
 
+@pytest.mark.parametrize(
+    "ref",
+    ((11, 77, 5), (29, 33, 6), (67, 27, 4)),
+)
+def test_sia_family_projects_the_ishmam_vowel_before_the_real_hamza(ref):
+    entry, reading = _reading(ref)
+    built = recitation(Riwayah.WARSH).build(reading)
+    seen, hamza, *_ = built.score.words[0].slots
+
+    assert entry.text.startswith("س۬")
+    assert seen.letter is CanonLetter.SEEN
+    assert seen.nucleus == Nucleus.long(Quality.I)
+    assert Annotation.ISHMAM in seen.annotations
+    assert hamza.letter is CanonLetter.HAMZA
+    assert hamza.nucleus == Nucleus.short(Quality.A)
+
+
 @pytest.mark.parametrize("ref", ((2, 79, 2), (2, 212, 2)))
 def test_prefixed_relative_pronoun_restores_its_second_lam(ref):
     entry, reading = _reading(ref)

@@ -688,6 +688,37 @@ def test_ishmam_keeps_the_fatha_visible_and_names_the_noon(riwayah):
     assert all("۫" not in c.text for c in word.columns)
 
 
+@pytest.mark.parametrize(
+    ("ref", "word_ref", "phonemes"),
+    [
+        ("11:76", "11:76:5", "si:ʔa"),
+        ("29:33", "29:33:6", "si:ʔa"),
+        ("67:28", "67:28:4", "si:ʔat"),
+    ],
+)
+def test_warsh_vowel_ishmam_has_no_independent_round_mark_cell(
+    ref, word_ref, phonemes
+):
+    _, bundle, view = _build_warsh(ref)
+    word_id = next(word.id for word in bundle.words if word.ref == word_ref)
+    word = next(word for word in view.words if word.word_id == word_id)
+
+    public_word = next(item for item in bundle.words if item.id == word_id)
+    sounds = {sound.id: sound for sound in bundle.sounds}
+    assert "".join(
+        sounds[sound].token for sound in public_word.sound_ids
+    ) == phonemes
+    assert all(column.text != "۬" for column in word.columns)
+    assert all(column.text for column in word.columns)
+    assert any(
+        column.role is CellRole.MADD
+        and any(carrier in column.text for carrier in "ےي")
+        and tuple(sounds[sound].token for sound in column.owned_sound_ids)
+        == ("i:",)
+        for column in word.columns
+    )
+
+
 def test_tanween_vowel_renders_emphatic_without_a_weight_label(hafs, pen):
     _, bundle, view = _build(
         hafs, pen, "4:1", extra_phonemes=frozenset({"emphatic_fatha"})

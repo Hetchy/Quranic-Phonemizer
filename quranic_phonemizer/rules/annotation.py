@@ -98,6 +98,7 @@ class CanonicalColour:
             following = near.after(at)
             if following is not None and following.letter is L.NOON:
                 return _classification(Rule.ISHMAM, following.id)
+            return _classification(Rule.ISHMAM, at)
         return None
 
 

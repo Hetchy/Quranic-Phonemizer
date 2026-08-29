@@ -107,3 +107,8 @@ def test_warsh_cells_have_semantic_sound_cardinality(surah, boundary_plan):
             **metadata,
         )
         _assert_madd_badal_only_labels_carriers(ref, view, bundle)
+        assert all(
+            column.text != "۬" and column.text
+            for word in view.words
+            for column in word.columns
+        ), f"{ref}: annotation-only cell survived semantic projection"

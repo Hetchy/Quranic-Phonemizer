@@ -97,6 +97,29 @@ def _project_marked_fatha(text, entries, *, wasl: bool) -> None:
                 )
 
 
+def _project_sia_ishmam(text, entries) -> None:
+    """Project Nafi's vowel ishmam in `سِيءَ` and `سِيئَتْ`.
+
+    The rounded mark supplies the initial, predominantly-I vowel; it does not
+    stand for a deleted hamza.  The following yaa remains its long carrier and
+    the lexical hamza remains a separate onset.  In `س۬يَٓٔتْ` the same yaa
+    scalar is also the written seat of the combining hamza, so release it as a
+    carrier and let clustering give the combining hamza its own omitted slot.
+    """
+    if not text.startswith("س۬"):
+        return
+    if not (text.startswith("س۬ےٓء") or text.startswith("س۬يٓٔ")):
+        return
+    entries[1] = MarkEntry(
+        role="vowel_ishmam",
+        cls=GraphemeClass.HARAKA,
+        fact=SlotFact.VOWEL_QUALITY,
+        value=Nucleus.short(Quality.I),
+    )
+    if text.startswith("س۬يٓٔ"):
+        entries[2] = LetterEntry(CanonLetter.YA)
+
+
 def _attach_reversed_fathatan(text, entries) -> None:
     for index, char in enumerate(text[1:], start=1):
         if char in _FATHATAN and text[index - 1] == "ا" and index > 1:
@@ -300,6 +323,7 @@ def _entries(inventory: Inventory, text: str) -> list:
     naql_script.project_article_naql(text, entries)
     naql_script.project_verse_final_host(text, entries)
     _project_marked_fatha(text, entries, wasl=wasl)
+    _project_sia_ishmam(text, entries)
     _attach_reversed_fathatan(text, entries)
     _project_alif_sukun_silence(text, entries)
     _project_orthographic_silence(text, entries)

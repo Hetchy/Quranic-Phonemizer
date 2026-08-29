@@ -18,6 +18,7 @@ MADD_SIGN = "ٓ"
 MAQSURA = "ى"
 TATWEEL = "ـ"
 ISHMAM_MARK = "۫"
+VOWEL_ISHMAM_MARK = "۬"
 
 
 def _merged_carrier(base: CellColumn, mark: CellColumn) -> CellColumn:
@@ -110,6 +111,59 @@ def clean_structural_marks(word: CellWord) -> CellWord:
             for col in word.columns
         ),
     )
+
+
+def fold_vowel_ishmam_presenter(word: CellWord) -> CellWord:
+    """Remove the `س۬يء` quality witness as an independent cell.
+
+    Its vowel is owned by the following yaa carrier.  Once carrier projection
+    has attached this soundless presenter to that madd column, retain the
+    source ids on the carrier and remap the sound to the carrier alone.  The
+    source mark remains available in the inscription/source views; transformed
+    cells expose only semantic sound or orthography.
+    """
+    rider = next(
+        (
+            column
+            for column in word.columns
+            if column.text == VOWEL_ISHMAM_MARK
+            and column.role is CellRole.HARAKA
+            and not column.owned_sound_ids
+            and column.attached_to_column_id is not None
+        ),
+        None,
+    )
+    if rider is None:
+        return word
+    host = next(
+        (
+            column for column in word.columns
+            if column.id == rider.attached_to_column_id
+            and column.role is CellRole.MADD
+        ),
+        None,
+    )
+    if host is None:
+        return word
+    merged = replace(
+        host,
+        source_character_ids=tuple(dict.fromkeys(
+            (*rider.source_character_ids, *host.source_character_ids)
+        )),
+        source_unit_ids=tuple(dict.fromkeys(
+            (*rider.source_unit_ids, *host.source_unit_ids)
+        )),
+        rule_occurrence_ids=tuple(dict.fromkeys(
+            (*rider.rule_occurrence_ids, *host.rule_occurrence_ids)
+        )),
+        presented_sound_ids=tuple(dict.fromkeys(
+            (*rider.presented_sound_ids, *host.presented_sound_ids)
+        )),
+    )
+    columns = tuple(
+        merged if column.id == host.id else column for column in word.columns
+    )
+    return _remap_column(replace(word, columns=columns), rider.id, host.id)
 
 
 def _shared_silence_host(rider, by_id, facts):

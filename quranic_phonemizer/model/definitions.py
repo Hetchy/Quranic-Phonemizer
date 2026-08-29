@@ -103,7 +103,8 @@ RULE_DEFINITIONS: dict[Rule, tuple[str, str, str]] = {
     ),
     Rule.ISHMAM: (
         "Ishmam", "إشمام",
-        "The lips round for a vowel that is not sounded.",
+        "A reading preserves a damma gesture: either silently with the lips, "
+        "or as the smaller opening component of a predominantly kasra vowel.",
     ),
     Rule.MADD_TABII: (
         "Madd Tabii", "مد طبيعي",
