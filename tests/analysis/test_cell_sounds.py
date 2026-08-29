@@ -14,7 +14,6 @@ from quranic_phonemizer.analysis.cells import (
     CellColumn,
     CellRole,
     CellSide,
-    CellSound,
     CellStatus,
     CellTier,
     CellValidationError,

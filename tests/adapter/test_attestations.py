@@ -8,8 +8,8 @@ from __future__ import annotations
 import dataclasses
 
 import pytest
-
 from conftest import built_for
+
 from quranic_phonemizer.engine.boundary_plan import all_join
 from quranic_phonemizer.engine.laws import check_attestations
 from quranic_phonemizer.engine.run import perform
@@ -17,6 +17,8 @@ from quranic_phonemizer.model.canon import Rule
 from quranic_phonemizer.model.inscription import Attests
 from quranic_phonemizer.model.performance import Hosts, MergedInto
 from quranic_phonemizer.riwayat.hafs import HAFS
+
+pytestmark = pytest.mark.audit
 
 #: Cross-word idgham mutamathilayn on letters outside the pair table.
 MERGERS = [(17, 33), (18, 78), (18, 82), (2, 137)]

@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any, TypeAlias
 
 from ..dataio import load_yaml, require_keys
-from ..model.address import Location, Riwayah, Script, SlotId, VerseRef
+from ..model.address import Location, Riwayah, Script, VerseRef
 from ..model.canon import Annotation, CanonLetter, Nucleus, Onset, Quality
 from ..model.inscription import VOWEL_FACTS, SlotFact
 

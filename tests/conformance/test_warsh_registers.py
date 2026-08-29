@@ -16,6 +16,7 @@ from quranic_phonemizer.model.canon import CanonLetter, Onset, Quality, Rule
 from quranic_phonemizer.phonemize.legacy_views import phonemes_by_word
 from quranic_phonemizer.riwayat.warsh import naql_script
 from quranic_phonemizer.riwayat.warsh.relative_pronoun import relative_pronoun_form
+from quranic_phonemizer.riwayat.warsh.resources import corpus as warsh_corpus
 from quranic_phonemizer.riwayat.warsh.single_hamza import (
     authored_locations,
     canonical_absence,
@@ -23,7 +24,6 @@ from quranic_phonemizer.riwayat.warsh.single_hamza import (
     fixed_ibdal_family,
     supplied_ibdal,
 )
-from quranic_phonemizer.riwayat.warsh.resources import corpus as warsh_corpus
 from tests.support.boundary import plan_for
 
 ROOT = Path(__file__).resolve().parents[2]

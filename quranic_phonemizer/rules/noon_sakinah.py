@@ -22,8 +22,8 @@ from ..model.address import BoundaryPlan, Junction, KhilafId, Location, SlotId
 from ..model.canon import CanonLetter as L
 from ..model.canon import Rule, SlotOrigin
 from ..model.performance import Aspect, Consonant, Occurrence
-from .ownership import is_performed_quiescent, is_quiescent
 from .khilaf import DEFAULT_NASAL_PLACE, nasal_place
+from .ownership import is_performed_quiescent, is_quiescent
 from .tables import NOON_OUTCOMES, Followers
 
 

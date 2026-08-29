@@ -13,7 +13,6 @@ from ..inscription import InscriptionFacts
 from .align import next_column_id
 from .dtos import CellRole, CellStatus, CellTier, CellWord
 
-
 _HAMZA_MARKS = frozenset({"ٔ", "ٕ"})
 _HAMZA_GLYPHS = frozenset("ءأإؤئٕٔ")
 _SEATS = frozenset({"ا", "و", "ي", "ى", "ے"})

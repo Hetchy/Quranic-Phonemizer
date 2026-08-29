@@ -19,17 +19,25 @@ from quranic_phonemizer.analysis import (
     Silenced,
     analyse,
 )
+from quranic_phonemizer.analysis.sounds import sounds_in_order as native_order
 from quranic_phonemizer.model.address import Junction, Script
 from quranic_phonemizer.model.performance import (
-    Aspect, Consonant, Hosts, Inserted, Release, Side, Vowel,
+    Aspect,
+    Consonant,
+    Hosts,
+    Inserted,
+    Release,
+    Side,
+    Vowel,
 )
+from quranic_phonemizer.model.performance import sounds_in_order as legacy_order
 from quranic_phonemizer.orthography.write import pen_for
 from quranic_phonemizer.phonemize import edges as ed
 from quranic_phonemizer.phonemize import nodes as nd
-from quranic_phonemizer.analysis.sounds import sounds_in_order as native_order
 from quranic_phonemizer.phonemize.assemble import assemble
-from quranic_phonemizer.model.performance import sounds_in_order as legacy_order
 from quranic_phonemizer.session import phonemize_request
+
+pytestmark = pytest.mark.audit
 
 #: One reference per boundary state, chosen for the hard cases they exercise:
 #: a word isolated, words joined, a start, a stop, a sakt, mergers (idgham),

@@ -18,11 +18,11 @@ from ...canon.spell import Muqattaat, load_muqattaat
 from ...corpus import PackedCorpus, load_corpus
 from ...model.address import Location, Riwayah, Script, VerseRef
 from ...model.canon import Quality
-from ..khilaf import Khilaf, load_khilaf
-from ..tables import RuleTables, load_rule_tables
 from ...orthography.adapter import Reading
 from ...orthography.cluster import read_verse
 from ...orthography.inventory import Inventory, load_inventory
+from ..khilaf import Khilaf, load_khilaf
+from ..tables import RuleTables, load_rule_tables
 
 RIWAYAH = Riwayah.HAFS
 

@@ -10,7 +10,6 @@ from quranic_phonemizer.model.address import Location, Riwayah, Script, VerseRef
 from quranic_phonemizer.model.canon import CanonLetter, Rule
 from tests.support.boundary import plan_for
 
-
 COUPLED_DHAT_YAA = frozenset({
     Location(2, 125, 11), Location(17, 18, 16), Location(84, 12, 1),
     Location(87, 12, 2), Location(88, 4, 1), Location(92, 15, 2),

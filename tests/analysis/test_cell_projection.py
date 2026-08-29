@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import pytest
 
-from quranic_phonemizer.api import recitation
 from quranic_phonemizer.analysis.build import build_bundle
 from quranic_phonemizer.analysis.cells import (
     CellRole,
@@ -17,6 +16,7 @@ from quranic_phonemizer.analysis.facts import analyse
 from quranic_phonemizer.analysis.inscription import inscribe
 from quranic_phonemizer.analysis.source import build_source_view
 from quranic_phonemizer.analysis.source_dtos import LiteralSilence
+from quranic_phonemizer.api import recitation
 from quranic_phonemizer.model.address import Riwayah, Script
 from quranic_phonemizer.model.canon import CanonLetter, Onset, Quality, VowelForm
 from quranic_phonemizer.model.performance import Aspect, Consonant, Vowel
@@ -832,11 +832,12 @@ def test_long_a_tarqeeq_labels_its_alif_carrier_not_the_hamza_presenter():
         for column in word.columns
         if column.role is CellRole.MADD and column.text == "ا"
     )
-    on = lambda column: tuple(
-        rules[item]
-        for item in column.rule_occurrence_ids
-        if rules[item] in {"tafkheem", "tarqeeq"}
-    )
+    def on(column):
+        return tuple(
+            rules[item]
+            for item in column.rule_occurrence_ids
+            if rules[item] in {"tafkheem", "tarqeeq"}
+        )
 
     assert on(hamza) == ()
     assert on(carrier) == ("tarqeeq",)

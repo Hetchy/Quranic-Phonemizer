@@ -4,7 +4,6 @@ import pytest
 
 from tests.support import Case, R, Site, assert_case, case_runs, joining, pick, through
 
-
 CASES = (
     # Hafs: بِمَآ أُنزِلَ
     # Warsh: بِمَآ أُنزِلَ

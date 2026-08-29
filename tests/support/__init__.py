@@ -10,10 +10,10 @@ from quranic_phonemizer.model.address import (
     VariantSelection,
 )
 
+from .assertions import assert_case, parse_phonemes
 from .boundary import UnreachableWasl, plan_for
 from .boundary_case import explicit, isolated, joining, through
-from .case import Case, Expect, StateCase, VariantCase, R, case_runs, pick
-from .assertions import assert_case, parse_phonemes
+from .case import Case, Expect, R, StateCase, VariantCase, case_runs, pick
 from .reading import Reading, loaded, reading
 from .selectors import SelectorError, registered_selectors
 from .site import Site

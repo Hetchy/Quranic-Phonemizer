@@ -15,7 +15,6 @@ from ...model.canon import (
     Quality,
 )
 
-
 _REGISTER = (
     Path(__file__).resolve().parents[2]
     / "data" / "riwayat" / "warsh" / "single_hamza.yaml"

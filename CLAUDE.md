@@ -65,10 +65,15 @@ semantic-case, source-span, boundary, and file-ownership conventions.
 
 Use `python tools/quick.py <targeted tests...>` while iterating; it never infers
 or expands the test scope. Pull requests run the full ordinary suite, essential
-structure checks, and exact Arabic source-context validation.
+structure checks, and exact Arabic source-context validation. The PR suite uses
+two pytest workers to bound corpus memory while parallelizing independent cases.
 
 Releases are `v*` tags. The publish workflow repeats the PR checks, runs Warsh
 cell closure, installs and smoke-tests the wheel, then publishes it to PyPI.
 
 Cross-script, L1, roundtrip, attestation, and legacy snapshot tools are manual
-audits. Do not run them automatically or treat them as routine handoff gates.
+audits. Run pytest-based audits explicitly with
+`python -m pytest --runaudit -m audit`; do not treat them as routine gates.
+
+Ruff checks imports and objective Python hygiene in pull requests and releases.
+Run `python -m ruff check . --fix` for its safe automatic cleanup.

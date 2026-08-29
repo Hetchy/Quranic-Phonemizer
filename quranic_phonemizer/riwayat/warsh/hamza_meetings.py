@@ -2,19 +2,17 @@
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
 from functools import lru_cache
-import json
 from pathlib import Path
 
-from ...canon.draft import _Draft
+from ...canon.draft import _Draft, nucleus_fact
 from ...canon.passes import word_spans
-from ...canon.draft import nucleus_fact
 from ...dataio import require_keys
 from ...model.address import Location
 from ...model.canon import Annotation, CanonLetter, Nucleus, Onset, Quality, SlotOrigin
 from ...model.inscription import SlotFact
-
 
 _REGISTER = Path(__file__).resolve().parents[2] / "data/riwayat/warsh/hamza_meetings.json"
 

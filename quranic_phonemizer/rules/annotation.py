@@ -18,8 +18,8 @@ from ..engine.plan import (
     mint,
 )
 from ..model.address import BoundaryPlan, SlotId
-from ..model.canon import CanonLetter as L
 from ..model.canon import Annotation, Onset, Quality, Rule, VowelForm
+from ..model.canon import CanonLetter as L
 from ..model.performance import Aspect, Length, Occurrence, Vowel
 from .tafkheem import Weight
 

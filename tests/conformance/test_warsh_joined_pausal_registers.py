@@ -9,7 +9,6 @@ from quranic_phonemizer.api import recitation
 from quranic_phonemizer.model.address import Riwayah, Script, VerseRef
 from quranic_phonemizer.model.canon import Annotation, CanonLetter, Onset, Quality
 
-
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "corpus_sources/warsh/scripts/king-fahd/quran.json"
 STOP = frozenset("ۖۗۘۙۚۛۜ۩")

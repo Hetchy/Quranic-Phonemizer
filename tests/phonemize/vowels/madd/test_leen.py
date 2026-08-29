@@ -13,7 +13,6 @@ from tests.support import (
     joining,
 )
 
-
 CASES = (
     # Hafs: يَوْمِ
     # Warsh: يَوْمِ

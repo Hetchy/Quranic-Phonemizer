@@ -15,7 +15,6 @@ from tests.support import (
     through,
 )
 
-
 MOVING_STRUCTURAL_CASES = (
     # Warsh: قِرَدَةً
     Case(

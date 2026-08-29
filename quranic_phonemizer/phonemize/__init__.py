@@ -7,15 +7,16 @@ from __future__ import annotations
 from collections.abc import Sequence
 from dataclasses import dataclass
 
-from ..api import UnknownRiwayah, alphabet as load_alphabet, recitation
+from ..api import UnknownRiwayah, recitation
+from ..api import alphabet as load_alphabet
 from ..model.address import Script
 from ..orthography.write import pen_for
 from ..render.alphabet import allowed_extra_phonemes, effective_extra_phonemes
+from ..session import phonemize_request
 from . import edges, names, nodes
 from .assemble import assemble
 from .document import PhonemizeResult, build_result
 from .runtime import suspend_collection
-from ..session import phonemize_request
 
 supported_riwayat = names.supported_riwayat
 available_variants = names.available_variants

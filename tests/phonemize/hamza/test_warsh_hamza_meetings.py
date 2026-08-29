@@ -5,8 +5,18 @@ Default collections cover only the selected value; they are not fixed-face claim
 
 import pytest
 
-from tests.support import Case, Expect, R, Site, StateCase, assert_case, case_runs, explicit, isolated, through
-
+from tests.support import (
+    Case,
+    Expect,
+    R,
+    Site,
+    StateCase,
+    assert_case,
+    case_runs,
+    explicit,
+    isolated,
+    through,
+)
 
 DHAT_FATH_DEFAULT_CASES = (
     # Warsh: ءَآنذَرْتَهُمُۥٓ

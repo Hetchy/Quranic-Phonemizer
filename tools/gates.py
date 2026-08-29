@@ -14,7 +14,10 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 
 GATES: dict[str, tuple[tuple[str, ...], ...]] = {
-    "suite": ((sys.executable, "-m", "pytest", "tests/", "-q"),),
+    "suite": ((
+        sys.executable, "-m", "pytest", "tests/", "-q", "-n", "2",
+    ),),
+    "lint": ((sys.executable, "-m", "ruff", "check", "."),),
     "structure": ((sys.executable, "tools/structure_lint.py"),),
     "test-style": ((sys.executable, "tools/test_style_lint.py"),),
 }

@@ -6,8 +6,8 @@ from dataclasses import dataclass
 from ..engine.neighbourhood import Neighbourhood
 from ..engine.plan import Classify, Phase, Plan, Verdict, mint
 from ..model.address import BoundaryPlan, Location, SlotId
-from ..model.canon import CanonLetter as L
 from ..model.canon import Annotation, Onset, Quality, Rule
+from ..model.canon import CanonLetter as L
 from ..model.performance import Aspect, Occurrence
 from .madd import _madd_of
 

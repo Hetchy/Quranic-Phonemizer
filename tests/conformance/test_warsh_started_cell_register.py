@@ -3,7 +3,6 @@ from __future__ import annotations
 
 from collections import Counter
 
-from quranic_phonemizer.api import recitation
 from quranic_phonemizer.analysis.build import build_bundle
 from quranic_phonemizer.analysis.cells import (
     CellRole,
@@ -11,6 +10,7 @@ from quranic_phonemizer.analysis.cells import (
     build_cell_view,
 )
 from quranic_phonemizer.analysis.facts import analyse
+from quranic_phonemizer.api import recitation
 from quranic_phonemizer.model.address import Riwayah, Script
 from quranic_phonemizer.model.canon import CanonLetter
 from quranic_phonemizer.model.performance import Consonant, Vowel

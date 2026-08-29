@@ -2,8 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from tests.support import Case, R, Site, assert_case, case_runs, isolated
-
+from tests.support import Case, Site, assert_case, case_runs, isolated
 
 CASES = (
     # Hafs: وَلُؤْلُؤًا ۖ

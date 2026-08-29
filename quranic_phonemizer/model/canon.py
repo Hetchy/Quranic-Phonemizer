@@ -9,8 +9,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import StrEnum
 
-from .address import Location, Riwayah, SlotId, SpellingRunId, VariantSelection
 from . import rule as _rule
+from .address import Location, Riwayah, SlotId, SpellingRunId, VariantSelection
 
 Rule = _rule.Rule
 HAMZA_WASL_START = _rule.HAMZA_WASL_START

@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from collections.abc import Mapping
+from dataclasses import dataclass
 
 from ..engine.neighbourhood import Neighbourhood
 from ..engine.plan import (
@@ -21,7 +21,6 @@ from ..engine.plan import (
 from ..model.address import BoundaryPlan, Location, SlotId
 from ..model.canon import Annotation, CanonLetter, Onset, Quality, Rule
 from ..model.performance import Aspect, Consonant, Occurrence
-
 
 _BARE_ANTA = frozenset({Location(5, 116, 7), Location(21, 62, 2)})
 

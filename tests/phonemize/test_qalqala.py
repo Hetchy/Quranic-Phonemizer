@@ -12,7 +12,6 @@ from tests.support import (
     reading,
 )
 
-
 CASES = (
     # Hafs: رَزَقْنَـٰهُمْ
     # Warsh: رَزَقْنَٰهُمْ

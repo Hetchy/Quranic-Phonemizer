@@ -11,7 +11,6 @@ from ..ids import CellColumnId, SoundId
 from .align import next_column_id
 from .dtos import CellColumn, CellRole, CellStatus, CellTier
 
-
 _VOWEL_ROLE = {Quality.A: "fatha", Quality.U: "damma", Quality.I: "kasra"}
 
 

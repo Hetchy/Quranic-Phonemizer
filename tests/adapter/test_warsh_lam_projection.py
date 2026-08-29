@@ -12,12 +12,12 @@ from quranic_phonemizer.model.address import (
     SourceLocation,
 )
 from quranic_phonemizer.model.canon import CanonLetter, Quality
+from quranic_phonemizer.riwayat.warsh.lam import SITES
 from quranic_phonemizer.riwayat.warsh.resources import (
     ARTIFACT,
     corpus,
     script_adapter,
 )
-from quranic_phonemizer.riwayat.warsh.lam import SITES
 
 
 @dataclass(frozen=True, slots=True)

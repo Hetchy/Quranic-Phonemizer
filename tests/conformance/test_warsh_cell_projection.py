@@ -5,7 +5,6 @@ import pytest
 
 from tools.warsh_projection_audit import audit
 
-
 KNOWN_PROJECTION_GAPS = {
     "2:1", "3:1", "3:93", "7:1", "11:87", "12:90", "13:1", "26:1",
     "27:29", "27:32", "27:39", "27:62", "27:64", "27:65", "27:66",

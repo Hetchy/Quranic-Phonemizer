@@ -10,11 +10,10 @@ from .dtos import (
     CellGroup,
     CellGroupKind,
     CellRole,
-    CellTier,
     CellStatus,
+    CellTier,
     CellWord,
 )
-
 
 _IQLAB_MEEM = frozenset({"ۢ", "ۭ"})
 

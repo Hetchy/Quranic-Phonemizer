@@ -6,8 +6,8 @@ rather than moving a percentage somewhere.
 from __future__ import annotations
 
 import pytest
-
 from conftest import score_for
+
 from quranic_phonemizer.engine.run import perform
 from quranic_phonemizer.model.address import BoundaryPlan, Junction
 from quranic_phonemizer.model.canon import CanonLetter, Nucleus, Onset, Quality, Rule

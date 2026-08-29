@@ -6,11 +6,10 @@ the inscription tier's glyphs and spellings.
 from __future__ import annotations
 
 from ..model.address import SlotId
-from ..model.inscription import SlotFact
+from ..model.inscription import GlyphKind, SlotFact
 from ..model.performance import Aspect, Length, Vowel
 from .attributions import Insertion, Relengthened
 from .facts import AnalysisFacts
-from ..model.inscription import GlyphKind
 from .inscription import Decorated, InscriptionFacts, Supplied
 
 _VOWEL_FACTS = (SlotFact.VOWEL_QUALITY, SlotFact.VOWEL_LENGTH)

@@ -12,7 +12,6 @@ import json
 from collections import Counter
 from pathlib import Path
 
-
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SCRIPTS_DIR = REPO_ROOT / "corpus_sources" / "hafs" / "scripts"
 DST = SCRIPTS_DIR / "indopak" / "quran.json"

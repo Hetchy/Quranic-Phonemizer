@@ -3,7 +3,6 @@ from __future__ import annotations
 import pytest
 
 from tests.support import (
-    Case,
     Expect,
     R,
     Site,
@@ -13,7 +12,6 @@ from tests.support import (
     explicit,
     through,
 )
-
 
 CASES = (
     # Warsh: دَعَانِۦۖ فَلْيَسْتَجِيبُواْ

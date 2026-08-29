@@ -15,7 +15,6 @@ from tests.support import (
     through,
 )
 
-
 DIRECT_CASES = (
     # Warsh: صَلَوَٰتٞ
     Case(

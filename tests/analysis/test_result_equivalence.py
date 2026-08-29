@@ -24,6 +24,8 @@ from quranic_phonemizer.phonemize.document import text as legacy_text
 from quranic_phonemizer.phonemize.names import tajweed_rules as legacy_tajweed_rules
 from quranic_phonemizer.session import phonemize_request
 
+pytestmark = pytest.mark.audit
+
 #: One reference per boundary state and hard case: a word isolated, a start,
 #: joined words, cross-word idgham mergers, a spelled-out iltiqa fatha, an
 #: authored sakt, and an internal stop taken two ways.

@@ -16,11 +16,11 @@ from ...orthography.write import Pen
 from ...render.alphabet import packaged_alphabet
 from ...session import Session
 from ..facts import AnalysisFacts, analyse
-from ..inscription import InscriptionFacts, inscribe
 from ..ids import CellColumnId, LetterUnitId, SoundId
+from ..inscription import InscriptionFacts, inscribe
 from ..source_dtos import SourceView
-from .dtos import CellColumn, CellRole, CellSide, CellStatus, CellTier, CellWord
 from .align import next_column_id
+from .dtos import CellColumn, CellRole, CellSide, CellStatus, CellTier, CellWord
 from .transform_tashil import split_compact_tashil
 
 #: The haraka role that writes each short quality, for spelling an inserted

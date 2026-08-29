@@ -14,13 +14,13 @@ from ...render.alphabet import (
 from ..checks import requirer
 from ..dtos import AnalysisBundle
 from ..source_dtos import SourceView
+from .cardinality_laws import check_cell_cardinality
 from .dtos import CellRole, CellSound, CellStatus, CellView
 from .laws import CellValidationError
 from .view_identity_laws import (
     check_carrier_identity_placement,
     check_weight_identity_placement,
 )
-from .cardinality_laws import check_cell_cardinality
 
 _require = requirer(CellValidationError)
 _HAMZA_GLYPHS = frozenset("ءأإؤئٕٔ")

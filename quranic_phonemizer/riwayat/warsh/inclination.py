@@ -6,7 +6,6 @@ from ...model.address import Location
 from ...model.canon import CanonLetter, Nucleus, Quality, SlotOrigin, VowelState
 from ...model.inscription import SlotFact
 
-
 FIXED_KUBRA = frozenset({Location(20, 1, 1)})
 HAA_OPENINGS = frozenset(Location(surah, 1, 1) for surah in range(40, 47))
 RAA_OPENINGS = frozenset(Location(surah, 1, 1) for surah in range(10, 16))

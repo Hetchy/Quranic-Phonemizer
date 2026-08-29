@@ -1,12 +1,11 @@
 """Mechanical shape checks for hand-authored semantic test tables."""
 from __future__ import annotations
 
+import argparse
 import ast
 import importlib.util
-import argparse
 import sys
 from pathlib import Path
-
 
 ROOT = Path(__file__).resolve().parents[1]
 SEMANTIC = ROOT / "tests" / "phonemize"
@@ -61,8 +60,8 @@ def _source_comment_block(lines: list[str], line: int) -> list[str]:
 
 
 def _source_text(site, riwayah: str) -> str:
-    from tests.support.reading import _through, _words, loaded
     from quranic_phonemizer.model.address import Riwayah, Script
+    from tests.support.reading import _through, _words, loaded
 
     address = site.address(riwayah)
     record = loaded(riwayah)

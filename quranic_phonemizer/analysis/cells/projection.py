@@ -21,30 +21,30 @@ from ..inscription import InscriptionFacts
 from ..source_dtos import LiteralSilence, SourceView
 from .align import next_column_id
 from .dtos import CellRole, CellStatus, CellWord
-from .projection_marks import (
-    clean_structural_marks,
-    fold_vowel_ishmam_presenter,
-    fold_shared_silence_riders,
-    fold_maqsura_daggers,
-    fold_pausal_sukun,
-    transform_plain_madd,
-)
-from .projection_groups import group_words
-from .projection_semantics import (
-    keep_pausal_alif_on_carriers,
-    preserve_semantic_cells,
-)
-from .projection_naql import split_carried_naql_alif
-from .projection_sukun import fold_sukun
-from .projection_compounds import (
-    fold_article_naql_madd,
-    project_warsh_compounds,
-)
 from .projection_carriers import (
     ensure_carriers,
     ensure_started_qualities,
     slot_of_columns,
 )
+from .projection_compounds import (
+    fold_article_naql_madd,
+    project_warsh_compounds,
+)
+from .projection_groups import group_words
+from .projection_marks import (
+    clean_structural_marks,
+    fold_maqsura_daggers,
+    fold_pausal_sukun,
+    fold_shared_silence_riders,
+    fold_vowel_ishmam_presenter,
+    transform_plain_madd,
+)
+from .projection_naql import split_carried_naql_alif
+from .projection_semantics import (
+    keep_pausal_alif_on_carriers,
+    preserve_semantic_cells,
+)
+from .projection_sukun import fold_sukun
 
 
 def _column_targets(words: tuple[CellWord, ...], sound: int, *, presenters=False):

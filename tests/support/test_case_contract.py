@@ -4,7 +4,6 @@ import pytest
 
 from quranic_phonemizer.api import alphabet
 from quranic_phonemizer.model.address import Junction, Script, VariantSelection
-
 from tests.support import (
     Case,
     Expect,
@@ -19,8 +18,8 @@ from tests.support import (
     isolated,
     joining,
     parse_phonemes,
-    plan_for,
     pick,
+    plan_for,
     reading,
     registered_selectors,
     through,

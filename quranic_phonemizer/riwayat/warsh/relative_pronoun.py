@@ -8,7 +8,6 @@ from ...canon.passes import word_spans
 from ...model.canon import CanonLetter, Nucleus, Onset, Quality
 from ...model.inscription import SlotFact
 
-
 _IGNORED = frozenset("ـۥۦۧۨ")
 _FORMS = {
     CanonLetter.THAL: frozenset({

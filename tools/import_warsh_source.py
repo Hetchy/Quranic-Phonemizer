@@ -11,7 +11,6 @@ import json
 from collections import Counter
 from pathlib import Path
 
-
 REPO_ROOT = Path(__file__).resolve().parent.parent
 WARSH_DIR = REPO_ROOT / "corpus_sources" / "warsh"
 SRC = WARSH_DIR / "upstream" / "king-fahd-v2.json"

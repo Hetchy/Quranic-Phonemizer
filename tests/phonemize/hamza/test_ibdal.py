@@ -4,7 +4,6 @@ import pytest
 
 from tests.support import Case, R, Site, assert_case, case_runs, isolated, pick, through
 
-
 REPLACEMENT_RULES = R("ibdal_hamza", "madd_badal", "madd_tabii")
 
 

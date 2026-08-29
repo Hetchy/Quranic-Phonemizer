@@ -18,7 +18,6 @@ from tests.support import (
     through,
 )
 
-
 LAM_TO_MEEM = {
     "لام/@madd": R("madd_lazim"),
     "لام/م": R("idgham_shafawi"),

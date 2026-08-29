@@ -10,7 +10,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from quranic_phonemizer.api import recitation
+from quranic_phonemizer.analysis.build import build_bundle
 from quranic_phonemizer.analysis.cells import (
     CellRole,
     CellSide,
@@ -20,14 +20,19 @@ from quranic_phonemizer.analysis.cells import (
     build_cell_view,
     validate_transformed,
 )
-from quranic_phonemizer.analysis.build import build_bundle
 from quranic_phonemizer.analysis.cells.transform import _inserted_column
 from quranic_phonemizer.analysis.dtos import BoundaryState
 from quranic_phonemizer.analysis.facts import analyse
 from quranic_phonemizer.analysis.ids import CellColumnId, LetterUnitId
 from quranic_phonemizer.analysis.source import build_source_view
+from quranic_phonemizer.api import recitation
 from quranic_phonemizer.model.address import (
-    KhilafId, Option, Riwayah, Script, VariantSelection, VerseRef,
+    KhilafId,
+    Option,
+    Riwayah,
+    Script,
+    VariantSelection,
+    VerseRef,
 )
 from quranic_phonemizer.model.canon import Quality
 from quranic_phonemizer.model.performance import Vowel

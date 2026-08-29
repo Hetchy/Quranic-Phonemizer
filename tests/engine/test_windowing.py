@@ -10,10 +10,8 @@ from quranic_phonemizer.model.address import (
     Option,
     VariantSelection,
 )
-from quranic_phonemizer.session import span
-from quranic_phonemizer.session import phonemize_request
-from quranic_phonemizer.session import windows
 from quranic_phonemizer.phonemize.legacy_views import phonemes_by_word
+from quranic_phonemizer.session import phonemize_request, span, windows
 
 
 def test_windows_own_machinery_is_not_public():

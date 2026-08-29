@@ -290,6 +290,7 @@ def _assert_case(run: CaseRun) -> None:
             ).alignment(result._assembled, text="source", grouping="glyph")
             for index in pairing.silent
         }
+
     for selector in resolve(expect.said, run.riwayah, run.script):
         glyph = resolve_glyph(result._assembled, words, selector)
         assert glyph not in {
@@ -306,8 +307,9 @@ def assert_case(run: CaseRun) -> None:
         _assert_case(run)
     except Exception as error:
         if run is not None:
-            from .reading import _through, _words, loaded
             from quranic_phonemizer.model.address import Riwayah, Script
+
+            from .reading import _through, _words, loaded
 
             address = run.site.address(run.riwayah)
             record = loaded(run.riwayah)

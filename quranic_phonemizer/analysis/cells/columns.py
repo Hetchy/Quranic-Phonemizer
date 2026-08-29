@@ -22,7 +22,6 @@ from .dtos import CellColumn, CellRole, CellStatus, CellTier, CellWord
 from .laws import validate_cell_columns, validate_cell_sounds
 from .spelled import expand_spelled_words
 
-
 _MINI_MEEM = frozenset({"ۢ", "ۭ"})
 
 

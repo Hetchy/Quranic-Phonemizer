@@ -10,8 +10,8 @@ import importlib
 import inspect
 
 import pytest
-
 from conftest import performance_for
+
 from quranic_phonemizer.model import address, canon, inscription, performance
 from quranic_phonemizer.model.canon import Rule
 from quranic_phonemizer.model.performance import Classifies, Recolours, SetsLength

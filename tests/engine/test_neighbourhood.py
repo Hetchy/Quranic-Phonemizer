@@ -6,6 +6,7 @@ tests pin the answers the shared one has to keep giving.
 from __future__ import annotations
 
 from conftest import score_for
+
 from quranic_phonemizer.engine.boundary_plan import all_join
 from quranic_phonemizer.engine.neighbourhood import Neighbourhood
 from quranic_phonemizer.model.address import BoundaryPlan, Junction, SlotId

@@ -14,7 +14,6 @@ from tests.support import (
     selected,
 )
 
-
 DAAF = Site(hafs=("30:54", (5, 10, 17)))
 
 CASES = (

@@ -3,7 +3,6 @@ from __future__ import annotations
 import pytest
 
 from quranic_phonemizer.model.address import KhilafId
-
 from tests.support import (
     Case,
     Expect,
@@ -17,7 +16,6 @@ from tests.support import (
     pick,
     through,
 )
-
 
 CASES = (
     # Hafs: يَنبَغِى

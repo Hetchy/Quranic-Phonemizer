@@ -14,7 +14,6 @@ from tests.support import (
     through,
 )
 
-
 CASES = (
     # Warsh: وَعَدُوَّكُمُۥٓ أَوْلِيَآءَۖ
     Case(

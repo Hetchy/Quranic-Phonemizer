@@ -174,7 +174,8 @@ def resolve_glyph(assembled, words: Iterable[int], value: str) -> int:
             raise SelectorError(
                 f"subtle mark {selector.name!r} needs a registered @selector"
             )
-        predicate = lambda a, g: a.glyphs[g].char == selector.name
+        def predicate(assembled, glyph):
+            return assembled.glyphs[glyph].char == selector.name
     candidates = tuple(
         index for index, glyph in enumerate(assembled.glyphs)
         if glyph.word in focused and predicate(assembled, index)
@@ -230,7 +231,8 @@ def resolve_cell(view, words: Iterable[int], value: str) -> int:
                     f"unknown transformed-cell selector {selector.name!r}"
                 )
             if predicate is None:
-                predicate = lambda column: _bare(column.text) == selector.name
+                def predicate(column):
+                    return _bare(column.text) == selector.name
             candidates.extend(
                 column.id.value for column in scope_columns if predicate(column)
             )

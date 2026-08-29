@@ -10,9 +10,9 @@ import pytest
 
 from quranic_phonemizer.canon.lexicon import (
     EMPTY,
-    MatchMode,
-    LexiconError,
     Affixes,
+    LexiconError,
+    MatchMode,
     load_affixes,
     load_lexicon,
 )

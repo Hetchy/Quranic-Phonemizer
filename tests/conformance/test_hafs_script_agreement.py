@@ -7,9 +7,6 @@ from __future__ import annotations
 
 import pytest
 
-from conftest import sources  # noqa: F401  (fixture)
-from quranic_phonemizer.canon.build import build
-from quranic_phonemizer.engine.run import perform
 from quranic_phonemizer.model.address import (
     BoundaryPlan,
     Junction,
@@ -17,7 +14,8 @@ from quranic_phonemizer.model.address import (
     VerseRef,
 )
 from quranic_phonemizer.phonemize.legacy_views import phonemes_by_word
-from quranic_phonemizer.riwayat.hafs import HAFS, script_adapter
+
+pytestmark = pytest.mark.audit
 
 #: (surah, ayah, word), the reading, and what the two scripts disagree about.
 SITES = [

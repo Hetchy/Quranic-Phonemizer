@@ -1,8 +1,15 @@
+from .address import Location, Riwayah, Script, SlotId, VerseRef
 from .canon import (
-    CanonLetter, Nucleus, Onset, Quality, Rule, Score, ScoreWord, Slot,
+    CanonLetter,
+    Nucleus,
+    Onset,
+    Quality,
+    Rule,
+    Score,
+    ScoreWord,
+    Slot,
     VowelForm,
 )
-from .address import Location, Riwayah, Script, SlotId, VerseRef
 
 __all__ = [
     "CanonLetter", "Location", "Nucleus", "Onset", "Quality", "Riwayah",

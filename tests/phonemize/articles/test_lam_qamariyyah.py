@@ -4,7 +4,6 @@ import pytest
 
 from tests.support import Case, R, Site, assert_case, case_runs, pick, through
 
-
 CASES = (
     # Hafs: وَبِٱلْيَوْمِ ٱلْـَٔاخِرِ
     Case(id="yaa-hamza", site=Site(hafs=("2:8", (7, 8))), read=through(),

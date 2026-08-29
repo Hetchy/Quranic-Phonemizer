@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        name: [suite, structure, test-style]
+        name: [suite, lint, structure, test-style]
     name: ${{ matrix.name }}
     steps:
       - uses: actions/checkout@v4

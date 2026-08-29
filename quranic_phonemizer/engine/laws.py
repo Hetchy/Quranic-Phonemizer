@@ -24,7 +24,6 @@ from ..model.performance import (
     Performance,
     Recolours,
     SetsLength,
-    Silent,
     effect_targets,
 )
 from .run import has_content
