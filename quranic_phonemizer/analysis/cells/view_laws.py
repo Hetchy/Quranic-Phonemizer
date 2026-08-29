@@ -20,6 +20,7 @@ from .view_identity_laws import (
     check_carrier_identity_placement,
     check_weight_identity_placement,
 )
+from .cardinality_laws import check_cell_cardinality
 
 _require = requirer(CellValidationError)
 _HAMZA_GLYPHS = frozenset("ءأإؤئٕٔ")
@@ -313,45 +314,6 @@ def _check_groups(view: CellView) -> None:
         sounds = {sound.sound_id for sound in word.sounds}
         claimed_columns = [item for group in word.groups for item in group.column_ids]
         claimed_sounds = [item for group in word.groups for item in group.sound_ids]
-        overfull_column = next(
-            (
-                column for column in word.columns
-                if len(column.owned_sound_ids) > 2
-            ),
-            None,
-        )
-        _require(
-            overfull_column is None,
-            "column "
-            f"{overfull_column.id.value if overfull_column is not None else '?'} "
-            "owns more than two sounds",
-        )
-        overfull_group = next(
-            (group for group in word.groups if len(group.sound_ids) > 3), None
-        )
-        _require(
-            overfull_group is None,
-            "visual group "
-            f"{overfull_group.key.value if overfull_group is not None else '?'} "
-            "owns more than three sounds",
-        )
-        unlicensed_three = next(
-            (
-                group for group in word.groups
-                if len(group.sound_ids) == 3
-                and not any(
-                    columns_by_id[column].role is CellRole.TANWEEN
-                    for column in group.column_ids
-                )
-            ),
-            None,
-        )
-        _require(
-            unlicensed_three is None,
-            "three-sound visual group "
-            f"{unlicensed_three.key.value if unlicensed_three is not None else '?'} "
-            "has no tanween",
-        )
         _require(
             set(claimed_columns) == columns and len(claimed_columns) == len(columns),
             "the groups do not partition a word's columns",
@@ -420,6 +382,7 @@ def validate_cell_view(
     _check_no_iltiqa_bridge(view, bundle)
     _check_bridges(view, bundle, source)
     _check_closure(view, bundle)
+    check_cell_cardinality(view)
     _check_groups(view)
     check_carrier_identity_placement(view, bundle)
     check_weight_identity_placement(view, bundle)

@@ -82,6 +82,7 @@ def _is_partitioned_unit(
     pair = len(columns) == 2 and (
         (text in {"َا", "ُا", "ِا"} and roles == {"haraka", "letter"})
         or (text == "ا۟" and roles == {"haraka", "letter"})
+        or (text == "ٰ࢜" and roles == {"haraka", "letter"})
         or ("ٓ" in text and roles == {"letter", "madd"})
     )
     compact_tashil = (

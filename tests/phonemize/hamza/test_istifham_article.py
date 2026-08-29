@@ -87,11 +87,11 @@ CASES = (
     # Hafs: ءَآلْـَٔـٰنَ
     _case("alan", ALAN,
           "ʔ a: l ʔ a: n", "ʔ a ʔ̞ a l ʔ a: n",
-          "a:[1]", "@dagger_alif[1]", "@dagger_alif[1]"),
+          "a:[1]", "@dagger_alif[1]", "@madd_sign"),
     # Hafs: ءَآللَّهُ
     _case("allah", ALLAH,
           "ʔ a: lˤlˤ aˤ: h", "ʔ a ʔ̞ a lˤlˤ aˤ: h",
-          "a:", "@dagger_alif[1]", "@dagger_alif[1]"),
+          "a:", "@dagger_alif[1]", "@madd_sign"),
 )
 
 REGISTER_CASES = tuple(
