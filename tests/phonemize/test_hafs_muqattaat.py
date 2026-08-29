@@ -20,7 +20,7 @@ CASES = (
     VariantCase(
         id="yaseen-wasl",
         site=Site(hafs=("36:1", (1, 2))),
-        selector=KhilafId.NOON_YASEEN_WASL,
+        selector=KhilafId.YASEEN_WASL,
         faces={
             "izhar": Expect(
                 read=explicit(ibtidaa=1, wasl=1),

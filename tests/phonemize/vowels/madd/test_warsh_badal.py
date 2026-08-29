@@ -33,6 +33,15 @@ CASES = (
         sound_rules={"a:": R("madd_badal")},
         absent_sound_rules={"a:": R("madd_tabii")},
     ),
+    # Warsh: اٰيَةً
+    Case(
+        id="suu-ayah-ibtidaa-restores-qata",
+        site=Site(warsh=("20:22", (10,))),
+        read=isolated(),
+        phonemes="ʔ a: j a h",
+        sound_rules={"a:": R("madd_badal")},
+        absent_sound_rules={"a:": R("naql", "ibdal_hamza", "madd_tabii")},
+    ),
     # Warsh: مَـَٔابٖۖ
     Case(
         id="pausal-arid-overlap",
@@ -116,6 +125,15 @@ MUGHAYYAR_BIN_NAQL_CASES = (
         sound_rules={"a:": R("naql", "madd_badal")},
         absent_sound_rules={"a:": R("madd_tabii")},
     ),
+    # Warsh: سُوٓءٍ اٰيَةً
+    Case(
+        id="a-tanwin-suu-ayah",
+        site=Site(warsh=("20:22", (9, 10))),
+        read=joining(),
+        phonemes=("s u: ʔ i n", "a: j a t a n"),
+        sound_rules={"a:": R("naql", "madd_badal")},
+        absent_sound_rules={"a:": R("ibdal_hamza", "madd_tabii")},
+    ),
     # A-badal across an ayah edge: رَدْماًۖ اٰتُونِے
     Case(
         id="a-ayah-edge",
@@ -133,26 +151,6 @@ MUGHAYYAR_BIN_NAQL_CASES = (
         read=joining(),
         phonemes=("f a q aˤ d", "u: t i j a"),
         char_rules={"ا": R("naql"), "و": R("madd_badal")},
-        sound_rules={"u:": R("naql", "madd_badal")},
-        absent_sound_rules={"u:": R("madd_tabii")},
-    ),
-    # U-badal after tanwin: كُفَّارٌ ا۟وْلَٰٓئِكَ
-    Case(
-        id="u-tanwin",
-        site=Site(warsh=("2:161", (6, 7))),
-        read=joining(),
-        phonemes=("k u ff a: rˤ u n", "u: l a: ʔ i k a"),
-        char_rules={"ا[2]": R("naql"), "و": R("madd_badal")},
-        sound_rules={"u:": R("naql", "madd_badal")},
-        absent_sound_rules={"u:": R("madd_tabii")},
-    ),
-    # U-badal across an ayah edge: اَلِيمٌۖ ا۟وْلَٰٓئِكَ
-    Case(
-        id="u-ayah-edge",
-        site=Site(warsh=("2:174", (29, 30))),
-        read=joining(),
-        phonemes=("ʔ a l i: m u n", "u: l a: ʔ i k a"),
-        char_rules={"ا[2]": R("naql"), "و": R("madd_badal")},
         sound_rules={"u:": R("naql", "madd_badal")},
         absent_sound_rules={"u:": R("madd_tabii")},
     ),
@@ -191,7 +189,6 @@ MUGHAYYAR_BIN_NAQL_CASES = (
 
 MEETING_OWNED_INITIAL_SHAPES = frozenset({
     Location(2, 140, 14),
-    Location(20, 22, 10),
     Location(58, 13, 1),
 })
 
@@ -206,7 +203,7 @@ def test_warsh_madd_badal_mughayyar_bin_naql(run):
     assert_case(run)
 
 
-def test_warsh_mughayyar_bin_naql_is_one_second_word_bridge():
+def test_warsh_mughayyar_bin_naql_is_one_cross_word_bridge():
     case = next(
         item for item in MUGHAYYAR_BIN_NAQL_CASES if item.id == "a-tanwin"
     )
@@ -229,16 +226,25 @@ def test_warsh_mughayyar_bin_naql_is_one_second_word_bridge():
         for item in sound.rule_occurrence_ids
     }
     bridge = next(
-        item
-        for boundary in result._cells.boundaries
-        for item in boundary.bridges
+        item for boundary in result._cells.boundaries for item in boundary.bridges
         if item.merger_id == merger.id
+    )
+    before_column = next(
+        item for item in result._cells.words[before].columns
+        if sound.id in item.presented_sound_ids
+    )
+    after_column = next(
+        item for item in result._cells.words[after].columns
+        if sound.id in item.owned_sound_ids
     )
 
     assert sound.word_id == merger.after_word_id
-    assert rules == {"naql", "madd_badal"}
-    assert bridge.before_column_ids and bridge.after_column_ids
-    assert bridge.sound.sound_id == sound.id
+    assert rules == {"naql", "madd_badal", "tarqeeq"}
+    assert bridge.before_column_ids == (before_column.id,)
+    assert bridge.after_column_ids == (after_column.id,)
+    assert bridge.sound.column_ids == (before_column.id, after_column.id)
+    assert before_column.role.value in {"haraka", "tanween"}
+    assert after_column.role.value == "madd"
 
 
 def _mughayyar_overlaps(built, performance, candidates):
@@ -322,6 +328,6 @@ def test_warsh_mughayyar_bin_naql_register_reconciles():
         if latent_qata_badal_quality(entry.text) is not None
     }
     assert initial_shapes & set(meeting_targets) == MEETING_OWNED_INITIAL_SHAPES
-    assert boundaries == Counter({"within": 208, "ayah_edge": 16})
-    assert qualities == Counter({"A": 174, "U": 47, "I": 3})
-    assert hosts == Counter({"written": 146, "nunation": 78})
+    assert boundaries == Counter({"within": 186, "ayah_edge": 4})
+    assert qualities == Counter({"A": 174, "U": 13, "I": 3})
+    assert hosts == Counter({"written": 144, "nunation": 46})

@@ -50,6 +50,29 @@ DHAT_FATH_DEFAULT_CASES = (
 )
 
 
+NON_ADJACENT_CASES = (
+    # Warsh: إِسْرَآءِيلَ إِلَّا
+    Case(
+        id="internal-hamza-before-final-lam-is-not-a-meeting",
+        site=Site(warsh=("3:93", (6, 7))),
+        read=through(),
+        phonemes=("ʔ i s rˤ aˤ: ʔ i: l a", "ʔ i ll a:"),
+        sound_rules={"i:": R("madd_badal")},
+        absent_sound_rules={"ʔ[2]": R("ibdal_hamza")},
+    ),
+    # Warsh: اُ۬لسُّوٓأ۪ىٰٓ أَن كَذَّبُواْ
+    Case(
+        id="final-inclined-vowel-separates-across-word-hamzas",
+        site=Site(warsh=("30:10", (6, 7, 8))),
+        read=through(),
+        phonemes=("ʔ a ss u: ʔ ɛ:", "ʔ a ŋ", "k a ðð a b u:"),
+        char_rules={"ى": R("taqlil")},
+        sound_rules={"ɛ:": R("taqlil")},
+        absent_sound_rules={"ʔ[2]": R("ibdal_hamza", "tashil")},
+    ),
+)
+
+
 BARE_ANTA_PAUSAL_CASES = (
     # Warsh: ءَآنتَ فَعَلْتَ
     Case(
@@ -72,6 +95,14 @@ BARE_ANTA_PAUSAL_CASES = (
 
 
 FIXED_ONE_WORD_CASES = (
+    # Warsh: اَوْ۟نَبِّئُكُم
+    Case(
+        id="one-word-second-u-keeps-later-lexical-hamza",
+        site=Site(warsh=("3:15", (2,))),
+        read=isolated(),
+        phonemes="ʔ a ʔ̞ u n a bb i ʔ u k u m",
+        sound_rules={"ʔ̞": R("tashil")},
+    ),
     # Warsh: أَئِنَّكُمْ
     Case(
         id="one-word-second-i-fixed-tashil",
@@ -87,7 +118,7 @@ FIXED_ONE_WORD_CASES = (
         site=Site(warsh=("54:25", (1,))),
         read=isolated(),
         phonemes="ʔ a ʔ̞ u l q i:",
-        char_rules={"ا": R("tashil")},
+        char_rules={"@round_zero": R("tashil")},
         sound_rules={"ʔ̞": R("tashil")},
     ),
     # Warsh: ءَاٰ۬مَنتُم
@@ -149,6 +180,20 @@ AIMMA_DEFAULT_CASES = (
 
 
 MUTTAFIQ_DEFAULT_CASES = (
+    # Warsh: اوْ
+    Case(
+        id="registered-right-qata-at-ibtidaa",
+        site=Site(warsh=("33:24", (9,))),
+        read=isolated(),
+        phonemes="ʔ a w",
+    ),
+    # Warsh: شَآءَ اوْ
+    Case(
+        id="bare-aw-glide-survives-the-meeting",
+        site=Site(warsh=("33:24", (8, 9))),
+        read=through(),
+        phonemes=("ʃ a: ʔ", "a: w"),
+    ),
     # Warsh: جَآءَ احَدٞ مِّنكُم
     StateCase(id="default-a-a-ibdal-boundaries", site=Site(warsh=("4:43", (27, 28, 29))), states={
         "stopped-before": Expect(
@@ -294,6 +339,11 @@ DAMM_KASR_DEFAULT_CASES = (
 
 @pytest.mark.parametrize("run", case_runs(DHAT_FATH_DEFAULT_CASES))
 def test_dhat_fath_default(run):
+    assert_case(run)
+
+
+@pytest.mark.parametrize("run", case_runs(NON_ADJACENT_CASES))
+def test_non_adjacent_internal_hamza(run):
     assert_case(run)
 
 

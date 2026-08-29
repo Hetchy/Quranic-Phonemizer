@@ -45,6 +45,7 @@ class WaslHamza:
     starting leaves the canonical value untouched.
     """
 
+    start_choices: tuple[object, ...] = ()
     rule: Rule = Rule.HAMZA_WASL_SILENT
     phase: Phase = Phase.BOUNDARY
     triggers: frozenset = frozenset({Onset.WASL})
@@ -59,6 +60,21 @@ class WaslHamza:
         if slot is None or word is None or slot.onset is not Onset.WASL:
             return None
         if boundaries.started_on(word) and near.first_of_word(at):
+            location = near.score.words[word].location
+            choice = next(
+                (item for item in self.start_choices if location in item.locations),
+                None,
+            )
+            if choice is not None and choice.choose(near.score.selection) == "lam":
+                return Verdict(
+                    Occurrence(
+                        mint(Rule.HAMZA_WASL_SILENT, at),
+                        Rule.HAMZA_WASL_SILENT,
+                        (at,),
+                        boundary=_junction_before(word),
+                    ),
+                    (Silence(at, Aspect.CONSONANT), Silence(at, Aspect.VOWEL)),
+                )
             start = _START_OF[slot.nucleus.quality]
             return Verdict(
                 Occurrence(

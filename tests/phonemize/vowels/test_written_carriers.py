@@ -6,6 +6,13 @@ from tests.support import Case, R, Site, assert_case, case_runs, isolated, pick
 
 
 CASES = (
+    # Warsh: وَمَحْي۪آےْ
+    Case(
+        id="mahyaya-selected-sakin-yaa",
+        site=Site(warsh=("6:162", (5,))),
+        read=isolated(),
+        phonemes="w a m a ħ j ɛ: j",
+    ),
     # Hafs: ٱلصَّلَوٰةَ
     # Warsh: اَ۬لصَّلَوٰةَ
     Case(

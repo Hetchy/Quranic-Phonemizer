@@ -31,7 +31,9 @@ class RaaProfile:
             return Rule.TARQEEQ
         return (
             Rule.TAFKHEEM
-            if _ordinary_is_heavy(near, slot, plan, self.always_heavy)
+            if _ordinary_is_heavy(
+                near, slot, plan, boundaries, self.always_heavy
+            )
             else Rule.TARQEEQ
         )
 
@@ -93,8 +95,14 @@ def _performed_quality(slot, at, plan, near, boundaries):
     return state.quality
 
 
-def _ordinary_is_heavy(near, slot, plan, always_heavy) -> bool:
-    own = None if plan.merged_away(slot.id, Aspect.VOWEL) else slot.nucleus.quality
+def _ordinary_is_heavy(near, slot, plan, boundaries, always_heavy) -> bool:
+    word = near.word_of(slot.id)
+    state = (
+        slot.nucleus.stopped
+        if word is not None and boundaries.stopped_on(word)
+        else slot.nucleus.joined
+    )
+    own = None if plan.merged_away(slot.id, Aspect.VOWEL) else state.quality
     if own in {Quality.I, Quality.TAQLIL, Quality.KUBRA}:
         return False
     if own is Quality.U:

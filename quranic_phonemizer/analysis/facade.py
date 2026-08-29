@@ -89,6 +89,10 @@ def available_variants(riwayah: str) -> dict[str, dict[str, object]]:
     return recitation(check_riwayah(riwayah)).khilaf.points()
 
 
+def variant_catalogue(riwayah: str) -> tuple[dict[str, object], ...]:
+    return recitation(check_riwayah(riwayah)).khilaf.public_catalogue()
+
+
 def tajweed_rules(riwayah: str) -> tuple[RuleDefinition, ...]:
     return _tajweed_rules(riwayah)
 
@@ -174,6 +178,7 @@ class Result:
     analysis: AnalysisResult
     _state: _ProjectionState
     _rule_catalogue: tuple[RuleDefinition, ...]
+    _variant_catalogue: tuple[dict[str, object], ...]
 
     @property
     def words(self):
@@ -222,6 +227,42 @@ class Result:
 
     def cells(self, *, spelling: str = "source") -> CellView:
         return self._state.cells(spelling)
+
+    def variant_occurrences(self) -> tuple[dict[str, object], ...]:
+        words = {word.ref: word for word in self.words}
+        boundaries = {boundary.id: boundary for boundary in self.boundaries}
+        rows = []
+        for entry in self._variant_catalogue:
+            for occurrence in entry["occurrences"]:
+                matched = [words.get(ref) for ref in occurrence["word_refs"]]
+                if any(word is None for word in matched):
+                    continue
+                first = matched[0]
+                after = boundaries[first.after_boundary_id]
+                before = boundaries[first.before_boundary_id]
+                requirement = occurrence["requires"]
+                active = (
+                    requirement == "all"
+                    or requirement == "waqf" and after.state.value == "stop"
+                    or requirement == "ibtidaa" and before.state.value in {"start", "stop"}
+                    or requirement in {"wasl", "joined"}
+                    and after.state.value in {"join", "sakt"}
+                )
+                rows.append({
+                    "variant_id": entry["id"],
+                    "selected": self.analysis.variant[entry["id"]],
+                    "word_ids": [word.id.value for word in matched],
+                    "anchor": occurrence["anchor"],
+                    "anchor_word_id": first.id.value,
+                    "anchor_boundary_id": (
+                        first.after_boundary_id.value
+                        if occurrence["anchor"] == "boundary" else None
+                    ),
+                    "requires": requirement,
+                    "active": active,
+                    "masked": not active,
+                })
+        return tuple(rows)
 
     def document(self, kind: str, *, spelling: str = "source") -> Json:
         if kind not in KINDS:
@@ -278,6 +319,10 @@ class Phonemizer:
         return available_variants(self.riwayah)
 
     @property
+    def variant_catalogue(self) -> tuple[dict[str, object], ...]:
+        return variant_catalogue(self.riwayah)
+
+    @property
     def tajweed_rules(self) -> tuple[RuleDefinition, ...]:
         return tajweed_rules(self.riwayah)
 
@@ -332,7 +377,12 @@ class Phonemizer:
             bundle=bundle,
             pen=self._pen,
         )
-        return Result(_result_from_bundle(bundle), state, self.tajweed_rules)
+        return Result(
+            _result_from_bundle(bundle),
+            state,
+            self.tajweed_rules,
+            self.variant_catalogue,
+        )
 
 
 __all__ = [
@@ -343,6 +393,7 @@ __all__ = [
     "UnknownStopSign",
     "available_stop_signs",
     "available_variants",
+    "variant_catalogue",
     "supported_riwayat",
     "tajweed_rules",
 ]

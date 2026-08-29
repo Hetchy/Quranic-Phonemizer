@@ -8,16 +8,23 @@ from ..engine.plan import (
     Classify, Length, Phase, Plan, Realize, Relength, Verdict, mint,
 )
 from ..model.address import BoundaryPlan, Junction, KhilafId, Location, SlotId
-from ..model.canon import Annotation, CanonLetter as L
-from ..model.canon import Onset, Quality, Rule, SlotOrigin, VowelForm
+from ..model.canon import Annotation, CanonLetter as L, Onset, Quality, Rule, SlotOrigin, VowelForm
 from ..model.performance import Aspect, Occurrence, Vowel
+
+
+def _badal_slot(slot) -> bool:
+    return (
+        slot.letter is L.HAMZA
+        or Annotation.BADAL in slot.annotations
+        or (Annotation.NAQL in slot.annotations and slot.nucleus.sounds_long)
+    )
 @dataclass(frozen=True, slots=True)
 class MaddLazimIbdal:
     """Name the hamza replaced by the long alif at madd-tasheel sites."""
 
     locations: frozenset[Location]
     default: str
-    khilaf: KhilafId = KhilafId.MADD_LAZIM_TASHEEL
+    khilaf: KhilafId = KhilafId.ISTIFHAM_ARTICLE
     rule: Rule = Rule.IBDAL_HAMZA
     phase: Phase = Phase.LENGTH
     triggers: frozenset = frozenset({VowelForm.LONG})
@@ -34,7 +41,7 @@ class MaddLazimIbdal:
         if near.score.words[word].location not in self.locations:
             return None
         chosen = near.score.selection.chosen(self.khilaf) or self.default
-        if chosen != "madd_lazim":
+        if chosen != "ibdal":
             return None
         return _classify(Rule.IBDAL_HAMZA, at, None)
 
@@ -70,6 +77,7 @@ class IltiqaShortening:
             # `after` already refuses to look across a stop, so at a pause
             # there is no second sakin to meet and the madd stands.
             return None
+        behind_wasl = False
         if following.onset is Onset.WASL:
             # A joined wasl hamza vanishes, so the sakin the madd meets is
             # the consonant behind it -- read from the Score, since
@@ -77,11 +85,15 @@ class IltiqaShortening:
             following = near.after(following.id)
             if following is None:
                 return None
+            behind_wasl = True
         if plan.removed_by(
             following.id, Aspect.CONSONANT, Rule.IBDAL_HAMZA
         ):
             return None
-        if not _opens_on_a_sakin(following):
+        if not (
+            _opens_on_a_sakin(following)
+            or behind_wasl and Annotation.NAQL in following.annotations
+        ):
             return None
         inclined = slot.nucleus.quality in {Quality.TAQLIL, Quality.KUBRA}
         effect = (Realize(at, Aspect.VOWEL, Vowel(Quality.A))
@@ -219,8 +231,7 @@ class MaddClass:
             and rule is Rule.MADD_TABII
             and slot is not None
             and (
-                slot.letter is L.HAMZA
-                or Annotation.BADAL in slot.annotations
+                _badal_slot(slot)
                 or _is_started_badal(near, plan, slot, boundaries)
             )
         ):
@@ -245,8 +256,7 @@ class MaddBadal:
     ) -> Verdict | None:
         slot = near.slot(at)
         if slot is None or (
-            slot.letter is not L.HAMZA
-            and Annotation.BADAL not in slot.annotations
+            not _badal_slot(slot)
         ):
             return None
         # the ibdal case: the plan carries a length the Score does not
@@ -386,9 +396,7 @@ def _context(other: SlotId | None) -> tuple[SlotId, ...]:
 
 
 def _tabii(slot, at: SlotId, other: SlotId | None) -> Verdict:
-    """`MADD_TABII` cannot be classification-only, so it realizes the sound
-    the plain fill would have given it -- except a pausal alif, whose own
-    rule realizes it already, and only takes a length here."""
+    """Realize plain madd, or only lengthen an already realized pausal alif."""
     occurrence = Occurrence(
         mint(Rule.MADD_TABII, at), Rule.MADD_TABII, (at,), _context(other)
     )

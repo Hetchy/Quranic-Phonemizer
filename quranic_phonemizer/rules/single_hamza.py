@@ -7,17 +7,17 @@ from dataclasses import dataclass
 from ..engine.neighbourhood import Neighbourhood
 from ..engine.plan import (
     Classify,
-    Length,
+    MergeInto,
     Phase,
     Plan,
-    Relength,
+    Realize,
     Silence,
     Verdict,
     mint,
 )
 from ..model.address import BoundaryPlan, SlotId
 from ..model.canon import Annotation, CanonLetter, Onset, Rule
-from ..model.performance import Aspect, Occurrence
+from ..model.performance import Aspect, Occurrence, Vowel
 
 
 @dataclass(frozen=True, slots=True)
@@ -88,10 +88,47 @@ class JoinedIbdal:
                 boundary=word - 1,
             ),
             (
-                Relength(carrier.id, Length.LONG),
+                Realize(
+                    at,
+                    Aspect.VOWEL,
+                    Vowel(carrier.nucleus.quality, long=True),
+                ),
+                MergeInto(
+                    carrier.id,
+                    Aspect.VOWEL,
+                    at,
+                    Aspect.VOWEL,
+                ),
                 Silence(at, Aspect.CONSONANT),
             ),
         )
 
 
-__all__ = ["JoinedIbdal", "SuppliedIbdal"]
+@dataclass(frozen=True, slots=True)
+class JoinedIbdalMadd:
+    """Name the natural length created by connected single-hamza ibdal."""
+
+    rule: Rule = Rule.MADD_TABII
+    phase: Phase = Phase.LENGTH
+    triggers: frozenset = frozenset({CanonLetter.HAMZA})
+    emits: frozenset = frozenset({Rule.MADD_TABII})
+
+    def look(
+        self, near: Neighbourhood, plan: Plan, at: SlotId,
+        boundaries: BoundaryPlan,
+    ) -> Verdict | None:
+        del boundaries
+        slot = near.slot(at)
+        if (
+            slot is None
+            or slot.letter is not CanonLetter.HAMZA
+            or not plan.joined_ibdal_length(at)
+        ):
+            return None
+        return Verdict(
+            Occurrence(mint(Rule.MADD_TABII, at), Rule.MADD_TABII, (at,)),
+            (Classify(at, Aspect.VOWEL),),
+        )
+
+
+__all__ = ["JoinedIbdal", "JoinedIbdalMadd", "SuppliedIbdal"]

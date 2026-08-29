@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 from dataclasses import replace
 
-from ...model.canon import CanonLetter, Nucleus, Onset, Quality
+from ...model.canon import Annotation, CanonLetter, Nucleus, Onset, Quality
 from ...model.inscription import GraphemeClass, SlotFact
 from ...orthography.inventory import Inventory, LetterEntry, MarkEntry
 from . import naql_script
@@ -97,6 +97,29 @@ def _project_marked_fatha(text, entries, *, wasl: bool) -> None:
                 )
 
 
+def _project_sia_ishmam(text, entries) -> None:
+    """Project Nafi's vowel ishmam in `سِيءَ` and `سِيئَتْ`.
+
+    The rounded mark supplies the initial, predominantly-I vowel; it does not
+    stand for a deleted hamza.  The following yaa remains its long carrier and
+    the lexical hamza remains a separate onset.  In `س۬يَٓٔتْ` the same yaa
+    scalar is also the written seat of the combining hamza, so release it as a
+    carrier and let clustering give the combining hamza its own omitted slot.
+    """
+    if not text.startswith("س۬"):
+        return
+    if not (text.startswith("س۬ےٓء") or text.startswith("س۬يٓٔ")):
+        return
+    entries[1] = MarkEntry(
+        role="vowel_ishmam",
+        cls=GraphemeClass.HARAKA,
+        fact=SlotFact.VOWEL_QUALITY,
+        value=Nucleus.short(Quality.I),
+    )
+    if text.startswith("س۬يٓٔ"):
+        entries[2] = LetterEntry(CanonLetter.YA)
+
+
 def _attach_reversed_fathatan(text, entries) -> None:
     for index, char in enumerate(text[1:], start=1):
         if char in _FATHATAN and text[index - 1] == "ا" and index > 1:
@@ -122,19 +145,13 @@ def _attach_reversed_fathatan(text, entries) -> None:
             )
 
 
-def _project_plural_alif_silence(text, entries) -> None:
-    for alif_index in range(1, len(text) - 1):
+def _project_alif_sukun_silence(text, entries) -> None:
+    """An ordinary sukun on alif marks rasm, never a consonantal alif."""
+    for alif_index in range(len(text) - 1):
         if text[alif_index:alif_index + 2] != "اْ":
             continue
-        previous_base = next(
-            (
-                entry
-                for entry in reversed(entries[:alif_index])
-                if isinstance(entry, LetterEntry)
-            ),
-            None,
-        )
-        if previous_base is not None and previous_base.letter is CanonLetter.WAW:
+        entry = entries[alif_index]
+        if isinstance(entry, LetterEntry) and entry.letter is CanonLetter.ALIF:
             entries[alif_index + 1] = MarkEntry(
                 role="silence_sign",
                 cls=GraphemeClass.HARAKA,
@@ -161,26 +178,58 @@ def _consonantal_sukun(entries, index: int) -> None:
     )
 
 
+def _project_collapsed_hamza(text, entries) -> None:
+    """Keep the explicit interrogative hamza in the `أَ۟...` family.
+
+    The following rounded mark attests the unwritten second qata; it is not a
+    silence sign on the first hamza.
+    """
+    if text.startswith("اَوْ۟"):
+        # `اَوْ۟نَبِّئُكُم` writes the second qata on the waw-shaped
+        # carrier. Keep it as its own source-backed slot; otherwise the
+        # fallback repair puts both vocalised hamzas on the first alif and
+        # creates an impossible four-sound cell at ibtidaa.
+        entries[2] = LetterEntry(CanonLetter.HAMZA)
+        entries[3] = MarkEntry(
+            role="hamza_seat",
+            cls=GraphemeClass.ANNOTATION,
+            fact=SlotFact.ONSET,
+            value=Onset.PLAIN,
+        )
+        entries[4] = MarkEntry(
+            role="damma",
+            cls=GraphemeClass.ANNOTATION,
+            fact=SlotFact.VOWEL_QUALITY,
+            value=Nucleus.short(Quality.U),
+        )
+    elif text.startswith("أَ۟"):
+        entries[2] = MarkEntry(
+            role="collapsed_hamza",
+            cls=GraphemeClass.ANNOTATION,
+            decorates="host",
+        )
+
+
 def _project_orthographic_silence(text, entries) -> None:
     """Project selected-script sukuns or harakas that mark rasm-only letters."""
     for pattern, relative in (
-        ("أُوْلَ", 3),
-        ("مِاْئ", 3),
+        ("أُوْ", 3),
+        ("ا۟وْ", 3),
         ("إِيْن", 3),
         ("إِيْه", 3),
         ("إِےْ", 3),
-        ("اْيْـٔ", 1),
-        ("اْےْء", 1),
+        ("ءِےْ", 3),
     ):
         start = text.find(pattern)
         if start >= 0:
             _silence_mark(entries, start + relative)
 
-    # `بِأَيَيْدٖ`: the first written yaa is rasm-only; the following sakin
-    # yaa is the pronounced glide.
+    # `بِأَيَيْدٖ`: the stroke after the first yaa is the Maghribi jarrah
+    # sukun, while the second written yaa is the rasm-only addition.
     start = text.find("أَيَيْ")
     if start >= 0:
-        _silence_mark(entries, start + 3)
+        _consonantal_sukun(entries, start + 3)
+        _silence_mark(entries, start + 5)
 
     for pattern, relative in (
         ("ليْل", 2),
@@ -192,6 +241,18 @@ def _project_orthographic_silence(text, entries) -> None:
             _consonantal_sukun(entries, start + relative)
 
 
+def _project_consonantal_sukun_families(text, entries) -> None:
+    start = text.find("ٰٓيْ")
+    if start >= 0:
+        _consonantal_sukun(entries, start + 3)
+
+    if text.endswith("آےْ"):
+        _consonantal_sukun(entries, len(text) - 1)
+
+    if text == "اوْ":
+        _consonantal_sukun(entries, 2)
+
+
 def _release_dagger_hamza_seats(text, entries) -> None:
     for index, char in enumerate(text[:-2]):
         if char == "ٰ" and text[index + 1] == "ء" and text[index + 2] == "ْ":
@@ -200,6 +261,19 @@ def _release_dagger_hamza_seats(text, entries) -> None:
                 cls=GraphemeClass.SMALL_VOWEL,
                 decorates="host",
             )
+
+
+def _project_hamza_madd(text, entries) -> None:
+    """A maddah after hamza supplies the written long A nucleus."""
+    for index, char in enumerate(text[1:], start=1):
+        if char != "ٓ" or text[index - 1] not in "ءأإؤئ":
+            continue
+        entries[index] = MarkEntry(
+            role="madd",
+            cls=GraphemeClass.MADD_SIGN,
+            fact=SlotFact.VOWEL_QUALITY,
+            value=Nucleus.long(Quality.A),
+        )
 
 
 def _project_composite_tanwin(text, entries) -> None:
@@ -227,6 +301,19 @@ def _project_composite_tanwin(text, entries) -> None:
                 )
 
 
+def _project_noon_iqlab_witness(text, entries) -> None:
+    for index, char in enumerate(text[1:], start=1):
+        if char != "ۢ" or text[index - 1] != "ن":
+            continue
+        entry = entries[index]
+        if isinstance(entry, MarkEntry):
+            entries[index] = replace(
+                entry,
+                fact=SlotFact.TAJWEED_MARK,
+                value=Annotation.IQLAB_WITNESS,
+            )
+
+
 def _entries(inventory: Inventory, text: str) -> list:
     entries = [inventory.classify(char) for char in text]
     _release_combining_hamza_seats(inventory, text, entries)
@@ -236,11 +323,16 @@ def _entries(inventory: Inventory, text: str) -> list:
     naql_script.project_article_naql(text, entries)
     naql_script.project_verse_final_host(text, entries)
     _project_marked_fatha(text, entries, wasl=wasl)
+    _project_sia_ishmam(text, entries)
     _attach_reversed_fathatan(text, entries)
-    _project_plural_alif_silence(text, entries)
+    _project_alif_sukun_silence(text, entries)
     _project_orthographic_silence(text, entries)
+    _project_consonantal_sukun_families(text, entries)
+    _project_collapsed_hamza(text, entries)
     _release_dagger_hamza_seats(text, entries)
+    _project_hamza_madd(text, entries)
     _project_composite_tanwin(text, entries)
+    _project_noon_iqlab_witness(text, entries)
     return entries
 
 

@@ -19,7 +19,7 @@ an adapter-specific graph or infer presentation semantics.
 reader = Phonemizer(
     riwayah="hafs",
     script="uthmani",
-    variants={"iqlab_nasal": "bilabial"},
+    variants={"iqlab_nasal": "closed"},
     extra_phonemes=("emphatic_fatha", "emphatic_ikhfaa"),
 )
 ```
@@ -42,6 +42,7 @@ The reader publishes only values applicable to its selected configuration:
 ```python
 reader.available_stop_signs
 reader.available_variants
+reader.variant_catalogue
 reader.tajweed_rules
 ```
 
@@ -51,15 +52,24 @@ Equivalent metadata queries are available at the package root:
 from quranic_phonemizer import (
     available_stop_signs,
     available_variants,
+    variant_catalogue,
     supported_riwayat,
     tajweed_rules,
 )
 
 available_stop_signs("hafs", script="uthmani")
 available_variants("hafs")
+variant_catalogue("hafs")
 tajweed_rules("hafs")
 supported_riwayat()
 ```
+
+`available_variants` is the compact selector contract. `variant_catalogue`
+adds producer-owned groups, display metadata, visibility, fixed occurrence
+spans, anchors, and boundary requirements. After a request,
+`result.variant_occurrences()` maps matching spans to result-local word and
+boundary IDs and says whether each selector is active or masked by the current
+boundary plan.
 
 The packaged stop catalogues are:
 
@@ -215,7 +225,7 @@ cells = result.document("cell_view", spelling="transformed")
 ```
 
 Each call returns a JSON-compatible dictionary stamped with
-`schema_version == 2`:
+`schema_version == 3`:
 
 | Kind | Contents |
 | --- | --- |

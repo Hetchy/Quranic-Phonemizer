@@ -8,7 +8,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from ..model.address import BoundaryPlan, SlotId, SoundId, VariantSelection
-from ..model.canon import CLASSIFICATION_ONLY, Onset, Rule, Score, Slot
+from ..model.canon import (
+    CLASSIFICATION_ONLY, Onset, Rule, Score, Slot, VowelForm,
+)
 from ..model.performance import (
     Aspect,
     Attribution,
@@ -44,7 +46,8 @@ from .plan import (
 )
 
 #: Which aspect a rule's `Classifies` edge names.
-#: `ishmam` names the noon whose rounding is shown by the preceding mark.
+#: `ishmam` names a consonant: either the merged noon whose rounding is shown
+#: without sound, or the first consonant whose vowel begins with partial damma.
 _CLASSIFIES_ASPECT: dict[Rule, Aspect] = {
     Rule.TARQEEQ: Aspect.CONSONANT,
     Rule.ISHMAM: Aspect.CONSONANT,
@@ -184,7 +187,9 @@ def _materialise(
         occurrences.append(verdict.occurrence)
 
     _realize(plan, mint, colours, sounds, attributions, hosted)
-    _fill(plan, score, mint, colours, sounds, attributions, hosted)
+    _fill(
+        plan, score, boundaries, mint, colours, sounds, attributions, hosted
+    )
     _resolve_merges(plan, hosted, attributions)
 
     return Performance(
@@ -198,7 +203,9 @@ def _materialise(
     )
 
 
-def _plain_sound(slot: Slot, aspect: Aspect, colours, lengths=None) -> Sound:
+def _plain_sound(
+    slot: Slot, aspect: Aspect, colours, state, lengths=None
+) -> Sound:
     features = colours.get((slot.id, aspect), {})
     emphatic = bool(features.get(SoundFeature.EMPHATIC, False))
     if aspect is Aspect.CONSONANT:
@@ -208,11 +215,11 @@ def _plain_sound(slot: Slot, aspect: Aspect, colours, lengths=None) -> Sound:
             emphatic=emphatic,
             eased=slot.onset is Onset.TASHIL,
         )
-    long = slot.nucleus.sounds_long
+    long = state.form is VowelForm.LONG
     override = (lengths or {}).get(slot.id)
     if override is not None:
         long = override is Length.LONG
-    return Vowel(slot.nucleus.quality, long=long, emphatic=emphatic)
+    return Vowel(state.quality, long=long, emphatic=emphatic)
 
 
 
@@ -243,14 +250,28 @@ def _realize(plan, mint, colours, sounds, attributions, hosted) -> None:
                 )
 
 
-def _fill(plan, score, mint, colours, sounds, attributions, hosted) -> None:
+def _fill(
+    plan, score, boundaries, mint, colours, sounds, attributions, hosted
+) -> None:
     """Every aspect no rule spoke for, said as the Score writes it."""
     lengths = {
         e.slot: e.length for e in plan.effects() if isinstance(e, Relength)
     }
+    words = {
+        slot.id: word
+        for word, score_word in enumerate(score.words)
+        for slot in score_word.slots
+    }
     for slot, aspect in _fill_plain(plan, score):
+        state = (
+            slot.nucleus.stopped
+            if boundaries.stopped_on(words[slot.id])
+            else slot.nucleus.joined
+        )
         sound_id = mint.sound()
-        sounds.append((sound_id, _plain_sound(slot, aspect, colours, lengths)))
+        sounds.append(
+            (sound_id, _plain_sound(slot, aspect, colours, state, lengths))
+        )
         hosted[(slot.id, aspect)] = sound_id
         attributions.append(Hosts((slot.id,), aspect, sound_id, None))
 

@@ -26,6 +26,7 @@ class Idgham:
     pairs: Pairs
     never_follows: frozenset[CanonLetter] = frozenset()
     article: ArticleShape = field(default_factory=ArticleShape)
+    choices: tuple[object, ...] = ()
     rule: Rule = Rule.IDGHAM_MUTAMATHILAYN
     phase: Phase = Phase.MERGE
     triggers: frozenset = field(default=frozenset())
@@ -48,6 +49,15 @@ class Idgham:
         here = near.slot(at)
         if here is None or not here.nucleus.is_silent:
             return None
+        word = near.word_of(at)
+        if word is not None:
+            location = near.score.words[word].location
+            choice = next(
+                (item for item in self.choices if location in item.locations),
+                None,
+            )
+            if choice is not None and choice.choose(near.score.selection) == "izhar":
+                return None
         if self.article(near, at):
             return None  # lam shamsiyyah owns this slot
         following = near.after(at)

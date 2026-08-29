@@ -25,21 +25,18 @@ CASES = (
             "hadhf": Expect(
                 read=isolated(),
                 phonemes="ʔ a: t a: n",
-                char_rules={"@small_yaa": R("variant_silence")},
                 silent=("@small_yaa",),
             ),
             "ithbat": Expect(
                 read=isolated(),
                 phonemes="ʔ a: t a: n i:",
                 sound_rules={"i:": R("madd_tabii")},
-                absent_char_rules={"@small_yaa": R("variant_silence")},
             ),
         },
-        default="hadhf",
+        default="ithbat",
         masked=Expect(
             read=joining(),
             phonemes="ʔ a: t a: n i j a",
-            absent_char_rules={"@small_yaa": R("variant_silence")},
         ),
     ),
 )

@@ -4,7 +4,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from ..model.address import KhilafId, Location
-from ..model.canon import CanonLetter, Nucleus, Onset, Quality, SlotOrigin
+from ..model.canon import Annotation, CanonLetter, Nucleus, Onset, Quality, SlotOrigin
 from ..model.inscription import SlotFact
 from ..orthography.adapter import Reading
 from .draft import _Draft
@@ -45,10 +45,20 @@ class MaddSite:
 
 
 @dataclass(frozen=True, slots=True)
+class SpecialSite:
+    khilaf: KhilafId
+    location: Location
+    default: str
+
+
+@dataclass(frozen=True, slots=True)
 class CanonicalKhilaf:
     vowel: VowelKhilaf = field(default_factory=VowelKhilaf)
     letters: tuple[LetterSite, ...] = ()
     madd: MaddSite | None = None
+    tamanna: SpecialSite | None = None
+    salasila: SpecialSite | None = None
+    sakt: tuple[SpecialSite, ...] = ()
 
 
 def apply_canonical_khilaf(khilaf: CanonicalKhilaf):
@@ -65,8 +75,106 @@ def apply_canonical_khilaf(khilaf: CanonicalKhilaf):
             _apply_madd(
                 khilaf.madd, location, span, drafts, reading, scribe, selection
             )
+            _apply_tamanna(
+                khilaf.tamanna, location, span, drafts, scribe, selection
+            )
+            _apply_salasila(khilaf.salasila, location, span, selection)
+            _apply_sakt(
+                khilaf.sakt, location, span, drafts, reading, scribe, selection
+            )
 
     return apply
+
+
+def _choice(site, selection) -> str:
+    return selection.chosen(site.khilaf) or site.default
+
+
+def _apply_tamanna(site, location, span, drafts, scribe, selection) -> None:
+    if site is None or location != site.location or _choice(site, selection) == "ishmam":
+        return
+    host, noon = span[2], span[3]
+    host.annotations -= {Annotation.ISHMAM}
+    noon.onset = Onset.PLAIN
+    reduced = _Draft(
+        letter=CanonLetter.NOON,
+        onset=Onset.PLAIN,
+        nucleus=Nucleus.short(Quality.U),
+        origin=SlotOrigin.SPELLED,
+        cluster=noon.cluster,
+        onset_declared=True,
+        nucleus_declared=True,
+    )
+    letter_offsets = scribe.evidence_offsets(noon, SlotFact.LETTER)
+    mark_offsets = scribe.evidence_offsets(host, SlotFact.TAJWEED_MARK)
+    for offset in mark_offsets:
+        scribe.withdraw_evidence(offset, host, SlotFact.TAJWEED_MARK)
+    for offset in letter_offsets[:1]:
+        scribe.evidence(offset, reduced, SlotFact.LETTER)
+    for offset in (mark_offsets or letter_offsets)[:1]:
+        scribe.evidence(offset, reduced, SlotFact.VOWEL_QUALITY)
+    drafts.insert(drafts.index(noon), reduced)
+
+
+def _apply_salasila(site, location, span, selection) -> None:
+    if site is None or location != site.location:
+        return
+    if _choice(site, selection) == "ithbat":
+        span[-1].nucleus = Nucleus.pausal_long(Quality.A)
+
+
+def _apply_sakt(sites, location, span, drafts, reading, scribe, selection) -> None:
+    site = next((item for item in sites if item.location == location), None)
+    if site is not None:
+        choice = _choice(site, selection)
+        host = next(
+            draft for draft in reversed(span)
+            if draft.origin is not SlotOrigin.NUNATION
+        )
+        for draft in span:
+            draft.sakt_after = False
+        host.sakt_after = choice == "sakt"
+        if site.khilaf == KhilafId.IWAJA_QAYYIMA and choice == "sakt":
+            nunation = [
+                draft for draft in span if draft.origin is SlotOrigin.NUNATION
+            ]
+            if nunation:
+                host.nucleus = Nucleus.long(Quality.A)
+                scribe.withdraw(nunation)
+                for draft in nunation:
+                    drafts.remove(draft)
+        if site.khilaf == KhilafId.IWAJA_QAYYIMA and choice == "idraj":
+            host.nucleus = Nucleus.pausal_long(Quality.A)
+            if any(draft.origin is SlotOrigin.NUNATION for draft in span):
+                return
+            noon = _Draft(
+                letter=CanonLetter.NOON,
+                onset=Onset.PLAIN,
+                nucleus=Nucleus.silent(),
+                origin=SlotOrigin.NUNATION,
+                cluster=host.cluster,
+                onset_declared=True,
+                nucleus_declared=True,
+            )
+            offsets = scribe.evidence_offsets(host, SlotFact.SAKT)
+            for offset in offsets:
+                scribe.withdraw_evidence(offset, host, SlotFact.SAKT)
+                scribe.evidence(offset, noon, SlotFact.LETTER)
+            mark = next(
+                (
+                    mark
+                    for cluster in reading.clusters
+                    for mark in cluster.marks
+                    if mark.char in {"ۜ", "ۣ"}
+                ),
+                None,
+            )
+            source_offset = (
+                mark.offset if mark is not None
+                else reading.clusters[host.cluster].offset
+            )
+            scribe.evidence(source_offset, noon, SlotFact.LETTER)
+            drafts.insert(drafts.index(host) + 1, noon)
 
 
 def _apply_vowel(khilaf, span, selection) -> None:
@@ -90,10 +198,10 @@ def _apply_madd(site, location, span, drafts, reading, scribe, selection) -> Non
     if site is None or location not in site.locations:
         return
     chosen = selection.chosen(site.khilaf) or site.default
-    if chosen == "madd_lazim":
+    if chosen == "ibdal":
         return
-    if chosen != "tasheel":
-        _invalid(site.khilaf, chosen, ("madd_lazim", "tasheel"))
+    if chosen != "tashil":
+        _invalid(site.khilaf, chosen, ("ibdal", "tashil"))
     first = span[0]
     length_offsets = scribe.evidence_offsets(first, SlotFact.VOWEL_LENGTH)
     quality_offsets = scribe.evidence_offsets(first, SlotFact.VOWEL_QUALITY)

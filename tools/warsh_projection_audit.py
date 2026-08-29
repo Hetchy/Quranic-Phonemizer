@@ -1,18 +1,14 @@
-"""Audit every selected Warsh scalar through source and transformed cells."""
+"""Audit every selected Warsh scalar through the public analysis facade."""
 from __future__ import annotations
 
 import argparse
 import unicodedata
 from collections import Counter, defaultdict
 
-from quranic_phonemizer.analysis.build import build_bundle
-from quranic_phonemizer.analysis.cells import build_cell_view
-from quranic_phonemizer.analysis.source import build_source_view
+from quranic_phonemizer import Phonemizer
 from quranic_phonemizer.analysis.source_dtos import CharacterKind
 from quranic_phonemizer.api import recitation
-from quranic_phonemizer.model.address import Riwayah, Script
-from quranic_phonemizer.orthography.write import pen_for
-from quranic_phonemizer.session import phonemize_request
+from quranic_phonemizer.model.address import Riwayah
 
 
 class ScalarReach:
@@ -56,6 +52,15 @@ def _audit_view(ref, source, source_cells, transformed, reaches, failures):
 
     units = {unit.id.value: unit for unit in source.units}
     for character in source.characters:
+        if (
+            character.kind is CharacterKind.SEPARATOR
+            and unicodedata.category(character.text).startswith("L")
+            and character.text != "ـ"
+        ):
+            raise ValueError(
+                f"character {character.index} {character.text!r} is a "
+                "lexical glyph classified as a separator"
+            )
         reach = reaches[character.text]
         reach.count += 1
         source_columns = source_by_char[character.id.value]
@@ -95,37 +100,91 @@ def _audit_view(ref, source, source_cells, transformed, reaches, failures):
             reach.routes.add("boundary_character")
 
 
+def _audit_facade(result, source, transformed) -> None:
+    sounds = {sound.id for sound in result.sounds}
+    occurrences = {occurrence.id for occurrence in result.rule_occurrences}
+    mergers = {
+        merger.id for merger in result.mergers
+        if merger.boundary_id is not None
+    }
+    units = {unit.id for unit in source.units}
+    highlights = result.highlights()
+    columns = _columns(transformed)
+    cell_sounds = {
+        sound.sound_id
+        for word in transformed.words for sound in word.sounds
+    } | {
+        sound.sound_id
+        for boundary in transformed.boundaries for sound in boundary.sounds
+    } | {
+        bridge.sound.sound_id
+        for boundary in transformed.boundaries for bridge in boundary.bridges
+    }
+    cell_units = {
+        unit for column in columns for unit in column.source_unit_ids
+    }
+    cell_occurrences = {
+        occurrence
+        for column in columns for occurrence in column.rule_occurrence_ids
+    }
+    cell_mergers = {
+        bridge.merger_id
+        for boundary in transformed.boundaries for bridge in boundary.bridges
+    }
+    highlight_units = {unit for group in highlights for unit in group.unit_ids}
+    highlight_sounds = {sound for group in highlights for sound in group.sound_ids}
+
+    if cell_sounds != sounds:
+        raise ValueError("transformed cells do not close over result sounds")
+    if not cell_units <= units or not highlight_units <= units:
+        raise ValueError("a public view names an unknown source unit")
+    if not cell_occurrences <= occurrences:
+        raise ValueError("transformed cells name an unknown rule occurrence")
+    if not highlight_sounds <= sounds:
+        raise ValueError("highlights name an unknown sound")
+    if cell_mergers != mergers:
+        raise ValueError("transformed cells do not close over boundary mergers")
+    for kind in ("analysis_result", "source_view", "highlight_groups"):
+        if result.document(kind)["schema_version"] != 2:
+            raise ValueError(f"{kind} has the wrong schema version")
+    for spelling in ("source", "transformed"):
+        if result.document(
+            "cell_view", spelling=spelling
+        )["schema_version"] != 2:
+            raise ValueError(
+                f"cell_view ({spelling}) has the wrong schema version"
+            )
+
+
 def audit() -> AuditResult:
     reading = recitation(Riwayah.WARSH)
-    pen = pen_for(reading.inventory(Script.UTHMANI))
+    reader = Phonemizer(riwayah="warsh")
     reaches: dict[str, ScalarReach] = defaultdict(ScalarReach)
     failures: list[str] = []
     verses = 0
 
     def audit_ref(ref: str) -> None:
-        session = phonemize_request(reading, ref)
-        kw = dict(ref=ref, riwayah="warsh", script="uthmani", variant={})
-        bundle = build_bundle(session, **kw)
-        source = build_source_view(session, bundle=bundle)
-        source_cells = build_cell_view(
-            session, spelling="source", pen=pen, **kw
-        )
-        transformed = build_cell_view(
-            session, spelling="transformed", pen=pen, **kw
-        )
+        result = reader.analyse(ref)
+        source = result.source()
+        source_cells = result.cells(spelling="source")
+        transformed = result.cells(spelling="transformed")
+        _audit_facade(result, source, transformed)
         _audit_view(ref, source, source_cells, transformed, reaches, failures)
 
-    for surah, rows in sorted(
-        reading.corpus.surah_info.items(), key=lambda item: int(item[0])
-    ):
-        verses += len(rows)
-        for start in range(1, len(rows) + 1, 10):
-            end = min(start + 9, len(rows))
+    source_ayahs: dict[int, list[int]] = defaultdict(list)
+    for verse in reading.corpus.source_by_verse:
+        source_ayahs[verse.surah].append(verse.ayah)
+    for surah, ayahs in sorted(source_ayahs.items()):
+        ayahs.sort()
+        verses += len(ayahs)
+        for offset in range(0, len(ayahs), 10):
+            chunk = ayahs[offset:offset + 10]
+            start, end = chunk[0], chunk[-1]
             ref = f"{surah}:{start}" if start == end else f"{surah}:{start}-{surah}:{end}"
             try:
                 audit_ref(ref)
             except Exception:
-                for ayah in range(start, end + 1):
+                for ayah in chunk:
                     verse_ref = f"{surah}:{ayah}"
                     try:
                         audit_ref(verse_ref)

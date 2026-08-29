@@ -22,16 +22,16 @@ The selected Warsh corpus contains 60 one-word adjacent-hamza sites:
 | `ءَأَعْجَمِيٌّ` | 1 | Fixed tashil |
 | Triple-hamza forms | 4 | Fixed tashil on the second qata |
 
-The selected corpus also contains 156 adjacent qata pairs across two words:
+The selected corpus also contains 153 adjacent qata pairs across two words:
 
 | First + second quality | Count | General outcome |
 | --- | ---: | --- |
 | A + A | 30 | `hamza_muttafiq`, except the two `jaa_aal` sites |
-| I + I | 37 | `hamza_muttafiq`, except the two `hamza_kasr_yaa` sites |
+| I + I | 35 | `hamza_muttafiq`, except the two `hamza_kasr_yaa` sites |
 | U + U | 1 | `hamza_muttafiq` |
 | A + I | 19 | Fixed tashil |
 | A + U | 1 | Fixed tashil |
-| I + A | 29 | Fixed pure ibdal |
+| I + A | 28 | Fixed pure ibdal |
 | U + A | 13 | Fixed pure ibdal |
 | U + I | 26 | `hamza_damm_kasr` |
 
@@ -268,7 +268,7 @@ the same result sound. Visible unit and cell placements follow sound ownership
 and silence; trigger-only neighboring letters are not tagged. A moving waw or
 yaa receives no invented madd.
 
-Machine data must own all 60 one-word and 156 across-word rows with source
+Machine data must own all 60 one-word and 153 across-word rows with source
 ref, canonical ref, first and second qualities, boundary scope, structural
 owner, and authored-exception owner. Tests assert the exact partitions above,
 all five Aimma sites, the Aajami site, all four triple-hamza sites, both Jaa-Aal

@@ -102,7 +102,6 @@ selectors or a fixed Warsh inclination result, not merely a packaged source.
 | `test_muqattaat.py` | `haa-meem` | Fixed Warsh taqlil on the named haa. |
 | `test_muqattaat.py` | `noon-wasl` | Riwayah-owned continuation selector. |
 | `test_sakt.py` | `iwaja-qayyima` | Public lexical sakt selector. |
-| `test_sakt.py` | `marqadina-hadha` | Public lexical sakt selector. |
 | `test_sakt.py` | `man-raq` | Public lexical sakt selector. |
 | `test_sakt.py` | `bal-ran` | Public lexical sakt selector. |
 | `test_sakt.py` | `maliyah-halak` | Public lexical sakt selector. |

@@ -9,7 +9,7 @@ CASES = (
     # Hafs: رَبِّ
     Case(id="moving-fatha", site=Site(hafs=("1:2", (3,))), read=isolated(),
          phonemes="rˤ aˤ bb Q", extra_phonemes=("emphatic_fatha",),
-         char_rules={"ر": R("tafkheem"), "@fatha": R("tafkheem")},
+         char_rules={"ر": R("tafkheem")},
          sound_rules={"rˤ": R("tafkheem"), "aˤ": R("tafkheem")}),
     # Hafs: رُزِقْنَا
     Case(id="moving-damma", site=Site(hafs=("2:25", (22,))), read=isolated(),
@@ -79,8 +79,8 @@ CASES = (
     Case(id="geminate-fatha", site=Site(hafs=("1:1", (3,))), read=isolated(),
          phonemes="ʔ a rˤrˤ aˤ ħ m a: n", extra_phonemes=("emphatic_fatha",),
          char_rules=pick(
-             hafs={"ر": R("tafkheem"), "@fatha[1]": R("tafkheem")},
-             hafs_indopak={"ر": R("tafkheem"), "@fatha": R("tafkheem")},
+             hafs={"ر": R("tafkheem")},
+             hafs_indopak={"ر": R("tafkheem")},
          ),
          sound_rules={"rˤrˤ": R("tafkheem"), "aˤ": R("tafkheem")}),
     # Hafs: مُّسْتَمِرٌّ

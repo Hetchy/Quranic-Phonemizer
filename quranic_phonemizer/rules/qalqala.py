@@ -26,6 +26,7 @@ _DEGREE_OF_RULE = {
 class Qalqala:
     letters: frozenset[CanonLetter]
     pairs: Pairs
+    choices: tuple[object, ...] = ()
     rule: Rule = Rule.QALQALA_SUGHRA
     phase: Phase = Phase.RELEASE
     triggers: frozenset = field(default=frozenset())
@@ -73,6 +74,15 @@ class Qalqala:
         homorganic, and joined -- the same pair table `Idgham` reads."""
         if not slot.nucleus.is_silent:
             return False
+        word = near.word_of(at)
+        if word is not None:
+            location = near.score.words[word].location
+            choice = next(
+                (item for item in self.choices if location in item.locations),
+                None,
+            )
+            if choice is not None and choice.choose(near.score.selection) == "izhar":
+                return False
         following = near.after(at)
         if following is None:
             return False

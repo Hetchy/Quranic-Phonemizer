@@ -29,7 +29,7 @@ Use cases:
 
 ## Phoneme Inventory
 
-The phoneme inventory uses the standard International Phonetic Alphabet (IPA) [Arabic phonemes](https://en.wikipedia.org/wiki/Help%3AIPA/Arabic?utm_source=chatgpt.com) alongside custom phonemes for Tajweed rules. Hafs has 68 base phonemes plus 5 optional tokens; Warsh has 71 base phonemes plus 4 optional tokens.
+The phoneme inventory uses the standard International Phonetic Alphabet (IPA) [Arabic phonemes](https://en.wikipedia.org/wiki/Help%3AIPA/Arabic?utm_source=chatgpt.com) alongside custom phonemes for Tajweed rules. Hafs has 68 base phonemes plus 5 optional tokens; Warsh has 71 base phonemes plus 5 optional tokens.
 
 ### Foundational Phonemes
 
@@ -55,7 +55,7 @@ The phoneme inventory uses the standard International Phonetic Alphabet (IPA) [A
 | ا , ى                          | `aː` / `aˤː`           |
 | و                              | `uː`                   |
 | ي , ى                          | `iː`                   |
-| ى۪ Warsh Taqlil (Imala Sughra) | `ɛː`                   |
+| Warsh Taqlil (Imala Sughra) | `ɛ` / `ɛː`                   |
 
 ### Tajweed Phonemes
 
@@ -78,8 +78,9 @@ Iqlab and ikhfaa shafawi use the open-lip nasal `ŋ` by default. Their nasal var
 | `emphatic_fatha`            | `aˤ`              | Off         | Allophone |
 | `emphatic_ikhfaa`           | `ŋˤ`              | Off         | Heavy nasal allophone |
 | `qalqala_degree`            | `QQ`              | Off         | Stronger Qalqala kubra/akbar degree |
-| `tashil` (Hafs only)        | `ʔ̞`              | Off         | One case Hafs: `ءَا۬عْجَمِيٌّ` (41:44), off -> `ʔ` <br>Warsh always applies Tashil as `ʔ̞` since it is common |
 | `imala` (kubra)             | `e:`              | Off         | Hafs: `مَجْر۪ىٰهَا` (11:41), off -> `i:` <br> Warsh: `طَه۪` (20:1), off -> `ɛ:` |
+| `tashil` (Hafs only)        | `ʔ̞`              | Off         | One case Hafs: `ءَا۬عْجَمِيٌّ` (41:44), off -> `ʔ` <br>Warsh always applies Tashil as `ʔ̞` since it is common |
+| `taqlil_short` (Warsh only) | `ɛ`               | Off         | The short taqlil on the raa of the fixed `رأى` family; off -> `a`. The `taqlil` rule and light raa always apply. |
 
 ## Quick start
 
@@ -115,12 +116,6 @@ Warsh 1:3
 m a l i k i j a w m i dd i: n
 ```
 
-The phoneme sequences differ at one token:
-
-Hafs: m `a:` l i k i j a w m i dd i: n
-
-Warsh: m `a` l i k i j a w m i dd i: n
-
 ### References
 
 `analyse()` accepts words, verses, surahs, and ranges:
@@ -140,12 +135,13 @@ Use `verse` to stop at every ayah end in a range. Mushaf sign keys and exact
 word references can add other stops:
 
 ```python
-hafs.analyse("1:4-1:5", stop_signs=("verse",))
 hafs.analyse("68:33", stop_signs=("optional_stop",))
 hafs.analyse("2:255", stop_refs=("2:255:7",))
 ```
 
-The first word always starts in ibtidaa. The last word always ends in waqf.
+This applies waqf to `2:255:7` and ibtidaa to `2:55:8`, or any words with `ۚ ` in `68:33`, changing phonemes and tajweed rules accordingly.
+
+Note the first and last word of a request always apply ibtidaa and waqf respectively.
 
 `reader.available_stop_signs` gives the keys valid for that reader. Hafs uses:
 
@@ -159,12 +155,11 @@ The first word always starts in ibtidaa. The last word always ends in waqf.
 | `prohibited_stop` | ۙ |
 | `either_stop` | ۛ |
 
-Warsh also supports `verse`. Its only written stop-sign key is
-`optional_stop`, rendered as ۖ.
+Warsh exposes only `optional_stop` ۖ
 
 ## Analysis
 
-The phonemizer exposes more detailed analysis, breakdowns, relationships and rules:
+The phonemizer exposes more detailed analysis, breakdowns, relationships and rules as below. See the [public API reference](docs/public-api.md) for the full details.
 
 ```python
 result = hafs.analyse("112:2")
@@ -199,17 +194,30 @@ highlights = result.highlights()
 cells = result.cells(spelling="transformed")
 ```
 
-Here is the transformed cell view without its internal IDs:
+The cell view is the renderer-ready alignment between transformed spelling,
+phonemes, and tajweed. It informs what to draw, what changed, where a
+sound is presented, and which rules belong to each cell:
 
-| Transformed cells | Phonemes | Changes | Rules |
-| :--- | :--- | :--- | :--- |
-| `أ` `َ` `ل` `لّ` `َ` `ٰ` `ه` `ُ` | `ʔ a lˤlˤ aˤ: h u` | Spoken hamza and fatha replace the opening wasl; madd is added | `hamza_wasl_fatha`, `lam_shamsiyyah`, `madd_tabii`, `tafkheem` |
-| ~~`ٱ`~~ `ل` `صّ` `َ` `م` `َ` `دْ` ~~`ُ`~~ | `sˤsˤ a m a d Q` | Wasl alif and final damma drop; final dal takes sukun | `hamza_wasl_silent`, `lam_shamsiyyah`, `tafkheem`, `qalqala_kubra`, `waqf_diacritic_drop` |
+| Word | Transformed cell | Role and placement | Status | Sound relationship | Rules |
+| :---: | :---: | :--- | :--- | :--- | :--- |
+| `ٱللَّهُ` | `أ` | Letter on the main row | Replaced | Owns `ʔ` | `hamza_wasl_fatha` |
+| `ٱللَّهُ` | `َ` | Haraka above `أ`; inserted after it | Inserted | Owns `a` | — |
+| `ٱللَّهُ` | `ل` | Letter on the main row | Present | Presents `lˤlˤ` with the next cell | `lam_shamsiyyah` |
+| `ٱللَّهُ` | `لّ` | Letter on the main row | Present | Owns the shared `lˤlˤ` | `tafkheem` |
+| `ٱللَّهُ` | `َ` | Haraka above `لّ` | Present | Presents `aˤː` with the following madd cell | `tafkheem` |
+| `ٱللَّهُ` | `ٰ` | Madd inserted after the fatha | Inserted | Owns the shared `aˤː` | `madd_tabii`, `tafkheem` |
+| `ٱللَّهُ` | `ه` | Letter on the main row | Present | Owns `h` | — |
+| `ٱللَّهُ` | `ُ` | Haraka above `ه` | Present | Owns `u` | — |
+| `ٱلصَّمَدُ` | `ٱ` | Letter on the main row | Dropped | No phoneme | `hamza_wasl_silent` |
+| `ٱلصَّمَدُ` | `ل` | Letter on the main row | Present | Presents `sˤsˤ` with the next cell | `lam_shamsiyyah` |
+| `ٱلصَّمَدُ` | `صّ` | Letter on the main row | Present | Owns the shared `sˤsˤ` | `tafkheem` |
+| `ٱلصَّمَدُ` | `َ` | Haraka above `صّ` | Present | Owns `a` | `tafkheem` |
+| `ٱلصَّمَدُ` | `م` | Letter on the main row | Present | Owns `m` | — |
+| `ٱلصَّمَدُ` | `َ` | Haraka above `م` | Present | Owns `a` | — |
+| `ٱلصَّمَدُ` | `دْ` | Letter on the main row | Replaced | Owns `d` and the qalqala release `Q` | `qalqala_kubra` |
+| `ٱلصَّمَدُ` | ~~`ُ`~~ | Haraka above `د` | Dropped | No phoneme | `waqf_diacritic_drop` |
 
-The article lam merges into sad, producing `sˤsˤ`. Struck cells are retained
-for alignment but are not pronounced.
-
-`document()` returns JSON-compatible schema 2 documents for the analysis and its projections. See the [public API reference](docs/public-api.md) for every record and field.
+`document()` returns JSON-compatible schema 2 documents for the analysis and its projections.
 
 ## Tajweed rules
 
@@ -225,29 +233,27 @@ result.rule_occurrences
 
 `rule_occurrences` contains the rules applied to that request. Hafs and Warsh share these published rule IDs:
 
-- Noon and tanween: `izhar`, `ikhfaa`, `iqlab`, `idgham_bi_ghunnah`, `idgham_bila_ghunnah`, `ghunnah_mushaddadah`
-- Meem sakinah: `izhar_shafawi`, `ikhfaa_shafawi`, `idgham_shafawi`
-- Assimilation and the definite article: `idgham_mutamathilayn`, `idgham_mutaqaribayn`, `idgham_mutajanisayn_kamil`, `idgham_mutajanisayn_naqis`, `lam_shamsiyyah`, `lam_qamariyyah`
-- Qalqala: `qalqala_sughra`, `qalqala_kubra`, `qalqala_akbar`
-- Tafkheem and tarqeeq: `tafkheem`, `tarqeeq`
-- Special readings: `imala`, `tashil`, `ishmam`
+- Noon / Meem: `izhar`, `izhar_shafawi`, `ikhfaa`, `ikhfaa_shafawi`, `iqlab`, `idgham_bi_ghunnah`, `idgham_bila_ghunnah`, `idgham_shafawi`, `ghunnah_mushaddadah`
+- Assimilation and definite articles: `idgham_mutamathilayn`, `idgham_mutaqaribayn`, `idgham_mutajanisayn_kamil`, `idgham_mutajanisayn_naqis`, `lam_shamsiyyah`, `lam_qamariyyah`
+- Qalqala and Emphasis: `qalqala_sughra`, `qalqala_kubra`, `qalqala_akbar`, `tafkheem`, `tarqeeq`
 - Madd: `madd_tabii`, `madd_muttasil`, `madd_munfasil`, `madd_lazim`, `madd_arid_lissukun`, `madd_leen`, `madd_iwad`, `madd_badal`, `madd_silah`
 - Hamza and adjacent sakin letters: `ibdal_hamza`, `hamza_wasl_silent`, `hamza_wasl_fatha`, `hamza_wasl_damma`, `hamza_wasl_kasra`, `iltiqa_haraka`, `iltiqa_shortening`
 - Waqf and silence: `waqf_diacritic_drop`, `waqf_silah_drop`, `waqf_taa_marbuta`, `pausal_alif` (seven alifs), `orthographic_silence` (rasm)
+- Special: `imala`, `tashil`, `ishmam`
 
 Warsh adds five rule IDs:
 
 - `taqlil`
+- `naql`
 - `madd_leen_mahmuz`
 - `madd_mim_al_jam`
 - `madd_yaa_zawaid`
-- `naql`
 
 ## Contributing
 
 If you find any issues or have feature suggestions, please feel free to open an issue or submit a pull request.
 
-Future plans include support for other turuq and riwayat.
+Future plans include extending the phonemizer to other riwayat, beginning with Qalun 'An Nafi' and Shu'ba 'An Asim. Contributions are welcome!
 
 ## Credits
 

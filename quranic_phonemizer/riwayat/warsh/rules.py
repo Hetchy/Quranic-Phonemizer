@@ -5,7 +5,7 @@ from __future__ import annotations
 from ...engine.classifier import RuleSet
 from ...engine.plan import Phase
 from ...model.address import Riwayah
-from ...rules.annotation import CanonicalColour, Inclination
+from ...rules.annotation import CanonicalColour, CarrierTarqeeq, Inclination
 from ...rules.boundary import (
     DroppedGlide,
     IwadLength,
@@ -37,7 +37,7 @@ from ...rules.meem_sakinah import GhunnahMushaddadah, MeemSakinah
 from ...rules.naql import CarriedNaql, Naql
 from ...rules.noon_sakinah import IkhfaaWeight, NoonSakinah
 from ...rules.qalqala import Qalqala
-from ...rules.single_hamza import JoinedIbdal, SuppliedIbdal
+from ...rules.single_hamza import JoinedIbdal, JoinedIbdalMadd, SuppliedIbdal
 from ...rules.hamza_meetings import HamzaMeetingMadd, HamzaMeetings
 from ...rules.raa import RaaWeight
 from ...rules.tafkheem import Emphasis, Weight
@@ -49,6 +49,7 @@ from ...rules.wasl import (
     TanweenBeforeWasl,
     WaslHamza,
 )
+from ...rules.waqf_marks import WaqfIqlabMarkDrop
 from .resources import khilaf, lexicon, rule_tables
 from .hamza_meetings import meeting_rows, rows_by_target
 from .lam import PROFILE as LAM_PROFILE
@@ -103,6 +104,7 @@ def _boundary() -> tuple:
         TanweenBeforeWasl(repairs=_DAMM_START_REPAIR),
         TanweenDrop(),
         TanweenIwad(),
+        WaqfIqlabMarkDrop(),
         WaqfHarakaDrop(yaa=khilaf().yaa),
         WaqfSilahDrop(),
         DroppedGlide(yaa=khilaf().yaa),
@@ -113,6 +115,7 @@ def _boundary() -> tuple:
 def _build() -> RuleSet:
     tables = rule_tables()
     article = _article(tables)
+    weight = Weight(always_heavy=tables.always_heavy, raa_enabled=False)
     return RuleSet(
         {
             Phase.BOUNDARY: _boundary(),
@@ -134,6 +137,7 @@ def _build() -> RuleSet:
                 PausalGlide(),
                 IltiqaShortening(),
                 HamzaMeetingMadd(),
+                JoinedIbdalMadd(),
                 MaddClass(badal_is_effective=True),
                 MaddClass(additive_arid=True),
                 MaddLeen(mahmuz_is_distinct=True),
@@ -146,12 +150,10 @@ def _build() -> RuleSet:
                 IwadLength(),
             ),
             Phase.COLOUR: (
-                LamWeight(profile=LAM_PROFILE),
-                Emphasis(weight=Weight(
-                    always_heavy=tables.always_heavy,
-                    raa_enabled=False,
-                )),
+                LamWeight(profile=LAM_PROFILE, base_weight=weight),
+                Emphasis(weight=weight),
                 RaaWeight(profile=RAA_PROFILE),
+                CarrierTarqeeq(),
                 Inclination(),
                 CanonicalColour(),
                 IkhfaaWeight(

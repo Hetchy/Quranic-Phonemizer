@@ -5,6 +5,16 @@ schema_version: 1
 riwayah: warsh
 
 supplies:
+  # Nafi reads the initial vowel of `سِيءَ` / `سِيئَتْ` with a compound
+  # movement: a smaller preceding damma component followed by the dominant
+  # kasra.  The selected script writes that ishmam with U+06EC after the seen.
+  - {slot: "11:77:5#0", skeleton: "سء", fact: TAJWEED_MARK, value: ISHMAM,
+     citation: "Al-Wafi, Bab Farsh al-Huruf: Nafi's ishmam of سيء بهم"}
+  - {slot: "29:33:6#0", skeleton: "سء", fact: TAJWEED_MARK, value: ISHMAM,
+     citation: "Al-Wafi, Bab Farsh al-Huruf: Nafi's ishmam of سيء بهم"}
+  - {slot: "67:27:4#0", skeleton: "سءت", fact: TAJWEED_MARK, value: ISHMAM,
+     citation: "Al-Wafi, Bab Farsh al-Huruf: Nafi's ishmam of سيئت"}
+
   # 12:11 `تَامَ۬نَّا` carries the shared Tamanna ishmam reading, although
   # this script does not write the Hafs ishmam mark after the mim.
   - {slot: "12:11:6#1", skeleton: "تمن", fact: TAJWEED_MARK, value: ISHMAM,

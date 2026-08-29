@@ -8,6 +8,7 @@ from ..canon.khilaf import (
     CanonicalKhilaf,
     LetterSite,
     MaddSite,
+    SpecialSite,
     VowelKhilaf,
     VowelSite,
 )
@@ -16,7 +17,30 @@ from ..model.address import KhilafId, Location
 from ..model.canon import CanonLetter, Quality
 from ..rules.khilaf import HEAVY, KEPT, KhilafError, Site, SitedKhilaf
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
+
+
+@dataclass(frozen=True, slots=True)
+class VariantSpan:
+    words: tuple[Location, ...]
+    anchor: str
+    requires: str
+
+    @property
+    def ref(self) -> str:
+        first, last = self.words[0], self.words[-1]
+        return str(first) if first == last else f"{first}-{last}"
+
+
+@dataclass(frozen=True, slots=True)
+class VariantCatalogueEntry:
+    khilaf: KhilafId
+    group: str
+    display_name: str
+    description: str | None
+    website_visible: bool
+    spans: tuple[VariantSpan, ...]
+    dynamic_scope: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -44,9 +68,16 @@ class Khilaf:
     raa: SitedKhilaf
     yaa: SitedKhilaf
     canonical: CanonicalKhilaf
+    catalogue: dict[KhilafId, VariantCatalogueEntry]
 
     def definition(self, khilaf: KhilafId) -> VariantDefinition:
-        return self.variants[khilaf]
+        try:
+            return self.variants[khilaf]
+        except KeyError:
+            raise KhilafError(
+                f"{khilaf.value!r} is not a variant for this riwayah; "
+                f"choose from {[point.value for point in self.variants]}"
+            ) from None
 
     def validate(self, selection) -> None:
         seen = set()
@@ -67,60 +98,163 @@ class Khilaf:
             for point, spec in self.variants.items()
         }
 
+    def public_catalogue(self) -> tuple[dict[str, object], ...]:
+        rows = []
+        for point, spec in self.variants.items():
+            meta = self.catalogue[point]
+            occurrences = [
+                {
+                    "ref": span.ref,
+                    "word_refs": [str(word) for word in span.words],
+                    "anchor": span.anchor,
+                    "requires": span.requires,
+                }
+                for span in meta.spans
+            ]
+            rows.append({
+                "id": point.value,
+                "options": list(spec.options),
+                "default": spec.default,
+                "group": meta.group,
+                "display_name": meta.display_name,
+                "description": meta.description,
+                "website_visible": meta.website_visible,
+                "occurrence_count": len(occurrences) if not meta.dynamic_scope else None,
+                "representative": occurrences[0] if occurrences else None,
+                "occurrences": occurrences,
+                "dynamic_scope": meta.dynamic_scope,
+            })
+        return tuple(rows)
 
-EMPTY = Khilaf({}, SitedKhilaf(), SitedKhilaf(), CanonicalKhilaf())
+
+EMPTY = Khilaf({}, SitedKhilaf(), SitedKhilaf(), CanonicalKhilaf(), {})
 
 
 def load_khilaf(path: Path) -> Khilaf:
     if not path.exists():
         return EMPTY
     data = load_yaml(path)
-    require_keys(data, {"schema_version", "variants"}, name=str(path))
+    require_keys(data, {"schema_version", "variants", "catalogue"}, name=str(path))
     if data["schema_version"] != SCHEMA_VERSION:
         raise KhilafError(
             f"{path}: schema_version {data['schema_version']!r}, expected "
             f"{SCHEMA_VERSION}"
         )
     raw = data["variants"]
-    _require_all_variants(raw, path)
-    definitions = {
-        point: _definition(point, raw[point.value], path) for point in KhilafId
-    }
-    raa = _sited(raw, definitions, _raa_points(), HEAVY, path)
-    yaa = _sited(raw, definitions, (KhilafId.YAA_AATANI_WAQF,), KEPT, path)
-    vowels = (
-        _vowel(
-            KhilafId.DAAF_HARAKA,
-            raw[KhilafId.DAAF_HARAKA.value],
-            definitions[KhilafId.DAAF_HARAKA],
-            path,
-        ),
+    definitions = _definitions(raw, path)
+    catalogue = _catalogue(data["catalogue"], definitions, path)
+    raa = _sited(
+        raw, definitions, _points_of_kind(raw, definitions, "raa_weight"),
+        HEAVY, path,
+    )
+    yaa = _sited(
+        raw, definitions, _points_of_kind(raw, definitions, "final_yaa"),
+        KEPT, path,
+    )
+    vowels = tuple(
+        _vowel(point, raw[point.value], definitions[point], path)
+        for point in _points_of_kind(raw, definitions, "vowel")
     )
     letters = tuple(
         site
-        for point in _letter_points()
+        for point in _points_of_kind(raw, definitions, "letter")
         for site in _letters(point, raw[point.value], definitions[point], path)
     )
-    madd = MaddSite(
-        KhilafId.MADD_LAZIM_TASHEEL,
-        definitions[KhilafId.MADD_LAZIM_TASHEEL].locations,
-        definitions[KhilafId.MADD_LAZIM_TASHEEL].default,
+    madd_points = _points_of_kind(raw, definitions, "madd_tasheel")
+    if len(madd_points) > 1:
+        raise KhilafError(f"{path}: more than one madd-tasheel variant")
+    madd = None
+    if madd_points:
+        point = madd_points[0]
+        madd = MaddSite(
+            point, definitions[point].locations, definitions[point].default
+        )
+    tamanna = _one_special(raw, definitions, "tamanna")
+    salasila = _one_special(raw, definitions, "salasila")
+    sakt = tuple(
+        SpecialSite(point, location, definitions[point].default)
+        for point in _points_of_kind(raw, definitions, "sakt")
+        for location in definitions[point].locations
     )
     return Khilaf(
         definitions,
         raa,
         yaa,
-        CanonicalKhilaf(VowelKhilaf(vowels), letters, madd),
+        CanonicalKhilaf(VowelKhilaf(vowels), letters, madd, tamanna, salasila, sakt),
+        catalogue,
     )
 
 
-def _require_all_variants(raw, path) -> None:
-    declared = set(raw)
-    expected = {point.value for point in KhilafId}
-    missing = sorted(expected - declared)
-    unknown = sorted(declared - expected)
-    if missing or unknown:
-        raise KhilafError(f"{path}: missing variants {missing}; unknown {unknown}")
+def _catalogue(raw, definitions, path):
+    if set(raw) != {point.value for point in definitions}:
+        missing = sorted({point.value for point in definitions} - set(raw))
+        extra = sorted(set(raw) - {point.value for point in definitions})
+        raise KhilafError(f"{path}: catalogue mismatch; missing={missing}, extra={extra}")
+    result = {}
+    for point in definitions:
+        spec = raw[point.value]
+        require_keys(
+            spec,
+            {"group", "display_name", "website_visible"},
+            optional={"description", "occurrences", "dynamic_scope"},
+            name=f"{path} catalogue[{point.value}]",
+        )
+        spans = tuple(_span(value) for value in spec.get("occurrences", ()))
+        result[point] = VariantCatalogueEntry(
+            point,
+            str(spec["group"]),
+            str(spec["display_name"]),
+            str(spec["description"]) if spec.get("description") else None,
+            bool(spec["website_visible"]),
+            spans,
+            str(spec["dynamic_scope"]) if spec.get("dynamic_scope") else None,
+        )
+    return result
+
+
+def _span(raw) -> VariantSpan:
+    require_keys(raw, {"words", "anchor", "requires"}, name="variant occurrence")
+    words = tuple(_location(value) for value in raw["words"])
+    if not words or len(words) > 2:
+        raise KhilafError("variant occurrence must cover one or two words")
+    anchor = str(raw["anchor"])
+    requires = str(raw["requires"])
+    if anchor not in {"word", "boundary"}:
+        raise KhilafError(f"bad variant anchor {anchor!r}")
+    if requires not in {"all", "wasl", "waqf", "ibtidaa", "joined"}:
+        raise KhilafError(f"bad variant requirement {requires!r}")
+    return VariantSpan(words, anchor, requires)
+
+
+def _one_special(raw, definitions, kind: str) -> SpecialSite | None:
+    points = _points_of_kind(raw, definitions, kind)
+    if not points:
+        return None
+    if len(points) != 1 or len(definitions[points[0]].locations) != 1:
+        raise KhilafError(f"{kind}: expected exactly one location")
+    point = points[0]
+    return SpecialSite(
+        point, next(iter(definitions[point].locations)), definitions[point].default
+    )
+
+
+def _definitions(raw, path) -> dict[KhilafId, VariantDefinition]:
+    definitions = {}
+    for name, spec in raw.items():
+        try:
+            point = KhilafId(str(name))
+        except ValueError as error:
+            raise KhilafError(f"{path}: {error}") from None
+        definitions[point] = _definition(point, spec, path)
+    return definitions
+
+
+def _points_of_kind(raw, definitions, kind: str) -> tuple[KhilafId, ...]:
+    return tuple(
+        point
+        for point in definitions
+        if raw[point.value]["kind"] == kind
+    )
 
 
 def _definition(point, spec, path) -> VariantDefinition:
@@ -203,23 +337,3 @@ def _letters(point, spec, definition, path) -> tuple[LetterSite, ...]:
 def _location(raw: str) -> Location:
     surah, ayah, word = (int(part) for part in str(raw).split(":"))
     return Location(surah, ayah, word)
-
-
-def _raa_points() -> tuple[KhilafId, ...]:
-    return (
-        KhilafId.RAA_FIRQ_WASL,
-        KhilafId.RAA_ALQITR_WAQF,
-        KhilafId.RAA_MISR_WAQF,
-        KhilafId.RAA_NUTHUR_WAQF,
-        KhilafId.RAA_YASR_WAQF,
-        KhilafId.RAA_ASR_WAQF,
-    )
-
-
-def _letter_points() -> tuple[KhilafId, ...]:
-    return (
-        KhilafId.SEEN_SAD_YABSUT,
-        KhilafId.SEEN_SAD_BASTAH,
-        KhilafId.SEEN_SAD_AL_MUSAYTIRUN,
-        KhilafId.SEEN_SAD_BIMUSAYTIR,
-    )

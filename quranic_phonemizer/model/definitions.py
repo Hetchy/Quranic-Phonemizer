@@ -103,7 +103,8 @@ RULE_DEFINITIONS: dict[Rule, tuple[str, str, str]] = {
     ),
     Rule.ISHMAM: (
         "Ishmam", "إشمام",
-        "The lips round for a vowel that is not sounded.",
+        "A reading preserves a damma gesture: either silently with the lips, "
+        "or as the smaller opening component of a predominantly kasra vowel.",
     ),
     Rule.MADD_TABII: (
         "Madd Tabii", "مد طبيعي",
@@ -210,10 +211,6 @@ SILENCE_DEFINITIONS: dict[SilenceReason, tuple[str, str, str]] = {
     SilenceReason.ORTHOGRAPHIC: (
         "Orthographic Silence", "حرف لا ينطق به",
         "A letter the script writes and no reading ever says.",
-    ),
-    SilenceReason.VARIANT: (
-        "Variant Silence", "حذف في وجه من الخلاف",
-        "A written letter the selected reading option leaves unsaid.",
     ),
 }
 

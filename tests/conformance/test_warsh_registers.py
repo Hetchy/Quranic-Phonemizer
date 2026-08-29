@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import unicodedata
 from collections import Counter
 from functools import lru_cache
 from pathlib import Path
@@ -54,22 +55,22 @@ EASED_ISTIFHAM = {"27:61:15", "37:16:1", "38:8:1", "43:19:8", "50:3:1", "54:25:1
 #: The sixteen silent-qata starts and their ibtidaa readings, read on into
 #: the following word except where the doc's row is the waqf-on-host form.
 QATA_STARTS = (
-    ("6:71:29", "ʔi:tina:", "joined"),
-    ("7:77:9", "ʔi:tina:", "joined"),
-    ("8:32:17", "ʔi:tina:", "joined"),
-    ("29:29:17", "ʔi:tina:", "joined"),
-    ("10:15:11", "ʔi:ti", "joined"),
-    ("26:10:6", "ʔi:ti", "joined"),
-    ("10:79:3", "ʔi:tu:ni:", "joined"),
-    ("12:50:3", "ʔi:tu:ni:", "joined"),
-    ("12:54:3", "ʔi:tu:ni:", "joined"),
-    ("12:59:5", "ʔi:tu:ni:", "joined"),
-    ("46:4:18", "ʔi:tu:ni:", "joined"),
-    ("20:64:4", "ʔi:tu:", "joined"),
-    ("45:25:12", "ʔi:tu:", "joined"),
-    ("41:11:10", "ʔi:tija:", "joined"),
-    ("9:49:4", "ʔi:ðan", "stopped"),
-    ("2:283:16", "ʔu:tumina", "joined"),
+    ("6:71:29", "ʔi:tina:", "a:tina:", "joined"),
+    ("7:77:9", "ʔi:tina:", "u:tina:", "joined"),
+    ("8:32:17", "ʔi:tina:", "i:tina:", "joined"),
+    ("29:29:17", "ʔi:tina:", "u:tina:", "joined"),
+    ("10:15:11", "ʔi:ti", "a:ti", "joined"),
+    ("26:10:6", "ʔi:ti", "i:ti", "joined"),
+    ("10:79:3", "ʔi:tu:ni:", "u:tu:ni:", "joined"),
+    ("12:50:3", "ʔi:tu:ni:", "u:tu:ni:", "joined"),
+    ("12:54:3", "ʔi:tu:ni:", "u:tu:ni:", "joined"),
+    ("12:59:5", "ʔi:tu:ni:", "a:tu:ni:", "joined"),
+    ("46:4:18", "ʔi:tu:ni:", "i:tu:ni:", "joined"),
+    ("20:64:4", "ʔi:tu:", "a:tu:", "joined"),
+    ("45:25:12", "ʔi:tu:", "u:tu:", "joined"),
+    ("41:11:10", "ʔi:tija:", "i:tija:", "joined"),
+    ("9:49:4", "ʔi:ðan", "u:ða", "stopped"),
+    ("2:283:16", "ʔu:tumina", "i:tumina", "joined"),
 )
 
 #: The closed damm-over-kasr connected-form register: canonical boundary,
@@ -294,9 +295,14 @@ def test_every_supplied_mark_start_reconciles_with_the_derivation():
 
 
 @pytest.mark.parametrize(
-    ("ref", "expected", "state"), QATA_STARTS, ids=[row[0] for row in QATA_STARTS]
+    ("ref", "expected", "joined", "state"),
+    QATA_STARTS,
+    ids=[row[0] for row in QATA_STARTS],
 )
-def test_a_started_silent_qata_form_reads_the_replacement_long(ref, expected, state):
+def test_a_started_silent_qata_form_reads_the_replacement_long(
+    ref, expected, joined, state
+):
+    del joined
     word = int(ref.split(":")[2])
     waqf = word if state == "stopped" else word + 1
     got = _read("warsh", ref, (word,), ibtidaa=word, waqf=waqf)
@@ -304,16 +310,20 @@ def test_a_started_silent_qata_form_reads_the_replacement_long(ref, expected, st
 
 
 @pytest.mark.parametrize(
-    ("ref", "started", "state"), QATA_STARTS, ids=[row[0] for row in QATA_STARTS]
+    ("ref", "started", "joined", "state"),
+    QATA_STARTS,
+    ids=[row[0] for row in QATA_STARTS],
 )
-def test_a_joined_silent_qata_form_uses_the_preceding_vowel(ref, started, state):
+def test_a_joined_silent_qata_form_uses_the_preceding_vowel(
+    ref, started, joined, state
+):
+    del started, state
     word = int(ref.split(":")[2])
     before, got = _read(
         "warsh", ref, (word - 1, word), ibtidaa=word - 1, waqf=word + 1
     )
-    assert before.endswith(":")
-    expected = started[3:-1] if state == "stopped" else started[3:]
-    assert got == expected
+    assert before
+    assert got == joined
 
 
 @pytest.mark.parametrize(
@@ -346,10 +356,134 @@ def test_relative_pronoun_projection_covers_only_its_selected_script_family():
         if relative_pronoun_form(entry.text)
     ]
 
-    assert len(relative) == 1385
+    forms = Counter(
+        "".join(
+            char for char in entry.text
+            if not unicodedata.combining(char) and char not in "ـۥۦۧۨ"
+        )
+        for entry in relative
+    )
+
+    assert forms == Counter({
+        "الذين": 812,
+        "الذے": 268,
+        "والذين": 163,
+        "للذين": 80,
+        "التے": 65,
+        "والذے": 15,
+        "بالذے": 11,
+        "فالذين": 10,
+        "كالذين": 9,
+        "بالتے": 7,
+        "بالذين": 6,
+        "كالذے": 5,
+        "والتے": 4,
+        "للذے": 4,
+        "كالتے": 1,
+        "للتے": 1,
+        "وبالذے": 1,
+        "وللذين": 1,
+        "والذن": 1,
+    })
+    assert len(relative) == 1464
     assert not relative_pronoun_form(
         warsh_corpus().entries[Location(12, 13, 10)].text
     )
+    assert not relative_pronoun_form(
+        warsh_corpus().entries[Location(7, 144, 7)].text
+    )
+
+
+def test_every_selected_relative_pronoun_restores_the_lam_gemination():
+    warsh = recitation(Riwayah.WARSH)
+    seen = 0
+    for location, entry in warsh_corpus().entries.items():
+        if not relative_pronoun_form(entry.text):
+            continue
+        built = warsh.build(warsh.read(
+            Script.UTHMANI,
+            location.verse,
+            ((location, entry.text),),
+        ))
+        lam, relative = next(
+            (current, following)
+            for current, following in zip(
+                built.score.words[0].slots,
+                built.score.words[0].slots[1:],
+            )
+            if current.letter is CanonLetter.LAM
+            and following.letter in {CanonLetter.THAL, CanonLetter.TA}
+        )
+        assert lam.onset is Onset.GEMINATE, (location, entry.text)
+        assert lam.nucleus.is_short and lam.nucleus.quality is Quality.A
+        assert relative.onset is Onset.PLAIN, (location, entry.text)
+        seen += 1
+
+    assert seen == 1464
+
+
+def test_unwritten_gemination_source_conventions_are_closed():
+    families = Counter()
+    for entry in warsh_corpus().entries.values():
+        text = entry.text
+        if "ّ" in text:
+            continue
+        skeleton = "".join(
+            char for char in text
+            if not unicodedata.combining(char) and char not in "ـۥۦۧۨ"
+        )
+        if relative_pronoun_form(text):
+            families["relative_pronoun"] += 1
+        elif skeleton in {"لله", "ولله", "فلله"}:
+            families["contracted_divine_name"] += 1
+        elif skeleton == "اليل":
+            families["al_layl"] += 1
+
+    assert families == Counter({
+        "relative_pronoun": 1434,
+        "contracted_divine_name": 135,
+        "al_layl": 59,
+    })
+
+
+def test_every_unmarked_solar_shape_is_relative_or_a_closed_nonarticle():
+    sun = set("تثدذرزسشصضطظلن")
+    prefixes = ("وبال", "وكال", "وال", "فال", "بال", "كال", "ولل", "لل", "ال")
+    residual = Counter()
+    for entry in warsh_corpus().entries.values():
+        bases = [
+            (char, offset)
+            for offset, char in enumerate(entry.text)
+            if not unicodedata.combining(char) and char not in "ـۥۦۧۨ"
+        ]
+        skeleton = "".join(char for char, _ in bases)
+        prefix = next((one for one in prefixes if skeleton.startswith(one)), None)
+        if prefix is None or len(bases) <= len(prefix):
+            continue
+        following = len(prefix)
+        if bases[following][0] not in sun:
+            continue
+        start = bases[following][1]
+        end = bases[following + 1][1] if following + 1 < len(bases) else len(entry.text)
+        if "ّ" in entry.text[start:end] or relative_pronoun_form(entry.text):
+            continue
+        residual[skeleton] += 1
+
+    assert residual == Counter({
+        "الن": 4,
+        "التقى": 3,
+        "فالن": 1,
+        "التقتا": 1,
+        "التقيتم": 1,
+        "الزمنه": 1,
+        "فالتقطه": 1,
+        "والد": 1,
+        "والده": 1,
+        "فالتقمه": 1,
+        "فالتقى": 1,
+        "فالتمسوا": 1,
+        "والتفت": 1,
+    })
 
 
 def test_the_fixed_single_hamza_register_is_the_documented_56():
@@ -526,35 +660,35 @@ def test_the_naql_latent_register_reconciles_with_canonical_hosts():
     """Every supplied latent qata stands after an eligible host: a written
     moved haraka, a tanwin, or one spelled opening at a verse edge."""
     within, edge = _naql_boundaries()
-    assert sum(within.values()) == 1658
+    assert sum(within.values()) == 1680
     assert within == Counter({
         ("written_A", "moved_haraka"): 752,
         ("written_A", "tanwin"): 365,
         ("written_I", "moved_haraka"): 173,
         ("written_I", "tanwin"): 298,
         ("written_U", "tanwin"): 1,
-        ("damm_stroke", "moved_haraka"): 46,
-        ("damm_stroke", "tanwin"): 23,
+        ("damm_stroke", "moved_haraka"): 48,
+        ("damm_stroke", "tanwin"): 43,
     })
     joinable = {key: count for key, count in edge.items() if key[1] != "surah_start"}
-    assert sum(joinable.values()) == 308
+    assert sum(joinable.values()) == 320
     assert joinable == {
         ("written_A", "tanwin"): 112,
         ("written_A", "spelled"): 1,
         ("written_I", "tanwin"): 192,
         ("written_I", "moved_haraka"): 1,
-        ("damm_stroke", "tanwin"): 2,
+        ("damm_stroke", "tanwin"): 14,
     }
 
 
-def test_the_227_initial_badals_have_the_reviewed_quality_register():
+def test_the_193_initial_badals_have_the_reviewed_quality_register():
     register = Counter(
         quality.name
         for entry in warsh_corpus().entries.values()
         if (quality := naql_script.latent_qata_badal_quality(entry.text))
         is not None
     )
-    assert register == Counter({"A": 177, "U": 47, "I": 3})
+    assert register == Counter({"A": 177, "U": 13, "I": 3})
 
 
 def test_the_selected_source_has_the_reviewed_304_leen_mahmuz_candidates():

@@ -110,6 +110,25 @@ and yaa may be consonants or carriers; an alif may be a carrier, a wasl seat, or
 part of a reviewed hamza sequence. The adapter emits typed evidence rather than
 making that decision from the scalar name.
 
+An ordinary U+0652 sukun written directly on alif is a silence sign: the alif
+is rasm-only and cannot be a consonant. The selected artifact contains 3,716
+such sequences. U+0652 on waw or yaa remains contextual because either letter
+may instead be a consonant. The 220 explicit-hamza `أُوْ...` tokens and 34
+latent-hamza `ا۟وْ...` tokens form one reviewed silent-waw family. The latter
+is a contextual Naql spelling: ibtidaa restores a short qata damma, joined
+Naql transfers that short damma, and the written waw remains rasm-only in both
+states. Initial `ا۟و...` without waw sukun is the distinct sounded Warsh badal
+carrier family.
+
+The four selected forms `تِلْقَآءِےْ` (10:15:24), `وَإِيتَآءِےْ`
+(16:90:6), `اٰنَآءِےْ` (20:130:14), and `وَّرَآءِےْ` (42:51:11)
+share a final rasm-support yaa after a kasra-bearing hamza. The yaa is silent
+in both wasl and waqf; wasl realizes short `/i/` on the hamza, while waqf
+stops on the hamza itself. It must not lengthen that kasra or become a separate
+slot. Hidayat al-Qari states this rule for the final hamza drawn on yaa and
+names `إيتاء` and `آناء` explicitly
+([source](https://www.islamweb.net/ar/library/content/231/84/?idfrom=&idto=&start=)).
+
 ### Alternate tanwin
 
 The selected source supplements ordinary tanwin with three alternate marks:
@@ -265,14 +284,14 @@ lam weights and selector faces, belong in Warsh authored data. No second Warsh
 script is planned, so the adapter may key its supplied facts to this source's
 reviewed Unicode conventions.
 
-The selected source has 1,385 relative-pronoun forms whose lam immediately
-before dhal does not carry the marks that spell its pronunciation. This
-includes bare and proclitic forms such as `اِ۬لذِے`, `اُ۬لذِينَ`, and
-`لِلذِينَ`; some proclitic forms carry a shadda on the preceding lam instead.
-Projection restores canonical `/ll a/` on the relative-pronoun lam before the
-single dhal. It does not claim ordinary article-plus-dhal words whose dhal
-carries shadda, such as `اُ۬لذِّيبُ`; those retain ordinary lam-shamsiyyah
-assimilation as `/ðð/`.
+The selected source has 1,464 relative-pronoun forms whose lam immediately
+before dhal or taa does not carry every mark that spells its pronunciation.
+This includes bare and proclitic forms such as `اِ۬لذِے`, `اُ۬لذِينَ`,
+`اَ۬لتِے`, `بِالتِے`, and `لِلذِينَ`; some proclitic forms carry a shadda on
+the preceding lam instead. Projection restores canonical `/ll a/` on the
+relative-pronoun lam. It does not claim ordinary article-plus-solar-letter
+words whose solar letter carries shadda, such as `اُ۬لذِّيبُ`; those retain
+ordinary lam-shamsiyyah assimilation as `/ðð/`.
 
 ## Adapter acceptance checks
 

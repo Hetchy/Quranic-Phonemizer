@@ -2,6 +2,7 @@
 
 The source writes the transformed joined form; projection restores the
 canonical sakin host and latent qata, and annotates the article family."""
+
 from __future__ import annotations
 
 from ...model.canon import Annotation, CanonLetter, Nucleus, Onset, Quality
@@ -13,7 +14,7 @@ _HARAKA_ROLE = {"َ": "fatha", "ُ": "damma", "ِ": "kasra"}
 _WASL_MARKS = frozenset("۪۬۟")
 
 #: Scalars that carry no letter identity when reading a base skeleton.
-_NON_SKELETON = frozenset('ًٌٍَُِّْٰٖ۪ٗٞٓ۬۟ـۥۦٕۧۢٔ')
+_NON_SKELETON = frozenset("ًٌٍَُِّْٰٖ۪ٗٞٓ۬۟ـۥۦٕۧۢٔۖ۩")
 
 #: The eased `جَآءَ ا۟لَ` tokens: their onset belongs to the hamza-meetings
 #: chapter, not to naql, although they share the bare-alif spelling.
@@ -30,10 +31,25 @@ _PROCLITICS = {"و": "َ", "ف": "َ", "ب": "ِ", "ك": "َ"}
 #: Article bases whose deleted qata carried the long badal A, so the written
 #: `لَا`/`لَٰ` reads long. Everything else in the family reads the short
 #: transferred vowel. Reviewed against the full selected corpus.
-_LONG_BASES = frozenset({
-    "ثمين", "خر", "خرة", "خرين", "زفة", "صال", "فاق", "فلين",
-    "كلين", "لهة", "مرون", "منين", "ن", "ية", "يت",
-})
+_LONG_BASES = frozenset(
+    {
+        "ثمين",
+        "خر",
+        "خرة",
+        "خرين",
+        "زفة",
+        "صال",
+        "فاق",
+        "فلين",
+        "كلين",
+        "لهة",
+        "مرون",
+        "منين",
+        "ن",
+        "ية",
+        "يت",
+    }
+)
 
 #: The one verse-final host written with its moved vowel: source `وَانْحَرِ`
 #: before the latent `اِنَّ` opening the next verse.
@@ -63,11 +79,13 @@ def latent_qata_badal_quality(text: str) -> Quality | None:
         return Quality.A
     if len(text) < 3:
         return None
-    if text[1] in "ُ۟" and text[2] == "و":
-        return Quality.U
-    if text[1] == "ِ" and text[2] in "يے" and (
-        len(text) < 4 or text[3] != "ّ"
+    if (
+        text[1] in "ُ۟"
+        and text[2] == "و"
+        and (len(text) < 4 or text[3] != "ْ")
     ):
+        return Quality.U
+    if text[1] == "ِ" and text[2] in "يے" and (len(text) < 4 or text[3] != "ّ"):
         return Quality.I
     return None
 
@@ -81,7 +99,7 @@ def project_latent_qata(text: str, entries: list) -> None:
         # The stroke spells the qata's damm here, not a wasl start quality.
         entries[1] = MarkEntry(
             role="damma",
-            cls=GraphemeClass.HARAKA,
+            cls=GraphemeClass.ANNOTATION,
             fact=SlotFact.VOWEL_QUALITY,
             value=Nucleus.short(Quality.U),
         )
@@ -117,8 +135,9 @@ def demote_moved_haraka(text: str, entries: list, quality: Quality) -> None:
     entries[index] = MarkEntry(
         role="naql_witness",
         cls=GraphemeClass.HARAKA,
+        fact=SlotFact.TAJWEED_MARK,
+        value=Annotation.NAQL_WITNESS,
         decorates="host",
-        attests=True,
     )
 
 
@@ -161,7 +180,12 @@ def _prefixed_lam(text: str) -> tuple[int, int] | None:
         and text[index + 1] == _PROCLITICS[text[index]]
     ):
         index += 2
-    if index and index + 1 < len(text) and text[index] == "ا" and text[index + 1] == "ل":
+    if (
+        index
+        and index + 1 < len(text)
+        and text[index] == "ا"
+        and text[index + 1] == "ل"
+    ):
         return index + 1, index
     return None
 
@@ -192,7 +216,7 @@ def project_article_naql(text: str, entries: list) -> None:
         return
     if carrier >= len(text) or text[carrier] not in "اٰ":
         return
-    long_base = text[carrier] == "ٰ" or _skeleton(text[carrier + 1:]) in _LONG_BASES
+    long_base = text[carrier] == "ٰ" or _skeleton(text[carrier + 1 :]) in _LONG_BASES
     entries[carrier] = MarkEntry(
         role="naql_qata_rasm",
         cls=GraphemeClass.ANNOTATION,
@@ -207,9 +231,7 @@ def project_article_naql(text: str, entries: list) -> None:
             value=Nucleus.long(Quality.A),
         )
     if wasl_alif is not None:
-        entries[wasl_alif] = LetterEntry(
-            CanonLetter.HAMZA, onset=Onset.WASL, seat=True
-        )
+        entries[wasl_alif] = LetterEntry(CanonLetter.HAMZA, onset=Onset.WASL, seat=True)
 
 
 __all__ = [

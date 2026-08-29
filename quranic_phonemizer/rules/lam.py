@@ -1,7 +1,7 @@
 """Lam weight from structural triggers and riwayah-owned registers."""
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from ..engine.neighbourhood import Neighbourhood
 from ..engine.plan import Phase, Plan, Recolour, SoundFeature, Verdict, mint
@@ -9,6 +9,7 @@ from ..model.address import BoundaryPlan, Location, SlotId
 from ..model.canon import CanonLetter as L
 from ..model.canon import Quality, Rule, VowelForm
 from ..model.performance import Aspect, Occurrence
+from .tafkheem import Weight
 
 LamKey = tuple[Location, int]
 
@@ -37,12 +38,16 @@ class LamProfile:
             return Rule.TAFKHEEM
         if key in self.final_waqf_tafkheem and boundaries.stopped_on(word):
             return Rule.TAFKHEEM
-        return Rule.TAFKHEEM if _ordinary_trigger(near, slot) else None
+        return (
+            Rule.TAFKHEEM if _ordinary_trigger(near, slot)
+            else Rule.TARQEEQ
+        )
 
 
 @dataclass(frozen=True, slots=True)
 class LamWeight:
     profile: LamProfile
+    base_weight: Weight = field(default_factory=Weight)
     rule: Rule = Rule.TAFKHEEM
     phase: Phase = Phase.COLOUR
     triggers: frozenset = frozenset({L.LAM})
@@ -54,6 +59,14 @@ class LamWeight:
     ) -> Verdict | None:
         slot, word = near.slot(at), near.word_of(at)
         if slot is None or word is None:
+            return None
+        if plan.merged_away(at, Aspect.CONSONANT):
+            return None
+        # The shared emphasis rule owns the ordinary divine-name verdict.
+        # This Warsh profile only supplies the riwayah-specific lam cases and
+        # the explicit light fallback; emitting both would give one lam two
+        # contradictory identities.
+        if self.base_weight.is_heavy(near, slot, plan, boundaries):
             return None
         rule = self.profile.rule(near, at, boundaries)
         if rule is None:
