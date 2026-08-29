@@ -14,7 +14,6 @@ from tests.support import (
     pick,
 )
 
-
 CASES = (
     # Hafs: هُدًى
     StateCase(id="fathatan-maqsura", site=Site(hafs=("2:5", (3,))), states={

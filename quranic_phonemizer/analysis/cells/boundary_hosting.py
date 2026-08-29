@@ -9,7 +9,6 @@ from ...orthography.write import Pen
 from ..ids import CellColumnId, OccurrenceId, SoundId
 from .dtos import CellColumn, CellRole, CellSide, CellStatus, CellTier
 
-
 _VOWEL_ROLE = {Quality.A: "fatha", Quality.U: "damma", Quality.I: "kasra"}
 
 

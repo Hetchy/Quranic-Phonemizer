@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from itertools import count
+from typing import TYPE_CHECKING
 
 from ..model.canon import (
     Annotation,
@@ -17,6 +18,9 @@ from ..model.canon import (
 from ..model.inscription import VOWEL_FACTS, SlotFact
 from . import derive
 from .derive import Absent, Shows, Target
+
+if TYPE_CHECKING:
+    from .scribe import Scribe
 
 #: Never serialised and never compared across builds -- only a key while one
 #: verse is being drafted, so a process-wide counter is enough.

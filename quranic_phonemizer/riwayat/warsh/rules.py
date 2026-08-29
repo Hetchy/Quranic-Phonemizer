@@ -4,7 +4,8 @@ from __future__ import annotations
 
 from ...engine.classifier import RuleSet
 from ...engine.plan import Phase
-from ...model.address import Riwayah
+from ...model.address import Location, Riwayah
+from ...model.canon import Quality
 from ...rules.annotation import CanonicalColour, CarrierTarqeeq, Inclination
 from ...rules.boundary import (
     DroppedGlide,
@@ -16,44 +17,42 @@ from ...rules.boundary import (
     WaqfHarakaDrop,
     WaqfSilahDrop,
 )
+from ...rules.hamza_meetings import HamzaMeetingMadd, HamzaMeetings
 from ...rules.idgham import Idgham
-from ...rules.lam_shamsiyyah import ArticleLam, ArticleShape
 from ...rules.lam import LamWeight
+from ...rules.lam_shamsiyyah import ArticleLam, ArticleShape
 from ...rules.madd import (
     IltiqaShortening,
-    MaddClass,
     MaddBadal,
+    MaddClass,
     MaddLeen,
     MaddSilah,
 )
+from ...rules.meem_sakinah import GhunnahMushaddadah, MeemSakinah
+from ...rules.naql import CarriedNaql, Naql
+from ...rules.noon_sakinah import IkhfaaWeight, NoonSakinah
+from ...rules.pausal_glide import PausalGlide
+from ...rules.qalqala import Qalqala
+from ...rules.raa import RaaWeight
+from ...rules.single_hamza import JoinedIbdal, JoinedIbdalMadd, SuppliedIbdal
+from ...rules.tafkheem import Emphasis, Weight
+from ...rules.waqf_marks import WaqfIqlabMarkDrop
 from ...rules.warsh_madd import (
     MaddLeenMahmuz,
     MaddMimAlJam,
     MaddYaaZawaid,
     StartedBadal,
 )
-from ...rules.pausal_glide import PausalGlide
-from ...rules.meem_sakinah import GhunnahMushaddadah, MeemSakinah
-from ...rules.naql import CarriedNaql, Naql
-from ...rules.noon_sakinah import IkhfaaWeight, NoonSakinah
-from ...rules.qalqala import Qalqala
-from ...rules.single_hamza import JoinedIbdal, JoinedIbdalMadd, SuppliedIbdal
-from ...rules.hamza_meetings import HamzaMeetingMadd, HamzaMeetings
-from ...rules.raa import RaaWeight
-from ...rules.tafkheem import Emphasis, Weight
-from ...model.address import Location
-from ...model.canon import Quality
 from ...rules.wasl import (
     SoftenedHamza,
     SpelledBeforeWasl,
     TanweenBeforeWasl,
     WaslHamza,
 )
-from ...rules.waqf_marks import WaqfIqlabMarkDrop
-from .resources import khilaf, lexicon, rule_tables
 from .hamza_meetings import meeting_rows, rows_by_target
 from .lam import PROFILE as LAM_PROFILE
 from .raa import PROFILE as RAA_PROFILE
+from .resources import khilaf, lexicon, rule_tables
 
 #: Warsh repairs a collision with damm when the elided word starts on an
 #: original damm; the shared kasra and fatha defaults stand elsewhere.

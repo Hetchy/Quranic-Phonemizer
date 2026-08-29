@@ -3,8 +3,8 @@ from __future__ import annotations
 import collections
 
 import pytest
-
 from conftest import performance_for
+
 from quranic_phonemizer.engine.classifier import RuleSet
 from quranic_phonemizer.engine.laws import check_performance
 from quranic_phonemizer.engine.plan import ConflictError, Phase, Plan, Realize, Verdict
@@ -19,7 +19,6 @@ from quranic_phonemizer.model.performance import (
 )
 from quranic_phonemizer.riwayat.hafs import rule_tables
 from quranic_phonemizer.rules.noon_sakinah import NoonSakinah
-
 
 FOLLOWERS = rule_tables().followers_of_noon
 RULES = RuleSet({Phase.MERGE: (NoonSakinah(followers=FOLLOWERS),)})

@@ -16,9 +16,9 @@ from ...rules.boundary import (
     TaaMarbutaAtWaqf,
     TanweenDrop,
     TanweenIwad,
+    VariantJoinedNunation,
     WaqfHarakaDrop,
     WaqfSilahDrop,
-    VariantJoinedNunation,
 )
 from ...rules.idgham import Idgham
 from ...rules.lam_shamsiyyah import ArticleLam, ArticleShape
@@ -30,9 +30,9 @@ from ...rules.madd import (
     MaddLeen,
     MaddSilah,
 )
-from ...rules.pausal_glide import PausalGlide
 from ...rules.meem_sakinah import GhunnahMushaddadah, MeemSakinah
 from ...rules.noon_sakinah import IkhfaaWeight, NoonSakinah
+from ...rules.pausal_glide import PausalGlide
 from ...rules.qalqala import Qalqala
 from ...rules.tafkheem import Emphasis, Weight
 from ...rules.wasl import (

@@ -19,7 +19,8 @@ def test_the_toggle_changes_no_node_and_no_edge():
     every sound, and every edge, stays identical between the two documents."""
     off = Phonemizer().analyse("2:29")
     on = Phonemizer(extra_phonemes=("emphatic_fatha",)).analyse("2:29")
-    bare = lambda sounds: [dataclasses.replace(s, token="") for s in sounds]
+    def bare(sounds):
+        return [dataclasses.replace(sound, token="") for sound in sounds]
     assert bare(off.sounds) == bare(on.sounds)
     assert off.words == on.words
     assert off.boundaries == on.boundaries

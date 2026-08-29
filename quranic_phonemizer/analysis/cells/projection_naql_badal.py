@@ -9,7 +9,6 @@ from ..facts import AnalysisFacts
 from ..ids import OccurrenceId, SoundId
 from .dtos import CellColumn, CellRole, CellWord
 
-
 _RULES = frozenset({"naql", "madd_badal"})
 
 

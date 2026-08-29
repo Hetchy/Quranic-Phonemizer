@@ -8,7 +8,6 @@ import argparse
 import ast
 import pathlib
 import re
-import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 DEFAULT_TARGETS = ("quranic_phonemizer", "tools", "tests")

@@ -11,30 +11,42 @@ from functools import cached_property
 from ..model.canon import Score
 from ..model.inscription import (
     Attests,
-    Decorates as InscDecorates,
     Evidences,
     Inscription,
     SilenceReason,
     SlotFact,
+)
+from ..model.inscription import (
+    Decorates as InscDecorates,
+)
+from ..model.inscription import (
     Structural as InscStructural,
 )
 from ..model.performance import (
     Aspect,
     Classifies,
     Consonant,
-    Hosts as PerfHosts,
     Inserted,
-    MergedInto as PerfMergedInto,
     Performance,
     Recolours,
     Release,
     SetsLength,
-    Silent as PerfSilent,
     Vowel,
     effect_targets,
+    sounds_in_order,
+)
+from ..model.performance import (
+    Hosts as PerfHosts,
+)
+from ..model.performance import (
+    MergedInto as PerfMergedInto,
+)
+from ..model.performance import (
+    Silent as PerfSilent,
 )
 from ..orthography.write import Pen
 from ..render.alphabet import Alphabet
+from ..session import Session
 from . import edges as ed
 from . import nodes as nd
 from .derived import (
@@ -43,9 +55,7 @@ from .derived import (
     shortened_carriers,
     silent_groups,
 )
-from ..model.performance import sounds_in_order
 from .recited import write_recited
-from ..session import Session
 
 #: SlotFact.SAKT is not mapped; nothing evidences it.
 _FACT_OF = {

@@ -213,8 +213,8 @@ def test_an_entry_for_this_verse_that_does_not_resolve_is_an_error(
     from conftest import words_of
 
     from quranic_phonemizer.canon.build import build
-    from quranic_phonemizer.canon.passes import LedgerAddressError
     from quranic_phonemizer.canon.ledger import Ledger, Supply, WordSlot
+    from quranic_phonemizer.canon.passes import LedgerAddressError
     from quranic_phonemizer.model.address import Location, Script, VerseRef
     from quranic_phonemizer.model.canon import Nucleus
     from quranic_phonemizer.riwayat.hafs import script_adapter

@@ -21,12 +21,12 @@ from ...orthography.inventory import Inventory, load_inventory
 from ..khilaf import EMPTY as EMPTY_KHILAF
 from ..khilaf import Khilaf
 from ..tables import RuleTables, load_rule_tables
-from .sequence import entries_for_words
-from .relative_pronoun import supply_relative_pronoun
-from .single_hamza import supply_single_hamza
 from .hamza_meetings import supply_hamza_meetings
-from .joined_pausal import supply_joined_pausal
 from .inclination import supply_inclination
+from .joined_pausal import supply_joined_pausal
+from .relative_pronoun import supply_relative_pronoun
+from .sequence import entries_for_words
+from .single_hamza import supply_single_hamza
 
 RIWAYAH = Riwayah.WARSH
 SCRIPTS = (Script.UTHMANI,)

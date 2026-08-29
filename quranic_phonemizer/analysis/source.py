@@ -7,12 +7,12 @@ from __future__ import annotations
 
 from collections import defaultdict
 
+from ..model.inscription import Glyph, GlyphKind
 from ..render.alphabet import packaged_alphabet
 from ..session import Session
 from . import ids
 from .dtos import AnalysisBundle
 from .facts import AnalysisFacts, analyse
-from ..model.inscription import Glyph, GlyphKind
 from .inscription import InscriptionFacts, inscribe
 from .source_dtos import (
     Character,
@@ -23,10 +23,10 @@ from .source_dtos import (
     SourceView,
 )
 from .source_laws import validate_source_view
-from .spans import coalesce
 from .source_ownership import Ownership, ownership
 from .source_placements import Placements, placements
 from .source_units import Tokenization, UnitDraft, tokenize
+from .spans import coalesce
 
 
 def _character(glyph: Glyph, tok: Tokenization, boundary: int) -> Character:

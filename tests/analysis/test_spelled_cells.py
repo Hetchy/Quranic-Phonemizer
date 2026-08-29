@@ -3,13 +3,12 @@ from __future__ import annotations
 
 import pytest
 
-from quranic_phonemizer.api import recitation
 from quranic_phonemizer.analysis.build import build_bundle
 from quranic_phonemizer.analysis.cells import build_cell_view
+from quranic_phonemizer.api import recitation
 from quranic_phonemizer.model.address import Riwayah, Script
 from quranic_phonemizer.orthography.write import pen_for
 from quranic_phonemizer.session import phonemize_request
-
 
 FORMS = {
     "2:1": ("أَلِفْ", "لَآم", "مِّيٓمْ"),

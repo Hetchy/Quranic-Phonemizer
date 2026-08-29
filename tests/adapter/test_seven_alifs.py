@@ -6,8 +6,8 @@ which cannot tell an ordinary long `أَنَا` from one of the seven alifs.
 from __future__ import annotations
 
 import pytest
+from conftest import score_for
 
-from conftest import score_for, sources  # noqa: F401  (fixture)
 from quranic_phonemizer.model.address import Script, VerseRef
 
 #: Every `أَنَا` / `وَأَنَا` / `فَأَنَا` site where Uthmani draws no `۠`. A

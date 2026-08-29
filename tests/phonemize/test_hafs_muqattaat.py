@@ -11,9 +11,7 @@ from tests.support import (
     assert_case,
     case_runs,
     explicit,
-    joining,
 )
-
 
 CASES = (
     # Hafs: يسٓ وَٱلْقُرْءَانِ

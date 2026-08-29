@@ -6,10 +6,10 @@ with closed id references, and the checks that validate a serialized document.
 from __future__ import annotations
 
 from .documents import (
+    KINDS,
     AnalysisDocument,
     CellDocument,
     HighlightDocument,
-    KINDS,
     SourceDocument,
     analysis_document,
     cell_document,

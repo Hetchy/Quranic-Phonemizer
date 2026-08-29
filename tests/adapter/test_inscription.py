@@ -1,7 +1,7 @@
 """Each test pins a specific glyph or spelling invariant."""
 from __future__ import annotations
 
-import pytest
+from conftest import built_for
 
 from quranic_phonemizer.canon import derive
 from quranic_phonemizer.model.address import Location, Script, VerseRef
@@ -15,8 +15,6 @@ from quranic_phonemizer.model.inscription import (
 from quranic_phonemizer.orthography.cluster import read_verse
 from quranic_phonemizer.orthography.inventory import load_inventory
 from quranic_phonemizer.riwayat.hafs.resources import DATA, RIWAYAH
-
-from conftest import built_for
 
 CONTRACT = {
     "riwayah": RIWAYAH,

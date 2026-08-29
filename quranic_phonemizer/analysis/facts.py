@@ -13,8 +13,10 @@ from ..model.inscription import SilenceReason
 from ..model.performance import (
     Aspect,
     Occurrence,
-    Silent as PerformanceSilent,
     effect_targets,
+)
+from ..model.performance import (
+    Silent as PerformanceSilent,
 )
 from ..render.alphabet import Alphabet
 from ..session import Session

@@ -18,7 +18,6 @@ from .dtos import (
     CellWord,
 )
 
-
 _CARRIED_QATA = frozenset({"َا", "ُا", "ِا"})
 _HARAKA_OF_TOKEN = {"a": "َ", "i": "ِ", "u": "ُ"}
 _SOURCE_HARAKA_OF_TOKEN = {

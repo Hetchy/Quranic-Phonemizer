@@ -6,6 +6,7 @@ checks depend on the full rule interaction.
 from __future__ import annotations
 
 import pytest
+from conftest import score_for
 
 from quranic_phonemizer.engine.boundary_plan import all_join
 from quranic_phonemizer.engine.plan import ConflictError
@@ -19,8 +20,6 @@ from quranic_phonemizer.model.definitions import (
 from quranic_phonemizer.phonemize.names import tajweed_rules
 from quranic_phonemizer.riwayat import ruleset_for
 from quranic_phonemizer.riwayat.hafs import HAFS
-
-from conftest import score_for
 
 #: Chosen to reach every implemented rule; the named ones are the only known
 #: site for some rule families.

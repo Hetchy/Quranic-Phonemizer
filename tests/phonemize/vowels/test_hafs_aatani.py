@@ -14,7 +14,6 @@ from tests.support import (
     joining,
 )
 
-
 CASES = (
     # Hafs: ءَاتَىٰنَِۧ
     VariantCase(

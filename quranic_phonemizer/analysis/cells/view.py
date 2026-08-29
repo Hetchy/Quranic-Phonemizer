@@ -10,9 +10,10 @@ from dataclasses import replace
 
 from ...model.address import Riwayah
 from ...model.inscription import StopAdvice
+from ...orthography.write import Pen
+from ...render.alphabet import effective_extra_phonemes, packaged_alphabet
 from ...riwayat import quality_fallbacks_for
 from ...session import Session
-from ...render.alphabet import effective_extra_phonemes, packaged_alphabet
 from ..build import build_bundle
 from ..dtos import Boundary, Merger
 from ..facts import analyse
@@ -20,24 +21,27 @@ from ..ids import CellColumnId
 from ..inscription import inscribe
 from ..source import build_source_view
 from ..source_dtos import Character, CharacterKind, SourceView
-from ...orthography.write import Pen
 from .align import next_column_id
+from .boundary_hosting import move_boundary_sounds
 from .columns import build_cell_words
-from .laws import CellValidationError
 from .dtos import (
     CellBoundary,
     CellBridge,
     CellColumn,
     CellRole,
+    CellSound,
     CellStatus,
     CellTier,
-    CellSound,
     CellView,
     CellWord,
 )
-from .transform import transform_words
-from .boundary_hosting import move_boundary_sounds
+from .laws import CellValidationError
 from .projection import project_words
+from .projection_naql import (
+    move_tanween_naql_haraka_to_boundary,
+    place_tanween_naql_on_written_haraka,
+)
+from .projection_naql_badal import project_naql_badal_bridges
 from .projection_semantics import (
     assign_native_iqlab_meem,
     keep_carrier_identity_off_harakas,
@@ -51,11 +55,7 @@ from .projection_weight import (
     keep_weight_labels_off_short_vowels,
     keep_weight_labels_on_sound_owners,
 )
-from .projection_naql_badal import project_naql_badal_bridges
-from .projection_naql import (
-    move_tanween_naql_haraka_to_boundary,
-    place_tanween_naql_on_written_haraka,
-)
+from .transform import transform_words
 from .transform_laws import validate_transformed
 from .view_laws import validate_cell_view, validate_spoken_hamza_glyphs
 

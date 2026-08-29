@@ -13,7 +13,6 @@ from tests.support import (
     isolated,
 )
 
-
 CASES = (
     # Hafs: ٱلِٱسْمُ
     VariantCase(

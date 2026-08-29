@@ -10,7 +10,6 @@ import hashlib
 import json
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parent.parent
 CANONICAL = ROOT / "corpus_sources" / "hafs" / "scripts" / "uthmani" / "quran.json"
 SOURCE = ROOT / "corpus_sources" / "warsh" / "scripts" / "king-fahd" / "quran.json"

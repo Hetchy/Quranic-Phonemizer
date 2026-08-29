@@ -7,7 +7,6 @@ from ...canon.passes import word_spans
 from ...model.canon import Annotation, CanonLetter, Nucleus, Onset, Quality
 from ...model.inscription import SlotFact
 
-
 _STOP = frozenset("ۖۗۘۙۚۛۜ۩")
 _YAA_TAIL = _STOP | {"ٓ", "َ"}
 _PLURAL_HOSTS = frozenset({CanonLetter.KAF, CanonLetter.HEH, CanonLetter.TA})

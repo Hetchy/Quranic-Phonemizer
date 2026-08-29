@@ -19,8 +19,10 @@ from ..model.inscription import (
     GlyphKind,
     Inscription,
     SlotFact,
-    Structural as InscStructural,
     glyph_kind_of,
+)
+from ..model.inscription import (
+    Structural as InscStructural,
 )
 from ..session import Session
 

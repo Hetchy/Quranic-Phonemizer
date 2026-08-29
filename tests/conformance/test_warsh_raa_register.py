@@ -6,7 +6,6 @@ from quranic_phonemizer.api import recitation
 from quranic_phonemizer.model.address import Location, Riwayah
 from quranic_phonemizer.riwayat.warsh.raa import PROFILE, RaaKey
 
-
 REPEATED_HEAVY = frozenset({
     Location(2, 231, 13),
     Location(9, 107, 4),

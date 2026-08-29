@@ -5,10 +5,18 @@ from dataclasses import dataclass
 
 from ..engine.neighbourhood import Neighbourhood
 from ..engine.plan import (
-    Classify, Length, Phase, Plan, Realize, Relength, Verdict, mint,
+    Classify,
+    Length,
+    Phase,
+    Plan,
+    Realize,
+    Relength,
+    Verdict,
+    mint,
 )
 from ..model.address import BoundaryPlan, Junction, KhilafId, Location, SlotId
-from ..model.canon import Annotation, CanonLetter as L, Onset, Quality, Rule, SlotOrigin, VowelForm
+from ..model.canon import Annotation, Onset, Quality, Rule, SlotOrigin, VowelForm
+from ..model.canon import CanonLetter as L
 from ..model.performance import Aspect, Occurrence, Vowel
 
 

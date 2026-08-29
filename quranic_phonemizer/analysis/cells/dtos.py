@@ -8,12 +8,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import StrEnum
 
+from ...model.address import KhilafId
 from ..dtos import BoundaryState
 from ..ids import (
     BoundaryId,
+    CanonicalSlotId,
     CellColumnId,
     CellRunId,
-    CanonicalSlotId,
     CharacterId,
     LetterUnitId,
     MergerId,
@@ -22,7 +23,6 @@ from ..ids import (
     WordId,
 )
 from ..source_dtos import Silence
-from ...model.address import KhilafId
 
 
 class CellRole(StrEnum):

@@ -18,11 +18,10 @@ from quranic_phonemizer.riwayat.warsh.inclination import (
     RAA_OPENINGS,
     RAA_SEEN_BEFORE_SAKIN,
     VERSE_HEAD_SURAHS,
-    mark_sequence_family,
     is_inclination_witness,
+    mark_sequence_family,
 )
 from quranic_phonemizer.riwayat.warsh.resources import corpus
-
 
 _MARKED_RAA_SEEN = frozenset({
     Location(6, 76, 5), Location(11, 70, 2),

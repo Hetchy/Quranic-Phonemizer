@@ -10,8 +10,10 @@ from dataclasses import dataclass
 from . import edges as ed
 from . import nodes as nd
 from .assemble import Assembled
-from .pairing import Pairing, alignment as _alignment
-from .respell import Block, respelling as _respelling
+from .pairing import Pairing
+from .pairing import alignment as _alignment
+from .respell import Block
+from .respell import respelling as _respelling
 
 #: The shape of this document. A union member added to `schema.py` bumps it.
 SCHEMA_VERSION = "1"

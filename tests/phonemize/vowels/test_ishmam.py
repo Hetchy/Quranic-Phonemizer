@@ -7,10 +7,9 @@ from __future__ import annotations
 
 import pytest
 
-from quranic_phonemizer.model.address import KhilafId
 from quranic_phonemizer.model import performance as pf
+from quranic_phonemizer.model.address import KhilafId
 from quranic_phonemizer.model.canon import CanonLetter, Rule
-
 from tests.support import (
     Expect,
     Site,

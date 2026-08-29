@@ -7,7 +7,7 @@ import pytest
 from quranic_phonemizer.phonemize import edges as ed
 from quranic_phonemizer.phonemize import nodes as nd
 
-from .support import built, find, opens_unit, only, supplies, units_named
+from .support import built, find, only, opens_unit, supplies, units_named
 
 # A base letter and, in the same word, a shadda that folds onto it.
 TUURI = "52:1:1"

@@ -12,7 +12,6 @@ from tests.support import (
     isolated,
 )
 
-
 CASES = (
     # Warsh: اَرَٰٓيْتُمُۥٓ
     Case(

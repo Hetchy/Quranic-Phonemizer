@@ -13,7 +13,6 @@ import json
 import struct
 from pathlib import Path
 
-
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SCRIPTS_DIR = REPO_ROOT / "corpus_sources" / "hafs" / "scripts"
 CORPUS_DIR = REPO_ROOT / "quranic_phonemizer" / "data" / "riwayat" / "hafs" / "corpus"

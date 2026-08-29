@@ -14,11 +14,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from quranic_phonemizer.api import recitation
-from quranic_phonemizer.model.address import Riwayah, Script, VerseRef
-from quranic_phonemizer.model.canon import CanonLetter, Onset
-from quranic_phonemizer.riwayat.warsh.resources import corpus
-
+from quranic_phonemizer.api import recitation  # noqa: E402
+from quranic_phonemizer.model.address import Riwayah, Script, VerseRef  # noqa: E402
+from quranic_phonemizer.model.canon import CanonLetter, Onset  # noqa: E402
+from quranic_phonemizer.riwayat.warsh.resources import corpus  # noqa: E402
 
 OUTPUT = ROOT / "quranic_phonemizer/data/riwayat/warsh/hamza_meetings.json"
 

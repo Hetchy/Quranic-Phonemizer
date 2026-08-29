@@ -11,7 +11,6 @@ from ...orthography.inventory import Inventory, LetterEntry, MarkEntry
 from . import naql_script
 from .inclination import is_inclination_witness
 
-
 _HARAKA_TO_TANWIN = {
     "َ": "fathatan",
     "ُ": "dammatan",

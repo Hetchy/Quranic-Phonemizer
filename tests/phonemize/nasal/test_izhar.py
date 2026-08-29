@@ -2,8 +2,17 @@ from __future__ import annotations
 
 import pytest
 
-from tests.support import Case, R, Site, assert_case, case_runs, isolated, joining, pick, through
-
+from tests.support import (
+    Case,
+    R,
+    Site,
+    assert_case,
+    case_runs,
+    isolated,
+    joining,
+    pick,
+    through,
+)
 
 MUTLAQ = (
     ("2:85", 38),

@@ -22,12 +22,12 @@ from quranic_phonemizer.phonemize import edges as ed
 from quranic_phonemizer.phonemize import nodes as nd
 from quranic_phonemizer.phonemize.assemble import assemble
 from quranic_phonemizer.phonemize.document import phonemes as assembled_phonemes
-from quranic_phonemizer.phonemize.pairing import alignment
 from quranic_phonemizer.phonemize.legacy_views import (
     anchored,
     graphemes_by_id,
     phonemes_by_word,
 )
+from quranic_phonemizer.phonemize.pairing import alignment
 from quranic_phonemizer.render.alphabet import effective_extra_phonemes
 from quranic_phonemizer.session import Session as PhonemizeSession
 from quranic_phonemizer.session.boundaries import mask_stopped_sakt_variants

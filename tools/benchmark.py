@@ -82,7 +82,8 @@ def benchmark(refs: list[str], repeats: int) -> dict:
     init_ms = (CLOCK() - started) * 1_000
     cases = []
     for ref in refs:
-        call = lambda ref=ref: reader.analyse(ref)
+        def call(ref=ref):
+            return reader.analyse(ref)
         result = call()
         batch = 100 if len(result.words) <= 4 else 10 if len(result.words) <= 50 else 1
         request_ms, result = _timed(call, repeats, batch)

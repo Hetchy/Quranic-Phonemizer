@@ -14,7 +14,6 @@ from tests.support import (
     through,
 )
 
-
 CASES = (
     # Hafs: قُلُوبِهِم مَّرَضٌ
     # Warsh: قُلُوبِهِم مَّرَضٞۖ

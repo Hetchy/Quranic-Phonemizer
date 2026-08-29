@@ -9,7 +9,12 @@ from dataclasses import dataclass
 
 from ..model.address import BoundaryPlan, SlotId, SoundId, VariantSelection
 from ..model.canon import (
-    CLASSIFICATION_ONLY, Onset, Rule, Score, Slot, VowelForm,
+    CLASSIFICATION_ONLY,
+    Onset,
+    Rule,
+    Score,
+    Slot,
+    VowelForm,
 )
 from ..model.performance import (
     Aspect,

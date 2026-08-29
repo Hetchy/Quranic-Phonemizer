@@ -4,7 +4,6 @@ import pytest
 
 from tests.support import Case, R, Site, assert_case, case_runs, isolated, pick, through
 
-
 CASES = (
     # Hafs: رَبِّ
     Case(id="moving-fatha", site=Site(hafs=("1:2", (3,))), read=isolated(),

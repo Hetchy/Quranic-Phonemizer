@@ -5,6 +5,7 @@ the model, and the notation, and reaches nothing of the public assembler.
 """
 from __future__ import annotations
 
+from ..model.inscription import Glyph, GlyphKind, glyph_kind_of
 from .attributions import (
     Classified,
     Hosted,
@@ -33,7 +34,6 @@ from .dtos import (
     Word,
 )
 from .facts import AnalysisFacts, analyse
-from ..model.inscription import Glyph, GlyphKind, glyph_kind_of
 from .highlight_dtos import HighlightGroup
 from .highlight_laws import HighlightValidationError, validate_highlight_groups
 from .highlights import highlight_groups

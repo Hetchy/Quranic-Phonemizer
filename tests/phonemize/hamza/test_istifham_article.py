@@ -16,7 +16,6 @@ from tests.support import (
     selected,
 )
 
-
 DHAKARAYN = (Site(hafs=("6:143", (10,))), 10)
 ALAN = (Site(hafs=("10:51", (7,))), 7)
 ALLAH = (Site(hafs=("10:59", (14,))), 14)

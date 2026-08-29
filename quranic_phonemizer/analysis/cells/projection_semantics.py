@@ -10,7 +10,6 @@ from ..facts import AnalysisFacts
 from ..ids import OccurrenceId
 from .dtos import CellRole, CellStatus, CellTier, CellWord
 
-
 _IQLAB_MEEM = frozenset({"ۢ", "ۭ"})
 _CARRIER_IDENTITIES = frozenset({
     "ibdal_hamza",

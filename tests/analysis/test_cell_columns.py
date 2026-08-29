@@ -9,6 +9,7 @@ import dataclasses
 
 import pytest
 
+from quranic_phonemizer.analysis.build import build_bundle
 from quranic_phonemizer.analysis.cells import (
     CellRole,
     CellStatus,
@@ -17,7 +18,6 @@ from quranic_phonemizer.analysis.cells import (
     build_cell_words,
     validate_cell_columns,
 )
-from quranic_phonemizer.analysis.build import build_bundle
 from quranic_phonemizer.analysis.cells.laws import _by_unit
 from quranic_phonemizer.analysis.inscription import inscribe
 from quranic_phonemizer.analysis.source import build_source_view

@@ -10,6 +10,7 @@ import dataclasses
 import pytest
 
 from quranic_phonemizer.analysis.build import build_bundle
+from quranic_phonemizer.analysis.dtos import BoundaryState
 from quranic_phonemizer.analysis.source import build_source_view
 from quranic_phonemizer.analysis.source_dtos import (
     CharacterKind,
@@ -21,7 +22,6 @@ from quranic_phonemizer.analysis.source_laws import (
     validate_source_view,
 )
 from quranic_phonemizer.api import recitation
-from quranic_phonemizer.analysis.dtos import BoundaryState
 from quranic_phonemizer.model.address import Riwayah, Script, VerseRef
 from quranic_phonemizer.model.inscription import StopAdvice
 from quranic_phonemizer.session import phonemize_request

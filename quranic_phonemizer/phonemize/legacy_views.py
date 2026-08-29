@@ -18,6 +18,7 @@ from ..model.inscription import (
     SlotFact,
 )
 from ..model.performance import (
+    _ASPECT_ORDER,
     Aspect,
     Hosts,
     Inserted,
@@ -25,9 +26,10 @@ from ..model.performance import (
     Performance,
     Side,
     Silent,
+    _hosts_key,
+    sounds_in_order,
 )
 from ..render.alphabet import Alphabet
-from ..model.performance import _ASPECT_ORDER, _hosts_key, sounds_in_order
 
 
 def phonemes_by_word(

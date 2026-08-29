@@ -13,8 +13,8 @@ from ...model.canon import (
     Quality,
 )
 from ...model.inscription import SlotFact
-from .vocabulary import Absent, Context, Outcome, Sets, Shows, Target, register
 from .silah import carries_silah
+from .vocabulary import Absent, Context, Outcome, Sets, Shows, Target, register
 
 #: Roles that give a cluster a vowel of its own, so it cannot be a carrier.
 VOWEL_ROLES = frozenset(

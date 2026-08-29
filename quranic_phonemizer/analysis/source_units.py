@@ -8,8 +8,9 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from ..model.address import SlotId
-from ..model.inscription import SlotFact
-from ..model.inscription import GlyphKind
+from ..model.inscription import GlyphKind, SlotFact
+from .derivations import decoration_targets, open_vowel_units, silent_groups
+from .facts import AnalysisFacts
 from .inscription import (
     Decorated,
     InscriptionFacts,
@@ -17,9 +18,6 @@ from .inscription import (
     Witnessed,
     sakt_seen_glyphs,
 )
-from .derivations import decoration_targets, open_vowel_units, silent_groups
-from .facts import AnalysisFacts
-
 from .source_dtos import LetterUnitKind
 
 #: Kinds a scalar writes at the vowel position or as a letter of its own.

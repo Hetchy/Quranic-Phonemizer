@@ -6,8 +6,7 @@ fails here, and so does a registered rule the catalogue dropped.
 from __future__ import annotations
 
 from quranic_phonemizer import tajweed_rules
-
-from tests.hardcase.registry import FixtureRef, RULE_FIXTURES
+from tests.hardcase.registry import RULE_FIXTURES, FixtureRef
 
 
 def _catalogued() -> set[str]:

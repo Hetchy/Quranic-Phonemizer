@@ -13,7 +13,6 @@ from tests.support import (
     through,
 )
 
-
 CASES = (
     # Hafs: أُو۟لَـٰٓئِكَ
     # Warsh: أُوْلَٰٓئِكَ

@@ -75,5 +75,5 @@ Cross-script, L1, roundtrip, attestation, and legacy snapshot tools are manual
 audits. Run pytest-based audits explicitly with
 `python -m pytest --runaudit -m audit`; do not treat them as routine gates.
 
-Ruff is configured for imports and objective Python hygiene. Its current
-baseline is intentionally non-gating until the one-time repository cleanup.
+Ruff checks imports and objective Python hygiene in pull requests and releases.
+Run `python -m ruff check . --fix` for its safe automatic cleanup.

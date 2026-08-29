@@ -21,7 +21,6 @@ from tests.support import (
     reading,
 )
 
-
 CASES = (
     # Warsh: ءَادَمَ
     Case(

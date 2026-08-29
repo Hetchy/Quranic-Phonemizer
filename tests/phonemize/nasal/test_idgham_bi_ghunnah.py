@@ -11,11 +11,9 @@ from tests.support import (
     assert_case,
     case_runs,
     explicit,
-    isolated,
     pick,
     through,
 )
-
 
 CASES = (
     # Hafs: مَن يَشَآءُ ۗ

@@ -15,7 +15,6 @@ from tests.support import (
     selected,
 )
 
-
 REGISTERS = {
     KhilafId.RAA_FIRQ: (
         (Site(hafs=("26:63", (11,))), 11, False),

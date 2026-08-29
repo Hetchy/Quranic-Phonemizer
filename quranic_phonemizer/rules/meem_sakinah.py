@@ -9,9 +9,9 @@ from ..model.address import BoundaryPlan, Junction, KhilafId, SlotId
 from ..model.canon import CanonLetter as L
 from ..model.canon import Onset, Rule, SlotOrigin
 from ..model.performance import Aspect, Consonant, Occurrence
+from .khilaf import nasal_place
 from .lam_shamsiyyah import ArticleShape
 from .ownership import is_performed_quiescent
-from .khilaf import nasal_place
 from .tables import MEEM_OUTCOMES, Followers
 
 NASAL_LETTERS = frozenset({L.NOON, L.MEEM})

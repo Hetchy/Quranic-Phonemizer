@@ -6,7 +6,6 @@ from quranic_phonemizer import Phonemizer, available_variants, variant_catalogue
 from quranic_phonemizer.model.address import KhilafId, Option, VariantSelection
 from tests.support import Site, reading
 
-
 VARIANTS = {
     "yabsut": (["seen", "saad"], "seen"),
     "bastah": (["seen", "saad"], "seen"),
