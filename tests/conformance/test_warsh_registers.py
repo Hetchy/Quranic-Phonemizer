@@ -681,14 +681,14 @@ def test_the_naql_latent_register_reconciles_with_canonical_hosts():
     }
 
 
-def test_the_227_initial_badals_have_the_reviewed_quality_register():
+def test_the_193_initial_badals_have_the_reviewed_quality_register():
     register = Counter(
         quality.name
         for entry in warsh_corpus().entries.values()
         if (quality := naql_script.latent_qata_badal_quality(entry.text))
         is not None
     )
-    assert register == Counter({"A": 177, "U": 47, "I": 3})
+    assert register == Counter({"A": 177, "U": 13, "I": 3})
 
 
 def test_the_selected_source_has_the_reviewed_304_leen_mahmuz_candidates():

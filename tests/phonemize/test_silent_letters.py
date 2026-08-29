@@ -2,7 +2,16 @@ from __future__ import annotations
 
 import pytest
 
-from tests.support import Case, R, Site, assert_case, case_runs, isolated, pick
+from tests.support import (
+    Case,
+    R,
+    Site,
+    assert_case,
+    case_runs,
+    isolated,
+    pick,
+    through,
+)
 
 
 CASES = (
@@ -14,6 +23,28 @@ CASES = (
         read=isolated(),
         phonemes="ʔ u l a: ʔ i k",
         char_rules={"و": R("orthographic_silence")},
+    ),
+    # Warsh: ا۟وْلَٰٓئِكَ
+    Case(
+        id="warsh-latent-ulaika-start",
+        site=Site(warsh=("2:161", (7,))),
+        read=isolated(),
+        phonemes="ʔ u l a: ʔ i k",
+        char_rules={"و": R("orthographic_silence")},
+        absent_sound_rules={"u": R("madd_badal")},
+    ),
+    # Warsh: كُفَّارٌ ا۟وْلَٰٓئِكَ
+    Case(
+        id="warsh-latent-ulaika-joined",
+        site=Site(warsh=("2:161", (6, 7))),
+        read=through(),
+        phonemes=("k u ff a: rˤ u n", "u l a: ʔ i k"),
+        char_rules={
+            "ا[2]": R("naql"),
+            "و": R("orthographic_silence"),
+        },
+        absent_char_rules={"و": R("naql")},
+        absent_sound_rules={"u[3]": R("madd_badal")},
     ),
     # Hafs: وَأُو۟لَـٰٓئِكَ
     # Warsh: وَأُوْلَٰٓئِكَ

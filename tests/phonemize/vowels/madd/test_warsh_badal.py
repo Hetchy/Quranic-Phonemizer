@@ -136,26 +136,6 @@ MUGHAYYAR_BIN_NAQL_CASES = (
         sound_rules={"u:": R("naql", "madd_badal")},
         absent_sound_rules={"u:": R("madd_tabii")},
     ),
-    # U-badal after tanwin: كُفَّارٌ ا۟وْلَٰٓئِكَ
-    Case(
-        id="u-tanwin",
-        site=Site(warsh=("2:161", (6, 7))),
-        read=joining(),
-        phonemes=("k u ff a: rˤ u n", "u: l a: ʔ i k a"),
-        char_rules={"ا[2]": R("naql"), "و": R("madd_badal")},
-        sound_rules={"u:": R("naql", "madd_badal")},
-        absent_sound_rules={"u:": R("madd_tabii")},
-    ),
-    # U-badal across an ayah edge: اَلِيمٌۖ ا۟وْلَٰٓئِكَ
-    Case(
-        id="u-ayah-edge",
-        site=Site(warsh=("2:174", (29, 30))),
-        read=joining(),
-        phonemes=("ʔ a l i: m u n", "u: l a: ʔ i k a"),
-        char_rules={"ا[2]": R("naql"), "و": R("madd_badal")},
-        sound_rules={"u:": R("naql", "madd_badal")},
-        absent_sound_rules={"u:": R("madd_tabii")},
-    ),
     # I-badal after an ordinary sakin: قُلِ اِے
     Case(
         id="i-moved-haraka",
@@ -331,6 +311,6 @@ def test_warsh_mughayyar_bin_naql_register_reconciles():
         if latent_qata_badal_quality(entry.text) is not None
     }
     assert initial_shapes & set(meeting_targets) == MEETING_OWNED_INITIAL_SHAPES
-    assert boundaries == Counter({"within": 208, "ayah_edge": 16})
-    assert qualities == Counter({"A": 174, "U": 47, "I": 3})
-    assert hosts == Counter({"written": 146, "nunation": 78})
+    assert boundaries == Counter({"within": 186, "ayah_edge": 4})
+    assert qualities == Counter({"A": 174, "U": 13, "I": 3})
+    assert hosts == Counter({"written": 144, "nunation": 46})

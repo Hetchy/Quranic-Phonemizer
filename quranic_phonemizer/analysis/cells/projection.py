@@ -18,7 +18,7 @@ from ..attributions import (
 from ..facts import AnalysisFacts
 from ..ids import OccurrenceId, SoundId
 from ..inscription import InscriptionFacts
-from ..source_dtos import SourceView
+from ..source_dtos import LiteralSilence, SourceView
 from .align import next_column_id
 from .dtos import CellRole, CellStatus, CellWord
 from .projection_marks import (
@@ -61,7 +61,8 @@ def _silenced_targets(columns, edge, slot_of_unit):
     return [
         col
         for col in columns
-        if (col.role in roles or col.silence == OccurrenceId(edge.by))
+        if not isinstance(col.silence, LiteralSilence)
+        and (col.role in roles or col.silence == OccurrenceId(edge.by))
         and any(slot_of_unit.get(unit.value) in slots for unit in col.source_unit_ids)
     ]
 

@@ -197,6 +197,24 @@ def test_every_explicit_hamza_u_sukun_waw_is_rasm_only():
     assert count == 220
 
 
+def test_every_latent_hamza_u_sukun_waw_is_rasm_only():
+    source = json.loads(SOURCE.read_text(encoding="utf-8"))
+    inventory = script_adapter(Script.UTHMANI).inventory
+    count = 0
+
+    for record in source.values():
+        text = record["text"]
+        entries = sequence.entries_for(inventory, text)
+        start = text.find("ا۟وْ")
+        while start >= 0:
+            count += 1
+            assert entries[start + 3].silences, text
+            assert naql_script.latent_qata_badal_quality(text) is None
+            start = text.find("ا۟وْ", start + 1)
+
+    assert count == 34
+
+
 def test_biaydin_jarrah_is_sukun_and_the_second_yaa_is_rasm_only():
     entry, reading = _reading((51, 47, 3))  # بِأَيَيْدٖ
     first_yaa = entry.text.index("ي")
@@ -394,7 +412,7 @@ def test_the_damm_stroke_after_a_bare_alif_is_the_qata_damm():
 
 @pytest.mark.parametrize(("ref", "quality"), (
     ((5, 41, 24), Quality.A),
-    ((2, 161, 7), Quality.U),
+    ((2, 269, 9), Quality.U),
     ((6, 158, 23), Quality.I),
     ((10, 53, 5), Quality.I),
 ))

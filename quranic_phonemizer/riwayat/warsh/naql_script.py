@@ -79,7 +79,11 @@ def latent_qata_badal_quality(text: str) -> Quality | None:
         return Quality.A
     if len(text) < 3:
         return None
-    if text[1] in "ُ۟" and text[2] == "و":
+    if (
+        text[1] in "ُ۟"
+        and text[2] == "و"
+        and (len(text) < 4 or text[3] != "ْ")
+    ):
         return Quality.U
     if text[1] == "ِ" and text[2] in "يے" and (len(text) < 4 or text[3] != "ّ"):
         return Quality.I

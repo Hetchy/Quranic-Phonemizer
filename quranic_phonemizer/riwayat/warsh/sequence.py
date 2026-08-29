@@ -173,6 +173,7 @@ def _project_orthographic_silence(text, entries) -> None:
     """Project selected-script sukuns or harakas that mark rasm-only letters."""
     for pattern, relative in (
         ("أُوْ", 3),
+        ("ا۟وْ", 3),
         ("إِيْن", 3),
         ("إِيْه", 3),
         ("إِےْ", 3),

@@ -45,10 +45,12 @@ hamza followed by a badal carrier is deferred to
 [`madd-badal.md`](madd-badal.md): naql transfers the short haraka, while the
 carrier separately owns the resulting length. Treating the whole long
 nucleus as naql would collapse `badal mughayyar bin-naql` into the wrong
-rule. The selected source has 227 initial-long shapes: 177 A, 47 U, and 3 I.
-Three are hamza-meeting spellings owned by that chapter: 2:140:14,
-20:22:10, and 58:13:1. The remaining 224 are badal mughayyar bin-naql:
-208 within ayahs and 16 across ayah edges.
+rule. The selected source has 193 initial-long shapes: 177 A, 13 U, and 3 I.
+The 34 `ا۟وْ...` spellings are excluded because their waw is rasm-only and
+their latent qata has a short damma. Three initial-long shapes are
+hamza-meeting spellings owned by that chapter: 2:140:14, 20:22:10, and
+58:13:1. The remaining 190 are badal mughayyar bin-naql: 186 within ayahs and
+4 across ayah edges.
 
 ## Corpus size and data ownership
 

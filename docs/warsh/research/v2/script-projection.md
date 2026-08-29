@@ -113,9 +113,12 @@ making that decision from the scalar name.
 An ordinary U+0652 sukun written directly on alif is a silence sign: the alif
 is rasm-only and cannot be a consonant. The selected artifact contains 3,716
 such sequences. U+0652 on waw or yaa remains contextual because either letter
-may instead be a consonant. The 220 explicit-hamza `أُوْ...` tokens form one
-reviewed silent-waw family; the separate `ا۟وْل...` spellings retain their
-sounded Warsh badal carrier.
+may instead be a consonant. The 220 explicit-hamza `أُوْ...` tokens and 34
+latent-hamza `ا۟وْ...` tokens form one reviewed silent-waw family. The latter
+is a contextual Naql spelling: ibtidaa restores a short qata damma, joined
+Naql transfers that short damma, and the written waw remains rasm-only in both
+states. Initial `ا۟و...` without waw sukun is the distinct sounded Warsh badal
+carrier family.
 
 ### Alternate tanwin
 
