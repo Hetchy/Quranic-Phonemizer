@@ -11,21 +11,21 @@ CASES = (
     Case(id="khaa", site=Site.shared("2:29", (3,)), read=isolated(),
          phonemes="x aˤ l a q Q",
          extra_phonemes=("emphatic_fatha",),
-         char_rules={"خ": R("tafkheem"), "@fatha[1]": R("tafkheem")},
+         char_rules={"خ": R("tafkheem")},
          sound_rules={"x": R("tafkheem"), "aˤ": R("tafkheem")}),
     # Hafs: صَبَرُوا۟
     # Warsh: صَبَرُواْ
     Case(id="saad", site=Site.shared("11:11", (3,)), read=isolated(),
          phonemes="sˤ aˤ b a rˤ u:",
          extra_phonemes=("emphatic_fatha",),
-         char_rules={"ص": R("tafkheem"), "@fatha[1]": R("tafkheem")},
+         char_rules={"ص": R("tafkheem")},
          sound_rules={"sˤ": R("tafkheem"), "aˤ": R("tafkheem")}),
     # Hafs: ضَرَبَ
     # Warsh: ضَرَبَ
     Case(id="daad", site=Site.shared("30:28", (1,)), read=isolated(),
          phonemes="dˤ aˤ rˤ aˤ b Q",
          extra_phonemes=("emphatic_fatha",),
-         char_rules={"ض": R("tafkheem"), "@fatha[1]": R("tafkheem")},
+         char_rules={"ض": R("tafkheem")},
          sound_rules={"dˤ": R("tafkheem"), "aˤ[1]": R("tafkheem")}),
     # Hafs: غُفْرَانَكَ
     # Warsh: غُفْرَانَكَ
@@ -37,14 +37,14 @@ CASES = (
     Case(id="taa", site=Site.shared("16:108", (3,)), read=isolated(),
          phonemes="tˤ aˤ b a ʕ",
          extra_phonemes=("emphatic_fatha",),
-         char_rules={"ط": R("tafkheem"), "@fatha[1]": R("tafkheem")},
+         char_rules={"ط": R("tafkheem")},
          sound_rules={"tˤ": R("tafkheem"), "aˤ": R("tafkheem")}),
     # Hafs: قَالَ
     # Warsh: قَالَ
     Case(id="qaaf", site=Site.shared("2:33", (1,)), read=isolated(),
          phonemes="q aˤ: l",
          extra_phonemes=("emphatic_fatha",),
-         char_rules={"ق": R("tafkheem"), "@fatha[1]": R("tafkheem"), "ا": R("tafkheem")},
+         char_rules={"ق": R("tafkheem"), "ا": R("tafkheem")},
          sound_rules={"q": R("tafkheem"), "aˤ:": R("tafkheem")}),
     # Hafs: ظَلَمَ
     # Warsh: ظَّلَمَ
@@ -52,9 +52,8 @@ CASES = (
          phonemes=pick(hafs="ðˤ aˤ l a m", warsh="ðˤ aˤ lˤ aˤ m"),
          extra_phonemes=("emphatic_fatha",),
          char_rules=pick(
-             hafs={"ظ": R("tafkheem"), "@fatha[1]": R("tafkheem")},
-             warsh={"ظ": R("tafkheem"), "@fatha[1]": R("tafkheem"),
-                    "ل": R("tafkheem"), "@fatha[2]": R("tafkheem")},
+             hafs={"ظ": R("tafkheem")},
+             warsh={"ظ": R("tafkheem"), "ل": R("tafkheem")},
          ),
          sound_rules=pick(
              hafs={"ðˤ": R("tafkheem"), "aˤ": R("tafkheem")},

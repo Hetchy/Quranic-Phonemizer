@@ -47,6 +47,13 @@ CASES = (
          char_rules={"ے": R("iltiqa_shortening")},
          absent_char_rules={"@kasra[1]": R("iltiqa_shortening")},
          sound_rules={"i": R("iltiqa_shortening")}),
+    # Warsh: فِے اِ۬لَارْضِۖ
+    Case(id="long-i-before-article-naql",
+         site=Site(warsh=("42:27", (7, 8))), read=through(),
+         phonemes=("f i", "l a rˤ dˤ"),
+         char_rules={"ے": R("iltiqa_shortening")},
+         absent_char_rules={"@kasra[1]": R("iltiqa_shortening")},
+         sound_rules={"i": R("iltiqa_shortening")}),
     # Hafs: قَالُوا۟ ٱدْعُ
     # Warsh: قَالُواْ اُ۟دْعُ
     Case(id="long-u", site=Site.shared("2:68", (1, 2)), read=through(),

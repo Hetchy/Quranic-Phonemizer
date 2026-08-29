@@ -123,15 +123,16 @@ def test_ain_has_only_madd_lazim_on_its_ya(hafs):
     assert all("madd_leen" not in rules for rules in tagged.values())
 
 
-def test_emphatic_fatha_and_its_carrier_receive_tafkheem(hafs):
+def test_emphatic_fatha_is_unlabelled_while_its_carrier_keeps_tafkheem(hafs):
     view, bundle = _build(hafs, "50:1")
     names = _rules(bundle)
     tagged = {
         column.text: {names[item] for item in column.rule_occurrence_ids}
         for column in view.words[0].columns
     }
-    for text in ("ق", "َ", "آ"):
+    for text in ("ق", "آ"):
         assert "tafkheem" in tagged[text]
+    assert "tafkheem" not in tagged["َ"]
 
 
 def test_sad_closes_with_the_boundary_specific_qalqala(hafs):

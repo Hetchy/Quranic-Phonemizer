@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from ..engine.neighbourhood import Neighbourhood
 from ..engine.plan import MergeInto, Phase, Plan, Realize, Silence, Verdict, mint
 from ..model.address import BoundaryPlan, Junction, Location, SlotId
-from ..model.canon import Annotation, CanonLetter, Onset, Rule
+from ..model.canon import Annotation, CanonLetter, Onset, Rule, SlotOrigin
 from ..model.performance import Aspect, Occurrence, Vowel
 from .ownership import is_quiescent
 
@@ -78,6 +78,14 @@ class Naql:
             # vowel. The preceding sakin presents that same sound through a
             # bridge; realizing a separate short vowel here would produce
             # the impossible sequence /a a:/ (and likewise for /u/ and /i/).
+            effects.append(
+                MergeInto(host.id, Aspect.VOWEL, at, Aspect.VOWEL)
+            )
+        elif host.origin is SlotOrigin.NUNATION:
+            # The written qata haraka remains the source/owner of its short
+            # vowel while the tanween noon presents that sound before the
+            # boundary.  A real merger exposes both sides as a bridge instead
+            # of inventing an unrelated vowel on the tanween cell.
             effects.append(
                 MergeInto(host.id, Aspect.VOWEL, at, Aspect.VOWEL)
             )

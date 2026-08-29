@@ -257,6 +257,25 @@ def _folded_length_openers(insc, facts, analysis) -> frozenset[int]:
     return frozenset(folded)
 
 
+def _folded_compact_vowel_openers(insc) -> frozenset[int]:
+    """A small vowel folds into a base that spells more than one slot."""
+    letters_by_glyph: dict[int, set[SlotId]] = {}
+    for edge in insc.spellings:
+        if isinstance(edge, Supplied) and edge.fact is SlotFact.LETTER:
+            letters_by_glyph.setdefault(edge.glyph, set()).add(edge.slot)
+    return frozenset(
+        edge.glyph
+        for edge in insc.spellings
+        if isinstance(edge, Supplied)
+        and edge.fact is SlotFact.VOWEL_QUALITY
+        and insc.glyphs[edge.glyph].kind is GlyphKind.SMALL_VOWEL
+        and any(
+            edge.slot in slots and len(slots) > 1
+            for slots in letters_by_glyph.values()
+        )
+    )
+
+
 def _semantic_carriers(facts, insc, unit_of_anchor, drafts, roles):
     """Bind an unwitnessed written carrier to the long vowel it displays."""
     open_vowels = open_vowel_units(facts)
@@ -302,7 +321,10 @@ def tokenize(
         e.glyph for e in insc.spellings if isinstance(e, Witnessed)
     )
     sakt_seen = sakt_seen_glyphs(insc, sakt_words)
-    folded = _folded_length_openers(insc, glyph_facts, facts)
+    folded = (
+        _folded_length_openers(insc, glyph_facts, facts)
+        | _folded_compact_vowel_openers(insc)
+    )
     drafts, unit_of_anchor = _draft_openers(
         insc, seen_marks, sakt_words, folded
     )

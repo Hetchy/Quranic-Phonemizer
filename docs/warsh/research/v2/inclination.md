@@ -26,7 +26,7 @@ uses the following broad engineering representatives:
 | Domain quality | Typed quality | Rule tag | Broad token |
 | --- | --- | --- | --- |
 | Fath | `A` | none | `a` or `a:` |
-| Taqlil | `TAQLIL` | `taqlil` | `ɛ` or `ɛ:` |
+| Taqlil | `TAQLIL` | `taqlil` | short `a` / optional `ɛ`; long `ɛ:` |
 | Imala kubra | `KUBRA` | `imala` | `e` or `e:` |
 
 The `/ɛ, ɛ:/` and `/e, e:/` choices are project modeling choices. They are not a
@@ -34,18 +34,41 @@ claim that the sources attest those exact IPA values or that every reciter has
 one invariant acoustic target.
 
 `TAQLIL` and `KUBRA` are distinct typed qualities, and `taqlil` and `imala` are
-distinct rule tags. Ordinary Warsh taqlil is never gated by an extra phoneme.
-The `imala` extra phoneme affects rendering only:
+distinct rule tags. Long Warsh taqlil is never gated by an extra phoneme. The
+fixed short-taqlil nucleus in the `رأى` family is also always typed `TAQLIL`,
+but the Warsh-only `taqlil_short` rendering control decides whether its narrow
+token is exposed. The `imala` extra phoneme affects kubra rendering only:
 
 | Typed quality | `imala` enabled | `imala` disabled for Warsh |
 | --- | --- | --- |
-| `TAQLIL` | `ɛ` or `ɛ:` | `ɛ` or `ɛ:` |
+| long `TAQLIL` | `ɛ:` | `ɛ:` |
 | `KUBRA` | `e` or `e:` | `ɛ` or `ɛ:` |
 
 Disabling the extra phoneme does not change the `KUBRA` fact or remove the
 `imala` rule. It only makes kubra render with the Warsh taqlil fallback. This is
 how the fixed Haa of `طَه۪ۖ` remains one domain reading without a public
 selector.
+
+### Short taqlil in the fixed `رأى` family
+
+The selected script contains exactly 16 independent short-taqlil witnesses:
+the first U+06EA mark in the double-marked `ر۪ء۪ا` / `ر۪أ۪ى` sequence family.
+The second mark belongs to the long hamza/alif nucleus. This pattern does not
+extend to inflections such as `رأت`, `رأوا`, or `رأيت`; the complete U+06EA
+audit finds no other independent short-vowel carrier.
+
+Six further `رأى` tokens precede a following-word sakin: Warsh public
+references 6:78, 6:79, 16:85, 16:86, 18:52, and 33:22. The connected script
+omits both marks because wasl realizes ordinary fath on both nuclei. At waqf,
+short taqlil on raa and long taqlil on the hamza/alif return together. This is
+the fixed canonical reading, not a variant. The raa classifier reads the
+effective boundary-state quality, so it emits `tarqeeq` whether the short
+token renders as default `/a/` or optional `/ɛ/`.
+
+Al-Nashr and Al-Wafi state the reduction of both the raa vowel and the
+following alif and their joint opening before a following sakin
+([Al-Nashr](https://www.islamweb.net/ar/library/content/70/164/),
+[Al-Wafi](https://quranpedia.net/book/436/1/262)).
 
 ## Classification order
 

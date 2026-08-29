@@ -30,7 +30,10 @@ _TANWEEN_ROLE = {
 #: Imala and ishmam are colourings a reciter applies to an ordinary vowel,
 #: not vowels of their own, so they spell as their base quality wherever the
 #: script has no mark that says otherwise.
-_BASE = {Quality.KUBRA: Quality.A, Quality.TAQLIL: Quality.A}
+_BASE = {
+    Quality.KUBRA: Quality.A,
+    Quality.TAQLIL: Quality.A,
+}
 
 #: Imala's inclined long vowel uses the ya carrier even though the Score writes
 #: the authored imala mark through its ordinary a-vowel spelling.

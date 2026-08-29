@@ -233,6 +233,8 @@ class Plan:
         return any(
             verdict.occurrence.rule is Rule.IBDAL_HAMZA
             and Relength(slot, Length.LONG) in verdict.effects
-            and Silence(previous, Aspect.VOWEL) in verdict.effects
+            and MergeInto(
+                previous, Aspect.VOWEL, slot, Aspect.VOWEL
+            ) in verdict.effects
             for _, verdict in self.entries
         )

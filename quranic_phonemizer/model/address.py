@@ -178,27 +178,48 @@ class BoundaryPlan:
         return self.after(index) in (Junction.STOP, Junction.EDGE)
 
 
-class KhilafId(StrEnum):
-    """Named points of legitimate disagreement within one riwayah: token
-    choice or per-location lexical only. Grows with `variants.yaml`, not code.
-    """
+class KhilafId(str):
+    """One ASCII selector ID declared by a riwayah's khilaf catalogue."""
 
-    SEEN_SAD_YABSUT = "seen_sad_yabsut"
-    SEEN_SAD_BASTAH = "seen_sad_bastah"
-    SEEN_SAD_AL_MUSAYTIRUN = "seen_sad_al_musaytirun"
-    SEEN_SAD_BIMUSAYTIR = "seen_sad_bimusaytir"
-    IQLAB_NASAL = "iqlab_nasal"
-    IKHFAA_SHAFAWI_NASAL = "ikhfaa_shafawi_nasal"
-    RAA_FIRQ_WASL = "raa_firq_wasl"
-    RAA_ALQITR_WAQF = "raa_alqitr_waqf"
-    RAA_MISR_WAQF = "raa_misr_waqf"
-    RAA_NUTHUR_WAQF = "raa_nuthur_waqf"
-    RAA_YASR_WAQF = "raa_yasr_waqf"
-    RAA_ASR_WAQF = "raa_asr_waqf"
-    DAAF_HARAKA = "daaf_haraka"
-    YAA_AATANI_WAQF = "yaa_aatani_waqf"
-    NOON_YASEEN_WASL = "noon_yaseen_wasl"
-    MADD_LAZIM_TASHEEL = "madd_lazim_tasheel"
+    def __new__(cls, value: str):
+        if not isinstance(value, str) or not value or any(
+            not (char.isascii() and (char.islower() or char.isdigit() or char == "_"))
+            for char in value
+        ):
+            raise ValueError(f"invalid variant ID {value!r}")
+        return super().__new__(cls, value)
+
+    @property
+    def value(self) -> str:
+        return str(self)
+
+
+KhilafId.YABSUT = KhilafId("yabsut")
+KhilafId.BASTAH = KhilafId("bastah")
+KhilafId.ALMUSAYTIRUN = KhilafId("almusaytirun")
+KhilafId.BIMUSAYTIR = KhilafId("bimusaytir")
+KhilafId.IQLAB_NASAL = KhilafId("iqlab_nasal")
+KhilafId.IKHFAA_SHAFAWI_NASAL = KhilafId("ikhfaa_shafawi_nasal")
+KhilafId.RAA_FIRQ = KhilafId("raa_firq")
+KhilafId.RAA_ALQITR_WAQF = KhilafId("raa_alqitr_waqf")
+KhilafId.RAA_MISR_WAQF = KhilafId("raa_misr_waqf")
+KhilafId.RAA_WANUTHUR_WAQF = KhilafId("raa_wanuthur_waqf")
+KhilafId.RAA_YASR_WAQF = KhilafId("raa_yasr_waqf")
+KhilafId.RAA_ASR_WAQF = KhilafId("raa_asr_waqf")
+KhilafId.DAAF_HARAKA = KhilafId("daaf_haraka")
+KhilafId.YAA_AATANI_WAQF = KhilafId("yaa_aatani_waqf")
+KhilafId.NOON_WASL = KhilafId("noon_wasl")
+KhilafId.YASEEN_WASL = KhilafId("yaseen_wasl")
+KhilafId.ISTIFHAM_ARTICLE = KhilafId("istifham_article")
+KhilafId.TAMANNA_NOON = KhilafId("tamanna_noon")
+KhilafId.MALIYAH_HALAK = KhilafId("maliyah_halak")
+KhilafId.SALASILA_WAQF = KhilafId("salasila_waqf")
+KhilafId.ALISM_IBTIDAA = KhilafId("alism_ibtidaa")
+KhilafId.IRKAB_MAANA = KhilafId("irkab_maana")
+KhilafId.YALHATH_DHALIK = KhilafId("yalhath_dhalik")
+KhilafId.IWAJA_QAYYIMA = KhilafId("iwaja_qayyima")
+KhilafId.MAN_RAQ = KhilafId("man_raq")
+KhilafId.BAL_RAN = KhilafId("bal_ran")
 
 
 @dataclass(frozen=True, slots=True)
@@ -217,7 +238,7 @@ class VariantSelection:
 
     def chosen(self, khilaf: KhilafId) -> str | None:
         """Return the one scalar choice made for a khilaf point."""
-        found = [option.name for option in self.options if option.khilaf is khilaf]
+        found = [option.name for option in self.options if option.khilaf == khilaf]
         if len(found) > 1:
             raise ValueError(f"{khilaf.value}: more than one option was selected")
         return found[0] if found else None

@@ -5,7 +5,7 @@ from __future__ import annotations
 from ...engine.classifier import RuleSet
 from ...engine.plan import Phase
 from ...model.address import Riwayah
-from ...rules.annotation import CanonicalColour, Inclination
+from ...rules.annotation import CanonicalColour, CarrierTarqeeq, Inclination
 from ...rules.boundary import (
     DroppedGlide,
     IwadLength,
@@ -113,6 +113,7 @@ def _boundary() -> tuple:
 def _build() -> RuleSet:
     tables = rule_tables()
     article = _article(tables)
+    weight = Weight(always_heavy=tables.always_heavy, raa_enabled=False)
     return RuleSet(
         {
             Phase.BOUNDARY: _boundary(),
@@ -146,12 +147,10 @@ def _build() -> RuleSet:
                 IwadLength(),
             ),
             Phase.COLOUR: (
-                LamWeight(profile=LAM_PROFILE),
-                Emphasis(weight=Weight(
-                    always_heavy=tables.always_heavy,
-                    raa_enabled=False,
-                )),
+                LamWeight(profile=LAM_PROFILE, base_weight=weight),
+                Emphasis(weight=weight),
                 RaaWeight(profile=RAA_PROFILE),
+                CarrierTarqeeq(),
                 Inclination(),
                 CanonicalColour(),
                 IkhfaaWeight(

@@ -132,11 +132,10 @@ occurrence connecting those exact targets. It does not accept unrelated
 occurrences with the same rule ID.
 
 A merger reaches both participating cells: the assimilated source and its
-host. Its `char_rules` entry must therefore name both letters, while its
+host. Its `char_rules` entry should therefore name both letters, while its
 `sound_rules` names the resulting geminate or the separately retained
 components of an incomplete merger. Muqattaat cases use `named-letter/cell`
-selectors to name both expanded endpoints. The style gate rejects one-sided
-merger expectations.
+selectors to name both expanded endpoints.
 
 ## Layout
 

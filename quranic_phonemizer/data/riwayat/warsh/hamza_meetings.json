@@ -692,16 +692,6 @@
       "exception": null
     },
     {
-      "source": "11:69:3",
-      "canonical": "11:70:3",
-      "previous": "11:70:2",
-      "first": "A",
-      "second": "A",
-      "scope": "joined_words",
-      "owner": "hamza_muttafiq",
-      "exception": null
-    },
-    {
       "source": "11:75:8",
       "canonical": "11:76:8",
       "previous": "11:76:7",
@@ -802,16 +792,6 @@
       "exception": null
     },
     {
-      "source": "30:9:7",
-      "canonical": "30:10:7",
-      "previous": "30:10:6",
-      "first": "A",
-      "second": "A",
-      "scope": "joined_words",
-      "owner": "hamza_muttafiq",
-      "exception": null
-    },
-    {
       "source": "33:17:12",
       "canonical": "33:17:12",
       "previous": "33:17:11",
@@ -835,6 +815,26 @@
       "source": "33:54:4",
       "canonical": "33:54:4",
       "previous": "33:54:3",
+      "first": "A",
+      "second": "A",
+      "scope": "joined_words",
+      "owner": "hamza_muttafiq",
+      "exception": null
+    },
+    {
+      "source": "35:46:20",
+      "canonical": "35:45:20",
+      "previous": "35:45:19",
+      "first": "A",
+      "second": "A",
+      "scope": "joined_words",
+      "owner": "hamza_muttafiq",
+      "exception": null
+    },
+    {
+      "source": "36:81:6",
+      "canonical": "36:82:6",
+      "previous": "36:82:5",
       "first": "A",
       "second": "A",
       "scope": "joined_words",
@@ -945,16 +945,6 @@
       "source": "11:70:8",
       "canonical": "11:71:8",
       "previous": "11:71:7",
-      "first": "I",
-      "second": "I",
-      "scope": "joined_words",
-      "owner": "hamza_muttafiq",
-      "exception": null
-    },
-    {
-      "source": "12:38:4",
-      "canonical": "12:38:4",
-      "previous": "12:38:3",
       "first": "I",
       "second": "I",
       "scope": "joined_words",
@@ -1195,16 +1185,6 @@
       "source": "67:10:8",
       "canonical": "67:9:13",
       "previous": "67:9:12",
-      "first": "I",
-      "second": "I",
-      "scope": "joined_words",
-      "owner": "hamza_muttafiq",
-      "exception": null
-    },
-    {
-      "source": "71:6:4",
-      "canonical": "71:6:4",
-      "previous": "71:6:3",
       "first": "I",
       "second": "I",
       "scope": "joined_words",
@@ -1782,16 +1762,6 @@
       "exception": null
     },
     {
-      "source": "12:16:2",
-      "canonical": "12:16:2",
-      "previous": "12:16:1",
-      "first": "U",
-      "second": "A",
-      "scope": "joined_words",
-      "owner": "fixed_ibdal",
-      "exception": null
-    },
-    {
       "source": "12:43:18",
       "canonical": "12:43:18",
       "previous": "12:43:17",
@@ -1835,6 +1805,16 @@
       "source": "41:27:3",
       "canonical": "41:28:3",
       "previous": "41:28:2",
+      "first": "U",
+      "second": "A",
+      "scope": "joined_words",
+      "owner": "fixed_ibdal",
+      "exception": null
+    },
+    {
+      "source": "60:4:28",
+      "canonical": "60:4:28",
+      "previous": "60:4:27",
       "first": "U",
       "second": "A",
       "scope": "joined_words",
@@ -1925,16 +1905,6 @@
       "source": "7:188:22",
       "canonical": "7:188:22",
       "previous": "7:188:21",
-      "first": "U",
-      "second": "I",
-      "scope": "joined_words",
-      "owner": "hamza_damm_kasr",
-      "exception": null
-    },
-    {
-      "source": "9:64:13",
-      "canonical": "9:64:13",
-      "previous": "9:64:12",
       "first": "U",
       "second": "I",
       "scope": "joined_words",
@@ -2095,6 +2065,16 @@
       "source": "82:1:3",
       "canonical": "82:1:3",
       "previous": "82:1:2",
+      "first": "U",
+      "second": "I",
+      "scope": "joined_words",
+      "owner": "hamza_damm_kasr",
+      "exception": null
+    },
+    {
+      "source": "84:1:3",
+      "canonical": "84:1:3",
+      "previous": "84:1:2",
       "first": "U",
       "second": "I",
       "scope": "joined_words",

@@ -35,7 +35,7 @@ CASES = (
                 absent_char_rules={"@small_yaa": R("variant_silence")},
             ),
         },
-        default="hadhf",
+        default="ithbat",
         masked=Expect(
             read=joining(),
             phonemes="ʔ a: t a: n i j a",

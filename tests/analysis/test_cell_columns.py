@@ -287,12 +287,12 @@ def test_the_seen_sad_pair_is_two_columns_carrying_the_variant_on_both(hafs):
     carry the selected khilaf as the choice flips which is dropped."""
     for choice, dropped_text in (("seen", "ص"), ("saad", "ۜ")):
         selection = VariantSelection(
-            (Option(KhilafId.SEEN_SAD_YABSUT, choice),)
+            (Option(KhilafId.YABSUT, choice),)
         )
         view, words, _ = _build(hafs, "2:245:14", {}, selection)
         pair = [
             c for c in _columns(words)
-            if c.variant_id is KhilafId.SEEN_SAD_YABSUT
+            if c.variant_id == KhilafId.YABSUT
         ]
         assert len(pair) == 2
         assert all(c.variant_choice == choice for c in pair)
@@ -319,9 +319,9 @@ def test_the_default_seen_sad_site_is_two_columns_without_a_variant(hafs):
 @pytest.mark.parametrize(
     "option",
     [
-        Option(KhilafId.MADD_LAZIM_TASHEEL, "tasheel"),
-        Option(KhilafId.IQLAB_NASAL, "assimilated"),
-        Option(KhilafId.SEEN_SAD_BASTAH, "seen"),
+        Option(KhilafId.ISTIFHAM_ARTICLE, "tashil"),
+        Option(KhilafId.IQLAB_NASAL, "open"),
+        Option(KhilafId.BASTAH, "seen"),
     ],
 )
 def test_a_foreign_khilaf_leaves_the_seen_sad_pair_unmarked(hafs, option):

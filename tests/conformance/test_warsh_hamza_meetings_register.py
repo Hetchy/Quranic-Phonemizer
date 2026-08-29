@@ -20,12 +20,12 @@ def test_the_one_word_register_is_the_documented_sixty():
     })
 
 
-def test_the_across_word_register_is_the_documented_156():
+def test_the_across_word_register_is_the_documented_154():
     rows = [row for row in meeting_rows() if row.scope != "one_word"]
-    assert len(rows) == 156
+    assert len(rows) == 154
     assert Counter((row.first.name, row.second.name) for row in rows) == Counter({
         ("A", "A"): 30,
-        ("I", "I"): 37,
+        ("I", "I"): 35,
         ("U", "U"): 1,
         ("A", "I"): 19,
         ("A", "U"): 1,
@@ -34,9 +34,21 @@ def test_the_across_word_register_is_the_documented_156():
         ("U", "I"): 26,
     })
     assert Counter(row.scope for row in rows) == Counter({
-        "joined_words": 154,
+        "joined_words": 152,
         "joined_ayahs": 2,
     })
+
+
+def test_long_vowels_after_qata_are_not_across_word_meetings():
+    sources = {row.source for row in meeting_rows() if row.scope != "one_word"}
+    assert not sources & {
+        "9:64:13",
+        "11:69:3",
+        "12:16:2",
+        "12:38:4",
+        "30:9:7",
+        "71:6:4",
+    }
 
 
 def test_the_two_joined_ayah_rows_are_exact_and_none_crosses_a_surah():
@@ -55,7 +67,10 @@ def test_the_two_joined_ayah_rows_are_exact_and_none_crosses_a_surah():
 def test_every_authored_exception_is_closed():
     by_exception = {
         name: {row.canonical for row in meeting_rows() if row.exception == name}
-        for name in ("aimma", "aajami", "triple", "jaa_aal", "kasr_yaa")
+        for name in (
+            "aimma", "aajami", "triple", "jaa_aal", "kasr_yaa",
+            "fused_badal",
+        )
     }
     assert by_exception == {
         "aimma": {
@@ -69,6 +84,7 @@ def test_every_authored_exception_is_closed():
         },
         "jaa_aal": {Location(15, 61, 3), Location(54, 41, 3)},
         "kasr_yaa": {Location(2, 31, 13), Location(24, 33, 33)},
+        "fused_badal": {Location(46, 32, 15)},
     }
 
 

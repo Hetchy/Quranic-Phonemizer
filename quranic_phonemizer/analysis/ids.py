@@ -10,7 +10,7 @@ from dataclasses import dataclass
 #: Bumped when a DTO field or a role, status, state, or tier value is added,
 #: removed, or changes meaning. A rule joining or leaving the catalogue does
 #: not bump it.
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 
 
 @dataclass(frozen=True, slots=True, order=True)

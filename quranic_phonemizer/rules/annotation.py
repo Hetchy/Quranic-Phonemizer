@@ -7,11 +7,20 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from ..engine.neighbourhood import Neighbourhood
-from ..engine.plan import Phase, Plan, Realize, Verdict, mint
+from ..engine.plan import (
+    Classify,
+    Phase,
+    Plan,
+    Realize,
+    Recolour,
+    Relength,
+    Verdict,
+    mint,
+)
 from ..model.address import BoundaryPlan, SlotId
 from ..model.canon import CanonLetter as L
 from ..model.canon import Annotation, Onset, Quality, Rule, VowelForm
-from ..model.performance import Aspect, Occurrence, Vowel
+from ..model.performance import Aspect, Length, Occurrence, Vowel
 from .tafkheem import Weight
 
 
@@ -94,15 +103,12 @@ class CanonicalColour:
 
 @dataclass(frozen=True, slots=True)
 class Tarqeeq:
-    """A raa that is not heavy is light; taught explicitly, not as an absence.
-
-    Scoped to raa -- the lam's light case would fire on every lam in the text.
-    """
+    """Every pronounced raa and lam has explicit light/heavy identity."""
 
     weight: Weight = field(default_factory=Weight)
     rule: Rule = Rule.TARQEEQ
     phase: Phase = Phase.COLOUR
-    triggers: frozenset = field(default=frozenset({L.RA}))
+    triggers: frozenset = field(default=frozenset({L.RA, L.LAM}))
     emits: frozenset = frozenset({Rule.TARQEEQ})
 
     def look(
@@ -110,11 +116,82 @@ class Tarqeeq:
         boundaries: BoundaryPlan,
     ) -> Verdict | None:
         slot = near.slot(at)
-        if slot is None or slot.letter is not L.RA:
+        if slot is None or slot.letter not in {L.RA, L.LAM}:
+            return None
+        if plan.merged_away(at, Aspect.CONSONANT):
             return None
         if self.weight.is_heavy(near, slot, plan, boundaries):
             return None
         return _classification(Rule.TARQEEQ, at)
 
 
-__all__ = ["CanonicalColour", "Inclination", "Tarqeeq"]
+@dataclass(frozen=True, slots=True)
+class CarrierTarqeeq:
+    """Name a light long-A carrier when no letter-weight rule already does."""
+
+    rule: Rule = Rule.TARQEEQ
+    phase: Phase = Phase.COLOUR
+    # Madd iwad starts from a short/nunated A slot and is relengthened before
+    # COLOUR, so both canonical forms must reach this classifier.
+    triggers: frozenset = frozenset({VowelForm.SHORT, VowelForm.LONG})
+    emits: frozenset = frozenset({Rule.TARQEEQ})
+
+    @staticmethod
+    def _sounds_long(plan: Plan, at: SlotId, canonical: VowelForm) -> bool:
+        """Return the performed length after boundary and length effects.
+
+        Canonically long vowels can be shortened before wasl; stopped iwad can
+        move in the opposite direction.  Carrier identity follows that final
+        performed length, never the slot's out-of-context shape.
+        """
+        long = canonical is VowelForm.LONG
+        for effect in plan.effects():
+            if getattr(effect, "slot", None) != at:
+                continue
+            if (
+                isinstance(effect, Realize)
+                and effect.aspect is Aspect.VOWEL
+                and isinstance(effect.sound, Vowel)
+            ):
+                long = effect.sound.long
+            elif isinstance(effect, Relength):
+                long = effect.length is Length.LONG
+        return long
+
+    def look(
+        self, near: Neighbourhood, plan: Plan, at: SlotId,
+        boundaries: BoundaryPlan,
+    ) -> Verdict | None:
+        slot, word = near.slot(at), near.word_of(at)
+        if slot is None or word is None:
+            return None
+        state = (
+            slot.nucleus.stopped
+            if boundaries.stopped_on(word)
+            else slot.nucleus.joined
+        )
+        if (
+            state.quality is not Quality.A
+            or not self._sounds_long(plan, at, state.form)
+            or plan.merged_away(at, Aspect.VOWEL)
+        ):
+            return None
+        if any(
+            verdict.occurrence.rule in {Rule.TAFKHEEM, Rule.TARQEEQ}
+            and at in verdict.occurrence.subjects
+            and any(
+                isinstance(effect, (Classify, Recolour))
+                and effect.slot == at
+                and effect.aspect is Aspect.VOWEL
+                for effect in verdict.effects
+            )
+            for _, verdict in plan.entries
+        ):
+            return None
+        occurrence = Occurrence(
+            mint(Rule.TARQEEQ, at, variant=1), Rule.TARQEEQ, (at,)
+        )
+        return Verdict(occurrence, (Classify(at, Aspect.VOWEL),))
+
+
+__all__ = ["CanonicalColour", "CarrierTarqeeq", "Inclination", "Tarqeeq"]

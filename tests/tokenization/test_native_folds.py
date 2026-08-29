@@ -144,7 +144,7 @@ def test_the_saad_reading_flips_which_half_of_the_pair_sounds(hafs):
     seen: the owner and the variant-silent half swap with the reading."""
     view = _view(
         hafs, "2:245:14",
-        selection=VariantSelection((Option(KhilafId.SEEN_SAD_YABSUT, "saad"),)),
+        selection=VariantSelection((Option(KhilafId.YABSUT, "saad"),)),
     )
     seen = _unit_of(view, SEEN_ABOVE)
     saad = _unit_of(view, SAD)

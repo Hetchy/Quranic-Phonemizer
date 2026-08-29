@@ -254,24 +254,6 @@
         "variant_id": {
           "anyOf": [
             {
-              "enum": [
-                "seen_sad_yabsut",
-                "seen_sad_bastah",
-                "seen_sad_al_musaytirun",
-                "seen_sad_bimusaytir",
-                "iqlab_nasal",
-                "ikhfaa_shafawi_nasal",
-                "raa_firq_wasl",
-                "raa_alqitr_waqf",
-                "raa_misr_waqf",
-                "raa_nuthur_waqf",
-                "raa_yasr_waqf",
-                "raa_asr_waqf",
-                "daaf_haraka",
-                "yaa_aatani_waqf",
-                "noon_yaseen_wasl",
-                "madd_lazim_tasheel"
-              ],
               "type": "string"
             },
             {
@@ -309,7 +291,7 @@
           "$ref": "#/$defs/CellView"
         },
         "schema_version": {
-          "const": 2,
+          "const": 3,
           "type": "integer"
         }
       },

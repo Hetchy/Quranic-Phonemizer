@@ -30,6 +30,7 @@ from quranic_phonemizer.phonemize.legacy_views import (
 )
 from quranic_phonemizer.render.alphabet import effective_extra_phonemes
 from quranic_phonemizer.session import Session as PhonemizeSession
+from quranic_phonemizer.session.boundaries import mask_stopped_sakt_variants
 
 from .boundary import UnreachableWasl, plan_for, reaches_past
 from .site import Site
@@ -345,7 +346,25 @@ def reading(
         ),
         **boundary,
     )
-    performance = recitation_.perform(built.score, plan, selection=selection)
+    effective = mask_stopped_sakt_variants(
+        recitation_.khilaf,
+        tuple(location for location, _ in words),
+        plan,
+        selection,
+    )
+    if effective != selection:
+        built = recitation_.build(
+            recitation_.read(script, address.verse, words), selection=effective
+        )
+        plan = plan_for(
+            len(words),
+            sakt_after=tuple(
+                index for index, word in enumerate(built.score.words, start=1)
+                if word.sakt_after
+            ),
+            **boundary,
+        )
+    performance = recitation_.perform(built.score, plan, selection=effective)
     requested_extra = (
         frozenset({"emphatic_fatha"})
         if extra_phonemes is None
@@ -356,7 +375,7 @@ def reading(
         name, script, built, plan, performance, words,
         requested_extra, extra,
         ref=f"{address.verse.surah}:{address.verse.ayah}",
-        selection=selection,
+        selection=effective,
     )
     return Reading(
         riwayah, script, built, performance, words, assembled, bundle,

@@ -32,23 +32,19 @@ LAM_IZHAR = {
 }
 RAA = {
     "را/ر": R("tafkheem"),
-    "را/@fatha": R("tafkheem"),
     "را/@madd": R("madd_tabii", "tafkheem"),
 }
 TAA = {
     "طا/ط": R("tafkheem"),
-    "طا/@fatha": R("tafkheem"),
     "طا/@madd": R("madd_tabii", "tafkheem"),
 }
 SAAD = {
     "صاد/ص": R("tafkheem"),
-    "صاد/@fatha": R("tafkheem"),
     "صاد/@madd": R("madd_lazim", "tafkheem"),
     "صاد/د": R("qalqala_sughra"),
 }
 QAAF = {
     "قاف/ق": R("tafkheem"),
-    "قاف/@fatha": R("tafkheem"),
     "قاف/@madd": R("madd_lazim", "tafkheem"),
 }
 
@@ -58,7 +54,7 @@ CASES = (
     # Warsh: أَلَٓمِّٓۖ
     Case(id="alif-lam-meem", site=Site.shared("2:1", (1,)), read=joining(),
          phonemes="ʔ a l i f l a: m̃ i: m",
-         all_rules=R("idgham_shafawi", "izhar_shafawi", "madd_lazim"),
+         all_rules=R("idgham_shafawi", "izhar_shafawi", "madd_lazim", "tarqeeq"),
          char_rules=LAM_TO_MEEM,
          sound_rules={"a:": R("madd_lazim"), "m̃": R("idgham_shafawi"),
                       "i:": R("madd_lazim"), "m": R("izhar_shafawi")}),
@@ -66,7 +62,7 @@ CASES = (
     # Warsh: اَلَٓمِّٓصَٓۖ
     Case(id="alif-lam-meem-saad", site=Site.shared("7:1", (1,)), read=joining(),
          phonemes="ʔ a l i f l a: m̃ i: m sˤ aˤ: d Q",
-         all_rules=R("idgham_shafawi", "izhar_shafawi", "madd_lazim", "tafkheem", "qalqala_sughra"),
+         all_rules=R("idgham_shafawi", "izhar_shafawi", "madd_lazim", "tafkheem", "tarqeeq", "qalqala_sughra"),
          char_rules=LAM_TO_MEEM | SAAD,
          sound_rules={"a:": R("madd_lazim"), "m̃": R("idgham_shafawi"),
                       "i:": R("madd_lazim"), "m": R("izhar_shafawi"),
@@ -75,14 +71,14 @@ CASES = (
     # Hafs: الٓر ۚ
     Case(id="alif-lam-raa", site=Site(hafs=("10:1", (1,))), read=joining(),
          phonemes="ʔ a l i f l a: m rˤ aˤ:",
-         all_rules=R("izhar_shafawi", "madd_lazim", "madd_tabii", "tafkheem"),
+         all_rules=R("izhar_shafawi", "madd_lazim", "madd_tabii", "tafkheem", "tarqeeq"),
          char_rules=LAM_IZHAR | RAA,
          sound_rules={"a:": R("madd_lazim"), "m": R("izhar_shafawi"),
                       "rˤ": R("tafkheem"), "aˤ:": R("madd_tabii", "tafkheem")}),
     # Hafs: الٓمٓر ۚ
     Case(id="alif-lam-meem-raa", site=Site(hafs=("13:1", (1,))), read=joining(),
          phonemes="ʔ a l i f l a: m̃ i: m rˤ aˤ:",
-         all_rules=R("idgham_shafawi", "izhar_shafawi", "madd_lazim", "madd_tabii", "tafkheem"),
+         all_rules=R("idgham_shafawi", "izhar_shafawi", "madd_lazim", "madd_tabii", "tafkheem", "tarqeeq"),
          char_rules=LAM_TO_MEEM | RAA,
          sound_rules={"a:": R("madd_lazim"), "m̃": R("idgham_shafawi"),
                       "i:": R("madd_lazim"), "m": R("izhar_shafawi"),
@@ -90,7 +86,7 @@ CASES = (
     # Hafs: كٓهيعٓصٓ
     Case(id="kaaf-haa-yaa-ayn-saad", site=Site(hafs=("19:1", (1,))), read=joining(),
          phonemes="k a: f h a: j a: ʕ a j ŋ sˤ aˤ: d Q",
-         all_rules=R("ikhfaa", "madd_lazim", "madd_tabii", "tafkheem", "qalqala_sughra"),
+         all_rules=R("ikhfaa", "madd_lazim", "madd_tabii", "tafkheem", "tarqeeq", "qalqala_sughra"),
          char_rules={
              "كاف/@madd": R("madd_lazim"),
              "ها/@madd": R("madd_tabii"),
@@ -105,7 +101,7 @@ CASES = (
                       "Q": R("qalqala_sughra")}),
     # Hafs: طه
     Case(id="taa-haa", site=Site(hafs=("20:1", (1,))), read=joining(),
-         phonemes="tˤ aˤ: h a:", all_rules=R("madd_tabii", "tafkheem"),
+         phonemes="tˤ aˤ: h a:", all_rules=R("madd_tabii", "tafkheem", "tarqeeq"),
          char_rules=TAA | {"ها/@madd": R("madd_tabii")},
          sound_rules={"tˤ": R("tafkheem"), "aˤ:": R("madd_tabii", "tafkheem"),
                       "a:": R("madd_tabii")}),
@@ -143,7 +139,7 @@ CASES = (
         states={
             "joined": Expect(
                 read=through(), phonemes=("tˤ aˤ: s i: ŋ", "t i l k"),
-                all_rules=R("ikhfaa", "madd_tabii", "madd_lazim", "tafkheem", "waqf_diacritic_drop"),
+                all_rules=R("ikhfaa", "madd_tabii", "madd_lazim", "tafkheem", "tarqeeq", "waqf_diacritic_drop"),
                 char_rules=TAA | {
                     "سين/@madd": R("madd_lazim"),
                     "سين/ن": R("ikhfaa"),
@@ -155,7 +151,7 @@ CASES = (
             "stopped": Expect(
                 read=explicit(ibtidaa=1, waqf=1),
                 phonemes=("tˤ aˤ: s i: n", "t i l k a"),
-                all_rules=R("izhar", "madd_tabii", "madd_lazim", "tafkheem"),
+                all_rules=R("izhar", "madd_tabii", "madd_lazim", "tafkheem", "tarqeeq"),
                 char_rules=TAA | {
                     "سين/@madd": R("madd_lazim"),
                     "سين/ن": R("izhar"),
@@ -168,7 +164,7 @@ CASES = (
     ),
     # Hafs: يسٓ
     Case(id="yaa-seen", site=Site(hafs=("36:1", (1,))), read=joining(),
-         phonemes="j a: s i: n", all_rules=R("izhar", "madd_tabii", "madd_lazim"),
+         phonemes="j a: s i: n", all_rules=R("izhar", "madd_tabii", "madd_lazim", "tarqeeq"),
          char_rules={"يا/@madd": R("madd_tabii"),
                      "سين/@madd": R("madd_lazim"),
                      "سين/ن": R("izhar")},
@@ -182,7 +178,7 @@ CASES = (
                       "Q": R("qalqala_sughra")}),
     # Hafs: حمٓ
     Case(id="haa-meem", site=Site(hafs=("40:1", (1,))), read=joining(),
-         phonemes="ħ a: m i: m", all_rules=R("izhar_shafawi", "madd_tabii", "madd_lazim"),
+         phonemes="ħ a: m i: m", all_rules=R("izhar_shafawi", "madd_tabii", "madd_lazim", "tarqeeq"),
          char_rules={"حا/@madd": R("madd_tabii"),
                      "ميم/@madd": R("madd_lazim"),
                      "ميم/م[2]": R("izhar_shafawi")},
@@ -223,7 +219,7 @@ CASES = (
     VariantCase(
         id="noon-wasl",
         site=Site(hafs=("68:1", (1, 2))),
-        selector=KhilafId.NOON_YASEEN_WASL,
+        selector=KhilafId.NOON_WASL,
         faces={
             "izhar": Expect(
                 read=joining(),

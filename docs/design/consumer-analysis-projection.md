@@ -164,7 +164,7 @@ The request and result retain separate variant and extra-phoneme values:
 
 ~~~python
 pm = Phonemizer(
-    variants={"iqlab_nasal": "bilabial"},
+    variants={"iqlab_nasal": "closed"},
     extra_phonemes=("emphatic_fatha",),
 )
 result = pm.phonemize("1:1")

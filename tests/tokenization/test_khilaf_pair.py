@@ -39,7 +39,7 @@ def test_selecting_the_variant_flips_the_sound_at_a_written_site():
     # وَيَبْصُطُ, default plain, saad emphatic
     default = reading(YABSUT, isolated=14)
     saad = reading(
-        YABSUT, selection=_selection(KhilafId.SEEN_SAD_YABSUT, "saad"),
+        YABSUT, selection=_selection(KhilafId.YABSUT, "saad"),
         isolated=14,
     )
     assert "sˤ" not in default.phonemes(14)
@@ -52,7 +52,7 @@ def test_at_the_unwritten_site_one_unit_carries_the_variant_sound():
     assert not _marks(BIMUSAYTIR, Script.UTHMANI, 3)
     default = reading(BIMUSAYTIR, isolated=3)
     seen = reading(
-        BIMUSAYTIR, selection=_selection(KhilafId.SEEN_SAD_BIMUSAYTIR, "seen"),
+        BIMUSAYTIR, selection=_selection(KhilafId.BIMUSAYTIR, "seen"),
         isolated=3,
     )
     assert "sˤ" in default.phonemes(3)

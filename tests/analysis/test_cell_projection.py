@@ -9,16 +9,19 @@ from quranic_phonemizer.analysis.cells import (
     CellRole,
     CellSide,
     CellStatus,
+    CellTier,
     build_cell_view,
 )
 from quranic_phonemizer.analysis.facts import analyse
 from quranic_phonemizer.analysis.inscription import inscribe
 from quranic_phonemizer.analysis.source import build_source_view
+from quranic_phonemizer.analysis.source_dtos import LiteralSilence
 from quranic_phonemizer.model.address import Riwayah, Script
-from quranic_phonemizer.model.canon import Quality, VowelForm
+from quranic_phonemizer.model.canon import CanonLetter, Onset, Quality, VowelForm
 from quranic_phonemizer.model.performance import Aspect, Consonant, Vowel
 from quranic_phonemizer.orthography.write import pen_for
 from quranic_phonemizer.render.alphabet import packaged_alphabet
+from quranic_phonemizer.riwayat.warsh.resources import corpus as warsh_corpus
 from quranic_phonemizer.session import phonemize_request
 
 
@@ -27,11 +30,27 @@ def pen(hafs):
     return pen_for(hafs.inventory(Script.UTHMANI))
 
 
-def _build(hafs, pen, ref: str):
+def _build(hafs, pen, ref: str, *, extra_phonemes=frozenset()):
     session = phonemize_request(hafs, ref)
     kw = dict(ref=ref, riwayah="hafs", script="uthmani", variant={})
-    bundle = build_bundle(session, **kw)
-    view = build_cell_view(session, spelling="transformed", pen=pen, **kw)
+    bundle = build_bundle(session, extra_phonemes=extra_phonemes, **kw)
+    view = build_cell_view(
+        session, spelling="transformed", pen=pen,
+        extra_phonemes=extra_phonemes, **kw,
+    )
+    return session, bundle, view
+
+
+def _build_warsh(ref: str, *, stop_refs=(), extra_phonemes=frozenset()):
+    warsh = recitation(Riwayah.WARSH)
+    warsh_pen = pen_for(warsh.inventory(Script.UTHMANI))
+    session = phonemize_request(warsh, ref, stop_refs=stop_refs)
+    kw = dict(ref=ref, riwayah="warsh", script="uthmani", variant={})
+    bundle = build_bundle(session, extra_phonemes=extra_phonemes, **kw)
+    view = build_cell_view(
+        session, spelling="transformed", pen=warsh_pen,
+        extra_phonemes=extra_phonemes, **kw,
+    )
     return session, bundle, view
 
 
@@ -39,6 +58,30 @@ def test_sukun_is_folded_into_its_main_letter(hafs, pen):
     _, _, view = _build(hafs, pen, "1:1")
     assert all(c.role is not CellRole.SUKUN for w in view.words for c in w.columns)
     assert any(c.tier.value == "main" and "ْ" in c.text for w in view.words for c in w.columns)
+
+
+def test_a_folded_warsh_sukun_remaps_its_realized_vowel_sound():
+    _, bundle, view = _build_warsh("35:28")
+    word_id = next(word.id for word in bundle.words if word.ref == "35:28:13")
+    word = next(item for item in view.words if item.word_id == word_id)
+    carrier = next(column for column in word.columns if column.text == "أْ")
+    tokens = {
+        bundle.sounds[sound.value].token for sound in carrier.owned_sound_ids
+    }
+
+    assert tokens == {"ʔ", "u"}
+    assert all(
+        carrier.id in sound.column_ids
+        for sound in word.sounds if sound.sound_id in carrier.owned_sound_ids
+    )
+
+
+def test_a_compact_hamza_seat_keeps_its_written_haraka_attached():
+    _, _, view = _build_warsh("37:52")
+    word = view.words[1]
+    haraka = next(column for column in word.columns if column.role is CellRole.HARAKA)
+
+    assert haraka.attached_to_column_id == word.columns[0].id
 
 
 def test_tanween_keeps_the_vowel_slot_it_is_written_on(hafs, pen):
@@ -151,7 +194,7 @@ def test_madd_iwad_inserts_an_alif_when_the_rasm_has_no_carrier(hafs, pen):
     assert carrier.text == "ا"
     assert not carrier.source_character_ids
     assert {names[item] for item in carrier.rule_occurrence_ids} == {
-        "madd_iwad", "madd_tabii"
+        "madd_iwad", "madd_tabii", "tarqeeq"
     }
 
 
@@ -507,8 +550,10 @@ def test_ishmam_keeps_the_fatha_visible_and_names_the_noon(riwayah):
     assert all("۫" not in c.text for c in word.columns)
 
 
-def test_tanween_keeps_vowel_colour_on_its_sound_not_its_glyph(hafs, pen):
-    _, bundle, view = _build(hafs, pen, "4:1")
+def test_tanween_vowel_renders_emphatic_without_a_weight_label(hafs, pen):
+    _, bundle, view = _build(
+        hafs, pen, "4:1", extra_phonemes=frozenset({"emphatic_fatha"})
+    )
     word_id = next(word.id for word in bundle.words if word.ref == "4:1:16")
     word = next(word for word in view.words if word.word_id == word_id)
     tafkheem = next(
@@ -530,8 +575,142 @@ def test_tanween_keeps_vowel_colour_on_its_sound_not_its_glyph(hafs, pen):
     )
 
     assert tafkheem.id not in tanween.rule_occurrence_ids
-    assert tafkheem.id in vowel.rule_occurrence_ids
+    assert tafkheem.id not in vowel.rule_occurrence_ids
+    assert bundle.sounds[vowel.sound_id.value].token.startswith("aˤ")
     assert idgham.id in tanween.rule_occurrence_ids
+
+
+def test_warsh_pronounced_raa_lam_and_a_carriers_have_one_weight_identity():
+    _, bundle, view = _build_warsh("32:4")
+    rules = {
+        occurrence.id: occurrence.rule_id.value
+        for occurrence in bundle.rule_occurrences
+    }
+    weights = {"tafkheem", "tarqeeq"}
+
+    for word in view.words:
+        for column in word.columns:
+            named = {
+                rules[item] for item in column.rule_occurrence_ids
+                if rules[item] in weights
+            }
+            sounds = tuple(dict.fromkeys((
+                *column.owned_sound_ids, *column.presented_sound_ids,
+            )))
+            pronounced_weight_letter = (
+                column.role is CellRole.LETTER
+                and any(letter in column.text for letter in "رل")
+                and sounds
+                and column.silence is None
+            )
+            pronounced_a_carrier = (
+                column.role is CellRole.MADD
+                and any(
+                    bundle.sounds[sound.value].token.startswith(("a", "aˤ"))
+                    for sound in sounds
+                )
+            )
+            if pronounced_weight_letter or pronounced_a_carrier:
+                assert len(named) == 1, (word.word_id, column.text, named)
+            if column.role is CellRole.HARAKA and "َ" in column.text:
+                assert not named, (word.word_id, column.text, named)
+
+
+def test_joined_shortened_long_a_has_no_weight_identity_on_its_base():
+    """A carrier dropped before wasl leaves short /a/, not a light alif."""
+    _, bundle, view = _build_warsh("2:35")
+    rules = {
+        occurrence.id: occurrence.rule_id.value
+        for occurrence in bundle.rule_occurrences
+    }
+    word_id = next(word.id for word in bundle.words if word.ref == "2:35:1")
+    word = next(word for word in view.words if word.word_id == word_id)
+    meem = next(column for column in word.columns if column.text == "م")
+    fatha = next(
+        column for column in word.columns
+        if column.role is CellRole.HARAKA
+        and column.attached_to_column_id == meem.id
+    )
+
+    assert not {
+        rules[item] for item in meem.rule_occurrence_ids
+        if rules[item] in {"tafkheem", "tarqeeq"}
+    }
+    assert not {
+        rules[item] for item in fatha.rule_occurrence_ids
+        if rules[item] in {"tafkheem", "tarqeeq"}
+    }
+
+
+def test_long_a_tarqeeq_labels_its_alif_carrier_not_the_hamza_presenter():
+    _, bundle, view = _build_warsh("2:5")
+    rules = {
+        occurrence.id: occurrence.rule_id.value
+        for occurrence in bundle.rule_occurrences
+    }
+    word_id = next(word.id for word in bundle.words if word.ref == "2:5:6")
+    word = next(word for word in view.words if word.word_id == word_id)
+    hamza = next(column for column in word.columns if column.text == "ء")
+    carrier = next(
+        column for column in word.columns
+        if column.role is CellRole.MADD and column.text == "ا"
+    )
+    on = lambda column: tuple(
+        rules[item] for item in column.rule_occurrence_ids
+        if rules[item] in {"tafkheem", "tarqeeq"}
+    )
+
+    assert on(hamza) == ()
+    assert on(carrier) == ("tarqeeq",)
+
+
+def test_compact_two_hamza_dagger_stays_in_the_source_alif_cell():
+    """The small vowel in Warsh `aantum` is not a standalone letter unit."""
+    _, _, view = _build_warsh("2:139:14")
+    columns = view.words[0].columns
+
+    assert any(column.text == "أٰ" for column in columns)
+    assert all(column.text != "ٰ" for column in columns)
+
+
+def test_joined_naql_badal_folds_the_silent_hamza_alif_into_its_carrier():
+    _, bundle, view = _build_warsh("3:83")
+    word_id = next(word.id for word in bundle.words if word.ref == "3:83:2")
+    word = next(item for item in view.words if item.word_id == word_id)
+    rules = {
+        occurrence.id: occurrence.rule_id.value
+        for occurrence in bundle.rule_occurrences
+    }
+    carrier = next(column for column in word.columns if column.text == "اٰ")
+
+    assert carrier.role is CellRole.MADD
+    assert carrier.status is CellStatus.PRESENT
+    assert {rules[item] for item in carrier.rule_occurrence_ids} >= {
+        "naql", "madd_badal",
+    }
+    assert {bundle.sounds[item.value].token for item in carrier.owned_sound_ids} == {
+        "a:",
+    }
+    assert all(column.text != "ٰ" for column in word.columns)
+    assert not any(
+        column.text == "ا"
+        and "naql" in {rules[item] for item in column.rule_occurrence_ids}
+        for column in word.columns
+    )
+
+
+def test_a_lam_shaped_tashil_seat_is_not_classified_as_a_spoken_lam():
+    _, bundle, view = _build_warsh("27:62")
+    word_id = next(word.id for word in bundle.words if word.ref == "27:62:21")
+    word = next(item for item in view.words if item.word_id == word_id)
+    seat = next(column for column in word.columns if column.text == "ل")
+    rules = {
+        bundle.rule_occurrences[item.value].rule_id.value
+        for item in seat.rule_occurrence_ids
+    }
+
+    assert "tashil" in rules
+    assert rules.isdisjoint({"tafkheem", "tarqeeq"})
 
 
 @pytest.mark.parametrize(("ref", "mark"), [
@@ -620,6 +799,779 @@ def test_warsh_native_iqlab_meem_is_its_own_source_backed_cell():
     assert meem.attached_to_column_id == tanween.attached_to_column_id
     assert tanween.owned_sound_ids
     assert occurrence.id not in tanween.rule_occurrence_ids
+
+
+def test_stopped_warsh_native_iqlab_meem_is_not_variant_silence():
+    """A written iqlab mark is not an implicit recitation variant handoff."""
+    session, bundle, view = _build_warsh(
+        "2:9-2:10", stop_refs=("2:9:9",)
+    )
+    source = build_source_view(session, bundle=bundle)
+    meem = next(unit for unit in source.units if unit.text == "ۢ")
+    word_id = next(word.id for word in bundle.words if word.ref == "2:9:9")
+    word = next(item for item in view.words if item.word_id == word_id)
+    cell = next(column for column in word.columns if column.text == "ۢ")
+    rules = {
+        occurrence.id: occurrence.rule_id.value
+        for occurrence in bundle.rule_occurrences
+    }
+
+    assert meem.silence not in {
+        LiteralSilence.ORTHOGRAPHIC, LiteralSilence.VARIANT,
+    }
+    assert rules[meem.silence] == "waqf_diacritic_drop"
+    assert cell.silence is not LiteralSilence.VARIANT
+    assert rules[cell.silence] == "waqf_diacritic_drop"
+
+
+def test_warsh_native_iqlab_meem_follows_kasratan_below_the_host():
+    _, _, view = _build_warsh("7:53")
+    word = next(
+        item for item in view.words
+        if any(column.text == "ۢ" for column in item.columns)
+    )
+    meem = next(column for column in word.columns if column.text == "ۢ")
+    tanween = next(
+        column for column in word.columns if column.role is CellRole.TANWEEN
+    )
+
+    assert tanween.tier is CellTier.BELOW
+    assert meem.tier is CellTier.BELOW
+    assert meem.attached_to_column_id == tanween.attached_to_column_id
+
+
+def test_warsh_native_noon_iqlab_meem_owns_the_rule_and_sound():
+    _, bundle, view = _build_warsh("19:93")
+    occurrence = next(
+        item for item in bundle.rule_occurrences
+        if item.rule_id.value == "iqlab"
+    )
+    word = next(
+        item for item in view.words
+        if any(column.text == "ۢ" for column in item.columns)
+    )
+    meem = next(column for column in word.columns if column.text == "ۢ")
+    noon = next(
+        column for column in word.columns
+        if column.id == meem.attached_to_column_id
+    )
+
+    assert meem.source_character_ids
+    assert meem.status is CellStatus.PRESENT
+    assert meem.silence is None
+    assert meem.owned_sound_ids == occurrence.sound_ids
+    assert meem.rule_occurrence_ids == (occurrence.id,)
+    assert not noon.owned_sound_ids
+    assert noon.silence == occurrence.id
+
+
+def test_warsh_final_alif_sukun_stays_with_its_written_alif():
+    _, _, view = _build_warsh("6:70")
+    word = next(
+        item for item in view.words
+        if "اَ۪تَّخَذُوا" in "".join(column.text for column in item.columns)
+    )
+    final = word.columns[-1]
+
+    assert final.role is CellRole.LETTER
+    assert final.text == "اْ"
+    assert not any(
+        column.role is CellRole.SUKUN for column in word.columns
+    )
+
+
+def test_warsh_naql_badal_long_vowel_is_a_cross_word_bridge():
+    _, bundle, view = _build_warsh("84:6-84:7")
+    rules = {
+        sound.id: {
+            bundle.rule_occurrences[item.value].rule_id.value
+            for item in sound.rule_occurrence_ids
+        }
+        for sound in bundle.sounds
+    }
+    merger = next(
+        item for item in bundle.mergers
+        if item.boundary_id is not None
+        and rules[item.sound_id] >= {"naql", "madd_badal"}
+    )
+    bridge = next(
+        item for boundary in view.boundaries for item in boundary.bridges
+        if item.merger_id == merger.id
+    )
+    before = next(
+        word for word in view.words if word.word_id == merger.before_word_id
+    )
+    after = next(
+        word for word in view.words if word.word_id == merger.after_word_id
+    )
+    presenter = next(
+        column for column in before.columns
+        if merger.sound_id in column.presented_sound_ids
+    )
+    carrier = next(
+        column for column in after.columns
+        if merger.sound_id in column.owned_sound_ids
+    )
+    qata = next(
+        column for column in after.columns
+        if column.text == "ا۟" and column.status is CellStatus.DROPPED
+    )
+
+    assert bridge.sound.sound_id == merger.sound_id
+    assert bridge.before_column_ids == (presenter.id,)
+    assert bridge.after_column_ids == (carrier.id,)
+    assert set(bridge.sound.column_ids) == {presenter.id, carrier.id}
+    assert presenter.role is CellRole.HARAKA and presenter.text == "ُ"
+    assert carrier.role is CellRole.MADD and carrier.text == "و"
+    assert qata.id != carrier.id and qata.silence is not None
+    assert all(
+        item.sound_id != merger.sound_id
+        for word in view.words for item in word.sounds
+    )
+
+
+def test_warsh_tanween_naql_vowel_is_a_cross_word_bridge():
+    _, bundle, view = _build_warsh("7:58")
+    occurrence = next(
+        item for item in bundle.rule_occurrences
+        if item.rule_id.value == "naql"
+        and {bundle.words[word.value].ref for word in item.word_ids}
+        == {"7:58:3", "7:58:4"}
+    )
+    merger = next(
+        item for item in bundle.mergers
+        if occurrence.id in item.rule_occurrence_ids
+    )
+    bridge = next(
+        item for boundary in view.boundaries for item in boundary.bridges
+        if item.merger_id == merger.id
+    )
+    before = view.words[2]
+    boundary = next(
+        boundary for boundary in view.boundaries
+        if bridge in boundary.bridges
+    )
+    tanween = next(
+        column for column in before.columns
+        if column.role is CellRole.TANWEEN
+        and merger.sound_id in column.presented_sound_ids
+    )
+    source_haraka = next(
+        column for column in boundary.columns
+        if column.role is CellRole.HARAKA
+        and merger.sound_id in column.owned_sound_ids
+    )
+
+    assert bundle.sounds[merger.sound_id.value].token == "i"
+    assert source_haraka.text == "ِ"
+    assert source_haraka.status is CellStatus.PRESENT
+    assert occurrence.id not in tanween.rule_occurrence_ids
+    assert occurrence.id in source_haraka.rule_occurrence_ids
+    assert occurrence.id in bridge.sound.rule_occurrence_ids
+    assert bridge.before_column_ids == (tanween.id,)
+    assert bridge.after_column_ids == (source_haraka.id,)
+    assert bridge.sound.column_ids == (tanween.id, source_haraka.id)
+    assert all(
+        sound.sound_id != merger.sound_id
+        for word in view.words for sound in word.sounds
+    )
+    assert all(
+        source_haraka.id not in group.column_ids
+        for word in view.words for group in word.groups
+    )
+
+
+def test_warsh_tanween_naql_extracts_a_compact_tashil_haraka_to_the_bridge():
+    _, bundle, view = _build_warsh("27:63")
+    merger = next(
+        item for item in bundle.mergers
+        if item.before_word_id == bundle.words[13].id
+        and item.after_word_id == bundle.words[14].id
+    )
+    boundary = next(
+        item for item in view.boundaries
+        if item.boundary_id == merger.boundary_id
+    )
+    bridge = next(item for item in boundary.bridges if item.merger_id == merger.id)
+    haraka = next(
+        column for column in boundary.columns
+        if column.role is CellRole.HARAKA
+    )
+    after = view.words[14]
+
+    assert haraka.text == "َ"
+    assert haraka.owned_sound_ids == (merger.sound_id,)
+    assert bridge.after_column_ids == (haraka.id,)
+    assert any(column.text == "ا۟" for column in after.columns)
+    assert all(column.text != "اَ۟" for column in after.columns)
+
+
+def test_warsh_naql_badal_compound_keeps_intervening_source_marks():
+    _, joined_bundle, joined_view = _build_warsh("84:6-84:7")
+    _, fresh_bundle, fresh_view = _build_warsh(
+        "84:6-84:7", stop_refs=("84:7:2",),
+    )
+    joined_id = next(
+        word.id for word in joined_bundle.words if word.ref == "84:7:3"
+    )
+    fresh_id = next(
+        word.id for word in fresh_bundle.words if word.ref == "84:7:3"
+    )
+    joined = next(word for word in joined_view.words if word.word_id == joined_id)
+    fresh = next(word for word in fresh_view.words if word.word_id == fresh_id)
+
+    joined_units = tuple(
+        unit for column in joined.columns for unit in column.source_unit_ids
+    )
+    fresh_units = tuple(
+        unit for column in fresh.columns for unit in column.source_unit_ids
+    )
+    assert joined_units == fresh_units
+    assert any(
+        column.text == "ا۟" and column.status is CellStatus.DROPPED
+        for column in joined.columns
+    )
+    assert all(column.text != "۟" for column in joined.columns)
+    assert any(
+        column.text == "و" and column.role is CellRole.MADD
+        and column.owned_sound_ids
+        for column in joined.columns
+    )
+    assert all(column.text != "ا۟و" for column in joined.columns)
+
+
+def test_warsh_matching_hamza_ibdal_long_is_a_cross_word_bridge():
+    session, bundle, view = _build_warsh("32:4")
+    underlying = session.score.words[4].slots[0]
+    merger = next(
+        item for item in bundle.mergers
+        if item.before_word_id == bundle.words[3].id
+        and item.after_word_id == bundle.words[4].id
+    )
+    bridge = next(
+        item for boundary in view.boundaries for item in boundary.bridges
+        if item.merger_id == merger.id
+    )
+    before = view.words[3]
+    after = view.words[4]
+    kasra = next(
+        column for column in before.columns
+        if merger.sound_id in column.presented_sound_ids
+    )
+    carrier = next(
+        column for column in after.columns
+        if merger.sound_id in column.owned_sound_ids
+    )
+
+    assert underlying.onset is Onset.PLAIN
+    assert underlying.nucleus.joined.quality is Quality.I
+    assert bundle.sounds[merger.sound_id.value].token == "i:"
+    assert kasra.role is CellRole.HARAKA and kasra.text == "ِ"
+    assert carrier.role is CellRole.MADD and carrier.text == "ى"
+    assert carrier.status is CellStatus.REPLACED
+    assert carrier.source_character_ids
+    assert bridge.before_column_ids == (kasra.id,)
+    assert bridge.after_column_ids == (carrier.id,)
+    assert bridge.sound.column_ids == (kasra.id, carrier.id)
+    assert {
+        bundle.rule_occurrences[item.value].rule_id.value
+        for item in bridge.sound.rule_occurrence_ids
+    } == {"ibdal_hamza", "madd_tabii"}
+
+
+def test_warsh_joined_pausal_alif_identity_stays_on_its_carrier():
+    _, bundle, view = _build_warsh("18:37")
+    occurrence = next(
+        item for item in bundle.rule_occurrences
+        if item.rule_id.value == "pausal_alif"
+    )
+    word_id = next(word.id for word in bundle.words if word.ref == "18:37:1")
+    word = next(item for item in view.words if item.word_id == word_id)
+    labelled = [
+        column for column in word.columns
+        if occurrence.id in column.rule_occurrence_ids
+    ]
+
+    assert len(labelled) == 1
+    assert labelled[0].role is CellRole.MADD
+    assert labelled[0].text == "ا"
+    assert labelled[0].status is CellStatus.DROPPED
+    assert all(
+        occurrence.id not in column.rule_occurrence_ids
+        for column in word.columns if column.role is CellRole.HARAKA
+    )
+
+
+def test_iltiqa_shortening_labels_only_the_carrier_in_both_riwayat(hafs, pen):
+    cases = (
+        (*_build(hafs, pen, "2:11"), "ى"),
+        (*_build_warsh("42:25"), "ے"),
+    )
+    for _, bundle, view, carrier_text in cases:
+        occurrence = next(
+            item for item in bundle.rule_occurrences
+            if item.rule_id.value == "iltiqa_shortening"
+        )
+        labelled = [
+            column for word in view.words for column in word.columns
+            if occurrence.id in column.rule_occurrence_ids
+        ]
+
+        assert len(labelled) == 1
+        assert labelled[0].text == carrier_text
+        assert labelled[0].status is CellStatus.DROPPED
+        assert all(
+            occurrence.id not in column.rule_occurrence_ids
+            for word in view.words for column in word.columns
+            if column.role is CellRole.HARAKA
+        )
+
+
+@pytest.mark.parametrize("ref", ["18:37", "2:15", "3:145"])
+def test_warsh_carrier_identity_rules_never_label_harakas(ref):
+    _, bundle, view = _build_warsh(ref)
+    rules = {
+        occurrence.id: occurrence.rule_id.value
+        for occurrence in bundle.rule_occurrences
+    }
+    forbidden = {"pausal_alif", "taqlil", "ibdal_hamza"}
+
+    assert all(
+        not any(
+            rules[occurrence] in forbidden
+            or rules[occurrence].startswith("madd_")
+            for occurrence in column.rule_occurrence_ids
+        )
+        for word in view.words for column in word.columns
+        if column.role is CellRole.HARAKA
+    )
+
+
+def test_warsh_long_article_naql_is_one_source_backed_madd_cell():
+    _, bundle, view = _build_warsh("31:3")
+    rules = {
+        occurrence.id: occurrence.rule_id.value
+        for occurrence in bundle.rule_occurrences
+    }
+    target = next(
+        column for word in view.words for column in word.columns
+        if {rules[item] for item in column.rule_occurrence_ids}
+        >= {"naql", "madd_badal"}
+        and column.text == "َا"
+    )
+
+    assert target.role is CellRole.MADD
+    assert target.status is CellStatus.PRESENT
+    assert target.source_character_ids
+    assert target.owned_sound_ids
+    assert not any(
+        column.text == "ا" and column.status is CellStatus.DROPPED
+        and any(rules[item] == "naql" for item in column.rule_occurrence_ids)
+        for word in view.words for column in word.columns
+    )
+
+
+def test_warsh_combining_hamza_seat_is_one_live_cell():
+    _, _, view = _build_warsh("11:53")
+    target = next(
+        column for word in view.words for column in word.columns
+        if column.text == "ئْ"
+    )
+
+    assert target.role is CellRole.LETTER
+    assert target.status is CellStatus.PRESENT
+    assert target.owned_sound_ids
+    assert not any(
+        column.text == "ي" and column.status is CellStatus.DROPPED
+        for word in view.words for column in word.columns
+    )
+
+
+def test_warsh_hamza_maddah_projects_separate_onset_and_carrier_cells():
+    session, bundle, view = _build_warsh("6:135")
+    facts = analyse(session, packaged_alphabet())
+    word = view.words[3]
+    hamza = next(column for column in word.columns if column.text == "أ")
+    carrier = next(column for column in word.columns if column.text == "َا")
+    hamza_sounds = [facts.sounds[sound.value].value for sound in hamza.owned_sound_ids]
+    carrier_sounds = [
+        facts.sounds[sound.value].value for sound in carrier.owned_sound_ids
+    ]
+    rules = {
+        occurrence.id: occurrence.rule_id.value
+        for occurrence in bundle.rule_occurrences
+    }
+
+    assert hamza.source_character_ids and carrier.source_character_ids
+    assert set(hamza.source_character_ids).isdisjoint(carrier.source_character_ids)
+    assert all(isinstance(sound, Consonant) for sound in hamza_sounds)
+    assert all(isinstance(sound, Vowel) and sound.long for sound in carrier_sounds)
+    assert "madd_badal" not in {
+        rules[occurrence] for occurrence in hamza.rule_occurrence_ids
+    }
+    assert "madd_badal" in {
+        rules[occurrence] for occurrence in carrier.rule_occurrence_ids
+    }
+    assert all(
+        cell.column_ids == (carrier.id,)
+        for cell in word.sounds if cell.sound_id in carrier.owned_sound_ids
+    )
+
+
+def test_warsh_suwaa_keeps_its_final_vowel_before_the_following_qata():
+    _, bundle, view = _build_warsh("30:9")
+    words = {word.ref: word.id for word in bundle.words}
+    suwaa = next(word for word in view.words if word.word_id == words["30:9:6"])
+    an = next(word for word in view.words if word.word_id == words["30:9:7"])
+    suwaa_hamza = next(column for column in suwaa.columns if column.text == "أ۪")
+    suwaa_carrier = next(column for column in suwaa.columns if column.text == "ىٰٓ")
+    an_hamza = next(column for column in an.columns if column.text == "أ")
+    an_fatha = next(column for column in an.columns if column.text == "َ")
+    rules = {
+        occurrence.id: occurrence.rule_id.value
+        for occurrence in bundle.rule_occurrences
+    }
+
+    def tokens(column):
+        return {bundle.sounds[sound.value].token for sound in column.owned_sound_ids}
+
+    assert suwaa_hamza.status is CellStatus.PRESENT
+    assert suwaa_carrier.status is CellStatus.PRESENT
+    assert an_hamza.status is CellStatus.PRESENT
+    assert tokens(suwaa_hamza) == {"ʔ"}
+    assert tokens(suwaa_carrier) == {"ɛ:"}
+    assert tokens(an_hamza) == {"ʔ"}
+    assert tokens(an_fatha) == {"a"}
+    assert {rules[item] for item in suwaa_carrier.rule_occurrence_ids} == {
+        "madd_munfasil",
+        "madd_badal",
+        "taqlil",
+    }
+    assert not {
+        rules[item]
+        for column in (*suwaa.columns, *an.columns)
+        for item in column.rule_occurrence_ids
+    } & {"naql", "ibdal_hamza", "tashil"}
+
+
+def test_all_warsh_hamza_maddah_spellings_project_separate_carriers():
+    corpus = warsh_corpus()
+    entries = [
+        (corpus.public_ref(location), entry.text)
+        for location, entry in corpus.entries.items()
+        if any(pair in entry.text for pair in ("أٓ", "إٓ", "ءٓ", "ؤٓ", "ئٓ"))
+    ]
+
+    assert len(entries) == 69
+    for ref, text in entries:
+        _, bundle, view = _build_warsh(ref)
+        word_id = next(word.id for word in bundle.words if word.ref == ref)
+        word = next(item for item in view.words if item.word_id == word_id)
+        assert any(column.text in {"أ", "إ", "ء", "ؤ", "ئ"} for column in word.columns), (
+            ref,
+            text,
+        )
+        assert any(column.text == "َا" for column in word.columns), (ref, text)
+
+
+def test_warsh_unwritten_divine_name_gemination_is_visible_when_transformed():
+    _, _, view = _build_warsh("27:25")
+    word = view.words[2]
+    lam = next(column for column in word.columns if column.text == "لّ")
+    carrier = next(
+        column for column in word.columns
+        if column.role is CellRole.MADD and column.anchor_unit_id in lam.source_unit_ids
+    )
+    long_vowel = next(
+        sound for sound in word.sounds if sound.sound_id in carrier.owned_sound_ids
+    )
+
+    assert lam.status is CellStatus.REPLACED
+    assert long_vowel.column_ids == (carrier.id,)
+    assert long_vowel.sound_id not in lam.presented_sound_ids
+
+
+@pytest.mark.parametrize(
+    ("ref", "word_ref"),
+    [
+        ("1:1", "1:1:2"),
+        ("1:6", "1:6:2"),
+        ("2:163", "2:163:7"),
+    ],
+)
+def test_warsh_unwritten_gemination_is_visible_for_every_source_convention(
+    ref, word_ref
+):
+    session, bundle, view = _build_warsh(ref)
+    facts = analyse(session, packaged_alphabet())
+    word_id = next(word.id for word in bundle.words if word.ref == word_ref)
+    source_word = next(word for word in bundle.words if word.id == word_id)
+    cell_word = next(word for word in view.words if word.word_id == word_id)
+    geminates = [
+        column for column in cell_word.columns
+        if any(
+            isinstance(facts.sounds[sound.value].value, Consonant)
+            and facts.sounds[sound.value].value.geminate
+            for sound in column.owned_sound_ids
+        )
+    ]
+
+    assert "ّ" not in source_word.text
+    assert geminates
+    assert all("ّ" in column.text for column in geminates)
+
+
+def test_warsh_feminine_relative_pronoun_inserts_its_unwritten_fatha_cell():
+    session, bundle, view = _build_warsh("41:33")
+    facts = analyse(session, packaged_alphabet())
+    word_id = next(word.id for word in bundle.words if word.ref == "41:33:7")
+    word = next(item for item in view.words if item.word_id == word_id)
+    lam = next(column for column in word.columns if column.text == "لّ")
+    fatha = next(
+        column for column in word.columns
+        if column.status is CellStatus.INSERTED
+        and column.role is CellRole.HARAKA
+        and column.text == "َ"
+        and column.anchor_unit_id in lam.source_unit_ids
+    )
+    ta = next(column for column in word.columns if column.text == "ت")
+
+    lam_sounds = [facts.sounds[sound.value].value for sound in lam.owned_sound_ids]
+    fatha_sounds = [facts.sounds[sound.value].value for sound in fatha.owned_sound_ids]
+    ta_sounds = [facts.sounds[sound.value].value for sound in ta.owned_sound_ids]
+
+    assert fatha.source_character_ids == ()
+    assert fatha.source_unit_ids == ()
+    assert len(lam_sounds) == 1
+    assert isinstance(lam_sounds[0], Consonant)
+    assert lam_sounds[0].letter is CanonLetter.LAM and lam_sounds[0].geminate
+    assert fatha_sounds == [Vowel(Quality.A)]
+    assert ta_sounds == [Consonant(CanonLetter.TA)]
+    assert not any(
+        occurrence.rule_id.value == "lam_shamsiyyah"
+        and word_id in occurrence.word_ids
+        for occurrence in bundle.rule_occurrences
+    )
+
+
+def test_warsh_taqlil_is_only_on_its_carrier_cell():
+    _, bundle, view = _build_warsh("2:15")
+    taqlil = {
+        occurrence.id for occurrence in bundle.rule_occurrences
+        if occurrence.rule_id.value == "taqlil"
+    }
+    labelled = [
+        column for word in view.words for column in word.columns
+        if taqlil.intersection(column.rule_occurrence_ids)
+    ]
+
+    assert labelled
+    assert all(column.role is CellRole.MADD for column in labelled)
+
+
+def test_warsh_article_naql_keeps_a_separate_silent_qata_alif_cell():
+    _, bundle, view = _build_warsh("31:18")
+    occurrence = next(
+        item for item in bundle.rule_occurrences
+        if item.rule_id.value == "naql"
+        and any(bundle.words[word.value].ref == "31:18:9" for word in item.word_ids)
+    )
+    word_id = next(word.id for word in bundle.words if word.ref == "31:18:9")
+    word = next(item for item in view.words if item.word_id == word_id)
+    named = [
+        column for column in word.columns
+        if occurrence.id in column.rule_occurrence_ids
+    ]
+
+    assert any(
+        column.role is CellRole.HARAKA and column.text == "َ"
+        and column.status is CellStatus.PRESENT
+        for column in named
+    )
+    assert any(
+        column.role is CellRole.LETTER and column.text == "ا"
+        and column.status is CellStatus.DROPPED
+        and column.source_character_ids
+        for column in named
+    )
+    assert all(column.text != "َا" for column in word.columns)
+
+
+@pytest.mark.parametrize(
+    ("ref", "word_ref", "haraka"),
+    [
+        ("84:6", "84:6:2", "ِ"),
+        ("81:23", "81:23:3", "ُ"),
+        ("53:20", "53:20:3", "ُ"),
+    ],
+)
+def test_warsh_article_naql_splits_non_fatha_haraka_from_qata_alif(
+    ref, word_ref, haraka
+):
+    _, bundle, view = _build_warsh(ref)
+    word_id = next(word.id for word in bundle.words if word.ref == word_ref)
+    word = next(item for item in view.words if item.word_id == word_id)
+    named = [
+        column for column in word.columns
+        if any(
+            bundle.rule_occurrences[item.value].rule_id.value == "naql"
+            for item in column.rule_occurrence_ids
+        )
+    ]
+
+    assert any(
+        column.role is CellRole.HARAKA and column.text == haraka
+        and column.status is CellStatus.PRESENT
+        for column in named
+    )
+    assert any(
+        column.role is CellRole.LETTER and column.text == "ا"
+        and column.status is CellStatus.DROPPED
+        for column in named
+    )
+    assert all(column.text != haraka + "ا" for column in word.columns)
+
+
+def test_warsh_ibdal_hamza_labels_the_carrier_not_its_haraka():
+    _, bundle, view = _build_warsh("3:145")
+    ibdal = {
+        occurrence.id for occurrence in bundle.rule_occurrences
+        if occurrence.rule_id.value == "ibdal_hamza"
+    }
+    labelled = [
+        column for word in view.words for column in word.columns
+        if ibdal.intersection(column.rule_occurrence_ids)
+    ]
+
+    assert labelled
+    assert any(column.role is CellRole.MADD for column in labelled)
+    assert all(column.role is not CellRole.HARAKA for column in labelled)
+
+
+@pytest.mark.parametrize(("ref", "word_ref", "text", "token"), [
+    ("16:61", "16:61:2", "و", "w"),
+    ("57:28", "57:28:1", "ي", "j"),
+])
+def test_warsh_moving_ibdal_absorbs_its_source_mark_without_rendering_it(
+    ref, word_ref, text, token,
+):
+    _, bundle, view = _build_warsh(ref)
+    word_id = next(word.id for word in bundle.words if word.ref == word_ref)
+    word = next(item for item in view.words if item.word_id == word_id)
+    carrier = next(column for column in word.columns if column.text == text)
+    rules = {
+        bundle.rule_occurrences[item.value].rule_id.value
+        for item in carrier.rule_occurrence_ids
+    }
+
+    assert carrier.status is CellStatus.PRESENT
+    assert len(carrier.source_character_ids) == 2
+    assert "ibdal_hamza" in rules
+    assert {
+        bundle.sounds[sound.value].token for sound in carrier.owned_sound_ids
+    } == {token}
+    assert all("۬" not in column.text for column in word.columns)
+
+
+@pytest.mark.parametrize(("ref", "expected"), [
+    ("23:1:2", "أ"),
+    ("49:9:10", "إ"),
+    ("77:12:3", "أ"),
+    ("15:87:2", "أ"),
+])
+def test_every_started_latent_qata_uses_a_visible_hamza_seat(ref, expected):
+    _, bundle, view = _build_warsh(ref)
+    hamza = next(
+        column for column in view.words[0].columns
+        if any(
+            bundle.sounds[sound.value].token == "ʔ"
+            for sound in column.owned_sound_ids
+        )
+    )
+
+    assert hamza.text == expected
+    assert hamza.status is CellStatus.REPLACED
+
+
+def test_a_stopped_naql_witness_uses_the_shared_waqf_diacritic_drop():
+    _, bundle, view = _build_warsh("23:1", stop_refs=("23:1:1",))
+    rules = {
+        occurrence.id: occurrence.rule_id.value
+        for occurrence in bundle.rule_occurrences
+    }
+    host = view.words[0]
+    witness = next(
+        column for column in reversed(host.columns)
+        if column.role is CellRole.HARAKA
+        and not column.owned_sound_ids
+        and not column.presented_sound_ids
+    )
+
+    assert witness.status is CellStatus.DROPPED
+    assert witness.silence is not None
+    assert rules[witness.silence] == "waqf_diacritic_drop"
+    assert witness.silence in witness.rule_occurrence_ids
+
+
+def test_warsh_native_iqlab_fatha_renders_weight_without_a_label():
+    _, bundle, view = _build_warsh(
+        "61:6", extra_phonemes=frozenset({"emphatic_fatha"})
+    )
+    word_id = next(word.id for word in bundle.words if word.ref == "61:6:18")
+    word = next(item for item in view.words if item.word_id == word_id)
+    rules = {
+        occurrence.id: occurrence.rule_id.value
+        for occurrence in bundle.rule_occurrences
+    }
+    fatha = next(column for column in word.columns if column.role is CellRole.TANWEEN)
+
+    assert "tafkheem" not in {
+        rules[occurrence] for occurrence in fatha.rule_occurrence_ids
+    }
+    vowel = next(
+        sound for sound in word.sounds
+        if fatha.id in sound.column_ids
+        and bundle.sounds[sound.sound_id.value].token.startswith("aˤ")
+    )
+    assert "tafkheem" not in {
+        rules[occurrence] for occurrence in vowel.rule_occurrence_ids
+    }
+
+
+def test_stopped_warsh_native_iqlab_keeps_iwad_cells_contiguous():
+    _, bundle, view = _build_warsh("61:6", stop_refs=("61:6:18",))
+    word_id = next(word.id for word in bundle.words if word.ref == "61:6:18")
+    word = next(item for item in view.words if item.word_id == word_id)
+    by_id = {column.id: column for column in word.columns}
+    carrier_group = next(
+        group for group in word.groups
+        if any(by_id[column].role is CellRole.MADD for column in group.column_ids)
+    )
+
+    assert [by_id[column].text for column in carrier_group.column_ids] == [
+        "َ", "ۢ", "ا",
+    ]
+
+
+def test_lam_shamsiyyah_cell_keeps_only_its_own_rule_in_warsh():
+    _, bundle, view = _build_warsh("2:263")
+    rules = {
+        occurrence.id: occurrence.rule_id.value
+        for occurrence in bundle.rule_occurrences
+    }
+    lams = [
+        column for word in view.words for column in word.columns
+        if "lam_shamsiyyah" in {
+            rules[occurrence] for occurrence in column.rule_occurrence_ids
+        }
+    ]
+
+    assert lams
+    assert all(
+        [rules[occurrence] for occurrence in column.rule_occurrence_ids]
+        == ["lam_shamsiyyah"]
+        for column in lams
+    )
 
 
 @pytest.mark.slow

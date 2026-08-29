@@ -17,7 +17,7 @@ from quranic_phonemizer.model.canon import (
 )
 from quranic_phonemizer.model.inscription import SlotFact
 from quranic_phonemizer.orthography.inventory import InventoryError
-from quranic_phonemizer.riwayat.warsh import naql_script
+from quranic_phonemizer.riwayat.warsh import naql_script, sequence
 from quranic_phonemizer.riwayat.warsh.resources import corpus, script_adapter
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -46,6 +46,29 @@ def test_the_inventory_is_total_over_all_62_selected_source_scalars():
 
     assert len(scalars) == 62
     assert all(inventory.classify(char) is not None for char in scalars)
+
+
+def test_all_69_hamza_maddah_spellings_supply_a_long_a_nucleus():
+    source = json.loads(SOURCE.read_text(encoding="utf-8"))
+    inventory = script_adapter(Script.UTHMANI).inventory
+    rows = [
+        record["text"] for record in source.values()
+        if any(pair in record["text"] for pair in ("أٓ", "إٓ", "ءٓ", "ؤٓ", "ئٓ"))
+    ]
+
+    assert len(rows) == 69
+    for text in rows:
+        entries = sequence.entries_for(inventory, text)
+        madd = text.index("ٓ")
+        assert entries[madd].value == Nucleus.long(Quality.A)
+
+
+def test_article_long_base_ignores_its_trailing_stop_advice():
+    text = json.loads(SOURCE.read_text(encoding="utf-8"))["24:18:4"]["text"]
+    entries = sequence.entries_for(script_adapter(Script.UTHMANI).inventory, text)
+
+    assert text == "اُ۬لَايَٰتِۖ"
+    assert entries[text.index("َ")].value == Nucleus.long(Quality.A)
 
 
 def test_initial_alif_haraka_mark_is_one_wasl_sequence():
@@ -230,6 +253,28 @@ def test_prefixed_relative_pronoun_restores_its_second_lam(ref):
     assert thal.letter is CanonLetter.THAL and thal.onset is Onset.PLAIN
 
 
+@pytest.mark.parametrize(
+    "ref",
+    ((2, 24, 8), (6, 152, 6), (4, 15, 1), (16, 92, 3), (17, 9, 5)),
+)
+def test_feminine_relative_pronoun_restores_its_geminate_lam(ref):
+    entry, reading = _reading(ref)
+    built = recitation(Riwayah.WARSH).build(reading)
+    lam, ta = next(
+        (current, following)
+        for current, following in zip(
+            built.score.words[0].slots, built.score.words[0].slots[1:]
+        )
+        if current.letter is CanonLetter.LAM
+        and following.letter is CanonLetter.TA
+    )
+
+    assert "ّ" not in entry.text
+    assert lam.onset is Onset.GEMINATE
+    assert lam.nucleus == Nucleus.short(Quality.A)
+    assert ta.onset is Onset.PLAIN
+
+
 def _reading_pair(first: tuple[int, int, int], second: tuple[int, int, int]):
     one, two = Location(*first), Location(*second)
     entries = (corpus().entries[one], corpus().entries[two])
@@ -325,7 +370,8 @@ def test_the_moved_host_haraka_demotes_to_a_naql_witness():
         row.offset == fatha and row.fact is SlotFact.VOWEL_QUALITY
         for row in reading.evidence
     )
-    assert any(row.offset == fatha for row in reading.attestations)
+    witness = _evidence_at(reading, fatha, SlotFact.TAJWEED_MARK)
+    assert witness.value is Annotation.NAQL_WITNESS
 
 
 def test_the_latent_qata_keeps_its_full_shape_for_restoration():

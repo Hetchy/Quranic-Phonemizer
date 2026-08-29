@@ -78,7 +78,12 @@ def _check_attachment(
         seated_on = unit.written_on_unit_id.value if unit.written_on_unit_id else unit.id.value
         _require(
             slot_of_unit.get(seat.id.value) == slot_of_unit.get(seated_on),
-            "attachment leaves the mark's slot",
+            "attachment leaves the mark's slot: "
+            f"word={word.word_id.value} column={col.id.value} text={col.text!r} "
+            f"unit={unit.id.value} seated_on={seated_on} "
+            f"target={target} seat_unit={seat.id.value} "
+            f"mark_slot={slot_of_unit.get(seated_on)!r} "
+            f"seat_slot={slot_of_unit.get(seat.id.value)!r}",
         )
 
 
