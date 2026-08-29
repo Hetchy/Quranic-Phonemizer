@@ -95,7 +95,7 @@ class HamzaMeetings:
             Relength(at, Length.LONG),
         )
         following = near.after(at)
-        if row.exception == "fused_badal" and following is not None:
+        if row.exception in {"fused_badal", "fused_glide"} and following is not None:
             actions += (Silence(following.id, Aspect.CONSONANT),)
         return Verdict(
             Occurrence(mint(Rule.IBDAL_HAMZA, at), Rule.IBDAL_HAMZA, (at,), boundary=boundary),

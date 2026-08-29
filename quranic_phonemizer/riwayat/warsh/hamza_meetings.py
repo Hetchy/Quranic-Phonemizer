@@ -104,11 +104,13 @@ def _split_collapsed(reading, drafts, scribe, first, quality: Quality):
 def _one_word(reading, drafts, scribe, span, row: MeetingRow) -> None:
     hamzas = [draft for draft in span if draft.letter is CanonLetter.HAMZA]
     first = hamzas[0] if hamzas else span[0]
+    first_index = span.index(first)
+    following = span[first_index + 1] if first_index + 1 < len(span) else None
     first.letter = CanonLetter.HAMZA
     first.onset = Onset.PLAIN
     first.nucleus = Nucleus.short(row.first)
-    if len(hamzas) >= 2:
-        second = hamzas[1]
+    if following is not None and following.letter is CanonLetter.HAMZA:
+        second = following
     elif row.exception == "aimma" and len(span) > 1:
         second = span[1]
         second.letter = CanonLetter.HAMZA
@@ -137,6 +139,33 @@ def _cluster_offsets(reading, cluster_index: int) -> frozenset[int]:
     return frozenset((cluster.offset, *(mark.offset for mark in cluster.marks)))
 
 
+def _restore_right_qata(reading, drafts, scribe, right, row: MeetingRow):
+    right_word = reading.words.index(row.canonical)
+    if not _word_text(reading, right_word).startswith(("ا", "أ", "إ", "ء")):
+        return None
+    first_cluster = next(
+        index for index, cluster in enumerate(reading.clusters)
+        if cluster.word == right_word
+    )
+    second = right[0]
+    if second.cluster != first_cluster:
+        second = _Draft(
+            letter=CanonLetter.HAMZA, onset=Onset.PLAIN,
+            nucleus=Nucleus.short(row.second), origin=SlotOrigin.WRITTEN,
+            cluster=first_cluster, onset_declared=True, nucleus_declared=True,
+        )
+        drafts.insert(drafts.index(right[0]), second)
+        scribe.retarget(_cluster_offsets(reading, first_cluster), right, second)
+        cluster = reading.clusters[first_cluster]
+        scribe.evidence(cluster.offset, second, SlotFact.LETTER)
+        for mark in cluster.marks:
+            scribe.decoration(mark.offset, second)
+    second.letter = CanonLetter.HAMZA
+    second.onset = Onset.PLAIN
+    second.nucleus = Nucleus.short(row.second)
+    return second
+
+
 def supply_hamza_meetings(reading, drafts, lexicon, scribe, selection) -> None:
     """Project only rows attested by the checked-in selected-source register."""
     del lexicon, selection
@@ -152,10 +181,10 @@ def supply_hamza_meetings(reading, drafts, lexicon, scribe, selection) -> None:
         if row.scope == "one_word":
             _one_word(reading, drafts, scribe, right, row)
             continue
-        if row.previous not in spans:
+        second = _restore_right_qata(reading, drafts, scribe, right, row)
+        if second is None:
             continue
-        right_word = reading.words.index(row.canonical)
-        if not _word_text(reading, right_word).startswith(("ا", "أ", "إ", "ء")):
+        if row.previous not in spans:
             continue
         left = spans[row.previous]
         if not left or left[-1].letter is not CanonLetter.HAMZA:
@@ -164,26 +193,6 @@ def supply_hamza_meetings(reading, drafts, lexicon, scribe, selection) -> None:
         first.letter = CanonLetter.HAMZA
         first.onset = Onset.PLAIN
         first.nucleus = Nucleus.short(row.first)
-        first_cluster = next(
-            index for index, cluster in enumerate(reading.clusters)
-            if cluster.word == right_word
-        )
-        second = right[0]
-        if second.cluster != first_cluster:
-            second = _Draft(
-                letter=CanonLetter.HAMZA, onset=Onset.PLAIN,
-                nucleus=Nucleus.short(row.second), origin=SlotOrigin.WRITTEN,
-                cluster=first_cluster, onset_declared=True, nucleus_declared=True,
-            )
-            drafts.insert(drafts.index(right[0]), second)
-            scribe.retarget(_cluster_offsets(reading, first_cluster), right, second)
-            cluster = reading.clusters[first_cluster]
-            scribe.evidence(cluster.offset, second, SlotFact.LETTER)
-            for mark in cluster.marks:
-                scribe.decoration(mark.offset, second)
-        second.letter = CanonLetter.HAMZA
-        second.onset = Onset.PLAIN
-        second.nucleus = Nucleus.short(row.second)
         if row.exception == "fused_badal":
             second.annotations |= {Annotation.BADAL}
 

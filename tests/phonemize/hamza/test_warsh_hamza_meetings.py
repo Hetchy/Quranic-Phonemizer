@@ -95,6 +95,14 @@ BARE_ANTA_PAUSAL_CASES = (
 
 
 FIXED_ONE_WORD_CASES = (
+    # Warsh: اَوْ۟نَبِّئُكُم
+    Case(
+        id="one-word-second-u-keeps-later-lexical-hamza",
+        site=Site(warsh=("3:15", (2,))),
+        read=isolated(),
+        phonemes="ʔ a ʔ̞ u n a bb i ʔ u k u m",
+        sound_rules={"ʔ̞": R("tashil")},
+    ),
     # Warsh: أَئِنَّكُمْ
     Case(
         id="one-word-second-i-fixed-tashil",
@@ -172,6 +180,20 @@ AIMMA_DEFAULT_CASES = (
 
 
 MUTTAFIQ_DEFAULT_CASES = (
+    # Warsh: اوْ
+    Case(
+        id="registered-right-qata-at-ibtidaa",
+        site=Site(warsh=("33:24", (9,))),
+        read=isolated(),
+        phonemes="ʔ a w",
+    ),
+    # Warsh: شَآءَ اوْ
+    Case(
+        id="bare-aw-glide-fuses-only-across-the-meeting",
+        site=Site(warsh=("33:24", (8, 9))),
+        read=through(),
+        phonemes=("ʃ a: ʔ", "a:"),
+    ),
     # Warsh: جَآءَ احَدٞ مِّنكُم
     StateCase(id="default-a-a-ibdal-boundaries", site=Site(warsh=("4:43", (27, 28, 29))), states={
         "stopped-before": Expect(

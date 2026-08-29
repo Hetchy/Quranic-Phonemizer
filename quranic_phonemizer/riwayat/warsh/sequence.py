@@ -199,6 +199,18 @@ def _project_orthographic_silence(text, entries) -> None:
             _consonantal_sukun(entries, start + relative)
 
 
+def _project_consonantal_sukun_families(text, entries) -> None:
+    start = text.find("ٰٓيْ")
+    if start >= 0:
+        _consonantal_sukun(entries, start + 3)
+
+    if text.endswith("آےْ"):
+        _consonantal_sukun(entries, len(text) - 1)
+
+    if text == "اوْ":
+        _consonantal_sukun(entries, 2)
+
+
 def _release_dagger_hamza_seats(text, entries) -> None:
     for index, char in enumerate(text[:-2]):
         if char == "ٰ" and text[index + 1] == "ء" and text[index + 2] == "ْ":
@@ -272,6 +284,7 @@ def _entries(inventory: Inventory, text: str) -> list:
     _attach_reversed_fathatan(text, entries)
     _project_alif_sukun_silence(text, entries)
     _project_orthographic_silence(text, entries)
+    _project_consonantal_sukun_families(text, entries)
     _project_collapsed_hamza(text, entries)
     _release_dagger_hamza_seats(text, entries)
     _project_hamza_madd(text, entries)

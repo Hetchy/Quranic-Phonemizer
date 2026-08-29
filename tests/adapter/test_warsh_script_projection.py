@@ -215,6 +215,63 @@ def test_every_latent_hamza_u_sukun_waw_is_rasm_only():
     assert count == 34
 
 
+def test_all_34_arayta_spellings_keep_the_sakin_yaa_consonantal():
+    source = json.loads(SOURCE.read_text(encoding="utf-8"))
+    inventory = script_adapter(Script.UTHMANI).inventory
+    rows = [
+        record["text"] for record in source.values()
+        if "ٰٓيْ" in record["text"]
+    ]
+
+    assert len(rows) == 34
+    for text in rows:
+        sukun = text.index("ْ", text.index("ٰٓيْ"))
+        entries = sequence.entries_for(inventory, text)
+        assert entries[sukun].role == "consonantal_sukun", text
+
+    package = recitation(Riwayah.WARSH)
+    selected = [
+        (location, entry) for location, entry in corpus().entries.items()
+        if "ٰٓيْ" in entry.text
+    ]
+    assert len(selected) == 34
+    for location, entry in selected:
+        built = package.build(package.read(
+            Script.UTHMANI, location.verse, ((location, entry.text),)
+        ))
+        assert CanonLetter.YA in {
+            slot.letter for slot in built.score.words[0].slots
+        }, location
+
+
+def test_mahyaya_keeps_the_selected_sakin_yaa_consonantal():
+    text = json.loads(SOURCE.read_text(encoding="utf-8"))["6:164:5"]["text"]
+    entries = sequence.entries_for(
+        script_adapter(Script.UTHMANI).inventory, text
+    )
+
+    assert text == "وَمَحْي۪آےْ"
+    assert entries[-1].role == "consonantal_sukun"
+
+    package = recitation(Riwayah.WARSH)
+    location = Location(6, 162, 5)
+    entry = corpus().entries[location]
+    built = package.build(package.read(
+        Script.UTHMANI, location.verse, ((location, entry.text),)
+    ))
+    assert built.score.words[0].slots[-1].letter is CanonLetter.YA
+
+
+def test_bare_aw_start_keeps_its_sakin_waw_consonantal():
+    text = json.loads(SOURCE.read_text(encoding="utf-8"))["33:24:9"]["text"]
+    entries = sequence.entries_for(
+        script_adapter(Script.UTHMANI).inventory, text
+    )
+
+    assert text == "اوْ"
+    assert entries[-1].role == "consonantal_sukun"
+
+
 def test_biaydin_jarrah_is_sukun_and_the_second_yaa_is_rasm_only():
     entry, reading = _reading((51, 47, 3))  # بِأَيَيْدٖ
     first_yaa = entry.text.index("ي")

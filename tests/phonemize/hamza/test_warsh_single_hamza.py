@@ -14,6 +14,13 @@ from tests.support import (
 
 
 CASES = (
+    # Warsh: اَرَٰٓيْتُمُۥٓ
+    Case(
+        id="arayta-ibdal-keeps-sakin-yaa",
+        site=Site(warsh=("46:10", (2,))),
+        read=isolated(),
+        phonemes="ʔ a rˤ aˤ: j t u m",
+    ),
     # Warsh: يُومِنُونَ
     Case(
         id="sakin-root-after-u",
