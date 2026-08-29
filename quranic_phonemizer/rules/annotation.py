@@ -131,18 +131,21 @@ class CarrierTarqeeq:
 
     rule: Rule = Rule.TARQEEQ
     phase: Phase = Phase.COLOUR
-    # Madd iwad starts from a short/nunated A slot and is relengthened before
-    # COLOUR, so both canonical forms must reach this classifier.
-    triggers: frozenset = frozenset({VowelForm.SHORT, VowelForm.LONG})
+    # Madd iwad starts short; joined ibdal realizes a canonically absent qata
+    # nucleus. Both become long A before COLOUR and need the same identity.
+    triggers: frozenset = frozenset(
+        {VowelForm.ABSENT, VowelForm.SHORT, VowelForm.LONG}
+    )
     emits: frozenset = frozenset({Rule.TARQEEQ})
 
     @staticmethod
-    def _sounds_long(plan: Plan, at: SlotId, canonical: VowelForm) -> bool:
-        """Return performed length after boundary and length effects.
+    def _performed_a_is_long(plan: Plan, at: SlotId, state) -> bool:
+        """Return whether final performance realizes a long A.
 
         Carrier identity follows final performance, not canonical shape.
         """
-        long = canonical is VowelForm.LONG
+        quality = state.quality
+        long = state.form is VowelForm.LONG
         for effect in plan.effects():
             if getattr(effect, "slot", None) != at:
                 continue
@@ -151,10 +154,11 @@ class CarrierTarqeeq:
                 and effect.aspect is Aspect.VOWEL
                 and isinstance(effect.sound, Vowel)
             ):
+                quality = effect.sound.quality
                 long = effect.sound.long
             elif isinstance(effect, Relength):
                 long = effect.length is Length.LONG
-        return long
+        return quality is Quality.A and long
 
     def look(
         self, near: Neighbourhood, plan: Plan, at: SlotId,
@@ -169,8 +173,7 @@ class CarrierTarqeeq:
             else slot.nucleus.joined
         )
         if (
-            state.quality is not Quality.A
-            or not self._sounds_long(plan, at, state.form)
+            not self._performed_a_is_long(plan, at, state)
             or plan.merged_away(at, Aspect.VOWEL)
         ):
             return None

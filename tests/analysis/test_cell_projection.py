@@ -137,6 +137,31 @@ def test_joined_wasl_ibdal_transforms_its_root_carrier_across_the_boundary():
     )
 
 
+def test_joined_wasl_ibdal_long_a_has_tarqeeq_on_its_carrier():
+    _, bundle, view = _build_warsh("10:15")
+    target = next(word for word in bundle.words if word.ref == "10:15:11")
+    word = next(item for item in view.words if item.word_id == target.id)
+    rules = {
+        occurrence.id: occurrence.rule_id.value
+        for occurrence in bundle.rule_occurrences
+    }
+    carrier = next(
+        column
+        for column in word.columns
+        if column.role is CellRole.MADD
+        and any(
+            bundle.sounds[sound.value].token == "a:"
+            for sound in column.owned_sound_ids
+        )
+    )
+
+    assert {
+        rules[occurrence]
+        for occurrence in carrier.rule_occurrence_ids
+        if rules[occurrence] in {"tafkheem", "tarqeeq"}
+    } == {"tarqeeq"}
+
+
 def test_a_compact_hamza_seat_keeps_its_written_haraka_attached():
     _, _, view = _build_warsh("37:52")
     word = view.words[1]

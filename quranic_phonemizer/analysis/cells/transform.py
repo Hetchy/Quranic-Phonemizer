@@ -20,6 +20,7 @@ from ..ids import CellColumnId, LetterUnitId, SoundId
 from ..source_dtos import SourceView
 from .dtos import CellColumn, CellRole, CellSide, CellStatus, CellTier, CellWord
 from .align import next_column_id
+from .transform_tashil import split_compact_tashil
 
 #: The haraka role that writes each short quality, for spelling an inserted
 #: connecting vowel.
@@ -355,6 +356,9 @@ def transform_words(
     if insc is None:
         insc = inscribe(session)
     slot_of_unit = _slot_of_unit(source, insc)
+    out = split_compact_tashil(
+        words, facts, source, insc, pen, _inserted_haraka
+    )
     out = tuple(
         replace(
             word,
@@ -362,7 +366,7 @@ def transform_words(
                 _transform_column(col, facts, slot_of_unit, pen) for col in word.columns
             ),
         )
-        for word in words
+        for word in out
     )
     out = _split_unwritten_short_vowels(out, facts, slot_of_unit, insc, pen)
     out = _insertions(out, facts)

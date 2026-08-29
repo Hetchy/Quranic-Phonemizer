@@ -203,6 +203,45 @@ def test_collapsed_double_hamzas_stay_in_their_word_and_preserve_the_letter():
     ).status is CellStatus.INSERTED
 
 
+def test_compact_fixed_tashil_is_two_vocalised_hamza_groups():
+    reading = recitation(Riwayah.WARSH)
+    pen = pen_for(reading.inventory(Script.UTHMANI))
+    session = phonemize_request(reading, "54:25")
+    metadata = dict(
+        ref="54:25", riwayah="warsh", script="uthmani", variant={}
+    )
+    bundle = build_bundle(session, **metadata)
+    view = build_cell_view(
+        session,
+        spelling="transformed",
+        pen=pen,
+        bundle=bundle,
+        **metadata,
+    )
+    word = view.words[0]
+    first, eased = word.groups[:2]
+
+    assert [bundle.sounds[item.value].token for item in first.sound_ids] == [
+        "ʔ", "a",
+    ]
+    assert [bundle.sounds[item.value].token for item in eased.sound_ids] == [
+        "ʔ̞", "u",
+    ]
+    columns = {column.id: column for column in word.columns}
+    assert [columns[item].role for item in first.column_ids] == [
+        CellRole.LETTER, CellRole.HARAKA,
+    ]
+    assert [columns[item].role for item in eased.column_ids] == [
+        CellRole.LETTER, CellRole.HARAKA,
+    ]
+    assert columns[eased.column_ids[0]].source_character_ids
+    assert columns[eased.column_ids[0]].status is CellStatus.REPLACED
+    assert not columns[eased.column_ids[1]].source_character_ids
+    assert columns[eased.column_ids[1]].status is CellStatus.INSERTED
+    assert max(len(column.owned_sound_ids) for column in word.columns) <= 2
+    assert max(len(group.sound_ids) for group in word.groups) <= 3
+
+
 # ---- the concrete cases the laws exercise ----
 
 def test_the_ibdal_started_prosthetic_hamza_is_replaced(hafs, pen):

@@ -308,10 +308,50 @@ def _check_groups(view: CellView) -> None:
     if not any(word.groups for word in view.words):
         return
     for word in view.words:
-        columns = {column.id for column in word.columns}
+        columns_by_id = {column.id: column for column in word.columns}
+        columns = set(columns_by_id)
         sounds = {sound.sound_id for sound in word.sounds}
         claimed_columns = [item for group in word.groups for item in group.column_ids]
         claimed_sounds = [item for group in word.groups for item in group.sound_ids]
+        overfull_column = next(
+            (
+                column for column in word.columns
+                if len(column.owned_sound_ids) > 2
+            ),
+            None,
+        )
+        _require(
+            overfull_column is None,
+            "column "
+            f"{overfull_column.id.value if overfull_column is not None else '?'} "
+            "owns more than two sounds",
+        )
+        overfull_group = next(
+            (group for group in word.groups if len(group.sound_ids) > 3), None
+        )
+        _require(
+            overfull_group is None,
+            "visual group "
+            f"{overfull_group.key.value if overfull_group is not None else '?'} "
+            "owns more than three sounds",
+        )
+        unlicensed_three = next(
+            (
+                group for group in word.groups
+                if len(group.sound_ids) == 3
+                and not any(
+                    columns_by_id[column].role is CellRole.TANWEEN
+                    for column in group.column_ids
+                )
+            ),
+            None,
+        )
+        _require(
+            unlicensed_three is None,
+            "three-sound visual group "
+            f"{unlicensed_three.key.value if unlicensed_three is not None else '?'} "
+            "has no tanween",
+        )
         _require(
             set(claimed_columns) == columns and len(claimed_columns) == len(columns),
             "the groups do not partition a word's columns",

@@ -110,7 +110,7 @@ FIXED_ONE_WORD_CASES = (
         site=Site(warsh=("54:25", (1,))),
         read=isolated(),
         phonemes="ʔ a ʔ̞ u l q i:",
-        char_rules={"ا": R("tashil")},
+        char_rules={"@round_zero": R("tashil")},
         sound_rules={"ʔ̞": R("tashil")},
     ),
     # Warsh: ءَاٰ۬مَنتُم

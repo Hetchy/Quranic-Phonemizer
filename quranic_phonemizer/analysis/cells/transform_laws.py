@@ -79,14 +79,20 @@ def _is_partitioned_unit(
     """Recognize projections that partition one written compound by glyph."""
     roles = {column.role.value for column in columns}
     text = source.units[unit_id].text
+    pair = len(columns) == 2 and (
+        (text in {"َا", "ُا", "ِا"} and roles == {"haraka", "letter"})
+        or (text == "ا۟" and roles == {"haraka", "letter"})
+        or ("ٓ" in text and roles == {"letter", "madd"})
+    )
+    compact_tashil = (
+        len(columns) == 3
+        and text.startswith("ا")
+        and sum(column.role is CellRole.LETTER for column in columns) == 2
+        and sum(column.role is CellRole.HARAKA for column in columns) == 1
+    )
     if (
-        len(columns) != 2
-        or any(not column.source_character_ids for column in columns)
-        or not (
-            (text in {"َا", "ُا", "ِا"} and roles == {"haraka", "letter"})
-            or (text == "ا۟" and roles == {"haraka", "letter"})
-            or ("ٓ" in text and roles == {"letter", "madd"})
-        )
+        any(not column.source_character_ids for column in columns)
+        or not (pair or compact_tashil)
     ):
         return False
     expected = sorted(

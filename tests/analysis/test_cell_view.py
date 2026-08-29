@@ -333,6 +333,35 @@ def test_a_missing_cell_fails_law_22(hafs):
         validate_cell_view(dataclasses.replace(view, words=words), bundle, source)
 
 
+def test_a_column_owning_more_than_two_sounds_fails_the_group_law(hafs):
+    session = phonemize_request(hafs, "1:1")
+    metadata = dict(ref="1:1", riwayah="hafs", script="uthmani", variant={})
+    bundle = build_bundle(session, **metadata)
+    source = build_source_view(session, bundle=bundle)
+    view = build_cell_view(
+        session,
+        spelling="transformed",
+        pen=pen_for(hafs.inventory(Script.UTHMANI)),
+        bundle=bundle,
+        **metadata,
+    )
+    word = view.words[0]
+    target = word.columns[0]
+    broken_column = dataclasses.replace(
+        target, owned_sound_ids=tuple(sound.sound_id for sound in word.sounds[:3])
+    )
+    broken_word = dataclasses.replace(
+        word,
+        columns=tuple(
+            broken_column if column is target else column for column in word.columns
+        ),
+    )
+    broken = dataclasses.replace(view, words=(broken_word, *view.words[1:]))
+
+    with pytest.raises(CellValidationError, match="more than two sounds"):
+        validate_cell_view(broken, bundle, source)
+
+
 def test_a_bridge_endpoint_off_the_host_fails_law_25(hafs):
     view, bundle, source = _build(hafs, "36:52-36:53", {})
     cb = _a_bridge_boundary(view)
