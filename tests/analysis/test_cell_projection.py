@@ -948,6 +948,45 @@ def test_a_started_damm_stroke_becomes_an_inserted_ordinary_damma():
     assert all(column.text != "۟" for column in view.words[0].columns)
 
 
+@pytest.mark.parametrize(
+    ("ref", "mark", "carrier_text", "token"),
+    [
+        ("69:18:3", "ُ", "و", "u:"),
+        ("46:21:5", "َ", "ٰ", "a:"),
+        ("2:139:14", "َ", "ا", "a:"),
+    ],
+)
+def test_a_started_hamza_long_vowel_groups_an_inserted_haraka_with_its_carrier(
+    ref, mark, carrier_text, token
+):
+    _, bundle, view = _build_warsh(ref)
+    word = view.words[0]
+    sound = next(item for item in bundle.sounds if item.token == token)
+    cell = next(item for item in word.sounds if item.sound_id == sound.id)
+    carrier = next(
+        column
+        for column in word.columns
+        if column.id in cell.column_ids and column.role is CellRole.MADD
+    )
+    haraka = next(
+        column
+        for column in word.columns
+        if column.id in cell.column_ids and column.role is CellRole.HARAKA
+    )
+    group = next(item for item in word.groups if item.key == carrier.id)
+
+    assert carrier.text == carrier_text
+    assert haraka.text == mark
+    assert haraka.status is CellStatus.INSERTED
+    assert not haraka.source_character_ids and not haraka.source_unit_ids
+    assert haraka.attached_to_column_id == carrier.id
+    assert haraka.presented_sound_ids == (sound.id,)
+    assert carrier.owned_sound_ids == (sound.id,)
+    assert cell.column_ids == (haraka.id, carrier.id)
+    assert group.column_ids == cell.column_ids
+    assert all(column.text != "۟" for column in word.columns)
+
+
 def test_warsh_native_iqlab_meem_is_its_own_source_backed_cell():
     warsh = recitation(Riwayah.WARSH)
     pen = pen_for(warsh.inventory(Script.UTHMANI))

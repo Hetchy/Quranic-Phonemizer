@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from dataclasses import replace
 
-from ...model.canon import Annotation, Quality
+from ...model.canon import Annotation, CanonLetter, Quality
 from ...model.inscription import GlyphKind
-from ...model.performance import Vowel
+from ...model.performance import Consonant, Vowel
 from ...orthography.write import Pen
 from ..facts import AnalysisFacts
 from ..ids import CellColumnId, SoundId
@@ -181,6 +181,88 @@ def _transform_existing_carrier(columns, by_id, span, existing, value, pen):
             )
 
 
+def _started_hamza_column(columns, sounds, sound_index, facts):
+    if sound_index != 1:
+        return None
+    previous = sounds[0]
+    value = facts.sounds[previous.sound_id.value].value
+    if not isinstance(value, Consonant) or value.letter is not CanonLetter.HAMZA:
+        return None
+    return next(
+        (column for column in columns if column.id in previous.column_ids), None
+    )
+
+
+def _small_vowel_artifacts(span, carrier, insc):
+    return tuple(
+        column for column in span
+        if column.id != carrier.id
+        and not column.owned_sound_ids
+        and column.source_character_ids
+        and all(
+            insc.glyphs[item.value].kind is GlyphKind.SMALL_VOWEL
+            for item in column.source_character_ids
+        )
+    )
+
+
+def _inserted_quality(new_id, carrier, sound, value, pen):
+    anchor = (
+        carrier.source_unit_ids[0]
+        if carrier.source_unit_ids else carrier.anchor_unit_id
+    )
+    return CellColumn(
+        id=CellColumnId(new_id), role=CellRole.HARAKA,
+        text=pen.short_vowel(value.quality), source_character_ids=(),
+        source_unit_ids=(),
+        tier=CellTier.BELOW if value.quality is Quality.I else CellTier.ABOVE,
+        attached_to_column_id=carrier.id, status=CellStatus.INSERTED,
+        rule_occurrence_ids=(), silence=None, variant_id=carrier.variant_id,
+        variant_choice=carrier.variant_choice, owned_sound_ids=(),
+        presented_sound_ids=(sound,), anchor_unit_id=anchor,
+        side=CellSide.BEFORE,
+    )
+
+
+def _ensure_started_quality(
+    columns, sounds, sound_index, value, facts, insc, pen, next_id
+):
+    cell = sounds[sound_index]
+    span = [column for column in columns if column.id in cell.column_ids]
+    carrier = next((c for c in span if c.role is CellRole.MADD), None)
+    hamza = _started_hamza_column(columns, sounds, sound_index, facts)
+    if (
+        carrier is None
+        or hamza is None
+        or any(c.role is CellRole.HARAKA for c in span)
+    ):
+        return next_id
+    artifacts = _small_vowel_artifacts(span, carrier, insc)
+    if artifacts:
+        hamza = replace(
+            hamza,
+            source_character_ids=tuple(dict.fromkeys((
+                *hamza.source_character_ids,
+                *(item for c in artifacts for item in c.source_character_ids),
+            ))),
+            source_unit_ids=tuple(dict.fromkeys((
+                *hamza.source_unit_ids,
+                *(item for c in artifacts for item in c.source_unit_ids),
+            ))),
+        )
+        hamza_index = next(i for i, c in enumerate(columns) if c.id == hamza.id)
+        columns[hamza_index] = hamza
+    artifact_ids = {column.id for column in artifacts}
+    columns[:] = [column for column in columns if column.id not in artifact_ids]
+    carrier = next(column for column in columns if column.id == carrier.id)
+    mark = _inserted_quality(next_id, carrier, cell.sound_id, value, pen)
+    columns.insert(columns.index(carrier), mark)
+    kept = [column for column in cell.column_ids if column not in artifact_ids]
+    kept.insert(kept.index(carrier.id), mark.id)
+    sounds[sound_index] = replace(cell, column_ids=tuple(kept))
+    return next_id + 1
+
+
 def _ensure_one_carrier(
     columns, sounds, sound_index, cell, value, facts, insc,
     slot_of_unit, pen, next_id,
@@ -238,4 +320,18 @@ def ensure_carriers(
     return replace(word, columns=tuple(columns), sounds=tuple(sounds)), next_id
 
 
-__all__ = ["ensure_carriers", "slot_of_columns"]
+def ensure_started_qualities(
+    word: CellWord, facts: AnalysisFacts, insc: InscriptionFacts,
+    pen: Pen, next_id: int,
+) -> tuple[CellWord, int]:
+    columns, sounds = list(word.columns), list(word.sounds)
+    for sound_index, cell in enumerate(list(sounds)):
+        value = facts.sounds[cell.sound_id.value].value
+        if isinstance(value, Vowel) and value.long:
+            next_id = _ensure_started_quality(
+                columns, sounds, sound_index, value, facts, insc, pen, next_id
+            )
+    return replace(word, columns=tuple(columns), sounds=tuple(sounds)), next_id
+
+
+__all__ = ["ensure_carriers", "ensure_started_qualities", "slot_of_columns"]

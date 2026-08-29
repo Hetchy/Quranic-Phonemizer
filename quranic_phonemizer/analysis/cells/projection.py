@@ -39,7 +39,11 @@ from .projection_compounds import (
     fold_article_naql_madd,
     project_warsh_compounds,
 )
-from .projection_carriers import ensure_carriers, slot_of_columns
+from .projection_carriers import (
+    ensure_carriers,
+    ensure_started_qualities,
+    slot_of_columns,
+)
 
 
 def _column_targets(words: tuple[CellWord, ...], sound: int, *, presenters=False):
@@ -194,6 +198,14 @@ def project_words(
         out = project_warsh_compounds(out, facts, insc, pen)
     out = keep_pausal_alif_on_carriers(out, facts, slot_of_unit)
     out = tuple(fold_shared_silence_riders(word, source, facts) for word in out)
+    next_id = next_column_id(out)
+    started = []
+    for word in out:
+        projected, next_id = ensure_started_qualities(
+            word, facts, insc, pen, next_id
+        )
+        started.append(projected)
+    out = tuple(started)
     return group_words(out, facts)
 
 
