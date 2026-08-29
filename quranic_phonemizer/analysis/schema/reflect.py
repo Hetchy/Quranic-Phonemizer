@@ -71,6 +71,8 @@ def _schema(tp: object, id_map: dict[type, str], defs: dict[str, dict]) -> dict:
         return node
     if isinstance(tp, type) and issubclass(tp, Enum):
         return {"type": "string", "enum": [member.value for member in tp]}
+    if isinstance(tp, type) and issubclass(tp, str):
+        return {"type": "string"}
     if isinstance(tp, type) and dataclasses.is_dataclass(tp):
         return _record(tp, id_map, defs)
     if tp in _SCALAR:

@@ -112,6 +112,7 @@ def _variant_dependent(col: CellColumn) -> bool:
     return (
         bool(col.owned_sound_ids or col.presented_sound_ids)
         or col.status is CellStatus.DROPPED
+        or col.variant_id is not None
     )
 
 

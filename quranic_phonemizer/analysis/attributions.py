@@ -87,7 +87,7 @@ def attributions(
 ) -> tuple[Attribution, ...]:
     out: list[Attribution] = []
     for edge in performance.attributions:
-        by = occurrence_index[edge.by] if edge.by is not None else None
+        by = occurrence_index.get(edge.by) if edge.by is not None else None
         match edge:
             case Hosts(slots=slots, aspect=aspect, sound=sound):
                 out.append(Hosted(slots, aspect, sound_index[sound], by))

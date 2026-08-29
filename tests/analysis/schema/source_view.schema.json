@@ -135,8 +135,7 @@
             },
             {
               "enum": [
-                "orthographic_silence",
-                "variant_silence"
+                "orthographic_silence"
               ],
               "type": "string"
             },
@@ -234,7 +233,7 @@
       "additionalProperties": false,
       "properties": {
         "schema_version": {
-          "const": 2,
+          "const": 3,
           "type": "integer"
         },
         "source": {

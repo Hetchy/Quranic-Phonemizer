@@ -219,7 +219,7 @@ CASES = (
     VariantCase(
         id="noon-wasl",
         site=Site(hafs=("68:1", (1, 2))),
-        selector=KhilafId.NOON_YASEEN_WASL,
+        selector=KhilafId.NOON_WASL,
         faces={
             "izhar": Expect(
                 read=joining(),

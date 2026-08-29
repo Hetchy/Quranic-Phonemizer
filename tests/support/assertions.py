@@ -233,7 +233,7 @@ def _assert_connected(char_targets: _Targets, sound_targets: _Targets, char_map,
                 ), f"{name}: {sound_selector} is not reached by a declared source"
 
 
-def assert_case(run: CaseRun) -> None:
+def _assert_case(run: CaseRun) -> None:
     if run is None:
         return
     address = run.site.address(run.riwayah)
@@ -298,3 +298,32 @@ def assert_case(run: CaseRun) -> None:
             ).alignment(result._assembled, text="source", grouping="glyph")
             for index in pairing.silent
         }
+
+
+def assert_case(run: CaseRun) -> None:
+    """Assert one semantic run and attach its exact corpus text on failure."""
+    try:
+        _assert_case(run)
+    except Exception as error:
+        if run is not None:
+            from .reading import _through, _words, loaded
+            from quranic_phonemizer.model.address import Riwayah, Script
+
+            address = run.site.address(run.riwayah)
+            record = loaded(run.riwayah)
+            words = _words(
+                record, Riwayah(run.riwayah), Script.UTHMANI, address.verse
+            )
+            count = record.corpus.surah_info[str(address.verse.surah)][
+                address.verse.ayah - 1
+            ]
+            if address.words and max(address.words) > count:
+                words = _through(
+                    record, Riwayah(run.riwayah), Script.UTHMANI, address.verse
+                )
+            text = " ".join(
+                value for index, (_, value) in enumerate(words, 1)
+                if not address.words or index in address.words
+            )
+            error.add_note(f"{run.riwayah.title()}: {text}")
+        raise

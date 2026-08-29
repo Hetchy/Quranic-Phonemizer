@@ -98,12 +98,6 @@ Ordinary second-I and second-U forms are fixed tashil:
 Each emits `tashil` on the second hamza in wasl, waqf, and ibtidaa. Warsh
 always renders the eased typed onset as `ʔ̞`; `tashil` is not an optional
 extra-phoneme value for this riwayah.
-
-Fourteen selected-source tokens begin with the collapsed spelling `أَ۟...`,
-including `أَ۟ذَا` at 19:66:3. The explicit `أَ` writes the full interrogative
-hamza and its A; the rounded mark witnesses the unwritten second qata and must
-not silence the explicit hamza. Projection assigns that witness to the eased
-second onset and keeps the following lexical consonant in the same word.
 The ellipses mark continuing spans; any word ending or plural-mim boundary
 outside the hamza meeting follows its independent boundary rule.
 
@@ -211,7 +205,7 @@ The different-vowel matrix is structural:
 | --- | ---: | --- | --- |
 | A+I | 19 | `تَفِےٓءَ ا۪لَىٰٓ`, source and canonical 49:9:17-18 | Fixed tashil: `... ʔ a ʔ̞ i l a:`. The final nucleus has the fixed Warsh fath result. |
 | A+U | 1 | `جَآءَ اُ۟مَّةٗ رَّسُولُهَا`, source and canonical 23:44:7-9 | Fixed tashil: `... ʔ a ʔ̞ u m̃ a t a rˤrˤ aˤ ...` in its actual joined context; ordinary tanwin-to-raa idgham owns `/rˤrˤ/`. |
-| I+A | 28 | `اِ۬لنِّسَآءِ اَ۬وَ اَكْنَنتُمْ فِےٓ`, source 2:233:9-12, canonical 2:235:9-12 | Fixed moving ibdal to yaa + A, followed by ordinary naql at the next boundary: `... ʔ i j a w a k n a ŋ t u m f i:`. |
+| I+A | 29 | `اِ۬لنِّسَآءِ اَ۬وَ اَكْنَنتُمْ فِےٓ`, source 2:233:9-12, canonical 2:235:9-12 | Fixed moving ibdal to yaa + A, followed by ordinary naql at the next boundary: `... ʔ i j a w a k n a ŋ t u m f i:`. |
 | U+A | 13 | `وَيَٰسَمَآءُ اَ۬قْلِعِےۖ`, source and canonical 11:44:5-6 | Fixed moving ibdal to waw + A: `... ʔ u w a q Q l ...`. |
 | U+I | 26 | `يَٰزَكَرِيَّآءُ اِ۪نَّا`, source 19:6:1-2, canonical 19:7:1-2 | Public `hamza_damm_kasr`: ibdal `... ʔ u w i ñ a:`, tashil `... ʔ u ʔ̞ i ñ a:`. |
 

@@ -24,20 +24,20 @@ CASES = (
         site=Site(hafs=("2:8", (10, 11))),
         selector=KhilafId.IKHFAA_SHAFAWI_NASAL,
         faces={
-            "assimilated": Expect(
+            "open": Expect(
                 read=through(),
                 phonemes=("h u ŋ", "b i m u ʔ m i n i: n"),
                 char_rules={"م[1]": R("ikhfaa_shafawi")},
                 sound_rules={"ŋ": R("ikhfaa_shafawi")},
             ),
-            "bilabial": Expect(
+            "closed": Expect(
                 read=through(),
                 phonemes=("h u m̃", "b i m u ʔ m i n i: n"),
                 char_rules={"م[1]": R("ikhfaa_shafawi")},
                 sound_rules={"m̃": R("ikhfaa_shafawi")},
             ),
         },
-        default="assimilated",
+        default="open",
         masked=Expect(
             read=explicit(ibtidaa=10, waqf=(10, 11)),
             phonemes=("h u m", "b i m u ʔ m i n i: n"),

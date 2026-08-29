@@ -124,7 +124,7 @@ selection, and extra phonemes. Add `analyse()` beside the existing
 result = Phonemizer(
     riwayah="hafs",
     script="uthmani",
-    variants={"iqlab_nasal": "bilabial"},
+    variants={"iqlab_nasal": "closed"},
     extra_phonemes=("emphatic_fatha", "imala"),
 ).analyse(
     "2:255",
@@ -615,7 +615,7 @@ For representative passages including `1:1`, `2:2`, `2:255`, `3:103`,
 
 ### Wire tests
 
-- Every facade document has `schema_version == 2`.
+- Every facade document has `schema_version == 3`.
 - The analysis and cell envelopes share sound, word, boundary, and rule IDs.
 - Transformed cell serialization includes `inserted`, `replaced`, `dropped`, and
   `gap` statuses without frontend reconstruction.

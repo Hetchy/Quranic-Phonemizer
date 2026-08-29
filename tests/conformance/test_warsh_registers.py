@@ -660,15 +660,15 @@ def test_the_naql_latent_register_reconciles_with_canonical_hosts():
     """Every supplied latent qata stands after an eligible host: a written
     moved haraka, a tanwin, or one spelled opening at a verse edge."""
     within, edge = _naql_boundaries()
-    assert sum(within.values()) == 1658
+    assert sum(within.values()) == 1680
     assert within == Counter({
         ("written_A", "moved_haraka"): 752,
         ("written_A", "tanwin"): 365,
         ("written_I", "moved_haraka"): 173,
         ("written_I", "tanwin"): 298,
         ("written_U", "tanwin"): 1,
-        ("damm_stroke", "moved_haraka"): 46,
-        ("damm_stroke", "tanwin"): 23,
+        ("damm_stroke", "moved_haraka"): 48,
+        ("damm_stroke", "tanwin"): 43,
     })
     joinable = {key: count for key, count in edge.items() if key[1] != "surah_start"}
     assert sum(joinable.values()) == 308

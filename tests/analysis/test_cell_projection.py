@@ -1132,12 +1132,8 @@ def test_stopped_warsh_native_iqlab_meem_is_not_variant_silence():
         for occurrence in bundle.rule_occurrences
     }
 
-    assert meem.silence not in {
-        LiteralSilence.ORTHOGRAPHIC,
-        LiteralSilence.VARIANT,
-    }
+    assert meem.silence is not LiteralSilence.ORTHOGRAPHIC
     assert rules[meem.silence] == "waqf_diacritic_drop"
-    assert cell.silence is not LiteralSilence.VARIANT
     assert rules[cell.silence] == "waqf_diacritic_drop"
 
 
@@ -1156,10 +1152,7 @@ def test_stopped_warsh_native_noon_iqlab_meem_uses_waqf_drop():
         for occurrence in bundle.rule_occurrences
     }
 
-    assert unit.silence not in {
-        LiteralSilence.ORTHOGRAPHIC,
-        LiteralSilence.VARIANT,
-    }
+    assert unit.silence is not LiteralSilence.ORTHOGRAPHIC
     assert rules[unit.silence] == "waqf_diacritic_drop"
     assert cell.silence == unit.silence
 

@@ -622,7 +622,7 @@ Optional facet:
 
 There is no boundary facet because this is an inherent rasm/orthographic property.
 
-Variant silence is not searchable.
+Variant omissions publish no rule and are therefore not searchable.
 
 ### 5.14 Pausal Alif
 

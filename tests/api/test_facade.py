@@ -161,8 +161,8 @@ def test_every_document_is_the_native_serialization():
     assert result.document(
         "cell_view", spelling="transformed"
     ) == serialize_document(cell_document(transformed))
-    assert result.document("source_view")["schema_version"] == 2
-    assert result.document("highlight_groups")["schema_version"] == 2
+    assert result.document("source_view")["schema_version"] == 3
+    assert result.document("highlight_groups")["schema_version"] == 3
 
 
 @pytest.mark.parametrize(

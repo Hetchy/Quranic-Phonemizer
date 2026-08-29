@@ -230,6 +230,20 @@ def _silenced_units(facts, tok, insc) -> dict[int, int]:
     return out
 
 
+def _variant_omitted_units(facts, tok) -> frozenset[int]:
+    """Variant choices can omit a written unit without publishing a rule."""
+    out: set[int] = set()
+    for slot, aspect in facts.variant_omissions:
+        unit = (
+            tok.roles.vowel.get(slot, tok.roles.letter.get(slot))
+            if aspect is Aspect.VOWEL
+            else tok.roles.letter.get(slot)
+        )
+        if unit is not None:
+            out.add(unit)
+    return frozenset(out)
+
+
 def _shortened_units(facts, tok, insc) -> dict[int, int]:
     """Unit -> the occurrence whose rule shortened its length carrier."""
     return {
@@ -278,6 +292,7 @@ def ownership(
     owner, presenters = _owners_and_presenters(facts, tok, insc, carriers)
     sounding = set(owner.values()) | {u for us in presenters.values() for u in us}
     silenced_by = _silenced_units(facts, tok, insc)
+    variant_omitted = _variant_omitted_units(facts, tok)
     shortened = _shortened_units(facts, tok, insc)
     riding_pairs = _riding_pair_units(tok)
     variant_pairs = _variant_pair_units(tok, insc)
@@ -292,8 +307,8 @@ def ownership(
                 silence[index] = silenced_by[index]
             elif index in shortened:
                 silence[index] = shortened[index]
-            elif index in variant_pairs:
-                silence[index] = LiteralSilence.VARIANT
+            elif index in variant_pairs or index in variant_omitted:
+                silence[index] = None
             elif index in orthographic or index in seats or index in riding_pairs:
                 silence[index] = LiteralSilence.ORTHOGRAPHIC
             else:

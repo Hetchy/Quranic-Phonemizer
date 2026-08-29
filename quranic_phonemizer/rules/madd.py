@@ -24,7 +24,7 @@ class MaddLazimIbdal:
 
     locations: frozenset[Location]
     default: str
-    khilaf: KhilafId = KhilafId.MADD_LAZIM_TASHEEL
+    khilaf: KhilafId = KhilafId.ISTIFHAM_ARTICLE
     rule: Rule = Rule.IBDAL_HAMZA
     phase: Phase = Phase.LENGTH
     triggers: frozenset = frozenset({VowelForm.LONG})

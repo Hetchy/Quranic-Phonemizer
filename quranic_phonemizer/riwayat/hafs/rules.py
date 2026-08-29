@@ -18,6 +18,7 @@ from ...rules.boundary import (
     TanweenIwad,
     WaqfHarakaDrop,
     WaqfSilahDrop,
+    VariantJoinedNunation,
 )
 from ...rules.idgham import Idgham
 from ...rules.lam_shamsiyyah import ArticleLam, ArticleShape
@@ -46,7 +47,7 @@ from .resources import khilaf, lexicon, rule_tables
 def _build() -> RuleSet:
     tables = rule_tables()
     choices = khilaf()
-    madd_tasheel = choices.definition(KhilafId.MADD_LAZIM_TASHEEL)
+    madd_tasheel = choices.definition(KhilafId.ISTIFHAM_ARTICLE)
     weight = Weight(always_heavy=tables.always_heavy, raa=choices.raa)
     article = ArticleShape(
         prefixes=tables.proclitics,
@@ -55,25 +56,37 @@ def _build() -> RuleSet:
     return RuleSet(
         {
             Phase.BOUNDARY: (
-                WaslHamza(), SoftenedHamza(), PausalAlif(),
+                WaslHamza(start_choices=(
+                    choices.definition(KhilafId.ALISM_IBTIDAA),
+                )), SoftenedHamza(), PausalAlif(),
                 SpelledBeforeWasl(),
                 TanweenBeforeWasl(),
                 TanweenDrop(), TanweenIwad(),
                 WaqfHarakaDrop(yaa=choices.yaa), WaqfSilahDrop(),
                 DroppedGlide(yaa=choices.yaa),
+                VariantJoinedNunation(
+                    choices.definition(KhilafId.IWAJA_QAYYIMA)
+                ),
                 TaaMarbutaAtWaqf(),
             ),
             Phase.MERGE: (
                 NoonSakinah(
                     followers=tables.followers_of_noon,
-                    opening_wasl=choices.definition(KhilafId.NOON_YASEEN_WASL),
+                    opening_wasl=(
+                        choices.definition(KhilafId.NOON_WASL),
+                        choices.definition(KhilafId.YASEEN_WASL),
+                    ),
                 ),
                 MeemSakinah(followers=tables.followers_of_meem),
                 ArticleLam(sun=tables.sun_letters, article=article),
                 GhunnahMushaddadah(sun=tables.sun_letters, article=article),
                 Idgham(pairs=tables.pairs,
                        never_follows=tables.never_follows,
-                       article=article),
+                       article=article,
+                       choices=(
+                           choices.definition(KhilafId.IRKAB_MAANA),
+                           choices.definition(KhilafId.YALHATH_DHALIK),
+                       )),
             ),
             Phase.LENGTH: (
                 PausalGlide(), IltiqaShortening(),
@@ -91,7 +104,13 @@ def _build() -> RuleSet:
                     always_heavy=tables.always_heavy,
                 ),
             ),
-            Phase.RELEASE: (Qalqala(letters=tables.qalqala, pairs=tables.pairs),),
+            Phase.RELEASE: (
+                Qalqala(
+                    letters=tables.qalqala,
+                    pairs=tables.pairs,
+                    choices=(choices.definition(KhilafId.IRKAB_MAANA),),
+                ),
+            ),
         }
     )
 

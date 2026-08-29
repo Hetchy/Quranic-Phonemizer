@@ -125,9 +125,9 @@ After implementation:
   implementation resolved it;
 - reconcile implementation registers against the independent conformance
   derivation and its family subtotals;
-- run `python tools/gates.py --fast` while iterating; and
-- run `python tools/gates.py` before handoff unless the delivery explicitly
-  carries narrow, documented failures owned by a scheduled later vertical.
+- run `python tools/quick.py <targeted tests...>` while iterating; and
+- rely on the pull-request checks for the full ordinary suite and required
+  structural and source-context validation.
 
 A vertical is complete only when its research contract, selected-script
 projection, semantic cases, negative cases, registers, runtime behavior, rule

@@ -17,7 +17,7 @@ from tests.support import (
 
 
 REGISTERS = {
-    KhilafId.RAA_FIRQ_WASL: (
+    KhilafId.RAA_FIRQ: (
         (Site(hafs=("26:63", (11,))), 11, False),
     ),
     KhilafId.RAA_ALQITR_WAQF: (
@@ -29,7 +29,7 @@ REGISTERS = {
         (Site(hafs=("43:51", (10,))), 10, True),
         (Site(hafs=("10:87", (8,))), 8, True),
     ),
-    KhilafId.RAA_NUTHUR_WAQF: (
+    KhilafId.RAA_WANUTHUR_WAQF: (
         (Site(hafs=("54:16", (4,))), 4, True),
         (Site(hafs=("54:18", (6,))), 6, True),
         (Site(hafs=("54:21", (4,))), 4, True),
@@ -94,8 +94,8 @@ def _case(
 
 CASES = (
     # Hafs: فِرْقٍ
-    _case("firq", KhilafId.RAA_FIRQ_WASL, False,
-          "f i rˤ q i ŋ", "f i r q i ŋ", "heavy", "f i rˤ q Q", "heavy"),
+    _case("firq", KhilafId.RAA_FIRQ, False,
+          "f i rˤ q i ŋ", "f i r q i ŋ", "light", "f i rˤ q Q", "heavy"),
     # Hafs: ٱلْقِطْرِ ۖ
     _case("alqitr", KhilafId.RAA_ALQITR_WAQF, True,
           "ʔ a l q i tˤ Q rˤ", "ʔ a l q i tˤ Q r", "light",
@@ -104,8 +104,8 @@ CASES = (
     _case("misr", KhilafId.RAA_MISR_WAQF, True,
           "m i sˤ rˤ", "m i sˤ r", "heavy", "m i sˤ rˤ aˤ", "heavy"),
     # Hafs: وَنُذُرِ
-    _case("wanuthur", KhilafId.RAA_NUTHUR_WAQF, True,
-          "w a n u ð u rˤ", "w a n u ð u r", "heavy",
+    _case("wanuthur", KhilafId.RAA_WANUTHUR_WAQF, True,
+          "w a n u ð u rˤ", "w a n u ð u r", "light",
           "w a n u ð u r i", "light"),
     # Hafs: يَسْرِ
     _case("yasr", KhilafId.RAA_YASR_WAQF, True,

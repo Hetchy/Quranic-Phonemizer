@@ -196,6 +196,37 @@ class PausalAlif:
 
 
 @dataclass(frozen=True, slots=True)
+class VariantJoinedNunation:
+    """Silence an inserted joined-only tanween when the face is masked by waqf."""
+
+    choice: object
+    rule: SilenceReason = SilenceReason.VARIANT
+    phase: Phase = Phase.BOUNDARY
+    triggers: frozenset = frozenset({CanonLetter.NOON})
+    emits: frozenset = frozenset()
+
+    def look(self, near, plan, at, boundaries) -> Verdict | None:
+        del plan
+        slot, word = near.slot(at), near.word_of(at)
+        before = near.before(at)
+        if (
+            slot is None or word is None or before is None
+            or slot.origin is not SlotOrigin.NUNATION
+            or not before.nucleus.is_long
+            or not boundaries.stopped_on(word)
+            or self.choice.choose(near.score.selection) != "idraj"
+        ):
+            return None
+        return Verdict(
+            Occurrence(
+                mint(SilenceReason.VARIANT, at), SilenceReason.VARIANT,
+                (at,), boundary=word,
+            ),
+            (Silence(at, Aspect.CONSONANT),),
+        )
+
+
+@dataclass(frozen=True, slots=True)
 class TanweenDrop:
     """A written tanween is not said at a stop.
 

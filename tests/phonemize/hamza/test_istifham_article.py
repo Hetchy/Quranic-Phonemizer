@@ -50,9 +50,9 @@ def _case(
     return VariantCase(
         id=case_id,
         site=site,
-        selector=KhilafId.MADD_LAZIM_TASHEEL,
+        selector=KhilafId.ISTIFHAM_ARTICLE,
         faces={
-            "madd_lazim": Expect(
+            "ibdal": Expect(
                 read=isolated(),
                 phonemes=ibdal,
                 char_rules=pick(
@@ -64,7 +64,7 @@ def _case(
                 sound_rules={madd_sound: R(
                     "ibdal_hamza", "madd_badal", "madd_lazim")},
             ),
-            "tasheel": Expect(
+            "tashil": Expect(
                 read=isolated(),
                 phonemes=tashil,
                 char_rules=pick(
@@ -75,7 +75,7 @@ def _case(
                 extra_phonemes=("tashil", "emphatic_fatha"),
             ),
         },
-        default="madd_lazim",
+        default="ibdal",
     )
 
 
@@ -109,9 +109,9 @@ def test_istifham_article_faces(run):
 @pytest.mark.parametrize(("site", "word"), REGISTER_CASES)
 def test_every_istifham_article_site_accepts_both_faces(site, word):
     ibdal = selected(
-        site, word, KhilafId.MADD_LAZIM_TASHEEL, "madd_lazim"
+        site, word, KhilafId.ISTIFHAM_ARTICLE, "ibdal"
     )
-    tashil = selected(site, word, KhilafId.MADD_LAZIM_TASHEEL, "tasheel")
+    tashil = selected(site, word, KhilafId.ISTIFHAM_ARTICLE, "tashil")
     assert Rule.MADD_LAZIM in {
         occurrence.rule for occurrence in ibdal.performance.occurrences
     }
@@ -124,10 +124,10 @@ def test_tashil_extra_changes_only_the_eased_token():
     # ءَآلْـَٰٔنَ
     site, word = ALAN
     plain = selected(
-        site, word, KhilafId.MADD_LAZIM_TASHEEL, "tasheel", extra=()
+        site, word, KhilafId.ISTIFHAM_ARTICLE, "tashil", extra=()
     )
     extra = selected(
-        site, word, KhilafId.MADD_LAZIM_TASHEEL, "tasheel",
+        site, word, KhilafId.ISTIFHAM_ARTICLE, "tashil",
         extra=("tashil",),
     )
     assert plain.sounds(word)[2] == "ʔ"

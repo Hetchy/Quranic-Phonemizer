@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from dataclasses import replace
 
+from ...model.address import KhilafId, VariantSelection
 from ...model.canon import CanonLetter, Onset, Quality
 from ...model.inscription import GlyphKind
 from ...model.performance import Consonant, Vowel
@@ -140,6 +141,66 @@ def _transform_column(
     return _transform_letter(col, cons, facts.slots[facts.slot_index[slot]], pen, facts)
 
 
+def _variant_column(
+    col: CellColumn, variant_id: KhilafId, choice: str, **changes
+) -> CellColumn:
+    return replace(col, variant_id=variant_id, variant_choice=choice, **changes)
+
+
+def _transform_haraka(
+    col: CellColumn,
+    facts: AnalysisFacts,
+    selection: VariantSelection,
+    pen: Pen,
+) -> CellColumn:
+    """Draw the selected short vowel rather than retaining the source mark."""
+    choice = selection.chosen(KhilafId.DAAF_HARAKA)
+    if choice is None or col.role is not CellRole.HARAKA:
+        return col
+    vowels = [
+        facts.sounds[sound.value].value
+        for sound in col.owned_sound_ids
+        if isinstance(facts.sounds[sound.value].value, Vowel)
+    ]
+    if len(vowels) != 1 or vowels[0].long:
+        return col
+    text = pen.short_vowel(vowels[0].quality)
+    if text == col.text:
+        return col
+    return _variant_column(
+        col,
+        KhilafId.DAAF_HARAKA,
+        choice,
+        text=text,
+        status=CellStatus.REPLACED,
+    )
+
+
+def _transform_plain_seen(
+    col: CellColumn,
+    facts: AnalysisFacts,
+    selection: VariantSelection,
+    pen: Pen,
+) -> CellColumn:
+    """Bimusaytir has no written small-seen cell to expose as the seen face."""
+    choice = selection.chosen(KhilafId.BIMUSAYTIR)
+    cons = _owned_consonant(col, facts)
+    if (
+        choice != "seen"
+        or cons is None
+        or cons.letter is not CanonLetter.SEEN
+        or pen.letter(CanonLetter.SAD) not in col.text
+    ):
+        return col
+    return _variant_column(
+        col,
+        KhilafId.BIMUSAYTIR,
+        choice,
+        text=_consonant_spelling(cons, pen),
+        status=CellStatus.REPLACED,
+    )
+
+
 def _spell_sound(value, pen: Pen) -> str:
     if isinstance(value, Vowel):
         return pen.role(_VOWEL_ROLE[value.quality])
@@ -224,7 +285,11 @@ def _inserted_haraka(
         variant_choice=col.variant_choice,
         owned_sound_ids=(SoundId(sound),),
         presented_sound_ids=(),
-        anchor_unit_id=col.source_unit_ids[0],
+        anchor_unit_id=(
+            col.source_unit_ids[0]
+            if col.source_unit_ids
+            else col.anchor_unit_id
+        ),
         side=CellSide.AFTER,
     )
 
@@ -267,6 +332,228 @@ def _split_started_wasl(words, facts, slot_of_unit, pen):
     for word in words:
         split, next_id = _split_wasl_word(word, facts, slot_of_unit, pen, next_id)
         out.append(split)
+    return tuple(out)
+
+
+def _split_selected_tashil(
+    words: tuple[CellWord, ...],
+    facts: AnalysisFacts,
+    selection: VariantSelection,
+    pen: Pen,
+) -> tuple[CellWord, ...]:
+    """Expose selected article tashil as its hamza and inserted fatha cells."""
+    if selection.chosen(KhilafId.ISTIFHAM_ARTICLE) != "tashil":
+        return words
+    next_id = next_column_id(words)
+    out = []
+    for word in words:
+        columns = []
+        sounds = list(word.sounds)
+        for col in word.columns:
+            consonants = [
+                sound.value for sound in col.owned_sound_ids
+                if isinstance(facts.sounds[sound.value].value, Consonant)
+                and facts.sounds[sound.value].value.eased
+            ]
+            vowels = [
+                sound.value for sound in col.owned_sound_ids
+                if isinstance(facts.sounds[sound.value].value, Vowel)
+                and not facts.sounds[sound.value].value.long
+            ]
+            if len(consonants) != 1 or len(vowels) != 1:
+                columns.append(col)
+                continue
+            base = _variant_column(
+                col,
+                KhilafId.ISTIFHAM_ARTICLE,
+                "tashil",
+                text=pen.letter(CanonLetter.HAMZA),
+                status=CellStatus.REPLACED,
+                owned_sound_ids=(SoundId(consonants[0]),),
+            )
+            mark = _variant_column(
+                _inserted_haraka(next_id, base, vowels[0], facts, pen),
+                KhilafId.ISTIFHAM_ARTICLE,
+                "tashil",
+            )
+            next_id += 1
+            columns.extend((base, mark))
+            sounds = [
+                replace(sound, column_ids=(mark.id,))
+                if sound.sound_id.value == vowels[0]
+                else replace(sound, column_ids=(base.id,))
+                if sound.sound_id.value == consonants[0]
+                else sound
+                for sound in sounds
+            ]
+        out.append(replace(word, columns=tuple(columns), sounds=tuple(sounds)))
+    return tuple(out)
+
+
+def _split_tamanna_words(
+    words: tuple[CellWord, ...],
+    facts: AnalysisFacts,
+    selection: VariantSelection,
+    pen: Pen,
+) -> tuple[CellWord, ...]:
+    """Ikhtilas writes the reduced first noon and damma as inserted cells."""
+    if selection.chosen(KhilafId.TAMANNA_NOON) != "ikhtilas":
+        return words
+    next_id = next_column_id(words)
+    out = []
+    for word in words:
+        columns = []
+        sounds = list(word.sounds)
+        for col in word.columns:
+            consonants = [
+                sound.value for sound in col.owned_sound_ids
+                if isinstance(facts.sounds[sound.value].value, Consonant)
+                and facts.sounds[sound.value].value.letter is CanonLetter.NOON
+            ]
+            vowels = [
+                sound.value for sound in col.owned_sound_ids
+                if isinstance(facts.sounds[sound.value].value, Vowel)
+                and facts.sounds[sound.value].value.quality is Quality.U
+            ]
+            if len(consonants) != 2 or len(vowels) != 1 or not col.source_unit_ids:
+                columns.append(col)
+                continue
+            first = _inserted_column(
+                next_id,
+                col.source_unit_ids[0],
+                CellSide.BEFORE,
+                consonants[0],
+                facts,
+                pen,
+            )
+            first = _variant_column(first, KhilafId.TAMANNA_NOON, "ikhtilas")
+            next_id += 1
+            mark = _inserted_haraka(next_id, first, vowels[0], facts, pen)
+            next_id += 1
+            final = _variant_column(
+                col,
+                KhilafId.TAMANNA_NOON,
+                "ikhtilas",
+                text=pen.letter(CanonLetter.NOON),
+                status=CellStatus.REPLACED,
+                owned_sound_ids=(SoundId(consonants[1]),),
+            )
+            columns.extend((first, mark, final))
+            targets = {
+                consonants[0]: first.id,
+                vowels[0]: mark.id,
+                consonants[1]: final.id,
+            }
+            sounds = [
+                replace(sound, column_ids=(targets[sound.sound_id.value],))
+                if sound.sound_id.value in targets else sound
+                for sound in sounds
+            ]
+        out.append(replace(word, columns=tuple(columns), sounds=tuple(sounds)))
+    return tuple(out)
+
+
+def _transform_iwaja_idraj(
+    words: tuple[CellWord, ...],
+    facts: AnalysisFacts,
+    selection: VariantSelection,
+    pen: Pen,
+) -> tuple[CellWord, ...]:
+    """Restore the written tanwin shape and silence its following alif."""
+    if selection.chosen(KhilafId.IWAJA_QAYYIMA) != "idraj":
+        return words
+    out = []
+    for word in words:
+        marker = next((
+            col for col in word.columns
+            if col.text in {"ۜ", "ۣ"}
+            and any(
+                isinstance(facts.sounds[sound.value].value, Consonant)
+                and facts.sounds[sound.value].value.letter is CanonLetter.NOON
+                for sound in col.owned_sound_ids
+            )
+        ), None)
+        if marker is None:
+            out.append(word)
+            continue
+        marker_at = word.columns.index(marker)
+        carrier = next((
+            col for col in reversed(word.columns[:marker_at])
+            if col.role in (CellRole.LETTER, CellRole.MADD)
+            and col.text == pen.letter(CanonLetter.ALIF)
+        ), None)
+        carrier_at = -1 if carrier is None else word.columns.index(carrier)
+        vowel = next((
+            col for col in reversed(word.columns[:carrier_at])
+            if col.role is CellRole.HARAKA
+        ), None)
+        if carrier is None or vowel is None:
+            out.append(word)
+            continue
+        vowel_sounds = tuple(
+            sound.sound_id
+            for sound in word.sounds
+            if vowel.id in sound.column_ids or carrier.id in sound.column_ids
+        )
+        noon_sounds = marker.owned_sound_ids
+        tanween = _variant_column(
+            vowel,
+            KhilafId.IWAJA_QAYYIMA,
+            "idraj",
+            role=CellRole.TANWEEN,
+            text=pen.role("fathatan"),
+            status=CellStatus.REPLACED,
+            owned_sound_ids=tuple(dict.fromkeys((*vowel_sounds, *noon_sounds))),
+            presented_sound_ids=vowel.presented_sound_ids,
+            rule_occurrence_ids=tuple(dict.fromkeys(
+                (*vowel.rule_occurrence_ids, *marker.rule_occurrence_ids)
+            )),
+        )
+        silent_carrier = _variant_column(
+            carrier,
+            KhilafId.IWAJA_QAYYIMA,
+            "idraj",
+            status=CellStatus.DROPPED,
+            owned_sound_ids=(),
+        )
+        columns = tuple(
+            tanween if col is vowel
+            else silent_carrier if col is carrier
+            else col
+            for col in word.columns
+            if col is not marker
+        )
+        moved = {*vowel_sounds, *noon_sounds}
+        sounds = tuple(
+            replace(sound, column_ids=(tanween.id,))
+            if sound.sound_id in moved else sound
+            for sound in word.sounds
+        )
+        out.append(replace(word, columns=columns, sounds=sounds))
+    return tuple(out)
+
+
+def _omit_inactive_sakt_marks(
+    words: tuple[CellWord, ...],
+) -> tuple[CellWord, ...]:
+    """An unselected sakt sign has no transformed word cell."""
+    out = []
+    for word in words:
+        by_id = {col.id: col for col in word.columns}
+        columns = tuple(
+            col for col in word.columns
+            if not (
+                col.text in {"ۜ", "ۣ"}
+                and not col.owned_sound_ids
+                and not col.presented_sound_ids
+                and col.variant_id is None
+                and not (
+                    col.attached_to_column_id is not None
+                    and by_id[col.attached_to_column_id].text.startswith("ص")
+                )
+            )
+        )
+        out.append(replace(word, columns=columns))
     return tuple(out)
 
 
@@ -368,6 +655,7 @@ def transform_words(
     if insc is None:
         insc = inscribe(session)
     slot_of_unit = _slot_of_unit(source, insc)
+    selection = session.performance.selection
     out = split_compact_tashil(
         words, facts, source, insc, pen, _inserted_haraka
     )
@@ -375,11 +663,26 @@ def transform_words(
         replace(
             word,
             columns=tuple(
-                _transform_column(col, facts, slot_of_unit, pen) for col in word.columns
+                _transform_plain_seen(
+                    _transform_haraka(
+                        _transform_column(col, facts, slot_of_unit, pen),
+                        facts,
+                        selection,
+                        pen,
+                    ),
+                    facts,
+                    selection,
+                    pen,
+                )
+                for col in word.columns
             ),
         )
         for word in out
     )
+    out = _split_selected_tashil(out, facts, selection, pen)
+    out = _split_tamanna_words(out, facts, selection, pen)
+    out = _transform_iwaja_idraj(out, facts, selection, pen)
+    out = _omit_inactive_sakt_marks(out)
     out = _split_unwritten_short_vowels(out, facts, slot_of_unit, insc, pen)
     out = _insertions(out, facts)
     return _split_started_wasl(out, facts, slot_of_unit, pen)

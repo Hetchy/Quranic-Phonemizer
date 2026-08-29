@@ -5,15 +5,49 @@ on:
     tags: ["v*"]
 
 jobs:
-  publish:
+  verify:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.x"
-      - run: pip install build twine
+          python-version: "3.13"
+      - run: pip install -e ".[dev]" build
+      - run: python tools/gates.py
+      - run: >-
+          python -m pytest
+          tests/conformance/test_warsh_cell_projection.py
+          --runslow -q
       - run: python -m build
+      - run: python -m venv release-venv
+      - run: release-venv/bin/pip install dist/*.whl
+      - name: Smoke-test the installed wheel
+        working-directory: ${{ runner.temp }}
+        run: |
+          "${{ github.workspace }}/release-venv/bin/python" - <<'PY'
+          from quranic_phonemizer import Phonemizer
+
+          for riwayah in ("hafs", "warsh"):
+              result = Phonemizer(riwayah=riwayah).analyse("1:1")
+              assert result.phonemes()
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: distribution
+          path: dist/*
+
+  publish:
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - uses: actions/download-artifact@v4
+        with:
+          name: distribution
+          path: dist
+      - run: pip install twine
       - run: twine upload dist/*
         env:
           TWINE_USERNAME: __token__

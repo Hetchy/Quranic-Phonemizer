@@ -36,20 +36,20 @@ CASES = (
         site=Site(hafs=("2:56", (3, 4))),
         selector=KhilafId.IQLAB_NASAL,
         faces={
-            "assimilated": Expect(
+            "open": Expect(
                 read=through(),
                 phonemes=("m i ŋ", "b a ʕ d Q"),
                 char_rules={"ن": R("iqlab")},
                 sound_rules={"ŋ": R("iqlab")},
             ),
-            "bilabial": Expect(
+            "closed": Expect(
                 read=through(),
                 phonemes=("m i m̃", "b a ʕ d Q"),
                 char_rules={"ن": R("iqlab")},
                 sound_rules={"m̃": R("iqlab")},
             ),
         },
-        default="assimilated",
+        default="open",
         masked=Expect(
             read=explicit(ibtidaa=3, waqf=(3, 4)),
             phonemes=("m i n", "b a ʕ d Q"),

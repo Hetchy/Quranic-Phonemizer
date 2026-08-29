@@ -5,13 +5,45 @@ without that mark. The rounding belongs to the noon in both readings.
 """
 from __future__ import annotations
 
+import pytest
+
+from quranic_phonemizer.model.address import KhilafId
 from quranic_phonemizer.model import performance as pf
 from quranic_phonemizer.model.canon import CanonLetter, Rule
 
-from tests.support import Site, for_each_riwayah
+from tests.support import (
+    Expect,
+    Site,
+    VariantCase,
+    assert_case,
+    case_runs,
+    for_each_riwayah,
+    isolated,
+)
 
 TAMANNA = Site.shared("12:11", (6,), riwayat=("hafs", "warsh"))
 SIA = Site.shared("11:77", (5,), riwayat=("warsh",))
+
+CASES = (
+    # Hafs: تَأْمَ۫نَّا
+    VariantCase(
+        id="tamanna-noon",
+        site=Site(hafs=("12:11", (6,))),
+        selector=KhilafId.TAMANNA_NOON,
+        faces={
+            "ishmam": Expect(read=isolated(), phonemes="t a ʔ m a ñ a:"),
+            "ikhtilas": Expect(
+                read=isolated(), phonemes="t a ʔ m a n u n a:"
+            ),
+        },
+        default="ishmam",
+    ),
+)
+
+
+@pytest.mark.parametrize("run", case_runs(CASES))
+def test_tamanna_variant(run):
+    assert_case(run)
 
 
 def _the_ishmam(r) -> pf.Occurrence:

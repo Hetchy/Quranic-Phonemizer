@@ -235,8 +235,8 @@ def _column(unit: LetterUnit, reading: _Reading,
     if tier is not CellTier.MAIN:
         seat = _seat_unit(unit, reading)
         attached = None if seat is None else CellColumnId(column_of_unit[seat])
-    status = CellStatus.DROPPED if unit.silence is not None else CellStatus.PRESENT
     option = reading.variant_of_unit.get(unit.id.value)
+    status = CellStatus.DROPPED if unit.silence is not None else CellStatus.PRESENT
     return CellColumn(
         id=CellColumnId(column_of_unit[unit.id.value]),
         role=role,

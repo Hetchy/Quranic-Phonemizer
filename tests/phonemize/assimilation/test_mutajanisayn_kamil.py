@@ -2,12 +2,15 @@ from __future__ import annotations
 
 import pytest
 
+from quranic_phonemizer.model.address import KhilafId
+
 from tests.support import (
     Case,
     Expect,
     R,
     Site,
     StateCase,
+    VariantCase,
     assert_case,
     case_runs,
     explicit,
@@ -57,8 +60,24 @@ CASES = (
                     "lˤ": R("tafkheem"), "aˤ[2]": R("tafkheem")},
          )),
     # Hafs: يَلْهَث ۚ ذَّٰلِكَ
+    VariantCase(
+         id="yalhath-dhalik", site=Site(hafs=("7:176", (20, 21))),
+         selector=KhilafId.YALHATH_DHALIK,
+         faces={
+             "idgham": Expect(read=through(), phonemes=("j a l h a", "ðð a: l i k"),
+                 char_rules={"ث": R("idgham_mutajanisayn_kamil"),
+                             "ذ": R("idgham_mutajanisayn_kamil")},
+                 sound_rules={"ðð": R("idgham_mutajanisayn_kamil")}),
+             "izhar": Expect(read=through(), phonemes=("j a l h a θ", "ð a: l i k"),
+                 absent_char_rules={"ث": R("idgham_mutajanisayn_kamil")}),
+         },
+         default="idgham",
+         masked=Expect(read=explicit(ibtidaa=20, waqf=20),
+                       phonemes=("j a l h a θ", "ð a: l i k a"),
+                       absent_char_rules={"ث": R("idgham_mutajanisayn_kamil")}),
+    ),
     # Warsh: يَلْهَثْۖ ذَٰلِكَ
-    Case(id="thaa-dhal", site=Site.shared("7:176", (20, 21)), read=through(),
+    Case(id="thaa-dhal-warsh", site=Site(warsh=("7:176", (20, 21))), read=through(),
          phonemes=("j a l h a", "ðð a: l i k"),
          char_rules={"ث": R("idgham_mutajanisayn_kamil"),
                      "ذ": R("idgham_mutajanisayn_kamil")},
@@ -98,8 +117,28 @@ CASES = (
                      "ت": R("idgham_mutajanisayn_kamil")},
          sound_rules={"tt": R("idgham_mutajanisayn_kamil")}),
     # Hafs: ٱرْكَب مَّعَنَا
+    VariantCase(
+         id="irkab-maana", site=Site(hafs=("11:42", (14, 15))),
+         selector=KhilafId.IRKAB_MAANA,
+         faces={
+             "idgham": Expect(read=through(), phonemes=("ʔ i rˤ k a", "m̃ a ʕ a n a:"),
+                 char_rules={"ب": R("idgham_mutajanisayn_kamil"),
+                             "م": R("idgham_mutajanisayn_kamil")},
+                 sound_rules={"m̃": R("idgham_mutajanisayn_kamil")}),
+             "izhar": Expect(read=through(), phonemes=("ʔ i rˤ k a b Q", "m a ʕ a n a:"),
+                 char_rules={"ب": R("qalqala_sughra")},
+                 sound_rules={"Q": R("qalqala_sughra")},
+                 absent_char_rules={"ب": R("idgham_mutajanisayn_kamil")}),
+         },
+         default="idgham",
+         masked=Expect(read=explicit(ibtidaa=14, waqf=14),
+                       phonemes=("ʔ i rˤ k a b Q", "m a ʕ a n a:"),
+                       char_rules={"ب": R("qalqala_kubra")},
+                       sound_rules={"Q": R("qalqala_kubra")},
+                       absent_char_rules={"ب": R("idgham_mutajanisayn_kamil")}),
+    ),
     # Warsh: اِ۪رْكَبْ مَعَنَا
-    Case(id="irkab-maana", site=Site.shared("11:42", (14, 15)), read=through(),
+    Case(id="irkab-maana-warsh", site=Site(warsh=("11:42", (14, 15))), read=through(),
          phonemes=("ʔ i rˤ k a", "m̃ a ʕ a n a:"),
          char_rules={"ب": R("idgham_mutajanisayn_kamil"),
                      "م": R("idgham_mutajanisayn_kamil")},
