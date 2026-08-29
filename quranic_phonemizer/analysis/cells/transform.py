@@ -99,6 +99,9 @@ def _transform_letter(
         and cons.letter is CanonLetter.HAMZA
         and not any(glyph in col.text for glyph in _HAMZA_GLYPHS)
         and not any(
+            pen.role(role) in col.text for role in _VOWEL_ROLE.values()
+        )
+        and not any(
             isinstance(facts.sounds[sound.value].value, Vowel)
             and facts.sounds[sound.value].value.long
             for sound in col.owned_sound_ids
