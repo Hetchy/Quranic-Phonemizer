@@ -13,14 +13,19 @@ from quranic_phonemizer.riwayat.warsh.inclination import (
     FIXED_KUBRA,
     HAA_OPENINGS,
     HAA_VERSE_HEADS,
+    LAM_COUPLED_WAQF_ONLY,
     LAM_DHAT_YAA,
     LAM_VERSE_HEADS,
+    NAMED_SITES,
     RAA_OPENINGS,
     RAA_SEEN_BEFORE_SAKIN,
     VERSE_HEAD_SURAHS,
+    dhat_yaa_locations,
+    dhat_yaa_register,
     is_inclination_witness,
     mark_sequence_family,
 )
+from quranic_phonemizer.riwayat.warsh.lam import SITES as LAM_SITES
 from quranic_phonemizer.riwayat.warsh.resources import corpus
 
 _MARKED_RAA_SEEN = frozenset({
@@ -143,3 +148,82 @@ def test_lam_verse_heads_expose_the_default_inclination_side(location):
 @pytest.mark.parametrize("location", sorted(HAA_VERSE_HEADS))
 def test_pronominal_haa_heads_keep_the_fixed_default_fath(location):
     assert Quality.TAQLIL not in _qualities(location)
+
+
+def _verse_lengths() -> dict[tuple[int, int], int]:
+    lengths: dict[tuple[int, int], int] = {}
+    for location in corpus().entries:
+        key = (location.surah, location.ayah)
+        lengths[key] = max(lengths.get(key, 0), location.word)
+    return lengths
+
+
+def test_the_dhat_yaa_register_is_closed_and_disjoint():
+    rows = dhat_yaa_register()
+    assert len(rows) == 1154
+    locations = dhat_yaa_locations()
+    assert len(locations) == len(rows)
+    owned_elsewhere = (
+        FIXED_KUBRA | HAA_OPENINGS | RAA_OPENINGS | HAA_VERSE_HEADS
+        | LAM_DHAT_YAA | LAM_VERSE_HEADS | RAA_SEEN_BEFORE_SAKIN
+        | _MARKED_RAA_SEEN | frozenset(NAMED_SITES)
+        | frozenset(site.canonical for site in LAM_SITES)
+    )
+    assert not locations & owned_elsewhere
+    lengths = _verse_lengths()
+    verse_final = {
+        location for location in locations
+        if location.surah in VERSE_HEAD_SURAHS
+        and location.word == lengths[(location.surah, location.ayah)]
+    }
+    fathatan = {
+        _row_location(row) for row in rows if row["requires"] == "waqf"
+    }
+    # Fixed verse heads stay out of the register; a fathatan host is the
+    # one shape the verse-head predicate never owns.
+    assert verse_final <= fathatan
+
+
+def _row_location(row) -> Location:
+    return Location(*(int(part) for part in row["canonical"].split(":")))
+
+
+def test_every_dhat_yaa_row_matches_its_written_shape():
+    entries = corpus().entries
+    for row in dhat_yaa_register():
+        location = _row_location(row)
+        text = entries[location].text
+        assert text == row["text"], row["canonical"]
+        witness = any(
+            char == "۪" and is_inclination_witness(text, offset)
+            for offset, char in enumerate(text)
+        )
+        fathatan = text.rstrip("ۖۗۘۙۚۛۜ۩ٓ").endswith("ىٗ")
+        if row["requires"] == "waqf":
+            assert fathatan and not witness, row["canonical"]
+        else:
+            assert witness, row["canonical"]
+
+
+def test_dhat_yaa_spot_members_and_exclusions():
+    locations = dhat_yaa_locations()
+    assert Location(2, 16, 5) in locations       # بِالْهُد۪ىٰ
+    assert Location(2, 5, 3) in locations        # هُدىٗ
+    assert Location(8, 43, 8) not in locations   # arakahum
+    assert Location(2, 6, 8) not in locations    # أَبْصٰ۪رِهِمْ, alif before raa
+    assert Location(2, 19, 19) not in locations  # بِالْكٰ۪فِرِينَ
+    assert Location(20, 2, 5) not in locations   # verse head in surah 20
+    assert Location(79, 43, 4) not in locations  # ذِكْر۪يٰهَآ, fixed taqlil
+
+
+def test_the_lam_registers_and_masks_agree_across_modules():
+    by_owner: dict[str, set[Location]] = {}
+    for site in LAM_SITES:
+        by_owner.setdefault(site.owner, set()).add(site.canonical)
+    assert by_owner["lam_dhat_yaa"] == set(LAM_DHAT_YAA)
+    assert by_owner["lam_verse_heads"] == set(LAM_VERSE_HEADS)
+    waqf_junctions = {
+        site.canonical for site in LAM_SITES if site.junction == "waqf"
+        and site.owner == "lam_dhat_yaa"
+    }
+    assert waqf_junctions == set(LAM_COUPLED_WAQF_ONLY)

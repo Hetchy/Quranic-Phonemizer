@@ -1,0 +1,6930 @@
+{
+ "schema_version": 1,
+ "artifact": "king-fahd-warsh-v2",
+ "dhat_yaa": [
+  {
+   "canonical": "2:2:6",
+   "source": "2:1:7",
+   "text": "هُدىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "2:5:3",
+   "source": "2:4:3",
+   "text": "هُدىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "2:16:5",
+   "source": "2:15:5",
+   "text": "بِالْهُد۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:28:6",
+   "source": "2:27:6",
+   "text": "فَأَحْي۪اكُمْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:29:10",
+   "source": "2:28:10",
+   "text": "اَ۪سْتَو۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:29:13",
+   "source": "2:28:13",
+   "text": "فَسَوّ۪يٰهُنَّ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:34:9",
+   "source": "2:33:9",
+   "text": "أَب۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:37:1",
+   "source": "2:36:1",
+   "text": "فَتَلَقّ۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:38:8",
+   "source": "2:37:8",
+   "text": "هُدىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "2:38:11",
+   "source": "2:37:11",
+   "text": "هُد۪ايَ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:51:3",
+   "source": "2:50:3",
+   "text": "مُوس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:54:3",
+   "source": "2:53:3",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:55:3",
+   "source": "2:54:3",
+   "text": "يَٰمُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:57:7",
+   "source": "2:56:7",
+   "text": "وَالسَّلْو۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:58:18",
+   "source": "2:57:18",
+   "text": "خَطَٰيٰ۪كُمْۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:60:2",
+   "source": "2:59:2",
+   "text": "اِ۪سْتَسْق۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:60:3",
+   "source": "2:59:3",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:61:3",
+   "source": "2:60:3",
+   "text": "يَٰمُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:61:27",
+   "source": "2:60:27",
+   "text": "أَدْن۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:67:3",
+   "source": "2:66:3",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:73:7",
+   "source": "2:72:7",
+   "text": "اُ۬لْمَوْت۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:81:1",
+   "source": "2:80:1",
+   "text": "بَل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:83:13",
+   "source": "2:82:13",
+   "text": "اِ۬لْقُرْب۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:83:14",
+   "source": "2:82:14",
+   "text": "وَالْيَتَٰم۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:85:38",
+   "source": "2:84:38",
+   "text": "اِ۬لدُّنْي۪اۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:86:5",
+   "source": "2:85:5",
+   "text": "اَ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:87:22",
+   "source": "2:86:22",
+   "text": "تَهْو۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:92:3",
+   "source": "2:91:3",
+   "text": "مُّوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:97:16",
+   "source": "2:96:16",
+   "text": "وَهُدىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "2:108:8",
+   "source": "2:107:8",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:112:1",
+   "source": "2:111:1",
+   "text": "بَل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:114:11",
+   "source": "2:113:11",
+   "text": "وَسَع۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:114:24",
+   "source": "2:113:24",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:117:5",
+   "source": "2:116:5",
+   "text": "قَض۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:120:2",
+   "source": "2:119:2",
+   "text": "تَرْض۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:120:15",
+   "source": "2:119:15",
+   "text": "اَ۬لْهُد۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:124:2",
+   "source": "2:123:2",
+   "text": "اِ۪بْتَل۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:130:13",
+   "source": "2:129:13",
+   "text": "اِ۬لدُّنْي۪اۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:132:1",
+   "source": "2:131:1",
+   "text": "وَأَوْص۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:132:9",
+   "source": "2:131:9",
+   "text": "اَ۪صْطَف۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:136:17",
+   "source": "2:135:17",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:136:18",
+   "source": "2:135:18",
+   "text": "وَعِيس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:142:6",
+   "source": "2:141:6",
+   "text": "وَلّ۪يٰهُمْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:144:9",
+   "source": "2:143:9",
+   "text": "تَرْض۪يٰهَاۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:159:8",
+   "source": "2:158:8",
+   "text": "وَالْهُد۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:164:24",
+   "source": "2:163:24",
+   "text": "فَأَحْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:175:5",
+   "source": "2:174:5",
+   "text": "بِالْهُد۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:177:24",
+   "source": "2:176:24",
+   "text": "اِ۬لْقُرْب۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:177:25",
+   "source": "2:176:25",
+   "text": "وَالْيَتَٰم۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:178:13",
+   "source": "2:177:13",
+   "text": "وَالُانث۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:178:14",
+   "source": "2:177:14",
+   "text": "بِالُانث۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:178:32",
+   "source": "2:177:32",
+   "text": "اِ۪عْتَد۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:185:7",
+   "source": "2:184:7",
+   "text": "هُدىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "2:185:11",
+   "source": "2:184:11",
+   "text": "اَ۬لْهُد۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:185:42",
+   "source": "2:184:42",
+   "text": "هَد۪يٰكُمْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:189:19",
+   "source": "2:188:19",
+   "text": "اِ۪تَّق۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:194:8",
+   "source": "2:193:8",
+   "text": "اِ۪عْتَد۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:194:14",
+   "source": "2:193:14",
+   "text": "اَ۪عْتَد۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:196:24",
+   "source": "2:195:24",
+   "text": "أَذىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "2:197:26",
+   "source": "2:196:26",
+   "text": "اِ۬لتَّقْو۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:198:20",
+   "source": "2:197:20",
+   "text": "هَد۪يٰكُمْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:200:18",
+   "source": "2:199:18",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:201:7",
+   "source": "2:199:31",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:203:19",
+   "source": "2:201:19",
+   "text": "اِ۪تَّق۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:204:8",
+   "source": "2:202:8",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:205:2",
+   "source": "2:203:2",
+   "text": "تَوَلّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:205:3",
+   "source": "2:203:3",
+   "text": "سَع۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:212:5",
+   "source": "2:210:5",
+   "text": "اُ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:214:23",
+   "source": "2:212:23",
+   "text": "مَت۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:215:11",
+   "source": "2:213:11",
+   "text": "وَالْيَتَٰم۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:216:7",
+   "source": "2:214:7",
+   "text": "وَعَس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:216:14",
+   "source": "2:214:14",
+   "text": "وَعَس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:217:50",
+   "source": "2:215:50",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:220:2",
+   "source": "2:218:2",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:220:6",
+   "source": "2:218:6",
+   "text": "اِ۬لْيَتَٰم۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:222:6",
+   "source": "2:220:6",
+   "text": "أَذىٗۖ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "2:223:6",
+   "source": "2:221:6",
+   "text": "أَنّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:232:26",
+   "source": "2:230:26",
+   "text": "أَزْك۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:237:26",
+   "source": "2:235:26",
+   "text": "لِلتَّقْو۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:238:5",
+   "source": "2:236:5",
+   "text": "اِ۬لْوُسْط۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:243:17",
+   "source": "2:241:17",
+   "text": "أَحْي۪اهُمُۥٓۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:246:10",
+   "source": "2:244:10",
+   "text": "مُوس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:247:12",
+   "source": "2:245:12",
+   "text": "أَنّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:247:29",
+   "source": "2:245:29",
+   "text": "اَ۪صْطَف۪يٰهُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:248:18",
+   "source": "2:246:18",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:251:7",
+   "source": "2:249:7",
+   "text": "وَءَات۪يٰهُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:256:18",
+   "source": "2:255:18",
+   "text": "اِ۬لْوُثْق۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:258:10",
+   "source": "2:257:10",
+   "text": "اٰت۪يٰهُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:259:11",
+   "source": "2:258:11",
+   "text": "أَنّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:260:8",
+   "source": "2:259:8",
+   "text": "اِ۬لْمَوْت۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:260:13",
+   "source": "2:259:13",
+   "text": "بَل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:262:14",
+   "source": "2:261:14",
+   "text": "أَذىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "2:263:8",
+   "source": "2:262:8",
+   "text": "أَذىٗۖ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "2:264:8",
+   "source": "2:263:8",
+   "text": "وَالَاذ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:272:3",
+   "source": "2:271:3",
+   "text": "هُد۪يٰهُمْۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:273:18",
+   "source": "2:272:18",
+   "text": "بِسِيمٰ۪هُمْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:275:31",
+   "source": "2:274:31",
+   "text": "فَانتَه۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:281:8",
+   "source": "2:280:8",
+   "text": "تُوَفّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:282:9",
+   "source": "2:281:9",
+   "text": "مُّسَمّىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "2:282:68",
+   "source": "2:281:68",
+   "text": "إِحْد۪يٰهُمَا",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:282:70",
+   "source": "2:281:70",
+   "text": "إِحْد۪يٰهُمَا",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:282:93",
+   "source": "2:281:93",
+   "text": "وَأَدْن۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "2:286:45",
+   "source": "2:285:45",
+   "text": "مَوْل۪يٰنَا",
+   "requires": "all"
+  },
+  {
+   "canonical": "3:4:3",
+   "source": "3:3:3",
+   "text": "هُدىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "3:5:4",
+   "source": "3:5:4",
+   "text": "يَخْف۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "3:14:20",
+   "source": "3:14:20",
+   "text": "اِ۬لدُّنْي۪اۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "3:22:6",
+   "source": "3:22:6",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "3:23:16",
+   "source": "3:23:16",
+   "text": "يَتَوَلّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "3:28:21",
+   "source": "3:28:21",
+   "text": "تُق۪يٰةٗۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "3:33:3",
+   "source": "3:33:3",
+   "text": "اَ۪صْطَف۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "3:36:7",
+   "source": "3:36:7",
+   "text": "أُنث۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "3:36:14",
+   "source": "3:36:14",
+   "text": "كَالُانث۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "3:37:20",
+   "source": "3:37:20",
+   "text": "أَنّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "3:39:11",
+   "source": "3:39:11",
+   "text": "بِيَحْي۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "3:40:3",
+   "source": "3:40:3",
+   "text": "أَنّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "3:42:7",
+   "source": "3:42:7",
+   "text": "اَ۪صْطَف۪يٰكِ",
+   "requires": "all"
+  },
+  {
+   "canonical": "3:42:9",
+   "source": "3:42:9",
+   "text": "وَاصْطَف۪يٰكِ",
+   "requires": "all"
+  },
+  {
+   "canonical": "3:45:17",
+   "source": "3:45:17",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "3:47:3",
+   "source": "3:47:3",
+   "text": "أَنّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "3:47:17",
+   "source": "3:47:17",
+   "text": "قَض۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "3:49:28",
+   "source": "3:48:33",
+   "text": "اِ۬لْمَوْت۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "3:52:3",
+   "source": "3:51:3",
+   "text": "عِيس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "3:55:4",
+   "source": "3:54:4",
+   "text": "يَٰعِيس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "3:56:8",
+   "source": "3:55:8",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "3:59:3",
+   "source": "3:58:3",
+   "text": "عِيس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "3:73:9",
+   "source": "3:72:9",
+   "text": "اَ۬لْهُد۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "3:73:13",
+   "source": "3:72:13",
+   "text": "يُّوت۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "3:76:1",
+   "source": "3:75:1",
+   "text": "بَل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "3:76:3",
+   "source": "3:75:3",
+   "text": "اَوْف۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "3:76:5",
+   "source": "3:75:5",
+   "text": "وَاتَّق۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "3:82:2",
+   "source": "3:81:2",
+   "text": "تَوَلّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "3:84:17",
+   "source": "3:83:17",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "3:84:18",
+   "source": "3:83:18",
+   "text": "وَعِيس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "3:91:15",
+   "source": "3:90:15",
+   "text": "اِ۪فْتَد۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "3:96:9",
+   "source": "3:96:9",
+   "text": "وَهُدىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "3:101:4",
+   "source": "3:101:4",
+   "text": "تُتْل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "3:102:7",
+   "source": "3:102:7",
+   "text": "تُق۪اتِهِۦۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "3:111:4",
+   "source": "3:111:4",
+   "text": "أَذىٗۖ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "3:117:7",
+   "source": "3:117:7",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "3:125:1",
+   "source": "3:125:1",
+   "text": "بَل۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "3:138:4",
+   "source": "3:138:4",
+   "text": "وَهُدىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "3:145:14",
+   "source": "3:145:14",
+   "text": "اَ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "3:148:1",
+   "source": "3:148:1",
+   "text": "فَـَٔات۪يٰهُمُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "3:148:4",
+   "source": "3:148:4",
+   "text": "اَ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "3:150:3",
+   "source": "3:150:3",
+   "text": "مَوْل۪يٰكُمْۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "3:151:15",
+   "source": "3:151:15",
+   "text": "وَمَأْو۪يٰهُمُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "3:152:24",
+   "source": "3:152:24",
+   "text": "اُ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "3:154:9",
+   "source": "3:154:9",
+   "text": "يَغْش۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "3:156:16",
+   "source": "3:156:16",
+   "text": "غُزّىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "3:161:14",
+   "source": "3:161:14",
+   "text": "تُوَفّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "3:162:10",
+   "source": "3:162:10",
+   "text": "وَمَأْو۪يٰهُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "3:165:8",
+   "source": "3:165:8",
+   "text": "أَنّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "3:170:3",
+   "source": "3:170:3",
+   "text": "ءَات۪يٰهُمُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "3:180:6",
+   "source": "3:180:6",
+   "text": "ءَات۪يٰهُمُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "3:185:20",
+   "source": "3:185:20",
+   "text": "اُ۬لدُّنْي۪آ",
+   "requires": "all"
+  },
+  {
+   "canonical": "3:186:15",
+   "source": "3:186:15",
+   "text": "أَذىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "3:195:13",
+   "source": "3:195:13",
+   "text": "ا۟نث۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "3:197:4",
+   "source": "3:197:4",
+   "text": "مَأْو۪يٰهُمْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:2:2",
+   "source": "4:2:2",
+   "text": "اُ۬لْيَتَٰم۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:3:6",
+   "source": "4:3:6",
+   "text": "اِ۬لْيَتَٰم۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:3:13",
+   "source": "4:3:13",
+   "text": "مَثْن۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:3:26",
+   "source": "4:3:26",
+   "text": "أَدْن۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:6:2",
+   "source": "4:6:2",
+   "text": "اُ۬لْيَتَٰم۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:6:35",
+   "source": "4:6:35",
+   "text": "وَكَف۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:8:5",
+   "source": "4:8:5",
+   "text": "اُ۬لْقُرْب۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:8:6",
+   "source": "4:8:6",
+   "text": "وَالْيَتَٰم۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:10:5",
+   "source": "4:10:5",
+   "text": "اَ۬لْيَتَٰم۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:15:16",
+   "source": "4:15:16",
+   "text": "يَتَوَفّ۪يٰهُنَّ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:19:26",
+   "source": "4:19:26",
+   "text": "فَعَس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:20:8",
+   "source": "4:20:8",
+   "text": "إِحْد۪يٰهُنَّ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:21:4",
+   "source": "4:21:4",
+   "text": "اَفْض۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:36:10",
+   "source": "4:36:10",
+   "text": "اِ۬لْقُرْب۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:36:11",
+   "source": "4:36:11",
+   "text": "وَالْيَتَٰم۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:36:15",
+   "source": "4:36:15",
+   "text": "اِ۬لْقُرْب۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:37:8",
+   "source": "4:37:8",
+   "text": "ءَات۪يٰهُمُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:42:8",
+   "source": "4:42:8",
+   "text": "تَسَّوّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:43:22",
+   "source": "4:43:22",
+   "text": "مَّرْض۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:45:4",
+   "source": "4:44:18",
+   "text": "وَكَف۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:45:7",
+   "source": "4:44:21",
+   "text": "وَكَف۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:50:7",
+   "source": "4:49:7",
+   "text": "وَكَف۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:51:16",
+   "source": "4:50:16",
+   "text": "اَ۬هْد۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:54:6",
+   "source": "4:53:6",
+   "text": "ءَات۪يٰهُمُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:55:9",
+   "source": "4:54:9",
+   "text": "وَكَف۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:70:5",
+   "source": "4:69:5",
+   "text": "وَكَف۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:74:8",
+   "source": "4:73:8",
+   "text": "اَ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:77:40",
+   "source": "4:76:40",
+   "text": "اُ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:77:45",
+   "source": "4:76:45",
+   "text": "اِ۪تَّق۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:79:16",
+   "source": "4:78:16",
+   "text": "وَكَف۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:80:8",
+   "source": "4:79:8",
+   "text": "تَوَلّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:81:22",
+   "source": "4:80:22",
+   "text": "وَكَف۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:94:13",
+   "source": "4:93:13",
+   "text": "اَلْق۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:94:21",
+   "source": "4:93:21",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:95:26",
+   "source": "4:94:26",
+   "text": "اُ۬لْحُسْن۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:97:3",
+   "source": "4:96:3",
+   "text": "تَوَفّ۪يٰهُمُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:97:24",
+   "source": "4:96:24",
+   "text": "مَأْو۪يٰهُمْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:102:46",
+   "source": "4:101:46",
+   "text": "أَذىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "4:102:51",
+   "source": "4:101:51",
+   "text": "مَّرْض۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:108:14",
+   "source": "4:107:14",
+   "text": "يَرْض۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:109:7",
+   "source": "4:108:7",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:114:6",
+   "source": "4:113:6",
+   "text": "نَّجْو۪يٰهُمُۥٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:115:9",
+   "source": "4:114:9",
+   "text": "اُ۬لْهُد۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:115:16",
+   "source": "4:114:16",
+   "text": "تَوَلّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:121:2",
+   "source": "4:120:2",
+   "text": "مَأْو۪يٰهُمْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:124:8",
+   "source": "4:123:8",
+   "text": "ا۟نث۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:127:9",
+   "source": "4:126:9",
+   "text": "يُتْل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:127:30",
+   "source": "4:126:30",
+   "text": "لِلْيَتَٰم۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:132:8",
+   "source": "4:131:8",
+   "text": "وَكَف۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:134:5",
+   "source": "4:133:5",
+   "text": "اَ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:134:9",
+   "source": "4:133:9",
+   "text": "اُ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:135:21",
+   "source": "4:134:21",
+   "text": "أَوْل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:135:25",
+   "source": "4:134:25",
+   "text": "اُ۬لْهَو۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:142:12",
+   "source": "4:141:12",
+   "text": "كُسَال۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:153:12",
+   "source": "4:152:12",
+   "text": "مُوس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:153:35",
+   "source": "4:152:35",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:163:18",
+   "source": "4:162:18",
+   "text": "وَعِيس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:164:13",
+   "source": "4:163:13",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:166:11",
+   "source": "4:165:11",
+   "text": "وَكَف۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:171:21",
+   "source": "4:170:21",
+   "text": "أَلْق۪يٰهَآ",
+   "requires": "all"
+  },
+  {
+   "canonical": "4:171:51",
+   "source": "4:170:51",
+   "text": "وَكَف۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "5:1:12",
+   "source": "5:2:7",
+   "text": "يُتْل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "5:2:41",
+   "source": "5:3:41",
+   "text": "وَالتَّقْو۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "5:6:24",
+   "source": "5:7:24",
+   "text": "مَّرْض۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "5:8:19",
+   "source": "5:9:19",
+   "text": "لِلتَّقْو۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "5:20:3",
+   "source": "5:22:3",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "5:20:16",
+   "source": "5:22:16",
+   "text": "وَءَات۪يٰكُم",
+   "requires": "all"
+  },
+  {
+   "canonical": "5:22:2",
+   "source": "5:24:2",
+   "text": "يَٰمُوس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "5:24:2",
+   "source": "5:26:2",
+   "text": "يَٰمُوس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "5:31:13",
+   "source": "5:33:13",
+   "text": "يَٰوَيْلَت۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "5:32:23",
+   "source": "5:34:23",
+   "text": "اَحْي۪اهَا",
+   "requires": "all"
+  },
+  {
+   "canonical": "5:33:29",
+   "source": "5:35:29",
+   "text": "اِ۬لدُّنْي۪اۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "5:41:61",
+   "source": "5:43:61",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "5:44:5",
+   "source": "5:46:5",
+   "text": "هُدىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "5:46:16",
+   "source": "5:48:16",
+   "text": "هُدىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "5:46:24",
+   "source": "5:48:24",
+   "text": "وَهُدىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "5:48:40",
+   "source": "5:50:40",
+   "text": "ءَات۪يٰكُمْۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "5:52:9",
+   "source": "5:54:9",
+   "text": "نَخْش۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "5:63:2",
+   "source": "5:65:2",
+   "text": "يَنْه۪يٰهُمُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "5:70:14",
+   "source": "5:72:14",
+   "text": "تَهْو۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "5:72:28",
+   "source": "5:74:28",
+   "text": "وَمَأْو۪يٰهُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "5:75:24",
+   "source": "5:77:24",
+   "text": "اَنّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "5:94:18",
+   "source": "5:96:18",
+   "text": "اِ۪عْتَد۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "5:106:43",
+   "source": "5:108:43",
+   "text": "قُرْب۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "5:108:2",
+   "source": "5:110:2",
+   "text": "أَدْن۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "5:110:45",
+   "source": "5:112:45",
+   "text": "اُ۬لْمَوْت۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "6:2:7",
+   "source": "6:3:7",
+   "text": "قَض۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "6:29:6",
+   "source": "6:30:6",
+   "text": "اَ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "6:30:12",
+   "source": "6:31:12",
+   "text": "بَل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "6:32:3",
+   "source": "6:33:3",
+   "text": "اُ۬لدُّنْي۪آ",
+   "requires": "all"
+  },
+  {
+   "canonical": "6:34:12",
+   "source": "6:35:12",
+   "text": "أَت۪يٰهُمْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "6:35:24",
+   "source": "6:36:24",
+   "text": "اَ۬لْهُد۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "6:36:5",
+   "source": "6:37:5",
+   "text": "وَالْمَوْت۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "6:40:4",
+   "source": "6:41:4",
+   "text": "اَت۪يٰكُمْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "6:47:4",
+   "source": "6:48:4",
+   "text": "اَت۪يٰكُمْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "6:50:20",
+   "source": "6:51:20",
+   "text": "يُوح۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "6:50:25",
+   "source": "6:51:25",
+   "text": "اِ۬لَاعْم۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "6:60:3",
+   "source": "6:61:3",
+   "text": "يَتَوَفّ۪يٰكُم",
+   "requires": "all"
+  },
+  {
+   "canonical": "6:60:12",
+   "source": "6:61:12",
+   "text": "لِيُقْض۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "6:60:14",
+   "source": "6:61:14",
+   "text": "مُّسَمّىٗۖ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "6:62:5",
+   "source": "6:63:5",
+   "text": "مَوْل۪يٰهُمُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "6:70:9",
+   "source": "6:70:9",
+   "text": "اُ۬لدُّنْي۪اۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "6:71:16",
+   "source": "6:71:16",
+   "text": "هَد۪يٰنَا",
+   "requires": "all"
+  },
+  {
+   "canonical": "6:71:35",
+   "source": "6:71:35",
+   "text": "اَ۬لْهُد۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "6:80:8",
+   "source": "6:81:8",
+   "text": "هَد۪يٰنِۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "6:84:17",
+   "source": "6:85:17",
+   "text": "وَمُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "6:85:2",
+   "source": "6:86:2",
+   "text": "وَيَحْي۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "6:85:3",
+   "source": "6:86:3",
+   "text": "وَعِيس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "6:90:5",
+   "source": "6:91:5",
+   "text": "فَبِهُد۪يٰهُمُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "6:91:22",
+   "source": "6:92:22",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "6:91:24",
+   "source": "6:92:24",
+   "text": "وَهُدىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "6:94:3",
+   "source": "6:95:3",
+   "text": "فُرَٰد۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "6:95:5",
+   "source": "6:96:5",
+   "text": "وَالنَّو۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "6:95:16",
+   "source": "6:96:16",
+   "text": "فَأَنّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "6:100:13",
+   "source": "6:101:13",
+   "text": "وَتَعَٰل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "6:101:4",
+   "source": "6:102:4",
+   "text": "أَنّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "6:111:7",
+   "source": "6:112:7",
+   "text": "اُ۬لْمَوْت۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "6:113:1",
+   "source": "6:114:1",
+   "text": "وَلِتَصْغ۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "6:124:8",
+   "source": "6:125:8",
+   "text": "نُوت۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "6:128:25",
+   "source": "6:129:25",
+   "text": "مَثْو۪يٰكُمْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "6:130:21",
+   "source": "6:131:21",
+   "text": "اُ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "6:144:21",
+   "source": "6:145:21",
+   "text": "وَصّ۪يٰكُمُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "6:146:19",
+   "source": "6:147:19",
+   "text": "اِ۬لْحَوَاي۪آ",
+   "requires": "all"
+  },
+  {
+   "canonical": "6:149:7",
+   "source": "6:150:7",
+   "text": "لَهَد۪يٰكُمُۥٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "6:151:39",
+   "source": "6:152:39",
+   "text": "وَصّ۪يٰكُم",
+   "requires": "all"
+  },
+  {
+   "canonical": "6:152:27",
+   "source": "6:153:27",
+   "text": "قُرْب۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "6:152:32",
+   "source": "6:153:32",
+   "text": "وَصّ۪يٰكُم",
+   "requires": "all"
+  },
+  {
+   "canonical": "6:153:14",
+   "source": "6:154:14",
+   "text": "وَصّ۪يٰكُم",
+   "requires": "all"
+  },
+  {
+   "canonical": "6:154:12",
+   "source": "6:155:12",
+   "text": "وَهُدىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "6:157:9",
+   "source": "6:158:9",
+   "text": "أَهْد۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "6:157:16",
+   "source": "6:158:16",
+   "text": "وَهُدىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "6:160:11",
+   "source": "6:161:11",
+   "text": "يُجْز۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "6:161:3",
+   "source": "6:162:3",
+   "text": "هَد۪يٰنِے",
+   "requires": "all"
+  },
+  {
+   "canonical": "6:162:5",
+   "source": "6:164:5",
+   "text": "وَمَحْي۪آےْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "6:165:14",
+   "source": "6:167:14",
+   "text": "ءَات۪يٰكُمُۥٓۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:5:3",
+   "source": "7:4:3",
+   "text": "دَعْو۪يٰهُمُۥٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:20:13",
+   "source": "7:19:13",
+   "text": "نَه۪يٰكُمَا",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:22:1",
+   "source": "7:21:1",
+   "text": "فَدَلّ۪يٰهُمَا",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:22:15",
+   "source": "7:21:15",
+   "text": "وَنَاد۪يٰهُمَا",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:26:11",
+   "source": "7:25:11",
+   "text": "اَ۬لتَّقْو۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:30:2",
+   "source": "7:28:18",
+   "text": "هَد۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:32:18",
+   "source": "7:30:18",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:35:11",
+   "source": "7:33:11",
+   "text": "اِ۪تَّق۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:38:26",
+   "source": "7:36:26",
+   "text": "لِأُول۪يٰهُمْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:39:2",
+   "source": "7:38:2",
+   "text": "ا۟ول۪يٰهُمْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:43:15",
+   "source": "7:42:15",
+   "text": "هَد۪يٰنَا",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:43:22",
+   "source": "7:42:22",
+   "text": "هَد۪يٰنَا",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:44:1",
+   "source": "7:43:1",
+   "text": "وَنَاد۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:46:8",
+   "source": "7:45:8",
+   "text": "بِسِيم۪يٰهُمْۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:48:1",
+   "source": "7:47:1",
+   "text": "وَنَاد۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:48:6",
+   "source": "7:47:6",
+   "text": "بِسِيم۪يٰهُمْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:48:9",
+   "source": "7:47:9",
+   "text": "أَغْن۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:50:1",
+   "source": "7:49:1",
+   "text": "وَنَاد۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:51:8",
+   "source": "7:50:8",
+   "text": "اُ۬لدُّنْي۪اۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:51:10",
+   "source": "7:50:10",
+   "text": "نَنس۪يٰهُمْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:52:7",
+   "source": "7:51:7",
+   "text": "هُدىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "7:54:12",
+   "source": "7:53:12",
+   "text": "اَ۪سْتَو۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:57:27",
+   "source": "7:56:27",
+   "text": "اُ۬لْمَوْت۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:79:1",
+   "source": "7:78:1",
+   "text": "فَتَوَلّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:89:12",
+   "source": "7:88:12",
+   "text": "نَجّ۪يٰنَا",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:93:1",
+   "source": "7:92:1",
+   "text": "فَتَوَلّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:93:12",
+   "source": "7:92:12",
+   "text": "ءَاس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:98:7",
+   "source": "7:97:7",
+   "text": "ضُحىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "7:103:5",
+   "source": "7:102:5",
+   "text": "مُّوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:104:2",
+   "source": "7:103:2",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:107:1",
+   "source": "7:106:1",
+   "text": "فَأَلْق۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:115:2",
+   "source": "7:114:2",
+   "text": "يَٰمُوس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:117:3",
+   "source": "7:116:3",
+   "text": "مُوس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:122:2",
+   "source": "7:121:2",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:127:7",
+   "source": "7:126:7",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:128:2",
+   "source": "7:127:2",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:129:12",
+   "source": "7:128:12",
+   "text": "عَس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:131:11",
+   "source": "7:130:11",
+   "text": "بِمُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:137:15",
+   "source": "7:136:15",
+   "text": "اَ۬لْحُسْن۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:142:2",
+   "source": "7:142:2",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:142:13",
+   "source": "7:142:13",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:143:3",
+   "source": "7:143:3",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:143:25",
+   "source": "7:143:25",
+   "text": "تَجَلّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:143:31",
+   "source": "7:143:31",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:144:2",
+   "source": "7:144:2",
+   "text": "يَٰمُوس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:148:3",
+   "source": "7:148:3",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:150:3",
+   "source": "7:150:3",
+   "text": "مُوس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:152:12",
+   "source": "7:152:12",
+   "text": "اِ۬لدُّنْي۪اۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:154:10",
+   "source": "7:154:10",
+   "text": "هُدىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "7:155:2",
+   "source": "7:155:2",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:156:5",
+   "source": "7:156:5",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:157:15",
+   "source": "7:157:15",
+   "text": "وَيَنْه۪يٰهُمْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:159:3",
+   "source": "7:159:3",
+   "text": "مُوس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:160:8",
+   "source": "7:160:8",
+   "text": "مُوس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:160:10",
+   "source": "7:160:10",
+   "text": "اِ۪سْتَسْق۪يٰهُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:160:32",
+   "source": "7:160:32",
+   "text": "وَالسَّلْو۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:169:10",
+   "source": "7:169:10",
+   "text": "اَ۬لَادْن۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:172:16",
+   "source": "7:172:16",
+   "text": "بَل۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:176:10",
+   "source": "7:176:10",
+   "text": "هَو۪يٰهُۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:180:3",
+   "source": "7:180:3",
+   "text": "اُ۬لْحُسْن۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:185:13",
+   "source": "7:185:13",
+   "text": "عَس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:187:5",
+   "source": "7:187:5",
+   "text": "مُرْس۪يٰهَاۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:189:13",
+   "source": "7:189:13",
+   "text": "تَغَشّ۪يٰهَا",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:190:2",
+   "source": "7:190:2",
+   "text": "ءَات۪يٰهُمَا",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:190:8",
+   "source": "7:190:8",
+   "text": "ءَات۪يٰهُمَاۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:193:4",
+   "source": "7:193:4",
+   "text": "اَ۬لْهُد۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:198:4",
+   "source": "7:198:4",
+   "text": "اَ۬لْهُد۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:203:12",
+   "source": "7:203:12",
+   "text": "يُوح۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "7:203:20",
+   "source": "7:203:20",
+   "text": "وَهُدىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "8:16:17",
+   "source": "8:16:17",
+   "text": "وَمَأْو۪يٰهُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "8:17:12",
+   "source": "8:17:12",
+   "text": "رَم۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "8:26:12",
+   "source": "8:26:12",
+   "text": "فَـَٔاو۪يٰكُمْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "8:31:2",
+   "source": "8:31:2",
+   "text": "تُتْل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "8:40:6",
+   "source": "8:40:6",
+   "text": "مَوْل۪يٰكُمْۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "8:40:8",
+   "source": "8:40:8",
+   "text": "اَ۬لْمَوْل۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "8:41:11",
+   "source": "8:41:11",
+   "text": "اِ۬لْقُرْب۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "8:41:12",
+   "source": "8:41:12",
+   "text": "وَالْيَتَٰم۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "8:42:4",
+   "source": "8:42:4",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "8:42:7",
+   "source": "8:42:7",
+   "text": "اِ۬لْقُصْو۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "8:42:27",
+   "source": "8:43:6",
+   "text": "وَيَحْي۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "8:67:14",
+   "source": "8:68:14",
+   "text": "اَ۬لدُّنْي۪اۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "8:75:13",
+   "source": "8:76:13",
+   "text": "أَوْل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "9:8:13",
+   "source": "9:8:13",
+   "text": "وَتَاب۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "9:18:18",
+   "source": "9:18:18",
+   "text": "فَعَس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "9:30:22",
+   "source": "9:30:22",
+   "text": "أَنّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "9:33:5",
+   "source": "9:33:5",
+   "text": "بِالْهُد۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "9:35:2",
+   "source": "9:35:2",
+   "text": "يُحْم۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "9:35:7",
+   "source": "9:35:7",
+   "text": "فَتُكْو۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "9:38:18",
+   "source": "9:38:18",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "9:38:24",
+   "source": "9:38:24",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "9:40:36",
+   "source": "9:40:36",
+   "text": "اُ۬لسُّفْل۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "9:40:40",
+   "source": "9:40:40",
+   "text": "اَ۬لْعُلْي۪اۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "9:51:10",
+   "source": "9:51:10",
+   "text": "مَوْل۪يٰنَاۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "9:54:17",
+   "source": "9:54:17",
+   "text": "كُسَال۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "9:55:13",
+   "source": "9:55:13",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "9:59:5",
+   "source": "9:59:5",
+   "text": "ءَات۪يٰهُمُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "9:69:28",
+   "source": "9:69:28",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "9:73:8",
+   "source": "9:74:8",
+   "text": "وَمَأْو۪يٰهُمْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "9:74:20",
+   "source": "9:75:20",
+   "text": "اَغْن۪يٰهُمُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "9:74:37",
+   "source": "9:75:37",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "9:75:6",
+   "source": "9:76:6",
+   "text": "اٰت۪يٰنَا",
+   "requires": "all"
+  },
+  {
+   "canonical": "9:76:2",
+   "source": "9:77:2",
+   "text": "ءَات۪يٰهُم",
+   "requires": "all"
+  },
+  {
+   "canonical": "9:78:7",
+   "source": "9:79:7",
+   "text": "وَنَجْو۪يٰهُمْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "9:85:12",
+   "source": "9:86:12",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "9:91:6",
+   "source": "9:92:6",
+   "text": "اَ۬لْمَرْض۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "9:95:13",
+   "source": "9:96:13",
+   "text": "وَمَأْو۪يٰهُمْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "9:96:11",
+   "source": "9:97:11",
+   "text": "يَرْض۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "9:107:20",
+   "source": "9:108:20",
+   "text": "اَ۬لْحُسْن۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "9:108:8",
+   "source": "9:109:8",
+   "text": "اَ۬لتَّقْو۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "9:109:5",
+   "source": "9:110:5",
+   "text": "تَقْو۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "9:111:25",
+   "source": "9:112:25",
+   "text": "اَوْف۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "9:113:12",
+   "source": "9:114:12",
+   "text": "قُرْب۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "9:115:8",
+   "source": "9:116:8",
+   "text": "هَد۪يٰهُمْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "10:3:12",
+   "source": "10:3:12",
+   "text": "اَ۪سْتَو۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "10:7:8",
+   "source": "10:7:8",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "10:8:2",
+   "source": "10:8:2",
+   "text": "مَأْو۪يٰهُمُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "10:10:1",
+   "source": "10:10:1",
+   "text": "دَعْو۪يٰهُمْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "10:10:9",
+   "source": "10:10:9",
+   "text": "دَعْو۪يٰهُمُۥٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "10:15:2",
+   "source": "10:15:2",
+   "text": "تُتْل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "10:15:30",
+   "source": "10:15:30",
+   "text": "يُوح۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "10:18:27",
+   "source": "10:18:27",
+   "text": "وَتَعَٰل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "10:23:2",
+   "source": "10:23:2",
+   "text": "أَنج۪يٰهُمُۥٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "10:23:18",
+   "source": "10:23:18",
+   "text": "اِ۬لدُّنْي۪اۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "10:24:4",
+   "source": "10:24:4",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "10:24:28",
+   "source": "10:24:28",
+   "text": "أَت۪يٰهَآ",
+   "requires": "all"
+  },
+  {
+   "canonical": "10:26:3",
+   "source": "10:26:3",
+   "text": "اُ۬لْحُسْن۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "10:29:1",
+   "source": "10:29:1",
+   "text": "فَكَف۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "10:30:10",
+   "source": "10:30:10",
+   "text": "مَوْل۪يٰهُمُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "10:32:10",
+   "source": "10:32:10",
+   "text": "فَأَنّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "10:34:16",
+   "source": "10:34:16",
+   "text": "فَأَنّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "10:35:25",
+   "source": "10:35:25",
+   "text": "يُّهْد۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "10:48:2",
+   "source": "10:48:2",
+   "text": "مَت۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "10:50:4",
+   "source": "10:50:4",
+   "text": "اَت۪يٰكُمْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "10:57:12",
+   "source": "10:57:12",
+   "text": "وَهُدىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "10:64:5",
+   "source": "10:64:5",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "10:70:3",
+   "source": "10:70:3",
+   "text": "اِ۬لدُّنْي۪اۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "10:75:5",
+   "source": "10:75:5",
+   "text": "مُّوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "10:77:2",
+   "source": "10:77:2",
+   "text": "مُوس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "10:80:6",
+   "source": "10:80:6",
+   "text": "مُّوس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "10:81:4",
+   "source": "10:81:4",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "10:83:3",
+   "source": "10:83:3",
+   "text": "لِمُوس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "10:84:2",
+   "source": "10:84:2",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "10:87:3",
+   "source": "10:87:3",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "10:88:2",
+   "source": "10:88:2",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "10:88:12",
+   "source": "10:88:12",
+   "text": "اِ۬لدُّنْي۪اۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "10:98:18",
+   "source": "10:98:18",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "10:104:21",
+   "source": "10:104:21",
+   "text": "يَتَوَفّ۪يٰكُمْۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "10:108:10",
+   "source": "10:108:10",
+   "text": "اِ۪هْتَد۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "10:109:3",
+   "source": "10:109:3",
+   "text": "يُوح۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "11:3:12",
+   "source": "11:3:12",
+   "text": "مُّسَمّىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "11:12:5",
+   "source": "11:12:5",
+   "text": "يُوح۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "11:15:5",
+   "source": "11:15:5",
+   "text": "اَ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "11:17:13",
+   "source": "11:17:13",
+   "text": "مُوس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "11:24:3",
+   "source": "11:24:3",
+   "text": "كَالَاعْم۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "11:28:10",
+   "source": "11:28:10",
+   "text": "وَءَات۪يٰنِے",
+   "requires": "all"
+  },
+  {
+   "canonical": "11:41:7",
+   "source": "11:41:7",
+   "text": "وَمُرْس۪يٰهَآۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "11:42:7",
+   "source": "11:42:7",
+   "text": "وَنَاد۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "11:45:1",
+   "source": "11:45:1",
+   "text": "وَنَاد۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "11:60:4",
+   "source": "11:59:4",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "11:62:9",
+   "source": "11:61:9",
+   "text": "أَتَنْه۪يٰنَآ",
+   "requires": "all"
+  },
+  {
+   "canonical": "11:63:10",
+   "source": "11:62:10",
+   "text": "وَءَات۪يٰنِے",
+   "requires": "all"
+  },
+  {
+   "canonical": "11:72:2",
+   "source": "11:71:2",
+   "text": "يَٰوَيْلَت۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "11:88:20",
+   "source": "11:88:20",
+   "text": "أَنْه۪يٰكُمْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "11:96:3",
+   "source": "11:96:3",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "12:5:5",
+   "source": "12:5:5",
+   "text": "رُءْي۪اكَ",
+   "requires": "all"
+  },
+  {
+   "canonical": "12:19:5",
+   "source": "12:19:5",
+   "text": "فَأَدْل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "12:21:8",
+   "source": "12:21:8",
+   "text": "مَثْو۪يٰهُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "12:21:9",
+   "source": "12:21:9",
+   "text": "عَس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "12:23:19",
+   "source": "12:23:19",
+   "text": "مَثْو۪ايَۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "12:30:8",
+   "source": "12:30:8",
+   "text": "فَت۪يٰهَا",
+   "requires": "all"
+  },
+  {
+   "canonical": "12:42:10",
+   "source": "12:42:10",
+   "text": "فَأَنس۪يٰهُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "12:43:20",
+   "source": "12:43:20",
+   "text": "رُءْيٰ۪يَ",
+   "requires": "all"
+  },
+  {
+   "canonical": "12:43:23",
+   "source": "12:43:23",
+   "text": "لِلرُّءْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "12:68:20",
+   "source": "12:68:20",
+   "text": "قَض۪يٰهَاۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "12:69:5",
+   "source": "12:69:5",
+   "text": "ءَاو۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "12:84:1",
+   "source": "12:84:1",
+   "text": "وَتَوَلّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "12:84:4",
+   "source": "12:84:4",
+   "text": "يَٰٓأَسَف۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "12:88:12",
+   "source": "12:88:12",
+   "text": "مُّزْج۪يٰةٖۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "12:96:5",
+   "source": "12:96:5",
+   "text": "أَلْق۪يٰهُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "12:99:5",
+   "source": "12:99:5",
+   "text": "ءَاو۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "12:100:12",
+   "source": "12:100:12",
+   "text": "رُءْيٰ۪يَ",
+   "requires": "all"
+  },
+  {
+   "canonical": "12:101:16",
+   "source": "12:101:16",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "12:109:7",
+   "source": "12:109:7",
+   "text": "يُوح۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "12:111:20",
+   "source": "12:111:20",
+   "text": "وَهُدىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "13:2:9",
+   "source": "13:2:9",
+   "text": "اَ۪سْتَو۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "13:2:18",
+   "source": "13:2:18",
+   "text": "مُّسَمّىٗۖ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "13:4:13",
+   "source": "13:4:13",
+   "text": "تُسْق۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "13:8:6",
+   "source": "13:9:6",
+   "text": "أُنث۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "13:16:22",
+   "source": "13:17:22",
+   "text": "اِ۬لَاعْم۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "13:18:4",
+   "source": "13:20:4",
+   "text": "اُ۬لْحُسْن۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "13:18:24",
+   "source": "13:20:24",
+   "text": "وَمَأْو۪يٰهُمْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "13:19:11",
+   "source": "13:21:11",
+   "text": "أَعْم۪ىٰٓۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "13:26:9",
+   "source": "13:27:9",
+   "text": "اِ۬لدُّنْي۪اۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "13:26:12",
+   "source": "13:27:12",
+   "text": "اُ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "13:29:5",
+   "source": "13:30:5",
+   "text": "طُوب۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "13:31:14",
+   "source": "13:32:14",
+   "text": "اِ۬لْمَوْت۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "13:34:5",
+   "source": "13:35:5",
+   "text": "اِ۬لدُّنْي۪اۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "13:43:7",
+   "source": "13:44:7",
+   "text": "كَف۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "14:3:4",
+   "source": "14:4:4",
+   "text": "اَ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "14:5:3",
+   "source": "14:6:3",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "14:6:3",
+   "source": "14:8:3",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "14:6:10",
+   "source": "14:8:10",
+   "text": "اَنج۪يٰكُم",
+   "requires": "all"
+  },
+  {
+   "canonical": "14:8:2",
+   "source": "14:10:2",
+   "text": "مُوس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "14:10:17",
+   "source": "14:13:17",
+   "text": "مُّسَمّىٗۖ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "14:12:8",
+   "source": "14:15:8",
+   "text": "هَد۪يٰنَا",
+   "requires": "all"
+  },
+  {
+   "canonical": "14:13:12",
+   "source": "14:16:12",
+   "text": "فَأَوْح۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "14:16:4",
+   "source": "14:19:4",
+   "text": "وَيُسْق۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "14:21:23",
+   "source": "14:23:23",
+   "text": "هَد۪يٰنَا",
+   "requires": "all"
+  },
+  {
+   "canonical": "14:27:9",
+   "source": "14:29:9",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "14:34:1",
+   "source": "14:36:1",
+   "text": "وَءَات۪يٰكُم",
+   "requires": "all"
+  },
+  {
+   "canonical": "14:36:12",
+   "source": "14:38:12",
+   "text": "عَص۪انِے",
+   "requires": "all"
+  },
+  {
+   "canonical": "14:38:9",
+   "source": "14:40:9",
+   "text": "يَخْف۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "14:50:4",
+   "source": "14:52:4",
+   "text": "وَتَغْش۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "15:31:3",
+   "source": "15:31:3",
+   "text": "أَب۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "15:84:2",
+   "source": "15:84:2",
+   "text": "أَغْن۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "16:1:1",
+   "source": "16:1:1",
+   "text": "أَت۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "16:1:7",
+   "source": "16:1:7",
+   "text": "وَتَعَٰل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "16:3:5",
+   "source": "16:3:5",
+   "text": "تَعَٰل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "16:9:9",
+   "source": "16:9:9",
+   "text": "لَهَد۪يٰكُمُۥٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "16:15:1",
+   "source": "16:15:1",
+   "text": "وَأَلْق۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "16:26:16",
+   "source": "16:26:16",
+   "text": "وَأَت۪يٰهُمُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "16:28:2",
+   "source": "16:28:2",
+   "text": "تَتَوَفّ۪يٰهُمُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "16:28:13",
+   "source": "16:28:13",
+   "text": "بَل۪ىٰٓۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "16:30:13",
+   "source": "16:30:13",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "16:32:2",
+   "source": "16:32:2",
+   "text": "تَتَوَفّ۪يٰهُمُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "16:37:4",
+   "source": "16:37:4",
+   "text": "هُد۪يٰهُمْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "16:37:8",
+   "source": "16:37:8",
+   "text": "يُهْد۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "16:38:10",
+   "source": "16:38:10",
+   "text": "بَل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "16:41:11",
+   "source": "16:41:11",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "16:43:7",
+   "source": "16:43:7",
+   "text": "يُوح۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "16:58:4",
+   "source": "16:58:4",
+   "text": "بِالُانث۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "16:60:9",
+   "source": "16:60:9",
+   "text": "اُ۬لَاعْل۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "16:61:15",
+   "source": "16:61:15",
+   "text": "مُّسَمّىٗۖ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "16:62:10",
+   "source": "16:62:10",
+   "text": "اُ۬لْحُسْن۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "16:64:11",
+   "source": "16:64:11",
+   "text": "وَهُدىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "16:65:6",
+   "source": "16:65:6",
+   "text": "فَأَحْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "16:68:1",
+   "source": "16:68:1",
+   "text": "وَأَوْح۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "16:70:4",
+   "source": "16:70:4",
+   "text": "يَتَوَفّ۪يٰكُمْۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "16:76:14",
+   "source": "16:76:14",
+   "text": "مَوْل۪يٰهُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "16:89:21",
+   "source": "16:89:21",
+   "text": "وَهُدىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "16:90:8",
+   "source": "16:90:8",
+   "text": "اِ۬لْقُرْب۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "16:90:9",
+   "source": "16:90:9",
+   "text": "وَيَنْه۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "16:92:18",
+   "source": "16:92:18",
+   "text": "أَرْب۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "16:97:7",
+   "source": "16:97:7",
+   "text": "ا۟نث۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "16:102:11",
+   "source": "16:102:11",
+   "text": "وَهُدىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "16:107:5",
+   "source": "16:107:5",
+   "text": "اَ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "16:111:8",
+   "source": "16:111:8",
+   "text": "وَتُوَفّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "16:121:3",
+   "source": "16:121:3",
+   "text": "اِ۪جْتَب۪يٰهُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "16:121:4",
+   "source": "16:121:4",
+   "text": "وَهَد۪يٰهُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "16:122:3",
+   "source": "16:122:3",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "17:2:5",
+   "source": "17:2:5",
+   "text": "هُدىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "17:5:4",
+   "source": "17:5:4",
+   "text": "أُول۪يٰهُمَا",
+   "requires": "all"
+  },
+  {
+   "canonical": "17:8:1",
+   "source": "17:8:1",
+   "text": "عَس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "17:13:12",
+   "source": "17:13:12",
+   "text": "يَلْق۪يٰهُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "17:14:3",
+   "source": "17:14:3",
+   "text": "كَف۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "17:15:2",
+   "source": "17:15:2",
+   "text": "اِ۪هْتَد۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "17:17:8",
+   "source": "17:17:8",
+   "text": "وَكَف۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "17:19:4",
+   "source": "17:19:4",
+   "text": "وَسَع۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "17:23:1",
+   "source": "17:23:1",
+   "text": "وَقَض۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "17:26:3",
+   "source": "17:26:3",
+   "text": "اَ۬لْقُرْب۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "17:32:3",
+   "source": "17:32:3",
+   "text": "اُ۬لزِّن۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "17:39:3",
+   "source": "17:39:3",
+   "text": "أَوْح۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "17:39:14",
+   "source": "17:39:14",
+   "text": "فَتُلْق۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "17:40:1",
+   "source": "17:40:1",
+   "text": "اَفَأَصْف۪يٰكُمْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "17:43:2",
+   "source": "17:43:2",
+   "text": "وَتَعَٰل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "17:47:11",
+   "source": "17:47:11",
+   "text": "نَجْو۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "17:51:19",
+   "source": "17:51:19",
+   "text": "مَت۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "17:51:22",
+   "source": "17:51:22",
+   "text": "عَس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "17:65:7",
+   "source": "17:65:7",
+   "text": "وَكَف۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "17:67:12",
+   "source": "17:67:12",
+   "text": "نَجّ۪يٰكُمُۥٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "17:72:5",
+   "source": "17:72:5",
+   "text": "أَعْم۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "17:72:9",
+   "source": "17:72:9",
+   "text": "أَعْم۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "17:79:7",
+   "source": "17:79:7",
+   "text": "عَس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "17:83:6",
+   "source": "17:83:6",
+   "text": "وَنَـ۪ٔا",
+   "requires": "all"
+  },
+  {
+   "canonical": "17:84:10",
+   "source": "17:84:10",
+   "text": "أَهْد۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "17:89:10",
+   "source": "17:89:10",
+   "text": "فَأَب۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "17:93:8",
+   "source": "17:93:8",
+   "text": "تَرْق۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "17:94:8",
+   "source": "17:94:8",
+   "text": "اُ۬لْهُد۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "17:96:2",
+   "source": "17:96:2",
+   "text": "كَف۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "17:97:22",
+   "source": "17:97:22",
+   "text": "مَّأْو۪يٰهُمْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "17:101:3",
+   "source": "17:101:3",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "17:101:17",
+   "source": "17:101:17",
+   "text": "يَٰمُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "17:107:14",
+   "source": "17:107:14",
+   "text": "يُتْل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "17:110:12",
+   "source": "17:109:12",
+   "text": "اُ۬لْحُسْن۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "18:12:6",
+   "source": "18:12:6",
+   "text": "أَحْص۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "18:13:11",
+   "source": "18:13:11",
+   "text": "هُدىٗۖ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "18:19:29",
+   "source": "18:19:29",
+   "text": "أَزْك۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "18:24:10",
+   "source": "18:24:17",
+   "text": "عَس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "18:28:18",
+   "source": "18:28:18",
+   "text": "اِ۬لدُّنْي۪اۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "18:28:27",
+   "source": "18:28:27",
+   "text": "هَو۪يٰهُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "18:37:15",
+   "source": "18:36:15",
+   "text": "سَوّ۪يٰكَ",
+   "requires": "all"
+  },
+  {
+   "canonical": "18:40:1",
+   "source": "18:39:1",
+   "text": "فَعَس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "18:45:5",
+   "source": "18:44:5",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "18:46:5",
+   "source": "18:45:5",
+   "text": "اِ۬لدُّنْي۪اۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "18:49:19",
+   "source": "18:48:19",
+   "text": "أَحْص۪يٰهَاۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "18:55:8",
+   "source": "18:54:8",
+   "text": "اُ۬لْهُد۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "18:57:26",
+   "source": "18:56:26",
+   "text": "اَ۬لْهُد۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "18:60:3",
+   "source": "18:59:3",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "18:60:4",
+   "source": "18:59:4",
+   "text": "لِفَت۪يٰهُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "18:62:4",
+   "source": "18:61:4",
+   "text": "لِفَت۪يٰهُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "18:63:11",
+   "source": "18:62:11",
+   "text": "أَنس۪يٰنِيهِ",
+   "requires": "all"
+  },
+  {
+   "canonical": "18:66:3",
+   "source": "18:65:3",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "18:88:8",
+   "source": "18:86:8",
+   "text": "اُ۬لْحُسْن۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "18:96:6",
+   "source": "18:92:6",
+   "text": "سَاو۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "18:104:6",
+   "source": "18:99:11",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "18:110:6",
+   "source": "18:105:6",
+   "text": "يُوح۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "19:3:2",
+   "source": "19:2:2",
+   "text": "نَاد۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "19:7:6",
+   "source": "19:6:6",
+   "text": "يَحْي۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "19:8:3",
+   "source": "19:7:3",
+   "text": "أَنّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "19:11:6",
+   "source": "19:10:6",
+   "text": "فَأَوْح۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "19:12:1",
+   "source": "19:11:1",
+   "text": "يَٰيَحْي۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "19:20:2",
+   "source": "19:19:2",
+   "text": "اَنّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "19:24:1",
+   "source": "19:23:1",
+   "text": "فَنَاد۪يٰهَا",
+   "requires": "all"
+  },
+  {
+   "canonical": "19:30:5",
+   "source": "19:29:5",
+   "text": "ءَات۪يٰنِيَ",
+   "requires": "all"
+  },
+  {
+   "canonical": "19:31:6",
+   "source": "19:30:6",
+   "text": "وَأَوْصٰ۪نِے",
+   "requires": "all"
+  },
+  {
+   "canonical": "19:35:10",
+   "source": "19:34:10",
+   "text": "قَض۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "19:48:9",
+   "source": "19:48:9",
+   "text": "عَس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "19:51:4",
+   "source": "19:51:4",
+   "text": "مُوس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "19:58:23",
+   "source": "19:58:23",
+   "text": "تُتْل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "19:70:6",
+   "source": "19:70:6",
+   "text": "أَوْل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "19:73:2",
+   "source": "19:73:2",
+   "text": "تُتْل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "19:76:5",
+   "source": "19:77:5",
+   "text": "هُدىٗۖ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "19:94:2",
+   "source": "19:95:2",
+   "text": "اَحْص۪يٰهُمْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "20:9:2",
+   "source": "20:8:2",
+   "text": "اَت۪يٰكَ",
+   "requires": "all"
+  },
+  {
+   "canonical": "20:10:18",
+   "source": "20:9:18",
+   "text": "هُدىٗۖ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "20:11:2",
+   "source": "20:10:2",
+   "text": "أَت۪يٰهَا",
+   "requires": "all"
+  },
+  {
+   "canonical": "20:15:6",
+   "source": "20:14:6",
+   "text": "لِتُجْز۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "20:16:9",
+   "source": "20:15:9",
+   "text": "هَو۪يٰهُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "20:20:1",
+   "source": "20:19:1",
+   "text": "فَأَلْق۪يٰهَا",
+   "requires": "all"
+  },
+  {
+   "canonical": "20:50:4",
+   "source": "20:49:4",
+   "text": "أَعْط۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "20:58:14",
+   "source": "20:57:14",
+   "text": "سِوىٗۖ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "20:59:8",
+   "source": "20:58:8",
+   "text": "ضُحىٗۖ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "20:60:1",
+   "source": "20:59:1",
+   "text": "فَتَوَلّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "20:61:3",
+   "source": "20:60:3",
+   "text": "مُّوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "20:65:2",
+   "source": "20:64:2",
+   "text": "يَٰمُوس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "20:73:6",
+   "source": "20:72:6",
+   "text": "خَطَٰيٰ۪نَا",
+   "requires": "all"
+  },
+  {
+   "canonical": "20:77:4",
+   "source": "20:76:4",
+   "text": "مُوس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "20:86:2",
+   "source": "20:84:2",
+   "text": "مُوس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "20:88:11",
+   "source": "20:86:26",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "20:114:11",
+   "source": "20:111:11",
+   "text": "يُّقْض۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "20:121:12",
+   "source": "20:118:12",
+   "text": "وَعَص۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "20:122:2",
+   "source": "20:119:2",
+   "text": "اَ۪جْتَبٰ۪هُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "20:123:11",
+   "source": "20:120:11",
+   "text": "هُدىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "20:123:14",
+   "source": "20:121:3",
+   "text": "هُد۪ايَ",
+   "requires": "all"
+  },
+  {
+   "canonical": "20:125:5",
+   "source": "20:123:5",
+   "text": "أَعْم۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "20:129:9",
+   "source": "20:127:9",
+   "text": "مُّسَمّىٗۖ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "20:131:12",
+   "source": "20:129:12",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "21:7:6",
+   "source": "21:7:6",
+   "text": "يُوح۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "21:15:4",
+   "source": "21:15:4",
+   "text": "دَعْو۪يٰهُمْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "21:25:8",
+   "source": "21:25:8",
+   "text": "يُوح۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "21:28:11",
+   "source": "21:28:11",
+   "text": "اِ۪رْتَض۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "21:38:2",
+   "source": "21:38:2",
+   "text": "مَت۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "21:47:18",
+   "source": "21:47:18",
+   "text": "وَكَف۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "21:48:3",
+   "source": "21:48:3",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "21:60:3",
+   "source": "21:60:3",
+   "text": "فَتىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "21:76:3",
+   "source": "21:75:3",
+   "text": "نَاد۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "21:83:3",
+   "source": "21:82:3",
+   "text": "نَاد۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "21:87:11",
+   "source": "21:86:11",
+   "text": "فَنَاد۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "21:89:3",
+   "source": "21:88:3",
+   "text": "نَاد۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "21:90:5",
+   "source": "21:89:5",
+   "text": "يَحْي۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "21:101:6",
+   "source": "21:100:6",
+   "text": "اَ۬لْحُسْن۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "21:103:5",
+   "source": "21:102:5",
+   "text": "وَتَتَلَقّ۪يٰهُمُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "21:108:3",
+   "source": "21:107:3",
+   "text": "يُوح۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "22:4:5",
+   "source": "22:4:5",
+   "text": "تَوَلّ۪اهُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "22:5:34",
+   "source": "22:5:34",
+   "text": "مُّسَمّىٗۖ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "22:5:43",
+   "source": "22:5:43",
+   "text": "يُّتَوَفّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "22:6:8",
+   "source": "22:6:8",
+   "text": "اِ۬لْمَوْت۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "22:8:10",
+   "source": "22:8:10",
+   "text": "هُدىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "22:9:9",
+   "source": "22:9:9",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "22:11:20",
+   "source": "22:11:20",
+   "text": "اَ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "22:13:8",
+   "source": "22:13:8",
+   "text": "اَ۬لْمَوْل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "22:15:9",
+   "source": "22:15:9",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "22:30:16",
+   "source": "22:28:16",
+   "text": "يُتْل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "22:33:6",
+   "source": "22:31:6",
+   "text": "مُّسَمّىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "22:37:9",
+   "source": "22:35:9",
+   "text": "اُ۬لتَّقْو۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "22:37:18",
+   "source": "22:35:18",
+   "text": "هَد۪يٰكُمْۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "22:44:4",
+   "source": "22:42:4",
+   "text": "مُوس۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "22:52:11",
+   "source": "22:50:11",
+   "text": "تَمَنّ۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "22:66:3",
+   "source": "22:64:3",
+   "text": "أَحْي۪اكُمْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "22:67:16",
+   "source": "22:65:16",
+   "text": "هُدىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "22:72:2",
+   "source": "22:70:2",
+   "text": "تُتْل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "22:78:7",
+   "source": "22:76:7",
+   "text": "اَ۪جْتَب۪يٰكُمْۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "22:78:19",
+   "source": "22:76:19",
+   "text": "سَمّ۪يٰكُمُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "22:78:40",
+   "source": "22:76:40",
+   "text": "مَوْل۪يٰكُمْۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "22:78:42",
+   "source": "22:76:42",
+   "text": "اَ۬لْمَوْل۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "23:7:2",
+   "source": "23:7:2",
+   "text": "اِ۪بْتَغ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "23:28:12",
+   "source": "23:28:12",
+   "text": "نَجّ۪يٰنَا",
+   "requires": "all"
+  },
+  {
+   "canonical": "23:33:13",
+   "source": "23:33:13",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "23:37:5",
+   "source": "23:37:5",
+   "text": "اَ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "23:37:7",
+   "source": "23:37:7",
+   "text": "وَنَحْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "23:45:3",
+   "source": "23:45:3",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "23:66:4",
+   "source": "23:67:4",
+   "text": "تُتْل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "23:89:4",
+   "source": "23:90:4",
+   "text": "فَأَنّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "23:92:4",
+   "source": "23:93:4",
+   "text": "فَتَعَٰل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "23:105:4",
+   "source": "23:106:4",
+   "text": "تُتْل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "24:11:23",
+   "source": "24:11:23",
+   "text": "تَوَلّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "24:14:7",
+   "source": "24:14:7",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "24:19:14",
+   "source": "24:19:14",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "24:22:10",
+   "source": "24:22:10",
+   "text": "اِ۬لْقُرْب۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "24:23:9",
+   "source": "24:23:9",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "24:28:17",
+   "source": "24:28:17",
+   "text": "أَزْك۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "24:30:9",
+   "source": "24:30:9",
+   "text": "أَزْك۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "24:32:2",
+   "source": "24:32:2",
+   "text": "اُ۬لَايَٰم۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "24:33:27",
+   "source": "24:33:27",
+   "text": "ءَات۪يٰكُمْۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "24:33:39",
+   "source": "24:33:39",
+   "text": "اِ۬لدُّنْي۪اۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "24:39:18",
+   "source": "24:38:18",
+   "text": "فَوَفّ۪يٰهُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "24:40:6",
+   "source": "24:39:6",
+   "text": "يَغْش۪يٰهُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "24:47:7",
+   "source": "24:45:7",
+   "text": "يَتَوَلّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "24:55:20",
+   "source": "24:53:20",
+   "text": "اِ۪رْتَض۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "24:57:8",
+   "source": "24:55:8",
+   "text": "وَمَأْو۪يٰهُمُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "24:61:3",
+   "source": "24:59:3",
+   "text": "اَ۬لَاعْم۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "25:5:6",
+   "source": "25:5:6",
+   "text": "تُمْل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "25:8:2",
+   "source": "25:8:2",
+   "text": "يُلْق۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "25:28:1",
+   "source": "25:28:1",
+   "text": "يَٰوَيْلَت۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "25:31:8",
+   "source": "25:31:8",
+   "text": "وَكَف۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "25:43:5",
+   "source": "25:43:5",
+   "text": "هَو۪يٰهُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "25:50:5",
+   "source": "25:50:5",
+   "text": "فَأَب۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "25:58:9",
+   "source": "25:58:9",
+   "text": "وَكَف۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "25:59:11",
+   "source": "25:59:11",
+   "text": "اَ۪سْتَو۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "26:10:2",
+   "source": "26:9:2",
+   "text": "نَاد۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "26:10:4",
+   "source": "26:9:4",
+   "text": "مُوس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "26:32:1",
+   "source": "26:31:1",
+   "text": "فَأَلْق۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "26:43:3",
+   "source": "26:42:3",
+   "text": "مُّوس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "26:45:1",
+   "source": "26:44:1",
+   "text": "فَأَلْق۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "26:45:2",
+   "source": "26:44:2",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "26:48:2",
+   "source": "26:47:2",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "26:51:7",
+   "source": "26:51:7",
+   "text": "خَطَٰيٰ۪نَآ",
+   "requires": "all"
+  },
+  {
+   "canonical": "26:52:3",
+   "source": "26:52:3",
+   "text": "مُوس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "26:61:6",
+   "source": "26:61:6",
+   "text": "مُوس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "26:63:3",
+   "source": "26:63:3",
+   "text": "مُوس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "26:65:2",
+   "source": "26:65:2",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "26:207:2",
+   "source": "26:207:2",
+   "text": "أَغْن۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "27:2:1",
+   "source": "27:2:1",
+   "text": "هُدىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "27:7:3",
+   "source": "27:7:3",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "27:9:1",
+   "source": "27:9:1",
+   "text": "يَٰمُوس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "27:10:8",
+   "source": "27:10:8",
+   "text": "وَلّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "27:10:12",
+   "source": "27:10:12",
+   "text": "يَٰمُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "27:19:19",
+   "source": "27:19:19",
+   "text": "تَرْض۪يٰهُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "27:36:8",
+   "source": "27:37:8",
+   "text": "ءَات۪يٰنِۦَ",
+   "requires": "all"
+  },
+  {
+   "canonical": "27:36:12",
+   "source": "27:37:12",
+   "text": "ءَات۪يٰكُم",
+   "requires": "all"
+  },
+  {
+   "canonical": "27:59:8",
+   "source": "27:61:8",
+   "text": "اَ۪صْطَف۪ىٰٓۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "27:71:2",
+   "source": "27:73:2",
+   "text": "مَت۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "27:72:2",
+   "source": "27:74:2",
+   "text": "عَس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "27:77:2",
+   "source": "27:79:2",
+   "text": "لَهُدىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "27:80:4",
+   "source": "27:82:4",
+   "text": "اُ۬لْمَوْت۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "27:92:5",
+   "source": "27:94:5",
+   "text": "اِ۪هْتَد۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "28:3:5",
+   "source": "28:2:5",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "28:7:4",
+   "source": "28:6:4",
+   "text": "مُوس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "28:9:10",
+   "source": "28:8:10",
+   "text": "عَس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "28:10:4",
+   "source": "28:9:4",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "28:14:4",
+   "source": "28:13:4",
+   "text": "وَاسْتَو۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "28:15:27",
+   "source": "28:14:27",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "28:15:28",
+   "source": "28:14:28",
+   "text": "فَقَض۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "28:18:13",
+   "source": "28:17:13",
+   "text": "مُوس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "28:19:11",
+   "source": "28:18:11",
+   "text": "يَٰمُوس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "28:20:6",
+   "source": "28:19:6",
+   "text": "يَسْع۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "28:20:8",
+   "source": "28:19:8",
+   "text": "يَٰمُوس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "28:22:6",
+   "source": "28:21:6",
+   "text": "عَس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "28:24:1",
+   "source": "28:24:1",
+   "text": "فَسَق۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "28:24:4",
+   "source": "28:24:4",
+   "text": "تَوَلّ۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "28:25:2",
+   "source": "28:25:2",
+   "text": "إِحْد۪يٰهُمَا",
+   "requires": "all"
+  },
+  {
+   "canonical": "28:26:2",
+   "source": "28:26:2",
+   "text": "اِحْد۪يٰهُمَا",
+   "requires": "all"
+  },
+  {
+   "canonical": "28:29:2",
+   "source": "28:29:2",
+   "text": "قَض۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "28:30:2",
+   "source": "28:30:2",
+   "text": "أَت۪يٰهَا",
+   "requires": "all"
+  },
+  {
+   "canonical": "28:30:14",
+   "source": "28:30:14",
+   "text": "يَّٰمُوس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "28:31:9",
+   "source": "28:31:9",
+   "text": "وَلّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "28:31:13",
+   "source": "28:31:13",
+   "text": "يَٰمُوس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "28:36:3",
+   "source": "28:36:3",
+   "text": "مُّوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "28:36:11",
+   "source": "28:36:11",
+   "text": "مُّفْتَرىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "28:37:2",
+   "source": "28:37:2",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "28:37:7",
+   "source": "28:37:7",
+   "text": "بِالْهُد۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "28:38:23",
+   "source": "28:38:23",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "28:42:4",
+   "source": "28:42:4",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "28:43:10",
+   "source": "28:43:10",
+   "text": "اَ۬لُاول۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "28:43:13",
+   "source": "28:43:13",
+   "text": "وَهُدىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "28:46:14",
+   "source": "28:46:14",
+   "text": "أَت۪يٰهُم",
+   "requires": "all"
+  },
+  {
+   "canonical": "28:48:12",
+   "source": "28:48:12",
+   "text": "مُوس۪ىٰٓۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "28:48:17",
+   "source": "28:48:17",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "28:49:8",
+   "source": "28:49:8",
+   "text": "أَهْد۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "28:50:13",
+   "source": "28:50:13",
+   "text": "هَو۪يٰهُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "28:50:15",
+   "source": "28:50:15",
+   "text": "هُدىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "28:53:2",
+   "source": "28:53:2",
+   "text": "يُتْل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "28:57:4",
+   "source": "28:57:4",
+   "text": "اِ۬لْهُد۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "28:57:14",
+   "source": "28:57:14",
+   "text": "تُجْب۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "28:60:7",
+   "source": "28:60:7",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "28:60:13",
+   "source": "28:60:13",
+   "text": "وَأَبْق۪ىٰٓۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "28:61:11",
+   "source": "28:61:11",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "28:67:7",
+   "source": "28:67:7",
+   "text": "فَعَس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "28:68:12",
+   "source": "28:68:12",
+   "text": "وَتَعَٰل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "28:70:10",
+   "source": "28:70:10",
+   "text": "اِ۬لُاول۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "28:76:6",
+   "source": "28:76:6",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "28:76:7",
+   "source": "28:76:7",
+   "text": "فَبَغ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "28:77:3",
+   "source": "28:77:3",
+   "text": "ءَات۪يٰكَ",
+   "requires": "all"
+  },
+  {
+   "canonical": "28:77:11",
+   "source": "28:77:11",
+   "text": "اَ۬لدُّنْي۪اۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "28:79:10",
+   "source": "28:79:10",
+   "text": "اَ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "28:80:14",
+   "source": "28:80:14",
+   "text": "يُلَقّ۪يٰهَآ",
+   "requires": "all"
+  },
+  {
+   "canonical": "28:85:14",
+   "source": "28:85:14",
+   "text": "بِالْهُد۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "28:86:5",
+   "source": "28:86:5",
+   "text": "يُّلْق۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "29:12:9",
+   "source": "29:11:9",
+   "text": "خَطَٰيٰ۪كُمْۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "29:12:14",
+   "source": "29:11:14",
+   "text": "خَطَٰيٰ۪هُم",
+   "requires": "all"
+  },
+  {
+   "canonical": "29:24:11",
+   "source": "29:23:11",
+   "text": "فَأَنج۪يٰهُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "29:25:12",
+   "source": "29:24:12",
+   "text": "اِ۬لدُّنْي۪اۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "29:25:22",
+   "source": "29:24:22",
+   "text": "وَمَأْو۪يٰكُمُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "29:27:13",
+   "source": "29:26:13",
+   "text": "اِ۬لدُّنْي۪اۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "29:39:6",
+   "source": "29:39:6",
+   "text": "مُّوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "29:45:11",
+   "source": "29:45:11",
+   "text": "تَنْه۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "29:51:7",
+   "source": "29:51:7",
+   "text": "يُتْل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "29:52:2",
+   "source": "29:52:2",
+   "text": "كَف۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "29:53:5",
+   "source": "29:53:5",
+   "text": "مُّسَمّىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "29:55:2",
+   "source": "29:55:2",
+   "text": "يَغْش۪يٰهُمُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "29:61:12",
+   "source": "29:61:12",
+   "text": "فَأَنّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "29:63:8",
+   "source": "29:63:8",
+   "text": "فَأَحْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "29:64:4",
+   "source": "29:64:4",
+   "text": "اُ۬لدُّنْي۪آ",
+   "requires": "all"
+  },
+  {
+   "canonical": "29:65:11",
+   "source": "29:65:11",
+   "text": "نَجّ۪يٰهُمُۥٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "29:68:16",
+   "source": "29:68:16",
+   "text": "مَثْوىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "30:7:5",
+   "source": "30:6:5",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "30:8:15",
+   "source": "30:7:15",
+   "text": "مُّسَمّىٗۖ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "30:10:6",
+   "source": "30:9:6",
+   "text": "اُ۬لسُّوٓأ۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "30:27:12",
+   "source": "30:26:12",
+   "text": "اُ۬لَاعْل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "30:38:3",
+   "source": "30:37:3",
+   "text": "اَ۬لْقُرْب۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "30:40:20",
+   "source": "30:39:20",
+   "text": "وَتَعَٰل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "30:50:14",
+   "source": "30:49:14",
+   "text": "اِ۬لْمَوْت۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "30:52:4",
+   "source": "30:51:4",
+   "text": "اُ۬لْمَوْت۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "31:3:1",
+   "source": "31:2:1",
+   "text": "هُدىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "31:5:3",
+   "source": "31:4:3",
+   "text": "هُدىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "31:7:2",
+   "source": "31:6:2",
+   "text": "تُتْل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "31:7:5",
+   "source": "31:6:5",
+   "text": "وَلّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "31:10:6",
+   "source": "31:9:6",
+   "text": "وَأَلْق۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "31:15:16",
+   "source": "31:14:16",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "31:20:27",
+   "source": "31:19:27",
+   "text": "هُدىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "31:22:11",
+   "source": "31:21:11",
+   "text": "اِ۬لْوُثْق۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "31:29:20",
+   "source": "31:28:20",
+   "text": "مُّسَمّىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "31:32:11",
+   "source": "31:31:11",
+   "text": "نَجّ۪يٰهُمُۥٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "31:33:26",
+   "source": "31:32:26",
+   "text": "اُ۬لدُّنْي۪اۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "32:3:12",
+   "source": "32:2:12",
+   "text": "أَت۪يٰهُم",
+   "requires": "all"
+  },
+  {
+   "canonical": "32:4:12",
+   "source": "32:3:12",
+   "text": "اَ۪سْتَو۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "32:9:2",
+   "source": "32:8:2",
+   "text": "سَوّ۪يٰهُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "32:11:2",
+   "source": "32:11:2",
+   "text": "يَتَوَفّ۪يٰكُم",
+   "requires": "all"
+  },
+  {
+   "canonical": "32:13:6",
+   "source": "32:13:6",
+   "text": "هُد۪يٰهَاۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "32:16:1",
+   "source": "32:16:1",
+   "text": "تَتَجَاف۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "32:19:8",
+   "source": "32:19:8",
+   "text": "اُ۬لْمَأْو۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "32:20:4",
+   "source": "32:20:4",
+   "text": "فَمَأْو۪يٰهُمُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "32:21:4",
+   "source": "32:21:4",
+   "text": "اِ۬لَادْن۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "32:23:12",
+   "source": "32:23:12",
+   "text": "هُدىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "32:28:2",
+   "source": "32:28:2",
+   "text": "مَت۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "33:2:3",
+   "source": "33:2:3",
+   "text": "يُوح۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "33:3:4",
+   "source": "33:3:4",
+   "text": "وَكَف۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "33:6:2",
+   "source": "33:6:2",
+   "text": "اَ۬وْل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "33:6:11",
+   "source": "33:6:11",
+   "text": "أَوْل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "33:7:10",
+   "source": "33:7:10",
+   "text": "وَمُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "33:19:12",
+   "source": "33:19:12",
+   "text": "يُغْش۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "33:23:11",
+   "source": "33:23:11",
+   "text": "قَض۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "33:28:9",
+   "source": "33:28:9",
+   "text": "اَ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "33:33:8",
+   "source": "33:33:8",
+   "text": "اِ۬لُاول۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "33:34:3",
+   "source": "33:34:3",
+   "text": "يُتْل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "33:37:25",
+   "source": "33:37:25",
+   "text": "تَخْش۪يٰهُۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "33:37:27",
+   "source": "33:37:27",
+   "text": "قَض۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "33:39:11",
+   "source": "33:39:11",
+   "text": "وَكَف۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "33:48:6",
+   "source": "33:48:6",
+   "text": "اَذ۪يٰهُمْۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "33:48:10",
+   "source": "33:48:10",
+   "text": "وَكَف۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "33:51:17",
+   "source": "33:51:17",
+   "text": "أَدْن۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "33:53:16",
+   "source": "33:53:16",
+   "text": "إِن۪يٰهُۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "33:57:9",
+   "source": "33:57:9",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "33:59:13",
+   "source": "33:59:13",
+   "text": "أَدْن۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "33:69:8",
+   "source": "33:69:8",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "34:3:8",
+   "source": "34:3:8",
+   "text": "بَل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "34:17:6",
+   "source": "34:17:6",
+   "text": "يُجَٰز۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "34:18:8",
+   "source": "34:18:8",
+   "text": "قُرىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "34:29:2",
+   "source": "34:29:2",
+   "text": "مَت۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "34:32:9",
+   "source": "34:32:9",
+   "text": "اِ۬لْهُد۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "34:37:8",
+   "source": "34:37:8",
+   "text": "زُلْف۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "34:43:2",
+   "source": "34:43:2",
+   "text": "تُتْل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "34:43:23",
+   "source": "34:43:23",
+   "text": "مُّفْتَرىٗۖ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "34:46:8",
+   "source": "34:46:8",
+   "text": "مَثْن۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "34:46:9",
+   "source": "34:46:9",
+   "text": "وَفُرَٰد۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "34:52:4",
+   "source": "34:52:4",
+   "text": "وَأَنّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "35:1:11",
+   "source": "35:1:11",
+   "text": "مَّثْن۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "35:3:20",
+   "source": "35:3:20",
+   "text": "فَأَنّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "35:5:10",
+   "source": "35:5:10",
+   "text": "اُ۬لدُّنْي۪اۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "35:11:14",
+   "source": "35:11:14",
+   "text": "ا۟نث۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "35:13:15",
+   "source": "35:13:15",
+   "text": "مُّسَمّىٗۖ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "35:18:18",
+   "source": "35:18:18",
+   "text": "قُرْب۪ىٰٓۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "35:18:28",
+   "source": "35:18:28",
+   "text": "تَزَكّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "35:18:30",
+   "source": "35:18:30",
+   "text": "يَتَزَكّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "35:19:3",
+   "source": "35:19:3",
+   "text": "اِ۬لَاعْم۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "35:36:7",
+   "source": "35:36:7",
+   "text": "يُقْض۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "35:42:9",
+   "source": "35:42:9",
+   "text": "أَهْد۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "35:45:17",
+   "source": "35:46:17",
+   "text": "مُّسَمّىٗۖ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "36:12:4",
+   "source": "36:11:4",
+   "text": "اِ۬لْمَوْت۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "36:20:6",
+   "source": "36:19:6",
+   "text": "يَسْع۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "36:48:2",
+   "source": "36:47:2",
+   "text": "مَت۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "36:66:8",
+   "source": "36:65:8",
+   "text": "فَأَنّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "36:81:11",
+   "source": "36:80:11",
+   "text": "بَل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "37:6:4",
+   "source": "37:6:4",
+   "text": "اَ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "37:8:5",
+   "source": "37:8:5",
+   "text": "اِ۬لَاعْل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "37:59:3",
+   "source": "37:59:3",
+   "text": "اَ۬لُاول۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "37:75:2",
+   "source": "37:75:2",
+   "text": "نَاد۪يٰنَا",
+   "requires": "all"
+  },
+  {
+   "canonical": "37:105:3",
+   "source": "37:105:3",
+   "text": "اَ۬لرُّءْي۪آۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "37:114:4",
+   "source": "37:114:4",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "37:120:3",
+   "source": "37:120:3",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "38:21:2",
+   "source": "38:20:2",
+   "text": "اَت۪يٰكَ",
+   "requires": "all"
+  },
+  {
+   "canonical": "38:22:11",
+   "source": "38:21:11",
+   "text": "بَغ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "38:25:7",
+   "source": "38:24:7",
+   "text": "لَزُلْف۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "38:26:13",
+   "source": "38:25:13",
+   "text": "اِ۬لْهَو۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "38:40:4",
+   "source": "38:39:4",
+   "text": "لَزُلْف۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "38:41:5",
+   "source": "38:40:5",
+   "text": "نَاد۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "38:69:7",
+   "source": "38:68:7",
+   "text": "اِ۬لَاعْل۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "38:70:2",
+   "source": "38:69:2",
+   "text": "يُّوح۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "39:3:16",
+   "source": "39:3:16",
+   "text": "زُلْف۪ىٰٓۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "39:4:7",
+   "source": "39:5:7",
+   "text": "لَّاصْطَف۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "39:6:35",
+   "source": "39:7:35",
+   "text": "فَأَنّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "39:7:8",
+   "source": "39:8:8",
+   "text": "يَرْض۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "39:10:11",
+   "source": "39:11:11",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "39:18:8",
+   "source": "39:17:8",
+   "text": "هَد۪يٰهُمُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "39:25:5",
+   "source": "39:24:5",
+   "text": "فَأَت۪يٰهُمُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "39:26:6",
+   "source": "39:25:6",
+   "text": "اِ۬لدُّنْي۪اۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "39:32:14",
+   "source": "39:31:14",
+   "text": "مَثْوىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "39:41:8",
+   "source": "39:38:8",
+   "text": "اِ۪هْتَد۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "39:42:13",
+   "source": "39:39:13",
+   "text": "قَض۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "39:50:7",
+   "source": "39:47:7",
+   "text": "أَغْن۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "39:56:4",
+   "source": "39:53:4",
+   "text": "يَٰحَسْرَت۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "39:57:6",
+   "source": "39:54:6",
+   "text": "هَد۪يٰنِے",
+   "requires": "all"
+  },
+  {
+   "canonical": "39:59:1",
+   "source": "39:56:1",
+   "text": "بَل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "39:60:13",
+   "source": "39:57:13",
+   "text": "مَثْوىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "39:67:15",
+   "source": "39:64:15",
+   "text": "وَتَعَٰل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "39:71:28",
+   "source": "39:68:28",
+   "text": "بَل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "40:16:5",
+   "source": "40:15:5",
+   "text": "يَخْف۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "40:17:2",
+   "source": "40:16:2",
+   "text": "تُجْز۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "40:23:3",
+   "source": "40:23:3",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "40:26:5",
+   "source": "40:26:5",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "40:27:2",
+   "source": "40:27:2",
+   "text": "مُوس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "40:35:8",
+   "source": "40:35:8",
+   "text": "اَت۪يٰهُمْۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "40:37:6",
+   "source": "40:37:6",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "40:39:5",
+   "source": "40:39:5",
+   "text": "اُ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "40:40:5",
+   "source": "40:40:5",
+   "text": "يُجْز۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "40:40:14",
+   "source": "40:40:14",
+   "text": "ا۟نث۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "40:43:10",
+   "source": "40:43:10",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "40:45:1",
+   "source": "40:45:1",
+   "text": "فَوَق۪يٰهُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "40:50:8",
+   "source": "40:50:8",
+   "text": "بَل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "40:51:8",
+   "source": "40:51:8",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "40:53:4",
+   "source": "40:53:4",
+   "text": "اَ۬لْهُد۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "40:54:1",
+   "source": "40:53:9",
+   "text": "هُدىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "40:56:9",
+   "source": "40:55:9",
+   "text": "اَت۪يٰهُمُۥٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "40:58:3",
+   "source": "40:57:3",
+   "text": "اِ۬لَاعْم۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "40:62:11",
+   "source": "40:62:11",
+   "text": "فَأَنّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "40:67:23",
+   "source": "40:67:23",
+   "text": "يُّتَوَفّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "40:67:28",
+   "source": "40:67:28",
+   "text": "مُّسَمّىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "40:68:6",
+   "source": "40:68:6",
+   "text": "قَض۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "40:69:9",
+   "source": "40:69:9",
+   "text": "أَنّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "40:82:21",
+   "source": "40:81:21",
+   "text": "أَغْن۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "41:6:6",
+   "source": "41:5:6",
+   "text": "يُوح۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "41:11:2",
+   "source": "41:10:2",
+   "text": "اَ۪سْتَو۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "41:12:1",
+   "source": "41:11:1",
+   "text": "فَقَض۪يٰهُنَّ",
+   "requires": "all"
+  },
+  {
+   "canonical": "41:12:6",
+   "source": "41:11:6",
+   "text": "وَأَوْح۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "41:12:13",
+   "source": "41:11:13",
+   "text": "اَ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "41:16:13",
+   "source": "41:15:13",
+   "text": "اِ۬لدُّنْي۪اۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "41:16:16",
+   "source": "41:15:16",
+   "text": "أَخْز۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "41:17:5",
+   "source": "41:16:5",
+   "text": "اُ۬لْعَم۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "41:17:7",
+   "source": "41:16:7",
+   "text": "اَ۬لْهُد۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "41:23:6",
+   "source": "41:22:6",
+   "text": "أَرْد۪يٰكُمْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "41:24:4",
+   "source": "41:23:4",
+   "text": "مَثْوىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "41:31:5",
+   "source": "41:30:5",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "41:35:2",
+   "source": "41:34:2",
+   "text": "يُلَقّ۪يٰهَآ",
+   "requires": "all"
+  },
+  {
+   "canonical": "41:35:7",
+   "source": "41:34:7",
+   "text": "يُلَقّ۪يٰهَآ",
+   "requires": "all"
+  },
+  {
+   "canonical": "41:39:15",
+   "source": "41:38:15",
+   "text": "أَحْي۪اهَا",
+   "requires": "all"
+  },
+  {
+   "canonical": "41:39:17",
+   "source": "41:38:17",
+   "text": "اِ۬لْمَوْت۪ىٰٓۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "41:40:10",
+   "source": "41:39:10",
+   "text": "يُّلْق۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "41:44:15",
+   "source": "41:43:15",
+   "text": "هُدىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "41:47:14",
+   "source": "41:46:14",
+   "text": "ا۟نث۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "41:50:23",
+   "source": "41:49:23",
+   "text": "لَلْحُسْن۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "41:51:6",
+   "source": "41:50:6",
+   "text": "وَنَـ۪ٔا",
+   "requires": "all"
+  },
+  {
+   "canonical": "42:9:11",
+   "source": "42:7:11",
+   "text": "اِ۬لْمَوْت۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "42:13:6",
+   "source": "42:11:6",
+   "text": "وَصّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "42:13:16",
+   "source": "42:11:16",
+   "text": "وَمُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "42:13:17",
+   "source": "42:11:17",
+   "text": "وَعِيس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "42:14:18",
+   "source": "42:12:18",
+   "text": "مُّسَمّىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "42:20:14",
+   "source": "42:18:14",
+   "text": "اَ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "42:23:18",
+   "source": "42:21:18",
+   "text": "اِ۬لْقُرْب۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "42:36:7",
+   "source": "42:33:7",
+   "text": "اِ۬لدُّنْي۪اۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "42:36:12",
+   "source": "42:33:12",
+   "text": "وَأَبْق۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "43:8:5",
+   "source": "43:7:5",
+   "text": "وَمَض۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "43:16:6",
+   "source": "43:15:6",
+   "text": "وَأَصْف۪يٰكُم",
+   "requires": "all"
+  },
+  {
+   "canonical": "43:24:4",
+   "source": "43:23:4",
+   "text": "بِأَهْد۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "43:32:11",
+   "source": "43:31:11",
+   "text": "اِ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "43:35:8",
+   "source": "43:34:8",
+   "text": "اِ۬لدُّنْي۪اۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "43:46:3",
+   "source": "43:45:3",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "43:51:1",
+   "source": "43:50:1",
+   "text": "وَنَاد۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "43:63:3",
+   "source": "43:63:3",
+   "text": "عِيس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "43:80:7",
+   "source": "43:80:7",
+   "text": "وَنَجْو۪يٰهُم",
+   "requires": "all"
+  },
+  {
+   "canonical": "43:80:8",
+   "source": "43:80:8",
+   "text": "بَل۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "43:87:7",
+   "source": "43:87:7",
+   "text": "فَأَنّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "44:13:1",
+   "source": "44:12:1",
+   "text": "أَنّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "44:35:5",
+   "source": "44:33:8",
+   "text": "اَ۬لُاول۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "44:41:6",
+   "source": "44:39:6",
+   "text": "مَّوْلىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "44:56:7",
+   "source": "44:53:7",
+   "text": "اَ۬لُاول۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "44:56:8",
+   "source": "44:53:8",
+   "text": "وَوَق۪يٰهُمْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "45:5:11",
+   "source": "45:4:11",
+   "text": "فَأَحْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "45:8:4",
+   "source": "45:7:4",
+   "text": "تُتْل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "45:11:2",
+   "source": "45:10:2",
+   "text": "هُدىٗۖ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "45:20:4",
+   "source": "45:19:4",
+   "text": "وَهُدىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "45:21:13",
+   "source": "45:20:13",
+   "text": "مَّحْي۪اهُمْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "45:22:6",
+   "source": "45:21:6",
+   "text": "وَلِتُجْز۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "45:23:5",
+   "source": "45:22:5",
+   "text": "هَو۪يٰهُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "45:24:6",
+   "source": "45:23:6",
+   "text": "اَ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "45:24:8",
+   "source": "45:23:8",
+   "text": "وَنَحْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "45:25:2",
+   "source": "45:24:2",
+   "text": "تُتْل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "45:28:7",
+   "source": "45:27:7",
+   "text": "تُدْع۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "45:31:7",
+   "source": "45:30:7",
+   "text": "تُتْل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "45:34:3",
+   "source": "45:33:3",
+   "text": "نَنس۪يٰكُمْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "45:34:9",
+   "source": "45:33:9",
+   "text": "وَمَأْو۪يٰكُمُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "45:35:9",
+   "source": "45:34:9",
+   "text": "اُ۬لدُّنْي۪اۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "46:3:10",
+   "source": "46:2:10",
+   "text": "مُّسَمّىٗۖ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "46:7:2",
+   "source": "46:6:2",
+   "text": "تُتْل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "46:8:18",
+   "source": "46:7:18",
+   "text": "كَف۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "46:9:18",
+   "source": "46:8:18",
+   "text": "يُوح۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "46:12:4",
+   "source": "46:11:4",
+   "text": "مُوس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "46:15:35",
+   "source": "46:14:35",
+   "text": "تَرْض۪يٰهُۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "46:20:11",
+   "source": "46:19:11",
+   "text": "اُ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "46:26:13",
+   "source": "46:25:13",
+   "text": "أَغْن۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "46:30:9",
+   "source": "46:29:9",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "46:33:16",
+   "source": "46:32:16",
+   "text": "اَ۬لْمَوْت۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "46:33:17",
+   "source": "46:32:17",
+   "text": "بَل۪ىٰٓۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "46:34:11",
+   "source": "46:33:11",
+   "text": "بَل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "47:11:10",
+   "source": "47:12:10",
+   "text": "مَوْل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "47:12:21",
+   "source": "47:13:21",
+   "text": "مَثْوىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "47:15:26",
+   "source": "47:16:26",
+   "text": "مُّصَفّىٗۖ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "47:17:4",
+   "source": "47:18:4",
+   "text": "هُدىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "47:17:5",
+   "source": "47:18:5",
+   "text": "وَءَات۪يٰهُمْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "47:17:6",
+   "source": "47:18:6",
+   "text": "تَقْو۪يٰهُمْۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "47:18:11",
+   "source": "47:19:11",
+   "text": "فَأَنّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "47:19:14",
+   "source": "47:20:14",
+   "text": "وَمَثْو۪يٰكُمْۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "47:20:26",
+   "source": "47:21:26",
+   "text": "فَأَوْل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "47:23:6",
+   "source": "47:24:6",
+   "text": "وَأَعْم۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "47:25:15",
+   "source": "47:26:15",
+   "text": "وَأَمْل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "47:30:5",
+   "source": "47:31:5",
+   "text": "بِسِيمٰ۪هُمْۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "47:32:15",
+   "source": "47:33:15",
+   "text": "اُ۬لْهُد۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "47:36:3",
+   "source": "47:37:3",
+   "text": "اُ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "48:10:18",
+   "source": "48:10:18",
+   "text": "اَوْف۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "48:17:3",
+   "source": "48:17:3",
+   "text": "اَ۬لَاعْم۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "48:26:19",
+   "source": "48:26:19",
+   "text": "اَ۬لتَّقْو۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "48:27:5",
+   "source": "48:27:5",
+   "text": "اُ۬لرُّءْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "48:28:5",
+   "source": "48:28:5",
+   "text": "بِالْهُد۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "48:28:12",
+   "source": "48:28:12",
+   "text": "وَكَف۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "48:29:19",
+   "source": "48:29:19",
+   "text": "سِيم۪اهُمْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "48:29:37",
+   "source": "48:29:37",
+   "text": "فَاسْتَو۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "49:3:13",
+   "source": "49:3:13",
+   "text": "لِلتَّقْو۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "49:9:10",
+   "source": "49:9:10",
+   "text": "اِحْد۪يٰهُمَا",
+   "requires": "all"
+  },
+  {
+   "canonical": "49:11:9",
+   "source": "49:11:9",
+   "text": "عَس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "49:11:18",
+   "source": "49:11:18",
+   "text": "عَس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "49:13:7",
+   "source": "49:13:7",
+   "text": "وَأُنث۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "49:13:16",
+   "source": "49:13:16",
+   "text": "أَتْق۪يٰكُمُۥٓۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "49:17:15",
+   "source": "49:17:15",
+   "text": "هَد۪يٰكُمْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "51:16:3",
+   "source": "51:16:3",
+   "text": "ءَات۪يٰهُمْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "51:24:2",
+   "source": "51:24:2",
+   "text": "اَت۪يٰكَ",
+   "requires": "all"
+  },
+  {
+   "canonical": "51:38:2",
+   "source": "51:38:2",
+   "text": "مُوس۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "51:39:1",
+   "source": "51:39:1",
+   "text": "فَتَوَلّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "52:18:3",
+   "source": "52:16:3",
+   "text": "ءَات۪يٰهُمْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "52:18:5",
+   "source": "52:16:5",
+   "text": "وَوَق۪يٰهُمْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "52:27:4",
+   "source": "52:25:4",
+   "text": "وَوَق۪يٰنَا",
+   "requires": "all"
+  },
+  {
+   "canonical": "53:10:1",
+   "source": "53:10:1",
+   "text": "فَأَوْح۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "53:29:4",
+   "source": "53:28:20",
+   "text": "تَوَلّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "53:34:1",
+   "source": "53:33:1",
+   "text": "وَأَعْط۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "53:41:2",
+   "source": "53:40:2",
+   "text": "يُجْز۪يٰهُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "53:48:3",
+   "source": "53:47:3",
+   "text": "أَغْن۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "53:54:1",
+   "source": "53:53:1",
+   "text": "فَغَشّ۪يٰهَا",
+   "requires": "all"
+  },
+  {
+   "canonical": "54:29:3",
+   "source": "54:29:3",
+   "text": "فَتَعَاط۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "54:46:5",
+   "source": "54:46:5",
+   "text": "أَدْه۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "55:27:1",
+   "source": "55:25:1",
+   "text": "وَيَبْق۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "55:41:3",
+   "source": "55:40:3",
+   "text": "بِسِيمٰ۪هُمْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "56:62:4",
+   "source": "56:65:4",
+   "text": "اَ۬لُاول۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "57:4:10",
+   "source": "57:4:10",
+   "text": "اَ۪سْتَو۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "57:10:33",
+   "source": "57:10:33",
+   "text": "اُ۬لْحُسْن۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "57:12:5",
+   "source": "57:12:5",
+   "text": "يَسْع۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "57:14:6",
+   "source": "57:13:33",
+   "text": "بَل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "57:15:10",
+   "source": "57:14:10",
+   "text": "مَأْو۪يٰكُمُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "57:15:13",
+   "source": "57:14:13",
+   "text": "مَوْل۪يٰكُمْۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "57:20:4",
+   "source": "57:19:4",
+   "text": "اُ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "57:20:36",
+   "source": "57:19:36",
+   "text": "اُ۬لدُّنْي۪آ",
+   "requires": "all"
+  },
+  {
+   "canonical": "57:23:9",
+   "source": "57:22:9",
+   "text": "ءَات۪يٰكُمْۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "58:6:8",
+   "source": "58:6:8",
+   "text": "أَحْص۪يٰهُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "58:7:15",
+   "source": "58:7:15",
+   "text": "نَّجْو۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "58:7:26",
+   "source": "58:7:26",
+   "text": "أَدْن۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "58:8:7",
+   "source": "58:8:7",
+   "text": "اِ۬لنَّجْو۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "58:9:14",
+   "source": "58:9:14",
+   "text": "وَالتَّقْو۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "58:10:2",
+   "source": "58:10:2",
+   "text": "اَ۬لنَّجْو۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "58:12:10",
+   "source": "58:12:10",
+   "text": "نَجْو۪يٰكُمْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "58:13:6",
+   "source": "58:13:6",
+   "text": "نَجْو۪يٰكُمْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "58:19:4",
+   "source": "58:19:4",
+   "text": "فَأَنس۪يٰهُمْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "59:2:23",
+   "source": "59:2:23",
+   "text": "فَأَت۪يٰهُمُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "59:3:9",
+   "source": "59:3:9",
+   "text": "اِ۬لدُّنْي۪اۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "59:7:12",
+   "source": "59:7:12",
+   "text": "اِ۬لْقُرْب۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "59:7:13",
+   "source": "59:7:13",
+   "text": "وَالْيَتَٰم۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "59:7:25",
+   "source": "59:7:25",
+   "text": "ءَات۪يٰكُمُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "59:7:29",
+   "source": "59:7:29",
+   "text": "نَه۪يٰكُمْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "59:14:6",
+   "source": "59:14:6",
+   "text": "قُرىٗ",
+   "requires": "waqf"
+  },
+  {
+   "canonical": "59:14:18",
+   "source": "59:14:18",
+   "text": "شَتّ۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "59:19:6",
+   "source": "59:19:6",
+   "text": "فَأَنس۪يٰهُمُۥٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "59:24:8",
+   "source": "59:24:8",
+   "text": "اُ۬لْحُسْن۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "60:8:2",
+   "source": "60:8:2",
+   "text": "يَنْه۪يٰكُمُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "60:9:2",
+   "source": "60:9:2",
+   "text": "يَنْه۪يٰكُمُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "61:5:3",
+   "source": "61:5:3",
+   "text": "مُوس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "61:7:9",
+   "source": "61:7:9",
+   "text": "يُدْع۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "61:9:5",
+   "source": "61:9:5",
+   "text": "بِالْهُد۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "63:4:21",
+   "source": "63:4:21",
+   "text": "أَنّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "64:7:8",
+   "source": "64:7:8",
+   "text": "بَل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "65:7:12",
+   "source": "65:7:12",
+   "text": "ءَات۪يٰهُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "65:7:20",
+   "source": "65:7:20",
+   "text": "ءَات۪يٰهَاۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "66:2:8",
+   "source": "66:2:8",
+   "text": "مَوْل۪يٰكُمْۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "66:4:14",
+   "source": "66:4:14",
+   "text": "مَوْل۪يٰهُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "66:5:1",
+   "source": "66:5:1",
+   "text": "عَس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "66:8:9",
+   "source": "66:8:9",
+   "text": "عَس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "66:8:30",
+   "source": "66:8:30",
+   "text": "يَسْع۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "66:9:8",
+   "source": "66:9:8",
+   "text": "وَمَأْو۪يٰهُمْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "67:5:4",
+   "source": "67:5:4",
+   "text": "اَ۬لدُّنْي۪ا",
+   "requires": "all"
+  },
+  {
+   "canonical": "67:9:2",
+   "source": "67:9:2",
+   "text": "بَل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "67:22:6",
+   "source": "67:23:6",
+   "text": "أَهْد۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "67:25:2",
+   "source": "67:26:2",
+   "text": "مَت۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "68:15:2",
+   "source": "68:15:2",
+   "text": "تُتْل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "68:32:1",
+   "source": "68:32:1",
+   "text": "عَس۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "68:48:9",
+   "source": "68:48:9",
+   "text": "نَاد۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "68:50:1",
+   "source": "68:50:1",
+   "text": "فَاجْتَبٰ۪هُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "69:7:11",
+   "source": "69:6:11",
+   "text": "صَرْع۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "69:18:4",
+   "source": "69:17:4",
+   "text": "تَخْف۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "69:28:2",
+   "source": "69:28:2",
+   "text": "أَغْن۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "70:31:2",
+   "source": "70:31:2",
+   "text": "اِ۪بْتَغ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "72:3:2",
+   "source": "72:3:2",
+   "text": "تَعَٰل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "72:13:4",
+   "source": "72:13:4",
+   "text": "اَ۬لْهُد۪ىٰٓ",
+   "requires": "all"
+  },
+  {
+   "canonical": "72:27:3",
+   "source": "72:27:3",
+   "text": "اِ۪رْتَض۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "72:28:10",
+   "source": "72:28:10",
+   "text": "وَأَحْص۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "73:16:1",
+   "source": "73:15:1",
+   "text": "فَعَص۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "73:20:6",
+   "source": "73:18:6",
+   "text": "أَدْن۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "73:20:35",
+   "source": "73:18:35",
+   "text": "مَّرْض۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "74:47:2",
+   "source": "74:46:2",
+   "text": "أَت۪يٰنَا",
+   "requires": "all"
+  },
+  {
+   "canonical": "74:52:7",
+   "source": "74:51:7",
+   "text": "يُّوت۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "74:56:9",
+   "source": "74:55:9",
+   "text": "اُ۬لتَّقْو۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "75:4:1",
+   "source": "75:4:1",
+   "text": "بَل۪ىٰۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "75:15:2",
+   "source": "75:15:2",
+   "text": "اَلْق۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "75:34:1",
+   "source": "75:33:1",
+   "text": "أَوْل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "75:35:2",
+   "source": "75:34:2",
+   "text": "أَوْل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "76:1:2",
+   "source": "76:1:2",
+   "text": "اَت۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "76:11:1",
+   "source": "76:11:1",
+   "text": "فَوَق۪يٰهُمُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "76:11:6",
+   "source": "76:11:6",
+   "text": "وَلَقّ۪يٰهُمْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "76:12:1",
+   "source": "76:12:1",
+   "text": "وَجَز۪يٰهُم",
+   "requires": "all"
+  },
+  {
+   "canonical": "76:18:3",
+   "source": "76:18:3",
+   "text": "تُسَمّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "76:21:10",
+   "source": "76:21:10",
+   "text": "وَسَق۪يٰهُمْ",
+   "requires": "all"
+  },
+  {
+   "canonical": "79:15:2",
+   "source": "79:15:2",
+   "text": "اَت۪يٰكَ",
+   "requires": "all"
+  },
+  {
+   "canonical": "79:16:2",
+   "source": "79:16:2",
+   "text": "نَاد۪يٰهُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "82:7:3",
+   "source": "82:7:3",
+   "text": "فَسَوّ۪يٰكَ",
+   "requires": "all"
+  },
+  {
+   "canonical": "83:13:2",
+   "source": "83:13:2",
+   "text": "تُتْل۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "84:15:1",
+   "source": "84:15:1",
+   "text": "بَل۪ىٰٓۖ",
+   "requires": "all"
+  },
+  {
+   "canonical": "85:17:2",
+   "source": "85:17:2",
+   "text": "اَت۪يٰكَ",
+   "requires": "all"
+  },
+  {
+   "canonical": "88:1:2",
+   "source": "88:1:2",
+   "text": "اَت۪يٰكَ",
+   "requires": "all"
+  },
+  {
+   "canonical": "88:5:1",
+   "source": "88:5:1",
+   "text": "تُسْق۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "88:23:3",
+   "source": "88:23:3",
+   "text": "تَوَلّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "89:15:5",
+   "source": "89:15:5",
+   "text": "اَ۪بْتَل۪يٰهُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "89:16:4",
+   "source": "89:17:4",
+   "text": "اَ۪بْتَل۪يٰهُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "89:23:7",
+   "source": "89:26:4",
+   "text": "وَأَنّ۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "92:5:3",
+   "source": "92:5:3",
+   "text": "اَعْط۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "99:5:3",
+   "source": "99:5:3",
+   "text": "أَوْح۪ىٰ",
+   "requires": "all"
+  },
+  {
+   "canonical": "102:1:1",
+   "source": "102:1:1",
+   "text": "اَلْه۪يٰكُمُ",
+   "requires": "all"
+  },
+  {
+   "canonical": "111:2:2",
+   "source": "111:2:2",
+   "text": "أَغْن۪ىٰ",
+   "requires": "all"
+  }
+ ]
+}

@@ -106,9 +106,15 @@ single ownership, so the catalogue entry gains an optional `register` source
 key: the loader resolves those occurrences from the authored register at
 load time, and `occurrence_count` is real, not `None`.
 
-Five selectors are genuinely structural and cannot enumerate in authored
-data: `dhat_yaa`, `raa_fathatan`, `raa_damma`, `lam_after_taa`, and
-`lam_after_zhaa`.
+Four selectors are genuinely structural and cannot enumerate in authored
+data: `raa_fathatan`, `raa_damma`, `lam_after_taa`, and `lam_after_zhaa`.
+`dhat_yaa` was planned here too, but its scope closed during the family
+build: the reviewed witness marks plus the fathatan `ىٗ` shapes classify to
+a finite owner list, and the research's normative-data section already
+demands that generated audit export. The register is authored as
+`data/riwayat/warsh/inclination.json` (1,072 all-state rows plus 82
+waqf-only fathatan rows) and the catalogue resolves it through the same
+`register` key the hamza generals use, so `occurrence_count` is real.
 
 - They use `dynamic_scope` but, unlike the Hafs nasal selectors, they are
   real recitation choices and stay `website_visible: true`. The Hafs
@@ -167,7 +173,7 @@ Single-form selectors (`ha_antum`, `hamza_aimma`, `allai_waqf`,
 ### Occurrence counts
 
 Counts are the authored-register cardinality that lands in the catalogue;
-`dynamic` marks the five structural selectors plus the two nasal controls.
+`dynamic` marks the four structural selectors plus the two nasal controls.
 
 | Selector | Count | Selector | Count |
 | --- | ---: | --- | ---: |
@@ -186,7 +192,7 @@ Counts are the authored-register cardinality that lands in the catalogue;
 | `hamza_kasr_yaa` | 2 | `raa_five_words` | 16 |
 | `hamza_aimma` | 5 | `raa_sihra` | 1 |
 | `allai_waqf` | 4 | `raa_iram` | 1 |
-| `dhat_yaa` | dynamic | `raa_alif_ayn` | 4 |
+| `dhat_yaa` | 1154 | `raa_alif_ayn` | 4 |
 | `arakahum` | 1 | `raa_alif_hamza` | 3 |
 | `al_jar` | 2 | `raa_dual_alif` | 4 |
 | `jabbarin` | 2 | `raa_ashiratukum` | 1 |

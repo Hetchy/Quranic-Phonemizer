@@ -107,6 +107,41 @@ WARSH_VARIANTS = {
     "raa_hidhrakum": (["light", "heavy"], "light"),
     "raa_ibrah_kibrahu": (["light", "heavy"], "light"),
     "raa_hasirat_suduruhum": (["light", "heavy"], "light"),
+    "dhat_yaa": (["fath", "taqlil"], "taqlil"),
+    "arakahum": (["fath", "taqlil"], "taqlil"),
+    "al_jar": (["fath", "taqlil"], "taqlil"),
+    "jabbarin": (["fath", "taqlil"], "taqlil"),
+    "haa_verse_heads": (["fath", "taqlil"], "fath"),
+    "maryam_haa_yaa": (["taqlil", "fath"], "taqlil"),
+    "yaseen_yaa": (["fath", "taqlil"], "fath"),
+    "lam_dhat_yaa": (["fath_tafkheem", "taqlil_tarqiq"], "fath_tafkheem"),
+    "lam_verse_heads": (["taqlil_tarqiq", "fath_tafkheem"], "taqlil_tarqiq"),
+    "lam_separated_by_alif": (["tafkheem", "tarqiq"], "tafkheem"),
+    "lam_final_waqf": (["tafkheem", "tarqiq"], "tafkheem"),
+    "lam_after_taa": (["tarqiq", "tafkheem"], "tafkheem"),
+    "lam_after_zhaa": (["tarqiq", "tafkheem"], "tafkheem"),
+    "lam_salsal": (["tarqiq", "tafkheem"], "tarqiq"),
+}
+
+WARSH_GROUPS = {
+    **dict.fromkeys(
+        (name for name in WARSH_VARIANTS if name.startswith("raa_")),
+        "raa_pronunciation",
+    ),
+    "dhat_yaa": "inclination",
+    "arakahum": "inclination",
+    "al_jar": "inclination",
+    "jabbarin": "inclination",
+    "haa_verse_heads": "inclination",
+    "maryam_haa_yaa": "inclination",
+    "yaseen_yaa": "inclination",
+    "lam_dhat_yaa": "lam_pronunciation",
+    "lam_verse_heads": "lam_pronunciation",
+    "lam_separated_by_alif": "lam_pronunciation",
+    "lam_final_waqf": "lam_pronunciation",
+    "lam_after_taa": "lam_pronunciation",
+    "lam_after_zhaa": "lam_pronunciation",
+    "lam_salsal": "lam_pronunciation",
 }
 
 
@@ -124,9 +159,9 @@ def test_catalogues_are_riwayah_specific():
 
 def test_warsh_catalogue_rows_carry_registers_and_dynamic_scopes():
     catalogue = variant_catalogue("warsh")
-    assert len(catalogue) == 26
+    assert len(catalogue) == 40
     assert {row["id"] for row in catalogue} == set(WARSH_VARIANTS)
-    assert all(row["group"] == "raa_pronunciation" for row in catalogue)
+    assert {row["id"]: row["group"] for row in catalogue} == WARSH_GROUPS
     assert all(
         row["display_name"] == row["id"].replace("_", " ").title()
         for row in catalogue
@@ -139,7 +174,12 @@ def test_warsh_catalogue_rows_carry_registers_and_dynamic_scopes():
     } == systematic
     assert all(
         row["subgroup"] == "lexical"
-        for row_id, row in by_id.items() if row_id not in systematic
+        for row_id, row in by_id.items()
+        if row_id not in systematic and row_id.startswith("raa_")
+    )
+    assert all(
+        row["subgroup"] is None
+        for row_id, row in by_id.items() if not row_id.startswith("raa_")
     )
     assert by_id["raa_five_words"]["occurrence_count"] == 16
     assert by_id["raa_ibrah_kibrahu"]["occurrence_count"] == 7
@@ -149,6 +189,61 @@ def test_warsh_catalogue_rows_carry_registers_and_dynamic_scopes():
     assert pair["anchor"] == "boundary"
     assert pair["word_refs"] == ["4:89:11", "4:89:12"]
     assert pair["requires"] == "wasl"
+
+
+def test_warsh_inclination_and_lam_rows_resolve_their_registers():
+    by_id = {row["id"]: row for row in variant_catalogue("warsh")}
+    counts = {
+        "arakahum": 1, "al_jar": 2, "jabbarin": 2, "haa_verse_heads": 25,
+        "maryam_haa_yaa": 1, "yaseen_yaa": 1, "lam_dhat_yaa": 7,
+        "lam_verse_heads": 3, "lam_separated_by_alif": 5,
+        "lam_final_waqf": 9, "lam_salsal": 4,
+    }
+    for row_id, count in counts.items():
+        assert by_id[row_id]["occurrence_count"] == count, row_id
+    assert by_id["dhat_yaa"]["occurrence_count"] == 1154
+    assert by_id["lam_after_taa"]["dynamic_scope"] == "eligible_lam_taa"
+    assert by_id["lam_after_zhaa"]["dynamic_scope"] == "eligible_lam_zhaa"
+    assert all(
+        occurrence["requires"] == "waqf"
+        for occurrence in by_id["lam_final_waqf"]["occurrences"]
+    )
+    masked = {
+        occurrence["ref"]
+        for occurrence in by_id["lam_dhat_yaa"]["occurrences"]
+        if occurrence["requires"] == "waqf"
+    }
+    assert masked == {"2:124:11", "87:12:2"}
+    arakahum = by_id["arakahum"]["occurrences"][0]
+    assert arakahum["ref"] == "8:44:8"
+    assert arakahum["requires"] == "all"
+    waqf_only = [
+        occurrence for occurrence in by_id["dhat_yaa"]["occurrences"]
+        if occurrence["requires"] == "waqf"
+    ]
+    assert len(waqf_only) == 82
+
+
+def test_warsh_lam_generals_report_dynamic_occurrences():
+    joined = Phonemizer(riwayah="warsh").analyse("97:5")
+    rows = [
+        row for row in joined.variant_occurrences()
+        if row["variant_id"] == "lam_after_taa"
+    ]
+    assert len(rows) == 1
+    assert rows[0]["selected"] == "tafkheem"
+    assert not [
+        row for row in joined.variant_occurrences()
+        if row["variant_id"] == "lam_after_zhaa"
+    ]
+    stopped = Phonemizer(riwayah="warsh").analyse(
+        "7:117:1-7:117:4", stop_refs=("7:117:3",)
+    )
+    taa_rows = [
+        row for row in stopped.variant_occurrences()
+        if row["variant_id"] == "lam_after_taa"
+    ]
+    assert not taa_rows  # the stopped final lam belongs to lam_final_waqf
 
 
 def test_warsh_systematic_selectors_report_dynamic_occurrences():

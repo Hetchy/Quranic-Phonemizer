@@ -220,7 +220,7 @@ class MaddClass:
                 near, plan, slot, boundaries
             ):
                 return None
-            return _tabii(slot, at, None)
+            return _tabii(slot, at, None, _stopped_on(near, boundaries, at))
         found = _madd_of(near, plan, at, boundaries)
         if self.additive_arid:
             if found is None or found[0] is not Rule.MADD_MUTTASIL:
@@ -246,7 +246,7 @@ class MaddClass:
             return None
         if rule is not Rule.MADD_TABII:
             return _classify(rule, at, other)
-        return _tabii(slot, at, other)
+        return _tabii(slot, at, other, _stopped_on(near, boundaries, at))
 
 @dataclass(frozen=True, slots=True)
 class MaddBadal:
@@ -392,6 +392,11 @@ def _stop_makes_quiescent(
     return plan.merged_away(slot.id, Aspect.VOWEL)
 
 
+def _stopped_on(near: Neighbourhood, boundaries, at: SlotId) -> bool:
+    word = near.word_of(at)
+    return word is not None and boundaries.stopped_on(word)
+
+
 def _classify(rule: Rule, at: SlotId, other: SlotId | None,
               aspect: Aspect | None = None) -> Verdict:
     effects = () if aspect is None else (Classify(at, aspect),)
@@ -403,14 +408,15 @@ def _context(other: SlotId | None) -> tuple[SlotId, ...]:
     return () if other is None else (other,)
 
 
-def _tabii(slot, at: SlotId, other: SlotId | None) -> Verdict:
+def _tabii(slot, at: SlotId, other: SlotId | None, stopped: bool) -> Verdict:
     """Realize plain madd, or only lengthen an already realized pausal alif."""
     occurrence = Occurrence(
         mint(Rule.MADD_TABII, at), Rule.MADD_TABII, (at,), _context(other)
     )
     if slot.nucleus.is_pausal_long:
         return Verdict(occurrence, (Relength(at, Length.LONG),))
+    state = slot.nucleus.stopped if stopped else slot.nucleus.joined
     return Verdict(
         occurrence,
-        (Realize(at, Aspect.VOWEL, Vowel(slot.nucleus.quality, long=True)),),
+        (Realize(at, Aspect.VOWEL, Vowel(state.quality, long=True)),),
     )
