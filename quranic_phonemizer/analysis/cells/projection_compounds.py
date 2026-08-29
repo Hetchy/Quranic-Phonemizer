@@ -358,16 +358,10 @@ def fold_article_naql_madd(words: tuple[CellWord, ...], facts) -> tuple[CellWord
                 role=CellRole.MADD,
                 text=haraka.text + alif.text,
                 source_character_ids=_unique(
-                    (
-                        *haraka.source_character_ids,
-                        *alif.source_character_ids,
-                    )
+                    (*haraka.source_character_ids, *alif.source_character_ids)
                 ),
                 source_unit_ids=_unique(
-                    (
-                        *haraka.source_unit_ids,
-                        *alif.source_unit_ids,
-                    )
+                    (*haraka.source_unit_ids, *alif.source_unit_ids)
                 ),
                 tier=CellTier.MAIN,
                 attached_to_column_id=None,
@@ -399,7 +393,6 @@ def project_warsh_compounds(words, facts, insc, pen):
     words = split_hamza_madd_carriers(words, facts, insc, pen)
     words = fold_combining_hamza_seats(words)
     return fold_marked_ibdal_carriers(words, facts)
-
 
 __all__ = [
     "fold_article_naql_madd",

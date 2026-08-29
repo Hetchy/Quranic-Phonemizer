@@ -112,82 +112,74 @@ def clean_structural_marks(word: CellWord) -> CellWord:
     )
 
 
+def _shared_silence_host(rider, by_id, facts):
+    if (
+        rider.tier is CellTier.MAIN
+        or rider.status is not CellStatus.DROPPED
+        or rider.attached_to_column_id is None
+        or rider.owned_sound_ids
+        or rider.presented_sound_ids
+    ):
+        return None
+    host = by_id.get(rider.attached_to_column_id)
+    cause = (
+        facts.occurrences[rider.silence.value].rule.value
+        if isinstance(rider.silence, OccurrenceId)
+        else None
+    )
+    if (
+        host is None
+        or host.status is not CellStatus.DROPPED
+        or host.silence != rider.silence
+        or cause != "naql"
+        or host.variant_id != rider.variant_id
+        or host.variant_choice != rider.variant_choice
+    ):
+        return None
+    return host
+
+
+def _merge_shared_silence(columns, source, host, rider):
+    character_ids = tuple(sorted(
+        {*host.source_character_ids, *rider.source_character_ids},
+        key=lambda item: item.value,
+    ))
+    unit_ids = tuple(sorted(
+        {*host.source_unit_ids, *rider.source_unit_ids},
+        key=lambda item: item.value,
+    ))
+    merged = replace(
+        host,
+        text="".join(source.characters[item.value].text for item in character_ids),
+        source_character_ids=character_ids,
+        source_unit_ids=unit_ids,
+        rule_occurrence_ids=tuple(dict.fromkeys(
+            (*host.rule_occurrence_ids, *rider.rule_occurrence_ids)
+        )),
+    )
+    return [
+        replace(column, attached_to_column_id=host.id)
+        if column.attached_to_column_id == rider.id
+        else merged if column.id == host.id else column
+        for column in columns if column.id != rider.id
+    ]
+
+
 def fold_shared_silence_riders(
     word: CellWord, source: SourceView, facts: AnalysisFacts
 ) -> CellWord:
     """Fold a silenced Naql haraka into its silenced qata host."""
     columns = list(word.columns)
-    changed = True
-    while changed:
-        changed = False
+    while True:
         by_id = {column.id: column for column in columns}
-        for rider in columns:
-            if (
-                rider.tier is CellTier.MAIN
-                or rider.status is not CellStatus.DROPPED
-                or rider.attached_to_column_id is None
-                or rider.owned_sound_ids
-                or rider.presented_sound_ids
-            ):
-                continue
-            host = by_id.get(rider.attached_to_column_id)
-            cause = (
-                facts.occurrences[rider.silence.value].rule.value
-                if isinstance(rider.silence, OccurrenceId)
-                else None
-            )
-            if (
-                host is None
-                or host.status is not CellStatus.DROPPED
-                or host.silence != rider.silence
-                or cause != "naql"
-                or host.variant_id != rider.variant_id
-                or host.variant_choice != rider.variant_choice
-            ):
-                continue
-            character_ids = tuple(
-                sorted(
-                    {*host.source_character_ids, *rider.source_character_ids},
-                    key=lambda item: item.value,
-                )
-            )
-            unit_ids = tuple(
-                sorted(
-                    {*host.source_unit_ids, *rider.source_unit_ids},
-                    key=lambda item: item.value,
-                )
-            )
-            merged = replace(
-                host,
-                text="".join(
-                    source.characters[item.value].text for item in character_ids
-                ),
-                source_character_ids=character_ids,
-                source_unit_ids=unit_ids,
-                rule_occurrence_ids=tuple(
-                    dict.fromkeys(
-                        (
-                            *host.rule_occurrence_ids,
-                            *rider.rule_occurrence_ids,
-                        )
-                    )
-                ),
-            )
-            columns = [
-                replace(
-                    column,
-                    attached_to_column_id=host.id,
-                )
-                if column.attached_to_column_id == rider.id
-                else merged
-                if column.id == host.id
-                else column
-                for column in columns
-                if column.id != rider.id
-            ]
-            changed = True
-            break
-    return replace(word, columns=tuple(columns))
+        pair = next(
+            ((host, rider) for rider in columns
+             if (host := _shared_silence_host(rider, by_id, facts)) is not None),
+            None,
+        )
+        if pair is None:
+            return replace(word, columns=tuple(columns))
+        columns = _merge_shared_silence(columns, source, *pair)
 
 
 def _owns_consonant(col: CellColumn, facts: AnalysisFacts) -> bool:

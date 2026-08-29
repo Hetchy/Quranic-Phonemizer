@@ -3,7 +3,6 @@ from __future__ import annotations
 
 from dataclasses import replace
 
-from ...model.canon import Quality
 from ...model.performance import Vowel
 from ...orthography.write import Pen
 from ..attributions import Recoloured
@@ -19,7 +18,6 @@ _CARRIER_IDENTITIES = frozenset({
     "pausal_alif",
     "taqlil",
 })
-_WEIGHT_RULES = frozenset({"tafkheem", "tarqeeq"})
 
 
 def is_carrier_identity_rule(rule: str) -> bool:
@@ -404,87 +402,8 @@ def keep_carrier_identity_off_harakas(
     )) for word in words)
 
 
-def keep_weight_labels_off_short_vowels(
-    words: tuple[CellWord, ...], facts: AnalysisFacts,
-) -> tuple[CellWord, ...]:
-    """Weight is visible on its letter/carrier, not on a short-vowel cell."""
-    weight = {
-        OccurrenceId(index)
-        for index, occurrence in enumerate(facts.occurrences)
-        if occurrence.rule.value in _WEIGHT_RULES
-    }
-    out = []
-    for word in words:
-        columns = tuple(
-            replace(column, rule_occurrence_ids=tuple(
-                occurrence for occurrence in column.rule_occurrence_ids
-                if occurrence not in weight
-            )) if column.role in {CellRole.HARAKA, CellRole.TANWEEN}
-            else column
-            for column in word.columns
-        )
-        sounds = tuple(
-            replace(sound, rule_occurrence_ids=tuple(
-                occurrence for occurrence in sound.rule_occurrence_ids
-                if occurrence not in weight
-            )) if (
-                isinstance(facts.sounds[sound.sound_id.value].value, Vowel)
-                and not facts.sounds[sound.sound_id.value].value.long
-                and facts.sounds[sound.sound_id.value].value.quality is Quality.A
-            ) else sound
-            for sound in word.sounds
-        )
-        out.append(replace(word, columns=columns, sounds=sounds))
-    return tuple(out)
-
-
-def keep_weight_labels_on_sound_owners(
-    words: tuple[CellWord, ...], facts: AnalysisFacts,
-) -> tuple[CellWord, ...]:
-    """Do not copy a sound's weight identity onto mere presenters.
-
-    A long vowel can be presented by its fatha or an adjacent hamza while its
-    carrier owns it.  Likewise a merger presenter can share a sound owned by
-    another letter.  Weight identity belongs only to the column that owns the
-    classified sound; short-vowel owners were already excluded above.
-    """
-    weight = {
-        OccurrenceId(index)
-        for index, occurrence in enumerate(facts.occurrences)
-        if occurrence.rule.value in _WEIGHT_RULES
-    }
-    out = []
-    for word in words:
-        sounds_by_occurrence: dict[OccurrenceId, set] = {}
-        for sound in word.sounds:
-            for occurrence in sound.rule_occurrence_ids:
-                if occurrence in weight:
-                    sounds_by_occurrence.setdefault(occurrence, set()).add(
-                        sound.sound_id
-                    )
-        columns = tuple(replace(column, rule_occurrence_ids=tuple(
-            occurrence for occurrence in column.rule_occurrence_ids
-            if occurrence not in weight
-            or bool(
-                set(column.owned_sound_ids)
-                & sounds_by_occurrence.get(occurrence, set())
-            )
-        )) for column in word.columns)
-        out.append(replace(word, columns=columns))
-    return tuple(out)
-
-
 __all__ = [
-    "assign_native_iqlab_meem",
-    "is_carrier_identity_rule",
-    "keep_carrier_identity_off_harakas",
-    "keep_ibdal_off_harakas",
-    "keep_madd_rules_on_carriers",
-    "keep_pausal_alif_on_carriers",
-    "keep_taqlil_on_carriers",
-    "keep_waqf_drop_on_silenced_cells",
-    "keep_weight_labels_off_short_vowels",
-    "keep_weight_labels_on_sound_owners",
-    "preserve_semantic_cells",
-    "separate_tanween_vowel_colours",
+    "assign_native_iqlab_meem", "is_carrier_identity_rule", "keep_carrier_identity_off_harakas",
+    "keep_ibdal_off_harakas", "keep_madd_rules_on_carriers", "keep_pausal_alif_on_carriers",
+    "keep_taqlil_on_carriers", "keep_waqf_drop_on_silenced_cells", "preserve_semantic_cells", "separate_tanween_vowel_colours",
 ]

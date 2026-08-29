@@ -138,11 +138,9 @@ class CarrierTarqeeq:
 
     @staticmethod
     def _sounds_long(plan: Plan, at: SlotId, canonical: VowelForm) -> bool:
-        """Return the performed length after boundary and length effects.
+        """Return performed length after boundary and length effects.
 
-        Canonically long vowels can be shortened before wasl; stopped iwad can
-        move in the opposite direction.  Carrier identity follows that final
-        performed length, never the slot's out-of-context shape.
+        Carrier identity follows final performance, not canonical shape.
         """
         long = canonical is VowelForm.LONG
         for effect in plan.effects():

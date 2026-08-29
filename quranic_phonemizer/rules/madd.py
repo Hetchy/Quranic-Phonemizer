@@ -8,8 +8,7 @@ from ..engine.plan import (
     Classify, Length, Phase, Plan, Realize, Relength, Verdict, mint,
 )
 from ..model.address import BoundaryPlan, Junction, KhilafId, Location, SlotId
-from ..model.canon import Annotation, CanonLetter as L
-from ..model.canon import Onset, Quality, Rule, SlotOrigin, VowelForm
+from ..model.canon import Annotation, CanonLetter as L, Onset, Quality, Rule, SlotOrigin, VowelForm
 from ..model.performance import Aspect, Occurrence, Vowel
 
 
@@ -17,10 +16,7 @@ def _badal_slot(slot) -> bool:
     return (
         slot.letter is L.HAMZA
         or Annotation.BADAL in slot.annotations
-        or (
-            Annotation.NAQL in slot.annotations
-            and slot.nucleus.sounds_long
-        )
+        or (Annotation.NAQL in slot.annotations and slot.nucleus.sounds_long)
     )
 @dataclass(frozen=True, slots=True)
 class MaddLazimIbdal:
@@ -400,9 +396,7 @@ def _context(other: SlotId | None) -> tuple[SlotId, ...]:
 
 
 def _tabii(slot, at: SlotId, other: SlotId | None) -> Verdict:
-    """`MADD_TABII` cannot be classification-only, so it realizes the sound
-    the plain fill would have given it -- except a pausal alif, whose own
-    rule realizes it already, and only takes a length here."""
+    """Realize plain madd, or only lengthen an already realized pausal alif."""
     occurrence = Occurrence(
         mint(Rule.MADD_TABII, at), Rule.MADD_TABII, (at,), _context(other)
     )

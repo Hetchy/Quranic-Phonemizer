@@ -208,7 +208,19 @@ def _seat_unit(unit: LetterUnit, reading: _Reading) -> int | None:
         # A cross-word long-vowel merger is rendered as a boundary bridge.
         # Its presenter remains seated on its own word; it must not attach
         # across the boundary to the carrier that owns the shared sound.
-    return _main_of_slot(unit.id.value, reading)
+    same_slot = _main_of_slot(unit.id.value, reading)
+    if same_slot is not None:
+        return same_slot
+    # A trailing source sukun can be assigned the following empty canonical
+    # slot even though it is visibly written on the preceding rasm carrier.
+    if unit.text == "ْ" and not unit.owned_sound_ids and not unit.presented_sound_ids:
+        prior = [
+            candidate for candidate in reading.main_units
+            if candidate < unit.id.value
+            and reading.word_of_unit.get(candidate) == unit.word_id.value
+        ]
+        return prior[-1] if prior else None
+    return None
 
 
 def _owns_consonant(unit_id: int, reading: _Reading) -> bool:

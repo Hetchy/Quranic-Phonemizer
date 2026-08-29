@@ -76,8 +76,20 @@ def _check_attachment(
         # A written_on target that is itself riding -- the iqlab meem on the
         # tanween -- seats on a main of that target's slot, not the target.
         seated_on = unit.written_on_unit_id.value if unit.written_on_unit_id else unit.id.value
+        shared_sound = bool(
+            set(unit.presented_sound_ids) & set(seat.owned_sound_ids)
+        )
+        trailing_sukun = (
+            unit.text == "ْ"
+            and not unit.owned_sound_ids
+            and not unit.presented_sound_ids
+            and seat.word_id == unit.word_id
+            and seat.id.value < unit.id.value
+        )
         _require(
-            slot_of_unit.get(seat.id.value) == slot_of_unit.get(seated_on),
+            slot_of_unit.get(seat.id.value) == slot_of_unit.get(seated_on)
+            or shared_sound
+            or trailing_sukun,
             "attachment leaves the mark's slot: "
             f"word={word.word_id.value} column={col.id.value} text={col.text!r} "
             f"unit={unit.id.value} seated_on={seated_on} "

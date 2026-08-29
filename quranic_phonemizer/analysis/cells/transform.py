@@ -257,97 +257,86 @@ def _split_started_wasl(words, facts, slot_of_unit, pen):
     return tuple(out)
 
 
+def _native_vowel_marks(word):
+    return {
+        column.id: tuple(
+            mark for mark in word.columns
+            if mark.role is CellRole.HARAKA
+            and mark.attached_to_column_id == column.id
+            and mark.source_character_ids
+            and mark.status is not CellStatus.DROPPED
+        )
+        for column in word.columns
+    }
+
+
+def _unwritten_short_vowel(col, facts, slot_of_unit, insc):
+    if col.role is not CellRole.LETTER or not col.source_unit_ids:
+        return None
+    slot_id = slot_of_unit.get(col.source_unit_ids[0].value)
+    slot = None if slot_id is None else facts.slots[facts.slot_index[slot_id]]
+    if slot is None or slot.onset is Onset.WASL:
+        return None
+    kinds = {insc.glyphs[glyph.value].kind for glyph in col.source_character_ids}
+    if kinds.difference({GlyphKind.BASE, GlyphKind.SHADDA, GlyphKind.TAJWEED_MARK}):
+        return None
+    consonants = [
+        sound.value for sound in col.owned_sound_ids
+        if isinstance(facts.sounds[sound.value].value, Consonant)
+    ]
+    vowels = [
+        sound.value for sound in col.owned_sound_ids
+        if isinstance(facts.sounds[sound.value].value, Vowel)
+        and not facts.sounds[sound.value].value.long
+        and facts.sounds[sound.value].value.quality in _VOWEL_ROLE
+    ]
+    return vowels[0] if len(consonants) == 1 and len(vowels) == 1 else None
+
+
+def _split_word_short_vowels(word, facts, slot_of_unit, insc, pen, next_id):
+    columns, sounds = [], list(word.sounds)
+    native_marks = _native_vowel_marks(word)
+    native_sounds: dict[CellColumnId, list[SoundId]] = {}
+    for col in word.columns:
+        columns.append(col)
+        vowel = _unwritten_short_vowel(col, facts, slot_of_unit, insc)
+        if vowel is None:
+            continue
+        base = replace(col, owned_sound_ids=tuple(
+            sound for sound in col.owned_sound_ids if sound.value != vowel
+        ))
+        columns[-1] = base
+        text = pen.role(_VOWEL_ROLE[facts.sounds[vowel].value.quality])
+        written = [mark for mark in native_marks[col.id] if mark.text == text]
+        if len(written) == 1:
+            mark = written[0]
+            native_sounds.setdefault(mark.id, []).append(SoundId(vowel))
+        else:
+            mark = _inserted_haraka(next_id, base, vowel, facts, pen)
+            next_id += 1
+            columns.append(mark)
+        sounds = [
+            replace(sound, column_ids=(mark.id,))
+            if sound.sound_id.value == vowel else sound
+            for sound in sounds
+        ]
+    columns = [
+        replace(column, owned_sound_ids=tuple(dict.fromkeys(
+            (*column.owned_sound_ids, *native_sounds[column.id])
+        ))) if column.id in native_sounds else column
+        for column in columns
+    ]
+    return replace(word, columns=tuple(columns), sounds=tuple(sounds)), next_id
+
+
 def _split_unwritten_short_vowels(words, facts, slot_of_unit, insc, pen):
     """Give an unwritten short vowel its own inserted mark cell."""
-    next_id = next_column_id(words)
-    out = []
+    next_id, out = next_column_id(words), []
     for word in words:
-        columns = []
-        sounds = list(word.sounds)
-        native_marks = {
-            column.id: tuple(
-                mark
-                for mark in word.columns
-                if mark.role is CellRole.HARAKA
-                and mark.attached_to_column_id == column.id
-                and mark.source_character_ids
-                and mark.status is not CellStatus.DROPPED
-            )
-            for column in word.columns
-        }
-        native_sounds: dict[CellColumnId, list[SoundId]] = {}
-        for col in word.columns:
-            columns.append(col)
-            if col.role is not CellRole.LETTER or not col.source_unit_ids:
-                continue
-            slot_id = slot_of_unit.get(col.source_unit_ids[0].value)
-            slot = None if slot_id is None else facts.slots[facts.slot_index[slot_id]]
-            if slot is None or slot.onset is Onset.WASL:
-                continue
-            kinds = {
-                insc.glyphs[glyph.value].kind for glyph in col.source_character_ids
-            }
-            if kinds.difference(
-                {GlyphKind.BASE, GlyphKind.SHADDA, GlyphKind.TAJWEED_MARK}
-            ):
-                continue
-            consonants = [
-                sound.value
-                for sound in col.owned_sound_ids
-                if isinstance(facts.sounds[sound.value].value, Consonant)
-            ]
-            vowels = [
-                sound.value
-                for sound in col.owned_sound_ids
-                if isinstance(facts.sounds[sound.value].value, Vowel)
-                and not facts.sounds[sound.value].value.long
-                and facts.sounds[sound.value].value.quality in _VOWEL_ROLE
-            ]
-            if len(consonants) != 1 or len(vowels) != 1:
-                continue
-            vowel = vowels[0]
-            base = replace(
-                col,
-                owned_sound_ids=tuple(
-                    sound for sound in col.owned_sound_ids if sound.value != vowel
-                ),
-            )
-            columns[-1] = base
-            written = [
-                mark
-                for mark in native_marks[col.id]
-                if mark.text == pen.role(_VOWEL_ROLE[facts.sounds[vowel].value.quality])
-            ]
-            if len(written) == 1:
-                mark = written[0]
-                native_sounds.setdefault(mark.id, []).append(SoundId(vowel))
-            else:
-                mark = _inserted_haraka(next_id, base, vowel, facts, pen)
-                next_id += 1
-                columns.append(mark)
-            sounds = [
-                replace(sound, column_ids=(mark.id,))
-                if sound.sound_id.value == vowel
-                else sound
-                for sound in sounds
-            ]
-        columns = [
-            replace(
-                column,
-                owned_sound_ids=tuple(
-                    dict.fromkeys(
-                        (
-                            *column.owned_sound_ids,
-                            *native_sounds[column.id],
-                        )
-                    )
-                ),
-            )
-            if column.id in native_sounds
-            else column
-            for column in columns
-        ]
-        out.append(replace(word, columns=tuple(columns), sounds=tuple(sounds)))
+        split, next_id = _split_word_short_vowels(
+            word, facts, slot_of_unit, insc, pen, next_id
+        )
+        out.append(split)
     return tuple(out)
 
 

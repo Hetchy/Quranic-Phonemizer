@@ -10,15 +10,16 @@ from ...model.canon import ILTIQA_RULES
 from ...render.alphabet import (
     is_eased_hamza_token,
     is_hamza_token,
-    is_long_a_token,
-    is_short_a_token,
 )
 from ..checks import requirer
 from ..dtos import AnalysisBundle
 from ..source_dtos import SourceView
 from .dtos import CellRole, CellSound, CellStatus, CellView
 from .laws import CellValidationError
-from .projection_semantics import is_carrier_identity_rule
+from .view_identity_laws import (
+    check_carrier_identity_placement,
+    check_weight_identity_placement,
+)
 
 _require = requirer(CellValidationError)
 _HAMZA_GLYPHS = frozenset("ءأإؤئٕٔ")
@@ -277,6 +278,10 @@ def validate_spoken_hamza_glyphs(
 ) -> None:
     """Every plain hamza sound has a visible original or replacement glyph."""
     columns = _all_columns(view).values()
+    rules = {
+        occurrence.id: occurrence.rule_id.value
+        for occurrence in bundle.rule_occurrences
+    }
     for sound in bundle.sounds:
         if not is_hamza_token(sound.token):
             continue
@@ -288,6 +293,10 @@ def validate_spoken_hamza_glyphs(
                 or any(
                     is_eased_hamza_token(bundle.sounds[item.value].token)
                     for item in column.owned_sound_ids
+                )
+                or any(
+                    rules[occurrence] == "tashil"
+                    for occurrence in column.rule_occurrence_ids
                 )
                 for column in owners
             ),
@@ -314,149 +323,6 @@ def _check_groups(view: CellView) -> None:
         _require(
             all(group.key in group.column_ids for group in word.groups),
             "a group key is not one of its columns",
-        )
-
-
-def _check_carrier_identity_placement(
-    view: CellView,
-    bundle: AnalysisBundle,
-) -> None:
-    rules = {
-        occurrence.id: occurrence.rule_id.value
-        for occurrence in bundle.rule_occurrences
-    }
-    for word in view.words:
-        for column in word.columns:
-            pausal_alif = any(
-                rules[occurrence] == "pausal_alif"
-                for occurrence in column.rule_occurrence_ids
-            )
-            _require(
-                not pausal_alif
-                or (
-                    column.role is CellRole.MADD
-                    and column.text.startswith("ا")
-                ),
-                "pausal-alif identity is not on its alif carrier",
-            )
-            if column.role is not CellRole.HARAKA:
-                continue
-            _require(
-                not any(
-                    is_carrier_identity_rule(rules[occurrence])
-                    for occurrence in column.rule_occurrence_ids
-                ),
-                "a carrier identity labels its accompanying haraka",
-            )
-
-
-def _check_weight_identity_placement(
-    view: CellView,
-    bundle: AnalysisBundle,
-) -> None:
-    """Weight labels name pronounced letters and A carriers, never harakas."""
-    rules = {
-        occurrence.id: occurrence.rule_id.value
-        for occurrence in bundle.rule_occurrences
-    }
-    weight = frozenset({"tafkheem", "tarqeeq"})
-    sounds = {sound.id: sound for sound in bundle.sounds}
-    for word in view.words:
-        for column in word.columns:
-            weight_occurrences = tuple(
-                dict.fromkeys(
-                    occurrence
-                    for occurrence in column.rule_occurrence_ids
-                    if rules[occurrence] in weight
-                )
-            )
-            named = {rules[occurrence] for occurrence in weight_occurrences}
-            if column.role in {CellRole.HARAKA, CellRole.TANWEEN}:
-                _require(not named, "a short-vowel cell has a weight label")
-                continue
-            held = tuple(
-                dict.fromkeys(
-                    (
-                        *column.owned_sound_ids,
-                        *column.presented_sound_ids,
-                    )
-                )
-            )
-            pronounced_weight_letter = (
-                column.role is CellRole.LETTER
-                and any(
-                    ("ر" in column.text and sounds[sound].token.startswith("r"))
-                    or ("ل" in column.text and sounds[sound].token.startswith("l"))
-                    for sound in column.owned_sound_ids
-                )
-                and column.silence is None
-            )
-            a_carrier_shape = (
-                column.role in {CellRole.LETTER, CellRole.MADD}
-                and (
-                    column.role is CellRole.MADD
-                    or any(carrier in column.text for carrier in "اىٰ")
-                )
-                and column.silence is None
-            )
-            pronounced_a_carrier = a_carrier_shape and any(
-                is_long_a_token(sounds[sound].token) for sound in column.owned_sound_ids
-            )
-            presented_a_carrier = a_carrier_shape and any(
-                is_long_a_token(sounds[sound].token) for sound in held
-            )
-            spelled_run = any(column.id in run.column_ids for run in word.runs)
-            compact_spelling = (
-                column.role is CellRole.LETTER
-                and column.text == "ا"
-                and len(column.owned_sound_ids) > 1
-            )
-            if pronounced_weight_letter or pronounced_a_carrier:
-                _require(
-                    len(named) == 1,
-                    "a pronounced raa, lam, or A carrier lacks one weight "
-                    f"identity: word={word.word_id.value} column={column.id.value} "
-                    f"text={column.text!r} role={column.role.value} "
-                    f"weights={sorted(named)} sounds={[item.value for item in held]}",
-                )
-            _require(
-                "tarqeeq" not in named
-                or pronounced_weight_letter
-                or presented_a_carrier
-                or spelled_run
-                or compact_spelling,
-                "tarqeeq labels something other than a pronounced raa, lam, "
-                f"or long-A carrier: word={word.word_id.value} "
-                f"column={column.id.value} text={column.text!r} "
-                f"role={column.role.value} "
-                f"sounds={[(item.value, sounds[item].token) for item in held]}",
-            )
-    for boundary in view.boundaries:
-        for column in boundary.columns:
-            named = {
-                rules[occurrence]
-                for occurrence in column.rule_occurrence_ids
-                if rules[occurrence] in weight
-            }
-            _require(
-                not named,
-                "a boundary haraka or sign has a weight label: "
-                f"boundary={boundary.boundary_id.value} "
-                f"column={column.id.value} text={column.text!r} "
-                f"weights={sorted(named)}",
-            )
-    for cell in _all_cells(view):
-        named = {
-            rules[occurrence]
-            for occurrence in cell.rule_occurrence_ids
-            if rules[occurrence] in weight
-        }
-        token = sounds[cell.sound_id].token
-        _require(
-            not named or not is_short_a_token(token),
-            "a short /a/ sound has a visible weight label: "
-            f"sound={cell.sound_id.value} token={token!r} "
-            f"weights={sorted(named)}",
         )
 
 
@@ -515,8 +381,8 @@ def validate_cell_view(
     _check_bridges(view, bundle, source)
     _check_closure(view, bundle)
     _check_groups(view)
-    _check_carrier_identity_placement(view, bundle)
-    _check_weight_identity_placement(view, bundle)
+    check_carrier_identity_placement(view, bundle)
+    check_weight_identity_placement(view, bundle)
     _check_tanween_naql_bridges(view, bundle)
 
 

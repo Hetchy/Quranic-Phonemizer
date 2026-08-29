@@ -69,18 +69,23 @@ def test_sukun_is_folded_into_its_main_letter(hafs, pen):
     )
 
 
-def test_a_folded_warsh_sukun_remaps_its_realized_vowel_sound():
+def test_a_replaced_warsh_sukun_separates_its_realized_vowel_mark():
     _, bundle, view = _build_warsh("35:28")
     word_id = next(word.id for word in bundle.words if word.ref == "35:28:13")
     word = next(item for item in view.words if item.word_id == word_id)
-    carrier = next(column for column in word.columns if column.text == "أْ")
-    tokens = {bundle.sounds[sound.value].token for sound in carrier.owned_sound_ids}
+    carrier = next(column for column in word.columns if column.text == "ؤ")
+    mark = next(
+        column for column in word.columns
+        if column.role is CellRole.HARAKA
+        and column.attached_to_column_id == carrier.id
+    )
 
-    assert tokens == {"ʔ", "u"}
+    assert {bundle.sounds[sound.value].token for sound in carrier.owned_sound_ids} == {"ʔ"}
+    assert {bundle.sounds[sound.value].token for sound in mark.owned_sound_ids} == {"u"}
     assert all(
-        carrier.id in sound.column_ids
+        mark.id in sound.column_ids
         for sound in word.sounds
-        if sound.sound_id in carrier.owned_sound_ids
+        if sound.sound_id in mark.owned_sound_ids
     )
 
 
@@ -821,7 +826,14 @@ def test_a_lam_shaped_tashil_seat_is_not_classified_as_a_spoken_lam():
     _, bundle, view = _build_warsh("27:62")
     word_id = next(word.id for word in bundle.words if word.ref == "27:62:21")
     word = next(item for item in view.words if item.word_id == word_id)
-    seat = next(column for column in word.columns if column.text == "ل")
+    eased = next(
+        sound for sound in word.sounds
+        if bundle.sounds[sound.sound_id.value].token == "ʔ̞"
+    )
+    seat = next(
+        column for column in word.columns
+        if eased.sound_id in column.owned_sound_ids
+    )
     rules = {
         bundle.rule_occurrences[item.value].rule_id.value
         for item in seat.rule_occurrence_ids

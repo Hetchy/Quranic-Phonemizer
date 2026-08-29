@@ -55,22 +55,22 @@ EASED_ISTIFHAM = {"27:61:15", "37:16:1", "38:8:1", "43:19:8", "50:3:1", "54:25:1
 #: The sixteen silent-qata starts and their ibtidaa readings, read on into
 #: the following word except where the doc's row is the waqf-on-host form.
 QATA_STARTS = (
-    ("6:71:29", "ʔi:tina:", "joined"),
-    ("7:77:9", "ʔi:tina:", "joined"),
-    ("8:32:17", "ʔi:tina:", "joined"),
-    ("29:29:17", "ʔi:tina:", "joined"),
-    ("10:15:11", "ʔi:ti", "joined"),
-    ("26:10:6", "ʔi:ti", "joined"),
-    ("10:79:3", "ʔi:tu:ni:", "joined"),
-    ("12:50:3", "ʔi:tu:ni:", "joined"),
-    ("12:54:3", "ʔi:tu:ni:", "joined"),
-    ("12:59:5", "ʔi:tu:ni:", "joined"),
-    ("46:4:18", "ʔi:tu:ni:", "joined"),
-    ("20:64:4", "ʔi:tu:", "joined"),
-    ("45:25:12", "ʔi:tu:", "joined"),
-    ("41:11:10", "ʔi:tija:", "joined"),
-    ("9:49:4", "ʔi:ðan", "stopped"),
-    ("2:283:16", "ʔu:tumina", "joined"),
+    ("6:71:29", "ʔi:tina:", "a:tina:", "joined"),
+    ("7:77:9", "ʔi:tina:", "u:tina:", "joined"),
+    ("8:32:17", "ʔi:tina:", "i:tina:", "joined"),
+    ("29:29:17", "ʔi:tina:", "u:tina:", "joined"),
+    ("10:15:11", "ʔi:ti", "a:ti", "joined"),
+    ("26:10:6", "ʔi:ti", "i:ti", "joined"),
+    ("10:79:3", "ʔi:tu:ni:", "u:tu:ni:", "joined"),
+    ("12:50:3", "ʔi:tu:ni:", "u:tu:ni:", "joined"),
+    ("12:54:3", "ʔi:tu:ni:", "u:tu:ni:", "joined"),
+    ("12:59:5", "ʔi:tu:ni:", "a:tu:ni:", "joined"),
+    ("46:4:18", "ʔi:tu:ni:", "i:tu:ni:", "joined"),
+    ("20:64:4", "ʔi:tu:", "a:tu:", "joined"),
+    ("45:25:12", "ʔi:tu:", "u:tu:", "joined"),
+    ("41:11:10", "ʔi:tija:", "i:tija:", "joined"),
+    ("9:49:4", "ʔi:ðan", "u:ða", "stopped"),
+    ("2:283:16", "ʔu:tumina", "i:tumina", "joined"),
 )
 
 #: The closed damm-over-kasr connected-form register: canonical boundary,
@@ -295,9 +295,14 @@ def test_every_supplied_mark_start_reconciles_with_the_derivation():
 
 
 @pytest.mark.parametrize(
-    ("ref", "expected", "state"), QATA_STARTS, ids=[row[0] for row in QATA_STARTS]
+    ("ref", "expected", "joined", "state"),
+    QATA_STARTS,
+    ids=[row[0] for row in QATA_STARTS],
 )
-def test_a_started_silent_qata_form_reads_the_replacement_long(ref, expected, state):
+def test_a_started_silent_qata_form_reads_the_replacement_long(
+    ref, expected, joined, state
+):
+    del joined
     word = int(ref.split(":")[2])
     waqf = word if state == "stopped" else word + 1
     got = _read("warsh", ref, (word,), ibtidaa=word, waqf=waqf)
@@ -305,16 +310,20 @@ def test_a_started_silent_qata_form_reads_the_replacement_long(ref, expected, st
 
 
 @pytest.mark.parametrize(
-    ("ref", "started", "state"), QATA_STARTS, ids=[row[0] for row in QATA_STARTS]
+    ("ref", "started", "joined", "state"),
+    QATA_STARTS,
+    ids=[row[0] for row in QATA_STARTS],
 )
-def test_a_joined_silent_qata_form_uses_the_preceding_vowel(ref, started, state):
+def test_a_joined_silent_qata_form_uses_the_preceding_vowel(
+    ref, started, joined, state
+):
+    del started, state
     word = int(ref.split(":")[2])
     before, got = _read(
         "warsh", ref, (word - 1, word), ibtidaa=word - 1, waqf=word + 1
     )
-    assert before.endswith(":")
-    expected = started[3:-1] if state == "stopped" else started[3:]
-    assert got == expected
+    assert before
+    assert got == joined
 
 
 @pytest.mark.parametrize(

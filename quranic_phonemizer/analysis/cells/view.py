@@ -45,9 +45,11 @@ from .projection_semantics import (
     keep_madd_rules_on_carriers,
     keep_taqlil_on_carriers,
     keep_waqf_drop_on_silenced_cells,
+    separate_tanween_vowel_colours,
+)
+from .projection_weight import (
     keep_weight_labels_off_short_vowels,
     keep_weight_labels_on_sound_owners,
-    separate_tanween_vowel_colours,
 )
 from .projection_naql_badal import project_naql_badal_bridges
 from .projection_naql import (
