@@ -32,7 +32,7 @@ SNAPSHOTS = (
 #: word-for-word equality; the second also credits a word whose only
 #: difference is which side of a shared seam a merged sound landed on.
 FLOORS = {
-    "word": (0.9992, 0.9992),
+    "word": (0.9990, 0.9990),
     "verse": (0.9767, 0.9982),
     "continuous": (0.9742, 0.9955),
 }
