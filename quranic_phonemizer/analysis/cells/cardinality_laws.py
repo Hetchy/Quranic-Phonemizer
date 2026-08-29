@@ -9,8 +9,16 @@ _require = requirer(CellValidationError)
 
 
 def check_cell_cardinality(view: CellView) -> None:
-    """A column owns at most two sounds; only tanween groups may own three."""
+    """A lexical column owns at most two sounds; only tanween groups may own
+    three.  Muqattaat are named-letter runs, not lexical grapheme cells: one
+    compact source glyph legitimately owns the sounds of the whole letter
+    name, while its transformed view expands that run into ordinary cells.
+    """
     for word in view.words:
+        # Source spelling intentionally keeps compact source ownership.  The
+        # semantic bound applies after projection, whose words have groups.
+        if not word.groups or word.runs:
+            continue
         columns = {column.id: column for column in word.columns}
         overfull_column = next(
             (
