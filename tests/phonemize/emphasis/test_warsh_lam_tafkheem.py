@@ -2,18 +2,22 @@ from __future__ import annotations
 
 import pytest
 
+from quranic_phonemizer.model.address import KhilafId
+from quranic_phonemizer.riwayat.warsh.lam import SITES
 from tests.support import (
     Case,
     Expect,
     R,
     Site,
     StateCase,
+    VariantCase,
     assert_case,
     case_runs,
     explicit,
     isolated,
     through,
 )
+from tests.support.variant import selected
 
 DIRECT_CASES = (
     # Warsh: صَلَوَٰتٞ
@@ -287,6 +291,251 @@ COUPLED_BOUNDARY_CASES = (
         },
     ),
 )
+
+
+LAM_VARIANT_CASES = (
+    # Warsh: طَالَ
+    VariantCase(
+        id="separated-taala",
+        site=Site(warsh=("21:44", (6,))),
+        selector=KhilafId.LAM_SEPARATED_BY_ALIF,
+        faces={
+            "tafkheem": Expect(
+                read=isolated(),
+                phonemes="tˤ aˤ: lˤ",
+                char_rules={"ل": R("tafkheem")},
+                sound_rules={"lˤ": R("tafkheem")},
+                extra_phonemes=("emphatic_fatha",),
+            ),
+            "tarqiq": Expect(
+                read=isolated(),
+                phonemes="tˤ aˤ: l",
+                char_rules={"ل": R("tarqeeq")},
+                sound_rules={"l": R("tarqeeq")},
+                extra_phonemes=("emphatic_fatha",),
+            ),
+        },
+        default="tafkheem",
+    ),
+    # Warsh: فِصَالاً عَن
+    VariantCase(
+        id="separated-fisal-joined",
+        site=Site(warsh=("2:233", (36, 37))),
+        selector=KhilafId.LAM_SEPARATED_BY_ALIF,
+        faces={
+            "tafkheem": Expect(
+                read=explicit(ibtidaa=36, wasl=37),
+                phonemes=("f i sˤ aˤ: lˤ aˤ n", "ʕ a ŋ"),
+                char_rules={"ل": R("tafkheem")},
+                sound_rules={"lˤ": R("tafkheem"), "aˤ": R("tafkheem")},
+                extra_phonemes=("emphatic_fatha",),
+            ),
+            "tarqiq": Expect(
+                read=explicit(ibtidaa=36, wasl=37),
+                phonemes=("f i sˤ aˤ: l a n", "ʕ a ŋ"),
+                char_rules={"ل": R("tarqeeq")},
+                sound_rules={"l": R("tarqeeq")},
+                # The alif before the target keeps the sad's own emphasis.
+                absent_sound_rules={"aˤ:": R("tarqeeq")},
+                extra_phonemes=("emphatic_fatha",),
+            ),
+        },
+        default="tafkheem",
+    ),
+    # Warsh: فَصَلَ
+    VariantCase(
+        id="final-waqf-fasala",
+        site=Site(warsh=("2:249", (2, 3))),
+        selector=KhilafId.LAM_FINAL_WAQF,
+        faces={
+            "tafkheem": Expect(
+                read=explicit(ibtidaa=2, waqf=(2, 3)),
+                phonemes=("f a sˤ aˤ lˤ", "tˤ aˤ: l u: t"),
+                char_rules={"ل[1]": R("tafkheem")},
+                sound_rules={"lˤ": R("tafkheem")},
+                extra_phonemes=("emphatic_fatha",),
+            ),
+            "tarqiq": Expect(
+                read=explicit(ibtidaa=2, waqf=(2, 3)),
+                phonemes=("f a sˤ aˤ l", "tˤ aˤ: l u: t"),
+                char_rules={"ل[1]": R("tarqeeq")},
+                sound_rules={"l[1]": R("tarqeeq")},
+                extra_phonemes=("emphatic_fatha",),
+            ),
+        },
+        default="tafkheem",
+        masked=Expect(
+            # In wasl the ordinary sad trigger owns the sounded lam.
+            read=explicit(ibtidaa=2, wasl=2),
+            phonemes=("f a sˤ aˤ lˤ aˤ", "tˤ aˤ: l u: t u"),
+            char_rules={"ل[1]": R("tafkheem")},
+            sound_rules={"lˤ": R("tafkheem"), "aˤ[2]": R("tafkheem")},
+            extra_phonemes=("emphatic_fatha",),
+        ),
+    ),
+    # Warsh: ظَلَّ
+    VariantCase(
+        id="final-waqf-zalla",
+        site=Site(warsh=("16:58", (5, 6))),
+        selector=KhilafId.LAM_FINAL_WAQF,
+        faces={
+            "tafkheem": Expect(
+                read=explicit(ibtidaa=5, waqf=(5, 6)),
+                phonemes=("ðˤ aˤ lˤlˤ", "w a ʒ Q h u h"),
+                char_rules={"ل": R("tafkheem")},
+                sound_rules={"lˤlˤ": R("tafkheem")},
+                extra_phonemes=("emphatic_fatha",),
+            ),
+            "tarqiq": Expect(
+                read=explicit(ibtidaa=5, waqf=(5, 6)),
+                phonemes=("ðˤ aˤ ll", "w a ʒ Q h u h"),
+                char_rules={"ل": R("tarqeeq")},
+                sound_rules={"ll": R("tarqeeq")},
+                extra_phonemes=("emphatic_fatha",),
+            ),
+        },
+        default="tafkheem",
+        masked=Expect(
+            # In wasl the zhaa general consumer owns the sounded lam.
+            read=explicit(ibtidaa=5, wasl=5),
+            phonemes=("ðˤ aˤ lˤlˤ aˤ", "w a ʒ Q h u h u:"),
+            char_rules={"ل": R("tafkheem")},
+            sound_rules={"lˤlˤ": R("tafkheem"), "aˤ[2]": R("tafkheem")},
+            extra_phonemes=("emphatic_fatha",),
+        ),
+    ),
+    # Warsh: صَلْصَٰلٖ
+    VariantCase(
+        id="salsal-first-lam",
+        site=Site(warsh=("15:26", (5,))),
+        selector=KhilafId.LAM_SALSAL,
+        faces={
+            "tarqiq": Expect(
+                read=isolated(),
+                phonemes="sˤ aˤ l sˤ aˤ: l",
+                char_rules={"ل[1]": R("tarqeeq")},
+                sound_rules={"l[1]": R("tarqeeq")},
+                extra_phonemes=("emphatic_fatha",),
+            ),
+            "tafkheem": Expect(
+                read=isolated(),
+                phonemes="sˤ aˤ lˤ sˤ aˤ: l",
+                char_rules={"ل[1]": R("tafkheem")},
+                sound_rules={"lˤ": R("tafkheem")},
+                # The second lam stays outside the salsal owner.
+                absent_char_rules={"ل[2]": R("tafkheem")},
+                extra_phonemes=("emphatic_fatha",),
+            ),
+        },
+        default="tarqiq",
+    ),
+    # Warsh: مَطْلَعِ
+    VariantCase(
+        id="general-taa-lam",
+        site=Site(warsh=("97:5", (4,))),
+        selector=KhilafId.LAM_AFTER_TAA,
+        faces={
+            "tafkheem": Expect(
+                read=isolated(),
+                phonemes="m a tˤ Q lˤ aˤ ʕ",
+                char_rules={"ل": R("tafkheem")},
+                sound_rules={"lˤ": R("tafkheem"), "aˤ": R("tafkheem")},
+                extra_phonemes=("emphatic_fatha",),
+            ),
+            "tarqiq": Expect(
+                read=isolated(),
+                phonemes="m a tˤ Q l a ʕ",
+                char_rules={"ل": R("tarqeeq")},
+                sound_rules={"l": R("tarqeeq")},
+                # The taa keeps its own emphasis and qalqala.
+                absent_sound_rules={"tˤ": R("tarqeeq")},
+                extra_phonemes=("emphatic_fatha",),
+            ),
+        },
+        default="tafkheem",
+    ),
+    # Warsh: ظَلَمْتُمُۥٓ
+    VariantCase(
+        id="general-zhaa-open-lam",
+        site=Site(warsh=("2:54", (7,))),
+        selector=KhilafId.LAM_AFTER_ZHAA,
+        faces={
+            "tafkheem": Expect(
+                read=isolated(),
+                phonemes="ðˤ aˤ lˤ aˤ m t u m",
+                char_rules={"ل": R("tafkheem")},
+                sound_rules={"lˤ": R("tafkheem"), "aˤ[2]": R("tafkheem")},
+                extra_phonemes=("emphatic_fatha",),
+            ),
+            "tarqiq": Expect(
+                read=isolated(),
+                phonemes="ðˤ aˤ l a m t u m",
+                char_rules={"ل": R("tarqeeq")},
+                sound_rules={"l": R("tarqeeq")},
+                absent_sound_rules={"ðˤ": R("tarqeeq")},
+                extra_phonemes=("emphatic_fatha",),
+            ),
+        },
+        default="tafkheem",
+    ),
+    # Warsh: تُظْلَمُونَۖ
+    VariantCase(
+        id="general-zhaa-sakin-lam",
+        site=Site(warsh=("2:272", (28,))),
+        selector=KhilafId.LAM_AFTER_ZHAA,
+        faces={
+            "tafkheem": Expect(
+                read=isolated(),
+                phonemes="t u ðˤ lˤ aˤ m u: n",
+                char_rules={"ل": R("tafkheem")},
+                sound_rules={"lˤ": R("tafkheem"), "aˤ": R("tafkheem")},
+                extra_phonemes=("emphatic_fatha",),
+            ),
+            "tarqiq": Expect(
+                read=isolated(),
+                phonemes="t u ðˤ l a m u: n",
+                char_rules={"ل": R("tarqeeq")},
+                sound_rules={"l": R("tarqeeq")},
+                extra_phonemes=("emphatic_fatha",),
+            ),
+        },
+        default="tafkheem",
+    ),
+)
+
+
+_SWEEP_FACES = {
+    "lam_dhat_yaa": ("fath_tafkheem", "taqlil_tarqiq"),
+    "lam_verse_heads": ("fath_tafkheem", "taqlil_tarqiq"),
+    "lam_separated_by_alif": ("tafkheem", "tarqiq"),
+    "lam_final_waqf": ("tafkheem", "tarqiq"),
+    "lam_salsal": ("tafkheem", "tarqiq"),
+}
+
+SELECTOR_SWEEP = tuple(
+    pytest.param(site, id=f"{site.owner}-{site.canonical}")
+    for site in SITES
+)
+
+
+@pytest.mark.parametrize("lam_site", SELECTOR_SWEEP)
+def test_every_lam_selector_site_accepts_both_faces(lam_site):
+    location = lam_site.canonical
+    site = Site(warsh=(f"{location.surah}:{location.ayah}", (location.word,)))
+    khilaf = KhilafId(lam_site.owner)
+    heavy_name, light_name = _SWEEP_FACES[lam_site.owner]
+    heavy = selected(
+        site, location.word, khilaf, heavy_name, stopped=True, riwayah="warsh"
+    )
+    light = selected(
+        site, location.word, khilaf, light_name, stopped=True, riwayah="warsh"
+    )
+    assert heavy.sounds(location.word) != light.sounds(location.word)
+
+
+@pytest.mark.parametrize("run", case_runs(LAM_VARIANT_CASES))
+def test_lam_selector_variants(run):
+    assert_case(run)
 
 
 @pytest.mark.parametrize("run", case_runs(DIRECT_CASES))

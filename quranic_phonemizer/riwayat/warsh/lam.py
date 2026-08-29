@@ -1,12 +1,34 @@
-"""Authored al-Azraq lam registers and their fixed profile."""
+"""Authored al-Azraq lam registers and their selector profile."""
 from __future__ import annotations
 
 from dataclasses import dataclass
 
-from ...model.address import Location, SourceLocation
-from ...rules.lam import LamKey, LamProfile
+from ...model.address import KhilafId, Location, SourceLocation
+from ...rules.lam import (
+    GeneralLamChoice,
+    LamChoice,
+    LamKey,
+    LamProfile,
+    general_sites,
+)
+from ..khilaf import VariantSpan
 
 _ARTIFACT = "king-fahd-warsh-v2"
+
+#: The waqf-only junction on 2:125 and 87:12 is the wasl mask: the inclined
+#: alif is unavailable in wasl and the ordinary sad trigger reads tafkheem.
+SELECTOR_JUNCTIONS = {
+    "lam_dhat_yaa": "all",
+    "lam_verse_heads": "all",
+    "lam_separated_by_alif": "all",
+    "lam_final_waqf": "waqf",
+    "lam_salsal": "all",
+}
+
+GENERAL_SELECTORS = {
+    "lam_after_taa": "eligible_lam_taa",
+    "lam_after_zhaa": "eligible_lam_zhaa",
+}
 
 
 @dataclass(frozen=True, slots=True)
@@ -16,26 +38,30 @@ class LamSite:
     canonical: Location
     text: str
     lam: int = 1
+    junction: str | None = None
 
     @property
     def key(self) -> LamKey:
         return self.canonical, self.lam
 
 
-def _site(owner, source, canonical, text) -> LamSite:
+def _site(owner, source, canonical, text, junction=None) -> LamSite:
     return LamSite(
         owner,
         SourceLocation(_ARTIFACT, *source),
         Location(*canonical),
         text,
+        junction=junction,
     )
 
 
 SITES = (
-    _site("lam_dhat_yaa", (2, 124, 11), (2, 125, 11), "مُصَلّىٗۖ"),
+    _site("lam_dhat_yaa", (2, 124, 11), (2, 125, 11), "مُصَلّىٗۖ",
+          junction="waqf"),
     _site("lam_dhat_yaa", (17, 18, 16), (17, 18, 16), "يَصْلَيٰهَا"),
     _site("lam_dhat_yaa", (84, 12, 1), (84, 12, 1), "وَيُصَلَّىٰ"),
-    _site("lam_dhat_yaa", (87, 12, 2), (87, 12, 2), "يَصْلَى"),
+    _site("lam_dhat_yaa", (87, 12, 2), (87, 12, 2), "يَصْلَى",
+          junction="waqf"),
     _site("lam_dhat_yaa", (88, 4, 1), (88, 4, 1), "تَصْلَىٰ"),
     _site("lam_dhat_yaa", (92, 15, 2), (92, 15, 2), "يَصْلَيٰهَآ"),
     _site("lam_dhat_yaa", (111, 3, 1), (111, 3, 1), "سَيَصْلَىٰ"),
@@ -63,17 +89,59 @@ SITES = (
 )
 
 
-def _keys(owner: str) -> frozenset[LamKey]:
-    return frozenset(site.key for site in SITES if site.owner == owner)
+def selector_profile(definitions) -> LamProfile:
+    """Bind every published lam selector over the authored registers."""
+    selected = {}
+    for site in SITES:
+        khilaf = KhilafId(site.owner)
+        definition = definitions.get(khilaf)
+        if definition is None:
+            continue
+        selected[site.key] = LamChoice(
+            khilaf,
+            site.junction or SELECTOR_JUNCTIONS[site.owner],
+            definition.default,
+        )
+    generals = {}
+    for owner in GENERAL_SELECTORS:
+        khilaf = KhilafId(owner)
+        definition = definitions.get(khilaf)
+        if definition is not None:
+            generals[owner] = GeneralLamChoice(khilaf, definition.default)
+    return LamProfile(
+        selected=selected,
+        taa=generals.get("lam_after_taa"),
+        zhaa=generals.get("lam_after_zhaa"),
+    )
 
 
-PROFILE = LamProfile(
-    coupled_tafkheem=_keys("lam_dhat_yaa"),
-    coupled_tarqeeq=_keys("lam_verse_heads"),
-    salsal_tarqeeq=_keys("lam_salsal"),
-    separated_tafkheem=_keys("lam_separated_by_alif"),
-    final_waqf_tafkheem=_keys("lam_final_waqf"),
-)
+def catalogue_registers() -> dict[str, tuple[VariantSpan, ...]]:
+    """Occurrence spans per lam selector, in the source's own coordinates."""
+    registers: dict[str, list[VariantSpan]] = {
+        owner: [] for owner in SELECTOR_JUNCTIONS
+    }
+    for site in SITES:
+        word = Location(site.source.surah, site.source.ayah, site.source.word)
+        requires = site.junction or SELECTOR_JUNCTIONS[site.owner]
+        registers[site.owner].append(VariantSpan((word,), "word", requires))
+    return {owner: tuple(spans) for owner, spans in registers.items()}
 
 
-__all__ = ["LamSite", "PROFILE", "SITES"]
+def dynamic_sites(profile: LamProfile) -> dict:
+    """Structural resolvers for the taa and zhaa general selectors."""
+
+    def resolve(score, boundaries):
+        return general_sites(score, boundaries, profile)
+
+    return {scope: resolve for scope in GENERAL_SELECTORS.values()}
+
+
+__all__ = [
+    "GENERAL_SELECTORS",
+    "LamSite",
+    "SELECTOR_JUNCTIONS",
+    "SITES",
+    "catalogue_registers",
+    "dynamic_sites",
+    "selector_profile",
+]

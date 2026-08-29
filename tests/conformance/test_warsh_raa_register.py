@@ -126,9 +126,8 @@ def test_no_raa_key_has_both_a_fixed_and_a_selector_owner():
 def test_every_published_raa_selector_has_register_or_dynamic_sites():
     package = recitation(Riwayah.WARSH)
     published = {point.value for point in package.khilaf.variants}
-    assert published == set(SELECTOR_JUNCTIONS) | {
-        "raa_fathatan", "raa_damma",
-    }
+    raa = {name for name in published if name.startswith("raa_")}
+    assert raa == set(SELECTOR_JUNCTIONS) | {"raa_fathatan", "raa_damma"}
 
 
 @pytest.mark.slow

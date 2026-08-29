@@ -162,6 +162,91 @@ variants:
     default: light
     source: docs/warsh/research/v2/raa.md
 
+  dhat_yaa:
+    kind: inclination_site
+    options: [fath, taqlil]
+    default: taqlil
+    source: docs/warsh/research/v2/inclination.md
+
+  arakahum:
+    kind: inclination_site
+    options: [fath, taqlil]
+    default: taqlil
+    source: docs/warsh/research/v2/inclination.md
+
+  al_jar:
+    kind: inclination_site
+    options: [fath, taqlil]
+    default: taqlil
+    source: docs/warsh/research/v2/inclination.md
+
+  jabbarin:
+    kind: inclination_site
+    options: [fath, taqlil]
+    default: taqlil
+    source: docs/warsh/research/v2/inclination.md
+
+  haa_verse_heads:
+    kind: inclination_site
+    options: [fath, taqlil]
+    default: fath
+    source: docs/warsh/research/v2/inclination.md
+
+  maryam_haa_yaa:
+    kind: inclination_site
+    options: [taqlil, fath]
+    default: taqlil
+    source: docs/warsh/research/v2/inclination.md
+
+  yaseen_yaa:
+    kind: inclination_site
+    options: [fath, taqlil]
+    default: fath
+    source: docs/warsh/research/v2/inclination.md
+
+  lam_dhat_yaa:
+    kind: lam_coupled
+    options: [fath_tafkheem, taqlil_tarqiq]
+    default: fath_tafkheem
+    source: docs/warsh/research/v2/lam-tafkheem.md
+
+  lam_verse_heads:
+    kind: lam_coupled
+    options: [taqlil_tarqiq, fath_tafkheem]
+    default: taqlil_tarqiq
+    source: docs/warsh/research/v2/lam-tafkheem.md
+
+  lam_separated_by_alif:
+    kind: lam_site
+    options: [tafkheem, tarqiq]
+    default: tafkheem
+    source: docs/warsh/research/v2/lam-tafkheem.md
+
+  lam_final_waqf:
+    kind: lam_site
+    options: [tafkheem, tarqiq]
+    default: tafkheem
+    source: docs/warsh/research/v2/lam-tafkheem.md
+
+  lam_after_taa:
+    kind: lam_systematic
+    options: [tarqiq, tafkheem]
+    default: tafkheem
+    source: docs/warsh/research/v2/lam-tafkheem.md
+
+  lam_after_zhaa:
+    kind: lam_systematic
+    options: [tarqiq, tafkheem]
+    default: tafkheem
+    source: docs/warsh/research/v2/lam-tafkheem.md
+
+  lam_salsal:
+    kind: lam_site
+    options: [tarqiq, tafkheem]
+    default: tarqiq
+    source: docs/warsh/research/v2/lam-tafkheem.md
+
+
 catalogue:
   raa_firq:
     {group: raa_pronunciation, subgroup: lexical, display_name: "Raa Firq",
@@ -296,3 +381,72 @@ catalogue:
     {group: raa_pronunciation, subgroup: lexical,
      display_name: "Raa Hasirat Suduruhum", website_visible: true,
      register: raa_hasirat_suduruhum}
+  dhat_yaa:
+    group: inclination
+    display_name: "Dhat Yaa"
+    description: "Ordinary yaa-origin final alifs, such as هُد۪ىٰ and اِ۪شْتَر۪ىٰ; named and fixed scopes are owned separately."
+    website_visible: true
+    register: dhat_yaa
+  arakahum:
+    {group: inclination, display_name: "Arakahum", website_visible: true,
+     register: arakahum}
+  al_jar:
+    {group: inclination, display_name: "Al Jar", website_visible: true,
+     register: al_jar}
+  jabbarin:
+    {group: inclination, display_name: "Jabbarin", website_visible: true,
+     register: jabbarin}
+  haa_verse_heads:
+    group: inclination
+    display_name: "Haa Verse Heads"
+    description: "The 25 pronominal-haa verse endings of 79 and 91, such as ضُحَيٰهَا; ذِكْر۪يٰهَآ is fixed taqlil."
+    website_visible: true
+    register: haa_verse_heads
+  maryam_haa_yaa:
+    group: inclination
+    display_name: "Maryam Haa Yaa"
+    description: "Haa and Yaa of كَٓه۪ي۪عَٓصَٓ as one transmitted pair."
+    website_visible: true
+    register: maryam_haa_yaa
+  yaseen_yaa:
+    {group: inclination, display_name: "Yaseen Yaa", website_visible: true,
+     register: yaseen_yaa}
+  lam_dhat_yaa:
+    group: lam_pronunciation
+    display_name: "Lam Dhat Yaa"
+    description: "The seven sad-lam forms, such as تَصْلَىٰ and سَيَصْلَىٰ; wasl masks مُصَلّىٗ and يَصْلَى to fath with tafkheem."
+    website_visible: true
+    register: lam_dhat_yaa
+  lam_verse_heads:
+    group: lam_pronunciation
+    display_name: "Lam Verse Heads"
+    description: "The صَلّ۪ىٰ verse endings at 75:30, 87:15, and 96:10."
+    website_visible: true
+    register: lam_verse_heads
+  lam_separated_by_alif:
+    group: lam_pronunciation
+    display_name: "Lam Separated By Alif"
+    description: "The five alif-separated forms فِصَالاً, يَّصَّٰلَحَا, اَفَطَالَ, طَالَ, and فَطَالَ."
+    website_visible: true
+    register: lam_separated_by_alif
+  lam_final_waqf:
+    group: lam_pronunciation
+    display_name: "Lam Final Waqf"
+    description: "The six final-lam shapes يُّوصَلَ, فَصَلَ, فَصَّلَ, وَبَطَلَ, ظَلَّ, and وَفَصْلَ at a complete stop."
+    website_visible: true
+    register: lam_final_waqf
+  lam_after_taa:
+    group: lam_pronunciation
+    display_name: "Lam After Taa"
+    description: "Ordinary qualifying taa before an open lam, such as مَطْلَعِ."
+    website_visible: true
+    dynamic_scope: eligible_lam_taa
+  lam_after_zhaa:
+    group: lam_pronunciation
+    display_name: "Lam After Zhaa"
+    description: "Ordinary qualifying zhaa before an open lam, such as يُظْلَمُونَ."
+    website_visible: true
+    dynamic_scope: eligible_lam_zhaa
+  lam_salsal:
+    {group: lam_pronunciation, display_name: "Lam Salsal",
+     website_visible: true, register: lam_salsal}

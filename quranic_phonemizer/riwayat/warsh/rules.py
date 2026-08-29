@@ -50,7 +50,7 @@ from ...rules.wasl import (
     WaslHamza,
 )
 from .hamza_meetings import meeting_rows, rows_by_target
-from .lam import PROFILE as LAM_PROFILE
+from .lam import selector_profile as lam_selector_profile
 from .raa import selector_profile as raa_selector_profile
 from .resources import khilaf, lexicon, rule_tables
 
@@ -149,7 +149,10 @@ def _build() -> RuleSet:
                 IwadLength(),
             ),
             Phase.COLOUR: (
-                LamWeight(profile=LAM_PROFILE, base_weight=weight),
+                LamWeight(
+                    profile=lam_selector_profile(khilaf().variants),
+                    base_weight=weight,
+                ),
                 Emphasis(weight=weight),
                 RaaWeight(profile=raa_selector_profile(khilaf().variants)),
                 CarrierTarqeeq(),
