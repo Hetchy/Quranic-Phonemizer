@@ -244,6 +244,13 @@ MUTTAFIQ_DEFAULT_CASES = (
 
 
 FIXED_DIFFERENT_VOWEL_CASES = (
+    # Warsh: اٰيَةً
+    Case(
+        id="registered-right-qata-keeps-complete-lexical-start",
+        site=Site(warsh=("20:22", (10,))),
+        read=isolated(),
+        phonemes="ʔ a: j a h",
+    ),
     # Warsh: اِ۬لنِّسَآءِ اَ۬وَ اَكْنَنتُمْ فِےٓ
     Case(
         id="different-i-a-through-following-naql",

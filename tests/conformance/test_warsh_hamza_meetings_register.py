@@ -96,4 +96,14 @@ def test_every_row_carries_the_machine_contract():
         assert row.second.name in {"A", "I", "U"}
         assert row.scope in {"one_word", "joined_words", "joined_ayahs"}
         assert row.owner
-        assert row.exception in {None, "aimma", "aajami", "triple", "jaa_aal", "kasr_yaa", "fused_badal"}
+        assert row.exception in {
+            None,
+            "aimma",
+            "aajami",
+            "triple",
+            "jaa_aal",
+            "kasr_yaa",
+            "fused_badal",
+            "fused_glide",
+            "lexical_badal_start",
+        }

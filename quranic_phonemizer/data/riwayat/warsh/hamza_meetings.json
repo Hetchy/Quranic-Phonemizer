@@ -1549,7 +1549,7 @@
       "second": "A",
       "scope": "joined_words",
       "owner": "fixed_ibdal",
-      "exception": null
+      "exception": "lexical_badal_start"
     },
     {
       "source": "21:98:4",

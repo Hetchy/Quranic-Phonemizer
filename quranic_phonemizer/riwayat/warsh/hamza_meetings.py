@@ -162,7 +162,11 @@ def _restore_right_qata(reading, drafts, scribe, right, row: MeetingRow):
             scribe.decoration(mark.offset, second)
     second.letter = CanonLetter.HAMZA
     second.onset = Onset.PLAIN
-    second.nucleus = Nucleus.short(row.second)
+    if (
+        second.nucleus.is_silent
+        or row.exception != "lexical_badal_start"
+    ):
+        second.nucleus = Nucleus.short(row.second)
     return second
 
 
@@ -181,10 +185,11 @@ def supply_hamza_meetings(reading, drafts, lexicon, scribe, selection) -> None:
         if row.scope == "one_word":
             _one_word(reading, drafts, scribe, right, row)
             continue
+        joined = row.previous in spans
         second = _restore_right_qata(reading, drafts, scribe, right, row)
         if second is None:
             continue
-        if row.previous not in spans:
+        if not joined:
             continue
         left = spans[row.previous]
         if not left or left[-1].letter is not CanonLetter.HAMZA:

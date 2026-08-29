@@ -82,9 +82,14 @@ class HamzaMeetings:
         moving = row.owner == "fixed_ibdal" or row.owner == "hamza_damm_kasr"
         if moving:
             letter = CanonLetter.YA if row.first is Quality.I else CanonLetter.WAW
+            actions = [
+                Realize(at, Aspect.CONSONANT, Consonant(letter)),
+            ]
+            if slot.nucleus.sounds_long:
+                actions.append(Relength(at, Length.SHORT))
             return Verdict(
                 Occurrence(mint(Rule.IBDAL_HAMZA, at), Rule.IBDAL_HAMZA, (at,), boundary=boundary),
-                (Realize(at, Aspect.CONSONANT, Consonant(letter)),),
+                tuple(actions),
             )
         previous = near.before(at)
         if previous is None:
