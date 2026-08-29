@@ -125,9 +125,17 @@ class HamzaMeetings:
         if face == "tashil":
             if slot.onset is Onset.TASHIL:
                 return None
+            actions = (
+                Realize(at, Aspect.CONSONANT, Consonant(CanonLetter.HAMZA, eased=True)),
+            )
+            following = near.after(at)
+            if row.exception == "fused_badal" and following is not None:
+                # The written waw is the badal long's carrier, not a
+                # consonant after the eased onset.
+                actions += (Silence(following.id, Aspect.CONSONANT),)
             return Verdict(
                 Occurrence(mint(Rule.TASHIL, at), Rule.TASHIL, (at,), boundary=boundary),
-                (Realize(at, Aspect.CONSONANT, Consonant(CanonLetter.HAMZA, eased=True)),),
+                actions,
             )
         if face == "moving":
             letter = (

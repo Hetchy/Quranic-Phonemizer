@@ -5,16 +5,20 @@ Default collections cover only the selected value; they are not fixed-face claim
 
 import pytest
 
+from quranic_phonemizer.model.address import KhilafId
+from quranic_phonemizer.riwayat.warsh.hamza_meetings import meeting_rows
 from tests.support import (
     Case,
     Expect,
     R,
     Site,
     StateCase,
+    VariantCase,
     assert_case,
     case_runs,
     explicit,
     isolated,
+    selected,
     through,
 )
 
@@ -345,6 +349,232 @@ DAMM_KASR_DEFAULT_CASES = (
         sound_rules={"w": R("ibdal_hamza")},
     ),
 )
+
+
+VARIANT_CASES = (
+    # Warsh: ءَآنذَرْتَهُمُۥٓ
+    VariantCase(
+        id="dhat-fath-faces",
+        site=Site(warsh=("2:6", (6,))),
+        selector=KhilafId.HAMZA_DHAT_FATH,
+        faces={
+            "ibdal": Expect(
+                read=isolated(),
+                phonemes="ʔ a: ŋ ð a rˤ t a h u m",
+                sound_rules={"a:": R("ibdal_hamza", "madd_lazim")},
+            ),
+            "tashil": Expect(
+                read=isolated(),
+                phonemes="ʔ a ʔ̞ a ŋ ð a rˤ t a h u m",
+                sound_rules={"ʔ̞": R("tashil")},
+                absent_sound_rules={"ʔ̞": R("ibdal_hamza")},
+            ),
+        },
+        default="ibdal",
+    ),
+    # Warsh: ءَآنتَ فَعَلْتَ
+    VariantCase(
+        id="dhat-fath-bare-anta-waqf-mask",
+        site=Site(warsh=("21:62", (2, 3))),
+        selector=KhilafId.HAMZA_DHAT_FATH,
+        faces={
+            "ibdal": Expect(
+                read=explicit(ibtidaa=2, wasl=2, waqf=3),
+                phonemes=("ʔ a: ŋ t a", "f a ʕ a l t"),
+                sound_rules={"a:": R("ibdal_hamza", "madd_lazim")},
+            ),
+            "tashil": Expect(
+                read=explicit(ibtidaa=2, wasl=2, waqf=3),
+                phonemes=("ʔ a ʔ̞ a ŋ t a", "f a ʕ a l t"),
+                sound_rules={"ʔ̞": R("tashil")},
+            ),
+        },
+        default="ibdal",
+        masked=Expect(
+            read=explicit(ibtidaa=2, waqf=(2, 3)),
+            phonemes=("ʔ a ʔ̞ a ŋ t", "f a ʕ a l t"),
+            sound_rules={"ʔ̞": R("tashil")},
+            absent_sound_rules={"ʔ̞": R("ibdal_hamza")},
+        ),
+    ),
+    # Warsh: جَآءَ احَدٞ مِّنكُم
+    VariantCase(
+        id="muttafiq-faces",
+        site=Site(warsh=("4:43", (27, 28, 29))),
+        selector=KhilafId.HAMZA_MUTTAFIQ,
+        faces={
+            "ibdal": Expect(
+                read=through(),
+                phonemes=("ʒ a: ʔ", "a: ħ a d u", "m̃ i ŋ k u m"),
+                sound_rules={"a:[2]": R("ibdal_hamza", "madd_tabii")},
+            ),
+            "tashil": Expect(
+                read=through(),
+                phonemes=("ʒ a: ʔ a", "ʔ̞ a ħ a d u", "m̃ i ŋ k u m"),
+                sound_rules={"ʔ̞": R("tashil")},
+            ),
+        },
+        default="ibdal",
+        masked=Expect(
+            read=explicit(ibtidaa=27, waqf=(27, 29)),
+            phonemes=("ʒ a: ʔ", "ʔ a ħ a d u", "m̃ i ŋ k u m"),
+            absent_sound_rules={"ʔ[2]": R("ibdal_hamza", "tashil")},
+        ),
+    ),
+    # Warsh: يَٰزَكَرِيَّآءُ اِ۪نَّا
+    VariantCase(
+        id="damm-kasr-faces",
+        site=Site(warsh=("19:7", (1, 2))),
+        selector=KhilafId.HAMZA_DAMM_KASR,
+        faces={
+            "ibdal": Expect(
+                read=explicit(ibtidaa=1, wasl=1, waqf=2),
+                phonemes=("j a: z a k a r i jj a: ʔ u", "w i ñ a:"),
+                sound_rules={"w": R("ibdal_hamza")},
+                absent_sound_rules={"w": R("madd_tabii")},
+            ),
+            "tashil": Expect(
+                read=explicit(ibtidaa=1, wasl=1, waqf=2),
+                phonemes=("j a: z a k a r i jj a: ʔ u", "ʔ̞ i ñ a:"),
+                sound_rules={"ʔ̞": R("tashil")},
+            ),
+        },
+        default="ibdal",
+        masked=Expect(
+            read=explicit(ibtidaa=2, waqf=2),
+            phonemes=("j a: z a k a r i jj a: ʔ", "ʔ i ñ a:"),
+            absent_sound_rules={"ʔ[2]": R("ibdal_hamza", "tashil")},
+        ),
+    ),
+    # Warsh: جَآءَ ا۟لَ لُوطٍ
+    VariantCase(
+        id="jaa-aal-faces",
+        site=Site(warsh=("15:61", (2, 3, 4))),
+        selector=KhilafId.JAA_AAL,
+        faces={
+            "tashil": Expect(
+                read=explicit(ibtidaa=2, wasl=(2, 3), waqf=4),
+                phonemes=("ʒ a: ʔ a", "ʔ̞ a: l a", "l u: tˤ Q"),
+                sound_rules={
+                    "ʔ̞": R("tashil"),
+                    "a:[2]": R("madd_badal"),
+                },
+                absent_sound_rules={"a:[2]": R("madd_tabii", "ibdal_hamza")},
+            ),
+            "ibdal": Expect(
+                read=explicit(ibtidaa=2, wasl=(2, 3), waqf=4),
+                phonemes=("ʒ a: ʔ", "a: l a", "l u: tˤ Q"),
+                sound_rules={
+                    "a:[2]": R("ibdal_hamza", "madd_badal"),
+                },
+                absent_sound_rules={"a:[2]": R("madd_tabii", "madd_lazim")},
+            ),
+        },
+        default="tashil",
+        masked=Expect(
+            read=explicit(ibtidaa=2, waqf=(2, 4)),
+            phonemes=("ʒ a: ʔ", "ʔ a: l a", "l u: tˤ Q"),
+            sound_rules={"a:[2]": R("madd_badal")},
+            absent_sound_rules={"a:[2]": R("ibdal_hamza", "tashil")},
+        ),
+    ),
+    # Warsh: هَٰٓؤُلَآءِ ان
+    VariantCase(
+        id="kasr-yaa-three-faces",
+        site=Site(warsh=("2:31", (12, 13))),
+        selector=KhilafId.HAMZA_KASR_YAA,
+        faces={
+            "ibdal": Expect(
+                read=explicit(ibtidaa=12, wasl=12, waqf=13),
+                phonemes=("h a: ʔ u l a: ʔ", "i: n"),
+                sound_rules={"i:": R("ibdal_hamza", "madd_lazim")},
+            ),
+            "tashil": Expect(
+                read=explicit(ibtidaa=12, wasl=12, waqf=13),
+                phonemes=("h a: ʔ u l a: ʔ i", "ʔ̞ i n"),
+                sound_rules={"ʔ̞": R("tashil")},
+            ),
+            "yaa": Expect(
+                read=explicit(ibtidaa=12, wasl=12, waqf=13),
+                phonemes=("h a: ʔ u l a: ʔ i", "j i n"),
+                sound_rules={"j": R("ibdal_hamza")},
+                absent_sound_rules={"j": R("madd_tabii")},
+            ),
+        },
+        default="ibdal",
+        masked=Expect(
+            read=explicit(ibtidaa=13, waqf=13),
+            phonemes=("h a: ʔ u l a: ʔ", "ʔ i n"),
+            absent_sound_rules={"ʔ[3]": R("ibdal_hamza", "tashil")},
+        ),
+    ),
+    # Warsh: أَي۪مَّةَ
+    VariantCase(
+        id="aimma-faces",
+        site=Site(warsh=("9:12", (11,))),
+        selector=KhilafId.HAMZA_AIMMA,
+        faces={
+            "tashil": Expect(
+                read=isolated(),
+                phonemes="ʔ a ʔ̞ i m̃ a h",
+                sound_rules={"ʔ̞": R("tashil")},
+            ),
+            "ibdal": Expect(
+                read=isolated(),
+                phonemes="ʔ a j i m̃ a h",
+                sound_rules={"j": R("ibdal_hamza")},
+                absent_sound_rules={"j": R("madd_tabii", "tashil")},
+            ),
+        },
+        default="tashil",
+    ),
+)
+
+
+_SELECTOR_OWNERS = frozenset({
+    "hamza_dhat_fath", "hamza_muttafiq", "hamza_damm_kasr",
+    "jaa_aal", "hamza_kasr_yaa", "hamza_aimma",
+})
+
+
+def _sweep_rows():
+    out = []
+    for row in meeting_rows():
+        owner = "hamza_aimma" if row.exception == "aimma" else row.owner
+        if owner not in _SELECTOR_OWNERS or row.separated:
+            continue
+        loc = row.canonical
+        words = (
+            (loc.word,) if row.scope == "one_word"
+            else (loc.word - 1, loc.word)
+        )
+        out.append(pytest.param(
+            owner, f"{loc.surah}:{loc.ayah}", words,
+            id=f"{owner}-{loc}",
+        ))
+    return tuple(out)
+
+
+@pytest.mark.parametrize(("owner", "verse", "words"), _sweep_rows())
+def test_every_meeting_selector_site_separates_its_faces(owner, verse, words):
+    """Every register row realizes a distinct performance per option."""
+    site = Site(warsh=(verse, words))
+    options = {
+        "hamza_kasr_yaa": ("ibdal", "tashil", "yaa"),
+    }.get(owner, ("ibdal", "tashil"))
+    faces = {}
+    for option in options:
+        result = selected(
+            site, words[0], KhilafId(owner), option,
+            stopped=False, riwayah="warsh",
+        )
+        faces[option] = tuple(result.sounds(word) for word in words)
+    assert len(set(faces.values())) == len(options)
+
+
+@pytest.mark.parametrize("run", case_runs(VARIANT_CASES))
+def test_meeting_selector_faces(run):
+    assert_case(run)
 
 
 @pytest.mark.parametrize("run", case_runs(DHAT_FATH_DEFAULT_CASES))

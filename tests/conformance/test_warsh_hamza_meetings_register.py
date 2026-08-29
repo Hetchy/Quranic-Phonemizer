@@ -88,6 +88,25 @@ def test_every_authored_exception_is_closed():
     }
 
 
+def test_the_separated_rows_are_the_closed_non_meeting_subset():
+    """Canonical qata pairs whose hamzas never meet in performance: a tanwin
+    noon sounds between them, or the first qata is not word-final. Their
+    joined boundaries read by ordinary naql or ordinary madd instead."""
+    separated = [row for row in meeting_rows() if row.separated]
+    assert len(separated) == 48
+    assert all(row.scope == "joined_words" for row in separated)
+    assert Counter(row.owner for row in separated) == Counter({
+        "hamza_muttafiq": 26,
+        "fixed_ibdal": 14,
+        "fixed_tashil": 7,
+        "hamza_damm_kasr": 1,
+    })
+    assert {
+        row.canonical for row in separated
+        if row.previous is not None and row.owner == "hamza_muttafiq"
+    } >= {Location(3, 93, 7), Location(7, 11, 12), Location(7, 125, 3)}
+
+
 def test_every_row_carries_the_machine_contract():
     for row in meeting_rows():
         assert row.source

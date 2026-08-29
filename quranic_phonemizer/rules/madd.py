@@ -155,6 +155,12 @@ def _madd_of(
         return (Rule.MADD_TABII, None)
 
     following = near.after(at)
+    while following is not None and (
+        plan.removed_by(following.id, Aspect.CONSONANT, Rule.IBDAL_HAMZA)
+        or plan.removed_by(following.id, Aspect.CONSONANT, Rule.TASHIL)
+    ):
+        # A consonant a hamza face silenced is a carrier, not a stop.
+        following = near.after(following.id)
     if following is None:
         return None
 
@@ -216,6 +222,8 @@ class MaddClass:
     ) -> Verdict | None:
         slot = near.slot(at)
         if not self.additive_arid and slot is not None and plan.relengthened_long(at):
+            if Annotation.BADAL in slot.annotations:
+                return None
             if self.badal_is_effective and _is_started_badal(
                 near, plan, slot, boundaries
             ):

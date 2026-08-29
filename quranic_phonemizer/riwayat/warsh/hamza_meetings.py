@@ -27,6 +27,9 @@ class MeetingRow:
     owner: str
     exception: str | None
     previous: Location | None = None
+    separated: bool = False
+    """A tanwin noon sounds between the two qatas, so the joined boundary
+    is ordinary naql rather than a hamza meeting."""
 
 
 def _location(ref: str) -> Location:
@@ -47,7 +50,7 @@ def meeting_rows() -> tuple[MeetingRow, ...]:
         require_keys(
             item,
             {"source", "canonical", "first", "second", "scope", "owner", "exception"},
-            name=str(_REGISTER), optional={"previous"},
+            name=str(_REGISTER), optional={"previous", "separated"},
         )
         rows.append(MeetingRow(
             source=str(item["source"]),
@@ -56,6 +59,7 @@ def meeting_rows() -> tuple[MeetingRow, ...]:
             first=Quality[item["first"]], second=Quality[item["second"]],
             scope=str(item["scope"]), owner=str(item["owner"]),
             exception=item["exception"],
+            separated=bool(item.get("separated", False)),
         ))
     return tuple(rows)
 
@@ -183,9 +187,9 @@ def supply_hamza_meetings(reading, drafts, lexicon, scribe, selection) -> None:
         second = _restore_right_qata(reading, drafts, scribe, right, row)
         if second is None:
             continue
-        if row.exception == "jaa_aal":
-            # The lexical `آل` long stands in every state: the restored qata
-            # carries its badal carrier rather than a short helping vowel.
+        if row.exception in {"jaa_aal", "fused_badal"}:
+            # The lexical badal long stands in every state: the restored
+            # qata carries it rather than a short helping vowel.
             second.nucleus = Nucleus.long(row.second)
             second.annotations |= {Annotation.BADAL}
         if not joined:
@@ -238,7 +242,7 @@ def catalogue_registers():
     registers: dict[str, list] = {owner: [] for owner in SELECTOR_OWNERS}
     for row in meeting_rows():
         owner = _selector_owner(row)
-        if owner is None:
+        if owner is None or row.separated:
             continue
         second = _location(row.source)
         if row.scope == "one_word":

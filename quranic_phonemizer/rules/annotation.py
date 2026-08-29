@@ -86,11 +86,15 @@ class CanonicalColour:
         self, near: Neighbourhood, plan: Plan, at: SlotId,
         boundaries: BoundaryPlan,
     ) -> Verdict | None:
-        del plan, boundaries
+        del boundaries
         slot = near.slot(at)
         if slot is None:
             return None
         if slot.onset is Onset.TASHIL:
+            realized = plan.realized_consonant(at)
+            if realized is not None and not realized.eased:
+                # An ibdal face replaced the eased onset with a consonant.
+                return None
             return _classification(Rule.TASHIL, at)
         if Annotation.IMALA in slot.annotations:
             return _classification(Rule.IMALA, at)

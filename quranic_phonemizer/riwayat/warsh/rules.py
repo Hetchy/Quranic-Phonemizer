@@ -62,8 +62,12 @@ _DAMM_START_REPAIR = {Quality.U: Quality.U}
 #: The `كتابيه إني` boundary reads tahqiq by default: haa stays sakin and
 #: the qata is fully realized, so the general transfer must not claim it.
 _NAQL_TAHQIQ = frozenset({Location(69, 20, 1)})
+#: A tanwin-separated row's boundary reads by ordinary naql, so only the
+#: real meetings shield their second word from the transfer.
 _HAMZA_MEETING_STARTS = frozenset(
-    row.canonical for row in meeting_rows() if row.scope != "one_word"
+    row.canonical
+    for row in meeting_rows()
+    if row.scope != "one_word" and not row.separated
 )
 _NAQL_IBDAL_MEETINGS = frozenset(
     row.canonical
