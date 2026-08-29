@@ -7,6 +7,7 @@ column keeps its provenance, and variant fields match the resolved selection.
 from __future__ import annotations
 
 from ...model.address import VariantSelection
+from ...render.alphabet import is_eased_hamza_token
 from ..checks import requirer
 from ..dtos import AnalysisBundle
 from ..source_dtos import SourceView
@@ -153,6 +154,20 @@ def _check_no_duplicate_vowel_riders(columns: tuple[CellColumn, ...]) -> None:
         seen[key] = column
 
 
+def _check_no_raw_eased_hamza_marks(
+    columns: tuple[CellColumn, ...], bundle: AnalysisBundle
+) -> None:
+    for column in columns:
+        _require(
+            column.text != "۬"
+            or not any(
+                is_eased_hamza_token(bundle.sounds[sound.value].token)
+                for sound in column.owned_sound_ids
+            ),
+            f"eased hamza mark column {column.id.value} was not transformed",
+        )
+
+
 def _check_no_redundant_dropped_riders(word: CellWord, bundle: AnalysisBundle) -> None:
     columns = {column.id: column for column in word.columns}
     rules = {
@@ -196,6 +211,8 @@ def validate_transformed(
         if _is_partitioned_unit(unit_id, columns, source)
     }
     for word in view.words:
+        if bundle is not None:
+            _check_no_raw_eased_hamza_marks(word.columns, bundle)
         _check_no_duplicate_vowel_riders(word.columns)
         if bundle is not None:
             _check_no_redundant_dropped_riders(word, bundle)

@@ -84,4 +84,4 @@ def test_every_marked_warsh_long_hamza_start_has_one_quality_carrier_group():
         ), ref
 
     assert len(candidates) == 299
-    assert long_starts == {"اٰ": 177, "ا۟": 46}
+    assert long_starts == {"اٰ": 177, "ا۟": 12}

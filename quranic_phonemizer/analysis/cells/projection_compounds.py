@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import replace
 
-from ...model.canon import Quality
+from ...model.canon import CanonLetter, Quality
 from ...model.inscription import GlyphKind
 from ...model.performance import Consonant, Vowel
 from ...orthography.write import Pen
@@ -140,6 +140,94 @@ def split_hamza_madd_carriers(
                 sounds=_retarget_long_vowels(word, column.id, carrier.id, vowels),
             )
             next_id += 1
+        out.append(replace(word, columns=tuple(columns)))
+    return tuple(out)
+
+
+def _column_rules(column, facts):
+    return {
+        facts.occurrences[item.value].rule.value
+        for item in column.rule_occurrence_ids
+    }
+
+
+def _is_eased_mark(column, facts):
+    values = tuple(
+        facts.sounds[sound.value].value for sound in column.owned_sound_ids
+    )
+    return (
+        column.text == "۬"
+        and len(values) == 1
+        and isinstance(values[0], Consonant)
+        and values[0].letter is CanonLetter.HAMZA
+        and values[0].eased
+        and "tashil" in _column_rules(column, facts)
+    )
+
+
+def _is_inserted_a_badal(column, facts):
+    values = tuple(
+        facts.sounds[sound.value].value for sound in column.owned_sound_ids
+    )
+    return (
+        column.role is CellRole.MADD
+        and column.status is CellStatus.INSERTED
+        and not column.source_character_ids
+        and len(values) == 1
+        and isinstance(values[0], Vowel)
+        and values[0].long
+        and values[0].quality is Quality.A
+        and "madd_badal" in _column_rules(column, facts)
+    )
+
+
+def _triple_hamza_cells(window, facts, pen):
+    alif, eased, inserted, dagger = window
+    if not (
+        alif.text == "ا"
+        and alif.status is CellStatus.DROPPED
+        and not alif.owned_sound_ids
+        and not alif.presented_sound_ids
+        and _is_eased_mark(eased, facts)
+        and _is_inserted_a_badal(inserted, facts)
+        and dagger.text == "ٰ"
+        and dagger.presented_sound_ids == inserted.owned_sound_ids
+    ):
+        return None
+    hamza = replace(
+        eased, text=pen.seated_hamza(Quality.A), tier=CellTier.MAIN,
+        attached_to_column_id=None, status=CellStatus.REPLACED,
+    )
+    carrier = replace(
+        alif, role=CellRole.MADD, text=pen.performed_carrier(Quality.A)[1],
+        source_character_ids=_unique(
+            (*alif.source_character_ids, *dagger.source_character_ids)
+        ),
+        source_unit_ids=_unique((*alif.source_unit_ids, *dagger.source_unit_ids)),
+        status=CellStatus.REPLACED, silence=None,
+        rule_occurrence_ids=inserted.rule_occurrence_ids,
+        owned_sound_ids=inserted.owned_sound_ids, presented_sound_ids=(),
+        slot_ids=_unique((*alif.slot_ids, *dagger.slot_ids)),
+    )
+    return hamza, carrier
+
+
+def fold_triple_hamza_badal(words, facts, pen):
+    """Project fixed tashil followed by lexical badal as two source cells."""
+    out = []
+    for word in words:
+        columns, at = list(word.columns), 0
+        while at + 3 < len(columns):
+            folded = _triple_hamza_cells(columns[at : at + 4], facts, pen)
+            if folded is None:
+                at += 1
+                continue
+            inserted, dagger = columns[at + 2 : at + 4]
+            columns[at : at + 4] = folded
+            word = replace(word, sounds=_replace_sound_columns(
+                word, {inserted.id, dagger.id}, folded[1].id,
+            ))
+            at += 2
         out.append(replace(word, columns=tuple(columns)))
     return tuple(out)
 
@@ -390,6 +478,7 @@ def fold_article_naql_madd(words: tuple[CellWord, ...], facts) -> tuple[CellWord
 
 def project_warsh_compounds(words, facts, insc, pen):
     words = fold_naql_badal_alif_daggers(words, facts)
+    words = fold_triple_hamza_badal(words, facts, pen)
     words = split_hamza_madd_carriers(words, facts, insc, pen)
     words = fold_combining_hamza_seats(words)
     return fold_marked_ibdal_carriers(words, facts)
@@ -399,6 +488,7 @@ __all__ = [
     "fold_combining_hamza_seats",
     "fold_marked_ibdal_carriers",
     "fold_naql_badal_alif_daggers",
+    "fold_triple_hamza_badal",
     "project_warsh_compounds",
     "split_hamza_madd_carriers",
 ]

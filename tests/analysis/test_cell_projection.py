@@ -820,6 +820,57 @@ def test_compact_two_hamza_dagger_stays_in_the_source_alif_cell():
     assert all(column.text != "ٰ" for column in columns)
 
 
+@pytest.mark.parametrize(("ref", "word_number"), (
+    ("7:122", 3),
+    ("20:70", 2),
+    ("26:48", 2),
+    ("43:58", 2),
+))
+def test_triple_hamza_uses_source_backed_hamza_and_alif_cells(
+    ref, word_number,
+):
+    _, bundle, view = _build_warsh(ref)
+    word_ref = f"{ref}:{word_number}"
+    word_id = next(word.id for word in bundle.words if word.ref == word_ref)
+    word = next(item for item in view.words if item.word_id == word_id)
+    rules = {
+        occurrence.id: occurrence.rule_id.value
+        for occurrence in bundle.rule_occurrences
+    }
+
+    eased = next(
+        sound for sound in bundle.sounds
+        if sound.word_id == word_id and sound.token == "ʔ̞"
+    )
+    badal = next(
+        sound for sound in bundle.sounds
+        if sound.word_id == word_id
+        and sound.token == "a:"
+        and "madd_badal" in {rules[item] for item in sound.rule_occurrence_ids}
+    )
+    hamza = next(
+        column for column in word.columns if eased.id in column.owned_sound_ids
+    )
+    carrier = next(
+        column for column in word.columns if badal.id in column.owned_sound_ids
+    )
+
+    assert hamza.status is CellStatus.REPLACED
+    assert any(glyph in hamza.text for glyph in "ءأإؤئ")
+    assert carrier.role is CellRole.MADD
+    assert carrier.status is CellStatus.REPLACED
+    assert carrier.text == "ا"
+    assert all(column.text not in {"۬", "ٰ"} for column in word.columns)
+    assert not any(
+        column.status is CellStatus.INSERTED and column.text == "ا"
+        for column in word.columns
+    )
+    assert not any(
+        column.status is CellStatus.DROPPED and column.text == "ا"
+        for column in word.columns
+    )
+
+
 def test_joined_naql_badal_folds_the_silent_hamza_alif_into_its_carrier():
     _, bundle, view = _build_warsh("3:83")
     word_id = next(word.id for word in bundle.words if word.ref == "3:83:2")
