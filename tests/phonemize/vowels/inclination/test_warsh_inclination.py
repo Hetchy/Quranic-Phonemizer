@@ -253,22 +253,24 @@ QUALITY_VARIANT_CASES = (
         },
         default="taqlil",
     ),
-    # Warsh: وَضُحَيٰهَا
+    # Warsh: وَضُحَيٰهَا. The dagger-bearing yaa is the maqsura carrier, and
+    # the taqlil face inclines the pre-haa alif together with the ending.
     VariantCase(
-        id="haa-verse-head-ending-only",
+        id="haa-verse-head-both-alifs",
         site=Site(warsh=("91:1", (2,))),
         selector=KhilafId.HAA_VERSE_HEADS,
         faces={
             "fath": Expect(
                 read=isolated(),
-                phonemes="w a dˤ u ħ a j a: h a:",
-                absent_sound_rules={"a:[2]": R("taqlil")},
+                phonemes="w a dˤ u ħ a: h a:",
+                absent_sound_rules={
+                    "a:[1]": R("taqlil"), "a:[2]": R("taqlil"),
+                },
             ),
             "taqlil": Expect(
                 read=isolated(),
-                phonemes="w a dˤ u ħ a j a: h ɛ:",
-                sound_rules={"ɛ:": R("taqlil")},
-                absent_sound_rules={"a:": R("taqlil")},
+                phonemes="w a dˤ u ħ ɛ: h ɛ:",
+                sound_rules={"ɛ:[1]": R("taqlil"), "ɛ:[2]": R("taqlil")},
             ),
         },
         default="fath",
@@ -343,17 +345,16 @@ COUPLED_VARIANT_CASES = (
         faces={
             "fath_tafkheem": Expect(
                 read=isolated(),
-                phonemes="j a sˤ lˤ aˤ j a: h a:",
+                phonemes="j a sˤ lˤ aˤ: h a:",
                 char_rules={"ل": R("tafkheem")},
-                sound_rules={"lˤ": R("tafkheem"), "aˤ": R("tafkheem")},
+                sound_rules={"lˤ": R("tafkheem"), "aˤ:": R("tafkheem")},
                 extra_phonemes=("emphatic_fatha",),
             ),
             "taqlil_tarqiq": Expect(
                 read=isolated(),
-                phonemes="j a sˤ l a j ɛ: h a:",
+                phonemes="j a sˤ l ɛ: h a:",
                 char_rules={"ل": R("tarqeeq")},
                 sound_rules={"l": R("tarqeeq"), "ɛ:": R("taqlil")},
-                extra_phonemes=("emphatic_fatha",),
             ),
         },
         default="fath_tafkheem",

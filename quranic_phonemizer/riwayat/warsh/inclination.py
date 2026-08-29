@@ -280,13 +280,14 @@ def _supply_lam_coupled(span, location: Location, choices) -> None:
 
 
 def _supply_haa_verse_heads(span, location: Location, choices) -> None:
+    """The taqlil face inclines the pre-haa alif together with the ending."""
     if location not in HAA_VERSE_HEADS:
         return
     if choices[KhilafId.HAA_VERSE_HEADS] != "taqlil":
         return
-    target = span[-1]
-    if target.nucleus.sounds_long and target.nucleus.quality is Quality.A:
-        target.nucleus = target.nucleus.with_quality(Quality.TAQLIL)
+    for target in span:
+        if target.nucleus.sounds_long and target.nucleus.quality is Quality.A:
+            target.nucleus = target.nucleus.with_quality(Quality.TAQLIL)
 
 
 def _supply_yaseen(span, location: Location, choices) -> None:

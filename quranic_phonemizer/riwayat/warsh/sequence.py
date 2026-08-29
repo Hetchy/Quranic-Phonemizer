@@ -96,6 +96,24 @@ def _project_marked_fatha(text, entries, *, wasl: bool) -> None:
                 )
 
 
+def _project_fatha_carrier_yaa(text, entries) -> None:
+    """A dagger-bearing yaa after an explicit fatha is the maqsura carrier.
+
+    This is the fath-face spelling of the witness-marked `۪يٰ` family; a
+    consonantal yaa carries its own haraka instead (`سُقْيَاهَا`)."""
+    for index in range(1, len(text) - 1):
+        if (
+            text[index] == "ي"
+            and text[index + 1] == "ٰ"
+            and text[index - 1] == "َ"
+        ):
+            entries[index] = LetterEntry(
+                CanonLetter.ALIF,
+                dagger_host=True,
+                bare_rasm=True,
+            )
+
+
 def _project_sia_ishmam(text, entries) -> None:
     """Project Nafi's vowel ishmam in `سِيءَ` and `سِيئَتْ`.
 
@@ -322,6 +340,7 @@ def _entries(inventory: Inventory, text: str) -> list:
     naql_script.project_article_naql(text, entries)
     naql_script.project_verse_final_host(text, entries)
     _project_marked_fatha(text, entries, wasl=wasl)
+    _project_fatha_carrier_yaa(text, entries)
     _project_sia_ishmam(text, entries)
     _attach_reversed_fathatan(text, entries)
     _project_alif_sukun_silence(text, entries)
