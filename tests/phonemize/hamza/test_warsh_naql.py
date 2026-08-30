@@ -5,12 +5,14 @@ from __future__ import annotations
 
 import pytest
 
+from quranic_phonemizer.model.address import KhilafId
 from tests.support import (
     Case,
     Expect,
     R,
     Site,
     StateCase,
+    VariantCase,
     assert_case,
     case_runs,
     explicit,
@@ -130,9 +132,104 @@ CASES = (
         absent_char_rules={"ه": R("naql"), "إ": R("naql")},
         absent_sound_rules={"ʔ": R("naql"), "h": R("naql")},
     ),
+    # Warsh: عَاداٗ اَ۬لُّاول۪ىٰ
+    Case(
+        id="adan-al-ula-assimilated-tanwin",
+        site=Site(warsh=("53:50", (3, 4))),
+        read=explicit(ibtidaa=3, waqf=4),
+        phonemes=("ʕ a: d a", "ll u: l ɛ:"),
+        sound_rules={"ll": R("idgham_bila_ghunnah")},
+        absent_sound_rules={"a": R("iltiqa_haraka")},
+    ),
 )
 
 
-@pytest.mark.parametrize("run", case_runs(CASES))
+VARIANT_CASES = (
+    # Warsh: كِتَٰبِيَهْۖ إِنِّے
+    VariantCase(
+        id="kitabiyah-inni-faces",
+        site=Site(warsh=("69:19", (9, 10))),
+        selector=KhilafId.KITABIYAH_INNI,
+        faces={
+            "tahqiq": Expect(
+                read=explicit(ibtidaa=9, waqf=10),
+                phonemes=("k i t a: b i j a h", "ʔ i ñ i:"),
+                absent_sound_rules={"ʔ": R("naql")},
+            ),
+            "naql": Expect(
+                read=explicit(ibtidaa=9, waqf=10),
+                phonemes=("k i t a: b i j a h i", "ñ i:"),
+                char_rules={"إ": R("naql")},
+            ),
+        },
+        default="tahqiq",
+        masked=Expect(
+            read=explicit(ibtidaa=9, waqf=(9, 10)),
+            phonemes=("k i t a: b i j a h", "ʔ i ñ i:"),
+            absent_sound_rules={"ʔ": R("naql")},
+        ),
+    ),
+    # Warsh: اِ۬لَارْضِ
+    VariantCase(
+        id="article-ibtidaa-faces",
+        site=Site(warsh=("2:11", (7,))),
+        selector=KhilafId.ARTICLE_IBTIDAA,
+        faces={
+            "hamza": Expect(
+                read=explicit(ibtidaa=7, wasl=7),
+                phonemes="ʔ a l a rˤ dˤ i",
+                sound_rules={"ʔ": R("hamza_wasl_fatha")},
+            ),
+            "lam": Expect(
+                read=explicit(ibtidaa=7, wasl=7),
+                phonemes="l a rˤ dˤ i",
+                char_rules={"ا[1]": R("hamza_wasl_silent")},
+            ),
+        },
+        default="hamza",
+        masked=Expect(
+            read=explicit(ibtidaa=6, wasl=7),
+            phonemes="l a rˤ dˤ i",
+        ),
+    ),
+    # Warsh: اَ۬لُّاول۪ىٰ
+    VariantCase(
+        id="article-ibtidaa-shadda-absorbed-ula",
+        site=Site(warsh=("53:50", (4,))),
+        selector=KhilafId.ARTICLE_IBTIDAA,
+        faces={
+            "hamza": Expect(
+                read=explicit(ibtidaa=4),
+                phonemes="ʔ a ll u: l ɛ:",
+                sound_rules={"ʔ": R("hamza_wasl_fatha")},
+            ),
+            "lam": Expect(
+                read=explicit(ibtidaa=4),
+                phonemes="ll u: l ɛ:",
+            ),
+        },
+        default="hamza",
+    ),
+    # Warsh: اَ۬لِاسْمُ
+    VariantCase(
+        id="article-ibtidaa-authored-alism",
+        site=Site(warsh=("49:11", (30,))),
+        selector=KhilafId.ARTICLE_IBTIDAA,
+        faces={
+            "hamza": Expect(
+                read=explicit(ibtidaa=30, waqf=30),
+                phonemes="ʔ a l i s m",
+            ),
+            "lam": Expect(
+                read=explicit(ibtidaa=30, waqf=30),
+                phonemes="l i s m",
+            ),
+        },
+        default="hamza",
+    ),
+)
+
+
+@pytest.mark.parametrize("run", case_runs(CASES + VARIANT_CASES))
 def test_warsh_naql(run):
     assert_case(run)

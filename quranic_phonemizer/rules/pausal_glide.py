@@ -44,6 +44,9 @@ class PausalGlide:
         before = near.before(at)
         if before is None or not before.nucleus.is_short:
             return None
+        if plan.merged_away(before.id, Aspect.VOWEL):
+            # An earlier face silenced that vowel, so nothing lengthens.
+            return None
         if GLIDE_OF.get(before.nucleus.quality) is not slot.letter:
             return None
         return Verdict(

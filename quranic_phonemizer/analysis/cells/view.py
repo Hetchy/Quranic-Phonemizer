@@ -348,7 +348,7 @@ def build_cell_view(
         session, metadata, extra_phonemes, bundle, source, facts, insc
     )
     words = _words(session, bundle, source, facts, insc, spelling, pen, active, riwayah)
-    words = assign_native_iqlab_meem(words, facts, riwayah)
+    words = assign_native_iqlab_meem(words, facts, riwayah, source)
     words = separate_tanween_vowel_colours(words, facts)
     words = keep_madd_rules_on_carriers(words, facts)
     words = keep_waqf_drop_on_silenced_cells(words, facts)

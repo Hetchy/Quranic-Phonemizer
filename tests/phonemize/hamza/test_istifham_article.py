@@ -24,14 +24,20 @@ REGISTERS = {
     "dhakarayn": (
         DHAKARAYN,
         (Site(hafs=("6:144", (8,))), 8),
+        (Site(warsh=("6:143", (10,))), 10),
+        (Site(warsh=("6:144", (8,))), 8),
     ),
     "alan": (
         ALAN,
         (Site(hafs=("10:91", (1,))), 1),
+        (Site(warsh=("10:51", (7,))), 7),
+        (Site(warsh=("10:91", (1,))), 1),
     ),
     "allah": (
         ALLAH,
         (Site(hafs=("27:59", (9,))), 9),
+        (Site(warsh=("10:59", (14,))), 14),
+        (Site(warsh=("27:59", (9,))), 9),
     ),
 }
 
@@ -91,12 +97,56 @@ CASES = (
     _case("allah", ALLAH,
           "ʔ a: lˤlˤ aˤ: h", "ʔ a ʔ̞ a lˤlˤ aˤ: h",
           "a:", "@dagger_alif[1]", "@madd_sign"),
+    # Warsh: ءَالَٰنَ
+    VariantCase(
+        id="alan-warsh",
+        site=Site(warsh=("10:51", (7,))),
+        selector=KhilafId.ISTIFHAM_ARTICLE,
+        faces={
+            "ibdal": Expect(
+                read=isolated(),
+                phonemes="ʔ a: l a: n",
+                sound_rules={"a:[1]": R("ibdal_hamza", "madd_badal")},
+                absent_sound_rules={"a:[1]": R("madd_lazim")},
+            ),
+            "tashil": Expect(
+                read=isolated(),
+                phonemes="ʔ a ʔ̞ a l a: n",
+                sound_rules={"ʔ̞": R("tashil")},
+            ),
+        },
+        default="ibdal",
+    ),
+    # Warsh: آٰللَّهُ
+    VariantCase(
+        id="allah-warsh",
+        site=Site(warsh=("10:59", (14,))),
+        selector=KhilafId.ISTIFHAM_ARTICLE,
+        faces={
+            "ibdal": Expect(
+                read=isolated(),
+                phonemes="ʔ a: lˤlˤ aˤ: h",
+                sound_rules={"a:": R(
+                    "ibdal_hamza", "madd_badal", "madd_lazim")},
+            ),
+            "tashil": Expect(
+                read=isolated(),
+                phonemes="ʔ a ʔ̞ a lˤlˤ aˤ: h",
+                sound_rules={"ʔ̞": R("tashil")},
+            ),
+        },
+        default="ibdal",
+    ),
 )
 
 REGISTER_CASES = tuple(
-    pytest.param(site, word, id=f"{form}-{site.address('hafs').verse}-{word}")
+    pytest.param(
+        site, word, name, form,
+        id=f"{form}-{name}-{site.address(name).verse}-{word}",
+    )
     for form, sites in REGISTERS.items()
     for site, word in sites
+    for name in site.addresses
 )
 
 
@@ -105,13 +155,24 @@ def test_istifham_article_faces(run):
     assert_case(run)
 
 
-@pytest.mark.parametrize(("site", "word"), REGISTER_CASES)
-def test_every_istifham_article_site_accepts_both_faces(site, word):
+@pytest.mark.parametrize(("site", "word", "riwayah", "form"), REGISTER_CASES)
+def test_every_istifham_article_site_accepts_both_faces(
+    site, word, riwayah, form
+):
     ibdal = selected(
-        site, word, KhilafId.ISTIFHAM_ARTICLE, "ibdal"
+        site, word, KhilafId.ISTIFHAM_ARTICLE, "ibdal", riwayah=riwayah
     )
-    tashil = selected(site, word, KhilafId.ISTIFHAM_ARTICLE, "tashil")
-    assert Rule.MADD_LAZIM in {
+    tashil = selected(
+        site, word, KhilafId.ISTIFHAM_ARTICLE, "tashil", riwayah=riwayah
+    )
+    # The Warsh alan form reads with naql, so the ibdal long has no fixed
+    # sukun after it and is badal rather than lazim.
+    effective = (
+        Rule.MADD_BADAL
+        if riwayah == "warsh" and form == "alan"
+        else Rule.MADD_LAZIM
+    )
+    assert effective in {
         occurrence.rule for occurrence in ibdal.performance.occurrences
     }
     assert Rule.TASHIL in {

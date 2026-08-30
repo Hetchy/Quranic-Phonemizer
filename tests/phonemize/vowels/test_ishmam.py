@@ -37,6 +37,19 @@ CASES = (
         },
         default="ishmam",
     ),
+    # Warsh: تَامَ۬نَّا
+    VariantCase(
+        id="tamanna-noon-warsh",
+        site=Site(warsh=("12:11", (6,))),
+        selector=KhilafId.TAMANNA_NOON,
+        faces={
+            "ishmam": Expect(read=isolated(), phonemes="t a: m a ñ a:"),
+            "ikhtilas": Expect(
+                read=isolated(), phonemes="t a: m a n u n a:"
+            ),
+        },
+        default="ishmam",
+    ),
 )
 
 

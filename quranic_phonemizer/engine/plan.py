@@ -215,6 +215,18 @@ class Plan:
             for _, verdict in self.entries
         )
 
+    def realized_consonant(self, slot: SlotId):
+        """The consonant an earlier phase realized on this slot, if any."""
+        found = None
+        for effect in self.effects():
+            if (
+                isinstance(effect, Realize)
+                and effect.slot == slot
+                and effect.aspect is Aspect.CONSONANT
+            ):
+                found = effect.sound
+        return found
+
     def voweled(self, slot: SlotId) -> bool:
         """Has an earlier phase given this slot a vowel it did not have?
 

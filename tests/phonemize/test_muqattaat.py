@@ -243,6 +243,35 @@ CASES = (
             absent_char_rules={"نون/ن[2]": R("idgham_bi_ghunnah")},
         ),
     ),
+    # Warsh: نُّٓۖ وَالْقَلَمِ
+    VariantCase(
+        id="noon-wasl-warsh",
+        site=Site(warsh=("68:1", (1, 2))),
+        selector=KhilafId.NOON_WASL,
+        faces={
+            "izhar": Expect(
+                read=joining(),
+                phonemes=("n u: n", "w a l q aˤ l a m i"),
+                char_rules={"نون/ن[2]": R("izhar")},
+                sound_rules={"n[2]": R("izhar")},
+            ),
+            "idgham": Expect(
+                read=joining(),
+                phonemes=("n u:", "w̃ a l q aˤ l a m i"),
+                char_rules={"نون/ن[2]": R("idgham_bi_ghunnah"),
+                            "و": R("idgham_bi_ghunnah")},
+                sound_rules={"w̃": R("idgham_bi_ghunnah")},
+            ),
+        },
+        default="izhar",
+        masked=Expect(
+            read=explicit(ibtidaa=1, waqf=1),
+            phonemes=("n u: n", "w a l q aˤ l a m i"),
+            char_rules={"نون/ن[2]": R("izhar")},
+            sound_rules={"n[2]": R("izhar")},
+            absent_char_rules={"نون/ن[2]": R("idgham_bi_ghunnah")},
+        ),
+    ),
 )
 
 

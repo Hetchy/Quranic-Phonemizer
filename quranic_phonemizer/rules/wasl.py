@@ -19,8 +19,9 @@ from ..engine.plan import (
     Verdict,
     mint,
 )
-from ..model.address import BoundaryPlan, Junction, SlotId
+from ..model.address import BoundaryPlan, Junction, Location, SlotId
 from ..model.canon import (
+    Annotation,
     CanonLetter,
     Onset,
     Quality,
@@ -46,6 +47,10 @@ class WaslHamza:
     """
 
     start_choices: tuple[object, ...] = ()
+    article_choice: object | None = None
+    """A start selector over every naql-carrying article: begin with the
+    prosthetic hamza, or directly on the vowel-bearing lam."""
+
     rule: Rule = Rule.HAMZA_WASL_SILENT
     phase: Phase = Phase.BOUNDARY
     triggers: frozenset = frozenset({Onset.WASL})
@@ -65,6 +70,11 @@ class WaslHamza:
                 (item for item in self.start_choices if location in item.locations),
                 None,
             )
+            if choice is None and self.article_choice is not None:
+                if _starts_naql_article(near, at) or (
+                    location in self.article_choice.locations
+                ):
+                    choice = self.article_choice
             if choice is not None and choice.choose(near.score.selection) == "lam":
                 return Verdict(
                     Occurrence(
@@ -148,6 +158,10 @@ class TanweenBeforeWasl:
     """Repair vowel by the following word's start quality; the riwayah binds
     its table -- Warsh copies an original damm -- and kasra stays the default."""
 
+    assimilated: frozenset[Location] = frozenset()
+    """Following words whose script writes the noon assimilated into the
+    voweled letter behind the prosthetic hamza, so no repair is needed."""
+
     def look(
         self, near: Neighbourhood, plan: Plan, at: SlotId,
         boundaries: BoundaryPlan,
@@ -161,6 +175,12 @@ class TanweenBeforeWasl:
         # `after` is `None` at a stop, where `TanweenDrop` owns the noon.
         following = near.after(at)
         if following is None or following.onset is not Onset.WASL:
+            return None
+        next_word = near.word_of(following.id)
+        if (
+            next_word is not None
+            and near.score.words[next_word].location in self.assimilated
+        ):
             return None
         quality = self.repairs.get(following.nucleus.quality, Quality.I)
         return Verdict(
@@ -215,6 +235,16 @@ class SpelledBeforeWasl:
             ),
             (Realize(at, Aspect.VOWEL, Vowel(quality)),),
         )
+
+
+def _starts_naql_article(near: Neighbourhood, at: SlotId) -> bool:
+    """The word opens with a prosthetic hamza over a naql-carrying lam."""
+    following = near.raw_after(at)
+    return (
+        following is not None
+        and following.letter is CanonLetter.LAM
+        and Annotation.NAQL in following.annotations
+    )
 
 
 def _junction_before(word: int) -> int:

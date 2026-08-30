@@ -39,6 +39,14 @@ There is no I + U pair in the selected register. These counts are generated
 from canonical qata identity and performed vowels, then checked against the
 selected script. A source sign can attest a face but cannot create a meeting.
 
+Of the 153 pairs, 48 are canonically adjacent but never meet in performance:
+a tanwin noon stands between the qata hamzas, or the first qata is not
+word-final. The authored register tags these rows `separated`; their
+boundaries read the ordinary rules (naql for the tanwin rows) and they
+publish no selector occurrence. The published counts are therefore
+`hamza_muttafiq` 36, `hamza_damm_kasr` 25, `jaa_aal` 2, `hamza_kasr_yaa` 2,
+and the fixed rows shrink accordingly in performance.
+
 Exactly two pairs cross an ayah boundary within the same surah:
 
 - source `14:29:18 -> 14:30:1`, canonical `14:27:18 -> 14:28:1`, is U+A; and
