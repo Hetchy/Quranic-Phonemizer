@@ -100,8 +100,10 @@ Static occurrence registers come straight from the closed registers in
 
 The three general hamza-meeting selectors are also closed: the authored
 `data/riwayat/warsh/hamza_meetings.json` register already tags every row
-with its owner (`hamza_dhat_fath` 20, `hamza_muttafiq` 62,
-`hamza_damm_kasr` 26). Duplicating 108 spans into the yaml would violate
+with its owner (`hamza_dhat_fath` 20, `hamza_muttafiq` 36,
+`hamza_damm_kasr` 25; the 48 canonically adjacent but performance-separated
+rows are tagged `separated` and publish no selector site). Duplicating the
+spans into the yaml would violate
 single ownership, so the catalogue entry gains an optional `register` source
 key: the loader resolves those occurrences from the authored register at
 load time, and `occurrence_count` is real, not `None`.
@@ -184,8 +186,8 @@ Counts are the authored-register cardinality that lands in the catalogue;
 | `maliyah_halak` | 1 | `raa_yasr_waqf` | 1 |
 | `article_ibtidaa` | dynamic | `raa_asr_waqf` | 3 |
 | `hamza_dhat_fath` | 20 | `raa_fathatan` | dynamic |
-| `hamza_muttafiq` | 62 | `raa_damma` | dynamic |
-| `hamza_damm_kasr` | 26 | `raa_ishruna_kibr` | 2 |
+| `hamza_muttafiq` | 36 | `raa_damma` | dynamic |
+| `hamza_damm_kasr` | 25 | `raa_ishruna_kibr` | 2 |
 | `jaa_aal` | 2 | `raa_alishraq` | 1 |
 | `hamza_arayta` | 34 | `raa_hayran` | 1 |
 | `ha_antum` | 4 | `raa_bisharar` | 1 |
@@ -316,10 +318,9 @@ owned by a later PR in the sequence may carry the mark at any commit.
   waw-hamz and tanwin-izhar faces at this site belong to Qalun. At ibtidaa
   the two naql-article starts are already owned by `article_ibtidaa`,
   whose scope names `ٱلْأُولَى`; the route-dependent waw duration is
-  outside the sound-length model per `madd-badal.md`. The pending work is
-  the fixed tanwin-into-naql-lam interaction; implementing it removes the
-  register carve-out in `docs/conformance.md`. It lands with PR 3's
-  boundary work or earlier as a standalone fix.
+  outside the sound-length model per `madd-badal.md`. The fixed
+  tanwin-into-naql-lam interaction landed with PR 3's boundary work and the
+  register carve-out in `docs/conformance.md` is resolved.
 
 ## PR order
 

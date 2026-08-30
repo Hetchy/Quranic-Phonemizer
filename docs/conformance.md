@@ -141,11 +141,11 @@ register generated from the supplied script families and canonical hosts:
 The research file's 1,550 within-ayah and 180 adjacent-ayah subtotals in
 `docs/warsh/research/v2/naql.md` are not reproducible from the supplied
 families under any principled cut; the mechanical totals above supersede
-them for conformance. Two more intentional deltas against that file's
+them for conformance. One more intentional delta against that file's
 tables: dad is not a qalqala letter, so waqf on `اِ۬لَارْضِ` ends
-`l a rˤ dˤ` with no release; and the received `عَاداٗ اَ۬لُّاول۪ىٰ` junction
-stays outside both the article family and the tanwin repair register until
-its idgham-with-naql face is implemented.
+`l a rˤ dˤ` with no release. The received `عَاداٗ اَ۬لُّاول۪ىٰ` junction reads
+the written assimilation: the tanwin noon merges into the naql-voweled
+geminate lam by idgham bila ghunnah, outside the tanwin repair register.
 
 ## Verse mode
 

@@ -57,10 +57,10 @@ from ...rules.wasl import (
     WaslHamza,
 )
 from .hamza_meetings import meeting_rows, rows_by_target, selector_choices
-from .single_hamza import authored_locations
 from .lam import selector_profile as lam_selector_profile
 from .raa import selector_profile as raa_selector_profile
 from .resources import khilaf, lexicon, rule_tables
+from .single_hamza import authored_locations
 
 #: Warsh repairs a collision with damm when the elided word starts on an
 #: original damm; the shared kasra and fatha defaults stand elsewhere.

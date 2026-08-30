@@ -121,6 +121,23 @@ WARSH_VARIANTS = {
     "lam_after_taa": (["tarqiq", "tafkheem"], "tafkheem"),
     "lam_after_zhaa": (["tarqiq", "tafkheem"], "tafkheem"),
     "lam_salsal": (["tarqiq", "tafkheem"], "tarqiq"),
+    "tamanna_noon": (["ishmam", "ikhtilas"], "ishmam"),
+    "istifham_article": (["ibdal", "tashil"], "ibdal"),
+    "noon_wasl": (["izhar", "idgham"], "izhar"),
+    "maliyah_halak": (["sakt", "idgham"], "idgham"),
+    "kitabiyah_inni": (["tahqiq", "naql"], "tahqiq"),
+    "article_ibtidaa": (["hamza", "lam"], "hamza"),
+    "hamza_dhat_fath": (["ibdal", "tashil"], "ibdal"),
+    "hamza_muttafiq": (["ibdal", "tashil"], "ibdal"),
+    "hamza_damm_kasr": (["ibdal", "tashil"], "ibdal"),
+    "jaa_aal": (["ibdal", "tashil"], "tashil"),
+    "hamza_kasr_yaa": (["ibdal", "tashil", "yaa"], "ibdal"),
+    "hamza_aimma": (["tashil", "ibdal"], "tashil"),
+    "hamza_arayta": (["ibdal", "tashil"], "ibdal"),
+    "ha_antum": (["hadhf", "ibdal", "ithbat"], "ibdal"),
+    "allai_waqf": (["tashil", "ibdal_yaa"], "tashil"),
+    "iqlab_nasal": (["open", "closed"], "open"),
+    "ikhfaa_shafawi_nasal": (["open", "closed"], "open"),
 }
 
 WARSH_GROUPS = {
@@ -142,6 +159,23 @@ WARSH_GROUPS = {
     "lam_after_taa": "lam_pronunciation",
     "lam_after_zhaa": "lam_pronunciation",
     "lam_salsal": "lam_pronunciation",
+    "tamanna_noon": "word_readings",
+    "istifham_article": "word_readings",
+    "noon_wasl": "joined_readings",
+    "maliyah_halak": "joined_readings",
+    "kitabiyah_inni": "joined_readings",
+    "article_ibtidaa": "stopping_starting",
+    "hamza_dhat_fath": "hamza_readings",
+    "hamza_muttafiq": "hamza_readings",
+    "hamza_damm_kasr": "hamza_readings",
+    "jaa_aal": "hamza_readings",
+    "hamza_kasr_yaa": "hamza_readings",
+    "hamza_aimma": "hamza_readings",
+    "hamza_arayta": "hamza_readings",
+    "ha_antum": "hamza_readings",
+    "allai_waqf": "hamza_readings",
+    "iqlab_nasal": "nasal_variants",
+    "ikhfaa_shafawi_nasal": "nasal_variants",
 }
 
 
@@ -159,13 +193,15 @@ def test_catalogues_are_riwayah_specific():
 
 def test_warsh_catalogue_rows_carry_registers_and_dynamic_scopes():
     catalogue = variant_catalogue("warsh")
-    assert len(catalogue) == 40
+    assert len(catalogue) == 57
     assert {row["id"] for row in catalogue} == set(WARSH_VARIANTS)
     assert {row["id"]: row["group"] for row in catalogue} == WARSH_GROUPS
     assert all(
         row["display_name"] == row["id"].replace("_", " ").title()
         for row in catalogue
     )
+    hidden = {row["id"] for row in catalogue if not row["website_visible"]}
+    assert hidden == {"iqlab_nasal", "ikhfaa_shafawi_nasal"}
     by_id = {row["id"]: row for row in catalogue}
     systematic = {"raa_fathatan", "raa_damma"}
     assert {
@@ -222,6 +258,49 @@ def test_warsh_inclination_and_lam_rows_resolve_their_registers():
         if occurrence["requires"] == "waqf"
     ]
     assert len(waqf_only) == 82
+
+
+def test_warsh_hamza_and_boundary_rows_resolve_their_registers():
+    by_id = {row["id"]: row for row in variant_catalogue("warsh")}
+    counts = {
+        "tamanna_noon": 1, "istifham_article": 6, "noon_wasl": 1,
+        "maliyah_halak": 1, "kitabiyah_inni": 1,
+        "hamza_dhat_fath": 20, "hamza_muttafiq": 36, "hamza_damm_kasr": 25,
+        "jaa_aal": 2, "hamza_kasr_yaa": 2, "hamza_aimma": 5,
+        "hamza_arayta": 34, "ha_antum": 4, "allai_waqf": 4,
+    }
+    for row_id, count in counts.items():
+        assert by_id[row_id]["occurrence_count"] == count, row_id
+    assert by_id["article_ibtidaa"]["dynamic_scope"] == "article_starts"
+    assert by_id["article_ibtidaa"]["occurrence_count"] is None
+    assert all(
+        occurrence["requires"] == "waqf"
+        for occurrence in by_id["allai_waqf"]["occurrences"]
+    )
+    assert all(
+        occurrence["requires"] == "wasl"
+        for occurrence in by_id["hamza_muttafiq"]["occurrences"]
+    )
+    kitabiyah = by_id["kitabiyah_inni"]["occurrences"][0]
+    assert kitabiyah["anchor"] == "boundary"
+    assert kitabiyah["word_refs"] == ["69:18:9", "69:19:1"]
+    assert kitabiyah["requires"] == "wasl"
+
+
+def test_warsh_article_ibtidaa_reports_started_sites_only():
+    started = Phonemizer(riwayah="warsh").analyse("2:21:4-2:21:5")
+    rows = [
+        row for row in started.variant_occurrences()
+        if row["variant_id"] == "article_ibtidaa"
+    ]
+    assert len(rows) == 1
+    assert rows[0]["selected"] == "hamza"
+    assert rows[0]["word_ids"] == [0]
+    joined = Phonemizer(riwayah="warsh").analyse("2:21:3-2:21:5")
+    assert not [
+        row for row in joined.variant_occurrences()
+        if row["variant_id"] == "article_ibtidaa"
+    ]
 
 
 def test_warsh_lam_generals_report_dynamic_occurrences():

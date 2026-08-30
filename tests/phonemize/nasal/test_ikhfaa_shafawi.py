@@ -45,8 +45,7 @@ CASES = (
             absent_sound_rules={"m[1]": R("ikhfaa_shafawi")},
         ),
     ),
-    # Warsh: هُم بِمُومِنِينَ — the single-hamza ibdal in the second word is
-    # independent of the nasal rendering choice.
+    # Warsh: هُم بِمُومِنِينَۖ
     VariantCase(
         id="meem-before-baa-boundary-warsh",
         site=Site(warsh=("2:8", (10, 11))),

@@ -13,7 +13,6 @@ from tests.support import (
     case_runs,
     explicit,
     isolated,
-    through,
 )
 
 CASES = (
