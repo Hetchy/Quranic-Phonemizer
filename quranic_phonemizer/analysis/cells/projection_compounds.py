@@ -44,7 +44,7 @@ def _rules_for(word, sounds):
     )
 
 
-def _retarget_long_vowels(word, old, new, sounds):
+def _retarget_sounds(word, old, new, sounds):
     moved = set(sounds)
     return tuple(
         replace(
@@ -56,6 +56,44 @@ def _retarget_long_vowels(word, old, new, sounds):
         )
         for cell in word.sounds
     )
+
+
+def _split_shared_length_tashil(
+    column, word, facts, pen, new_id, madd_chars, consonants, long_vowels,
+):
+    cells = {cell.sound_id: cell for cell in word.sounds}
+    external = tuple(
+        sound for sound in long_vowels
+        if column.id not in cells[sound].column_ids
+    )
+    short = tuple(
+        sound for sound in column.owned_sound_ids
+        if isinstance((value := facts.sounds[sound.value].value), Vowel)
+        and not value.long
+    )
+    bases = tuple(
+        char for char in column.source_character_ids if char not in madd_chars
+    )
+    if not (
+        len(external) == len(consonants) == len(short) == 1
+        and len(madd_chars) == len(bases) == 1
+    ):
+        return None
+    quality = facts.sounds[short[0].value].value.quality
+    hamza = replace(
+        column, text=pen.seated_hamza(quality), source_character_ids=bases,
+        status=CellStatus.REPLACED, rule_occurrence_ids=_rules_for(word, consonants),
+        owned_sound_ids=consonants, presented_sound_ids=(),
+    )
+    mark = replace(
+        column, id=CellColumnId(new_id), role=CellRole.HARAKA,
+        text=pen.short_vowel(quality), source_character_ids=madd_chars,
+        tier=CellTier.BELOW if quality is Quality.I else CellTier.ABOVE,
+        attached_to_column_id=hamza.id, status=CellStatus.REPLACED, silence=None,
+        rule_occurrence_ids=_rules_for(word, short), owned_sound_ids=short,
+        presented_sound_ids=(),
+    )
+    return hamza, mark, short, external
 
 
 def _split_hamza_madd_column(column, word, facts, insc, pen, new_id):
@@ -78,6 +116,12 @@ def _split_hamza_madd_column(column, word, facts, insc, pen, new_id):
     )
     if not madd_chars or not consonants or not vowels:
         return None
+    shared = _split_shared_length_tashil(
+        column, word, facts, pen, new_id,
+        madd_chars, consonants, vowels,
+    )
+    if shared is not None:
+        return shared
     hamza_text = "".join(
         insc.glyphs[char.value].char
         for char in column.source_character_ids
@@ -116,7 +160,21 @@ def _split_hamza_madd_column(column, word, facts, insc, pen, new_id):
         owned_sound_ids=vowels,
         presented_sound_ids=(),
     )
-    return hamza, carrier, vowels
+    return hamza, carrier, vowels, ()
+
+
+def _reattach_external_presenters(columns, sounds):
+    wanted = set(sounds)
+    owner = next((
+        column for column in columns
+        if column.role is CellRole.MADD
+        and wanted.intersection(column.owned_sound_ids)
+    ), None)
+    if owner is None:
+        return
+    for index, column in enumerate(columns):
+        if wanted.intersection(column.presented_sound_ids):
+            columns[index] = replace(column, attached_to_column_id=owner.id)
 
 
 def split_hamza_madd_carriers(
@@ -132,11 +190,12 @@ def split_hamza_madd_carriers(
             if split is None:
                 columns.append(column)
                 continue
-            hamza, carrier, vowels = split
+            hamza, carrier, vowels, external = split
+            _reattach_external_presenters(columns, external)
             columns.extend((hamza, carrier))
             word = replace(
                 word,
-                sounds=_retarget_long_vowels(word, column.id, carrier.id, vowels),
+                sounds=_retarget_sounds(word, column.id, carrier.id, vowels),
             )
             next_id += 1
         out.append(replace(word, columns=tuple(columns)))

@@ -73,13 +73,19 @@ def _source_parts(column, sequence, source, insc, pen):
     )
     first_text = pen.role(_VOWEL_ROLE[sequence[0].quality])
     first_marks = tuple(item for item in characters if item.text == first_text)
+    if not first_marks:
+        first_marks = tuple(
+            item for item in characters
+            if insc.glyphs[item.id.value].kind is GlyphKind.SMALL_VOWEL
+        )
     eased_marks = tuple(
         item for item in characters if item not in (*bases, *first_marks)
     )
     if not (
         len(characters) == 3
         and len(bases) == len(first_marks) == len(eased_marks) == 1
-        and insc.glyphs[eased_marks[0].id.value].kind is GlyphKind.TAJWEED_MARK
+        and insc.glyphs[eased_marks[0].id.value].kind
+        in {GlyphKind.TAJWEED_MARK, GlyphKind.MADD_SIGN}
     ):
         return None
     return bases[0], first_marks[0], eased_marks[0], first_text
@@ -106,7 +112,11 @@ def _split_full(column, sequence, parts, facts, pen, insert_haraka, next_id):
         source_character_ids=(first_char.id,),
         tier=CellTier.BELOW if sequence[0].quality is Quality.I else CellTier.ABOVE,
         attached_to_column_id=first_base.id,
-        status=CellStatus.PRESENT,
+        status=(
+            CellStatus.PRESENT
+            if first_char.text == first_text
+            else CellStatus.REPLACED
+        ),
         rule_occurrence_ids=(),
         silence=None,
         owned_sound_ids=(SoundId(first_vowel),),

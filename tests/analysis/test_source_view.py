@@ -22,7 +22,14 @@ from quranic_phonemizer.analysis.source_laws import (
     validate_source_view,
 )
 from quranic_phonemizer.api import recitation
-from quranic_phonemizer.model.address import Riwayah, Script, VerseRef
+from quranic_phonemizer.model.address import (
+    KhilafId,
+    Option,
+    Riwayah,
+    Script,
+    VariantSelection,
+    VerseRef,
+)
 from quranic_phonemizer.model.inscription import StopAdvice
 from quranic_phonemizer.session import phonemize_request
 from quranic_phonemizer.session.boundaries import resolve_boundaries
@@ -207,6 +214,21 @@ def test_every_warsh_optional_stop_uses_the_typed_inventory_entry():
     assert occurrences == 9_948
     assert entry.advice is StopAdvice.OPTIONAL_STOP
     assert not entry.structural
+
+
+@pytest.mark.parametrize("ref", ("65:4:1", "65:4:12"))
+@pytest.mark.parametrize("choice", ("tashil", "ibdal_yaa"))
+def test_warsh_allai_prefix_alif_is_orthographic(ref, choice):
+    warsh = recitation(Riwayah.WARSH)
+    selection = VariantSelection((Option(KhilafId.ALLAI_WAQF, choice),))
+    session = phonemize_request(warsh, ref, selection=selection)
+    bundle = build_bundle(
+        session, ref=ref, riwayah="warsh", script="uthmani", variant={}
+    )
+    view = build_source_view(session, bundle=bundle)
+
+    alif = next(unit for unit in view.units if unit.text == "ا")
+    assert alif.silence is LiteralSilence.ORTHOGRAPHIC
 
 
 def test_a_cross_word_merger_places_a_contributor(hafs):

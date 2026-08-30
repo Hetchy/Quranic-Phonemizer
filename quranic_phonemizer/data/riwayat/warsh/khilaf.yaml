@@ -4,6 +4,9 @@
 # registers of riwayat/warsh/raa.py; this file owns options, defaults, and
 # the public catalogue.
 schema_version: 3
+group_order:
+  [word_readings, joined_readings, stopping_starting, inclination,
+   hamza_readings, lam_pronunciation, raa_pronunciation, nasal_variants]
 
 variants:
   raa_firq:
@@ -44,7 +47,7 @@ variants:
 
   raa_fathatan:
     kind: raa_systematic
-    options: [light, heavy_wasl, heavy]
+    options: [light, heavy, heavy_wasl]
     default: light
     source: docs/warsh/research/v2/raa.md
 
@@ -530,42 +533,48 @@ catalogue:
      register: yaseen_yaa}
   lam_dhat_yaa:
     group: lam_pronunciation
+    subgroup: lexical
     display_name: "Lam Dhat Yaa"
     description: "The sad-lam forms, such as تَصْلَىٰ and سَيَصْلَىٰ; wasl masks مُصَلّىٗ and يَصْلَى to fath with tafkheem."
     website_visible: true
     register: lam_dhat_yaa
   lam_verse_heads:
     group: lam_pronunciation
+    subgroup: lexical
     display_name: "Lam Verse Heads"
     description: "The صَلّ۪ىٰ verse endings."
     website_visible: true
     register: lam_verse_heads
   lam_separated_by_alif:
     group: lam_pronunciation
+    subgroup: lexical
     display_name: "Lam Separated By Alif"
     description: "The five alif-separated forms فِصَالاً, يَّصَّٰلَحَا, اَفَطَالَ, طَالَ, and فَطَالَ."
     website_visible: true
     register: lam_separated_by_alif
   lam_final_waqf:
     group: lam_pronunciation
+    subgroup: lexical
     display_name: "Lam Final Waqf"
     description: "The six final-lam shapes يُّوصَلَ, فَصَلَ, فَصَّلَ, وَبَطَلَ, ظَلَّ, and وَفَصْلَ at waqf."
     website_visible: true
     register: lam_final_waqf
   lam_after_taa:
     group: lam_pronunciation
+    subgroup: systematic
     display_name: "Lam After Taa"
     description: "Ordinary qualifying taa before an open lam, such as مَطْلَعِ."
     website_visible: true
     dynamic_scope: eligible_lam_taa
   lam_after_zhaa:
     group: lam_pronunciation
+    subgroup: systematic
     display_name: "Lam After Zhaa"
     description: "Ordinary qualifying zhaa before an open lam, such as يُظْلَمُونَ."
     website_visible: true
     dynamic_scope: eligible_lam_zhaa
   lam_salsal:
-    {group: lam_pronunciation, display_name: "Lam Salsal",
+    {group: lam_pronunciation, subgroup: lexical, display_name: "Lam Salsal",
      website_visible: true, register: lam_salsal}
 
   tamanna_noon:

@@ -230,6 +230,11 @@ def _supply_allai(span, drafts, scribe) -> None:
     lam.nucleus_declared = True
     if lam is not span[0] and span[0].letter is CanonLetter.WAW:
         span[0].nucleus = Nucleus.short(Quality.A)
+        length_offsets = scribe.evidence_offsets(
+            span[0], SlotFact.VOWEL_LENGTH
+        )
+        for offset in length_offsets:
+            scribe.withdraw_evidence(offset, span[0], SlotFact.VOWEL_LENGTH)
     eased = _eased_hamza(lam, Quality.I)
     drafts.insert(drafts.index(yaa), eased)
     offsets = scribe.evidence_offsets(yaa, SlotFact.LETTER)
