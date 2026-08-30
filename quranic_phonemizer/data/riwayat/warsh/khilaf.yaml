@@ -382,7 +382,7 @@ catalogue:
     group: raa_pronunciation
     subgroup: lexical
     display_name: "Raa Wanuthur Waqf"
-    description: "The six وَنُذُرِ endings in Surah al-Qamar."
+    description: "The six وَنُذُرِ endings in Surah Al-Qamar."
     website_visible: true
     register: raa_wanuthur_waqf
   raa_yasr_waqf:
@@ -393,7 +393,6 @@ catalogue:
     group: raa_pronunciation
     subgroup: lexical
     display_name: "Raa Asr Waqf"
-    description: "The three فَاسْرِ sites; both اِ۪سْرِ sites are fixed light."
     website_visible: true
     register: raa_asr_waqf
   raa_fathatan:
@@ -524,7 +523,6 @@ catalogue:
   maryam_haa_yaa:
     group: inclination
     display_name: "Maryam Haa Yaa"
-    description: "Haa and Yaa of كَٓه۪ي۪عَٓصَٓ as one transmitted pair."
     website_visible: true
     register: maryam_haa_yaa
   yaseen_yaa:
@@ -533,13 +531,13 @@ catalogue:
   lam_dhat_yaa:
     group: lam_pronunciation
     display_name: "Lam Dhat Yaa"
-    description: "The seven sad-lam forms, such as تَصْلَىٰ and سَيَصْلَىٰ; wasl masks مُصَلّىٗ and يَصْلَى to fath with tafkheem."
+    description: "The sad-lam forms, such as تَصْلَىٰ and سَيَصْلَىٰ; wasl masks مُصَلّىٗ and يَصْلَى to fath with tafkheem."
     website_visible: true
     register: lam_dhat_yaa
   lam_verse_heads:
     group: lam_pronunciation
     display_name: "Lam Verse Heads"
-    description: "The صَلّ۪ىٰ verse endings at 75:30, 87:15, and 96:10."
+    description: "The صَلّ۪ىٰ verse endings."
     website_visible: true
     register: lam_verse_heads
   lam_separated_by_alif:
@@ -551,7 +549,7 @@ catalogue:
   lam_final_waqf:
     group: lam_pronunciation
     display_name: "Lam Final Waqf"
-    description: "The six final-lam shapes يُّوصَلَ, فَصَلَ, فَصَّلَ, وَبَطَلَ, ظَلَّ, and وَفَصْلَ at a complete stop."
+    description: "The six final-lam shapes يُّوصَلَ, فَصَلَ, فَصَّلَ, وَبَطَلَ, ظَلَّ, and وَفَصْلَ at waqf."
     website_visible: true
     register: lam_final_waqf
   lam_after_taa:
@@ -594,7 +592,6 @@ catalogue:
   kitabiyah_inni:
     group: joined_readings
     display_name: "Kitabiyah Inni"
-    description: "The كِتَٰبِيَهْ اِ۪نِّي boundary: tahqiq keeps the haa sakin; naql performs the ordinary transfer."
     website_visible: true
     occurrences:
       - {words: ["69:18:9", "69:19:1"], anchor: boundary, requires: wasl}
@@ -608,7 +605,7 @@ catalogue:
   hamza_dhat_fath:
     group: hamza_readings
     display_name: "Hamza Dhat Fath"
-    description: "Ordinary one-word double hamzas with an open second, such as ءَآنذَرْتَهُمُۥٓ; the fixed-tashil forms are excluded."
+    description: "Ordinary one-word double hamzas with an open second, such as ءَآنذَرْتَهُمُۥٓ"
     website_visible: true
     register: hamza_dhat_fath
   hamza_muttafiq:
@@ -641,7 +638,7 @@ catalogue:
   hamza_arayta:
     group: hamza_readings
     display_name: "Hamza Arayta"
-    description: "All 34 tokens of the اَرَٰٓيْتَ family; a complete stop on a bare form reads the eased face."
+    description: "The اَرَٰٓيْتَ family"
     website_visible: true
     register: hamza_arayta
   ha_antum:
