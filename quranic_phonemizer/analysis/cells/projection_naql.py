@@ -21,7 +21,7 @@ from .dtos import (
 _CARRIED_QATA = frozenset({"َا", "ُا", "ِا"})
 _HARAKA_OF_TOKEN = {"a": "َ", "i": "ِ", "u": "ُ"}
 _SOURCE_HARAKA_OF_TOKEN = {
-    "a": frozenset({"َ"}),
+    "a": frozenset({"َ", "ٰ"}),
     "i": frozenset({"ِ"}),
     "u": frozenset({"ُ", "۟"}),
 }
@@ -214,7 +214,11 @@ def _compact_haraka(after, merger, occurrence, bundle, characters, next_id):
     remaining = tuple(item for item in compact.source_character_ids if item != haraka_id)
     changed = replace(
         compact,
-        text="".join(characters[item].text for item in remaining),
+        text=(
+            compact.text
+            if compact.status is CellStatus.REPLACED
+            else "".join(characters[item].text for item in remaining)
+        ),
         source_character_ids=remaining,
         owned_sound_ids=tuple(
             sound for sound in compact.owned_sound_ids if sound != merger.sound_id

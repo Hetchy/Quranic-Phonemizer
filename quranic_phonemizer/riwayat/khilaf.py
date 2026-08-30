@@ -77,6 +77,7 @@ class Khilaf:
     yaa: SitedKhilaf
     canonical: CanonicalKhilaf
     catalogue: dict[KhilafId, VariantCatalogueEntry]
+    group_order: tuple[str, ...] = ()
     dynamic_sites: dict = field(default_factory=dict)
     """Scope name to resolver callable over (score, boundaries), yielding
     (selector id, word index) pairs for occurrences no authored list holds."""
@@ -111,7 +112,12 @@ class Khilaf:
 
     def public_catalogue(self) -> tuple[dict[str, object], ...]:
         rows = []
-        for point, spec in self.variants.items():
+        points = list(self.variants)
+        if self.group_order:
+            rank = {group: index for index, group in enumerate(self.group_order)}
+            points.sort(key=lambda point: rank[self.catalogue[point].group])
+        for point in points:
+            spec = self.variants[point]
             meta = self.catalogue[point]
             occurrences = [
                 {
@@ -150,7 +156,12 @@ def load_khilaf(
     if not path.exists():
         return EMPTY
     data = load_yaml(path)
-    require_keys(data, {"schema_version", "variants", "catalogue"}, name=str(path))
+    require_keys(
+        data,
+        {"schema_version", "variants", "catalogue"},
+        optional={"group_order"},
+        name=str(path),
+    )
     if data["schema_version"] != SCHEMA_VERSION:
         raise KhilafError(
             f"{path}: schema_version {data['schema_version']!r}, expected "
@@ -159,6 +170,7 @@ def load_khilaf(
     raw = data["variants"]
     definitions = _definitions(raw, path)
     catalogue = _catalogue(data["catalogue"], definitions, registers or {}, path)
+    group_order = _group_order(data.get("group_order", ()), catalogue, path)
     raa = _sited(
         raw, definitions, _points_of_kind(raw, definitions, "raa_weight"),
         HEAVY, path,
@@ -198,8 +210,23 @@ def load_khilaf(
         yaa,
         CanonicalKhilaf(VowelKhilaf(vowels), letters, madd, tamanna, salasila, sakt),
         catalogue,
+        group_order,
         dynamic_sites or {},
     )
+
+
+def _group_order(raw, catalogue, path) -> tuple[str, ...]:
+    order = tuple(str(group) for group in raw)
+    if len(order) != len(set(order)):
+        raise KhilafError(f"{path}: group_order contains duplicates")
+    groups = {entry.group for entry in catalogue.values()}
+    if order and set(order) != groups:
+        missing = sorted(groups - set(order))
+        extra = sorted(set(order) - groups)
+        raise KhilafError(
+            f"{path}: group_order mismatch; missing={missing}, extra={extra}"
+        )
+    return order
 
 
 def _catalogue(raw, definitions, registers, path):
@@ -302,6 +329,9 @@ def _definition(point, spec, path) -> VariantDefinition:
     default = str(spec["default"])
     if default not in options:
         raise KhilafError(f"{where}: default {default!r} is not in {options}")
+    # The public option index is a reading aid, not a source transcription.
+    # Keep face 1 consistent across riwayat by publishing the default first.
+    options = (default, *(option for option in options if option != default))
     locations = frozenset(
         _location(value)
         for value in spec.get("locations", ())

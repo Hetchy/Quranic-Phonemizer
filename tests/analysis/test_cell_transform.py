@@ -259,6 +259,136 @@ def test_compact_fixed_tashil_is_two_vocalised_hamza_groups():
     assert max(len(group.sound_ids) for group in word.groups) <= 3
 
 
+def _variant_source_partition(ref, target, unit_text, khilaf, choice):
+    reading = recitation(Riwayah.WARSH)
+    pen = pen_for(reading.inventory(Script.UTHMANI))
+    selection = VariantSelection((Option(khilaf, choice),))
+    stop_refs = tuple(
+        reading.corpus.public_ref(location)
+        for location in reading.corpus.locations(ref)
+    )
+    session = phonemize_request(
+        reading, ref, stop_refs=stop_refs, selection=selection
+    )
+    metadata = dict(
+        ref=ref, riwayah="warsh", script="uthmani", variant={}
+    )
+    bundle = build_bundle(session, **metadata)
+    source = build_source_view(session, bundle=bundle)
+    view = build_cell_view(
+        session,
+        spelling="transformed",
+        pen=pen,
+        bundle=bundle,
+        source=source,
+        **metadata,
+    )
+    word_id = next(word.id for word in bundle.words if word.ref == target)
+    word = next(word for word in view.words if word.word_id == word_id)
+    unit = next(
+        unit for unit in source.units
+        if unit.word_id == word_id and unit.text == unit_text
+    )
+    columns = [
+        column for column in word.columns if unit.id in column.source_unit_ids
+    ]
+    return word, unit, columns
+
+
+def _assert_replaced_partition(unit, columns):
+    assert all(column.status is CellStatus.REPLACED for column in columns)
+    assert sorted(
+        character.value
+        for column in columns
+        for character in column.source_character_ids
+    ) == sorted(character.value for character in unit.character_ids)
+
+
+def test_started_article_tashil_partitions_the_dagger_madd_source_unit():
+    _, unit, columns = _variant_source_partition(
+        "6:144", "6:144:10", "ٰٓ",
+        KhilafId.ISTIFHAM_ARTICLE, "tashil",
+    )
+
+    assert {column.role for column in columns} == {
+        CellRole.LETTER,
+        CellRole.HARAKA,
+    }
+    _assert_replaced_partition(unit, columns)
+
+
+def test_started_dhat_fath_tashil_splits_the_dagger_madd_spelling():
+    word, unit, columns = _variant_source_partition(
+        "2:139", "2:139:14", "آٰ",
+        KhilafId.HAMZA_DHAT_FATH, "tashil",
+    )
+
+    assert [column.role for column in columns] == [
+        CellRole.LETTER,
+        CellRole.HARAKA,
+        CellRole.LETTER,
+    ]
+    _assert_replaced_partition(unit, columns)
+    assert max(len(column.owned_sound_ids) for column in word.columns) <= 2
+
+
+def test_ha_antum_ithbat_separates_its_shared_length_and_tashil():
+    word, unit, columns = _variant_source_partition(
+        "3:65", "3:65:1", "آ", KhilafId.HA_ANTUM, "ithbat",
+    )
+
+    assert [column.role for column in columns] == [
+        CellRole.LETTER,
+        CellRole.HARAKA,
+    ]
+    _assert_replaced_partition(unit, columns)
+    assert max(len(column.owned_sound_ids) for column in word.columns) <= 2
+
+
+def test_tanween_naql_splits_the_dagger_from_dhat_fath_tashil():
+    reading = recitation(Riwayah.WARSH)
+    pen = pen_for(reading.inventory(Script.UTHMANI))
+    selection = VariantSelection((
+        Option(KhilafId.HAMZA_DHAT_FATH, "tashil"),
+    ))
+    ref = "58:12-58:13"
+    session = phonemize_request(reading, ref, selection=selection)
+    metadata = dict(
+        ref=ref, riwayah="warsh", script="uthmani", variant={}
+    )
+    bundle = build_bundle(session, **metadata)
+    source = build_source_view(session, bundle=bundle)
+    view = build_cell_view(
+        session,
+        spelling="transformed",
+        pen=pen,
+        bundle=bundle,
+        source=source,
+        **metadata,
+    )
+
+    word_id = next(word.id for word in bundle.words if word.ref == "58:13:1")
+    unit = next(
+        unit for unit in source.units
+        if unit.word_id == word_id and unit.text == "آٰ"
+    )
+    columns = [
+        column
+        for host in (*view.words, *view.boundaries)
+        for column in host.columns
+        if unit.id in column.source_unit_ids
+    ]
+
+    assert {column.role for column in columns} == {
+        CellRole.LETTER,
+        CellRole.HARAKA,
+    }
+    _assert_replaced_partition(unit, columns)
+    letter = next(column for column in columns if column.role is CellRole.LETTER)
+    assert letter.text == pen.seated_hamza(Quality.A)
+    assert len(letter.owned_sound_ids) == 2
+
+
 # ---- the concrete cases the laws exercise ----
 
 def test_the_ibdal_started_prosthetic_hamza_is_replaced(hafs, pen):

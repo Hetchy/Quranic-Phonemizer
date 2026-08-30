@@ -16,13 +16,17 @@ single ID may have different defaults or cover different positions in each
 riwayah when the domain choice is the same but its transmission differs.
 
 `available_variants(riwayah)` returns the legal values and the default for that
-riwayah. An explicit selection overrides only its own scope.
+riwayah. The default is always the first published option, so numbered controls
+use face 1 consistently in Hafs and Warsh. An explicit selection overrides only
+its own scope.
 
 `variant_catalogue(riwayah)` adds producer-owned presentation and applicability
 metadata: semantic group, display name, optional description, website
 visibility, occurrence count, representative occurrence, every fixed word
 span, selector anchor, and required boundary state. The two corpus-wide nasal
 selectors publish a dynamic scope rather than a fixed occurrence register.
+Rows are published in each riwayah's semantic category order. Raa and Warsh
+Lam rows additionally publish lexical or systematic subgroup metadata.
 
 `Phonemizer(...).analyse(ref).variant_occurrences()` returns the fixed
 occurrences wholly contained in that analysis, with result-local word and

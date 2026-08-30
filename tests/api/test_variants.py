@@ -20,7 +20,7 @@ VARIANTS = {
     "raa_yasr_waqf": (["light", "heavy"], "light"),
     "raa_asr_waqf": (["light", "heavy"], "light"),
     "daaf_haraka": (["fatha", "damma"], "fatha"),
-    "yaa_aatani_waqf": (["hadhf", "ithbat"], "ithbat"),
+    "yaa_aatani_waqf": (["ithbat", "hadhf"], "ithbat"),
     "noon_wasl": (["izhar", "idgham"], "izhar"),
     "yaseen_wasl": (["izhar", "idgham"], "izhar"),
     "istifham_article": (["ibdal", "tashil"], "ibdal"),
@@ -87,7 +87,7 @@ WARSH_VARIANTS = {
     "raa_wanuthur_waqf": (["light", "heavy"], "light"),
     "raa_yasr_waqf": (["light", "heavy"], "light"),
     "raa_asr_waqf": (["heavy", "light"], "heavy"),
-    "raa_fathatan": (["light", "heavy_wasl", "heavy"], "light"),
+    "raa_fathatan": (["light", "heavy", "heavy_wasl"], "light"),
     "raa_damma": (["light", "heavy"], "light"),
     "raa_ishruna_kibr": (["light", "heavy"], "light"),
     "raa_alishraq": (["heavy", "light"], "heavy"),
@@ -107,10 +107,10 @@ WARSH_VARIANTS = {
     "raa_hidhrakum": (["light", "heavy"], "light"),
     "raa_ibrah_kibrahu": (["light", "heavy"], "light"),
     "raa_hasirat_suduruhum": (["light", "heavy"], "light"),
-    "dhat_yaa": (["fath", "taqlil"], "taqlil"),
-    "arakahum": (["fath", "taqlil"], "taqlil"),
-    "al_jar": (["fath", "taqlil"], "taqlil"),
-    "jabbarin": (["fath", "taqlil"], "taqlil"),
+    "dhat_yaa": (["taqlil", "fath"], "taqlil"),
+    "arakahum": (["taqlil", "fath"], "taqlil"),
+    "al_jar": (["taqlil", "fath"], "taqlil"),
+    "jabbarin": (["taqlil", "fath"], "taqlil"),
     "haa_verse_heads": (["fath", "taqlil"], "fath"),
     "maryam_haa_yaa": (["taqlil", "fath"], "taqlil"),
     "yaseen_yaa": (["fath", "taqlil"], "fath"),
@@ -118,23 +118,23 @@ WARSH_VARIANTS = {
     "lam_verse_heads": (["taqlil_tarqiq", "fath_tafkheem"], "taqlil_tarqiq"),
     "lam_separated_by_alif": (["tafkheem", "tarqiq"], "tafkheem"),
     "lam_final_waqf": (["tafkheem", "tarqiq"], "tafkheem"),
-    "lam_after_taa": (["tarqiq", "tafkheem"], "tafkheem"),
-    "lam_after_zhaa": (["tarqiq", "tafkheem"], "tafkheem"),
+    "lam_after_taa": (["tafkheem", "tarqiq"], "tafkheem"),
+    "lam_after_zhaa": (["tafkheem", "tarqiq"], "tafkheem"),
     "lam_salsal": (["tarqiq", "tafkheem"], "tarqiq"),
     "tamanna_noon": (["ishmam", "ikhtilas"], "ishmam"),
     "istifham_article": (["ibdal", "tashil"], "ibdal"),
     "noon_wasl": (["izhar", "idgham"], "izhar"),
-    "maliyah_halak": (["sakt", "idgham"], "idgham"),
+    "maliyah_halak": (["idgham", "sakt"], "idgham"),
     "kitabiyah_inni": (["tahqiq", "naql"], "tahqiq"),
     "article_ibtidaa": (["hamza", "lam"], "hamza"),
     "hamza_dhat_fath": (["ibdal", "tashil"], "ibdal"),
     "hamza_muttafiq": (["ibdal", "tashil"], "ibdal"),
     "hamza_damm_kasr": (["ibdal", "tashil"], "ibdal"),
-    "jaa_aal": (["ibdal", "tashil"], "tashil"),
+    "jaa_aal": (["tashil", "ibdal"], "tashil"),
     "hamza_kasr_yaa": (["ibdal", "tashil", "yaa"], "ibdal"),
     "hamza_aimma": (["tashil", "ibdal"], "tashil"),
     "hamza_arayta": (["ibdal", "tashil"], "ibdal"),
-    "ha_antum": (["hadhf", "ibdal", "ithbat"], "ibdal"),
+    "ha_antum": (["ibdal", "hadhf", "ithbat"], "ibdal"),
     "allai_waqf": (["tashil", "ibdal_yaa"], "tashil"),
     "iqlab_nasal": (["open", "closed"], "open"),
     "ikhfaa_shafawi_nasal": (["open", "closed"], "open"),
@@ -191,6 +191,14 @@ def test_catalogues_are_riwayah_specific():
         Phonemizer(variants={"raa_fathatan": "light"})
 
 
+@pytest.mark.parametrize("riwayah", ("hafs", "warsh"))
+def test_catalogue_publishes_every_default_as_option_one(riwayah):
+    assert all(
+        row["options"][0] == row["default"]
+        for row in variant_catalogue(riwayah)
+    )
+
+
 def test_warsh_catalogue_rows_carry_registers_and_dynamic_scopes():
     catalogue = variant_catalogue("warsh")
     assert len(catalogue) == 57
@@ -206,17 +214,35 @@ def test_warsh_catalogue_rows_carry_registers_and_dynamic_scopes():
     systematic = {"raa_fathatan", "raa_damma"}
     assert {
         row_id for row_id, row in by_id.items()
-        if row["subgroup"] == "systematic"
+        if row["subgroup"] == "systematic" and row_id.startswith("raa_")
     } == systematic
     assert all(
         row["subgroup"] == "lexical"
         for row_id, row in by_id.items()
         if row_id not in systematic and row_id.startswith("raa_")
     )
+    lam_systematic = {"lam_after_taa", "lam_after_zhaa"}
+    assert {
+        row_id for row_id, row in by_id.items()
+        if row["subgroup"] == "systematic" and row_id.startswith("lam_")
+    } == lam_systematic
+    assert all(
+        row["subgroup"] == "lexical"
+        for row_id, row in by_id.items()
+        if row_id not in lam_systematic and row_id.startswith("lam_")
+    )
     assert all(
         row["subgroup"] is None
-        for row_id, row in by_id.items() if not row_id.startswith("raa_")
+        for row_id, row in by_id.items()
+        if not row_id.startswith(("raa_", "lam_"))
     )
+    assert list(dict.fromkeys(
+        row["group"] for row in catalogue if row["website_visible"]
+    )) == [
+        "word_readings", "joined_readings", "stopping_starting",
+        "inclination", "hamza_readings", "lam_pronunciation",
+        "raa_pronunciation",
+    ]
     assert by_id["raa_five_words"]["occurrence_count"] == 16
     assert by_id["raa_ibrah_kibrahu"]["occurrence_count"] == 7
     assert by_id["raa_wizra_ukhra"]["occurrence_count"] == 5
@@ -351,6 +377,12 @@ def test_variant_catalogue_owns_website_metadata_and_occurrences():
     )
     hidden = {row["id"] for row in catalogue if not row["website_visible"]}
     assert hidden == {"iqlab_nasal", "ikhfaa_shafawi_nasal"}
+    assert list(dict.fromkeys(
+        row["group"] for row in catalogue if row["website_visible"]
+    )) == [
+        "word_readings", "joined_readings", "stopping_starting", "sakt",
+        "raa_pronunciation",
+    ]
     istifham = next(row for row in catalogue if row["id"] == "istifham_article")
     assert istifham["occurrence_count"] == 6
     assert "ءَآلذَّكَرَيْنِ" in istifham["description"]
@@ -360,7 +392,7 @@ def test_variant_catalogue_owns_website_metadata_and_occurrences():
     assert "وَنُذُرِ" in wanuthur["description"]
 
 
-def test_catalogue_rows_expose_the_raa_subgroup_and_moved_group():
+def test_catalogue_rows_expose_the_raa_subgroup_and_sakt_group():
     catalogue = variant_catalogue("hafs")
     by_id = {row["id"]: row for row in catalogue}
     lexical = {
@@ -369,7 +401,7 @@ def test_catalogue_rows_expose_the_raa_subgroup_and_moved_group():
     }
     assert {row_id for row_id, row in by_id.items() if row["subgroup"]} == lexical
     assert all(by_id[row_id]["subgroup"] == "lexical" for row_id in lexical)
-    assert by_id["maliyah_halak"]["group"] == "joined_readings"
+    assert by_id["maliyah_halak"]["group"] == "sakt"
 
 
 def test_dynamic_nasal_selectors_report_realized_occurrences():

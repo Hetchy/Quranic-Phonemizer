@@ -1,5 +1,8 @@
 # Scalar Hafs choices. Each ID applies to every form or location it covers.
 schema_version: 3
+group_order:
+  [word_readings, joined_readings, stopping_starting, sakt,
+   raa_pronunciation, nasal_variants]
 
 variants:
   raa_firq:
@@ -304,7 +307,7 @@ catalogue:
     {group: joined_readings, display_name: "Yaseen Wasl", website_visible: true,
      occurrences: [{words: ["36:1:1", "36:2:1"], anchor: boundary, requires: wasl}]}
   maliyah_halak:
-    {group: joined_readings, display_name: "Maliyah Halak", website_visible: true,
+    {group: sakt, display_name: "Maliyah Halak", website_visible: true,
      occurrences: [{words: ["69:28:4", "69:29:1"], anchor: boundary, requires: wasl}]}
   irkab_maana:
     {group: joined_readings, display_name: "Irkab Maana", website_visible: true,
