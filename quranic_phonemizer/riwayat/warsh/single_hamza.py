@@ -6,14 +6,19 @@ import unicodedata
 from functools import lru_cache
 from pathlib import Path
 
+from ...canon.draft import _Draft, nucleus_fact
 from ...canon.passes import word_spans
 from ...dataio import load_yaml, require_keys
-from ...model.address import Location
+from ...model.address import KhilafId, Location
 from ...model.canon import (
     Annotation,
     CanonLetter,
+    Nucleus,
+    Onset,
     Quality,
+    SlotOrigin,
 )
+from ...model.inscription import SlotFact
 
 _REGISTER = (
     Path(__file__).resolve().parents[2]
@@ -42,6 +47,10 @@ def _raw_register() -> dict:
             "tahqiq_exclusions",
             "canonical_absence",
             "supplied",
+            "arayta",
+            "arayta_bare",
+            "ha_antum",
+            "allai",
         },
         name=str(_REGISTER),
     )
@@ -148,26 +157,162 @@ def _fixed_target(family: str, span):
     return next(draft for draft in span if draft.nucleus.is_long)
 
 
-def supply_single_hamza(reading, drafts, lexicon, scribe, selection) -> None:
-    """Annotate the reviewed replacement slot written by the selected text."""
-    del lexicon, scribe, selection
-    for word, (location, span) in enumerate(
-        zip(reading.words, word_spans(reading, drafts))
-    ):
-        text = _word_text(reading, word)
-        family = fixed_ibdal_family(text)
-        if family is not None:
-            _fixed_target(family, span).annotations |= {Annotation.IBDAL}
-            continue
-        index = supplied_ibdal().get(location)
-        if index is not None:
-            span[index].annotations |= {Annotation.IBDAL}
-            if "وَ۬ا" in text:
-                span[index].annotations |= {Annotation.BADAL}
+def _eased_hamza(after, quality: Quality) -> _Draft:
+    return _Draft(
+        letter=CanonLetter.HAMZA,
+        onset=Onset.TASHIL,
+        nucleus=Nucleus.short(quality),
+        origin=SlotOrigin.WRITTEN,
+        cluster=after.cluster,
+        onset_declared=True,
+        nucleus_declared=True,
+    )
+
+
+def _split_length(scribe, host, drafts, quality: Quality) -> _Draft:
+    """Shorten the written long and seat an eased qata on its length marks."""
+    offsets = scribe.evidence_offsets(host, SlotFact.VOWEL_LENGTH)
+    host.nucleus = Nucleus.short(host.nucleus.quality)
+    for offset in offsets:
+        scribe.withdraw_evidence(offset, host, SlotFact.VOWEL_LENGTH)
+    eased = _eased_hamza(host, quality)
+    drafts.insert(drafts.index(host) + 1, eased)
+    for offset in offsets[:1]:
+        scribe.evidence(offset, eased, SlotFact.LETTER)
+        scribe.evidence(offset, eased, nucleus_fact(eased.nucleus))
+    for offset in offsets[1:]:
+        scribe.decoration(offset, eased)
+    return eased
+
+
+def _supply_arayta(reading, span, drafts, scribe) -> None:
+    """Canonicalize the tashil-able structure behind the written ibdal.
+
+    The raa's written long is a fatha plus dagger alif; the dagger and the
+    madda over it become the restored qata's seat."""
+    raa = next(
+        draft for draft in span
+        if draft.letter is CanonLetter.RA and draft.nucleus.sounds_long
+    )
+    quality_offsets = scribe.evidence_offsets(raa, SlotFact.VOWEL_QUALITY)
+    raa.nucleus = Nucleus.short(Quality.A)
+    eased = _eased_hamza(raa, Quality.A)
+    drafts.insert(drafts.index(raa) + 1, eased)
+    for offset in quality_offsets[1:]:
+        scribe.withdraw_evidence(offset, raa, SlotFact.VOWEL_QUALITY)
+        scribe.evidence(offset, eased, SlotFact.LETTER)
+        scribe.evidence(offset, eased, nucleus_fact(eased.nucleus))
+    cluster = reading.clusters[raa.cluster]
+    for mark in cluster.marks:
+        if mark.char == "ٓ":
+            scribe.decoration(mark.offset, eased)
+
+
+def _supply_ha_antum(span, drafts, scribe, chosen: str) -> None:
+    heh = span[0]
+    if chosen == "ibdal":
+        heh.annotations |= {Annotation.IBDAL}
+        return
+    _split_length(scribe, heh, drafts, Quality.A)
+    if chosen == "ithbat":
+        heh.nucleus = Nucleus.long(Quality.A)
+        heh.annotations |= {Annotation.JOINED_PARTICLE}
+
+
+def _supply_allai(span, drafts, scribe) -> None:
+    """The continuation reading: geminate lam, inclined long, eased qata,
+    and the written yaa the faces dispute at waqf."""
+    lam = next(draft for draft in span if draft.letter is CanonLetter.LAM)
+    yaa = span[-1]
+    lam.onset = Onset.GEMINATE
+    lam.onset_declared = True
+    lam.nucleus = Nucleus.long(Quality.TAQLIL)
+    lam.nucleus_declared = True
+    if lam is not span[0] and span[0].letter is CanonLetter.WAW:
+        span[0].nucleus = Nucleus.short(Quality.A)
+    eased = _eased_hamza(lam, Quality.I)
+    drafts.insert(drafts.index(yaa), eased)
+    offsets = scribe.evidence_offsets(yaa, SlotFact.LETTER)
+    for offset in offsets[:1]:
+        scribe.evidence(offset, eased, SlotFact.LETTER)
+        scribe.evidence(offset, eased, nucleus_fact(eased.nucleus))
+
+
+def supply_single_hamza(definitions):
+    """Build the pass supplying the reviewed single-hamza structures."""
+
+    def supply(reading, drafts, lexicon, scribe, selection) -> None:
+        del lexicon
+        if scribe is None:
+            return
+        antum = definitions.get(KhilafId.HA_ANTUM)
+        chosen_antum = (
+            antum.choose(selection) if antum is not None else "ibdal"
+        )
+        for word, (location, span) in enumerate(
+            zip(reading.words, word_spans(reading, drafts))
+        ):
+            if not span:
+                continue
+            if location in authored_locations("arayta"):
+                _supply_arayta(reading, span, drafts, scribe)
+                continue
+            if location in authored_locations("ha_antum"):
+                _supply_ha_antum(span, drafts, scribe, chosen_antum)
+                continue
+            if location in authored_locations("allai"):
+                _supply_allai(span, drafts, scribe)
+                continue
+            text = _word_text(reading, word)
+            family = fixed_ibdal_family(text)
+            if family is not None:
+                _fixed_target(family, span).annotations |= {Annotation.IBDAL}
+                continue
+            index = supplied_ibdal().get(location)
+            if index is not None:
+                span[index].annotations |= {Annotation.IBDAL}
+                if "وَ۬ا" in text:
+                    span[index].annotations |= {Annotation.BADAL}
+
+    return supply
+
+
+#: Source-coordinate occurrence rows for the single-hamza selectors.
+_SELECTOR_SOURCES = {
+    "hamza_arayta": ("all", (
+        (6, 41, 2), (6, 47, 2), (6, 48, 2), (10, 50, 2), (10, 59, 2),
+        (11, 28, 3), (11, 62, 3), (11, 88, 3), (17, 62, 2), (18, 62, 2),
+        (19, 78, 1), (25, 43, 1), (26, 75, 2), (26, 205, 1), (28, 71, 2),
+        (28, 72, 2), (35, 40, 2), (39, 36, 10), (41, 51, 2), (45, 22, 1),
+        (46, 3, 2), (46, 9, 2), (53, 19, 1), (53, 32, 1), (56, 61, 1),
+        (56, 66, 1), (56, 71, 1), (56, 74, 1), (67, 29, 2), (67, 31, 2),
+        (96, 9, 1), (96, 11, 1), (96, 13, 1), (107, 1, 1),
+    )),
+    "ha_antum": ("all", (
+        (3, 65, 1), (3, 119, 1), (4, 108, 1), (47, 39, 1),
+    )),
+    "allai_waqf": ("waqf", (
+        (33, 4, 12), (58, 2, 12), (65, 4, 1), (65, 4, 12),
+    )),
+}
+
+
+def catalogue_registers():
+    """Occurrence spans per single-hamza selector, in source coordinates."""
+    from ..khilaf import VariantSpan
+
+    return {
+        owner: tuple(
+            VariantSpan((Location(*site),), "word", requires)
+            for site in sites
+        )
+        for owner, (requires, sites) in _SELECTOR_SOURCES.items()
+    }
 
 
 __all__ = [
     "authored_locations",
+    "catalogue_registers",
     "canonical_absence",
     "fixed_ibdal_family",
     "fixed_ibdal_counts",

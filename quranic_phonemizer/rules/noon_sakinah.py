@@ -20,7 +20,7 @@ from ..engine.plan import (
 )
 from ..model.address import BoundaryPlan, Junction, KhilafId, Location, SlotId
 from ..model.canon import CanonLetter as L
-from ..model.canon import Rule, SlotOrigin
+from ..model.canon import Onset, Rule, SlotOrigin
 from ..model.performance import Aspect, Consonant, Occurrence
 from .khilaf import DEFAULT_NASAL_PLACE, nasal_place
 from .ownership import is_performed_quiescent, is_quiescent
@@ -67,6 +67,12 @@ class NoonSakinah:
                 return _classification(Rule.IZHAR, at, None)
             return _merge(Rule.IDGHAM_BI_GHUNNAH, at, opening, ghunnah=True)
         following = near.after(at)
+        if following is not None and following.onset is Onset.WASL:
+            # A joined prosthetic hamza is silent; the noon still sakin here
+            # meets the voweled naql letter behind it, not the hamza.
+            bare = near.raw_after(following.id)
+            if bare is not None and not is_quiescent(bare):
+                following = bare
         if following is None:
             if clear or (
                 slot.origin is SlotOrigin.SPELLED and near.last_of_word(at)

@@ -276,6 +276,22 @@ variants:
     locations: ["69:28:4"]
     source: docs/variants.md
 
+  kitabiyah_inni:
+    kind: naql_boundary
+    options: [tahqiq, naql]
+    default: tahqiq
+    junction: wasl
+    locations: ["69:20:1"]
+    source: docs/variants.md
+
+  article_ibtidaa:
+    kind: start
+    options: [hamza, lam]
+    default: hamza
+    junction: ibtidaa
+    locations: ["49:11:30", "53:50:4"]
+    source: docs/variants.md
+
   hamza_dhat_fath:
     kind: hamza_meeting
     options: [ibdal, tashil]
@@ -315,6 +331,25 @@ variants:
     options: [tashil, ibdal]
     default: tashil
     source: docs/warsh/research/v2/hamza-meetings.md
+
+  hamza_arayta:
+    kind: hamza_lexical
+    options: [ibdal, tashil]
+    default: ibdal
+    source: docs/warsh/research/v2/single-hamza.md
+
+  ha_antum:
+    kind: hamza_lexical
+    options: [hadhf, ibdal, ithbat]
+    default: ibdal
+    source: docs/warsh/research/v2/single-hamza.md
+
+  allai_waqf:
+    kind: hamza_lexical
+    options: [tashil, ibdal_yaa]
+    default: tashil
+    junction: waqf
+    source: docs/warsh/research/v2/single-hamza.md
 
   iqlab_nasal:
     kind: nasal_place
@@ -556,6 +591,20 @@ catalogue:
   maliyah_halak:
     {group: joined_readings, display_name: "Maliyah Halak", website_visible: true,
      occurrences: [{words: ["69:28:4", "69:29:1"], anchor: boundary, requires: wasl}]}
+  kitabiyah_inni:
+    group: joined_readings
+    display_name: "Kitabiyah Inni"
+    description: "The كِتَٰبِيَهْ اِ۪نِّي boundary: tahqiq keeps the haa sakin; naql performs the ordinary transfer."
+    website_visible: true
+    occurrences:
+      - {words: ["69:18:9", "69:19:1"], anchor: boundary, requires: wasl}
+  article_ibtidaa:
+    group: stopping_starting
+    display_name: "Article Ibtidaa"
+    description: "Starting a naql-carrying article on its prosthetic hamza or directly on the voweled lam."
+    website_visible: true
+    dynamic_scope: article_starts
+
   hamza_dhat_fath:
     group: hamza_readings
     display_name: "Hamza Dhat Fath"
@@ -589,6 +638,18 @@ catalogue:
   hamza_aimma:
     {group: hamza_readings, display_name: "Hamza Aimma",
      website_visible: true, register: hamza_aimma}
+  hamza_arayta:
+    group: hamza_readings
+    display_name: "Hamza Arayta"
+    description: "All 34 tokens of the اَرَٰٓيْتَ family; a complete stop on a bare form reads the eased face."
+    website_visible: true
+    register: hamza_arayta
+  ha_antum:
+    {group: hamza_readings, display_name: "Ha Antum",
+     website_visible: true, register: ha_antum}
+  allai_waqf:
+    {group: hamza_readings, display_name: "Allai Waqf",
+     website_visible: true, register: allai_waqf}
 
   iqlab_nasal:
     {group: nasal_variants, display_name: Iqlab Nasal, website_visible: false,

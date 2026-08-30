@@ -113,7 +113,8 @@ def rule_tables() -> RuleTables:
 def khilaf() -> Khilaf:
     from dataclasses import replace
 
-    from . import hamza_meetings, inclination, lam, raa
+    from . import article_start, hamza_meetings, inclination, lam, raa
+    from . import single_hamza as single_hamza_module
 
     loaded = load_khilaf(
         DATA / "khilaf.yaml",
@@ -122,6 +123,7 @@ def khilaf() -> Khilaf:
             **lam.catalogue_registers(),
             **inclination.catalogue_registers(),
             **hamza_meetings.catalogue_registers(),
+            **single_hamza_module.catalogue_registers(),
         },
     )
     return replace(
@@ -129,6 +131,7 @@ def khilaf() -> Khilaf:
         dynamic_sites={
             **raa.dynamic_sites(raa.selector_profile(loaded.variants)),
             **lam.dynamic_sites(lam.selector_profile(loaded.variants)),
+            **article_start.dynamic_sites(loaded.variants),
         },
     )
 
@@ -145,7 +148,7 @@ def lexeme_passes() -> tuple:
     return (
         *LEXEME_PASSES,
         supply_relative_pronoun,
-        supply_single_hamza,
+        supply_single_hamza(khilaf().variants),
         supply_hamza_meetings,
         supply_joined_pausal,
         spell_muqattaat(muqattaat(), vocalized_compact=True),

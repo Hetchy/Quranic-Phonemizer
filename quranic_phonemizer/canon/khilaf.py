@@ -237,6 +237,9 @@ def _apply_madd(site, location, span, drafts, reading, scribe, selection) -> Non
         scribe.withdraw_evidence(offset, first, SlotFact.VOWEL_LENGTH)
     if not quality_offsets and length_offsets:
         scribe.evidence(length_offsets[0], first, SlotFact.VOWEL_QUALITY)
+        for offset in length_offsets[1:]:
+            if offset != source_offset:
+                scribe.decoration(offset, first)
     scribe.evidence(source_offset, eased, SlotFact.LETTER)
 
 

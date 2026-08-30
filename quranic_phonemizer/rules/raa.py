@@ -107,6 +107,20 @@ class RaaWeight:
             effects.append(Recolour(at, Aspect.CONSONANT, SoundFeature.EMPHATIC, value))
         if _performed_quality(slot, at, plan, near, boundaries) is Quality.A:
             effects.append(Recolour(at, Aspect.VOWEL, SoundFeature.EMPHATIC, value))
+        elif (
+            plan.merged_away(at, Aspect.VOWEL)
+            and slot.nucleus.quality is Quality.A
+        ):
+            # An ibdal face folded the raa's dependent A into the following
+            # carrier; the colour follows that presented long.
+            following = near.after(at)
+            if following is not None and plan.relengthened_long(following.id):
+                effects.append(
+                    Recolour(
+                        following.id, Aspect.VOWEL, SoundFeature.EMPHATIC,
+                        value,
+                    )
+                )
         if not effects:
             return None
         return Verdict(

@@ -35,7 +35,13 @@ from ...rules.noon_sakinah import IkhfaaWeight, NoonSakinah
 from ...rules.pausal_glide import PausalGlide
 from ...rules.qalqala import Qalqala
 from ...rules.raa import RaaWeight
-from ...rules.single_hamza import JoinedIbdal, JoinedIbdalMadd, SuppliedIbdal
+from ...rules.single_hamza import (
+    AllaiFaces,
+    AraytaIbdal,
+    JoinedIbdal,
+    JoinedIbdalMadd,
+    SuppliedIbdal,
+)
 from ...rules.tafkheem import Emphasis, Weight
 from ...rules.waqf_marks import WaqfIqlabMarkDrop
 from ...rules.warsh_madd import (
@@ -51,6 +57,7 @@ from ...rules.wasl import (
     WaslHamza,
 )
 from .hamza_meetings import meeting_rows, rows_by_target, selector_choices
+from .single_hamza import authored_locations
 from .lam import selector_profile as lam_selector_profile
 from .raa import selector_profile as raa_selector_profile
 from .resources import khilaf, lexicon, rule_tables
@@ -62,6 +69,9 @@ _DAMM_START_REPAIR = {Quality.U: Quality.U}
 #: The `كتابيه إني` boundary reads tahqiq by default: haa stays sakin and
 #: the qata is fully realized, so the general transfer must not claim it.
 _NAQL_TAHQIQ = frozenset({Location(69, 20, 1)})
+#: The mushaf writes عَاداً ا۬لُّولَىٰ with the tanwin noon already assimilated
+#: into the naql-voweled geminate lam, so no iltiqa repair applies there.
+_NAQL_ASSIMILATED = frozenset({Location(53, 50, 4)})
 #: A tanwin-separated row's boundary reads by ordinary naql, so only the
 #: real meetings shield their second word from the transfer.
 _HAMZA_MEETING_STARTS = frozenset(
@@ -96,19 +106,37 @@ def _boundary() -> tuple:
             excluded=_NAQL_TAHQIQ | _HAMZA_MEETING_STARTS,
             ibdal_meetings=_NAQL_IBDAL_MEETINGS,
             meeting_choice=khilaf().variants.get(KhilafId.HAMZA_DHAT_FATH),
+            tahqiq_choices={
+                location: khilaf().variants.get(KhilafId.KITABIYAH_INNI)
+                for location in _NAQL_TAHQIQ
+            },
         ),
         CarriedNaql(),
         HamzaMeetings(
             rows=rows_by_target(),
             choices=selector_choices(khilaf().variants),
         ),
+        AraytaIbdal(
+            locations=authored_locations("arayta"),
+            bare=authored_locations("arayta_bare"),
+            choice=khilaf().variants.get(KhilafId.HAMZA_ARAYTA),
+        ),
+        AllaiFaces(
+            locations=authored_locations("allai"),
+            choice=khilaf().variants.get(KhilafId.ALLAI_WAQF),
+        ),
         SuppliedIbdal(),
         JoinedIbdal(),
-        WaslHamza(),
+        WaslHamza(
+            article_choice=khilaf().variants.get(KhilafId.ARTICLE_IBTIDAA),
+        ),
         SoftenedHamza(),
         PausalAlif(),
         SpelledBeforeWasl(repairs=_DAMM_START_REPAIR),
-        TanweenBeforeWasl(repairs=_DAMM_START_REPAIR),
+        TanweenBeforeWasl(
+            repairs=_DAMM_START_REPAIR,
+            assimilated=_NAQL_ASSIMILATED,
+        ),
         TanweenDrop(),
         TanweenIwad(),
         WaqfIqlabMarkDrop(),

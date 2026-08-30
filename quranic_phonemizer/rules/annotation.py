@@ -95,6 +95,9 @@ class CanonicalColour:
             if realized is not None and not realized.eased:
                 # An ibdal face replaced the eased onset with a consonant.
                 return None
+            if plan.removed_by(at, Aspect.CONSONANT, Rule.IBDAL_HAMZA):
+                # An ibdal face folded the eased onset into a long.
+                return None
             return _classification(Rule.TASHIL, at)
         if Annotation.IMALA in slot.annotations:
             return _classification(Rule.IMALA, at)
@@ -184,7 +187,6 @@ class CarrierTarqeeq:
             return None
         if any(
             verdict.occurrence.rule in {Rule.TAFKHEEM, Rule.TARQEEQ}
-            and at in verdict.occurrence.subjects
             and any(
                 isinstance(effect, (Classify, Recolour))
                 and effect.slot == at

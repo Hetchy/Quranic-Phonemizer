@@ -3,7 +3,8 @@
 Joined-only transfer reads the plan; the carried shape holds in every state."""
 from __future__ import annotations
 
-from dataclasses import dataclass
+from collections.abc import Mapping
+from dataclasses import dataclass, field
 
 from ..engine.neighbourhood import Neighbourhood
 from ..engine.plan import MergeInto, Phase, Plan, Realize, Silence, Verdict, mint
@@ -28,6 +29,10 @@ class Naql:
     meeting_choice: object | None = None
     """The one-word meeting selector; its tashil face keeps the second qata
     a consonant, so the transfer realizes a plain short vowel instead."""
+
+    tahqiq_choices: Mapping[Location, object] = field(default_factory=dict)
+    """Excluded boundaries a published selector can re-open: its naql face
+    performs the ordinary transfer, its tahqiq face keeps the exclusion."""
 
     rule: Rule = Rule.NAQL
     phase: Phase = Phase.BOUNDARY
@@ -72,8 +77,11 @@ class Naql:
         # A spelled opening ends as it would at a pause, so it hosts nothing.
         if host is None or not is_quiescent(host) or host.spelled:
             return None
-        if near.score.words[word].location in self.excluded:
-            return None
+        location = near.score.words[word].location
+        if location in self.excluded:
+            choice = self.tahqiq_choices.get(location)
+            if choice is None or choice.choose(near.score.selection) != "naql":
+                return None
         effects = [Silence(at, Aspect.CONSONANT)]
         ibdal_carrier = self._ibdal_carrier(near, at, word)
         if ibdal_carrier is not None:
