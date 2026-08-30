@@ -1,4 +1,4 @@
-# Qurʾanic Phonemizer
+# Quranic Phonemizer
 
 <p align="center">
   <a href="https://pypi.org/project/quranic-phonemizer/"><img src="https://img.shields.io/pypi/v/quranic-phonemizer" alt="PyPI version"></a>
@@ -7,14 +7,14 @@
   <a href="https://github.com/Hetchy/Quranic-Phonemizer/blob/main/LICENSE"><img src="https://img.shields.io/pypi/l/quranic-phonemizer" alt="License"></a>
 </p>
 
-Qur'anic Grapheme-to-Phoneme (G2P) converter and tajweed annotator for the riwayat of Hafs 'An Asim and Warsh 'An Nafi', converting text to phoneme sequences with comprehensive support for waqf/intidaa transformations and tajweed breakdowns.
+Quranic Grapheme-to-Phoneme (G2P) converter and tajweed annotator for the riwayat of Hafs 'An Asim and Warsh 'An Nafi', converting text to phoneme sequences with comprehensive support for waqf/intidaa transformations and tajweed breakdowns.
 
 Use cases:
 
 - **Speech Recognition**: Phonetically transcribe recitations, create training data for machine learning systems
 - **Text-to-Speech**: Develop accurate TTS systems for Qurʾanic Arabic
 - **Linguistic & Tajweed Analysis**: Study phonological patterns and tajweed rule distributions across the Qurʾan, apply tajweed rule labels and coloring
-- **Educational Tools**: Build interactive applications for assessing Qur'an and tajweed pronunciation
+- **Educational Tools**: Build interactive applications for assessing Quran and tajweed pronunciation
 - **Timing Analysis**: Generate word-by-word timestamps for recitations, analyse madd/ghunnah durations
 
 ## Table of Contents
@@ -76,11 +76,11 @@ Iqlab and ikhfaa shafawi use the open-lip nasal `ŋ` by default. Their nasal var
 | **API option**              | **Phoneme**        | **Default** | **Notes** |
 |-----------------------------|:------------------|:-----------:|:---------|
 | `emphatic_fatha`            | `aˤ`              | Off         | Allophone |
-| `emphatic_ikhfaa`           | `ŋˤ`              | Off         | Heavy nasal allophone |
-| `qalqala_degree`            | `QQ`              | Off         | Stronger Qalqala kubra/akbar degree |
+| `emphatic_ikhfaa`           | `ŋˤ`              | Off         | Heavy nasal allophone before the 5 ikhfaa-isti'la letters |
+| `qalqala_degree`            | `QQ`              | Off         | Stronger Qalqala kubra/akbar allophone |
 | `imala` (kubra)             | `e:`              | Off         | Hafs: `مَجْر۪ىٰهَا` (11:41), off -> `i:` <br> Warsh: `طَه۪` (20:1), off -> `ɛ:` |
 | `tashil` (Hafs only)        | `ʔ̞`              | Off         | One case Hafs: `ءَا۬عْجَمِيٌّ` (41:44), off -> `ʔ` <br>Warsh always applies Tashil as `ʔ̞` since it is common |
-| `taqlil_short` (Warsh only) | `ɛ`               | Off         | The short taqlil on the raa of the fixed `رأى` family; off -> `a`. The `taqlil` rule and light raa always apply. |
+| `taqlil_short` (Warsh only) | `ɛ`               | Off         | The short taqlil on the raa of the fixed `رأى` family, off -> `a`.<br> The `taqlil` rule and light raa always apply. |
 
 ## Quick start
 
@@ -257,7 +257,7 @@ Future plans include extending the phonemizer to other riwayat, beginning with Q
 
 ## Credits
 
-The project makes use of the [Quranic Universal Library's (QUL) Hafs script](https://qul.tarteel.ai/resources/quran-script/312).
+The project makes use of the [Quranic Universal Library's (QUL) Quran script](https://qul.tarteel.ai/resources/quran-script/312).
 
 ## Citing
 

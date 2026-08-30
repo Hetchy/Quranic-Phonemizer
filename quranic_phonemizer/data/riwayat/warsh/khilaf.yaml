@@ -598,7 +598,7 @@ catalogue:
   article_ibtidaa:
     group: stopping_starting
     display_name: "Article Ibtidaa"
-    description: "Starting a naql-carrying article on its prosthetic hamza or directly on the voweled lam."
+    description: "Starting a naql-carrying article on its hamza or lam."
     website_visible: true
     dynamic_scope: article_starts
 
