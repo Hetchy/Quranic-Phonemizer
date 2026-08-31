@@ -23,6 +23,7 @@ Use cases:
 - [Waqf](#waqf)
 - [Analysis](#analysis)
 - [Tajweed rules](#tajweed-rules)
+- [Variants](#variants)
 - [Contributing](#contributing)
 - [Credits](#credits)
 - [Citing](#citing)
@@ -67,7 +68,7 @@ The phoneme inventory uses the standard International Phonetic Alphabet (IPA) [A
 | Idgham         | `ñ` / `m̃` / `j̃` / `w̃`     |
 | Qalqala        | `Q`                           |
 
-Iqlab and ikhfaa shafawi use the open-lip nasal `ŋ` by default. Their nasal variants can instead select the closed-lip bilabial realization `m̃`, since both alternatives exist in recitations.
+Iqlab and ikhfaa shafawi use the open-lip nasal `ŋ` by default. Their nasal variants can instead select the closed-lip bilabial realization `m̃`, since both alternatives exist in recitations (see [Variants](#variants)).
 
 ### Extra Phonemes
 
@@ -248,6 +249,66 @@ Warsh adds five rule IDs:
 - `madd_leen_mahmuz`
 - `madd_mim_al_jam`
 - `madd_yaa_zawaid`
+
+## Variants
+
+A riwayah carries authenticated khilaf of awjuh and turuq: places where more than one
+performance is transmitted for the same text. These are lexical words, systematic
+patterns, and junctions between words. Each variant is one selector taking one
+scalar value, chosen at construction:
+
+```python
+from quranic_phonemizer import Phonemizer, available_variants
+
+available_variants("hafs")["man_raq"]
+
+sakt = Phonemizer(variants={"man_raq": "sakt"})
+idraj = Phonemizer(variants={"man_raq": "idraj"})
+
+print(result.text())
+
+sakt_res = sakt.analyse("75:27")
+print(" ".join(sakt_res.phonemes()))
+idraj_res = idraj.analyse("75:27")
+print(" ".join(idraj_res.phonemes()))
+```
+
+```text
+وَقِيلَ مَنْ ۜ رَاقٍ
+
+w a q i: l a m a n rˤ aˤ: q Q
+w a q i: l a m a rˤrˤ aˤ: q Q
+```
+
+`available_variants(riwayah)` gives the legal values and the default for each ID,
+`variant_catalogue(riwayah)` adds presentation and applicability metadata, and
+`result.variant_occurrences()` reports the sites contained in one analysis. See
+the [variants contract](docs/variants.md) for every option, scope, boundary
+condition, and source.
+
+Hafs publishes 26 selectors and Warsh 57, of which 12 are shared:
+
+- Nasal and merger performance: `iqlab_nasal`, `ikhfaa_shafawi_nasal`, `tamanna_noon`
+- Openings, hamza, and word boundaries: `noon_wasl`, `istifham_article`, `maliyah_halak`
+- Raa: `raa_firq`, `raa_alqitr_waqf`, `raa_misr_waqf`, `raa_wanuthur_waqf`, `raa_yasr_waqf`, `raa_asr_waqf`
+
+Hafs adds:
+
+- Letters and vowels: `daaf_haraka`, `yabsut`, `bastah`, `almusaytirun`, `bimusaytir`
+- Waqf and ibtidaa: `yaa_aatani_waqf`, `salasila_waqf`, `alism_ibtidaa`
+- Junctions and nasals: `yaseen_wasl`, `irkab_maana`, `yalhath_dhalik`
+- Sakt: `iwaja_qayyima`, `man_raq`, `bal_ran`
+
+Warsh adds:
+
+- Boundaries: `kitabiyah_inni`, `article_ibtidaa`
+- General hamza meetings: `hamza_dhat_fath`, `hamza_muttafiq`, `hamza_damm_kasr`, `jaa_aal`
+- Lexical and start-specific hamza: `hamza_arayta`, `ha_antum`, `hamza_kasr_yaa`, `hamza_aimma`, `allai_waqf`
+- General and lexical inclination: `dhat_yaa`, `arakahum`, `al_jar`, `jabbarin`, `haa_verse_heads`
+- Opening letters and coupled lam: `maryam_haa_yaa`, `yaseen_yaa`, `lam_dhat_yaa`, `lam_verse_heads`
+- Lam: `lam_separated_by_alif`, `lam_final_waqf`, `lam_after_taa`, `lam_after_zhaa`, `lam_salsal`
+- Systematic raa: `raa_fathatan`, `raa_damma`, `raa_ishruna_kibr`
+- Lexical raa: `raa_alishraq`, `raa_hayran`, `raa_bisharar`, `raa_five_words`, `raa_sihra`, `raa_iram`, `raa_alif_ayn`, `raa_alif_hamza`, `raa_dual_alif`, `raa_ashiratukum`, `raa_wizraka`, `raa_dhikraka`, `raa_wizra_ukhra`, `raa_ijrami`, `raa_hidhrakum`, `raa_ibrah_kibrahu`, `raa_hasirat_suduruhum`
 
 ## Contributing
 
