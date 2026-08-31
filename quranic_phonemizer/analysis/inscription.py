@@ -26,8 +26,8 @@ from ..model.inscription import (
 )
 from ..session import Session
 
-#: Canonical combining class of a mark the script writes below the baseline.
-_COMBINING_BELOW = 220
+#: Canonical combining classes of Arabic marks written below the baseline.
+_COMBINING_BELOW = frozenset({29, 32, 220})
 
 
 @dataclass(frozen=True, slots=True)
@@ -155,7 +155,7 @@ def sakt_seen_glyphs(
 
 
 def _written_below(char: str) -> bool:
-    return len(char) == 1 and unicodedata.combining(char) == _COMBINING_BELOW
+    return len(char) == 1 and unicodedata.combining(char) in _COMBINING_BELOW
 
 
 def inscribe(session: Session) -> InscriptionFacts:

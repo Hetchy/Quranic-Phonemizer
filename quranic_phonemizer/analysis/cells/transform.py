@@ -141,6 +141,50 @@ def _transform_column(
     return _transform_letter(col, cons, facts.slots[facts.slot_index[slot]], pen, facts)
 
 
+def _promote_replaced_riding_consonants(
+    words: tuple[CellWord, ...],
+    facts: AnalysisFacts,
+    slot_of_unit: dict[int, object],
+) -> tuple[CellWord, ...]:
+    """Give a full consonant replacement its own main cell and vowel riders."""
+    out = []
+    for word in words:
+        promoted: dict[tuple[CellColumnId, object], CellColumnId] = {}
+        for column in word.columns:
+            if (
+                column.role is not CellRole.LETTER
+                or column.tier is CellTier.MAIN
+                or column.status is not CellStatus.REPLACED
+                or column.attached_to_column_id is None
+                or not column.source_unit_ids
+            ):
+                continue
+            slot_id = slot_of_unit.get(column.source_unit_ids[0].value)
+            slot = None if slot_id is None else facts.slots[facts.slot_index[slot_id]]
+            consonant = _owned_consonant(column, facts)
+            if slot is not None and consonant is not None and consonant.letter is not slot.letter:
+                promoted[(column.attached_to_column_id, slot_id)] = column.id
+
+        columns = []
+        for column in word.columns:
+            replacement = next((
+                replacement
+                for (host, slot_id), replacement in promoted.items()
+                if column.attached_to_column_id == host
+                and column.role in (CellRole.HARAKA, CellRole.SUKUN, CellRole.TANWEEN)
+                and any(slot_of_unit.get(unit.value) == slot_id for unit in column.source_unit_ids)
+            ), None)
+            if column.id in promoted.values():
+                column = replace(
+                    column, tier=CellTier.MAIN, attached_to_column_id=None
+                )
+            elif replacement is not None:
+                column = replace(column, attached_to_column_id=replacement)
+            columns.append(column)
+        out.append(replace(word, columns=tuple(columns)))
+    return tuple(out)
+
+
 def _variant_column(
     col: CellColumn, variant_id: KhilafId, choice: str, **changes
 ) -> CellColumn:
@@ -715,6 +759,7 @@ def transform_words(
         )
         for word in out
     )
+    out = _promote_replaced_riding_consonants(out, facts, slot_of_unit)
     out = _split_selected_tashil(out, facts, selection, pen)
     out = _split_tamanna_words(out, facts, selection, pen)
     out = _transform_iwaja_idraj(out, facts, selection, pen)

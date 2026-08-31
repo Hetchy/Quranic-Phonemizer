@@ -161,7 +161,11 @@ def _tier(unit: LetterUnit, reading: _Reading) -> CellTier:
             return CellTier.BELOW
         return CellTier.BELOW if unit.id.value in reading.below_units else CellTier.ABOVE
     quality = reading.canonical_quality.get(unit.id.value)
-    return CellTier.BELOW if quality is Quality.I else CellTier.ABOVE
+    return (
+        CellTier.BELOW
+        if quality is Quality.I or unit.id.value in reading.below_units
+        else CellTier.ABOVE
+    )
 
 
 def _main_of_slot(unit_id: int, reading: _Reading) -> int | None:

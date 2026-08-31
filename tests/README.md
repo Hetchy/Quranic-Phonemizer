@@ -29,11 +29,6 @@ StateCase(
     },
 )
 ```
-
-Every expected phoneme is an inventory token separated by exactly one ASCII
-space. Geminates such as `ll`, `ñ`, and `m̃` are one token. Qalqala release is
-separate from its consonant: `q Q`.
-
 Put an exact source block immediately before every semantic row, including a
 row created by a helper such as `wasl_case()` or `_pausal()`:
 

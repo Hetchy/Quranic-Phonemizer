@@ -1824,6 +1824,45 @@ def test_warsh_article_naql_keeps_a_separate_silent_qata_alif_cell():
     assert all(column.text != "َا" for column in word.columns)
 
 
+def test_warsh_hamza_meeting_replacement_letter_has_its_own_main_cell():
+    _, bundle, view = _build_warsh("8:32")
+    word_id = next(word.id for word in bundle.words if word.ref == "8:32:16")
+    word = next(item for item in view.words if item.word_id == word_id)
+    yaa = next(
+        column for column in word.columns
+        if column.role is CellRole.LETTER
+        and column.text == "ي"
+        and column.status is CellStatus.REPLACED
+    )
+    silent_alif = next(
+        column for column in word.columns
+        if column.role is CellRole.LETTER
+        and column.text == "ا"
+        and column.status is CellStatus.DROPPED
+    )
+    fatha = next(
+        column for column in word.columns
+        if column.role is CellRole.HARAKA and column.text == "َ"
+    )
+
+    assert yaa.tier is CellTier.MAIN
+    assert yaa.attached_to_column_id is None
+    assert fatha.attached_to_column_id == yaa.id
+    assert silent_alif.tier is CellTier.MAIN
+
+
+def test_warsh_written_naql_kasra_keeps_its_below_tier():
+    _, bundle, view = _build_warsh("34:48")
+    word_id = next(word.id for word in bundle.words if word.ref == "34:48:1")
+    word = next(item for item in view.words if item.word_id == word_id)
+    kasra = next(
+        column for column in word.columns
+        if column.role is CellRole.HARAKA and column.text == "ِ"
+    )
+
+    assert kasra.tier is CellTier.BELOW
+
+
 @pytest.mark.parametrize(
     ("ref", "word_ref", "haraka"),
     [
