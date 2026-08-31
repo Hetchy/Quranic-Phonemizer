@@ -2098,26 +2098,6 @@
       "scope": "joined_words",
       "owner": "hamza_damm_kasr",
       "exception": null
-    },
-    {
-      "source": "82:1:3",
-      "canonical": "82:1:3",
-      "previous": "82:1:2",
-      "first": "U",
-      "second": "I",
-      "scope": "joined_words",
-      "owner": "hamza_damm_kasr",
-      "exception": null
-    },
-    {
-      "source": "84:1:3",
-      "canonical": "84:1:3",
-      "previous": "84:1:2",
-      "first": "U",
-      "second": "I",
-      "scope": "joined_words",
-      "owner": "hamza_damm_kasr",
-      "exception": null
     }
   ]
 }

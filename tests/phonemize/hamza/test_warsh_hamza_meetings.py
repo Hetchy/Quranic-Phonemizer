@@ -239,10 +239,10 @@ MUTTAFIQ_DEFAULT_CASES = (
         id="default-i-i-ibdal",
         site=Site(warsh=("4:22", (7, 8))),
         read=through(),
-        phonemes=("ʔ a ñ i s a: ʔ", "i: l a:"),
-        char_rules={"ا[3]": R("ibdal_hamza", "madd_tabii")},
-        sound_rules={"i:": R("ibdal_hamza", "madd_tabii")},
-        absent_sound_rules={"i:": R("madd_badal", "madd_lazim")},
+        phonemes=("ʔ a ñ i s a: ʔ", "i: ll a:"),
+        char_rules={"ا[3]": R("ibdal_hamza", "madd_lazim")},
+        sound_rules={"i:": R("ibdal_hamza", "madd_lazim")},
+        absent_sound_rules={"i:": R("madd_badal", "madd_tabii")},
     ),
     # Warsh: أَوْلِيَآءُۖ اوْلَٰٓئِكَ
     Case(
@@ -570,6 +570,18 @@ def test_every_meeting_selector_site_separates_its_faces(owner, verse, words):
         )
         faces[option] = tuple(result.sounds(word) for word in words)
     assert len(set(faces.values())) == len(options)
+
+
+@pytest.mark.parametrize("option", ("ibdal", "tashil"))
+def test_muttafiq_keeps_iyyaakum_yaa_geminated(option):
+    """Restoring the latent opening qata must not consume the written shadda."""
+    result = selected(
+        Site(warsh=("34:40", (7, 8))), 7,
+        KhilafId.HAMZA_MUTTAFIQ, option,
+        stopped=False, riwayah="warsh",
+    )
+
+    assert "jj" in result.sounds(8)
 
 
 @pytest.mark.parametrize("run", case_runs(VARIANT_CASES))

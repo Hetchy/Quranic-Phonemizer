@@ -242,6 +242,11 @@ class Result:
                 matched = [words.get(ref) for ref in occurrence["word_refs"]]
                 if any(word is None for word in matched):
                     continue
+                targets = [
+                    words.get(ref) for ref in occurrence["target_word_refs"]
+                ]
+                if any(word is None for word in targets):
+                    continue
                 first = matched[0]
                 after = boundaries[first.after_boundary_id]
                 before = boundaries[first.before_boundary_id]
@@ -257,6 +262,7 @@ class Result:
                     "variant_id": entry["id"],
                     "selected": self.analysis.variant[entry["id"]],
                     "word_ids": [word.id.value for word in matched],
+                    "target_word_ids": [word.id.value for word in targets],
                     "anchor": occurrence["anchor"],
                     "anchor_word_id": first.id.value,
                     "anchor_boundary_id": (
@@ -304,6 +310,7 @@ class Result:
                 "variant_id": entry["id"],
                 "selected": self.analysis.variant[entry["id"]],
                 "word_ids": word_ids,
+                "target_word_ids": word_ids,
                 "anchor": anchor,
                 "anchor_word_id": first.id.value,
                 "anchor_boundary_id": (

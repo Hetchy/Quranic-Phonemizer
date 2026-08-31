@@ -22,7 +22,7 @@ The selected Warsh corpus contains 60 one-word adjacent-hamza sites:
 | `ءَأَعْجَمِيٌّ` | 1 | Fixed tashil |
 | Triple-hamza forms | 4 | Fixed tashil on the second qata |
 
-The selected corpus also contains 153 adjacent qata pairs across two words:
+The selected corpus also contains 151 adjacent qata pairs across two words:
 
 | First + second quality | Count | General outcome |
 | --- | ---: | --- |
@@ -33,18 +33,18 @@ The selected corpus also contains 153 adjacent qata pairs across two words:
 | A + U | 1 | Fixed tashil |
 | I + A | 28 | Fixed pure ibdal |
 | U + A | 13 | Fixed pure ibdal |
-| U + I | 26 | `hamza_damm_kasr` |
+| U + I | 24 | `hamza_damm_kasr` |
 
 There is no I + U pair in the selected register. These counts are generated
 from canonical qata identity and performed vowels, then checked against the
 selected script. A source sign can attest a face but cannot create a meeting.
 
-Of the 153 pairs, 48 are canonically adjacent but never meet in performance:
+Of the 151 pairs, 48 are canonically adjacent but never meet in performance:
 a tanwin noon stands between the qata hamzas, or the first qata is not
 word-final. The authored register tags these rows `separated`; their
 boundaries read the ordinary rules (naql for the tanwin rows) and they
 publish no selector occurrence. The published counts are therefore
-`hamza_muttafiq` 36, `hamza_damm_kasr` 25, `jaa_aal` 2, `hamza_kasr_yaa` 2,
+`hamza_muttafiq` 36, `hamza_damm_kasr` 23, `jaa_aal` 2, `hamza_kasr_yaa` 2,
 and the fixed rows shrink accordingly in performance.
 
 Exactly two pairs cross an ayah boundary within the same surah:
@@ -201,6 +201,9 @@ carrier and the resulting `/u:/` has `ibdal_hamza`, `madd_badal`, and
 `madd_muttasil`; under tashil it remains the muttasil `/u:/` after the eased
 onset.
 Tashil emits `tashil` on that onset and renders it as `ʔ̞`.
+At `الَّا`, the explicit geminated lam makes the created `/i:/`
+`madd_lazim`; restoring the latent qata must not discard that shadda and
+misclassify the result as `madd_tabii`.
 In the A+A row, the selected context continues as `احَدٞ مِّنكُم`; ordinary
 tanwin-to-meem idgham owns `/m̃/`. The ellipsis crops the sequence after that
 assimilating onset rather than inventing an isolated final consonant.
@@ -215,7 +218,7 @@ The different-vowel matrix is structural:
 | A+U | 1 | `جَآءَ اُ۟مَّةٗ رَّسُولُهَا`, source and canonical 23:44:7-9 | Fixed tashil: `... ʔ a ʔ̞ u m̃ a t a rˤrˤ aˤ ...` in its actual joined context; ordinary tanwin-to-raa idgham owns `/rˤrˤ/`. |
 | I+A | 29 | `اِ۬لنِّسَآءِ اَ۬وَ اَكْنَنتُمْ فِےٓ`, source 2:233:9-12, canonical 2:235:9-12 | Fixed moving ibdal to yaa + A, followed by ordinary naql at the next boundary: `... ʔ i j a w a k n a ŋ t u m f i:`. |
 | U+A | 13 | `وَيَٰسَمَآءُ اَ۬قْلِعِےۖ`, source and canonical 11:44:5-6 | Fixed moving ibdal to waw + A: `... ʔ u w a q Q l ...`. |
-| U+I | 26 | `يَٰزَكَرِيَّآءُ اِ۪نَّا`, source 19:6:1-2, canonical 19:7:1-2 | Public `hamza_damm_kasr`: ibdal `... ʔ u w i ñ a:`, tashil `... ʔ u ʔ̞ i ñ a:`. |
+| U+I | 24 | `يَٰزَكَرِيَّآءُ اِ۪نَّا`, source 19:6:1-2, canonical 19:7:1-2 | Public `hamza_damm_kasr`: ibdal `... ʔ u w i ñ a:`, tashil `... ʔ u ʔ̞ i ñ a:`. |
 
 For I+A and U+A, the replacement is a moving consonant carrying the second
 hamza's A nucleus. It emits `ibdal_hamza` and no replacement madd. U+I likewise
@@ -276,7 +279,7 @@ the same result sound. Visible unit and cell placements follow sound ownership
 and silence; trigger-only neighboring letters are not tagged. A moving waw or
 yaa receives no invented madd.
 
-Machine data must own all 60 one-word and 153 across-word rows with source
+Machine data must own all 60 one-word and 151 across-word rows with source
 ref, canonical ref, first and second qualities, boundary scope, structural
 owner, and authored-exception owner. Tests assert the exact partitions above,
 all five Aimma sites, the Aajami site, all four triple-hamza sites, both Jaa-Aal

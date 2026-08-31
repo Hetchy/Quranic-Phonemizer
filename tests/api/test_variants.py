@@ -250,6 +250,7 @@ def test_warsh_catalogue_rows_carry_registers_and_dynamic_scopes():
     pair = by_id["raa_hasirat_suduruhum"]["occurrences"][0]
     assert pair["anchor"] == "boundary"
     assert pair["word_refs"] == ["4:89:11", "4:89:12"]
+    assert pair["target_word_refs"] == ["4:89:11"]
     assert pair["requires"] == "wasl"
 
 
@@ -291,7 +292,7 @@ def test_warsh_hamza_and_boundary_rows_resolve_their_registers():
     counts = {
         "tamanna_noon": 1, "istifham_article": 6, "noon_wasl": 1,
         "maliyah_halak": 1, "kitabiyah_inni": 1,
-        "hamza_dhat_fath": 20, "hamza_muttafiq": 36, "hamza_damm_kasr": 25,
+        "hamza_dhat_fath": 20, "hamza_muttafiq": 36, "hamza_damm_kasr": 23,
         "jaa_aal": 2, "hamza_kasr_yaa": 2, "hamza_aimma": 5,
         "hamza_arayta": 34, "ha_antum": 4, "allai_waqf": 4,
     }
@@ -426,6 +427,7 @@ def test_analysis_reports_active_and_masked_variant_occurrences():
         "variant_id": "irkab_maana",
         "selected": "idgham",
         "word_ids": [0, 1],
+        "target_word_ids": [0, 1],
         "anchor": "boundary",
         "anchor_word_id": 0,
         "anchor_boundary_id": 1,

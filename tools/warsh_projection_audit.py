@@ -6,6 +6,7 @@ import unicodedata
 from collections import Counter, defaultdict
 
 from quranic_phonemizer import Phonemizer
+from quranic_phonemizer.analysis.ids import SCHEMA_VERSION
 from quranic_phonemizer.analysis.source_dtos import CharacterKind
 from quranic_phonemizer.api import recitation
 from quranic_phonemizer.model.address import Riwayah
@@ -114,6 +115,9 @@ def _audit_facade(result, source, transformed) -> None:
         sound.sound_id
         for word in transformed.words for sound in word.sounds
     } | {
+        bridge.sound.sound_id
+        for word in transformed.words for bridge in word.bridges
+    } | {
         sound.sound_id
         for boundary in transformed.boundaries for sound in boundary.sounds
     } | {
@@ -145,12 +149,12 @@ def _audit_facade(result, source, transformed) -> None:
     if cell_mergers != mergers:
         raise ValueError("transformed cells do not close over boundary mergers")
     for kind in ("analysis_result", "source_view", "highlight_groups"):
-        if result.document(kind)["schema_version"] != 2:
+        if result.document(kind)["schema_version"] != SCHEMA_VERSION:
             raise ValueError(f"{kind} has the wrong schema version")
     for spelling in ("source", "transformed"):
         if result.document(
             "cell_view", spelling=spelling
-        )["schema_version"] != 2:
+        )["schema_version"] != SCHEMA_VERSION:
             raise ValueError(
                 f"cell_view ({spelling}) has the wrong schema version"
             )

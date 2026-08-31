@@ -515,6 +515,22 @@ def test_every_selector_site_accepts_both_faces(raa_site, junction):
     assert heavy.sounds(location.word) != light.sounds(location.word)
 
 
+@pytest.mark.parametrize(
+    ("site", "word"),
+    ((Site(warsh=("20:77", (6,))), 6), (Site(warsh=("26:52", (5,))), 5)),
+)
+def test_an_asr_sites_are_fixed_light_outside_warsh_asr_selector(site, word):
+    light = selected(
+        site, word, KhilafId.RAA_ASR_WAQF, "light", stopped=True,
+        riwayah="warsh",
+    )
+    heavy = selected(
+        site, word, KhilafId.RAA_ASR_WAQF, "heavy", stopped=True,
+        riwayah="warsh",
+    )
+    assert light.sounds(word) == heavy.sounds(word) == ("ʔ", "i", "s", "r")
+
+
 @pytest.mark.parametrize("run", case_runs(SAKIN_AND_BOUNDARY_CASES))
 def test_sakin_and_boundary_law(run):
     assert_case(run)

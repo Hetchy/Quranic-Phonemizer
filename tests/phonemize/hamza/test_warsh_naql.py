@@ -205,7 +205,7 @@ VARIANT_CASES = (
             ),
             "lam": Expect(
                 read=explicit(ibtidaa=4),
-                phonemes="ll u: l ɛ:",
+                phonemes="l u: l ɛ:",
             ),
         },
         default="hamza",

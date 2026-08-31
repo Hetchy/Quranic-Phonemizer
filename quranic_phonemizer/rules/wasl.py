@@ -29,7 +29,7 @@ from ..model.canon import (
     SlotOrigin,
     VowelForm,
 )
-from ..model.performance import Aspect, Occurrence, Vowel
+from ..model.performance import Aspect, Consonant, Occurrence, Vowel
 
 #: A start names the helping vowel it is read with.
 _START_OF: dict[Quality, Rule] = {
@@ -76,14 +76,36 @@ class WaslHamza:
                 ):
                     choice = self.article_choice
             if choice is not None and choice.choose(near.score.selection) == "lam":
+                following = near.raw_after(at)
+                subjects = (at,)
+                effects = [
+                    Silence(at, Aspect.CONSONANT),
+                    Silence(at, Aspect.VOWEL),
+                ]
+                if (
+                    following is not None
+                    and following.letter is CanonLetter.LAM
+                    and following.onset is Onset.GEMINATE
+                ):
+                    # Beginning directly on the naql-bearing article lam
+                    # reads one lam.  The written shadda describes the
+                    # hamza-start face and must not survive this start.
+                    subjects = (at, following.id)
+                    effects.append(
+                        Realize(
+                            following.id,
+                            Aspect.CONSONANT,
+                            Consonant(CanonLetter.LAM),
+                        )
+                    )
                 return Verdict(
                     Occurrence(
                         mint(Rule.HAMZA_WASL_SILENT, at),
                         Rule.HAMZA_WASL_SILENT,
-                        (at,),
+                        subjects,
                         boundary=_junction_before(word),
                     ),
-                    (Silence(at, Aspect.CONSONANT), Silence(at, Aspect.VOWEL)),
+                    tuple(effects),
                 )
             start = _START_OF[slot.nucleus.quality]
             return Verdict(
