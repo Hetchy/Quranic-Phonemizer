@@ -1,12 +1,6 @@
 name: sync-quran-db
 
 on:
-  push:
-    paths:
-      - corpus_sources/riwayat/hafs/quran.json
-      - quranic_phonemizer/data/riwayat/hafs/corpus/surah_info.json
-      - quranic_phonemizer/data/riwayat/hafs/corpus/quran_db.bin
-      - tools/build_hafs_corpus.py
   pull_request:
     paths:
       - corpus_sources/riwayat/hafs/quran.json
