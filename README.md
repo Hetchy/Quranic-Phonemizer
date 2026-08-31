@@ -140,7 +140,7 @@ hafs.analyse("68:33", stop_signs=("optional_stop",))
 hafs.analyse("2:255", stop_refs=("2:255:7",))
 ```
 
-This applies waqf to `2:255:7` and ibtidaa to `2:55:8`, or any words with `ۚ ` in `68:33`, changing phonemes and tajweed rules accordingly.
+This applies waqf to `2:255:7` and ibtidaa to `2:255:8`, or any words with `ۚ ` in `68:33`, changing phonemes and tajweed rules accordingly.
 
 Note the first and last word of a request always apply ibtidaa and waqf respectively.
 
@@ -242,7 +242,7 @@ result.rule_occurrences
 - Waqf and silence: `waqf_diacritic_drop`, `waqf_silah_drop`, `waqf_taa_marbuta`, `pausal_alif` (seven alifs), `orthographic_silence` (rasm)
 - Special: `imala`, `tashil`, `ishmam`
 
-Warsh shares the same rules and adds five:
+Warsh adds five unique rules:
 
 - `taqlil`
 - `naql`
