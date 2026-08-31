@@ -162,6 +162,20 @@ def _restore_right_qata(reading, drafts, scribe, right, row: MeetingRow):
         scribe.evidence(cluster.offset, second, SlotFact.LETTER)
         for mark in cluster.marks:
             scribe.decoration(mark.offset, second)
+        # A bare selected-source qata can precede a yaa whose explicit shadda
+        # was parsed as part of the collapsed carrier shape.  Restoring the
+        # qata must leave that following yaa geminated (not turn إِيَّاكم
+        # into the impossible /ʔ i: j a:/ sequence).
+    following_index = right.index(second) + 1 if second in right else 0
+    following = right[following_index] if following_index < len(right) else None
+    if (
+        following is not None
+        and any(
+            mark.role == "shadda"
+            for mark in reading.clusters[following.cluster].marks
+        )
+    ):
+        following.onset = Onset.GEMINATE
     second.letter = CanonLetter.HAMZA
     second.onset = Onset.PLAIN
     second.nucleus = Nucleus.short(row.second)

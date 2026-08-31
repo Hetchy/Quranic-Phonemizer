@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import pytest
 
+from quranic_phonemizer import Phonemizer
 from quranic_phonemizer.analysis.build import build_bundle
 from quranic_phonemizer.analysis.cells import (
     CellRole,
@@ -1499,6 +1500,17 @@ def test_pausal_alif_identity_stays_on_its_carrier_in_wasl_and_waqf(
         )
 
 
+@pytest.mark.parametrize("ref", ["2:1", "2:33", "2:159", "7:122"])
+def test_warsh_source_cells_validate_before_the_transformed_projection(ref):
+    result = Phonemizer(riwayah="warsh").analyse(ref)
+
+    source = result.cells(spelling="source")
+    transformed = result.cells(spelling="transformed")
+
+    assert source.words
+    assert transformed.words
+
+
 def test_iltiqa_shortening_labels_only_the_carrier_in_both_riwayat(hafs, pen):
     cases = (
         (*_build(hafs, pen, "2:11"), "ى"),
@@ -1848,6 +1860,60 @@ def test_warsh_article_naql_splits_non_fatha_haraka_from_qata_alif(
         for column in named
     )
     assert all(column.text != haraka + "ا" for column in word.columns)
+
+
+def test_kitabiyah_naql_draws_the_transferred_kasra_on_haa():
+    selection = VariantSelection((
+        Option(KhilafId.KITABIYAH_INNI, "naql"),
+    ))
+    _, bundle, view = _build_warsh(
+        "69:18:9-69:19:1", selection=selection,
+    )
+    word_id = next(word.id for word in bundle.words if word.ref == "69:18:9")
+    word = next(item for item in view.words if item.word_id == word_id)
+    haa = next(column for column in word.columns if column.text.startswith("ه"))
+    kasra = next(
+        column for column in word.columns
+        if column.role is CellRole.HARAKA and column.text == "ِ"
+        and column.attached_to_column_id == haa.id
+    )
+
+    assert haa.text == "ه"
+    assert {bundle.sounds[sound.value].token for sound in haa.owned_sound_ids} == {"h"}
+    assert kasra.status is CellStatus.REPLACED
+    assert {bundle.sounds[sound.value].token for sound in kasra.owned_sound_ids} == {"i"}
+
+
+def test_article_lam_start_removes_ula_gemination_from_sound_and_cell():
+    selection = VariantSelection((
+        Option(KhilafId.ARTICLE_IBTIDAA, "lam"),
+    ))
+    _, bundle, view = _build_warsh("53:49:4", selection=selection)
+    lam = next(
+        column for column in view.words[0].columns
+        if {bundle.sounds[sound.value].token for sound in column.owned_sound_ids}
+        & {"l", "ll"}
+    )
+
+    assert lam.text == "ل"
+    assert lam.status is CellStatus.REPLACED
+    assert {bundle.sounds[sound.value].token for sound in lam.owned_sound_ids} == {"l"}
+
+
+@pytest.mark.parametrize("option", ("ibdal", "tashil"))
+def test_muttafiq_iyyaakum_keeps_its_shadda_cell(option):
+    selection = VariantSelection((
+        Option(KhilafId.HAMZA_MUTTAFIQ, option),
+    ))
+    _, bundle, view = _build_warsh("34:40", selection=selection)
+    word_id = next(word.id for word in bundle.words if word.ref == "34:40:8")
+    word = next(item for item in view.words if item.word_id == word_id)
+    yaa = next(
+        column for column in word.columns
+        if "jj" in {bundle.sounds[sound.value].token for sound in column.owned_sound_ids}
+    )
+
+    assert yaa.text == "يّ"
 
 
 def test_warsh_ibdal_hamza_labels_the_carrier_not_its_haraka():

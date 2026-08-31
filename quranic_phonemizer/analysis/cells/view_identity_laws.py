@@ -26,7 +26,8 @@ def check_carrier_identity_placement(view: CellView, bundle: AnalysisBundle) -> 
             )
             _require(
                 not pausal_alif or (
-                    column.role is CellRole.MADD and column.text.startswith("ا")
+                    column.role in {CellRole.LETTER, CellRole.MADD}
+                    and column.text.startswith("ا")
                 ),
                 "pausal-alif identity is not on its alif carrier",
             )
@@ -66,13 +67,15 @@ def _column_weight_shape(word, column, rules, sounds):
     owned_carrier = carrier_shape and any(
         is_long_a_token(sounds[sound].token) for sound in column.owned_sound_ids
     )
-    presented_carrier = carrier_shape and any(
+    # A native source cell can keep the carrier inside a compound hamza or
+    # eased-hamza glyph. Sound ownership is the semantic carrier relation; the
+    # transformed view will split that compound into its renderer cells.
+    presented_carrier = column.silence is None and any(
         is_long_a_token(sounds[sound].token) for sound in held
     )
     spelled_run = any(column.id in run.column_ids for run in word.runs)
     compact = (
         column.role is CellRole.LETTER
-        and column.text == "ا"
         and len(column.owned_sound_ids) > 1
     )
     return named, held, letter, owned_carrier, presented_carrier, spelled_run, compact

@@ -32,6 +32,16 @@ class VariantSpan:
     words: tuple[Location, ...]
     anchor: str
     requires: str
+    targets: tuple[Location, ...] | None = None
+
+    @property
+    def target_words(self) -> tuple[Location, ...]:
+        """Words whose rendering actually changes under this selector.
+
+        ``words`` remains the full activation span.  A joined rule can depend
+        on its following word without making that context word a visual target.
+        """
+        return self.words if self.targets is None else self.targets
 
     @property
     def ref(self) -> str:
@@ -123,6 +133,7 @@ class Khilaf:
                 {
                     "ref": span.ref,
                     "word_refs": [str(word) for word in span.words],
+                    "target_word_refs": [str(word) for word in span.target_words],
                     "anchor": span.anchor,
                     "requires": span.requires,
                 }
@@ -273,7 +284,10 @@ def _catalogue(raw, definitions, registers, path):
 
 
 def _span(raw) -> VariantSpan:
-    require_keys(raw, {"words", "anchor", "requires"}, name="variant occurrence")
+    require_keys(
+        raw, {"words", "anchor", "requires"}, optional={"targets"},
+        name="variant occurrence",
+    )
     words = tuple(_location(value) for value in raw["words"])
     if not words or len(words) > 2:
         raise KhilafError("variant occurrence must cover one or two words")
@@ -283,7 +297,10 @@ def _span(raw) -> VariantSpan:
         raise KhilafError(f"bad variant anchor {anchor!r}")
     if requires not in {"all", "wasl", "waqf", "ibtidaa", "joined"}:
         raise KhilafError(f"bad variant requirement {requires!r}")
-    return VariantSpan(words, anchor, requires)
+    targets = tuple(_location(value) for value in raw.get("targets", ())) or None
+    if targets is not None and not set(targets) <= set(words):
+        raise KhilafError("variant targets must belong to its word span")
+    return VariantSpan(words, anchor, requires, targets)
 
 
 def _one_special(raw, definitions, kind: str) -> SpecialSite | None:

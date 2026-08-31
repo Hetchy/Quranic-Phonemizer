@@ -176,6 +176,38 @@ def _transform_haraka(
     )
 
 
+def _transform_sukun_vowel(
+    col: CellColumn,
+    facts: AnalysisFacts,
+    pen: Pen,
+) -> CellColumn:
+    """Replace a written sukun when its slot performs a short vowel.
+
+    Naql at ``كتابيهْ إني`` is the boundary example: the source
+    sukun is real evidence, but the transformed face must draw a kasra cell
+    that owns the transferred /i/ instead of folding both sounds into ``هْ``.
+    """
+    if col.role is not CellRole.SUKUN:
+        return col
+    vowels = [
+        facts.sounds[sound.value].value
+        for sound in col.owned_sound_ids
+        if isinstance(facts.sounds[sound.value].value, Vowel)
+        and not facts.sounds[sound.value].value.long
+        and facts.sounds[sound.value].value.quality in _VOWEL_ROLE
+    ]
+    if len(vowels) != 1:
+        return col
+    value = vowels[0]
+    return replace(
+        col,
+        role=CellRole.HARAKA,
+        text=pen.role(_VOWEL_ROLE[value.quality]),
+        tier=CellTier.BELOW if value.quality is Quality.I else CellTier.ABOVE,
+        status=CellStatus.REPLACED,
+    )
+
+
 def _transform_plain_seen(
     col: CellColumn,
     facts: AnalysisFacts,
@@ -665,7 +697,11 @@ def transform_words(
             columns=tuple(
                 _transform_plain_seen(
                     _transform_haraka(
-                        _transform_column(col, facts, slot_of_unit, pen),
+                        _transform_sukun_vowel(
+                            _transform_column(col, facts, slot_of_unit, pen),
+                            facts,
+                            pen,
+                        ),
                         facts,
                         selection,
                         pen,

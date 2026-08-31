@@ -391,7 +391,14 @@ def catalogue_registers() -> dict[str, tuple[VariantSpan, ...]]:
             words = (first, replace(first, word=first.word + 1))
             anchor = "boundary"
         requires = site.junction or SELECTOR_JUNCTIONS[site.owner]
-        registers[site.owner].append(VariantSpan(words, anchor, requires))
+        # The following word licenses the joined reading, but only the raa in
+        # the first word is disputed.  Keep activation span and visual targets
+        # distinct so clients do not mount a misleading selector on the
+        # unchanged context word.
+        targets = (first,) if site.owner in PAIR_SELECTORS else None
+        registers[site.owner].append(
+            VariantSpan(words, anchor, requires, targets)
+        )
     return {owner: tuple(spans) for owner, spans in registers.items()}
 
 

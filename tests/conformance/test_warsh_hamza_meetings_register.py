@@ -20,9 +20,9 @@ def test_the_one_word_register_is_the_documented_sixty():
     })
 
 
-def test_the_across_word_register_is_the_documented_153():
+def test_the_across_word_register_is_the_documented_151():
     rows = [row for row in meeting_rows() if row.scope != "one_word"]
-    assert len(rows) == 153
+    assert len(rows) == 151
     assert Counter((row.first.name, row.second.name) for row in rows) == Counter({
         ("A", "A"): 30,
         ("I", "I"): 35,
@@ -31,10 +31,10 @@ def test_the_across_word_register_is_the_documented_153():
         ("A", "U"): 1,
         ("I", "A"): 28,
         ("U", "A"): 13,
-        ("U", "I"): 26,
+        ("U", "I"): 24,
     })
     assert Counter(row.scope for row in rows) == Counter({
-        "joined_words": 151,
+        "joined_words": 149,
         "joined_ayahs": 2,
     })
 
@@ -116,3 +116,12 @@ def test_every_row_carries_the_machine_contract():
         assert row.scope in {"one_word", "joined_words", "joined_ayahs"}
         assert row.owner
         assert row.exception in {None, "aimma", "aajami", "triple", "jaa_aal", "kasr_yaa", "fused_badal"}
+
+
+def test_damm_kasr_register_does_not_promote_wasl_starts_to_qata():
+    """Infatarat and inshaqqat begin with wasl, not a second qata hamza."""
+    assert {
+        row.canonical
+        for row in meeting_rows()
+        if row.owner == "hamza_damm_kasr"
+    }.isdisjoint({Location(82, 1, 3), Location(84, 1, 3)})
