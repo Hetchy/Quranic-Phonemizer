@@ -195,7 +195,7 @@ highlights = result.highlights()
 cells = result.cells(spelling="transformed")
 ```
 
-The cell view is the renderer-ready alignment between transformed spelling,
+The cell view is the render-ready alignment between transformed spelling,
 phonemes, and tajweed. It informs what to draw, what changed, where a
 sound is presented, and which rules belong to each cell:
 
@@ -242,7 +242,7 @@ result.rule_occurrences
 - Waqf and silence: `waqf_diacritic_drop`, `waqf_silah_drop`, `waqf_taa_marbuta`, `pausal_alif` (seven alifs), `orthographic_silence` (rasm)
 - Special: `imala`, `tashil`, `ishmam`
 
-Warsh adds five rule IDs:
+Warsh shares the same rules and adds five:
 
 - `taqlil`
 - `naql`
@@ -265,11 +265,11 @@ available_variants("hafs")["man_raq"]
 sakt = Phonemizer(variants={"man_raq": "sakt"})
 idraj = Phonemizer(variants={"man_raq": "idraj"})
 
-print(result.text())
-
 sakt_res = sakt.analyse("75:27")
-print(" ".join(sakt_res.phonemes()))
 idraj_res = idraj.analyse("75:27")
+
+print(sakt_res.text())
+print(" ".join(sakt_res.phonemes()))
 print(" ".join(idraj_res.phonemes()))
 ```
 
@@ -283,32 +283,30 @@ w a q i: l a m a rˤrˤ aˤ: q Q
 `available_variants(riwayah)` gives the legal values and the default for each ID,
 `variant_catalogue(riwayah)` adds presentation and applicability metadata, and
 `result.variant_occurrences()` reports the sites contained in one analysis. See
-the [variants contract](docs/variants.md) for every option, scope, boundary
-condition, and source.
+the [variants contract](docs/variants.md) for details, options, scopes, examples and research sources.
 
-Hafs publishes 26 selectors and Warsh 57, of which 12 are shared:
+Hafs publishes 26 selectors:
 
-- Nasal and merger performance: `iqlab_nasal`, `ikhfaa_shafawi_nasal`, `tamanna_noon`
-- Openings, hamza, and word boundaries: `noon_wasl`, `istifham_article`, `maliyah_halak`
+- Word readings: `daaf_haraka`, `yabsut`, `bastah`, `almusaytirun`, `bimusaytir`, `istifham_article`, `tamanna_noon`
+- Joined readings: `noon_wasl`, `yaseen_wasl`, `irkab_maana`, `yalhath_dhalik`
+- Stopping and starting: `yaa_aatani_waqf`, `salasila_waqf`, `alism_ibtidaa`
+- Sakt: `maliyah_halak`, `iwaja_qayyima`, `man_raq`, `bal_ran`
 - Raa: `raa_firq`, `raa_alqitr_waqf`, `raa_misr_waqf`, `raa_wanuthur_waqf`, `raa_yasr_waqf`, `raa_asr_waqf`
+- Nasal: `iqlab_nasal`, `ikhfaa_shafawi_nasal`
 
-Hafs adds:
+Warsh publishes 57:
 
-- Letters and vowels: `daaf_haraka`, `yabsut`, `bastah`, `almusaytirun`, `bimusaytir`
-- Waqf and ibtidaa: `yaa_aatani_waqf`, `salasila_waqf`, `alism_ibtidaa`
-- Junctions and nasals: `yaseen_wasl`, `irkab_maana`, `yalhath_dhalik`
-- Sakt: `iwaja_qayyima`, `man_raq`, `bal_ran`
+- Word readings: `tamanna_noon`, `istifham_article`
+- Joined readings: `noon_wasl`, `maliyah_halak`, `kitabiyah_inni`
+- Stopping and starting: `article_ibtidaa`
+- Inclination: `dhat_yaa`, `arakahum`, `al_jar`, `jabbarin`, `haa_verse_heads`, `maryam_haa_yaa`, `yaseen_yaa`
+- Hamza: `hamza_dhat_fath`, `hamza_muttafiq`, `hamza_damm_kasr`, `jaa_aal`, `hamza_kasr_yaa`, `hamza_aimma`, `hamza_arayta`, `ha_antum`, `allai_waqf`
+- Lam: `lam_dhat_yaa`, `lam_verse_heads`, `lam_separated_by_alif`, `lam_final_waqf`, `lam_salsal`, `lam_after_taa`, `lam_after_zhaa`
+- Raa: the six Hafs raa selectors, plus `raa_ishruna_kibr`, `raa_alishraq`, `raa_hayran`, `raa_bisharar`, `raa_five_words`, `raa_sihra`, `raa_iram`, `raa_alif_ayn`, `raa_alif_hamza`, `raa_dual_alif`, `raa_ashiratukum`, `raa_wizraka`, `raa_dhikraka`, `raa_wizra_ukhra`, `raa_ijrami`, `raa_hidhrakum`, `raa_ibrah_kibrahu`, `raa_hasirat_suduruhum`, `raa_fathatan`, `raa_damma`
+- Nasal: `iqlab_nasal`, `ikhfaa_shafawi_nasal`
 
-Warsh adds:
-
-- Boundaries: `kitabiyah_inni`, `article_ibtidaa`
-- General hamza meetings: `hamza_dhat_fath`, `hamza_muttafiq`, `hamza_damm_kasr`, `jaa_aal`
-- Lexical and start-specific hamza: `hamza_arayta`, `ha_antum`, `hamza_kasr_yaa`, `hamza_aimma`, `allai_waqf`
-- General and lexical inclination: `dhat_yaa`, `arakahum`, `al_jar`, `jabbarin`, `haa_verse_heads`
-- Opening letters and coupled lam: `maryam_haa_yaa`, `yaseen_yaa`, `lam_dhat_yaa`, `lam_verse_heads`
-- Lam: `lam_separated_by_alif`, `lam_final_waqf`, `lam_after_taa`, `lam_after_zhaa`, `lam_salsal`
-- Systematic raa: `raa_fathatan`, `raa_damma`, `raa_ishruna_kibr`
-- Lexical raa: `raa_alishraq`, `raa_hayran`, `raa_bisharar`, `raa_five_words`, `raa_sihra`, `raa_iram`, `raa_alif_ayn`, `raa_alif_hamza`, `raa_dual_alif`, `raa_ashiratukum`, `raa_wizraka`, `raa_dhikraka`, `raa_wizra_ukhra`, `raa_ijrami`, `raa_hidhrakum`, `raa_ibrah_kibrahu`, `raa_hasirat_suduruhum`
+The two readings share 12 IDs. A shared ID may carry a
+different default or cover different positions in each riwayah.
 
 ## Contributing
 
