@@ -68,8 +68,38 @@ or expands the test scope. Pull requests run the full ordinary suite, essential
 structure checks, and exact Arabic source-context validation. The PR suite uses
 two pytest workers to bound corpus memory while parallelizing independent cases.
 
-Releases are `v*` tags. The publish workflow repeats the PR checks, runs Warsh
-cell closure, installs and smoke-tests the wheel, then publishes it to PyPI.
+## Deploy
+
+Releases are `v*` tags, built and uploaded from this machine. There is no
+publish workflow; a tag reaching GitHub does not ship anything.
+
+Before tagging, run the precheck and read its report:
+
+```bash
+python tools/prerelease.py --web ../phonemizer-web
+```
+
+It reports and never blocks. Three things are reported: that every reading the
+site draws, and every variant option, still produces a payload its renderer can
+join; the per-word phoneme differences against the newest release on PyPI,
+across both readings and both boundary plans; and the same sweep over the typed
+analysis and cell documents, which compares rule placements, phoneme and
+character attributions, roles, and cell status whenever the baseline publishes
+those documents too. A reading the baseline does not publish is reported as
+having no baseline rather than as a difference.
+
+The corpus is walked one verse at a time in short-lived shard processes, and
+only digests are held; the readings that moved are re-read for their detail.
+Keep it that way -- a surah-wide or corpus-wide request holds its whole score
+alive.
+
+Release once the report reads as intended:
+
+```bash
+python tools/gates.py
+python -m pytest tests/conformance/test_warsh_cell_projection.py --runslow -q
+python -m build && python -m twine upload dist/*
+```
 
 Cross-script, L1, roundtrip, attestation, and legacy snapshot tools are manual
 audits. Run pytest-based audits explicitly with

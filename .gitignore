@@ -22,3 +22,6 @@ build/
 
 docs/mualem_conversion.md
 .claude/worktrees/
+
+# Prerelease precheck workspace: baseline venv, shard digests, and reports.
+.prerelease/
