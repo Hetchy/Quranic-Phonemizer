@@ -7,14 +7,14 @@
   <a href="https://github.com/Hetchy/Quranic-Phonemizer/blob/main/LICENSE"><img src="https://img.shields.io/pypi/l/quranic-phonemizer" alt="License"></a>
 </p>
 
-Quranic Grapheme-to-Phoneme (G2P) converter and tajweed annotator for the riwayat of Hafs 'An Asim and Warsh 'An Nafi', converting text to phoneme sequences with comprehensive support for waqf/intidaa transformations and tajweed breakdowns.
+Quranic Grapheme-to-Phoneme (G2P) converter and tajweed annotator for the riwayat of Hafs 'An Asim and Warsh 'An Nafi' that converts text to phoneme sequences with comprehensive support for waqf/ibtidaa transformations and tajweed breakdowns.
 
 Use cases:
 
 - **Speech Recognition**: Phonetically transcribe recitations, create training data for machine learning systems
 - **Text-to-Speech**: Develop accurate TTS systems for Qurʾanic Arabic
-- **Linguistic & Tajweed Analysis**: Study phonological patterns and tajweed rule distributions across the Qurʾan, apply tajweed rule labels and coloring
-- **Educational Tools**: Build interactive applications for assessing Quran and tajweed pronunciation
+- **Linguistic & Tajweed Analysis**: Study phonological patterns and tajweed rule distributions across the Qurʾan, apply tajweed rule labels and colors
+- **Educational Tools**: Build interactive applications for assessing Quranic and tajweed pronunciation
 - **Timing Analysis**: Generate word-by-word timestamps for recitations, analyse madd/ghunnah durations
 
 ## Table of Contents
@@ -44,7 +44,7 @@ The phoneme inventory uses the standard International Phonetic Alphabet (IPA) [A
 | ح                        | `ħ` / `ħħ`               | ش          | `ʃ` / `ʃʃ`                | ف          | `f` / `ff`               | و          | `w` / `ww`               |
 | خ                        | `x` / `xx`               | ص          | `sˤ` / `sˤsˤ`             | ق          | `q` / `qq`               | ي , ى      | `j` / `jj`               |
 
-`lˤ` is the single emphatic lam used in Warsh. Gemination (shaddah) is represented by repeating the phoneme to create new distinct phonemes. Note that there is no gemination for `m` / `n` (modelled as tajweed instead), and for `ʔ` / `ɣ` (do not exist in the Qurʾān).
+`lˤ` is the single emphatic lam used in Warsh. Gemination (shaddah) is represented by repeating the phoneme to create distinct phonemes. Note that there is no gemination for `m` / `n` (modelled as tajweed instead), and for `ʔ` / `ɣ` (do not exist in the Qurʾān).
 
 ### Vowel Phonemes
 
@@ -81,7 +81,7 @@ Iqlab and ikhfaa shafawi use the open-lip nasal `ŋ` by default. Their nasal var
 | `qalqala_degree`            | `QQ`              | Off         | Stronger Qalqala kubra/akbar allophone |
 | `imala` (kubra)             | `e:`              | Off         | Hafs: `مَجْر۪ىٰهَا` (11:41), off -> `i:` <br> Warsh: `طَه۪` (20:1), off -> `ɛ:` |
 | `tashil` (Hafs only)        | `ʔ̞`              | Off         | One case Hafs: `ءَا۬عْجَمِيٌّ` (41:44), off -> `ʔ` <br>Warsh always applies Tashil as `ʔ̞` since it is common |
-| `taqlil_short` (Warsh only) | `ɛ`               | Off         | The short taqlil on the raa of the fixed `رأى` family, off -> `a`.<br> The `taqlil` rule and light raa always apply. |
+| `taqlil_short` (Warsh only) | `ɛ`               | Off         | The short taqlil on the raa of the fixed `رأى` family, off -> `a`<br> The `taqlil` rule and light raa always apply |
 
 ## Quick start
 
@@ -140,7 +140,7 @@ hafs.analyse("68:33", stop_signs=("optional_stop",))
 hafs.analyse("2:255", stop_refs=("2:255:7",))
 ```
 
-This applies waqf to `2:255:7` and ibtidaa to `2:255:8`, or any words with `ۚ ` in `68:33`, changing phonemes and tajweed rules accordingly.
+This applies waqf to `2:255:7` and ibtidaa to `2:255:8`, or to any words marked with `ۚ ` in `68:33`, changing phonemes and tajweed rules accordingly.
 
 Note the first and last word of a request always apply ibtidaa and waqf respectively.
 
@@ -160,7 +160,7 @@ Warsh exposes only `optional_stop` ۖ
 
 ## Analysis
 
-The phonemizer exposes more detailed analysis, breakdowns, relationships and rules as below. See the [public API reference](docs/public-api.md) for the full details.
+The phonemizer exposes more detailed analysis, breakdowns, relationships and rules, as shown below. See the [public API reference](docs/public-api.md) for the full details.
 
 ```python
 result = hafs.analyse("112:2")
@@ -252,7 +252,7 @@ Warsh adds five unique rules:
 
 ## Variants
 
-A riwayah carries authenticated khilaf of awjuh and turuq: places where more than one
+A riwayah carries authenticated khilaf in awjuh and turuq: places where more than one
 performance is transmitted for the same text. These are lexical words, systematic
 patterns, and junctions between words. Each variant is one selector taking one
 scalar value, chosen at construction:
@@ -310,7 +310,7 @@ different default or cover different positions in each riwayah.
 
 ## Contributing
 
-If you find any issues or have feature suggestions, please feel free to open an issue or submit a pull request.
+If you find any issues or have feature suggestions, please open an issue or submit a pull request.
 
 Future plans include extending the phonemizer to other riwayat, beginning with Qalun 'An Nafi' and Shu'ba 'An Asim. Contributions are welcome!
 
