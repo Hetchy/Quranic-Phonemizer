@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from enum import StrEnum
 
 from .ids import (
+    AnimationTokenId,
     BoundaryId,
     CharacterId,
     LetterUnitId,
@@ -46,6 +47,14 @@ class LiteralSilence(StrEnum):
 Silence = OccurrenceId | LiteralSilence | None
 
 
+class AnimationPolicy(StrEnum):
+    """How a source-backed animation token receives highlight paint."""
+
+    TIMED = "timed"
+    COHIGHLIGHT_PREVIOUS = "cohighlight_previous"
+    COHIGHLIGHT_NEXT = "cohighlight_next"
+
+
 @dataclass(frozen=True, slots=True)
 class Character:
     id: CharacterId
@@ -73,6 +82,21 @@ class LetterUnit:
 
 
 @dataclass(frozen=True, slots=True)
+class AnimationToken:
+    """A foundation-level paint target; independent of cell presentation."""
+
+    id: AnimationTokenId
+    word_id: WordId
+    source_unit_ids: tuple[LetterUnitId, ...]
+    character_ids: tuple[CharacterId, ...]
+    paint_character_ids: tuple[CharacterId, ...]
+    text: str
+    sound_ids: tuple[SoundId, ...]
+    policy: AnimationPolicy
+    target_token_id: AnimationTokenId | None
+
+
+@dataclass(frozen=True, slots=True)
 class RulePlacement:
     rule_occurrence_id: OccurrenceId
     unit_ids: tuple[LetterUnitId, ...]
@@ -93,11 +117,14 @@ class SourceView:
     text: str
     characters: tuple[Character, ...]
     units: tuple[LetterUnit, ...]
+    animation_tokens: tuple[AnimationToken, ...]
     rule_placements: tuple[RulePlacement, ...]
     merger_placements: tuple[MergerPlacement, ...]
 
 
 __all__ = [
+    "AnimationPolicy",
+    "AnimationToken",
     "Character",
     "CharacterKind",
     "LetterUnit",

@@ -11,8 +11,10 @@ import pytest
 
 from quranic_phonemizer.analysis.build import build_bundle
 from quranic_phonemizer.analysis.dtos import BoundaryState
+from quranic_phonemizer.analysis.facade import Phonemizer
 from quranic_phonemizer.analysis.source import build_source_view
 from quranic_phonemizer.analysis.source_dtos import (
+    AnimationPolicy,
     CharacterKind,
     LetterUnitKind,
     LiteralSilence,
@@ -383,3 +385,134 @@ def test_a_decoration_only_dagger_is_explicitly_silent(hafs):
     assert dagger.silence is LiteralSilence.ORTHOGRAPHIC
     assert hamza.owned_sound_ids
     assert hamza.silence is None
+
+
+def _animation_word(bundle, view, ref):
+    word = next(item for item in bundle.words if item.ref == ref)
+    return [token for token in view.animation_tokens if token.word_id == word.id]
+
+
+def test_animation_targets_follow_source_sound_ownership(hafs):
+    """Seats and sound-bearing small letters follow native source units, not
+    general Unicode categories."""
+    _, bundle, view = _both(hafs, "2:2-2:4", {})
+    sounds = {sound.id: sound.token for sound in bundle.sounds}
+
+    regular_hamza = _animation_word(bundle, view, "2:4:4")[0]
+    assert regular_hamza.text == "أ"
+    assert [sounds[item] for item in regular_hamza.sound_ids] == ["ʔ"]
+
+    mini_hamza = next(
+        token for token in _animation_word(bundle, view, "2:4:10")
+        if "ٔ" in token.text
+    )
+    assert mini_hamza.text == "ـٔ"
+    assert [view.characters[item.value].text for item in mini_hamza.paint_character_ids] == ["ٔ"]
+    assert [sounds[item] for item in mini_hamza.sound_ids] == ["ʔ"]
+
+    salah = _animation_word(bundle, view, "2:3:5")
+    carrier = next(token for token in salah if "ٰ" in token.text)
+    assert carrier.text == "وٰ"
+    assert [sounds[item] for item in carrier.sound_ids] == ["a:"]
+
+    independent_dagger = next(
+        token for token in _animation_word(bundle, view, "2:2:1")
+        if token.text == "ٰ"
+    )
+    assert [sounds[item] for item in independent_dagger.sound_ids] == ["a:"]
+
+
+@pytest.mark.parametrize(
+    ("ref", "word_ref", "variant", "choice", "mark"),
+    [
+        ("2:245", "2:245:14", "yabsut", "seen", "ۜ"),
+        ("2:245", "2:245:14", "yabsut", "saad", "ۜ"),
+        ("52:37", "52:37:7", "almusaytirun", "seen", "ۣ"),
+        ("52:37", "52:37:7", "almusaytirun", "saad", "ۣ"),
+    ],
+)
+def test_animation_splits_reading_aid_seen_from_its_saad_base(
+    ref, word_ref, variant, choice, mark
+):
+    result = Phonemizer(variants={variant: choice}).analyse(ref)
+    view = result.source()
+    word_id = next(word.id for word in result.words if word.ref == word_ref)
+    tokens = [token for token in view.animation_tokens if token.word_id == word_id]
+    saad = next(token for token in tokens if token.text == "ص")
+    seen = next(token for token in tokens if token.text == mark)
+
+    sounded, silent = (seen, saad) if choice == "seen" else (saad, seen)
+    assert sounded.sound_ids
+    assert sounded.policy is AnimationPolicy.TIMED
+    assert not silent.sound_ids
+    assert silent.target_token_id == sounded.id
+
+
+def test_animation_keeps_a_sakt_seen_out_of_letter_tokens(hafs):
+    _, _, view = _both(hafs, "75:27", {})
+
+    assert "ۜ" in view.text
+    assert all("ۜ" not in token.text for token in view.animation_tokens)
+
+
+def test_animation_silent_letters_target_a_sounding_token_directly(hafs):
+    _, bundle, view = _both(hafs, "17:7", {})
+    tokens = _animation_word(bundle, view, "17:7:14")
+    final_sounding = next(token for token in reversed(tokens) if token.text == "ل")
+    trailing = [token for token in tokens if token.id.value > final_sounding.id.value]
+
+    assert len(trailing) == 2
+    assert all(token.policy is AnimationPolicy.COHIGHLIGHT_PREVIOUS for token in trailing)
+    assert all(token.target_token_id == final_sounding.id for token in trailing)
+    assert all(not token.sound_ids for token in trailing)
+
+
+def test_animation_distinguishes_silent_solar_lam_from_a_merger_contributor(hafs):
+    _, bundle, view = _both(hafs, "1:1", {})
+    lam_shamsiyyah = {
+        sound.id
+        for sound in bundle.sounds
+        if any(
+            bundle.rule_occurrences[occurrence.value].rule_id.value
+            == "lam_shamsiyyah"
+            for occurrence in sound.rule_occurrence_ids
+        )
+    }
+    solar_lams = [
+        token
+        for token in view.animation_tokens
+        if token.text == "ل"
+        and any(
+            sound in lam_shamsiyyah
+            for unit_id in token.source_unit_ids
+            for sound in view.units[unit_id.value].presented_sound_ids
+        )
+    ]
+
+    assert len(solar_lams) == 3
+    assert all(not token.sound_ids for token in solar_lams)
+    assert all(token.policy is AnimationPolicy.COHIGHLIGHT_NEXT for token in solar_lams)
+    assert all(token.target_token_id is not None for token in solar_lams)
+
+    _, _, merged = _both(hafs, "2:5", {})
+    contributor = next(
+        token
+        for token in merged.animation_tokens
+        if token.text == "ن" and token.policy is AnimationPolicy.COHIGHLIGHT_NEXT
+    )
+    assert contributor.sound_ids
+
+
+def test_animation_silent_alif_shares_the_adjacent_merger_target(hafs):
+    _, bundle, view = _both(hafs, "2:61:55-2:61:59", {})
+    ending = _animation_word(bundle, view, "2:61:57")
+    following = _animation_word(bundle, view, "2:61:58")
+    waw = next(token for token in ending if token.text == "و")
+    silent_alif = next(token for token in ending if token.text == "ا۟")
+    merger_host = next(token for token in following if token.text == "وّ")
+
+    assert waw.policy is AnimationPolicy.COHIGHLIGHT_NEXT
+    assert waw.target_token_id == merger_host.id
+    assert silent_alif.policy is AnimationPolicy.COHIGHLIGHT_NEXT
+    assert silent_alif.target_token_id == merger_host.id
+    assert not silent_alif.sound_ids

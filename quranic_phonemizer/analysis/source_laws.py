@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from .checks import requirer
 from .dtos import AnalysisBundle
-from .source_dtos import CharacterKind, LiteralSilence, SourceView
+from .source_dtos import AnimationPolicy, CharacterKind, LiteralSilence, SourceView
 
 
 class SourceValidationError(ValueError):
@@ -111,6 +111,45 @@ def _check_placements(view: SourceView, bundle: AnalysisBundle, unit_ids: set) -
     _check_mergers(view, bundle, unit_ids)
 
 
+def _check_animation(view: SourceView, unit_ids: set) -> None:
+    token_ids = {token.id for token in view.animation_tokens}
+    assigned: set = set()
+    for index, token in enumerate(view.animation_tokens):
+        _require(token.id.value == index, "animation token ids are not positional")
+        _require(bool(token.source_unit_ids), f"animation token {index} has no source unit")
+        _require(set(token.source_unit_ids) <= unit_ids,
+                 f"animation token {index} names a missing source unit")
+        _require(not (assigned & set(token.source_unit_ids)),
+                 f"animation token {index} reuses a source unit")
+        assigned.update(token.source_unit_ids)
+        chars = [view.characters[char.value] for char in token.character_ids]
+        _require(all(char.word_id == token.word_id for char in chars),
+                 f"animation token {index} crosses words")
+        _require(token.text == "".join(char.text for char in chars),
+                 f"animation token {index} text is not its exact characters")
+        _require(bool(token.paint_character_ids),
+                 f"animation token {index} has no paint characters")
+        _require(set(token.paint_character_ids) <= set(token.character_ids),
+                 f"animation token {index} paints outside its characters")
+        if token.policy in {
+            AnimationPolicy.COHIGHLIGHT_PREVIOUS,
+            AnimationPolicy.COHIGHLIGHT_NEXT,
+        }:
+            _require(token.target_token_id in token_ids,
+                     f"animation token {index} has no co-highlight target")
+            target = token.target_token_id.value
+            expected_previous = token.policy is AnimationPolicy.COHIGHLIGHT_PREVIOUS
+            _require((target < index) == expected_previous,
+                     f"animation token {index} target contradicts its policy")
+            _require(view.animation_tokens[target].policy is AnimationPolicy.TIMED,
+                     f"animation token {index} targets a non-sounding token")
+        else:
+            _require(token.target_token_id is None,
+                     f"animation token {index} unexpectedly has a target")
+            _require(bool(token.sound_ids),
+                     f"timed animation token {index} owns no sound")
+
+
 def _check_mergers(view: SourceView, bundle: AnalysisBundle, unit_ids: set) -> None:
     _require(
         len(view.merger_placements) == len(bundle.mergers),
@@ -137,6 +176,7 @@ def validate_source_view(view: SourceView, bundle: AnalysisBundle) -> None:
     _check_ownership(view, len(bundle.sounds))
     _check_silence(view, occ_ids)
     _check_placements(view, bundle, unit_ids)
+    _check_animation(view, unit_ids)
 
 
 __all__ = ["SourceValidationError", "validate_source_view"]

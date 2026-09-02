@@ -39,6 +39,7 @@ from .highlight_laws import HighlightValidationError, validate_highlight_groups
 from .highlights import highlight_groups
 from .ids import (
     SCHEMA_VERSION,
+    AnimationTokenId,
     BoundaryId,
     HighlightId,
     MergerId,
@@ -72,6 +73,8 @@ from .schema import (
 from .sounds import SoundFact
 from .source import build_source_view
 from .source_dtos import (
+    AnimationPolicy,
+    AnimationToken,
     Character,
     CharacterKind,
     LetterUnit,
@@ -89,6 +92,9 @@ __all__ = [
     "AnalysisBundle",
     "AnalysisFacts",
     "AnalysisResult",
+    "AnimationPolicy",
+    "AnimationToken",
+    "AnimationTokenId",
     "Boundary",
     "BoundaryId",
     "BoundaryState",

@@ -177,11 +177,17 @@ for character in source.characters:
 
 for unit in source.units:
     print(unit.text, unit.kind, unit.silence, unit.rule_occurrence_ids)
+
+for token in source.animation_tokens:
+    print(token.text, token.sound_ids, token.policy, token.target_token_id)
 ```
 
 `source()` returns the native `SourceView`. Characters are exact Unicode
 scalars. Units are the producer-tokenized letter surface. Stop signs and sakt
-marks belong to boundaries rather than lexical units.
+marks belong to boundaries rather than lexical units. Animation tokens are
+foundation-level paint targets derived from source units and sound ownership.
+A timed token owns sound IDs; a soundless token names the previous or next
+timed token it co-highlights through its policy and target ID.
 
 ## Highlights
 
@@ -228,12 +234,12 @@ cells = result.document("cell_view", spelling="transformed")
 ```
 
 Each call returns a JSON-compatible dictionary stamped with
-`schema_version == 3`:
+`schema_version == 4`:
 
 | Kind | Contents |
 | --- | --- |
 | `analysis_result` | Metadata, source text, words, boundaries, sounds, rule occurrences, and mergers. |
-| `source_view` | Source characters, letter units, silence, and placements. |
+| `source_view` | Source characters, letter units, animation tokens, silence, and placements. |
 | `highlight_groups` | Source ranges and unit IDs grouped by active sound IDs. |
 | `cell_view` | Source or transformed educational cells, runs, boundaries, and merger bridges. |
 

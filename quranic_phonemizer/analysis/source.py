@@ -11,6 +11,7 @@ from ..model.inscription import Glyph, GlyphKind
 from ..render.alphabet import packaged_alphabet
 from ..session import Session
 from . import ids
+from .animation import build_animation_tokens
 from .dtos import AnalysisBundle
 from .facts import AnalysisFacts, analyse
 from .inscription import InscriptionFacts, inscribe
@@ -160,6 +161,7 @@ def build_source_view(
         text=bundle.source_text,
         characters=_characters(insc, tok),
         units=units,
+        animation_tokens=build_animation_tokens(units, bundle),
         rule_placements=_rule_placements(plc),
         merger_placements=_merger_placements(plc),
     )
