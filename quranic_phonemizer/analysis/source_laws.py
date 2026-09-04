@@ -113,15 +113,15 @@ def _check_placements(view: SourceView, bundle: AnalysisBundle, unit_ids: set) -
 
 def _check_animation(view: SourceView, unit_ids: set) -> None:
     token_ids = {token.id for token in view.animation_tokens}
-    assigned: set = set()
+    assigned_characters: set = set()
     for index, token in enumerate(view.animation_tokens):
         _require(token.id.value == index, "animation token ids are not positional")
         _require(bool(token.source_unit_ids), f"animation token {index} has no source unit")
         _require(set(token.source_unit_ids) <= unit_ids,
                  f"animation token {index} names a missing source unit")
-        _require(not (assigned & set(token.source_unit_ids)),
-                 f"animation token {index} reuses a source unit")
-        assigned.update(token.source_unit_ids)
+        _require(not (assigned_characters & set(token.character_ids)),
+                 f"animation token {index} reuses a source character")
+        assigned_characters.update(token.character_ids)
         chars = [view.characters[char.value] for char in token.character_ids]
         _require(all(char.word_id == token.word_id for char in chars),
                  f"animation token {index} crosses words")

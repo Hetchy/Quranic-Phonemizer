@@ -411,15 +411,43 @@ def test_animation_targets_follow_source_sound_ownership(hafs):
     assert [sounds[item] for item in mini_hamza.sound_ids] == ["ʔ"]
 
     salah = _animation_word(bundle, view, "2:3:5")
-    carrier = next(token for token in salah if "ٰ" in token.text)
-    assert carrier.text == "وٰ"
-    assert [sounds[item] for item in carrier.sound_ids] == ["a:"]
+    carrier = next(token for token in salah if token.text == "و")
+    dagger = next(token for token in salah if token.text == "ٰ")
+    assert not carrier.sound_ids
+    assert carrier.policy is AnimationPolicy.COHIGHLIGHT_NEXT
+    assert carrier.target_token_id == dagger.id
+    assert [sounds[item] for item in dagger.sound_ids] == ["a:"]
 
     independent_dagger = next(
         token for token in _animation_word(bundle, view, "2:2:1")
         if token.text == "ٰ"
     )
     assert [sounds[item] for item in independent_dagger.sound_ids] == ["a:"]
+
+
+@pytest.mark.parametrize(
+    ("ref", "word_ref", "carrier_text", "dagger_text"),
+    [
+        ("2:3", "2:3:5", "و", "ٰ"),
+        ("2:275", "2:275:3", "و", "ٰ"),
+        ("2:5", "2:5:2", "ى", "ٰ"),
+    ],
+)
+def test_animation_splits_a_sounded_dagger_from_its_silent_carrier(
+    hafs, ref, word_ref, carrier_text, dagger_text
+):
+    _, bundle, view = _both(hafs, ref, {})
+    tokens = _animation_word(bundle, view, word_ref)
+    carrier = next(token for token in tokens if token.text == carrier_text)
+    dagger = next(token for token in tokens if token.text.startswith(dagger_text))
+
+    assert not carrier.sound_ids
+    assert carrier.policy is AnimationPolicy.COHIGHLIGHT_NEXT
+    assert carrier.target_token_id == dagger.id
+    assert dagger.sound_ids
+    assert dagger.policy is AnimationPolicy.TIMED
+    assert set(carrier.character_ids).isdisjoint(dagger.character_ids)
+    assert carrier.source_unit_ids == dagger.source_unit_ids
 
 
 @pytest.mark.parametrize(

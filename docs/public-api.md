@@ -188,6 +188,9 @@ marks belong to boundaries rather than lexical units. Animation tokens are
 foundation-level paint targets derived from source units and sound ownership.
 A timed token owns sound IDs; a soundless token names the previous or next
 timed token it co-highlights through its policy and target ID.
+One source unit can supply multiple character-disjoint paint targets when its
+Unicode scalars need different highlight ownership. In particular, a sounded
+dagger alef is timed separately from its silent rasm carrier.
 
 ## Highlights
 

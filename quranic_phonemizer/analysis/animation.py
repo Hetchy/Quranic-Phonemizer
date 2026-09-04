@@ -9,6 +9,7 @@ from .dtos import AnalysisBundle
 from .source_dtos import AnimationPolicy, AnimationToken, LetterUnit, LetterUnitKind
 
 _TATWEEL = "ـ"
+_DAGGER_ALEF = "ٰ"
 _READING_AID_SEEN = frozenset({"ۜ", "ۣ"})
 
 
@@ -56,6 +57,74 @@ def _highlight_presented_sounds(
             for occurrence in bundle.sounds[sound.value].rule_occurrence_ids
         )
     )
+
+
+def _split_sounding_dagger_carriers(
+    tokens: list[AnimationToken],
+    text_by_character: dict[int, str],
+) -> tuple[AnimationToken, ...]:
+    """Give a sounded dagger its own paint target, apart from its rasm seat."""
+    expanded: list[tuple[AnimationToken, bool]] = []
+    timed_child: dict[int, int] = {}
+    for token in tokens:
+        scalars = [text_by_character[character.value] for character in token.character_ids]
+        try:
+            dagger_at = scalars.index(_DAGGER_ALEF)
+        except ValueError:
+            dagger_at = -1
+        if dagger_at <= 0 or not token.sound_ids:
+            timed_child[token.id.value] = len(expanded)
+            expanded.append((token, False))
+            continue
+
+        carrier_chars = token.character_ids[:dagger_at]
+        dagger_chars = token.character_ids[dagger_at:]
+        carrier = AnimationToken(
+            id=ids.AnimationTokenId(-1),
+            word_id=token.word_id,
+            source_unit_ids=token.source_unit_ids,
+            character_ids=carrier_chars,
+            paint_character_ids=_paint_characters(carrier_chars, text_by_character),
+            text="".join(text_by_character[item.value] for item in carrier_chars),
+            sound_ids=(),
+            policy=AnimationPolicy.COHIGHLIGHT_NEXT,
+            target_token_id=None,
+        )
+        dagger = AnimationToken(
+            id=ids.AnimationTokenId(-1),
+            word_id=token.word_id,
+            source_unit_ids=token.source_unit_ids,
+            character_ids=dagger_chars,
+            paint_character_ids=_paint_characters(dagger_chars, text_by_character),
+            text="".join(text_by_character[item.value] for item in dagger_chars),
+            sound_ids=token.sound_ids,
+            policy=AnimationPolicy.TIMED,
+            target_token_id=None,
+        )
+        expanded.append((carrier, True))
+        timed_child[token.id.value] = len(expanded)
+        expanded.append((dagger, False))
+
+    out: list[AnimationToken] = []
+    for new_id, (token, targets_own_dagger) in enumerate(expanded):
+        if targets_own_dagger:
+            target = ids.AnimationTokenId(new_id + 1)
+        elif token.target_token_id is not None:
+            target = ids.AnimationTokenId(timed_child[token.target_token_id.value])
+        else:
+            target = None
+        out.append(AnimationToken(
+            id=ids.AnimationTokenId(new_id),
+            word_id=token.word_id,
+            source_unit_ids=token.source_unit_ids,
+            character_ids=token.character_ids,
+            paint_character_ids=token.paint_character_ids,
+            text=token.text,
+            sound_ids=token.sound_ids,
+            policy=token.policy,
+            target_token_id=target,
+        ))
+    return tuple(out)
 
 
 def build_animation_tokens(
@@ -132,6 +201,7 @@ def build_animation_tokens(
     if ordered and not timed:
         raise AnimationProjectionError("the reading has no sounding animation token")
 
+    all_text_by_character = _character_text(letters)
     tokens: list[AnimationToken] = []
     for token_id, group in enumerate(ordered):
         primary = group[0]
@@ -194,7 +264,7 @@ def build_animation_tokens(
             policy=policy,
             target_token_id=None if target is None else ids.AnimationTokenId(target),
         ))
-    return tuple(tokens)
+    return _split_sounding_dagger_carriers(tokens, all_text_by_character)
 
 
 __all__ = ["AnimationProjectionError", "build_animation_tokens"]
