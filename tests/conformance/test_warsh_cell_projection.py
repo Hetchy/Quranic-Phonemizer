@@ -5,6 +5,7 @@ import pytest
 
 from tools.warsh_projection_audit import audit
 
+
 @pytest.mark.slow
 def test_every_warsh_scalar_reaches_a_cell_or_boundary():
     result = audit()
