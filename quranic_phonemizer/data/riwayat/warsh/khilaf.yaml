@@ -1,0 +1,665 @@
+# Scalar Warsh choices. Selector families land per owner-family PR; an ID
+# is published here only once its rules bind, so the catalogue never carries
+# a silent no-op selector. Runtime raa site keys live in the authored
+# registers of riwayat/warsh/raa.py; this file owns options, defaults, and
+# the public catalogue.
+schema_version: 3
+group_order:
+  [word_readings, joined_readings, stopping_starting, inclination,
+   hamza_readings, lam_pronunciation, raa_pronunciation, nasal_variants]
+
+variants:
+  raa_firq:
+    kind: raa_site
+    options: [light, heavy]
+    default: light
+    source: docs/warsh/research/v2/raa.md
+
+  raa_alqitr_waqf:
+    kind: raa_site
+    options: [light, heavy]
+    default: light
+    source: docs/warsh/research/v2/raa.md
+
+  raa_misr_waqf:
+    kind: raa_site
+    options: [heavy, light]
+    default: heavy
+    source: docs/warsh/research/v2/raa.md
+
+  raa_wanuthur_waqf:
+    kind: raa_site
+    options: [light, heavy]
+    default: light
+    source: docs/warsh/research/v2/raa.md
+
+  raa_yasr_waqf:
+    kind: raa_site
+    options: [light, heavy]
+    default: light
+    source: docs/warsh/research/v2/raa.md
+
+  raa_asr_waqf:
+    kind: raa_site
+    options: [heavy, light]
+    default: heavy
+    source: docs/warsh/research/v2/raa.md
+
+  raa_fathatan:
+    kind: raa_systematic
+    options: [light, heavy, heavy_wasl]
+    default: light
+    source: docs/warsh/research/v2/raa.md
+
+  raa_damma:
+    kind: raa_systematic
+    options: [light, heavy]
+    default: light
+    source: docs/warsh/research/v2/raa.md
+
+  raa_ishruna_kibr:
+    kind: raa_site
+    options: [light, heavy]
+    default: light
+    source: docs/warsh/research/v2/raa.md
+
+  raa_alishraq:
+    kind: raa_site
+    options: [heavy, light]
+    default: heavy
+    source: docs/warsh/research/v2/raa.md
+
+  raa_hayran:
+    kind: raa_site
+    options: [heavy, light]
+    default: heavy
+    source: docs/warsh/research/v2/raa.md
+
+  raa_bisharar:
+    kind: raa_site
+    options: [light, heavy]
+    default: light
+    source: docs/warsh/research/v2/raa.md
+
+  raa_five_words:
+    kind: raa_site
+    options: [heavy, light]
+    default: heavy
+    source: docs/warsh/research/v2/raa.md
+
+  raa_sihra:
+    kind: raa_site
+    options: [heavy, light]
+    default: heavy
+    source: docs/warsh/research/v2/raa.md
+
+  raa_iram:
+    kind: raa_site
+    options: [heavy, light]
+    default: heavy
+    source: docs/warsh/research/v2/raa.md
+
+  raa_alif_ayn:
+    kind: raa_site
+    options: [light, heavy]
+    default: light
+    source: docs/warsh/research/v2/raa.md
+
+  raa_alif_hamza:
+    kind: raa_site
+    options: [light, heavy]
+    default: light
+    source: docs/warsh/research/v2/raa.md
+
+  raa_dual_alif:
+    kind: raa_site
+    options: [light, heavy]
+    default: light
+    source: docs/warsh/research/v2/raa.md
+
+  raa_ashiratukum:
+    kind: raa_site
+    options: [light, heavy]
+    default: light
+    source: docs/warsh/research/v2/raa.md
+
+  raa_wizraka:
+    kind: raa_site
+    options: [light, heavy]
+    default: light
+    source: docs/warsh/research/v2/raa.md
+
+  raa_dhikraka:
+    kind: raa_site
+    options: [light, heavy]
+    default: light
+    source: docs/warsh/research/v2/raa.md
+
+  raa_wizra_ukhra:
+    kind: raa_site
+    options: [light, heavy]
+    default: light
+    source: docs/warsh/research/v2/raa.md
+
+  raa_ijrami:
+    kind: raa_site
+    options: [light, heavy]
+    default: light
+    source: docs/warsh/research/v2/raa.md
+
+  raa_hidhrakum:
+    kind: raa_site
+    options: [light, heavy]
+    default: light
+    source: docs/warsh/research/v2/raa.md
+
+  raa_ibrah_kibrahu:
+    kind: raa_site
+    options: [light, heavy]
+    default: light
+    source: docs/warsh/research/v2/raa.md
+
+  raa_hasirat_suduruhum:
+    kind: raa_site
+    options: [light, heavy]
+    default: light
+    source: docs/warsh/research/v2/raa.md
+
+  dhat_yaa:
+    kind: inclination_site
+    options: [fath, taqlil]
+    default: taqlil
+    source: docs/warsh/research/v2/inclination.md
+
+  arakahum:
+    kind: inclination_site
+    options: [fath, taqlil]
+    default: taqlil
+    source: docs/warsh/research/v2/inclination.md
+
+  al_jar:
+    kind: inclination_site
+    options: [fath, taqlil]
+    default: taqlil
+    source: docs/warsh/research/v2/inclination.md
+
+  jabbarin:
+    kind: inclination_site
+    options: [fath, taqlil]
+    default: taqlil
+    source: docs/warsh/research/v2/inclination.md
+
+  haa_verse_heads:
+    kind: inclination_site
+    options: [fath, taqlil]
+    default: fath
+    source: docs/warsh/research/v2/inclination.md
+
+  maryam_haa_yaa:
+    kind: inclination_site
+    options: [taqlil, fath]
+    default: taqlil
+    source: docs/warsh/research/v2/inclination.md
+
+  yaseen_yaa:
+    kind: inclination_site
+    options: [fath, taqlil]
+    default: fath
+    source: docs/warsh/research/v2/inclination.md
+
+  lam_dhat_yaa:
+    kind: lam_coupled
+    options: [fath_tafkheem, taqlil_tarqiq]
+    default: fath_tafkheem
+    source: docs/warsh/research/v2/lam-tafkheem.md
+
+  lam_verse_heads:
+    kind: lam_coupled
+    options: [taqlil_tarqiq, fath_tafkheem]
+    default: taqlil_tarqiq
+    source: docs/warsh/research/v2/lam-tafkheem.md
+
+  lam_separated_by_alif:
+    kind: lam_site
+    options: [tafkheem, tarqiq]
+    default: tafkheem
+    source: docs/warsh/research/v2/lam-tafkheem.md
+
+  lam_final_waqf:
+    kind: lam_site
+    options: [tafkheem, tarqiq]
+    default: tafkheem
+    source: docs/warsh/research/v2/lam-tafkheem.md
+
+  lam_after_taa:
+    kind: lam_systematic
+    options: [tarqiq, tafkheem]
+    default: tafkheem
+    source: docs/warsh/research/v2/lam-tafkheem.md
+
+  lam_after_zhaa:
+    kind: lam_systematic
+    options: [tarqiq, tafkheem]
+    default: tafkheem
+    source: docs/warsh/research/v2/lam-tafkheem.md
+
+  lam_salsal:
+    kind: lam_site
+    options: [tarqiq, tafkheem]
+    default: tarqiq
+    source: docs/warsh/research/v2/lam-tafkheem.md
+
+  tamanna_noon:
+    kind: tamanna
+    options: [ishmam, ikhtilas]
+    default: ishmam
+    locations: ["12:11:6"]
+    source: docs/variants.md
+
+  istifham_article:
+    kind: madd_tasheel
+    options: [ibdal, tashil]
+    default: ibdal
+    locations: ["6:143:10", "6:144:8", "10:51:7", "10:91:1", "10:59:14", "27:59:9"]
+    source: docs/variants.md
+
+  noon_wasl:
+    kind: rule
+    options: [izhar, idgham]
+    default: izhar
+    junction: wasl
+    locations: ["68:1:1"]
+    source: docs/variants.md
+
+  maliyah_halak:
+    kind: sakt
+    options: [sakt, idgham]
+    default: idgham
+    junction: wasl
+    locations: ["69:28:4"]
+    source: docs/variants.md
+
+  kitabiyah_inni:
+    kind: naql_boundary
+    options: [tahqiq, naql]
+    default: tahqiq
+    junction: wasl
+    locations: ["69:20:1"]
+    source: docs/variants.md
+
+  article_ibtidaa:
+    kind: start
+    options: [hamza, lam]
+    default: hamza
+    junction: ibtidaa
+    locations: ["49:11:30", "53:50:4"]
+    source: docs/variants.md
+
+  hamza_dhat_fath:
+    kind: hamza_meeting
+    options: [ibdal, tashil]
+    default: ibdal
+    source: docs/warsh/research/v2/hamza-meetings.md
+
+  hamza_muttafiq:
+    kind: hamza_meeting
+    options: [ibdal, tashil]
+    default: ibdal
+    junction: wasl
+    source: docs/warsh/research/v2/hamza-meetings.md
+
+  hamza_damm_kasr:
+    kind: hamza_meeting
+    options: [ibdal, tashil]
+    default: ibdal
+    junction: wasl
+    source: docs/warsh/research/v2/hamza-meetings.md
+
+  jaa_aal:
+    kind: hamza_meeting
+    options: [ibdal, tashil]
+    default: tashil
+    junction: wasl
+    source: docs/warsh/research/v2/hamza-meetings.md
+
+  hamza_kasr_yaa:
+    kind: hamza_meeting
+    options: [ibdal, tashil, yaa]
+    default: ibdal
+    junction: wasl
+    source: docs/warsh/research/v2/hamza-meetings.md
+
+  hamza_aimma:
+    kind: hamza_meeting
+    options: [tashil, ibdal]
+    default: tashil
+    source: docs/warsh/research/v2/hamza-meetings.md
+
+  hamza_arayta:
+    kind: hamza_lexical
+    options: [ibdal, tashil]
+    default: ibdal
+    source: docs/warsh/research/v2/single-hamza.md
+
+  ha_antum:
+    kind: hamza_lexical
+    options: [hadhf, ibdal, ithbat]
+    default: ibdal
+    source: docs/warsh/research/v2/single-hamza.md
+
+  allai_waqf:
+    kind: hamza_lexical
+    options: [tashil, ibdal_yaa]
+    default: tashil
+    junction: waqf
+    source: docs/warsh/research/v2/single-hamza.md
+
+  iqlab_nasal:
+    kind: nasal_place
+    options: [open, closed]
+    default: open
+    locations: [all_iqlab]
+    source: docs/variants.md
+
+  ikhfaa_shafawi_nasal:
+    kind: nasal_place
+    options: [open, closed]
+    default: open
+    locations: [all_ikhfaa_shafawi]
+    source: docs/variants.md
+
+
+catalogue:
+  raa_firq:
+    {group: raa_pronunciation, subgroup: lexical, display_name: "Raa Firq",
+     website_visible: true, register: raa_firq}
+  raa_alqitr_waqf:
+    {group: raa_pronunciation, subgroup: lexical,
+     display_name: "Raa Alqitr Waqf", website_visible: true,
+     register: raa_alqitr_waqf}
+  raa_misr_waqf:
+    {group: raa_pronunciation, subgroup: lexical,
+     display_name: "Raa Misr Waqf", website_visible: true,
+     register: raa_misr_waqf}
+  raa_wanuthur_waqf:
+    group: raa_pronunciation
+    subgroup: lexical
+    display_name: "Raa Wanuthur Waqf"
+    description: "The six وَنُذُرِ endings in Surah Al-Qamar."
+    website_visible: true
+    register: raa_wanuthur_waqf
+  raa_yasr_waqf:
+    {group: raa_pronunciation, subgroup: lexical,
+     display_name: "Raa Yasr Waqf", website_visible: true,
+     register: raa_yasr_waqf}
+  raa_asr_waqf:
+    group: raa_pronunciation
+    subgroup: lexical
+    display_name: "Raa Asr Waqf"
+    website_visible: true
+    register: raa_asr_waqf
+  raa_fathatan:
+    group: raa_pronunciation
+    subgroup: systematic
+    display_name: "Raa Fathatan"
+    description: "Eligible raa carrying fathatan, such as خَيْراٗ."
+    website_visible: true
+    dynamic_scope: eligible_fathatan
+  raa_damma:
+    group: raa_pronunciation
+    subgroup: systematic
+    display_name: "Raa Damma"
+    description: "Eligible raa carrying damma or dammatan, such as خَيْرٞ."
+    website_visible: true
+    dynamic_scope: eligible_damma
+  raa_ishruna_kibr:
+    group: raa_pronunciation
+    subgroup: lexical
+    display_name: "Raa Ishruna Kibr"
+    description: "عِشْرُونَ and كِبْرٞ."
+    website_visible: true
+    register: raa_ishruna_kibr
+  raa_alishraq:
+    {group: raa_pronunciation, subgroup: lexical,
+     display_name: "Raa Alishraq", website_visible: true,
+     register: raa_alishraq}
+  raa_hayran:
+    {group: raa_pronunciation, subgroup: lexical,
+     display_name: "Raa Hayran", website_visible: true,
+     register: raa_hayran}
+  raa_bisharar:
+    {group: raa_pronunciation, subgroup: lexical,
+     display_name: "Raa Bisharar", website_visible: true,
+     register: raa_bisharar}
+  raa_five_words:
+    group: raa_pronunciation
+    subgroup: lexical
+    display_name: "Raa Five Words"
+    description: "All ذِكْراٗ, سِتْراٗ, اِمْراٗ, وِزْراً, and حِجْراٗ forms."
+    website_visible: true
+    register: raa_five_words
+  raa_sihra:
+    {group: raa_pronunciation, subgroup: lexical,
+     display_name: "Raa Sihra", website_visible: true, register: raa_sihra}
+  raa_iram:
+    {group: raa_pronunciation, subgroup: lexical,
+     display_name: "Raa Iram", website_visible: true, register: raa_iram}
+  raa_alif_ayn:
+    group: raa_pronunciation
+    subgroup: lexical
+    display_name: "Raa Alif Ayn"
+    description: "ذِرَاعَيْهِ, سِرَاعاٗ, and ذِرَاعاٗ."
+    website_visible: true
+    register: raa_alif_ayn
+  raa_alif_hamza:
+    group: raa_pronunciation
+    subgroup: lexical
+    display_name: "Raa Alif Hamza"
+    description: "The two اَ۪فْتِرَآءً forms and مِرَآءٗ."
+    website_visible: true
+    register: raa_alif_hamza
+  raa_dual_alif:
+    group: raa_pronunciation
+    subgroup: lexical
+    display_name: "Raa Dual Alif"
+    description: "طَهِّرَا, لَسَٰحِرَٰنِ, سَٰحِرَٰنِ, and تَنتَصِرَٰنِ."
+    website_visible: true
+    register: raa_dual_alif
+  raa_ashiratukum:
+    {group: raa_pronunciation, subgroup: lexical,
+     display_name: "Raa Ashiratukum", website_visible: true,
+     register: raa_ashiratukum}
+  raa_wizraka:
+    {group: raa_pronunciation, subgroup: lexical,
+     display_name: "Raa Wizraka", website_visible: true,
+     register: raa_wizraka}
+  raa_dhikraka:
+    {group: raa_pronunciation, subgroup: lexical,
+     display_name: "Raa Dhikraka", website_visible: true,
+     register: raa_dhikraka}
+  raa_wizra_ukhra:
+    {group: raa_pronunciation, subgroup: lexical,
+     display_name: "Raa Wizra Ukhra", website_visible: true,
+     register: raa_wizra_ukhra}
+  raa_ijrami:
+    {group: raa_pronunciation, subgroup: lexical,
+     display_name: "Raa Ijrami", website_visible: true, register: raa_ijrami}
+  raa_hidhrakum:
+    group: raa_pronunciation
+    subgroup: lexical
+    display_name: "Raa Hidhrakum"
+    description: "The two حِذْرَكُمْ forms; حِذْرَهُمْ is fixed light."
+    website_visible: true
+    register: raa_hidhrakum
+  raa_ibrah_kibrahu:
+    group: raa_pronunciation
+    subgroup: lexical
+    display_name: "Raa Ibrah Kibrahu"
+    description: "The عِبْرَة and لَعِبْرَة sites plus كِبْرَهُ."
+    website_visible: true
+    register: raa_ibrah_kibrahu
+  raa_hasirat_suduruhum:
+    {group: raa_pronunciation, subgroup: lexical,
+     display_name: "Raa Hasirat Suduruhum", website_visible: true,
+     register: raa_hasirat_suduruhum}
+  dhat_yaa:
+    group: inclination
+    display_name: "Dhat Yaa"
+    description: "Ordinary yaa-origin final alifs, such as هُد۪ىٰ and اِ۪شْتَر۪ىٰ; named and fixed scopes are owned separately."
+    website_visible: true
+    register: dhat_yaa
+  arakahum:
+    {group: inclination, display_name: "Arakahum", website_visible: true,
+     register: arakahum}
+  al_jar:
+    {group: inclination, display_name: "Al Jar", website_visible: true,
+     register: al_jar}
+  jabbarin:
+    {group: inclination, display_name: "Jabbarin", website_visible: true,
+     register: jabbarin}
+  haa_verse_heads:
+    group: inclination
+    display_name: "Haa Verse Heads"
+    description: "The 25 pronominal-haa verse endings of 79 and 91, such as ضُحَيٰهَا; ذِكْر۪يٰهَآ is fixed taqlil."
+    website_visible: true
+    register: haa_verse_heads
+  maryam_haa_yaa:
+    group: inclination
+    display_name: "Maryam Haa Yaa"
+    website_visible: true
+    register: maryam_haa_yaa
+  yaseen_yaa:
+    {group: inclination, display_name: "Yaseen Yaa", website_visible: true,
+     register: yaseen_yaa}
+  lam_dhat_yaa:
+    group: lam_pronunciation
+    subgroup: lexical
+    display_name: "Lam Dhat Yaa"
+    description: "The sad-lam forms, such as تَصْلَىٰ and سَيَصْلَىٰ; wasl masks مُصَلّىٗ and يَصْلَى to fath with tafkheem."
+    website_visible: true
+    register: lam_dhat_yaa
+  lam_verse_heads:
+    group: lam_pronunciation
+    subgroup: lexical
+    display_name: "Lam Verse Heads"
+    description: "The صَلّ۪ىٰ verse endings."
+    website_visible: true
+    register: lam_verse_heads
+  lam_separated_by_alif:
+    group: lam_pronunciation
+    subgroup: lexical
+    display_name: "Lam Separated By Alif"
+    description: "The five alif-separated forms فِصَالاً, يَّصَّٰلَحَا, اَفَطَالَ, طَالَ, and فَطَالَ."
+    website_visible: true
+    register: lam_separated_by_alif
+  lam_final_waqf:
+    group: lam_pronunciation
+    subgroup: lexical
+    display_name: "Lam Final Waqf"
+    description: "The six final-lam shapes يُّوصَلَ, فَصَلَ, فَصَّلَ, وَبَطَلَ, ظَلَّ, and وَفَصْلَ at waqf."
+    website_visible: true
+    register: lam_final_waqf
+  lam_after_taa:
+    group: lam_pronunciation
+    subgroup: systematic
+    display_name: "Lam After Taa"
+    description: "Ordinary qualifying taa before an open lam, such as مَطْلَعِ."
+    website_visible: true
+    dynamic_scope: eligible_lam_taa
+  lam_after_zhaa:
+    group: lam_pronunciation
+    subgroup: systematic
+    display_name: "Lam After Zhaa"
+    description: "Ordinary qualifying zhaa before an open lam, such as يُظْلَمُونَ."
+    website_visible: true
+    dynamic_scope: eligible_lam_zhaa
+  lam_salsal:
+    {group: lam_pronunciation, subgroup: lexical, display_name: "Lam Salsal",
+     website_visible: true, register: lam_salsal}
+
+  tamanna_noon:
+    {group: word_readings, display_name: "Tamanna Noon", website_visible: true,
+     occurrences: [{words: ["12:11:6"], anchor: word, requires: all}]}
+  istifham_article:
+    group: word_readings
+    display_name: Istifham Article
+    description: "The forms آٰلذَّكَرَيْنِ, ءَالَٰنَ, and آٰللَّهُ."
+    website_visible: true
+    occurrences:
+      - {words: ["6:144:10"], anchor: word, requires: all}
+      - {words: ["6:145:8"], anchor: word, requires: all}
+      - {words: ["10:51:7"], anchor: word, requires: all}
+      - {words: ["10:91:1"], anchor: word, requires: all}
+      - {words: ["10:59:14"], anchor: word, requires: all}
+      - {words: ["27:61:9"], anchor: word, requires: all}
+  noon_wasl:
+    {group: joined_readings, display_name: "Noon Wasl", website_visible: true,
+     occurrences: [{words: ["68:1:1", "68:1:2"], anchor: boundary, requires: wasl}]}
+  maliyah_halak:
+    {group: joined_readings, display_name: "Maliyah Halak", website_visible: true,
+     occurrences: [{words: ["69:28:4", "69:29:1"], anchor: boundary, requires: wasl}]}
+  kitabiyah_inni:
+    group: joined_readings
+    display_name: "Kitabiyah Inni"
+    website_visible: true
+    occurrences:
+      - {words: ["69:18:9", "69:19:1"], anchor: boundary, requires: wasl}
+  article_ibtidaa:
+    group: stopping_starting
+    display_name: "Article Ibtidaa"
+    description: "Starting a naql-carrying article on its hamza or lam."
+    website_visible: true
+    dynamic_scope: article_starts
+
+  hamza_dhat_fath:
+    group: hamza_readings
+    display_name: "Hamza Dhat Fath"
+    description: "Ordinary one-word double hamzas with an open second, such as ءَآنذَرْتَهُمُۥٓ"
+    website_visible: true
+    register: hamza_dhat_fath
+  hamza_muttafiq:
+    group: hamza_readings
+    display_name: "Hamza Muttafiq"
+    description: "Two qata hamzas with matching vowels across joined words, such as جَآءَ احَدٞ."
+    website_visible: true
+    register: hamza_muttafiq
+  hamza_damm_kasr:
+    group: hamza_readings
+    display_name: "Hamza Damm Kasr"
+    description: "A damm qata before a kasr qata across joined words, such as يَٰزَكَرِيَّآءُ اِ۪نَّا."
+    website_visible: true
+    register: hamza_damm_kasr
+  jaa_aal:
+    group: hamza_readings
+    display_name: "Jaa Aal"
+    description: "The two جَآءَ ا۟لَ boundaries."
+    website_visible: true
+    register: jaa_aal
+  hamza_kasr_yaa:
+    group: hamza_readings
+    display_name: "Hamza Kasr Yaa"
+    description: "The two exceptional boundaries هَٰٓؤُلَآءِ ان and اَ۬لْبِغَآءِ انَ."
+    website_visible: true
+    register: hamza_kasr_yaa
+  hamza_aimma:
+    {group: hamza_readings, display_name: "Hamza Aimma",
+     website_visible: true, register: hamza_aimma}
+  hamza_arayta:
+    group: hamza_readings
+    display_name: "Hamza Arayta"
+    description: "The اَرَٰٓيْتَ family"
+    website_visible: true
+    register: hamza_arayta
+  ha_antum:
+    {group: hamza_readings, display_name: "Ha Antum",
+     website_visible: true, register: ha_antum}
+  allai_waqf:
+    {group: hamza_readings, display_name: "Allai Waqf",
+     website_visible: true, register: allai_waqf}
+
+  iqlab_nasal:
+    {group: nasal_variants, display_name: Iqlab Nasal, website_visible: false,
+     dynamic_scope: all_iqlab}
+  ikhfaa_shafawi_nasal:
+    {group: nasal_variants, display_name: Ikhfaa Shafawi Nasal,
+     website_visible: false, dynamic_scope: all_ikhfaa_shafawi}

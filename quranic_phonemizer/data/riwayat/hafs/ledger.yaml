@@ -1,0 +1,231 @@
+# Facts neither script determines on its own, and the witnesses that agree.
+#
+# Every entry is a canonical value — the same closed union the adapters emit
+# — so there is no syntax here for "do something" and the Ledger cannot grow
+# into a rule engine. `skeleton` is mandatory and validated against the built
+# word, which is what catches ordinal drift.
+#
+# The list is deliberately short. Everything a rule can reach is a rule; see
+# canon/derive/. What is left is genuinely per-location.
+schema_version: 1
+riwayah: hafs
+
+supplies:
+  # 41:44 `ءَا۬عْجَمِيٌّ` - tashil is a reading fact even where the selected
+  # script does not carry the Uthmani easing mark.
+  - {slot: "41:44:9#1", skeleton: "ءءعجمين", fact: ONSET, value: TASHIL,
+     citation: "Hafs; fixed tashil in aajamiyy"}
+
+  # رَءَا — Uthmani writes the hamza with a following alif, IndoPak writes a
+  # bare alif that carries nothing. The long a is the recitation fact both
+  # are spelling.
+  - {slot: "6:77:2#1", skeleton: "رء", fact: VOWEL_LENGTH,
+     value: {kind: Long, quality: A}, citation: "Hafs; ra'aa"}
+  - {slot: "6:78:2#1", skeleton: "رء", fact: VOWEL_LENGTH,
+     value: {kind: Long, quality: A}, citation: "Hafs; ra'aa"}
+  - {slot: "16:85:2#1", skeleton: "رء", fact: VOWEL_LENGTH,
+     value: {kind: Long, quality: A}, citation: "Hafs; ra'aa"}
+  - {slot: "16:86:2#1", skeleton: "رء", fact: VOWEL_LENGTH,
+     value: {kind: Long, quality: A}, citation: "Hafs; ra'aa"}
+  - {slot: "33:22:2#1", skeleton: "رء", fact: VOWEL_LENGTH,
+     value: {kind: Long, quality: A}, citation: "Hafs; ra'aa"}
+  - {slot: "18:53:1#2", skeleton: "ورء", fact: VOWEL_LENGTH,
+     value: {kind: Long, quality: A}, citation: "Hafs; wa-ra'aa"}
+
+  # 18:38 `لَّـٰكِنَّا۠` — a pausal long that its own vocalised skeleton cannot
+  # distinguish from `لَٰكِنَّ`. One site, so a rule would be inventing a class.
+  #
+  # `#N` is zero-based within the word, and the skeleton is written in the
+  # same notation `canon.build` derives — so a prosthetic hamza is `ء`, not
+  # the `ا` the script draws. All four entries below were wrong on one or
+  # both counts and silently did nothing.
+  - {slot: "18:38:1#2", skeleton: "لكن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A},
+     citation: "Hafs; one of the seven alifs"}
+
+  # 33:66-67 — `ٱلرَّسُولَا۠`, `ٱلسَّبِيلَا۠`, `ٱلظُّنُونَا۠`. Each shares a vocalised
+  # skeleton with its ordinary accusative, which occurs far more often, so a
+  # lexeme entry would break 27 words to fix one.
+  - {slot: "33:66:11#4", skeleton: "ءلرسل", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "33:67:8#4", skeleton: "ءلسبل", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "33:10:16#4", skeleton: "ءلظنن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+
+  # 76:15 `قَوَارِيرَا۠` against 76:16 `قَوَارِيرَا۟` and 27:44 `قَوَارِيرَ`.
+  # Uthmani's two marks separate the first from the second; IndoPak writes
+  # the same string for both, so the site is what carries the fact.
+  - {slot: "76:15:8#3", skeleton: "قورر", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+
+  # أَنَا۠ — the recurring member of the seven alifs, sited one entry per
+  # word rather than by its vocalised skeleton: the same skeleton is an
+  # ordinary long a wherever Uthmani draws no `۠`, and a skeleton cannot
+  # tell those apart. Every location below is where Uthmani draws `۠`.
+  - {slot: "2:258:21#1", skeleton: "ءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "3:81:30#2", skeleton: "وءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "5:28:7#1", skeleton: "ءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "6:56:19#1", skeleton: "ءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "6:79:10#1", skeleton: "ءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "6:104:13#1", skeleton: "ءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "6:163:6#2", skeleton: "وءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "7:12:9#1", skeleton: "ءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "7:68:4#2", skeleton: "وءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "7:143:39#2", skeleton: "وءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "7:188:23#1", skeleton: "ءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "10:41:12#2", skeleton: "وءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "10:90:25#2", skeleton: "وءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "10:108:20#1", skeleton: "ءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "11:29:12#1", skeleton: "ءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "11:35:9#2", skeleton: "وءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "11:72:4#2", skeleton: "وءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "11:86:9#1", skeleton: "ءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "12:45:8#1", skeleton: "ءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "12:51:23#1", skeleton: "ءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "12:59:15#2", skeleton: "وءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "12:69:10#1", skeleton: "ءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "12:72:10#2", skeleton: "وءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "12:90:6#1", skeleton: "ءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "12:108:9#1", skeleton: "ءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "12:108:15#1", skeleton: "ءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "14:22:29#1", skeleton: "ءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "16:2:17#1", skeleton: "ءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "18:34:8#1", skeleton: "ءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "18:39:15#1", skeleton: "ءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "18:110:3#1", skeleton: "ءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "19:19:3#1", skeleton: "ءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "20:12:2#1", skeleton: "ءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "20:14:7#1", skeleton: "ءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "21:25:14#1", skeleton: "ءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "21:56:9#2", skeleton: "وءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "21:92:6#2", skeleton: "وءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "22:49:5#1", skeleton: "ءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "23:52:6#2", skeleton: "وءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "26:20:4#2", skeleton: "وءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "26:114:2#1", skeleton: "ءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "26:115:2#1", skeleton: "ءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "27:39:5#1", skeleton: "ءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "27:40:7#1", skeleton: "ءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "27:92:13#1", skeleton: "ءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "29:50:14#1", skeleton: "ءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "38:65:3#1", skeleton: "ءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "38:70:6#1", skeleton: "ءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "38:76:2#1", skeleton: "ءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "38:86:8#1", skeleton: "ءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "40:42:11#2", skeleton: "وءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "41:6:3#1", skeleton: "ءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "43:52:2#1", skeleton: "ءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "43:81:6#2", skeleton: "فءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "46:9:21#1", skeleton: "ءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "50:29:6#1", skeleton: "ءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "58:21:4#1", skeleton: "ءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "60:1:36#2", skeleton: "وءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "67:26:7#1", skeleton: "ءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "79:24:2#1", skeleton: "ءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+  - {slot: "109:4:2#1", skeleton: "ءن", fact: VOWEL_LENGTH,
+     value: {kind: PausalLong, quality: A}, citation: "Hafs; seven alifs"}
+
+  # 27:36 `ءَاتَىٰنَِۧ` — the yaa both scripts write small where 19:30 writes
+  # the same word's full. Small is the mark that the letter is optional, and
+  # `GLIDE` is exactly that: said when joined to, absent at a pause.
+  - {slot: "27:36:8#3", skeleton: "ءتني", fact: ONSET, value: GLIDE,
+     citation: "Hafs; ithbat and hadhf of the yaa"}
+
+  # The four sakt sites. Both scripts write `ۜ` at them, but what that mark
+  # supplies is LETTER = SEEN; the sakt is a second sense of the same scalar
+  # and no rule over canonical context can separate the two. Four locations,
+  # and every tajwid source lists exactly these four: the Ledger's own
+  # definition.
+  - {slot: "18:1:11#2", skeleton: ["عوج", "عوجن"], fact: SAKT, value: true,
+     citation: "Hafs; sakt, 1 of 4"}
+  - {slot: "36:52:6#4", skeleton: "مرقدن", fact: SAKT, value: true,
+     citation: "Hafs; sakt, 2 of 4"}
+  - {slot: "75:27:2#1", skeleton: "من", fact: SAKT, value: true,
+     citation: "Hafs; sakt, 3 of 4"}
+  - {slot: "83:14:2#1", skeleton: "بل", fact: SAKT, value: true,
+     citation: "Hafs; sakt, 4 of 4"}
+
+  # 69:28-29 `مَالِيَهْ ۜ هَلَكَ` is the fifth site, and the one the sources argue
+  # over: the two haas would otherwise merge, and Hafs by the Shatibiyyah
+  # keeps the first clear. Listed here rather than among the four above
+  # because it is a decision this package makes, not one every source shares.
+  - {slot: "69:28:4#3", skeleton: "مليه", fact: SAKT, value: true,
+     citation: "Hafs; sakt on مَالِيَهْ, izhar of the two haas"}
+
+  # 11:41 `مَجْر۪ىٰهَا` — the one imala in the Quran. Only Uthmani marks it, so
+  # the site is what carries the vowel and both scripts build the same Score.
+  # The mark is the vowel and the naming of it at once, so it is two facts.
+  - {slot: "11:41:6#2", skeleton: "مجره", fact: VOWEL_QUALITY,
+     value: {kind: Long, quality: e}, citation: "Hafs; the one imala"}
+  - {slot: "11:41:6#2", skeleton: "مجره", fact: TAJWEED_MARK, value: imala,
+     citation: "Hafs; the one imala"}
+
+asserts:
+  - {script: uthmani, slot: "6:77:2#1", skeleton: "رء", fact: VOWEL_LENGTH,
+     value: {kind: Long, quality: A}}
+  - {script: uthmani, slot: "6:78:2#1", skeleton: "رء", fact: VOWEL_LENGTH,
+     value: {kind: Long, quality: A}}
+  # Uthmani draws `۪`; IndoPak writes the word with no mark of its own.
+  - {script: uthmani, slot: "11:41:6#2", skeleton: "مجره",
+     fact: VOWEL_QUALITY, value: {kind: Long, quality: e}}

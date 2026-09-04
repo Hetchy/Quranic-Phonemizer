@@ -1,0 +1,30 @@
+# Pull requests run behavioral tests alongside the fast checks: architectural
+# boundaries, exact Arabic source-context validation, and Python hygiene.
+name: gates
+
+on:
+  pull_request:
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # The suite dominates the wall clock, so the seconds-long checks share
+        # one job rather than each paying for its own install.
+        include:
+          - name: suite
+            gates: suite
+          - name: checks
+            gates: lint structure test-style
+    name: ${{ matrix.name }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - run: pip install -e ".[dev]"
+      - run: python tools/gates.py ${{ matrix.gates }}

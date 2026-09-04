@@ -1,0 +1,165 @@
+"""The native projection's private facts, derived straight from a `Session`.
+
+It reimplements the derivations it needs, reading only the resolved request,
+the model, and the notation, and reaches nothing of the public assembler.
+"""
+from __future__ import annotations
+
+from ..model.inscription import Glyph, GlyphKind, glyph_kind_of
+from .attributions import (
+    Classified,
+    Hosted,
+    Insertion,
+    Merged,
+    Recoloured,
+    Relengthened,
+    Silenced,
+)
+from .build import build_bundle
+from .catalogue import UnknownRiwayah, rule_definitions, tajweed_rules
+from .derivations import (
+    decoration_targets,
+    open_vowel_units,
+    shortened_carriers,
+    silent_groups,
+)
+from .dtos import (
+    AnalysisBundle,
+    Boundary,
+    BoundaryState,
+    Merger,
+    RuleDefinition,
+    RuleOccurrence,
+    Sound,
+    Word,
+)
+from .facts import AnalysisFacts, analyse
+from .highlight_dtos import HighlightGroup
+from .highlight_laws import HighlightValidationError, validate_highlight_groups
+from .highlights import highlight_groups
+from .ids import (
+    SCHEMA_VERSION,
+    AnimationTokenId,
+    BoundaryId,
+    HighlightId,
+    MergerId,
+    OccurrenceId,
+    RuleId,
+    SoundId,
+    WordId,
+)
+from .inscription import (
+    Decorated,
+    InscriptionFacts,
+    Structural,
+    Supplied,
+    Witnessed,
+    inscribe,
+)
+from .laws import ValidationError, validate
+from .result import AnalysisResult, build_result
+from .schema import (
+    KINDS,
+    analysis_document,
+    cell_document,
+    closed_reference_errors,
+    combined_reference_errors,
+    document_schema,
+    highlight_document,
+    serialize_document,
+    source_document,
+    validation_errors,
+)
+from .sounds import SoundFact
+from .source import build_source_view
+from .source_dtos import (
+    AnimationPolicy,
+    AnimationToken,
+    Character,
+    CharacterKind,
+    LetterUnit,
+    LetterUnitKind,
+    LiteralSilence,
+    MergerPlacement,
+    RulePlacement,
+    SourceView,
+)
+from .source_laws import SourceValidationError, validate_source_view
+
+__all__ = [
+    "KINDS",
+    "SCHEMA_VERSION",
+    "AnalysisBundle",
+    "AnalysisFacts",
+    "AnalysisResult",
+    "AnimationPolicy",
+    "AnimationToken",
+    "AnimationTokenId",
+    "Boundary",
+    "BoundaryId",
+    "BoundaryState",
+    "Character",
+    "CharacterKind",
+    "Classified",
+    "Decorated",
+    "Glyph",
+    "GlyphKind",
+    "HighlightGroup",
+    "HighlightId",
+    "HighlightValidationError",
+    "Hosted",
+    "Insertion",
+    "InscriptionFacts",
+    "LetterUnit",
+    "LetterUnitKind",
+    "LiteralSilence",
+    "Merged",
+    "Merger",
+    "MergerId",
+    "MergerPlacement",
+    "OccurrenceId",
+    "Recoloured",
+    "Relengthened",
+    "RuleDefinition",
+    "RuleId",
+    "RuleOccurrence",
+    "RulePlacement",
+    "Silenced",
+    "Sound",
+    "SoundFact",
+    "SoundId",
+    "SourceValidationError",
+    "SourceView",
+    "Structural",
+    "Supplied",
+    "UnknownRiwayah",
+    "ValidationError",
+    "Witnessed",
+    "Word",
+    "WordId",
+    "analyse",
+    "analysis_document",
+    "build_bundle",
+    "build_result",
+    "build_source_view",
+    "cell_document",
+    "closed_reference_errors",
+    "combined_reference_errors",
+    "decoration_targets",
+    "document_schema",
+    "glyph_kind_of",
+    "highlight_document",
+    "highlight_groups",
+    "inscribe",
+    "open_vowel_units",
+    "rule_definitions",
+    "serialize_document",
+    "shortened_carriers",
+    "silent_groups",
+    "source_document",
+    "tajweed_rules",
+    "validate",
+    "validate_highlight_groups",
+    "validate_source_view",
+    "validation_errors",
+]

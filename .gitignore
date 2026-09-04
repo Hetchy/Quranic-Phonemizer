@@ -4,24 +4,24 @@ __pycache__/
 .pytest_cache
 *.py[cod]
 out
-quranic_phonemizer/resources/tajweed_occurences
-quranic_phonemizer/resources/archive
 mappings.md
 test.ipynb
 .windsurf
 .vscode
 .cursor
+.playwright-mcp/
 .venv*
 .claude/settings.local.json
-CLAUDE.md
 
 # Package build artifacts
 *.egg-info/
 dist/
 build/
 *.egg
+.coverage
 
 docs/mualem_conversion.md
-scripts/
-tests/
-dev/helpers.py
+.claude/worktrees/
+
+# Prerelease precheck workspace: baseline venv, shard digests, and reports.
+.prerelease/

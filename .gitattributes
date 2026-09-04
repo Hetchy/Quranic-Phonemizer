@@ -1,0 +1,8 @@
+# Text is stored LF and checked out LF. Without this the repo held both, in
+# the same directory, and any editor that normalised produced a whole-file diff.
+* text=auto eol=lf
+
+# Byte-exact: the packed corpus and the frozen snapshots are hashed.
+*.bin binary
+*.gz binary
+*.json.gz binary

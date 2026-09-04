@@ -1,0 +1,231 @@
+"""Pre-`Session` views over a raw `Performance`, kept for callers that build
+a `Score` directly rather than through a corpus `ref`. `document.py` and
+`pairing.py` are the request-shaped replacements this module does not attempt.
+"""
+from __future__ import annotations
+
+from collections import defaultdict
+from dataclasses import dataclass
+
+from ..model.address import GraphemeId, SlotId, SoundId
+from ..model.canon import Rule, Score
+from ..model.inscription import (
+    Attests,
+    Decorates,
+    Evidences,
+    Grapheme,
+    Inscription,
+    SlotFact,
+)
+from ..model.performance import (
+    _ASPECT_ORDER,
+    Aspect,
+    Hosts,
+    Inserted,
+    MergedInto,
+    Performance,
+    Side,
+    Silent,
+    _hosts_key,
+    sounds_in_order,
+)
+from ..render.alphabet import Alphabet
+
+
+def phonemes_by_word(
+    performance: Performance, score: Score, alphabet: Alphabet
+) -> tuple[tuple[str, ...], ...]:
+    """The reading sequence, split at word boundaries.
+
+    A sound merged across a boundary belongs to the word that hosts it: in
+    `مِّن رَّبِّهِمْ` the noon's sound lands on the second word.
+    """
+    by_id = dict(performance.sounds)
+    owner: dict[int, int] = {}
+    for index, word in enumerate(score.words):
+        for slot in word.slots:
+            owner[slot.id.ordinal] = index
+
+    buckets: list[list[str]] = [[] for _ in score.words]
+    for attribution in performance.attributions:
+        match attribution:
+            case Hosts(slots=slots, aspect=aspect, sound=sound) if slots:
+                key = _hosts_key(slots, aspect, sound, by_id)
+            case Inserted(anchor=(slot, side), aspect=aspect, sound=sound):
+                key = (slot.ordinal, _ASPECT_ORDER[aspect],
+                       -1 if side is Side.BEFORE else 1)
+            case _:
+                continue
+        buckets[owner[key[0]]].append((key, alphabet.token(by_id[sound])))
+
+    return tuple(
+        tuple(token for _, token in sorted(bucket, key=lambda e: e[0]))
+        for bucket in buckets
+    )
+
+
+#: Which `SlotFact`s count as writing each `Aspect`. `Decorates` and
+#: `Attests` don't name an aspect, so they satisfy either one.
+_FACT_OF_ASPECT = {
+    Aspect.CONSONANT: (SlotFact.LETTER, SlotFact.ONSET),
+    Aspect.VOWEL: (SlotFact.VOWEL_QUALITY, SlotFact.VOWEL_LENGTH, SlotFact.VOWEL_ABSENCE),
+}
+
+
+@dataclass(frozen=True, slots=True)
+class AnchoredSound:
+    """One sound, and everything a consumer can ask about it."""
+
+    sound: SoundId
+    token: str
+    slots: tuple[SlotId, ...]
+    """Every slot that produced it. More than one is a merger."""
+    graphemes: tuple[GraphemeId, ...]
+    rule: Rule | None
+    """`None` where the Score's own default filled the sound: no rule
+    claimed it."""
+    merged_from: tuple[SlotId, ...] = ()
+    """Slots whose own sound was folded into this one."""
+
+
+@dataclass(frozen=True, slots=True)
+class SilentLetter:
+    """A slot that produced no sound, and the rule that says why."""
+
+    slot: SlotId
+    graphemes: tuple[GraphemeId, ...]
+    rule: Rule | None
+
+
+@dataclass(frozen=True, slots=True)
+class AnchoredView:
+    sounds: tuple[AnchoredSound, ...]
+    silent: tuple[SilentLetter, ...]
+
+    def by_grapheme(self) -> dict[GraphemeId, tuple[SoundId, ...]]:
+        """The inverse: which sounds each written grapheme produced.
+
+        Empty for a grapheme that produced nothing, such as a silence sign
+        or a stop mark.
+        """
+        out: dict[GraphemeId, list[SoundId]] = {}
+        for anchored in self.sounds:
+            for grapheme in anchored.graphemes:
+                out.setdefault(grapheme, []).append(anchored.sound)
+        return {grapheme: tuple(ids) for grapheme, ids in out.items()}
+
+
+def anchored(
+    performance: Performance,
+    inscription: Inscription,
+    alphabet: Alphabet,
+) -> AnchoredView:
+    writes = _writers(inscription)
+    rule_of = {
+        occurrence.id: occurrence.rule for occurrence in performance.occurrences
+    }
+    by_id = dict(performance.sounds)
+    merged: dict[SoundId, list[SlotId]] = defaultdict(list)
+    for attribution in performance.attributions:
+        if isinstance(attribution, MergedInto):
+            merged[attribution.sound].extend(attribution.slots)
+    owners = _owners(performance, rule_of)
+
+    sounds = tuple(
+        _anchored_sound(sound, owners, merged, writes, by_id, alphabet)
+        for sound in sounds_in_order(performance)
+    )
+    silent = tuple(
+        SilentLetter(
+            slot=slot,
+            graphemes=_graphemes_for(writes, (slot,), attribution.aspect),
+            rule=rule_of.get(attribution.by),
+        )
+        for attribution in performance.attributions
+        if isinstance(attribution, Silent)
+        for slot in attribution.slots
+    )
+    return AnchoredView(sounds, silent)
+
+
+def _owners(performance: Performance, rule_of) -> dict:
+    """Which slots each sound is attributed to, and by which rule."""
+    out: dict[SoundId, tuple[tuple[SlotId, ...], Aspect, Rule | None]] = {}
+    for attribution in performance.attributions:
+        match attribution:
+            case Hosts(slots=slots, aspect=aspect, sound=sound):
+                out[sound] = (slots, aspect, rule_of.get(attribution.by))
+            case Inserted(anchor=(slot, _), aspect=aspect, sound=sound):
+                out[sound] = ((slot,), aspect, rule_of.get(attribution.by))
+    return out
+
+
+def _anchored_sound(sound, owners, merged, writes, by_id, alphabet):
+    slots, aspect, rule = owners[sound]
+    graphemes = _graphemes_for(writes, slots, aspect)
+    contributors = tuple(merged.get(sound, ()))
+    if contributors:
+        graphemes = _dedupe(
+            graphemes + _graphemes_for(writes, contributors, aspect)
+        )
+    return AnchoredSound(
+        sound=sound,
+        token=alphabet.token(by_id[sound]),
+        slots=tuple(slots),
+        graphemes=graphemes,
+        rule=rule,
+        merged_from=contributors,
+    )
+
+
+def graphemes_by_id(inscription: Inscription) -> dict[GraphemeId, Grapheme]:
+    """So a consumer can turn an id back into the character it wrote."""
+    return {grapheme.id: grapheme for grapheme in inscription.graphemes}
+
+
+def _writers(
+    inscription: Inscription,
+) -> dict[SlotId, dict[SlotFact | None, list[GraphemeId]]]:
+    """Maps slot -> fact -> graphemes that wrote it. `None` is the fact used
+    by `Decorates` and `Attests`, which don't name one."""
+    out: dict[SlotId, dict[SlotFact | None, list[GraphemeId]]] = {}
+    for spelling in inscription.spellings:
+        match spelling:
+            case Evidences(grapheme=grapheme, slot=slot, fact=fact):
+                key: SlotFact | None = fact
+            case Decorates(grapheme=grapheme, slot=slot):
+                key = None
+            case Attests(grapheme=grapheme, anchor=slot):
+                key = None
+            case _:
+                continue
+        out.setdefault(slot, {}).setdefault(key, []).append(grapheme)
+    return out
+
+
+def _graphemes_for(writes, slots, aspect: Aspect) -> tuple[GraphemeId, ...]:
+    wanted = _FACT_OF_ASPECT[aspect]
+    found: list[GraphemeId] = []
+    for slot in slots:
+        facts = writes.get(slot, {})
+        for fact in wanted:
+            found.extend(facts.get(fact, ()))
+        found.extend(facts.get(None, ()))
+    return _dedupe(tuple(found))
+
+
+def _dedupe(ids: tuple[GraphemeId, ...]) -> tuple[GraphemeId, ...]:
+    seen: dict[GraphemeId, None] = {}
+    for identifier in ids:
+        seen[identifier] = None
+    return tuple(seen)
+
+
+__all__ = [
+    "AnchoredSound",
+    "AnchoredView",
+    "SilentLetter",
+    "anchored",
+    "graphemes_by_id",
+    "phonemes_by_word",
+]

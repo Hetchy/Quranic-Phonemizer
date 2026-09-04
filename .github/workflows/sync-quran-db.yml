@@ -1,28 +1,12 @@
 name: sync-quran-db
 
-# Ensures the runtime binary `quranic_phonemizer/resources/quran_db.bin`
-# stays in lockstep with the canonical source `dev/Quran.json` and with
-# `quranic_phonemizer/resources/surah_info.json`.
-#
-# Triggered on PRs and pushes that touch any of those three files. The
-# job regenerates the binary and fails if it differs from what was
-# committed — forcing the contributor to run `python dev/build_quran_db.py`
-# locally before merge. This makes a "Quran.json edit without bin
-# regeneration" a hard error, not a silent runtime drift.
-
 on:
-  push:
-    paths:
-      - dev/Quran.json
-      - quranic_phonemizer/resources/surah_info.json
-      - quranic_phonemizer/resources/quran_db.bin
-      - dev/build_quran_db.py
   pull_request:
     paths:
-      - dev/Quran.json
-      - quranic_phonemizer/resources/surah_info.json
-      - quranic_phonemizer/resources/quran_db.bin
-      - dev/build_quran_db.py
+      - corpus_sources/riwayat/hafs/quran.json
+      - quranic_phonemizer/data/riwayat/hafs/corpus/surah_info.json
+      - quranic_phonemizer/data/riwayat/hafs/corpus/quran_db.bin
+      - tools/build_hafs_corpus.py
 
 jobs:
   verify:
@@ -32,13 +16,14 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Regenerate quran_db.bin
-        run: python dev/build_quran_db.py
-      - name: Confirm regenerated binary matches the committed one
+      - name: Regenerate Hafs corpus
+        run: python tools/build_hafs_corpus.py
+      - name: Confirm packed corpus is current
         run: |
-          if ! git diff --quiet quranic_phonemizer/resources/quran_db.bin; then
-            echo "::error::quran_db.bin is out of sync with dev/Quran.json or surah_info.json."
-            echo "Run 'python dev/build_quran_db.py' locally and commit the result."
-            git diff --stat quranic_phonemizer/resources/quran_db.bin
+          corpus=quranic_phonemizer/data/riwayat/hafs/corpus/quran_db.bin
+          if ! git diff --quiet "$corpus"; then
+            echo "::error::quran_db.bin is out of sync with the Hafs source or address data."
+            echo "Run 'python tools/build_hafs_corpus.py' locally and commit the result."
+            git diff --stat "$corpus"
             exit 1
           fi

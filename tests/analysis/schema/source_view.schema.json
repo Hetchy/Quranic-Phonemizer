@@ -1,0 +1,375 @@
+{
+  "$defs": {
+    "AnimationToken": {
+      "additionalProperties": false,
+      "properties": {
+        "character_ids": {
+          "items": {
+            "type": "integer",
+            "x-ref": "Character"
+          },
+          "type": "array"
+        },
+        "id": {
+          "type": "integer",
+          "x-ref": "AnimationToken"
+        },
+        "paint_character_ids": {
+          "items": {
+            "type": "integer",
+            "x-ref": "Character"
+          },
+          "type": "array"
+        },
+        "policy": {
+          "enum": [
+            "timed",
+            "cohighlight_previous",
+            "cohighlight_next"
+          ],
+          "type": "string"
+        },
+        "sound_ids": {
+          "items": {
+            "type": "integer",
+            "x-ref": "Sound"
+          },
+          "type": "array"
+        },
+        "source_unit_ids": {
+          "items": {
+            "type": "integer",
+            "x-ref": "LetterUnit"
+          },
+          "type": "array"
+        },
+        "target_token_id": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "x-ref": "AnimationToken"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "text": {
+          "type": "string"
+        },
+        "word_id": {
+          "type": "integer",
+          "x-ref": "Word"
+        }
+      },
+      "required": [
+        "character_ids",
+        "id",
+        "paint_character_ids",
+        "policy",
+        "sound_ids",
+        "source_unit_ids",
+        "target_token_id",
+        "text",
+        "word_id"
+      ],
+      "type": "object",
+      "x-record": "AnimationToken"
+    },
+    "Character": {
+      "additionalProperties": false,
+      "properties": {
+        "boundary_id": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "x-ref": "Boundary"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "type": "integer",
+          "x-ref": "Character"
+        },
+        "index": {
+          "type": "integer"
+        },
+        "kind": {
+          "enum": [
+            "lexical",
+            "separator",
+            "stop_sign"
+          ],
+          "type": "string"
+        },
+        "letter_unit_id": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "x-ref": "LetterUnit"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "text": {
+          "type": "string"
+        },
+        "word_id": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "x-ref": "Word"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "boundary_id",
+        "id",
+        "index",
+        "kind",
+        "letter_unit_id",
+        "text",
+        "word_id"
+      ],
+      "type": "object",
+      "x-record": "Character"
+    },
+    "LetterUnit": {
+      "additionalProperties": false,
+      "properties": {
+        "character_ids": {
+          "items": {
+            "type": "integer",
+            "x-ref": "Character"
+          },
+          "type": "array"
+        },
+        "id": {
+          "type": "integer",
+          "x-ref": "LetterUnit"
+        },
+        "kind": {
+          "enum": [
+            "letter",
+            "haraka",
+            "sukun",
+            "tanween"
+          ],
+          "type": "string"
+        },
+        "owned_sound_ids": {
+          "items": {
+            "type": "integer",
+            "x-ref": "Sound"
+          },
+          "type": "array"
+        },
+        "presented_sound_ids": {
+          "items": {
+            "type": "integer",
+            "x-ref": "Sound"
+          },
+          "type": "array"
+        },
+        "ranges": {
+          "items": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "type": "array"
+          },
+          "type": "array"
+        },
+        "rule_occurrence_ids": {
+          "items": {
+            "type": "integer",
+            "x-ref": "RuleOccurrence"
+          },
+          "type": "array"
+        },
+        "silence": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "x-ref": "RuleOccurrence"
+            },
+            {
+              "enum": [
+                "orthographic_silence"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "text": {
+          "type": "string"
+        },
+        "word_id": {
+          "type": "integer",
+          "x-ref": "Word"
+        },
+        "written_on_unit_id": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "x-ref": "LetterUnit"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "character_ids",
+        "id",
+        "kind",
+        "owned_sound_ids",
+        "presented_sound_ids",
+        "ranges",
+        "rule_occurrence_ids",
+        "silence",
+        "text",
+        "word_id",
+        "written_on_unit_id"
+      ],
+      "type": "object",
+      "x-record": "LetterUnit"
+    },
+    "MergerPlacement": {
+      "additionalProperties": false,
+      "properties": {
+        "after_unit_ids": {
+          "items": {
+            "type": "integer",
+            "x-ref": "LetterUnit"
+          },
+          "type": "array"
+        },
+        "before_unit_ids": {
+          "items": {
+            "type": "integer",
+            "x-ref": "LetterUnit"
+          },
+          "type": "array"
+        },
+        "merger_id": {
+          "type": "integer",
+          "x-ref": "Merger"
+        }
+      },
+      "required": [
+        "after_unit_ids",
+        "before_unit_ids",
+        "merger_id"
+      ],
+      "type": "object"
+    },
+    "RulePlacement": {
+      "additionalProperties": false,
+      "properties": {
+        "rule_occurrence_id": {
+          "type": "integer",
+          "x-ref": "RuleOccurrence"
+        },
+        "unit_ids": {
+          "items": {
+            "type": "integer",
+            "x-ref": "LetterUnit"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "rule_occurrence_id",
+        "unit_ids"
+      ],
+      "type": "object"
+    },
+    "SourceDocument": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": 4,
+          "type": "integer"
+        },
+        "source": {
+          "$ref": "#/$defs/SourceView"
+        }
+      },
+      "required": [
+        "schema_version",
+        "source"
+      ],
+      "type": "object"
+    },
+    "SourceView": {
+      "additionalProperties": false,
+      "properties": {
+        "animation_tokens": {
+          "items": {
+            "$ref": "#/$defs/AnimationToken"
+          },
+          "type": "array"
+        },
+        "characters": {
+          "items": {
+            "$ref": "#/$defs/Character"
+          },
+          "type": "array"
+        },
+        "merger_placements": {
+          "items": {
+            "$ref": "#/$defs/MergerPlacement"
+          },
+          "type": "array"
+        },
+        "rule_placements": {
+          "items": {
+            "$ref": "#/$defs/RulePlacement"
+          },
+          "type": "array"
+        },
+        "text": {
+          "type": "string"
+        },
+        "units": {
+          "items": {
+            "$ref": "#/$defs/LetterUnit"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "animation_tokens",
+        "characters",
+        "merger_placements",
+        "rule_placements",
+        "text",
+        "units"
+      ],
+      "type": "object"
+    }
+  },
+  "$ref": "#/$defs/SourceDocument",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

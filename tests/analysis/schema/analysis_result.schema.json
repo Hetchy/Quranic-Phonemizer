@@ -1,0 +1,354 @@
+{
+  "$defs": {
+    "AnalysisDocument": {
+      "additionalProperties": false,
+      "properties": {
+        "result": {
+          "$ref": "#/$defs/AnalysisResult"
+        },
+        "schema_version": {
+          "const": 4,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "result",
+        "schema_version"
+      ],
+      "type": "object"
+    },
+    "AnalysisResult": {
+      "additionalProperties": false,
+      "properties": {
+        "boundaries": {
+          "items": {
+            "$ref": "#/$defs/Boundary"
+          },
+          "type": "array"
+        },
+        "canon_digest": {
+          "type": "string"
+        },
+        "extra_phonemes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "uniqueItems": true
+        },
+        "mergers": {
+          "items": {
+            "$ref": "#/$defs/Merger"
+          },
+          "type": "array"
+        },
+        "ref": {
+          "type": "string"
+        },
+        "riwayah": {
+          "type": "string"
+        },
+        "rule_occurrences": {
+          "items": {
+            "$ref": "#/$defs/RuleOccurrence"
+          },
+          "type": "array"
+        },
+        "schema_version": {
+          "type": "integer"
+        },
+        "script": {
+          "type": "string"
+        },
+        "sounds": {
+          "items": {
+            "$ref": "#/$defs/Sound"
+          },
+          "type": "array"
+        },
+        "source_text": {
+          "type": "string"
+        },
+        "tokens": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "variant": {
+          "type": "object"
+        },
+        "words": {
+          "items": {
+            "$ref": "#/$defs/Word"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "boundaries",
+        "canon_digest",
+        "extra_phonemes",
+        "mergers",
+        "ref",
+        "riwayah",
+        "rule_occurrences",
+        "schema_version",
+        "script",
+        "sounds",
+        "source_text",
+        "tokens",
+        "variant",
+        "words"
+      ],
+      "type": "object"
+    },
+    "Boundary": {
+      "additionalProperties": false,
+      "properties": {
+        "after": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "x-ref": "Word"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "before": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "x-ref": "Word"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "type": "integer",
+          "x-ref": "Boundary"
+        },
+        "state": {
+          "enum": [
+            "start",
+            "join",
+            "sakt",
+            "stop"
+          ],
+          "type": "string"
+        },
+        "stop_advice": {
+          "anyOf": [
+            {
+              "enum": [
+                "preferred_continue",
+                "preferred_stop",
+                "optional_stop",
+                "compulsory_stop",
+                "prohibited_stop",
+                "either_stop",
+                "permitted_stop"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "stop_sign": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "after",
+        "before",
+        "id",
+        "state",
+        "stop_advice",
+        "stop_sign"
+      ],
+      "type": "object",
+      "x-record": "Boundary"
+    },
+    "Merger": {
+      "additionalProperties": false,
+      "properties": {
+        "after_word_id": {
+          "type": "integer",
+          "x-ref": "Word"
+        },
+        "before_word_id": {
+          "type": "integer",
+          "x-ref": "Word"
+        },
+        "boundary_id": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "x-ref": "Boundary"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "type": "integer",
+          "x-ref": "Merger"
+        },
+        "rule_occurrence_ids": {
+          "items": {
+            "type": "integer",
+            "x-ref": "RuleOccurrence"
+          },
+          "type": "array"
+        },
+        "sound_id": {
+          "type": "integer",
+          "x-ref": "Sound"
+        }
+      },
+      "required": [
+        "after_word_id",
+        "before_word_id",
+        "boundary_id",
+        "id",
+        "rule_occurrence_ids",
+        "sound_id"
+      ],
+      "type": "object",
+      "x-record": "Merger"
+    },
+    "RuleOccurrence": {
+      "additionalProperties": false,
+      "properties": {
+        "boundary_ids": {
+          "items": {
+            "type": "integer",
+            "x-ref": "Boundary"
+          },
+          "type": "array"
+        },
+        "id": {
+          "type": "integer",
+          "x-ref": "RuleOccurrence"
+        },
+        "rule_id": {
+          "type": "string"
+        },
+        "sound_ids": {
+          "items": {
+            "type": "integer",
+            "x-ref": "Sound"
+          },
+          "type": "array"
+        },
+        "word_ids": {
+          "items": {
+            "type": "integer",
+            "x-ref": "Word"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "boundary_ids",
+        "id",
+        "rule_id",
+        "sound_ids",
+        "word_ids"
+      ],
+      "type": "object",
+      "x-record": "RuleOccurrence"
+    },
+    "Sound": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "integer",
+          "x-ref": "Sound"
+        },
+        "order": {
+          "type": "integer"
+        },
+        "rule_occurrence_ids": {
+          "items": {
+            "type": "integer",
+            "x-ref": "RuleOccurrence"
+          },
+          "type": "array"
+        },
+        "token": {
+          "type": "string"
+        },
+        "word_id": {
+          "type": "integer",
+          "x-ref": "Word"
+        }
+      },
+      "required": [
+        "id",
+        "order",
+        "rule_occurrence_ids",
+        "token",
+        "word_id"
+      ],
+      "type": "object",
+      "x-record": "Sound"
+    },
+    "Word": {
+      "additionalProperties": false,
+      "properties": {
+        "after_boundary_id": {
+          "type": "integer",
+          "x-ref": "Boundary"
+        },
+        "before_boundary_id": {
+          "type": "integer",
+          "x-ref": "Boundary"
+        },
+        "id": {
+          "type": "integer",
+          "x-ref": "Word"
+        },
+        "ref": {
+          "type": "string"
+        },
+        "sound_ids": {
+          "items": {
+            "type": "integer",
+            "x-ref": "Sound"
+          },
+          "type": "array"
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "after_boundary_id",
+        "before_boundary_id",
+        "id",
+        "ref",
+        "sound_ids",
+        "text"
+      ],
+      "type": "object",
+      "x-record": "Word"
+    }
+  },
+  "$ref": "#/$defs/AnalysisDocument",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

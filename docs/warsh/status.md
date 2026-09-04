@@ -1,0 +1,77 @@
+# Warsh implementation status
+
+> **Scope:** Warsh 'an Nafi' by tariq al-Azraq only.
+
+This is the implementation handoff for the Warsh stack. The table is the
+source of truth for delivery order, relevant specifications, current state,
+and the PR or branch carrying each unit. A concluded research item is ready
+to implement; it is not evidence that its runtime vertical exists.
+
+Every runtime workstream follows the mandatory
+[`vertical-methodology.md`](vertical-methodology.md): establish the domain
+contract, inspect the selected script and its code-point families, author the
+complete tests before production code, then implement from projection upward.
+
+## Delivery map
+
+| Order | Workstream | Relevant research and contract | Status | PR or branch |
+| ---: | --- | --- | --- | --- |
+| 1 | Test audit and semantic-tree reorganization | [`test-audit.md`](test-audit.md), [`test-refactor-plan.md`](test-refactor-plan.md), [`warsh-test-placement.md`](warsh-test-placement.md) | **Complete** | Delivered with [PR #60](https://github.com/Hetchy/Quranic-Phonemizer/pull/60) |
+| 2 | Warsh foundation: selected source, alignment, provenance, Uthmani adapter, package seam, and shared-rule baseline | [`script-projection.md`](research/v2/script-projection.md), [`phoneme-rule-inventory.md`](research/v2/phoneme-rule-inventory.md), [`codepoint-audit.md`](codepoint-audit.md) | **Complete** | [PR #60](https://github.com/Hetchy/Quranic-Phonemizer/pull/60) (merged) |
+| 3 | Model foundation: declared classifier emissions, per-riwayah rule catalogue, typed taqlil/kubra, riwayah-owned kubra fallback, and neutral joined-only-long shape | [`phoneme-rule-inventory.md`](research/v2/phoneme-rule-inventory.md) | **Complete** | `feat/warsh-model-foundation`; consumed as the base of [PR #61](https://github.com/Hetchy/Quranic-Phonemizer/pull/61) |
+| 4 | Wasl and iltiqa: start registers, U subregister, silent-qata starts, and boundary repair | [`wasl-hamza.md`](research/v2/wasl-hamza.md), [`iltiqa.md`](research/v2/iltiqa.md) | **Complete** | [PR #61](https://github.com/Hetchy/Quranic-Phonemizer/pull/61) (merged) |
+| 5 | Naql: general, article, lexical, and boundary-specific transfer | [`naql.md`](research/v2/naql.md) | **Complete** | [PR #62](https://github.com/Hetchy/Quranic-Phonemizer/pull/62) (merged) |
+| 6 | Hamza core: generic ibdal/tashil primitives and Warsh single hamza | [`single-hamza.md`](research/v2/single-hamza.md), [`phoneme-rule-inventory.md`](research/v2/phoneme-rule-inventory.md) | **Complete** | `feat/warsh-hamza-core`; variant-bearing `allai` deferred to order 14 |
+| 7 | Madd badal and leen mahmuz. Implements badal mughayar bin-naql tests deferred in #62 | [`madd-badal.md`](research/v2/madd-badal.md), [`madd-leen-mahmuz.md`](research/v2/madd-leen-mahmuz.md), [`madd-counts.md`](research/v2/madd-counts.md) | **Complete** | `feat/warsh-phonemizer`; see [`madd-iteration-log.md`](madd-iteration-log.md) |
+| 8 | Hamza meetings | [`hamza-meetings.md`](research/v2/hamza-meetings.md) | **Complete** | [PR #66](https://github.com/Hetchy/Quranic-Phonemizer/pull/66); `feat/warsh-hamza-meetings` |
+| 9 | Joined-only and pausal shapes: mim al-jam, yaa zawaid, and seven alifs | [`mim-al-jam.md`](research/v2/mim-al-jam.md), [`yaa-zawaid.md`](research/v2/yaa-zawaid.md), [`seven-alifs.md`](research/v2/seven-alifs.md) | **Complete** | [PR #67](https://github.com/Hetchy/Quranic-Phonemizer/pull/67); `feat/warsh-joined-pausal-shapes` |
+| 10 | Inclination: taqlil, kubra, fath, registers, and precedence | [`inclination.md`](research/v2/inclination.md) | **Complete** | [PR #68](https://github.com/Hetchy/Quranic-Phonemizer/pull/68); `feat/warsh-inclination` |
+| 11 | Lam tafkheem and its inclination coupling | [`lam-tafkheem.md`](research/v2/lam-tafkheem.md), [`lam-tafkheem-iteration-log.md`](lam-tafkheem-iteration-log.md) | **Complete** | [PR #69](https://github.com/Hetchy/Quranic-Phonemizer/pull/69); `feat/warsh-lam-taghliz` |
+| 12 | Raa weighting and dependent vowel coloring | [`raa.md`](research/v2/raa.md), [`raa-iteration-log.md`](raa-iteration-log.md) | **Complete** | [PR #70](https://github.com/Hetchy/Quranic-Phonemizer/pull/70); `feat/warsh-raa-weighting` |
+| 13 | Full-corpus attribution, default-profile conformance, and projection gates | [`script-projection.md`](research/v2/script-projection.md), [`phoneme-rule-inventory.md`](research/v2/phoneme-rule-inventory.md), [`projection-audit.md`](projection-audit.md), [`conformance.md`](../conformance.md) | **In progress** | Public-facade closure is total by scalar type; 23 verse-level blockers remain across 6214 Warsh source verses |
+| 14 | Public variant catalogue and selectable behavior | [`variants.md`](../variants.md), [`variants-implementation-plan.md`](variants-implementation-plan.md), plus the owning v2 research file for each phenomenon | **Complete** | Setup (#78), raa family (#79), inclination and lam families (#80), and the hamza and boundary family merged; all 57 selectors published |
+| 15 | Merge completed workstreams into the integration branch and open the overview PR to `main` | [`architecture.md`](../architecture.md), [`public-api.md`](../public-api.md), README.md, docs/design/public-api-facade.md | **In progress** | Public facade merged into `feat/warsh-phonemizer` in [PR #71](https://github.com/Hetchy/Quranic-Phonemizer/pull/71); overview PR to `main` remains |
+
+## Current implementation contract
+
+- The runtime target is Warsh through al-Azraq. Other Warsh transmitters are
+  outside scope.
+- Warsh is single-script: the King Fahd corpus is the supported source. A
+  reviewed mark-sequence family may supply the canonical fact it writes;
+  unreviewed sequences fail projection rather than being guessed.
+- Wasl, waqf, and ibtidaa are explicit boundary states. Closed lexical
+  exceptions belong in reviewed authored data.
+- The phonemizer classifies sounds and named rules, not recitation counts.
+  Count-dependent transmission details do not add a length model.
+- Rule occurrences name the acted-on unit, the changed or classified sound,
+  and its owned source placement. Trigger-only context is not copied onto
+  unrelated characters.
+- Taqlil and imala kubra are distinct typed qualities. Warsh uses taqlil as
+  its ordinary inclination fallback; kubra remains distinct where selected.
+- Tashil preserves its typed eased-hamza state and attribution even when its
+  optional rendering is collapsed to ordinary hamza. Ibdal names the replaced
+  hamza as source and the replacement unit as host.
+- Warsh adds `taqlil`, `naql`, `madd_leen_mahmuz`, `madd_mim_al_jam`, and
+  `madd_yaa_zawaid` to the shared rule vocabulary. Each riwayah derives its
+  public rule catalogue from the rule IDs emitted by its bound classifiers.
+
+## Progress rules
+
+- Use only **Pending**, **Ready**, **In progress**, **Blocked**, **Concluded**,
+  and **Complete** in the delivery table.
+- A runtime workstream is **Complete** only when its evidence, exceptions,
+  tests, implementation, and applicable corpus gates agree.
+- Keep domain evidence in `research/v2/`, historical material in
+  `research/v1/`, API matrices in [`variants.md`](../variants.md), and
+  exhaustive occurrence lists in authored data or tests.
+- Implement fixed behavior before adding public variants. Recount the final
+  semantic tree; planning case counts are not completion evidence.
+- Run `python tools/quick.py <targeted tests...>` during a workstream; pull
+  requests own the complete ordinary suite and required static checks.
+
+## Research boundaries
+
+The v2 files are the normative Warsh implementation specifications. The v1
+files are retained evidence only and may contain stale filenames, mixed routes,
+or count-oriented claims. `docs/new-riwayah.md` remains tentative guidance,
+not an established abstraction.
