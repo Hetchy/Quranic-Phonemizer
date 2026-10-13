@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from ...render.alphabet import is_long_a_token, is_short_a_token
+from ...render.alphabet import is_long_a_token, is_short_a_token, packaged_alphabet
 from ..checks import requirer
 from ..dtos import AnalysisBundle
 from .dtos import CellRole, CellView
@@ -11,6 +11,12 @@ from .projection_semantics import is_carrier_identity_rule
 
 _require = requirer(CellValidationError)
 _WEIGHT = frozenset({"tafkheem", "tarqeeq"})
+_HUMS = frozenset(
+    token
+    for entry in packaged_alphabet().consonants.values()
+    for token in (entry.hum, entry.heavy_hum)
+    if token is not None
+)
 
 
 def check_carrier_identity_placement(view: CellView, bundle: AnalysisBundle) -> None:
@@ -86,7 +92,18 @@ def _check_weight_column(word, column, rules, sounds):
         word, column, rules, sounds
     )
     if column.role in {CellRole.HARAKA, CellRole.TANWEEN}:
-        _require(not named, "a short-vowel cell has a weight label")
+        _require(
+            all(
+                any(
+                    occurrence in sounds[sound].rule_occurrence_ids
+                    and sounds[sound].token in _HUMS
+                    for sound in column.owned_sound_ids
+                )
+                for occurrence in column.rule_occurrence_ids
+                if rules[occurrence] in _WEIGHT
+            ),
+            "a short-vowel cell has a weight label off its ghunnah",
+        )
         return
     if letter or carrier:
         _require(

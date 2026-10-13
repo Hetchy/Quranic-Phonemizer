@@ -16,7 +16,10 @@ _WEIGHT_RULES = frozenset({"tafkheem", "tarqeeq"})
 def keep_weight_labels_off_short_vowels(
     words: tuple[CellWord, ...], facts: AnalysisFacts,
 ) -> tuple[CellWord, ...]:
-    """Keep weight visible on a letter/carrier, never a short vowel."""
+    """Keep weight visible on a letter/carrier, never a short vowel.
+
+    A tanween keeps the weight of the ghunnah it owns.
+    """
     weight = {
         OccurrenceId(index)
         for index, occurrence in enumerate(facts.occurrences)
@@ -24,10 +27,21 @@ def keep_weight_labels_off_short_vowels(
     }
     out = []
     for word in words:
+        consonant_weight = {
+            (sound.sound_id, occurrence)
+            for sound in word.sounds
+            if not isinstance(facts.sounds[sound.sound_id.value].value, Vowel)
+            for occurrence in sound.rule_occurrence_ids
+            if occurrence in weight
+        }
         columns = tuple(
             replace(column, rule_occurrence_ids=tuple(
                 occurrence for occurrence in column.rule_occurrence_ids
                 if occurrence not in weight
+                or any(
+                    (sound, occurrence) in consonant_weight
+                    for sound in column.owned_sound_ids
+                )
             )) if column.role in {CellRole.HARAKA, CellRole.TANWEEN}
             else column
             for column in word.columns

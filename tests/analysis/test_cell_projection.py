@@ -761,6 +761,26 @@ def test_tanween_vowel_renders_emphatic_without_a_weight_label(hafs, pen):
     assert idgham.id in tanween.rule_occurrence_ids
 
 
+@pytest.mark.parametrize("spelling", ("source", "transformed"))
+@pytest.mark.parametrize("extra", ((), ("emphatic_ikhfaa",)))
+def test_tanween_ghunnah_keeps_its_tafkheem_on_the_tanween(spelling, extra):
+    result = Phonemizer(extra_phonemes=extra).analyse("11:4")
+    word_id = next(word.id for word in result.words if word.ref == "11:4:7")
+    tafkheem = next(
+        occurrence
+        for occurrence in result.rule_occurrences
+        if occurrence.rule_id.value == "tafkheem" and word_id in occurrence.word_ids
+    )
+    word = next(
+        word for word in result.cells(spelling=spelling).words
+        if word.word_id == word_id
+    )
+    named = [c for c in word.columns if tafkheem.id in c.rule_occurrence_ids]
+
+    assert [c.role for c in named] == [CellRole.TANWEEN]
+    assert set(tafkheem.sound_ids) <= set(named[0].owned_sound_ids)
+
+
 def test_warsh_pronounced_raa_lam_and_a_carriers_have_one_weight_identity():
     _, bundle, view = _build_warsh("32:4")
     rules = {
