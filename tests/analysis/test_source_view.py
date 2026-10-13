@@ -425,6 +425,56 @@ def test_animation_targets_follow_source_sound_ownership(hafs):
     assert [sounds[item] for item in independent_dagger.sound_ids] == ["a:"]
 
 
+def _owners(units) -> dict:
+    return {sound: unit for unit in units for sound in unit.owned_sound_ids}
+
+
+@pytest.mark.parametrize(("ref", "hamza_text"), [
+    ("20:64:4", "ئ"),
+    ("2:283:16", "ؤ"),
+])
+def test_a_started_ibdal_hamza_owns_the_long_vowel_it_becomes(ref, hamza_text):
+    """Started on, the quiescent hamza after a hamzat wasl is read as a long
+    vowel. The written hamza owns it in every view; the wasl owns only its
+    glottal stop."""
+    result = Phonemizer().analyse(ref)
+    view = result.source()
+    rules = {item.id: item.rule_id.value for item in result.analysis.rule_occurrences}
+    wasl, hamza = view.units[:2]
+    long_vowel = result.analysis.sounds[1]
+
+    assert (wasl.text, hamza.text) == (_WASL_HAMZA, hamza_text)
+    assert [sound.value for sound in wasl.owned_sound_ids] == [0]
+    assert hamza.owned_sound_ids == (long_vowel.id,)
+    assert hamza.silence is None
+    assert "ibdal_hamza" in {rules[item] for item in hamza.rule_occurrence_ids}
+    assert "ibdal_hamza" not in {rules[item] for item in wasl.rule_occurrence_ids}
+    token = next(
+        item for item in view.animation_tokens if long_vowel.id in item.sound_ids
+    )
+    assert token.source_unit_ids == (hamza.id,)
+    for spelling in ("source", "transformed"):
+        columns = [
+            column for word in result.cells(spelling=spelling).words
+            for column in word.columns
+        ]
+        assert hamza.id in _owners(columns)[long_vowel.id].source_unit_ids
+
+
+def test_a_joined_quiescent_hamza_after_an_elided_wasl_keeps_its_stop():
+    """Joined, the wasl is elided and the hamza is said as written."""
+    # Hafs: ثُمَّ ٱئْتُوا۟
+    result = Phonemizer().analyse("20:64:3-20:64:4")
+    view = result.source()
+    hamza = next(unit for unit in view.units if unit.text == "ئ")
+    sounds = {sound.id: sound.token for sound in result.analysis.sounds}
+
+    assert [sounds[item] for item in hamza.owned_sound_ids] == ["ʔ"]
+    assert "ibdal_hamza" not in {
+        item.rule_id.value for item in result.analysis.rule_occurrences
+    }
+
+
 @pytest.mark.parametrize(
     ("ref", "word_ref", "carrier_text", "dagger_text"),
     [

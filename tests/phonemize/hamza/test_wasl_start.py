@@ -177,6 +177,31 @@ CASES = (
     qata_start_case(
         "silent-qata-uutumina", "2:283", 16, "ʔ u: t u m i n", "u:", "و",
     ),
+    # Hafs: ٱئْتُوا۟
+    # Warsh: اَ۪يتُواْ
+    Case(
+        id="silent-qata-iituu",
+        site=Site.shared("20:64", (4,)),
+        read=isolated(),
+        phonemes="ʔ i: t u:",
+        char_rules=pick(
+            hafs_uthmani={"ٱ": R("hamza_wasl_kasra"), "ئ": R("ibdal_hamza")},
+            hafs_indopak={
+                "ا[1]": R("hamza_wasl_kasra"), "@hamza_mark": R("ibdal_hamza"),
+            },
+            warsh_uthmani={
+                "ا[1]": R("hamza_wasl_kasra"),
+                "ي": R("ibdal_hamza", "madd_badal"),
+            },
+        ),
+        sound_rules=pick(
+            hafs={"ʔ": R("hamza_wasl_kasra"), "i:": R("ibdal_hamza")},
+            warsh={
+                "ʔ": R("hamza_wasl_kasra"),
+                "i:": R("ibdal_hamza", "madd_badal"),
+            },
+        ),
+    ),
 )
 
 

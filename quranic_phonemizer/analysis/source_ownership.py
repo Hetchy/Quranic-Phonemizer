@@ -9,7 +9,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 
 from ..model.address import SlotId
-from ..model.canon import ABJAD, CanonLetter, Rule
+from ..model.canon import ABJAD, CanonLetter, Onset, Rule
 from ..model.performance import Aspect, Vowel
 from .derivations import (
     decoration_targets,
@@ -154,6 +154,46 @@ def _naql_witness_unit(facts, tok, insc, edge) -> int | None:
     return candidates[-1] if candidates else None
 
 
+def _seat_of(tok: Tokenization, slot: SlotId) -> int | None:
+    """The rasm seat a hamza mark is written on, or the hamza letter itself."""
+    letter = tok.roles.letter.get(slot)
+    return next(
+        (
+            index for index, unit in enumerate(tok.units)
+            if unit.slot == slot
+            and unit.kind is LetterUnitKind.LETTER
+            and index != letter
+        ),
+        letter,
+    )
+
+
+def _started_ibdal_carriers(facts, tok: Tokenization) -> dict[SlotId, int]:
+    """Started on, a hamzat wasl lengthens over the quiescent hamza after it;
+    that written hamza, or the seat it rides, is the length's carrier."""
+    out: dict[SlotId, int] = {}
+    for edge in facts.silences:
+        if (
+            edge.by is None
+            or edge.aspect is not Aspect.CONSONANT
+            or facts.occurrences[edge.by].rule is not Rule.IBDAL_HAMZA
+        ):
+            continue
+        hamza = edge.slots[0]
+        index = facts.slot_index[hamza]
+        if index == 0 or facts.word_of_slot[index - 1] != facts.word_of_slot[index]:
+            continue
+        wasl = facts.slots[index - 1]
+        unit = _seat_of(tok, hamza)
+        if (
+            wasl.onset is Onset.WASL
+            and wasl.id not in tok.roles.carrier
+            and unit is not None
+        ):
+            out[wasl.id] = unit
+    return out
+
+
 def _owners_and_presenters(facts, tok, insc, carriers):
     owner: dict[int, int] = {}
     presenters: dict[int, set[int]] = defaultdict(set)
@@ -295,7 +335,7 @@ def _unclassified(index, unit, insc):
 def ownership(
     facts: AnalysisFacts, tok: Tokenization, insc: InscriptionFacts
 ) -> Ownership:
-    carriers = tok.roles.carrier
+    carriers = {**_started_ibdal_carriers(facts, tok), **tok.roles.carrier}
     owner, presenters = _owners_and_presenters(facts, tok, insc, carriers)
     sounding = set(owner.values()) | {u for us in presenters.values() for u in us}
     silenced_by = _silenced_units(facts, tok, insc)
